@@ -1,0 +1,153 @@
+Əlbəttə, anladım. Təqdim etdiyiniz dizaynı əsas götürərək, bütün strukturu və peşəkar görünüşü qoruyub saxlamaqla, lakin yaşıl rəngləri mavi çalarlarla əvəz edərək "CVERA" CV hazırlama saytı üçün mükəmməl bir "prompt" hazırladım.
+
+Bu təlimatı birbaşa Claude kimi bir süni intellektə verə bilərsiniz.
+
+Prompt for AI (like Claude)
+Objective: Generate the complete HTML and CSS code for a professional, single-page landing website for a company called "CVERA". The design, layout, structure, and all visual elements must be an exact replica of the provided image (Design.jpg), with one critical modification: the primary color scheme must be changed from teal/green to a professional blue.
+
+Key Design Mandates (to be replicated exactly from the image):
+
+Color Palette (CRITICAL CHANGE):
+
+Primary Background: White (#FFFFFF).
+
+Dark Section/Footer Background: Very dark navy blue (#161C2D).
+
+Primary Accent Color: A professional, vibrant blue (e.g., #3B82F6 or a similar tech blue) to replace all instances of teal/green. This applies to buttons, icons, highlights, underlines, and gradients.
+
+Secondary Accent Color: A very light, pale blue (e.g., #EFF6FF) to replace the light minty green backgrounds and gradient elements.
+
+Text Colors: Dark navy blue/black on light backgrounds, white on dark backgrounds. Gray for secondary text.
+
+Typography:
+
+Use a clean, modern sans-serif font (like "Manrope" or "Inter").
+
+Strictly follow the typographic hierarchy shown in the image: large bold headlines, smaller subheadings, and regular-weight body text.
+
+Layout & Structure:
+
+Replicate the layout perfectly, including all spacing, card designs, soft shadows on elements, and section structure.
+
+Maintain the use of custom icons and stylized illustrations, adapting their content for a CV builder theme.
+
+Detailed Section-by-Section Breakdown (CVERA Content):
+1. Header Section:
+
+Logo: "CVERA" on the top left.
+
+Navigation Links: "Home" (active/bold), "Templates," "Features," "Pricing."
+
+CTA Button: A solid blue button with the text "Create My CV."
+
+2. Hero Section:
+
+Main Headline: "Craft a CV That Opens Doors" (The words "Opens Doors" should be underlined with a wavy, hand-drawn blue line).
+
+Sub-headline: "Let's make your job application more organized and professional using the CVERA platform."
+
+CTA Button: A large, solid blue button with the text "Start for Free" and a small play icon inside a circle.
+
+Illustration: On the right, an image of a confident, smiling professional looking at a polished CV on a tablet. The background shape and decorative elements should be identical, but using the new blue color palette.
+
+Social Proof Bar: Below the hero content, with the text "Trusted by professionals at" and logos for major companies like "Google," "Microsoft," "Dropbox," "Amazon," and "Shopify."
+
+3. "Everything You Need" Section:
+
+Headline: "Everything You Need for a Perfect CV."
+
+Content (Left Side): Three feature snippets with blue icons, titles, and star ratings.
+
+"AI Writing Assistant" - 5 stars.
+
+"Professional Templates" - 5 stars.
+
+"Easy Customization" - 4.5 stars.
+
+Content (Right Side): The same clickable accordion-style items. The active item should be styled with a blue accent.
+
+Item 1: AI Writing Assistant: "Generate professional summaries and bullet points with our AI to showcase your skills effectively." (This one should be shown as active/open).
+
+Item 2: Professional Templates: "Choose from dozens of recruiter-approved templates designed for any industry."
+
+Item 3: Easy Customization: "Easily change colors, fonts, and layouts to create a CV that is uniquely yours."
+
+4. "Our Features" Section:
+
+Headline: "Our Features You Can Get."
+
+Content: Three feature cards. The central card must be highlighted with a light blue background and border, just like in the original design.
+
+Card 1: Real-Time Previews: (Icon: an eye or screen). "See your changes live as you edit. What you see is what you get."
+
+Card 2 (Highlighted): Premium Templates: (Icon: collection of documents). "Access our full library of exclusive, modern templates designed to get you hired."
+
+Card 3: PDF & Docx Download: (Icon: a download cloud). "Download your finished CV in multiple formats, including PDF and Word, with one click."
+
+5. "What Benefits Will You Get" Section:
+
+Headline: "Why Choose CVERA?"
+
+Content (Left Side): A bulleted list with custom blue checkmark icons.
+
+Land more interviews.
+
+Stand out from the crowd.
+
+Save hours of time and effort.
+
+Build confidence in your application.
+
+Look professional and organized.
+
+Content (Right Side): The same professional illustration of a laptop showing a well-designed CV on the screen.
+
+6. "Choose Plan" Section:
+
+Headline: "Choose a Plan That's Right For You."
+
+Background: The same abstract, soft gradient shapes, but using shades of light blue.
+
+Pricing Tiers: Three pricing cards. The middle card must be highlighted with a solid blue border and a "Most Popular" tag.
+
+Plan 1: Free: Features: 1 CV, Basic Templates, CVERA Branding. Button: "Get Started."
+
+Plan 2: Pro (Most Popular): Features: Unlimited CVs, All Premium Templates, AI Writing Assistant, No Branding, PDF & Docx Export. Button: Solid blue "Get Started."
+
+Plan 3: Business: Features: Everything in Pro, Team Collaboration, Priority Support. Button: "Contact Sales."
+
+7. "Testimonials & Sign Up" Section (Dark Background):
+
+Left Side (Testimonial):
+
+Headline: "People are Saying About CVERA."
+
+Quote: "I struggled with my CV for weeks. With CVERA, I created a professional CV in under an hour and landed three interviews the next week. A total game-changer!"
+
+Author: Show 4-5 small user avatars, with one highlighted, representing satisfied customers.
+
+Right Side (Sign Up Form):
+
+Form Title: "Start Your Journey."
+
+Fields: "Full Name," "Email Address," "Password."
+
+Button: A solid blue button with the text "Create Free Account."
+
+8. Footer Section (Dark Background):
+
+Replicate the layout exactly.
+
+Logo: "CVERA"
+
+Tagline: "The Ultimate CV Building Platform."
+
+Social Icons: LinkedIn, Twitter, etc.
+
+Footer Links:
+
+Company: About Us, Careers, Blog.
+
+Product: Features, Templates, Pricing.
+
+Support: Contact, Help Center, Terms of Service.

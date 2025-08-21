@@ -1,0 +1,38 @@
+User-agent: *
+Allow: /
+
+# Allow crawling of all pages
+Allow: /templates
+Allow: /pricing
+Allow: /auth/register
+Allow: /auth/login
+Allow: /privacy
+Allow: /terms
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /cv/edit/
+Disallow: /api/
+
+# Allow important SEO files
+Allow: /sitemap.xml
+Allow: /robots.txt
+
+# Crawl-delay (optional)
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://cvera.net/sitemap.xml
+
+# Google-specific directives
+User-agent: Googlebot
+Allow: /
+
+# Bing-specific directives
+User-agent: Bingbot
+Allow: /
+
+# Yandex-specific directives
+User-agent: YandexBot
+Allow: /

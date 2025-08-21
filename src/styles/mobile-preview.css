@@ -1,0 +1,350 @@
+/* Mobile CV Preview Optimizations */
+
+/* Mobile CV Preview Container */
+@media (max-width: 768px) {
+  .cv-preview-mobile {
+    width: 100%;
+    max-width: 100%;
+    transform-origin: top center;
+    margin: 0 auto;
+    padding: 8px;
+    box-sizing: border-box;
+  }
+
+  /* A4 Paper simulation on mobile */
+  .cv-preview-a4-mobile {
+    width: 100%;
+    max-width: 350px;
+    aspect-ratio: 210/297; /* A4 ratio */
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* CV Content scaling for mobile */
+  .cv-content-mobile {
+    width: 100%;
+    height: 100%;
+    padding: 8px 12px;
+    font-size: 8px;
+    line-height: 1.2;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  /* Mobile CV sections */
+  .cv-section-mobile {
+    margin-bottom: 8px;
+    page-break-inside: avoid;
+  }
+
+  .cv-section-mobile h1 {
+    font-size: 12px;
+    margin: 0 0 4px 0;
+    font-weight: bold;
+  }
+
+  .cv-section-mobile h2 {
+    font-size: 10px;
+    margin: 0 0 3px 0;
+    font-weight: bold;
+    color: #1e40af;
+  }
+
+  .cv-section-mobile h3 {
+    font-size: 9px;
+    margin: 0 0 2px 0;
+    font-weight: 600;
+  }
+
+  .cv-section-mobile p {
+    font-size: 8px;
+    margin: 0 0 2px 0;
+    line-height: 1.2;
+  }
+
+  .cv-section-mobile ul {
+    margin: 2px 0;
+    padding-left: 12px;
+  }
+
+  .cv-section-mobile li {
+    font-size: 7px;
+    line-height: 1.1;
+    margin-bottom: 1px;
+  }
+
+  /* Mobile preview controls */
+  .cv-preview-controls-mobile {
+    position: sticky;
+    top: 0;
+    background: white;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .cv-zoom-controls-mobile {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f8fafc;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid #e5e7eb;
+  }
+
+  .cv-zoom-button-mobile {
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .cv-zoom-button-mobile:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+  }
+
+  .cv-zoom-level-mobile {
+    font-size: 12px;
+    font-weight: 500;
+    color: #374151;
+    min-width: 40px;
+    text-align: center;
+  }
+
+  /* Full screen preview for mobile */
+  .cv-preview-fullscreen-mobile {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #f8fafc;
+    z-index: 999;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .cv-preview-fullscreen-mobile .cv-preview-a4-mobile {
+    max-width: 90%;
+    margin: 20px auto;
+  }
+
+  /* Mobile template selection */
+  .cv-template-selector-mobile {
+    display: flex;
+    overflow-x: auto;
+    gap: 12px;
+    padding: 16px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .cv-template-selector-mobile::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cv-template-card-mobile {
+    min-width: 120px;
+    height: 160px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    overflow: hidden;
+  }
+
+  .cv-template-card-mobile.active {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  }
+
+  .cv-template-preview-mobile {
+    width: 100%;
+    height: 120px;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: #6b7280;
+  }
+
+  .cv-template-name-mobile {
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+    background: white;
+  }
+}
+
+/* Tablet specific adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .cv-preview-a4-mobile {
+    max-width: 400px;
+  }
+
+  .cv-content-mobile {
+    font-size: 9px;
+    padding: 12px 16px;
+  }
+
+  .cv-section-mobile h1 {
+    font-size: 14px;
+  }
+
+  .cv-section-mobile h2 {
+    font-size: 12px;
+  }
+
+  .cv-section-mobile h3 {
+    font-size: 10px;
+  }
+
+  .cv-section-mobile p {
+    font-size: 9px;
+  }
+
+  .cv-section-mobile li {
+    font-size: 8px;
+  }
+}
+
+/* Very small mobile devices */
+@media (max-width: 375px) {
+  .cv-preview-a4-mobile {
+    max-width: 300px;
+  }
+
+  .cv-content-mobile {
+    font-size: 7px;
+    padding: 6px 8px;
+  }
+
+  .cv-section-mobile h1 {
+    font-size: 10px;
+  }
+
+  .cv-section-mobile h2 {
+    font-size: 9px;
+  }
+
+  .cv-section-mobile h3 {
+    font-size: 8px;
+  }
+
+  .cv-section-mobile p {
+    font-size: 7px;
+  }
+
+  .cv-section-mobile li {
+    font-size: 6px;
+  }
+
+  .cv-template-card-mobile {
+    min-width: 100px;
+    height: 140px;
+  }
+
+  .cv-template-preview-mobile {
+    height: 100px;
+    font-size: 8px;
+  }
+
+  .cv-template-name-mobile {
+    font-size: 11px;
+  }
+}
+
+/* Landscape mobile adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  .cv-preview-fullscreen-mobile .cv-preview-a4-mobile {
+    max-width: 60%;
+    margin: 10px auto;
+  }
+
+  .cv-preview-controls-mobile {
+    padding: 8px 12px;
+  }
+
+  .cv-template-selector-mobile {
+    padding: 12px;
+  }
+
+  .cv-template-card-mobile {
+    min-width: 100px;
+    height: 130px;
+  }
+
+  .cv-template-preview-mobile {
+    height: 90px;
+  }
+}
+
+/* Print styles for mobile */
+@media print {
+  .cv-preview-mobile,
+  .cv-preview-a4-mobile {
+    width: 210mm;
+    height: 297mm;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    border-radius: 0;
+    background: white;
+    transform: none;
+  }
+
+  .cv-content-mobile {
+    font-size: 11pt;
+    padding: 15mm;
+    height: auto;
+  }
+
+  .cv-section-mobile h1 {
+    font-size: 16pt;
+  }
+
+  .cv-section-mobile h2 {
+    font-size: 14pt;
+  }
+
+  .cv-section-mobile h3 {
+    font-size: 12pt;
+  }
+
+  .cv-section-mobile p {
+    font-size: 11pt;
+  }
+
+  .cv-section-mobile li {
+    font-size: 11pt;
+  }
+
+  .cv-preview-controls-mobile,
+  .cv-template-selector-mobile {
+    display: none;
+  }
+}

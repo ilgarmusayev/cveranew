@@ -1,0 +1,142 @@
+Key Design & Color Mandates:
+
+Background: The entire page background must be clean white (#FFFFFF).
+
+Primary Accent Color: All elements that are purple/violet in the original design must be replaced with a professional, vibrant blue (e.g., #0066FF). This applies to all buttons, highlighted text, links, icons, and data visualizations.
+
+Typography:
+
+Use a modern, clean sans-serif font like "Inter".
+
+Strictly follow the font sizes, weights, and hierarchy shown in the original design.
+
+Main text color should be a dark gray (e.g., #1F2937), and secondary text should be a lighter gray (e.g., #6B7280).
+
+Layout: Maintain the spacious, centered layout. All cards and modules must have the same subtle shadows and rounded corners as in the original image.
+
+Detailed Section-by-Section Breakdown (Content for CVERA):
+1. Header Section:
+
+Logo: CVERA
+
+Navigation Links: Şablonlar, Haqqımızda, Qiymətlər, Əlaqə, Bloq.
+
+Buttons: Daxil ol (as a plain link). Pulsuz Başla (as a solid blue button).
+
+2. Hero Section:
+
+Main Headline: Arzularınızdakı Karyeraya İlk Addım.
+
+Sub-headline: Süni intellektlə saniyələr içində fərqlənən, peşəkar CV-lər yaradın və işə qəbul şansınızı artırın.
+
+Central Visual: The phone mockup should display a sleek, modern CV template created on the CVERA platform. The UI inside the phone must use blue as its primary color.
+
+Floating UI Widgets:
+
+Top-left card: A user profile card with a photo saying Salam, Ayan!.
+
+Top-right card: A "CV Analitikası" (CV Analytics) card showing stats like Baxış sayı: 25, Yüklənmə: 10, and a progress bar for "Profil dolğunluğu: 95%" (The bar should be blue).
+
+CTA Button: A solid blue button with the text İndi CV Yarat. Below it, the text Kredit kartı tələb olunmur.
+
+3. Social Proof / Partners Section:
+
+Headline: İstifadəçilərimiz bu şirkətlərdə çalışır.
+
+Logos: Use logos of well-known companies in Azerbaijan and internationally (e.g., PASHA Bank, Azercell, SOCAR, BP, Google).
+
+4. Feature Section 1 (Dashboard):
+
+Headline: CV-nizin Uğurunu Real Zamanlı İzləyin.
+
+Description: CV-nizə kimlərin baxdığını, hansı şirkətlərin maraqlandığını və neçə dəfə yükləndiyini göstərən detallı analitika ilə tanış olun.
+
+Link: Analitikaya Bax (as a blue link).
+
+Visual: A UI mockup of a CVERA dashboard showing CV analytics graphs (views over time, etc.). The graphs must use shades of blue.
+
+5. Feature Section 2 (Task List):
+
+Headline: CV Yaratmaq Heç Vaxt Bu Qədər Asan Olmamışdı.
+
+Description: İntuitiv interfeysimizlə addım-addım təlimatları izləyin, məlumatlarınızı daxil edin və cəmi bir neçə dəqiqəyə peşəkar nəticə əldə edin.
+
+Visual: A UI mockup of the CVERA CV editor interface.
+
+CTA Button: A solid blue button: İndi Yoxla.
+
+6. "Big Features" Section:
+
+Headline: Platformamızın Əsas Üstünlükləri. (The word "Üstünlükləri" should be highlighted in blue).
+
+Four Feature Cards:
+
+Card 1: (Icon: a magic wand) Süni İntellekt Dəstəyi: Təcrübələrinizi ən təsirli cümlələrlə ifadə edin.
+
+Card 2: (Icon: document templates) Peşəkar Şablonlar: Recruiter'lərin bəyəndiyi onlarla müasir dizayn arasından seçin.
+
+Card 3: (Icon: bar chart) CV Analitikası: Müraciətinizin statusunu izləyin və effektivliyini ölçün.
+
+Card 4: (Icon: a paint brush) Asan Fərdiləşdirmə: Rəngləri, şriftləri və quruluşu bir kliklə öz zövqünüzə uyğunlaşdırın.
+
+7. "Build a Solution" Section (Adapted as "Why CVERA?"):
+
+Headline: Niyə Məhz CVERA Seçməlisiniz?
+
+Left Side Content: Replicate the bulleted list with blue checkmark icons.
+
+Recruiter tələblərinə tam uyğun
+
+ATS-dostu (Robot-oxunaqlı) formatlama
+
+Prosesə deyil, nəticəyə fokuslanın
+
+İşə qəbul şansınızı artırın
+
+Right Side Visual: The phone mockup showing a completed, impressive CVERA resume.
+
+8. Integrations Section (Adapted as "Template Gallery"):
+
+Headline: Hər Sahəyə Uyğun Geniş Şablon Seçimi.
+
+Visual: Instead of app logos, display a grid of 8-10 mini-previews of different, attractive CV templates (e.g., Creative, Modern, Professional, Minimalist).
+
+CTA Button: A solid blue button: Bütün Şablonlara Bax.
+
+9. Testimonials Section:
+
+Headline: İstifadəçilərimiz CVERA Haqqında Nə Deyir?
+
+Three Testimonial Cards: Replicate the card design with user photos and Azerbaijani names.
+
+Quote 1: "CVERA ilə CV-mi cəmi 1 saata yenilədim və ilk həftədə 3 müsahibə təklifi aldım. Bu inanılmazdır!" - Nərmin Vəliyeva, Marketinq Meneceri.
+
+Quote 2: "Ən çox bəyəndiyim xüsusiyyət AI köməkçisi oldu. Boş səhifəyə baxmaq əvəzinə, ağıllı təkliflərlə CV-mi sürətlə doldurdum." - Elvin Ağayev, Proqram Mühəndisi.
+
+10. Blog & Articles Section:
+
+Headline: Karyera Məsləhətləri və Bloq.
+
+Three Blog Cards: Replicate the card design with relevant titles.
+
+Müsahibədə Ən Çox Verilən 5 Kritik Sual
+
+"Cover Letter" (Motivasiya Məktubu) Necə Yazılmalıdır?
+
+LinkedIn Profilinizi CV-nizlə Necə Gücləndirə Bilərsiniz?
+
+11. Final CTA Section:
+
+Headline: Karyeranızda Növbəti Addımı Atmağa Hazırsınız?
+
+Description: Bu gün pulsuz qeydiyyatdan keçin və minlərlə istifadəçimiz kimi siz də xəyallarınızdakı işə bir addım daha yaxınlaşın.
+
+CTA Button: A large, solid blue button with the text Bəli, Başlayaq.
+
+12. Footer Section:
+
+Logo: CVERA
+
+Tagline: Azərbaycanın ən müasir CV platforması.
+
+Links: Replicate all footer links and columns, adapting them for CVERA (e.g., "Şablonlar," "Qiymətlər," "Bloq," "FAQ," "Məxfilik Siyasəti").

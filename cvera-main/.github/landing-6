@@ -1,0 +1,142 @@
+Objective: Design and generate the complete code (HTML, CSS, and JavaScript) for a cutting-edge, dynamic, and highly creative landing page for "CVERA", an AI-powered CV builder. The target audience is modern Azerbaijani professionals, so the site must feel premium, innovative, and inspiring. The goal is to move beyond static layouts and incorporate smooth animations, micro-interactions, and a compelling narrative flow.
+
+Core Creative Concept: "From Chaos to Career"
+
+The page should tell a visual story of transforming a messy, confusing job application process into a sleek, confident, and successful career move.
+
+Key Aesthetic & Technical Directives:
+
+Theme: Professional Dark Mode. This will make the accent colors pop and create a premium feel.
+
+UI Style: Use modern UI elements like Glassmorphism / Aurora UI. This means using blurred, glowing background shapes behind certain elements to create a sense of depth and light.
+
+Animation: The entire page must be animated. Use on-scroll reveal animations (elements fading or sliding into view) and interactive micro-interactions on hover/click. Use a library like AOS (Animate on Scroll) or the Intersection Observer API.
+
+Color Palette:
+
+Background: A very deep, near-black blue (e.g., #0D1117).
+
+Primary Accent: A sophisticated, strong blue (e.g., #3B82F6).
+
+Secondary Accent (for highlights & CTAs): A vibrant, energetic  blue (e.g., #A855F7) to create contrast and excitement.
+
+Text: White (#FFFFFF) for primary text and a light gray (#8B949E) for secondary text.
+
+Typography: A clean, modern sans-serif font like "Satoshi" or "Inter".
+
+Detailed Section-by-Section Breakdown:
+1. Interactive Hero Section
+
+Objective: To create an immediate "wow" factor and communicate the core value proposition.
+
+Visuals & Animation:
+
+The central element should be a 3D interactive model of a CV document. It should gently and slowly rotate. Users can click and drag to inspect it.
+
+As the user scrolls down, the 3D model should smoothly animate, flattening into a 2D icon that moves to the top corner of the next section.
+
+In the background, subtle, slow-moving aurora/gradient glows in shades of blue and purple.
+
+Content (Azerbaijani):
+
+Headline: Karyeranızın Gələcəyini Yaradın.
+
+Sub-headline: Süni intellektin gücü ilə saniyələr içində seçilən, peşəkar və unikal CV-lər hazırlayın.
+
+CTA Button: A button with a subtle gradient from blue to purple. On hover, it should glow. Text: Pulsuz Başla.
+
+2. The Problem Section
+
+Objective: To connect with the user's pain points.
+
+Visuals & Animation:
+
+A grid of three simple, clean cards with a glassmorphism effect (blurry background).
+
+As the user scrolls, each card animates into view with a slight delay. The icons inside should have a subtle hover animation (e.g., a slight scale or wiggle).
+
+Content (Azerbaijani):
+
+Section Title: Köhnə CV-lər Karyeranıza Əngəl Olur.
+
+Card 1: (Icon: a confused face) Boş Səhifə Sindromu? - Nədən başlayacağınızı bilmirsiniz.
+
+Card 2: (Icon: a rejected document) ATS Robotlarından Keçmir? - CV-niz nəzərdən qaçırılır.
+
+Card 3: (Icon: a messy design) Dizayn Zövqsüz Görünür? - Peşəkar təəssürat yaratmır.
+
+3. "Before & After" Interactive Slider
+
+Objective: To visually and dramatically showcase the transformation CVERA provides.
+
+Visuals & Animation:
+
+A full-width, interactive slider. The user can drag a handle in the middle to compare two images.
+
+"Before" Image (Left): A screenshot of a generic, poorly formatted, black-and-white Word document CV.
+
+"After" Image (Right): A screenshot of a stunning, modern, and colorful CV created with CVERA.
+
+Content (Azerbaijani):
+
+Section Title: Fərqi Özünüz Görün.
+
+Labels: "Əvvəl" and "Sonra" on the respective sides.
+
+4. Core Features Section
+
+Objective: To highlight the most powerful features in an engaging way.
+
+Visuals & Animation:
+
+A horizontal layout of three feature showcases.
+
+On the left, there are three clickable feature titles. On the right, a large visual area.
+
+When the user clicks on a feature title (e.g., "AI Köməkçi"), the visual on the right animates to show that feature in action (e.g., an animation of text being automatically written on a CV). This is a tab-like interactive component.
+
+Content (Azerbaijani):
+
+Section Title: Sizi Zirvəyə Aparacaq Xüsusiyyətlər.
+
+Feature 1: Süni İntellekt Köməkçisi: Təcrübələrinizi peşəkar cümlələrə çevirin.
+
+Feature 2: Peşəkar Şablonlar: Hər sektora uyğun, recruiter'lər tərəfindən bəyənilən dizaynlar.
+
+Feature 3: Real-Zamanlı Analitika: CV-nizə neçə dəfə baxıldığını izləyin və təkmilləşdirin.
+
+5. Testimonials Carousel
+
+Objective: Build trust through social proof.
+
+Visuals & Animation:
+
+A sleek, auto-playing carousel of user testimonials. Users can also manually swipe through them.
+
+Each card should have the user's photo, name, job title, and their quote. The cards should have the glassmorphism effect.
+
+Content (Azerbaijani):
+
+Section Title: İstifadəçilərimiz Nə Deyir?
+
+Testimonial 1: "CVERA ilə 1 saatda hazırladığım CV sayəsində 3 fərqli şirkətdən müsahibə təklifi aldım. Möhtəşəmdir!" - Ayan Məmmədova, Marketinq Meneceri
+
+Testimonial 2: "Dizaynla aram yoxdur. Buradakı hazır şablonlar həyatımı xilas etdi. Həm peşəkar, həm də gözəldir." - Kənan Əliyev, Proqram Mühəndisi
+
+6. Final Call-to-Action (CTA) Section
+
+Objective: A final, powerful push to get the user to sign up.
+
+Visuals & Animation:
+
+A large, impactful section with glowing Aurora background effects.
+
+The CTA button should be prominent and have an eye-catching hover animation (e.g., a "magnetic" effect where it slightly moves towards the cursor).
+
+Content (Azerbaijani):
+
+Headline: Növbəti Karyera Addımınızı Bu Gün Atın.
+
+Sub-headline: Xəyallarınızdakı işə gedən yolda ən güclü köməkçiniz CVERA olacaq. Risq yoxdur, sadəcə fürsətlər var.
+
+CTA Button: Text: Karyeramı Qurmağa Başlayıram.

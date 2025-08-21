@@ -1,0 +1,202 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String           @id @default(uuid())
+  name             String
+  email            String           @unique
+  password         String?
+  status           String           @default("active")
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  lastLogin        DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  role             String           @default("USER")
+  linkedinId       String?          @unique
+  tier             String           @default("Free")
+  emailVerified    DateTime?
+  linkedinUsername String?
+  loginMethod      String?
+  lastLogout       DateTime?
+  cvs              CV[]             @relation("UserCVs")
+  dailyUsage       DailyUsage[]     @relation("UserDailyUsage")
+  importSessions   ImportSession[]  @relation("UserImportSessions")
+  payments         Payment[]        @relation("UserPayments")
+  promoCodeUsages  PromoCodeUsage[] @relation("UserPromoCodeUsages")
+  subscriptions    Subscription[]   @relation("UserSubscriptions")
+}
+
+model CV {
+  id         String              @id @default(uuid())
+  userId     String
+  title      String
+  cv_data    Json
+  templateId String?
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  user       User                @relation("UserCVs", fields: [userId], references: [id])
+  fileJobs   FileGenerationJob[] @relation("CVFileJobs")
+
+  @@index([userId])
+}
+
+model Template {
+  id          String   @id @default(uuid())
+  name        String
+  tier        String
+  previewUrl  String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Subscription {
+  id          String   @id @default(uuid())
+  userId      String
+  tier        String
+  status      String
+  provider    String
+  providerRef String?  @unique
+  startedAt   DateTime @default(now())
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation("UserSubscriptions", fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model Admin {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  password  String
+  role      String    @default("admin")
+  active    Boolean   @default(true)
+  lastLogin DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model FileGenerationJob {
+  id        String   @id @default(uuid())
+  cvId      String
+  format    String
+  status    String
+  fileUrl   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  cv        CV       @relation("CVFileJobs", fields: [cvId], references: [id])
+
+  @@index([cvId])
+}
+
+model Payment {
+  id            String   @id @default(uuid())
+  userId        String
+  amount        Float
+  status        String
+  transactionId String   @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  currency      String   @default("AZN")
+  orderId       String   @unique
+  paymentMethod String
+  planType      String
+  user          User     @relation("UserPayments", fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model DailyUsage {
+  id          String   @id @default(uuid())
+  userId      String
+  date        DateTime @default(now()) @db.Date
+  cvCreated   Int      @default(0)
+  pdfExports  Int      @default(0)
+  docxExports Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation("UserDailyUsage", fields: [userId], references: [id])
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+model ImportSession {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  data      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation("UserImportSessions", fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model ApiKey {
+  id         String    @id @default(uuid())
+  service    String
+  active     Boolean   @default(true)
+  priority   Int       @default(1)
+  usageCount Int       @default(0)
+  lastUsed   DateTime?
+  lastResult String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  apiKey     String
+  dailyLimit Int       @default(1000)
+  dailyUsage Int       @default(0)
+  lastReset  DateTime  @default(now())
+
+  @@unique([service, apiKey])
+  @@index([service, active])
+}
+
+model TokenBlacklist {
+  id        String   @id
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
+  @@index([token])
+  @@index([userId])
+}
+
+model PromoCode {
+  id          String           @id @default(uuid())
+  code        String           @unique
+  tier        String
+  description String?
+  isActive    Boolean          @default(true)
+  usageLimit  Int?
+  usedCount   Int              @default(0)
+  expiresAt   DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  usedBy      PromoCodeUsage[] @relation("PromoCodeUsages")
+}
+
+model PromoCodeUsage {
+  id          String    @id @default(uuid())
+  userId      String
+  promoCodeId String
+  usedAt      DateTime  @default(now())
+  promoCode   PromoCode @relation("PromoCodeUsages", fields: [promoCodeId], references: [id])
+  user        User      @relation("UserPromoCodeUsages", fields: [userId], references: [id])
+
+  @@unique([userId, promoCodeId])
+  @@index([userId])
+  @@index([promoCodeId])
+}
