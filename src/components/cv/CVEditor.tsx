@@ -738,6 +738,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                         marginLeft: '0'
                     }}
                 >
+                    
                     {renderPreview()}
                 </div>
             </div>
