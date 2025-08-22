@@ -3,7 +3,34 @@ import axios from 'axios';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const prisma = new PrismaClient();
-const geminiAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+
+// Multiple Gemini API Keys for load balancing and failover
+const GEMINI_API_KEYS = [
+  process.env.GEMINI_API_KEY,
+  process.env.GEMINI_API_KEY_2,
+  process.env.GEMINI_API_KEY_3
+].filter(Boolean) as string[];
+
+// Initialize multiple Gemini AI instances
+const geminiAIInstances = GEMINI_API_KEYS.map(key => new GoogleGenerativeAI(key));
+
+console.log(`🔑 Initialized ${geminiAIInstances.length} Gemini API instances`);
+
+// Round-robin index for load balancing
+let currentAPIIndex = 0;
+
+// Get next available Gemini AI instance
+const getGeminiAI = () => {
+  if (geminiAIInstances.length === 0) {
+    throw new Error('No Gemini API keys configured');
+  }
+  
+  const instance = geminiAIInstances[currentAPIIndex];
+  currentAPIIndex = (currentAPIIndex + 1) % geminiAIInstances.length;
+  
+  console.log(`🔄 Using Gemini API instance ${currentAPIIndex + 1}/${geminiAIInstances.length}`);
+  return instance;
+};
 
 // Plan-based LinkedIn import limits
 export const LINKEDIN_LIMITS = {
@@ -670,29 +697,53 @@ export class LinkedInImportService {
    */
   private async generateProfessionalSummary(profile: LinkedInProfile): Promise<string> {
     try {
-      const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      let lastError: Error | null = null;
+      let summary = '';
 
-      const prompt = `
-        Based on the following LinkedIn profile information, create a professional summary for a CV:
+      // Try each API key until one works
+      for (let i = 0; i < geminiAIInstances.length; i++) {
+        try {
+          const geminiAI = getGeminiAI();
+          const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-        Name: ${profile.name}
-        Headline: ${profile.headline}
-        Current Summary: ${profile.summary}
-        Location: ${profile.location}
-        
-        Experience:
-        ${profile.experience.map(exp => `- ${exp.title} at ${exp.company} (${exp.duration})`).join('\n')}
-        
-        Education:
-        ${profile.education.map(edu => `- ${edu.degree} in ${edu.field} from ${edu.school}`).join('\n')}
-        
-        Skills: ${profile.skills.join(', ')}
+          const prompt = `
+            Based on the following LinkedIn profile information, create a professional summary for a CV:
 
-        Create a concise, professional summary (2-3 sentences) that highlights key strengths and experience.
-      `;
+            Name: ${profile.name}
+            Headline: ${profile.headline}
+            Current Summary: ${profile.summary}
+            Location: ${profile.location}
+            
+            Experience:
+            ${profile.experience.map(exp => `- ${exp.title} at ${exp.company} (${exp.duration})`).join('\n')}
+            
+            Education:
+            ${profile.education.map(edu => `- ${edu.degree} in ${edu.field} from ${edu.school}`).join('\n')}
+            
+            Skills: ${profile.skills.join(', ')}
 
-      const result = await model.generateContent(prompt);
-      const summary = result.response.text().trim();
+            Create a concise, professional summary (2-3 sentences) that highlights key strengths and experience.
+          `;
+
+          const result = await model.generateContent(prompt);
+          summary = result.response.text().trim();
+          
+          console.log(`✅ Professional summary generated successfully with API instance ${currentAPIIndex}/${geminiAIInstances.length}`);
+          break; // Success, exit retry loop
+        } catch (error: any) {
+          lastError = error;
+          console.log(`❌ API instance ${currentAPIIndex}/${geminiAIInstances.length} failed:`, error.message);
+          
+          // Check if it's a quota error
+          if (error.message?.includes('429') || error.message?.toLowerCase().includes('quota')) {
+            console.log(`🚫 Quota exceeded for API instance ${currentAPIIndex}/${geminiAIInstances.length}, trying next...`);
+            continue; // Try next API key
+          } else {
+            // For non-quota errors, don't retry
+            break;
+          }
+        }
+      }
 
       return summary || profile.summary;
     } catch (error) {
@@ -963,7 +1014,7 @@ export class LinkedInImportService {
    * Generate AI-powered professional summary for Medium and Premium users
    * This is now a separate method that can be called manually
    */
-  async generateAISummary(userId: string, cvId: string): Promise<{ success: boolean; summary?: string; error?: string }> {
+  async generateAISummary(userId: string, cvId: string): Promise<{ success: boolean; summary?: string; error?: string; quotaExceeded?: boolean }> {
     try {
       // Check user tier
       const user = await prisma.user.findUnique({
@@ -1002,142 +1053,285 @@ export class LinkedInImportService {
       const awards = cvData.awards || [];
       const languages = cvData.languages || [];
 
-      const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      // Detect CV language - with improved detection
+      let cvLanguage = cvData.cvLanguage || 'azerbaijani';
+      
+      // Auto-detect language from content if not set
+      if (!cvData.cvLanguage) {
+        const personalInfoText = [
+          personalInfo.fullName,
+          personalInfo.title,
+          personalInfo.summary,
+          personalInfo.location
+        ].filter(Boolean).join(' ').toLowerCase();
 
-      // Create different prompts based on user tier
+        const experienceText = experience.slice(0, 2).map((exp: any) => 
+          [exp.position, exp.company, exp.description].filter(Boolean).join(' ')
+        ).join(' ').toLowerCase();
+
+        const combinedText = (personalInfoText + ' ' + experienceText).toLowerCase();
+
+        // Simple language detection based on common words
+        const englishWords = ['the', 'and', 'for', 'with', 'experience', 'company', 'work', 'project', 'manager', 'developer'];
+        const azerbaijaniWords = ['və', 'üçün', 'ilə', 'təcrübə', 'şirkət', 'iş', 'layihə', 'menecer', 'inkişaf'];
+
+        const englishScore = englishWords.filter(word => combinedText.includes(word)).length;
+        const azerbaijaniScore = azerbaijaniWords.filter(word => combinedText.includes(word)).length;
+
+        if (englishScore > azerbaijaniScore && englishScore > 2) {
+          cvLanguage = 'english';
+        } else {
+          cvLanguage = 'azerbaijani';
+        }
+
+        console.log(`🌐 Auto-detected CV language: ${cvLanguage} (EN: ${englishScore}, AZ: ${azerbaijaniScore})`);
+      } else {
+        console.log(`🌐 Using CV language from data: ${cvLanguage}`);
+      }
+
+      const isEnglish = cvLanguage === 'english';
+
+      console.log(`🌐 Generating AI summary in ${cvLanguage}...`);
+
+      // Create different prompts based on user tier and CV language
       let prompt = '';
 
       if (user.tier === 'Medium') {
-        prompt = `
-          Create a professional summary for this candidate optimized for ATS (Applicant Tracking System) compatibility:
+        if (isEnglish) {
+          prompt = `
+          Write a professional CV summary in 4-5 sentences (60-80 words). No names, no "I am", no personal pronouns.
 
-          Personal Information:
-          - Name: ${personalInfo.fullName || 'Professional'}
-          - Current Title/Role: ${personalInfo.title || experience[0]?.position || 'Professional'}
-          - Location: ${personalInfo.location || ''}
-          - Current Summary: ${personalInfo.summary || ''}
+          Profile:
+          Title: ${personalInfo.title || experience[0]?.position || 'Professional'}
+          Location: ${personalInfo.location || ''}
+          
+          Experience: ${experience.slice(0, 2).map((exp: any) => 
+            `${exp.position} at ${exp.company}`
+          ).join(', ')}
 
-          Professional Experience:
-          ${experience.slice(0, 3).map((exp: any) => 
-            `- ${exp.position || exp.title} at ${exp.company} (${exp.startDate || ''} - ${exp.endDate || 'Present'})
-             Key responsibilities: ${exp.description || exp.summary || 'Professional role'}`
-          ).join('\n')}
+          Skills: ${skills.slice(0, 6).map((skill: any) => skill.name || skill).join(', ')}
 
-          Education:
-          ${education.slice(0, 2).map((edu: any) => 
-            `- ${edu.degree || edu.qualification} in ${edu.field || edu.fieldOfStudy} from ${edu.institution || edu.school}`
-          ).join('\n')}
+          Structure format:
+          1. "[Field] with [X+] years of experience in [specific areas]"
+          2. "Skilled in [2-3 key technical skills] with [specialization/background]"
+          3. "Successfully [achievement with metric/result]"
+          4. "Seeking to [career goal/contribution] in [type of company/role]"
 
-          Core Skills: ${skills.slice(0, 8).map((skill: any) => skill.name || skill).join(', ')}
+          Example: "Software engineer with 6+ years of experience in designing and developing scalable web applications. Skilled in JavaScript, React, and Node.js with a strong background in system architecture. Successfully led cross-functional teams and delivered projects that improved efficiency by 25%. Seeking to contribute technical expertise to innovative projects in a growth-oriented company."
 
-          Requirements:
-          1. Write 3-4 sentences (80-120 words)
-          2. Start with years of experience or professional title
-          3. Include 3-4 key technical skills naturally
-          4. Mention industry or domain expertise
-          5. Include one key achievement or strength
-          6. Use action verbs and professional language
-          7. Optimize for ATS by using industry keywords
-          8. Make it engaging but professional
-          9. Focus on value proposition to employers
+          STRICT RULES:
+          - 60-80 words total
+          - 4-5 sentences exactly
+          - NO names, NO "I am", NO personal pronouns
+          - Include specific metrics when possible
+          - Professional third-person perspective
 
-          Write a compelling professional summary that would make this candidate stand out to recruiters and pass ATS screening.
-        `;
+          Summary:`;
+        } else {
+          prompt = `
+          4-5 cümlədən ibarət peşəkar CV xülasəsi yaz (60-80 söz). Ad yox, "Mən" yox, şəxsi zamirlər yox.
+
+          Profil:
+          Vəzifə: ${personalInfo.title || experience[0]?.position || 'Peşəkar'}
+          Yer: ${personalInfo.location || ''}
+          
+          Təcrübə: ${experience.slice(0, 2).map((exp: any) => 
+            `${exp.position} - ${exp.company}`
+          ).join(', ')}
+
+          Bacarıqlar: ${skills.slice(0, 6).map((skill: any) => skill.name || skill).join(', ')}
+
+          Struktur format:
+          1. "[X+] ildən artıq təcrübəyə malik [sahə] mütəxəssisi [spesifik sahələr]də"
+          2. "[2-3 əsas texniki bacarıq]da güclü bacarıqlara sahibdir [ixtisaslaşma/background] ilə"
+          3. "[nailiyyət metrik/nəticə ilə] uğurla həyata keçirib"
+          4. "[karyera məqsədi/töhfə] istəyir [şirkət tipi/rol]də"
+
+          Nümunə: "6 ildən artıq təcrübəyə malik proqram mühəndisi. Veb tətbiqlərin hazırlanması və miqyaslandırılmasında ixtisaslaşıb. JavaScript, React və Node.js üzrə güclü bacarıqlara sahibdir. Layihələrin effektivliyini 25% artıran komandaları uğurla idarə edib. Dinamik şirkətdə texniki biliklərini tətbiq etməklə innovativ layihələrin inkişafına töhfə vermək istəyir."
+
+          QƏTİ QAYDALAR:
+          - 60-80 söz
+          - Tam 4-5 cümlə
+          - AD yox, "Mən" yox, şəxsi zamirlər yox
+          - Mümkün olduqda spesifik rəqəmlər daxil et
+          - Peşəkar üçüncü şəxs baxımından
+
+          Xülasə:`;
+        }
       } else if (user.tier === 'Premium') {
-        prompt = `
-          Create an executive-level professional summary for this candidate, optimized for senior positions and ATS compatibility:
+        if (isEnglish) {
+          prompt = `
+          Write a professional executive CV summary in 4-5 sentences (60-80 words). No names, no "I am", no personal pronouns.
 
-          Personal Information:
-          - Name: ${personalInfo.fullName || 'Executive Professional'}
-          - Current Title/Role: ${personalInfo.title || experience[0]?.position || 'Senior Professional'}
-          - Location: ${personalInfo.location || ''}
-          - Current Summary: ${personalInfo.summary || ''}
+          Executive Profile:
+          Title: ${personalInfo.title || experience[0]?.position || 'Senior Professional'}
+          Location: ${personalInfo.location || ''}
+          
+          Experience: ${experience.slice(0, 2).map((exp: any) => 
+            `${exp.position} at ${exp.company}`
+          ).join(', ')}
 
-          Professional Experience:
-          ${experience.map((exp: any) => 
-            `- ${exp.position || exp.title} at ${exp.company} (${exp.startDate || ''} - ${exp.endDate || 'Present'})
-             Key achievements: ${exp.description || exp.summary || 'Leadership role with significant impact'}`
-          ).join('\n')}
+          Skills: ${skills.slice(0, 6).map((skill: any) => skill.name || skill).join(', ')}
 
-          Education:
-          ${education.map((edu: any) => 
-            `- ${edu.degree || edu.qualification} in ${edu.field || edu.fieldOfStudy} from ${edu.institution || edu.school} (${edu.graduationYear || ''})`
-          ).join('\n')}
+          Executive Structure format:
+          1. "[Field] executive with [X+] years of experience in [specific leadership areas]"
+          2. "Expert in [2-3 key strategic skills] with [specialization/industry background]"
+          3. "Successfully [leadership achievement with quantifiable impact/metric]"
+          4. "Seeking to [strategic goal/contribution] in [type of organization/role]"
 
-          Technical Skills: ${skills.map((skill: any) => skill.name || skill).join(', ')}
+          Example: "Technology executive with 10+ years of experience in leading digital transformation and scaling engineering teams. Expert in cloud architecture, agile methodologies, and strategic planning with a strong background in fintech. Successfully delivered enterprise solutions that increased revenue by 40% and reduced operational costs by 30%. Seeking to drive innovation and business growth in a forward-thinking organization."
 
-          Key Projects:
-          ${projects.slice(0, 3).map((project: any) => 
-            `- ${project.title || project.name}: ${project.description || 'Significant project contribution'}`
-          ).join('\n')}
+          STRICT RULES:
+          - 60-80 words total
+          - 4-5 sentences exactly
+          - NO names, NO "I am", NO personal pronouns
+          - Executive-level language and achievements
+          - Include quantifiable leadership impact
+          - Professional third-person perspective
 
-          Awards & Recognition:
-          ${awards.slice(0, 3).map((award: any) => 
-            `- ${award.name || award.title}: ${award.description || award.organization || 'Professional recognition'}`
-          ).join('\n')}
+          Summary:`;
+        } else {
+          prompt = `
+          4-5 cümlədən ibarət peşəkar icraçı CV xülasəsi yaz (60-80 söz). Ad yox, "Mən" yox, şəxsi zamirlər yox.
 
-          Languages: ${languages.map((lang: any) => `${lang.name || lang} (${lang.proficiency || 'Proficient'})`).join(', ')}
+          İcraçı Profil:
+          Vəzifə: ${personalInfo.title || experience[0]?.position || 'Ali Səviyyəli Peşəkar'}
+          Yer: ${personalInfo.location || ''}
+          
+          Təcrübə: ${experience.slice(0, 2).map((exp: any) => 
+            `${exp.position} - ${exp.company}`
+          ).join(', ')}
 
-          Premium Requirements:
-          1. Write 4-5 sentences (120-180 words) 
-          2. Lead with years of experience and seniority level
-          3. Highlight leadership experience and team management
-          4. Include quantifiable achievements when possible
-          5. Mention strategic thinking and business impact
-          6. Include 5-6 key technical and soft skills naturally
-          7. Reference industry expertise and domain knowledge
-          8. Add international experience or multi-cultural competency if applicable
-          9. Include innovation, transformation, or growth achievements
-          10. Use executive-level language and terminology
-          11. Optimize heavily for ATS with industry-specific keywords
-          12. Position as a solution-oriented leader and decision maker
-          13. Include collaboration and stakeholder management skills
+          Bacarıqlar: ${skills.slice(0, 6).map((skill: any) => skill.name || skill).join(', ')}
 
-          Create a powerful executive summary that positions this candidate as a strategic leader ready for C-level or senior management roles, while ensuring ATS optimization for maximum visibility.
-        `;
+          İcraçı Struktur format:
+          1. "[X+] ildən artıq təcrübəyə malik [sahə] icraçısı [spesifik rəhbərlik sahələr]də"
+          2. "[2-3 əsas strateji bacarıq]da ekspert [ixtisaslaşma/sənaye background] ilə"
+          3. "[rəhbərlik nailiyyəti ölçülə bilən təsir/metrik ilə] uğurla həyata keçirib"
+          4. "[strateji məqsəd/töhfə] istəyir [təşkilat tipi/rol]də"
+
+          Nümunə: "10 ildən artıq təcrübəyə malik texnologiya icraçısı rəqəmsal transformasiya və mühəndislik komandalarının idarəetməsində. Bulud arxitekturası, çevik metodologiya və strateji planlaşdırmada ekspert fintech sahəsində güclü background ilə. Gəliri 40% artıran və əməliyyat xərclərini 30% azaldan enterprise həlləri uğurla təqdim edib. İrəligedən düşünən təşkilatda innovasiya və biznes artımını həyata keçirmək istəyir."
+
+          QƏTİ QAYDALAR:
+          - 60-80 söz
+          - Tam 4-5 cümlə
+          - AD yox, "Mən" yox, şəxsi zamirlər yox
+          - İcraçı səviyyəli dil və nailiyyətlər
+          - Ölçülə bilən rəhbərlik təsiri daxil et
+          - Peşəkar üçüncü şəxs baxımından
+
+          Xülasə:`;
+        }
       }
 
-      const result = await model.generateContent(prompt);
-      const aiSummary = result.response.text().trim();
+      try {
+        let lastError: Error | null = null;
+        let aiSummary = '';
 
-      // Clean up the AI response (remove any markdown or extra formatting)
-      const cleanedSummary = aiSummary
-        .replace(/\*\*/g, '') // Remove bold markdown
-        .replace(/\*/g, '') // Remove italic markdown
-        .replace(/#{1,6}\s/g, '') // Remove headers
-        .replace(/\n\s*\n/g, '\n') // Remove extra line breaks
-        .trim();
+        // Try each API key until one works
+        for (let i = 0; i < geminiAIInstances.length; i++) {
+          try {
+            const geminiAI = getGeminiAI();
+            const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-      // Update CV with AI-generated summary
-      const updatedCvData = {
-        ...cvData,
-        personalInfo: {
-          ...personalInfo,
-          summary: cleanedSummary
+            const result = await model.generateContent(prompt);
+            aiSummary = result.response.text().trim();
+            
+            console.log(`✅ AI summary generated successfully with API instance ${currentAPIIndex}/${geminiAIInstances.length}`);
+            break; // Success, exit retry loop
+          } catch (error: any) {
+            lastError = error;
+            console.log(`❌ API instance ${currentAPIIndex}/${geminiAIInstances.length} failed:`, error.message);
+            
+            // Check if it's a quota error
+            if (error.message?.includes('429') || error.message?.toLowerCase().includes('quota')) {
+              console.log(`🚫 Quota exceeded for API instance ${currentAPIIndex}/${geminiAIInstances.length}, trying next...`);
+              continue; // Try next API key
+            } else {
+              // For non-quota errors, don't retry
+              break;
+            }
+          }
         }
-      };
 
-      await prisma.cV.update({
-        where: { id: cvId },
-        data: { cv_data: updatedCvData }
-      });
-
-      // Log the AI summary generation for analytics
-      await prisma.importSession.create({
-        data: {
-          userId,
-          type: 'ai_summary_generated',
-          data: JSON.stringify({
-            tier: user.tier,
-            cvId,
-            summaryLength: cleanedSummary.length,
-            timestamp: new Date().toISOString()
-          }),
-          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+        if (!aiSummary) {
+          console.error('❌ All Gemini API keys failed');
+          const isQuotaError = lastError?.message?.includes('429') || lastError?.message?.toLowerCase().includes('quota');
+          
+          return {
+            success: false,
+            error: isEnglish 
+              ? 'All AI API quotas exceeded. Please try again in a few minutes.' 
+              : 'Bütün AI API limiti aşıldı. Zəhmət olmasa bir neçə dəqiqə sonra yenidən cəhd edin.',
+            quotaExceeded: isQuotaError
+          };
         }
-      });
 
-      return { success: true, summary: cleanedSummary };
+        // Clean up the AI response (remove any markdown or extra formatting)
+        const cleanedSummary = aiSummary
+          .replace(/\*\*/g, '') // Remove bold markdown
+          .replace(/\*/g, '') // Remove italic markdown
+          .replace(/#{1,6}\s/g, '') // Remove headers
+          .replace(/\n\s*\n/g, '\n') // Remove extra line breaks
+          .trim();
+
+        // Update CV with AI-generated summary and language
+        const updatedCvData = {
+          ...cvData,
+          cvLanguage: cvLanguage, // Ensure language is set
+          personalInfo: {
+            ...personalInfo,
+            summary: cleanedSummary
+          }
+        };
+
+        await prisma.cV.update({
+          where: { id: cvId },
+          data: { cv_data: updatedCvData }
+        });
+
+        // Log the AI summary generation for analytics
+        await prisma.importSession.create({
+          data: {
+            userId,
+            type: 'ai_summary_generated',
+            data: JSON.stringify({
+              tier: user.tier,
+              cvId,
+              language: cvLanguage,
+              summaryLength: cleanedSummary.length,
+              timestamp: new Date().toISOString()
+            }),
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+          }
+        });
+
+        console.log(`✅ AI summary generated successfully (${cvLanguage}): ${cleanedSummary.length} characters`);
+
+        return { success: true, summary: cleanedSummary };
+      } catch (apiError: any) {
+        console.error('AI API Error:', apiError);
+        
+        // Handle specific API errors
+        if (apiError.message && apiError.message.includes('429')) {
+          return { 
+            success: false, 
+            error: isEnglish ? 
+              'AI service is temporarily unavailable due to high demand. Please try again later.' :
+              'AI xidməti yüksək tələb səbəbindən müvəqqəti əlçatan deyil. Zəhmət olmasa sonra yenidən cəhd edin.',
+            quotaExceeded: true
+          };
+        } else if (apiError.message && apiError.message.includes('quota')) {
+          return { 
+            success: false, 
+            error: isEnglish ?
+              'AI service quota exceeded. Please try again tomorrow or contact support.' :
+              'AI xidməti kvotası aşılıb. Sabah yenidən cəhd edin və ya dəstəklə əlaqə saxlayın.'
+          };
+        } else {
+          throw apiError; // Re-throw for general error handling
+        }
+      }
     } catch (error) {
       console.error('Error generating AI summary:', error);
       return { success: false, error: 'AI xülasəsi yaratmaq mümkün olmadı. Zəhmət olmasa, yenidən cəhd edin.' };
@@ -1270,43 +1464,72 @@ export class LinkedInImportService {
         return [];
       }
 
-      const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
-      const prompt = `
-        Analyze this LinkedIn profile text and extract technical skills, programming languages, frameworks, tools, and technologies mentioned. 
-        Return ONLY a JSON array of skill names, no explanations:
-
-        Profile Text: "${textContent.substring(0, 2000)}"
-
-        Examples of skills to look for:
-        - Programming languages (JavaScript, Python, Java, etc.)
-        - Frameworks (React, Next.js, Spring, etc.) 
-        - Databases (PostgreSQL, MongoDB, etc.)
-        - Tools (Docker, Git, etc.)
-        - Cloud platforms (AWS, Azure, etc.)
-        - Other technical skills
-
-        Return format: ["skill1", "skill2", "skill3"]
-        Maximum 15 skills.
-      `;
-
-      const result = await model.generateContent(prompt);
-      const aiResponse = result.response.text().trim();
-
-      // Parse AI response
       try {
-        const extractedSkills = JSON.parse(aiResponse);
-        if (Array.isArray(extractedSkills)) {
-          const validSkills = extractedSkills
-            .filter(skill => typeof skill === 'string' && skill.trim())
-            .map(skill => skill.trim())
-            .slice(0, 15);
+        let lastError: Error | null = null;
+        let extractedSkills: string[] = [];
 
-          console.log(`🤖 AI extracted ${validSkills.length} skills:`, validSkills);
-          return validSkills;
+        // Try each API key until one works
+        for (let i = 0; i < geminiAIInstances.length; i++) {
+          try {
+            const geminiAI = getGeminiAI();
+            const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+            const prompt = `
+              Analyze this LinkedIn profile text and extract technical skills, programming languages, frameworks, tools, and technologies mentioned. 
+              Return ONLY a JSON array of skill names, no explanations:
+
+              Profile Text: "${textContent.substring(0, 2000)}"
+
+              Examples of skills to look for:
+              - Programming languages (JavaScript, Python, Java, etc.)
+              - Frameworks (React, Next.js, Spring, etc.)
+              - Databases (PostgreSQL, MongoDB, etc.)
+              - Tools (Docker, Git, etc.)
+              - Cloud platforms (AWS, Azure, etc.)
+              - Other technical skills
+
+              Return format: ["skill1", "skill2", "skill3"]
+              Maximum 15 skills.
+            `;
+
+            const result = await model.generateContent(prompt);
+            const aiResponse = result.response.text().trim();
+
+            // Parse AI response
+            try {
+              const skillsResult = JSON.parse(aiResponse);
+              if (Array.isArray(skillsResult)) {
+                extractedSkills = skillsResult
+                  .filter(skill => typeof skill === 'string' && skill.trim())
+                  .map(skill => skill.trim())
+                  .slice(0, 15);
+
+                console.log(`✅ AI extracted ${extractedSkills.length} skills with API instance ${currentAPIIndex}/${geminiAIInstances.length}`);
+                break; // Success, exit retry loop
+              }
+            } catch (parseError) {
+              console.log('❌ Failed to parse AI skills response:', aiResponse);
+              break; // Parse error, don't retry
+            }
+          } catch (error: any) {
+            lastError = error;
+            console.log(`❌ API instance ${currentAPIIndex}/${geminiAIInstances.length} failed:`, error.message);
+            
+            // Check if it's a quota error
+            if (error.message?.includes('429') || error.message?.toLowerCase().includes('quota')) {
+              console.log(`🚫 Quota exceeded for API instance ${currentAPIIndex}/${geminiAIInstances.length}, trying next...`);
+              continue; // Try next API key
+            } else {
+              // For non-quota errors, don't retry
+              break;
+            }
+          }
         }
-      } catch (parseError) {
-        console.log('❌ Failed to parse AI skills response:', aiResponse);
+
+        return extractedSkills;
+      } catch (error) {
+        console.error('❌ Error extracting skills with AI:', error);
+        return [];
       }
 
       return [];
@@ -1353,8 +1576,6 @@ export class LinkedInImportService {
       const personalInfo = cvData.personalInfo || {};
       const experience = cvData.experience || [];
       const skills = cvData.skills || [];
-
-      const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
       // Create different prompts based on skill type and user tier
       let prompt = '';
@@ -1420,8 +1641,42 @@ export class LinkedInImportService {
         `;
       }
 
-      const result = await model.generateContent(prompt);
-      const aiDescription = result.response.text().trim();
+      let lastError: Error | null = null;
+      let aiDescription = '';
+
+      // Try each API key until one works
+      for (let i = 0; i < geminiAIInstances.length; i++) {
+        try {
+          const geminiAI = getGeminiAI();
+          const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+          const result = await model.generateContent(prompt);
+          aiDescription = result.response.text().trim();
+          
+          console.log(`✅ AI skill description generated successfully with API instance ${currentAPIIndex}/${geminiAIInstances.length}`);
+          break; // Success, exit retry loop
+        } catch (error: any) {
+          lastError = error;
+          console.log(`❌ API instance ${currentAPIIndex}/${geminiAIInstances.length} failed:`, error.message);
+          
+          // Check if it's a quota error
+          if (error.message?.includes('429') || error.message?.toLowerCase().includes('quota')) {
+            console.log(`🚫 Quota exceeded for API instance ${currentAPIIndex}/${geminiAIInstances.length}, trying next...`);
+            continue; // Try next API key
+          } else {
+            // For non-quota errors, don't retry
+            break;
+          }
+        }
+      }
+
+      if (!aiDescription) {
+        console.error('❌ All Gemini API keys failed');
+        return {
+          success: false,
+          error: 'AI API limiti aşıldı. Zəhmət olmasa bir neçə dəqiqə sonra yenidən cəhd edin.'
+        };
+      }
 
       // Clean up the AI response
       const cleanedDescription = aiDescription

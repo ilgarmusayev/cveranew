@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 
 interface RichTextEditorProps {
   value: string;
@@ -18,46 +18,50 @@ export default function RichTextEditor({
   minHeight = "120px"
 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
+  const valueRef = useRef(value);
 
-  // Clean HTML content for proper display
-  const cleanHtmlContent = (htmlContent: string): string => {
-    if (!htmlContent) return '';
+  // Update value ref when value changes
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
 
-    let cleaned = htmlContent;
+  // Only update editor content on initial load or when completely empty
+  useEffect(() => {
+    if (editorRef.current) {
+      const currentContent = editorRef.current.innerHTML;
+      
+      // Only update if editor is empty and we have value, or on initial load
+      if ((!currentContent || currentContent === '<br>' || currentContent === '') && value) {
+        editorRef.current.innerHTML = value || '';
+      }
+    }
+  }, []);
 
-    // Replace &nbsp; with regular spaces
+  const handleInput = useCallback((e: React.FormEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLDivElement;
+    const content = target.innerHTML;
+    onChange(content);
+  }, [onChange]);
+
+  const handleBlur = useCallback((e: React.FocusEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLDivElement;
+    const content = target.innerHTML;
+    
+    // Clean content only on blur to avoid cursor issues
+    let cleaned = content;
+    
+    // Basic cleaning without affecting cursor
     cleaned = cleaned.replace(/&nbsp;/g, ' ');
-
-    // Replace div tags with p tags
     cleaned = cleaned.replace(/<div>/g, '<p>');
     cleaned = cleaned.replace(/<\/div>/g, '</p>');
-
-    // Remove empty paragraphs and clean up spacing
     cleaned = cleaned.replace(/<p><\/p>/g, '');
     cleaned = cleaned.replace(/<p>\s*<\/p>/g, '');
-    cleaned = cleaned.replace(/<p><br><\/p>/g, '<p></p>');
-
-    // Clean up multiple consecutive spaces
-    cleaned = cleaned.replace(/\s+/g, ' ');
-
-    // Ensure proper paragraph wrapping for plain text
-    if (cleaned && !cleaned.includes('<') && cleaned.trim()) {
-      cleaned = `<p>${cleaned.trim()}</p>`;
+    
+    if (cleaned !== content) {
+      target.innerHTML = cleaned;
+      onChange(cleaned);
     }
-
-    // Fix malformed HTML
-    cleaned = cleaned.replace(/<p>\s*<p>/g, '<p>');
-    cleaned = cleaned.replace(/<\/p>\s*<\/p>/g, '</p>');
-
-    return cleaned.trim();
-  };
-
-  // Update editor content when value changes externally
-  useEffect(() => {
-    if (editorRef.current && value && editorRef.current.innerHTML !== value) {
-      editorRef.current.innerHTML = cleanHtmlContent(value);
-    }
-  }, [value]);
+  }, [onChange]);
 
   return (
     <div className={`rich-text-editor ${className}`}>
@@ -143,22 +147,8 @@ export default function RichTextEditor({
           fontFamily: 'inherit',
           minHeight: minHeight
         }}
-        onInput={(e) => {
-          const target = e.target as HTMLDivElement;
-          const content = target.innerHTML;
-
-          // Immediately clean and save content
-          const cleanedContent = cleanHtmlContent(content);
-          onChange(cleanedContent);
-        }}
-        onBlur={(e) => {
-          const target = e.target as HTMLDivElement;
-          const content = target.innerHTML;
-
-          // Final cleanup on blur
-          const cleanedContent = cleanHtmlContent(content);
-          onChange(cleanedContent);
-        }}
+        onInput={handleInput}
+        onBlur={handleBlur}
         onPaste={(e) => {
           e.preventDefault();
           const text = e.clipboardData.getData('text/plain');

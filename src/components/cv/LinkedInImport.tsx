@@ -64,9 +64,10 @@ interface LinkedInData {
 interface LinkedInImportProps {
   onImport: (data: any) => void;
   onCancel: () => void;
+  cvLanguage?: 'azerbaijani' | 'english';
 }
 
-export default function LinkedInImport({ onImport, onCancel }: LinkedInImportProps) {
+export default function LinkedInImport({ onImport, onCancel, cvLanguage = 'azerbaijani' }: LinkedInImportProps) {
   // LinkedIn HTML SCRAPER - API YOXDUR 
   // Puppeteer istifadə edərək HTML səhifəsindən məlumatları çəkirik
   // Bütün məlumatlar real-time olaraq LinkedIn səhifəsindən alınır
@@ -153,7 +154,8 @@ export default function LinkedInImport({ onImport, onCancel }: LinkedInImportPro
             experience: importedData.experience,
             education: importedData.education,
             skills: importedData.skills
-          }
+          },
+          cvLanguage: cvLanguage
         })
       });
 
@@ -170,18 +172,24 @@ export default function LinkedInImport({ onImport, onCancel }: LinkedInImportPro
               name: prev.personalInfo?.name || '',
               email: prev.personalInfo?.email || '',
               linkedin: prev.personalInfo?.linkedin || '',
-              professionalSummary: data.summary
+              professionalSummary: data.data.professionalSummary
             }
           };
         });
         setShowAiSummary(true);
-        console.log('✅ AI Professional Summary generated');
+        console.log(`✅ AI Professional Summary generated (${cvLanguage})`);
       } else {
-        setError('AI Summary generasiya xətası: ' + (data.error || 'Bilinməyən xəta'));
+        setError(cvLanguage === 'english' ? 
+          'AI Summary generation error: ' + (data.error || 'Unknown error') :
+          'AI Summary generasiya xətası: ' + (data.error || 'Bilinməyən xəta')
+        );
       }
     } catch (error: any) {
       console.error('💥 AI Summary xətası:', error);
-      setError('AI Summary xətası: ' + (error.message || 'Şəbəkə xətası'));
+      setError(cvLanguage === 'english' ? 
+        'AI Summary error: ' + (error.message || 'Network error') :
+        'AI Summary xətası: ' + (error.message || 'Şəbəkə xətası')
+      );
     } finally {
       setAiSummaryLoading(false);
     }

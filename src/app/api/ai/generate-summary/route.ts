@@ -1,13 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Initialize Gemini AI
-function initializeGeminiAI() {
-  const geminiApiKey = process.env.GEMINI_API_KEY;
-  if (!geminiApiKey) {
-    throw new Error('GEMINI_API_KEY environment variable tapılmadı');
+// Multiple Gemini API Keys for load balancing and failover
+const GEMINI_API_KEYS = [
+  process.env.GEMINI_API_KEY,
+  process.env.GEMINI_API_KEY_2,
+  process.env.GEMINI_API_KEY_3
+].filter(Boolean) as string[];
+
+// Initialize multiple Gemini AI instances
+const geminiAIInstances = GEMINI_API_KEYS.map(key => new GoogleGenerativeAI(key));
+
+console.log(`🔑 Initialized ${geminiAIInstances.length} Gemini API instances for /api/ai/generate-summary`);
+
+// Round-robin index for load balancing
+let currentAPIIndex = 0;
+
+// Get next available Gemini AI instance
+const getGeminiAI = () => {
+  if (geminiAIInstances.length === 0) {
+    throw new Error('No Gemini API keys configured');
   }
-  return new GoogleGenerativeAI(geminiApiKey);
+  
+  const instance = geminiAIInstances[currentAPIIndex];
+  currentAPIIndex = (currentAPIIndex + 1) % geminiAIInstances.length;
+  
+  console.log(`🔄 Using Gemini API instance ${currentAPIIndex + 1}/${geminiAIInstances.length}`);
+  return instance;
+};
+
+// Initialize Gemini AI (deprecated - using load balancer now)
+function initializeGeminiAI() {
+  return getGeminiAI();
 }
 
 // Prepare profile text for AI analysis
@@ -52,7 +76,7 @@ function prepareProfileTextForAI(profileData: any): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { profileData } = await req.json();
+    const { profileData, cvLanguage } = await req.json();
 
     if (!profileData) {
       return NextResponse.json({
@@ -61,43 +85,111 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    console.log('🤖 AI Professional Summary generasiya edilir...');
+    // Determine language for summary generation
+    const targetLanguage = cvLanguage || 'azerbaijani';
+    const isEnglish = targetLanguage === 'english';
 
-    // Initialize Gemini AI
-    const geminiAI = initializeGeminiAI();
-    const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    console.log(`🤖 AI Professional Summary generasiya edilir (${targetLanguage})...`);
 
     // Create profile text for AI analysis
     const profileText = prepareProfileTextForAI(profileData);
 
-    const prompt = `
-LinkedIn profil məlumatlarına əsasən professional özət yazın. Özət qısa, təsirli və peşəkar olmalıdır.
+    // Create language-specific prompt with strict word limits
+    const prompt = isEnglish ? `
+Write a professional CV summary in 4-5 sentences (60-80 words). No names, no "I am", no personal pronouns.
 
-Profil məlumatları:
-${profileText}
+Profile: ${profileText.substring(0, 500)}
 
-Qaydalar:
-1. 2-3 cümlə ilə yazın
-2. Şəxsin əsas bacarıqları və təcrübəsini vurğulayın
-3. Professional ton istifadə edin
-4. Azərbaycan dilində yazın
-5. Özət birbaşa başlasın, giriş sözləri yazmayın
+Structure format:
+1. "[Field] with [X+] years of experience in [specific areas]"
+2. "Skilled in [2-3 key technical skills] with [specialization/background]"
+3. "Successfully [achievement with metric/result]"
+4. "Seeking to [career goal/contribution] in [type of company/role]"
 
-Peşəkar Xülasə:`;
+Example: "Software engineer with 6+ years of experience in designing and developing scalable web applications. Skilled in JavaScript, React, and Node.js with a strong background in system architecture. Successfully led cross-functional teams and delivered projects that improved efficiency by 25%. Seeking to contribute technical expertise to innovative projects in a growth-oriented company."
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const generatedSummary = response.text().trim();
+STRICT RULES:
+- 60-80 words total
+- 4-5 sentences exactly
+- NO names, NO "I am", NO personal pronouns
+- Include specific metrics when possible
+- Professional third-person perspective
 
-    console.log('✅ AI Peşəkar Xülasə generasiya edildi');
+Summary:` : `
+4-5 cümlədən ibarət peşəkar CV xülasəsi yaz (60-80 söz). Ad yox, "Mən" yox, şəxsi zamirlər yox.
+
+Profil: ${profileText.substring(0, 500)}
+
+Struktur format:
+1. "[X+] ildən artıq təcrübəyə malik [sahə] mütəxəssisi [spesifik sahələr]də"
+2. "[2-3 əsas texniki bacarıq]da güclü bacarıqlara sahibdir [ixtisaslaşma/background] ilə"
+3. "[nailiyyət metrik/nəticə ilə] uğurla həyata keçirib"
+4. "[karyera məqsədi/töhfə] istəyir [şirkət tipi/rol]də"
+
+Nümunə: "6 ildən artıq təcrübəyə malik proqram mühəndisi. Veb tətbiqlərin hazırlanması və miqyaslandırılmasında ixtisaslaşıb. JavaScript, React və Node.js üzrə güclü bacarıqlara sahibdir. Layihələrin effektivliyini 25% artıran komandaları uğurla idarə edib. Dinamik şirkətdə texniki biliklərini tətbiq etməklə innovativ layihələrin inkişafına töhfə vermək istəyir."
+
+QƏTİ QAYDALAR:
+- 60-80 söz
+- Tam 4-5 cümlə
+- AD yox, "Mən" yox, şəxsi zamirlər yox
+- Mümkün olduqda spesifik rəqəmlər daxil et
+- Peşəkar üçüncü şəxs baxımından
+
+Xülasə:`;
+
+    let lastError: Error | null = null;
+    let generatedSummary = '';
+
+    // Try each API key until one works
+    for (let i = 0; i < geminiAIInstances.length; i++) {
+      try {
+        const geminiAI = getGeminiAI();
+        const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        generatedSummary = response.text().trim();
+        
+        console.log(`✅ AI Professional Summary generated successfully with API instance ${currentAPIIndex}/${geminiAIInstances.length}`);
+        break; // Success, exit retry loop
+      } catch (error: any) {
+        lastError = error;
+        console.log(`❌ API instance ${currentAPIIndex}/${geminiAIInstances.length} failed:`, error.message);
+        
+        // Check if it's a quota error
+        if (error.message?.includes('429') || error.message?.toLowerCase().includes('quota')) {
+          console.log(`🚫 Quota exceeded for API instance ${currentAPIIndex}/${geminiAIInstances.length}, trying next...`);
+          continue; // Try next API key
+        } else {
+          // For non-quota errors, don't retry
+          break;
+        }
+      }
+    }
+
+    if (!generatedSummary) {
+      console.error('❌ All Gemini API keys failed');
+      const isQuotaError = lastError?.message?.includes('429') || lastError?.message?.toLowerCase().includes('quota');
+      
+      return NextResponse.json({
+        success: false,
+        error: isEnglish 
+          ? 'All AI API quotas exceeded. Please try again in a few minutes.' 
+          : 'Bütün AI API limiti aşıldı. Zəhmət olmasa bir neçə dəqiqə sonra yenidən cəhd edin.',
+        quotaExceeded: isQuotaError
+      }, { status: 429 });
+    }
+
+    console.log(`✅ AI Peşəkar Xülasə generasiya edildi (${targetLanguage})`);
 
     return NextResponse.json({
       success: true,
       data: {
         professionalSummary: generatedSummary,
+        language: targetLanguage,
         timestamp: new Date().toISOString()
       },
-      message: 'Peşəkar Xülasə uğurla generasiya edildi'
+      message: isEnglish ? 'Professional Summary generated successfully' : 'Peşəkar Xülasə uğurla generasiya edildi'
     });
 
   } catch (error) {
@@ -106,6 +198,7 @@ Peşəkar Xülasə:`;
     return NextResponse.json({
       success: false,
       error: 'Peşəkar Xülasə generasiya edilərkən xəta baş verdi',
+      errorEn: 'Error occurred while generating Professional Summary',
       details: process.env.NODE_ENV === 'development' ?
         (error instanceof Error ? error.message : 'Unknown error') : undefined
     }, { status: 500 });

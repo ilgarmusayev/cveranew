@@ -88,6 +88,7 @@ export default function AIAccessControl({
 interface AISummaryGeneratorProps {
   userTier: string;
   cvData: any;
+  cvLanguage?: 'azerbaijani' | 'english';
   onSummaryGenerated: (summary: string) => void;
   onUpgrade: () => void;
 }
@@ -95,6 +96,7 @@ interface AISummaryGeneratorProps {
 export function AISummaryGenerator({
   userTier,
   cvData,
+  cvLanguage = 'azerbaijani',
   onSummaryGenerated,
   onUpgrade
 }: AISummaryGeneratorProps) {
@@ -118,17 +120,20 @@ export function AISummaryGenerator({
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ cvData })
+        body: JSON.stringify({ 
+          profileData: cvData,
+          cvLanguage: cvLanguage
+        })
       });
 
       if (!response.ok) {
-        throw new Error('AI xülasə yaradıla bilmədi');
+        throw new Error(cvLanguage === 'english' ? 'Failed to generate AI summary' : 'AI xülasə yaradıla bilmədi');
       }
 
       const data = await response.json();
-      onSummaryGenerated(data.summary);
+      onSummaryGenerated(data.data.professionalSummary);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Xəta baş verdi');
+      setError(err instanceof Error ? err.message : (cvLanguage === 'english' ? 'An error occurred' : 'Xəta baş verdi'));
     } finally {
       setLoading(false);
     }
@@ -137,17 +142,24 @@ export function AISummaryGenerator({
   const summaryContent = (
     <div className="bg-white rounded-lg border border-gray-200 p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">AI Xülasə Yaradıcı</h3>
+        <h3 className="text-lg font-semibold text-gray-900">
+          {cvLanguage === 'english' ? 'AI Summary Generator' : 'AI Xülasə Yaradıcı'}
+        </h3>
         <div className="flex items-center space-x-2">
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
             AI Powered
+          </span>
+          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800">
+            {cvLanguage === 'english' ? 'EN' : 'AZ'}
           </span>
         </div>
       </div>
 
       <p className="text-gray-600 mb-6">
-        CV məlumatlarınız əsasında peşəkar xülasə yaradın. AI sizin təcrübə və bacarıqlarınızı analiz edərək
-        işəgötürənləri cəlb edəcək xülasə yaradacaq.
+        {cvLanguage === 'english' 
+          ? 'Generate a professional summary based on your CV information. AI will analyze your experience and skills to create a compelling summary that attracts employers.'
+          : 'CV məlumatlarınız əsasında peşəkar xülasə yaradın. AI sizin təcrübə və bacarıqlarınızı analiz edərək işəgötürənləri cəlb edəcək xülasə yaradacaq.'
+        }
       </p>
 
       {error && (
@@ -164,10 +176,10 @@ export function AISummaryGenerator({
         {loading ? (
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-            AI xülasə yaradılır...
+            {cvLanguage === 'english' ? 'Generating AI summary...' : 'AI xülasə yaradılır...'}
           </div>
         ) : (
-          'AI ilə Xülasə Yaradın'
+          cvLanguage === 'english' ? 'Generate AI Summary' : 'AI ilə Xülasə Yaradın'
         )}
       </button>
     </div>

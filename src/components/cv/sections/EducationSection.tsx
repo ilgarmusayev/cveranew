@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { getLabel } from '@/lib/cvLanguage';
+import RichTextEditor from '@/components/ui/RichTextEditor';
 
 interface Education {
   id: string;
@@ -186,7 +187,7 @@ export default function EducationSection({ data, onChange }: EducationSectionPro
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        GPA / Qiymət <span className="text-gray-400 text-xs">(ixtiyari)</span>
+                        ÜOMG / Qiymət <span className="text-gray-400 text-xs">(ixtiyari)</span>
                       </label>
                       <input
                         type="text"
@@ -198,16 +199,15 @@ export default function EducationSection({ data, onChange }: EducationSectionPro
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Təsvir
+               <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Təsvir (ixtiyari)
                     </label>
-                    <textarea
-                      value={education.description || ''}
-                      onChange={(e) => updateEducation(education.id, 'description', e.target.value)}
-                      rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
-                      placeholder="Əsas fənlər, nailiyyətlər, və ya digər əlavə məlumatlar..."
+                    <RichTextEditor
+                      value={education.description ?? ''}
+                      onChange={(value) => updateEducation(education.id, 'description', value)}
+                      placeholder="Təhsiliniz haqqında məlumat verin..."
+                      minHeight="120px"
                     />
                   </div>
                 </div>

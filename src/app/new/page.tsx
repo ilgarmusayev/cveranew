@@ -244,9 +244,9 @@ export default function NewCVPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
               </div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">Yeni CV Yarat</h1>
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">Yeni CV Yaradın</h1>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Əsas məlumatları daxil edin və sonra CV-ni tam redaktə edə bilərsiniz
+                Əsas məlumatları daxil edib CV yaratdıqdan sonra yaradılan CV-nizi tam redaktə edə bilərsiniz
               </p>
             </div>
 
@@ -348,7 +348,7 @@ export default function NewCVPage() {
                       id="email"
                       value={formData.personalInfo.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
-                      placeholder="email@example.com"
+                      placeholder="numune@cvera.net"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                       disabled={loading}
                     />
@@ -370,20 +370,6 @@ export default function NewCVPage() {
                   </div>
                 </div>
 
-                <div className="mt-4">
-                  <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
-                    Ünvan
-                  </label>
-                  <input
-                    type="text"
-                    id="address"
-                    value={formData.personalInfo.address}
-                    onChange={(e) => handleInputChange('address', e.target.value)}
-                    placeholder="Şəhər, ölkə"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                    disabled={loading}
-                  />
-                </div>
 
                 <div className="mt-4">
                   <label htmlFor="summary" className="block text-sm font-medium text-gray-700 mb-1">
@@ -436,7 +422,7 @@ export default function NewCVPage() {
                       Yaradılır...
                     </div>
                   ) : (
-                    'CV Yarat və Redaktəyə Başla'
+                    'CV yaradın və redaktəyə başlayın'
                   )}
                 </button>
               </div>
