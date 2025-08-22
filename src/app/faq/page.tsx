@@ -59,8 +59,8 @@ const faqData: FAQItem[] = [
   {
     id: 8,
     category: 'AI Xüsusiyyətlər',
-    question: 'AI özət generatoru necə işləyir?',
-    answer: 'AI sistemimiz sizin iş təcrübənizə və bacarıqlarınıza əsaslanaraq professional özət mətn yaradır. Siz bu mətni öz ehtiyaclarınıza uyğun redaktə edə bilərsiniz.'
+    question: 'AI xülasə generatoru necə işləyir?',
+    answer: 'AI sistemimiz sizin iş təcrübənizə və bacarıqlarınıza əsaslanaraq peşəkar xülasə mətn yaradır. Siz bu mətni öz ehtiyaclarınıza uyğun redaktə edə bilərsiniz.'
   },
   {
     id: 9,

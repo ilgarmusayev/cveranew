@@ -1315,6 +1315,165 @@ export class LinkedInImportService {
       return [];
     }
   }
+
+  /**
+   * Generate AI-powered skill description for Medium and Premium users
+   */
+  async generateAISkillDescription(userId: string, cvId: string, skillId: string, skillName: string, skillType?: string): Promise<{ success: boolean; description?: string; error?: string }> {
+    try {
+      // Check user tier
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { tier: true }
+      });
+
+      if (!user) {
+        return { success: false, error: 'İstifadəçi tapılmadı' };
+      }
+
+      // Only allow Medium and Premium users to generate AI skill descriptions
+      if (user.tier === 'Free') {
+        return {
+          success: false,
+          error: 'AI bacarıq təsviri yaratma yalnız Orta və Premium abunəçilər üçün mövcuddur. Bu xüsusiyyətə daxil olmaq üçün paketinizi yüksəldin.'
+        };
+      }
+
+      // Get CV data for context
+      const cv = await prisma.cV.findUnique({
+        where: { id: cvId, userId },
+        select: { cv_data: true }
+      });
+
+      if (!cv) {
+        return { success: false, error: 'CV tapılmadı' };
+      }
+
+      const cvData = cv.cv_data as any;
+      const personalInfo = cvData.personalInfo || {};
+      const experience = cvData.experience || [];
+      const skills = cvData.skills || [];
+
+      const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+      // Create different prompts based on skill type and user tier
+      let prompt = '';
+
+      const skillTypeText = skillType === 'hard' ? 'texniki bacarığı' : skillType === 'soft' ? 'şəxsi bacarığı' : 'bacarığı';
+      const experienceContext = experience.slice(0, 3).map((exp: any) => 
+        `${exp.position || exp.title} - ${exp.company}: ${exp.description || ''}`
+      ).join('\n');
+
+      if (user.tier === 'Medium') {
+        prompt = `
+          Create a professional description for the skill "${skillName}" (${skillTypeText}) based on this professional context:
+
+          Professional Background:
+          - Current Role: ${personalInfo.title || experience[0]?.position || 'Professional'}
+          - Industry/Field: ${experience[0]?.company || 'Technology/Business'}
+          
+          Recent Experience:
+          ${experienceContext}
+
+          Related Skills: ${skills.filter((s: any) => s.name !== skillName).slice(0, 5).map((s: any) => s.name).join(', ')}
+
+          Requirements for ${skillType === 'hard' ? 'Technical Skills' : skillType === 'soft' ? 'Soft Skills' : 'General Skills'}:
+          1. Write 1-2 sentences (25-40 words)
+          2. Be specific and professional
+          3. Focus on practical application in work context
+          4. Use industry-appropriate terminology
+          5. Make it ATS-friendly with relevant keywords
+          6. Show value to potential employers
+          ${skillType === 'hard' ? '7. Include specific technologies, tools, or methodologies' : ''}
+          ${skillType === 'soft' ? '7. Show impact on team performance and collaboration' : ''}
+
+          Generate a concise, professional description that demonstrates expertise and value.
+        `;
+      } else if (user.tier === 'Premium') {
+        prompt = `
+          Create an executive-level description for the skill "${skillName}" (${skillTypeText}) based on this professional context:
+
+          Executive Profile:
+          - Leadership Role: ${personalInfo.title || experience[0]?.position || 'Senior Professional'}
+          - Industry Experience: ${experience[0]?.company || 'Technology/Business Leadership'}
+          - Career Level: ${experience.length}+ years of experience
+
+          Leadership Experience:
+          ${experienceContext}
+
+          Complementary Skills: ${skills.filter((s: any) => s.name !== skillName).slice(0, 8).map((s: any) => s.name).join(', ')}
+
+          Premium Requirements for ${skillType === 'hard' ? 'Technical Leadership Skills' : skillType === 'soft' ? 'Executive Soft Skills' : 'Leadership Competencies'}:
+          1. Write 2-3 sentences (40-70 words)
+          2. Emphasize leadership and strategic application
+          3. Include measurable impact or scale
+          4. Use executive-level language and terminology
+          5. Position as competitive advantage
+          6. Show business value and ROI potential
+          7. Include team/organizational impact
+          ${skillType === 'hard' ? '8. Highlight architectural, strategic, or innovation aspects' : ''}
+          ${skillType === 'soft' ? '8. Demonstrate influence on company culture and team performance' : ''}
+          9. Make it compelling for C-level and senior management roles
+          10. Optimize for executive search and senior position ATS
+
+          Create a powerful description that positions this skill as a key differentiator for senior leadership roles.
+        `;
+      }
+
+      const result = await model.generateContent(prompt);
+      const aiDescription = result.response.text().trim();
+
+      // Clean up the AI response
+      const cleanedDescription = aiDescription
+        .replace(/\*\*/g, '') // Remove bold markdown
+        .replace(/\*/g, '') // Remove italic markdown
+        .replace(/#{1,6}\s/g, '') // Remove headers
+        .replace(/^"|"$/g, '') // Remove quotes at start/end
+        .replace(/\n\s*\n/g, ' ') // Replace line breaks with spaces
+        .trim();
+
+      // Update the specific skill in CV data
+      const updatedSkills = skills.map((skill: any) => {
+        if (skill.id === skillId) {
+          return { ...skill, description: cleanedDescription };
+        }
+        return skill;
+      });
+
+      const updatedCvData = {
+        ...cvData,
+        skills: updatedSkills
+      };
+
+      await prisma.cV.update({
+        where: { id: cvId },
+        data: { cv_data: updatedCvData }
+      });
+
+      // Log the AI skill description generation for analytics
+      await prisma.importSession.create({
+        data: {
+          userId,
+          type: 'ai_skill_generated',
+          data: JSON.stringify({
+            tier: user.tier,
+            cvId,
+            skillId,
+            skillName,
+            skillType,
+            descriptionLength: cleanedDescription.length,
+            timestamp: new Date().toISOString()
+          }),
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+        }
+      });
+
+      return { success: true, description: cleanedDescription };
+    } catch (error) {
+      console.error('Error generating AI skill description:', error);
+      return { success: false, error: 'AI bacarıq təsviri yaratmaq mümkün olmadı. Zəhmət olmasa, yenidən cəhd edin.' };
+    }
+  }
 }
 
 export const linkedInImportService = new LinkedInImportService();

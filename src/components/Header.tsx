@@ -4,14 +4,32 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import { CVTranslationPanel } from '@/components/translation/CVTranslationPanel';
+import { CVLanguage } from '@/lib/cvLanguage';
 
 interface HeaderProps {
   showAuthButtons?: boolean;
   currentPage?: 'home' | 'login' | 'register';
+  showAITranslate?: boolean;
+  cvData?: any;
+  currentLanguage?: CVLanguage;
+  onCVUpdate?: (updatedCV: any) => void;
+  onLanguageChange?: (language: CVLanguage) => void;
+  userTier?: string;
 }
 
-export default function Header({ showAuthButtons = true, currentPage }: HeaderProps) {
+export default function Header({ 
+  showAuthButtons = true, 
+  currentPage,
+  showAITranslate = false,
+  cvData,
+  currentLanguage = 'azerbaijani' as CVLanguage,
+  onCVUpdate,
+  onLanguageChange,
+  userTier = 'Free'
+}: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showTranslationPanel, setShowTranslationPanel] = useState(false);
   const router = useRouter();
   const { user, logout } = useAuth();
 
@@ -49,6 +67,19 @@ export default function Header({ showAuthButtons = true, currentPage }: HeaderPr
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-3 lg:space-x-4 xl:space-x-6 flex-shrink-0">
+            {/* AI Translate Button */}
+            {showAITranslate && cvData && onCVUpdate && onLanguageChange && (
+              <button
+                onClick={() => setShowTranslationPanel(!showTranslationPanel)}
+                className="flex items-center px-3 lg:px-4 py-2 text-xs lg:text-sm font-medium text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-lg transition-all duration-200 border border-white/20"
+              >
+                <svg className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                </svg>
+                AI Tərcümə
+              </button>
+            )}
+            
             {user ? (
               // Authenticated user buttons
               <>
@@ -130,6 +161,22 @@ export default function Header({ showAuthButtons = true, currentPage }: HeaderPr
         {isMobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-blue-500 w-full">
             <div className="flex flex-col space-y-3">
+              {/* AI Translate Button for Mobile */}
+              {showAITranslate && cvData && onCVUpdate && onLanguageChange && (
+                <button
+                  onClick={() => {
+                    setShowTranslationPanel(!showTranslationPanel);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-3 rounded-lg font-medium transition-all duration-200 text-center flex items-center justify-center"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                  </svg>
+                  AI Tərcümə
+                </button>
+              )}
+              
               {user ? (
                 // Authenticated user mobile menu
                 <div className="space-y-3">
@@ -182,6 +229,34 @@ export default function Header({ showAuthButtons = true, currentPage }: HeaderPr
           </div>
         )}
       </div>
+      
+      {/* AI Translation Panel */}
+      {showTranslationPanel && showAITranslate && cvData && onCVUpdate && onLanguageChange && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-900">AI Tərcümə Paneli</h2>
+                <button
+                  onClick={() => setShowTranslationPanel(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6m0 0l6-6m-6 6L6 6" />
+                  </svg>
+                </button>
+              </div>
+              <CVTranslationPanel
+                cvData={cvData}
+                currentLanguage={currentLanguage}
+                onCVUpdate={onCVUpdate}
+                onLanguageChange={onLanguageChange}
+                userTier={userTier}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

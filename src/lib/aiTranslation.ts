@@ -23,7 +23,7 @@ export interface AITranslationService {
 }
 
 /**
- * Professional CV Translation Context
+ * Peşəkar CV Tərcümə Konteksti
  */
 const CV_TRANSLATION_CONTEXT = {
   azerbaijani: {

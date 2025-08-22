@@ -80,25 +80,36 @@ export async function POST(request: NextRequest) {
     const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const prompt = `
-      Aşağıdaki CV məlumatlarına əsasən müvafiq texniki bacarıqlar (skills) təklif edin:
+      Aşağıdaki CV məlumatlarına əsasən müvafiq bacarıqlar təklif edin:
 
       CV Məlumatları: "${textContent.substring(0, 2000)}"
 
       Tələblər:
-      1. Yalnız texniki bacarıqları daxil edin (proqramlaşdırma dilləri, framework-lər, verilənlər bazası, alətlər)
-      2. CV məlumatlarına uyğun olan bacarıqları təklif edin
-      3. Maksimum 10 bacarıq
-      4. JSON array formatında qaytarın
-      5. Hər bacarıq ayrı string olmalıdır
-
-      Nümunə bacarıqlar:
-      - Proqramlaşdırma dilləri: JavaScript, Python, Java, C#, PHP
+      1. Hard Skills (Texniki bacarıqlar): proqramlaşdırma dilləri, framework-lər, verilənlər bazası, alətlər, texnologiyalar
+      2. Soft Skills (Şəxsi bacarıqlar): liderlik, komanda işi, kommunikasiya, problem həll etmə
+      3. CV məlumatlarına uyğun olan bacarıqları təklif edin
+      4. Hər kateqoriyada maksimum 8 bacarıq
+      5. JSON object formatında qaytarın
+      
+      Hard Skills Nümunələri:
+      - Proqramlaşdırma: JavaScript, Python, Java, C#, TypeScript
       - Framework-lər: React, Vue.js, Angular, Next.js, Laravel
       - Verilənlər bazası: MySQL, PostgreSQL, MongoDB, Redis
       - Alətlər: Git, Docker, AWS, Azure, Jenkins
+      - Dizayn: Photoshop, Figma, Adobe Illustrator
+      
+      Soft Skills Nümunələri:
+      - Liderlik, Komanda işi, Kommunikasiya, Problem həlli
+      - Kreativlik, Adaptasiya, Vaxt idarəetməsi, Analitik düşüncə
+      - Müştəri xidməti, Prezentasiya, Layihə idarəetməsi
 
-      Cavab formatı: ["JavaScript", "React", "Node.js", "PostgreSQL", "Git"]
-      Yalnız JSON array qaytarın, başqa heç nə yazmayın.
+      Cavab formatı: 
+      {
+        "hardSkills": ["JavaScript", "React", "Node.js", "PostgreSQL", "Git"],
+        "softSkills": ["Liderlik", "Komanda işi", "Problem həlli", "Kommunikasiya"]
+      }
+
+      YALNIZ JSON cavab verin, əlavə mətn yox:
     `;
 
     const result = await model.generateContent(prompt);
@@ -114,15 +125,19 @@ export async function POST(request: NextRequest) {
         cleanResponse = cleanResponse.replace(/```json\s*/g, '').replace(/```/g, '');
       }
 
-      const extractedSkills = JSON.parse(cleanResponse);
+      const extractedData = JSON.parse(cleanResponse);
 
-      if (Array.isArray(extractedSkills)) {
-        const validSkills = extractedSkills
-          .filter(skill => typeof skill === 'string' && skill.trim())
-          .map(skill => skill.trim())
-          .slice(0, 10);
+      // Check if response is in the new format with hardSkills and softSkills
+      if (extractedData.hardSkills && extractedData.softSkills) {
+        const hardSkills = Array.isArray(extractedData.hardSkills) 
+          ? extractedData.hardSkills.filter((skill: any) => typeof skill === 'string' && skill.trim()).map((skill: any) => skill.trim()).slice(0, 8)
+          : [];
 
-        console.log(`✅ Generated ${validSkills.length} AI skills:`, validSkills);
+        const softSkills = Array.isArray(extractedData.softSkills) 
+          ? extractedData.softSkills.filter((skill: any) => typeof skill === 'string' && skill.trim()).map((skill: any) => skill.trim()).slice(0, 8)
+          : [];
+
+        console.log(`✅ Generated ${hardSkills.length} hard skills and ${softSkills.length} soft skills`);
 
         // Log the AI skills generation for analytics
         await prisma.importSession.create({
@@ -131,13 +146,31 @@ export async function POST(request: NextRequest) {
             type: 'ai_skills_generated',
             data: JSON.stringify({
               tier: user.tier,
-              skillsCount: validSkills.length,
-              skills: validSkills,
+              hardSkillsCount: hardSkills.length,
+              softSkillsCount: softSkills.length,
+              hardSkills: hardSkills,
+              softSkills: softSkills,
               timestamp: new Date().toISOString()
             }),
             expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
           }
         });
+
+        return NextResponse.json({
+          success: true,
+          hardSkills: hardSkills,
+          softSkills: softSkills,
+          message: `${hardSkills.length + softSkills.length} yeni skill AI tərəfindən yaradıldı (${hardSkills.length} hard, ${softSkills.length} soft)`
+        });
+      } 
+      // Fallback for old array format
+      else if (Array.isArray(extractedData)) {
+        const validSkills = extractedData
+          .filter(skill => typeof skill === 'string' && skill.trim())
+          .map(skill => skill.trim())
+          .slice(0, 10);
+
+        console.log(`✅ Generated ${validSkills.length} AI skills (legacy format):`, validSkills);
 
         return NextResponse.json({
           success: true,

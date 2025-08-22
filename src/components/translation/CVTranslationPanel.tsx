@@ -12,19 +12,30 @@ interface CVTranslationPanelProps {
   currentLanguage: CVLanguage;
   onCVUpdate: (updatedCV: any) => void;
   onLanguageChange: (language: CVLanguage) => void;
+  userTier?: string;
 }
 
 export function CVTranslationPanel({
   cvData,
   currentLanguage,
   onCVUpdate,
-  onLanguageChange
+  onLanguageChange,
+  userTier = 'Free'
 }: CVTranslationPanelProps) {
   const { translationState, translateFullCV, resetTranslationState } = useAITranslation();
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [targetLanguageInTranslation, setTargetLanguageInTranslation] = useState<CVLanguage | null>(null);
+  
+  // AI translation permission check
+  const canUseAI = ['premium', 'populyar'].includes(userTier?.toLowerCase());
 
   const handleFullTranslation = async (targetLanguage: CVLanguage) => {
+    // Check if user can use AI translation
+    if (!canUseAI) {
+      alert(`AI Tərcümə xüsusiyyəti Premium və Populyar istifadəçilər üçün mövcuddur! Sizin abunəliyiniz: ${userTier}`);
+      return;
+    }
+
     try {
       setTargetLanguageInTranslation(targetLanguage);
       resetTranslationState();
@@ -66,8 +77,8 @@ export function CVTranslationPanel({
 
   const labels = {
     azerbaijani: {
-      title: 'AI Tərcümə',
-      description: 'Bütün CV məzmununu AI vasitəsilə professional şəkildə tərcümə edin',
+      title: 'Süni İntellekt ilə Tərcümə',
+      description: 'Bütün CV məzmununu Sİ vasitəsilə peşəkar şəkildə tərcümə edin',
       fullTranslation: 'Tam CV Tərcümə',
       advancedOptions: 'Ətraflı Seçimlər',
       currentLang: 'Hazırki dil: Azərbaycan',
@@ -78,17 +89,17 @@ export function CVTranslationPanel({
         'İş başlıqları və bacarıqların düzgün tərcüməsi',
         'Texniki terminlərin saxlanması'
       ],
-      warning: 'Qeyd: Tərcümə prosesi bir neçə dəqiqə çəkə bilər'
+      warning: 'Qeyd: Tərcümə prosesi bir dəqiqə çəkə bilər'
     },
     english: {
       title: 'AI Translation',
-      description: 'Translate your entire CV content professionally using AI',
+      description: 'Translate your entire CV content peşəkar şəkildə AI vasitəsilə',
       fullTranslation: 'Full CV Translation',
       advancedOptions: 'Advanced Options',
       currentLang: 'Current language: English',
       targetLang: 'Target language: Azerbaijani',
       features: [
-        'Professional terminology translation',
+        'Peşəkar terminologiya tərcüməsi',
         'Context-aware translation',
         'Accurate job titles and skills translation',
         'Technical terms preservation'
@@ -142,10 +153,12 @@ export function CVTranslationPanel({
           {/* Azerbaijani Option */}
           <button
             onClick={() => handleFullTranslation('azerbaijani')}
-            disabled={translationState.isTranslating || currentLanguage === 'azerbaijani'}
+            disabled={!canUseAI || translationState.isTranslating || currentLanguage === 'azerbaijani'}
             className={`
               relative p-4 border-2 rounded-lg text-left transition-all duration-200
-              ${currentLanguage === 'azerbaijani' 
+              ${!canUseAI 
+                ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-50'
+                : currentLanguage === 'azerbaijani' 
                 ? 'border-green-200 bg-green-50 cursor-not-allowed' 
                 : translationState.isTranslating 
                   ? 'border-gray-200 bg-gray-50 cursor-not-allowed'
@@ -181,10 +194,12 @@ export function CVTranslationPanel({
           {/* English Option */}
           <button
             onClick={() => handleFullTranslation('english')}
-            disabled={translationState.isTranslating || currentLanguage === 'english'}
+            disabled={!canUseAI || translationState.isTranslating || currentLanguage === 'english'}
             className={`
               relative p-4 border-2 rounded-lg text-left transition-all duration-200
-              ${currentLanguage === 'english' 
+              ${!canUseAI 
+                ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-50'
+                : currentLanguage === 'english' 
                 ? 'border-green-200 bg-green-50 cursor-not-allowed' 
                 : translationState.isTranslating 
                   ? 'border-gray-200 bg-gray-50 cursor-not-allowed'
@@ -236,32 +251,7 @@ export function CVTranslationPanel({
         </ul>
       </div>
 
-      {/* Advanced Options Toggle */}
-      <div className="flex flex-col gap-4">
-        <button
-          onClick={() => setShowAdvanced(!showAdvanced)}
-          className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 justify-center"
-        >
-          {content.advancedOptions}
-          <svg className={`w-4 h-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-      </div>
-
-      {/* Advanced Options */}
-      {showAdvanced && (
-        <div className="mt-4 pt-4 border-t border-gray-200">
-          <div className="space-y-4">
-            <p className="text-sm text-gray-600">
-              {currentLanguage === 'azerbaijani' 
-                ? 'Ətraflı tərcümə seçimləri buraya əlavə ediləcək...'
-                : 'Advanced translation options will be added here...'
-              }
-            </p>
-          </div>
-        </div>
-      )}
+ 
 
       {/* Warning */}
       <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">

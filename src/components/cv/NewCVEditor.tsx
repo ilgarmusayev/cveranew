@@ -74,6 +74,7 @@ interface CVDataType {
     courses: any[];
     sectionOrder?: any[];
     cvLanguage: CVLanguage;
+    sectionNames?: Record<string, string>;
 }
 
 interface CVEditorData {

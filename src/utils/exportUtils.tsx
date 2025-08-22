@@ -198,7 +198,7 @@ export const exportToDocx = async (
               new Paragraph({
                 children: [
                   new TextRun({
-                    text: 'ÖZƏT / SUMMARY',
+                    text: 'XÜLASƏ / SUMMARY',
                     bold: true,
                     size: 24,
                   }),

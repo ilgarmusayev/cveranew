@@ -38,22 +38,67 @@ async function translateCVContent(content: any, targetLanguage: string, sourceLa
   const sourceLangName = sourceLanguage === 'auto' ? 'mətndə olan dil' : LANGUAGE_NAMES[sourceLanguage as keyof typeof LANGUAGE_NAMES];
 
   const prompt = `
-Siz peşəkar tərcüməçisiniz. Aşağıdakı CV məzmununu ${sourceLangName} dilindən ${targetLangName} dilinə tərcümə edin.
+Siz peşəkar CV tərcümə mütəxəssisiniz. Aşağıdakı CV məzmununu ${sourceLangName} dilindən ${targetLangName} dilinə tam və dəqiq tərcümə edin.
 
-MÜTLƏQ QAYDALAR:
-1. Bütün mətnləri professional və dəqiq tərcümə edin
-2. Şəxs adları, şirkət adları və yer adlarını orijinal saxlayın
-3. Texniki terminləri düzgün tərcümə edin
-4. Bölmə başlıqlarını (section names) tərcümə edin
-5. CV formatını və strukturunu dəqiq saxlayın
-6. Tarixləri və rəqəmləri orijinal saxlayın
-7. JSON formatını dəqiq saxlayın
-8. Boş və ya null dəyərləri tərcümə etməyin
+🔥 MÜTLƏQ QAYDALAR:
+1. ✅ HƏR ŞEYİ tərcümə edin: ad/soyad, işlər, təhsil, bacarıqlar, layihələr, təsvirlər, xülasələr
+2. ❌ TƏRCÜMƏ ETMƏYIN: email, telefon, website, linkedin linkləri
+3. 🎯 MÜTLƏQ: "sectionNames" bölməsindəki BÜTÜN dəyərləri tərcümə edin
+4. 📋 JSON strukturunu dəqiq saxlayın - heç bir field silinməsin
+5. 🔒 Boş/null dəyərləri olduğu kimi saxlayın
 
-Tərcümə ediləcək məzmun:
+${targetLanguage === 'az' ? `
+� Azərbaycan Tərcümə Qaydaları:
+"personalInfo" → "Şəxsi Məlumatlar"
+"summary" → "Peşəkar Xülasə"
+"professionalSummary" → "Peşəkar Xülasə"
+"experience" → "İş Təcrübəsi"  
+"professionalExperience" → "Peşəkar Təcrübə"
+"education" → "Təhsil"
+"skills" → "Bacarıqlar"
+"technicalSkills" → "Texniki Bacarıqlar"
+"softSkills" → "Şəxsi Bacarıqlar"
+"coreCompetencies" → "Əsas Bacarıqlar"
+"projects" → "Layihələr"
+"keyProjects" → "Əsas Layihələr"
+"languages" → "Dillər"
+"certifications" → "Sertifikatlar"
+"volunteerExperience" → "Könüllü Təcrübə"
+"volunteerWork" → "Könüllü İş"
+"publications" → "Nəşrlər"
+"honorsAwards" → "Mükafatlar və Fəxri Adlar"
+` : `
+� English Translation Rules:
+"personalInfo" → "Personal Information"
+"summary" → "Professional Summary"
+"professionalSummary" → "Professional Summary"
+"experience" → "Work Experience"
+"professionalExperience" → "Professional Experience"
+"education" → "Education"
+"skills" → "Skills"
+"technicalSkills" → "Technical Skills"
+"softSkills" → "Soft Skills"
+"coreCompetencies" → "Core Competencies"
+"projects" → "Projects"
+"keyProjects" → "Key Projects"
+"languages" → "Languages"
+"certifications" → "Certifications"
+"volunteerExperience" → "Volunteer Experience"
+"volunteerWork" → "Volunteer Work"
+"publications" → "Publications"
+"honorsAwards" → "Honors & Awards"
+`}
+
+💡 NÜMUNƏ:
+Əgər "Software Engineer" varsa → ${targetLanguage === 'az' ? '"Proqram Təminatı Mühəndisi"' : '"Software Engineer"'}
+Əgər "University of Technology" varsa → olduğu kimi saxla
+Əgər "john@email.com" varsa → olduğu kimi saxla
+
+INPUT JSON:
 ${JSON.stringify(content, null, 2)}
 
-Yalnız tərcümə edilmiş JSON-u qaytarın, əlavə mətn yazmayın:`;
+⚠️ ÇOX ÖNƏMLİ: Cavabınızda "sectionNames" obyektini MÜTLƏQ daxil edin!
+🎯 YALNIZ tərcümə edilmiş JSON qaytarın, başqa heç nə yazmayın:`;
 
   try {
     const result = await model.generateContent(prompt);
@@ -75,13 +120,20 @@ function getDefaultSectionNames(targetLanguage: string): Record<string, string> 
     'az': {
       personalInfo: 'Şəxsi Məlumatlar',
       summary: 'Peşəkar Xülasə',
+      professionalSummary: 'Peşəkar Xülasə',
       experience: 'İş Təcrübəsi',
+      professionalExperience: 'Peşəkar Təcrübə',
       education: 'Təhsil',
       skills: 'Bacarıqlar',
+      technicalSkills: 'Texniki Bacarıqlar',
+      softSkills: 'Şəxsi Bacarıqlar',
+      coreCompetencies: 'Əsas Bacarıqlar',
       languages: 'Dillər',
       projects: 'Layihələr',
+      keyProjects: 'Əsas Layihələr',
       certifications: 'Sertifikatlar',
       volunteerExperience: 'Könüllü Təcrübə',
+      volunteerWork: 'Könüllü İş',
       publications: 'Nəşrlər',
       honorsAwards: 'Mükafatlar və Təltiflər',
       testScores: 'Test Nəticələri',
@@ -92,13 +144,20 @@ function getDefaultSectionNames(targetLanguage: string): Record<string, string> 
     'en': {
       personalInfo: 'Personal Information',
       summary: 'Professional Summary',
+      professionalSummary: 'Professional Summary',
       experience: 'Work Experience',
+      professionalExperience: 'Professional Experience',
       education: 'Education',
       skills: 'Skills',
+      technicalSkills: 'Technical Skills',
+      softSkills: 'Soft Skills',
+      coreCompetencies: 'Core Competencies',
       languages: 'Languages',
       projects: 'Projects',
+      keyProjects: 'Key Projects',
       certifications: 'Certifications',
       volunteerExperience: 'Volunteer Experience',
+      volunteerWork: 'Volunteer Work',
       publications: 'Publications',
       honorsAwards: 'Honors & Awards',
       testScores: 'Test Scores',
@@ -115,21 +174,23 @@ function getDefaultSectionNames(targetLanguage: string): Record<string, string> 
 function getTranslatableFields(cvData: any): any {
   const translatableContent: any = {};
 
-  // Personal info translations
+  // Personal info translations (including names for translation)
   if (cvData.personalInfo) {
-    translatableContent.personalInfo = {};
-    if (cvData.personalInfo.professionalSummary) {
-      translatableContent.personalInfo.professionalSummary = cvData.personalInfo.professionalSummary;
-    }
-    if (cvData.personalInfo.headline) {
-      translatableContent.personalInfo.headline = cvData.personalInfo.headline;
-    }
-    if (cvData.personalInfo.summary) {
-      translatableContent.personalInfo.summary = cvData.personalInfo.summary;
-    }
-    if (cvData.personalInfo.title) {
-      translatableContent.personalInfo.title = cvData.personalInfo.title;
-    }
+    // Include ALL fields for translation including names
+    const translatableFields: any = {};
+    
+    // Include ALL personal info fields including names for translation
+    Object.keys(cvData.personalInfo).forEach(key => {
+      // NEVER translate: contact details only
+      const neverTranslate = ['email', 'phone', 'website', 'linkedin', 'github'];
+      
+      if (!neverTranslate.includes(key) && cvData.personalInfo[key]) {
+        translatableFields[key] = cvData.personalInfo[key];
+      }
+    });
+    
+    // Send all fields including names to AI for translation
+    translatableContent.personalInfo = translatableFields;
   }
 
   // Experience translations
@@ -269,10 +330,27 @@ function getTranslatableFields(cvData: any): any {
     }));
   }
 
-  // Section names translations
-  if (cvData.sectionNames) {
-    translatableContent.sectionNames = { ...cvData.sectionNames };
-  }
+  // Section names translations - ALWAYS include default section names for translation
+  const defaultSectionNames = getDefaultSectionNames('en'); // Get English defaults as base
+  
+  // Enhanced section names mapping to match CVPreview expectations
+  const enhancedSectionNames = {
+    ...defaultSectionNames,
+    // Add CVPreview specific keys
+    professionalSummary: 'Professional Summary',
+    professionalExperience: 'Professional Experience', 
+    technicalSkills: 'Technical Skills',
+    softSkills: 'Soft Skills',
+    coreCompetencies: 'Core Competencies',
+    keyProjects: 'Key Projects',
+    volunteerWork: 'Volunteer Work',
+    // Override with custom section names if available
+    ...(cvData.sectionNames || {})
+  };
+
+  translatableContent.sectionNames = enhancedSectionNames;
+
+  console.log('📝 Section names for translation:', translatableContent.sectionNames);
 
   return translatableContent;
 }
@@ -377,27 +455,33 @@ export async function POST(req: NextRequest) {
     }
 
     // Translate the content
+    console.log('🚀 Starting translation with content keys:', Object.keys(translatableContent));
     const translatedContent = await translateCVContent(translatableContent, mappedTargetLanguage, sourceLanguage);
+    console.log('🎯 Translation completed with keys:', Object.keys(translatedContent || {}));
 
     // Get default section names for target language
     const defaultSectionNames = getDefaultSectionNames(mappedTargetLanguage);
 
-    // Merge section names - use translated ones if available, otherwise use defaults
+    console.log('🏷️ Default section names for target language:', defaultSectionNames);
+    console.log('🔄 Translated section names from AI:', translatedContent.sectionNames);
+
+    // FORCE section names translation - use AI translated names or defaults
     const finalSectionNames = {
-      ...defaultSectionNames,
-      ...(translatedContent.sectionNames || {}),
-      // Ensure we have section names for all existing sections
-      ...(cvToTranslate.sectionNames ?
-          Object.keys(cvToTranslate.sectionNames).reduce((acc, key) => {
-            acc[key] = translatedContent.sectionNames?.[key] || defaultSectionNames[key] || cvToTranslate.sectionNames[key];
-            return acc;
-          }, {} as Record<string, string>) : {})
+      ...defaultSectionNames, // Start with defaults for target language
+      ...(translatedContent.sectionNames || {}) // Override with AI translated names
     };
+
+    console.log('✅ Final section names:', finalSectionNames);
 
     // Merge translated content back with original CV data, preserving structure
     const translatedData = {
       ...cvToTranslate,
       ...translatedContent,
+      // CRITICAL: Preserve original personal info and merge only translated fields
+      personalInfo: {
+        ...cvToTranslate.personalInfo, // Keep ALL original personal info (names, contact, etc.)
+        ...(translatedContent.personalInfo || {}) // Add only translated fields (summary, title, etc.)
+      },
       cvLanguage: targetLanguage, // Use original frontend language code
       sectionNames: finalSectionNames, // Ensure section names are properly set
       translationMetadata: {

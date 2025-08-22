@@ -2,6 +2,9 @@ import { useState, useCallback, useEffect } from 'react';
 import { useNotification } from '@/components/ui/Toast';
 import { CVData, PersonalInfo, Experience, Education, Skill, Language, Project, Certification, VolunteerExperience } from '@/types/cv';
 import dynamic from 'next/dynamic';
+import Header from '@/components/Header';
+import { CVTranslationPanel } from '@/components/translation/CVTranslationPanel';
+import { CVLanguage } from '@/lib/cvLanguage';
 
 // Import section components
 import PersonalInfoSection from './sections/PersonalInfoSection';
@@ -23,9 +26,6 @@ import { ApiClient } from '@/lib/api';
 // Create API client instance
 const apiClient = new ApiClient();
 
-// Type definitions
-type CVLanguage = 'azerbaijani' | 'english';
-
 interface CVDataType {
     personalInfo: PersonalInfo;
     experience: Experience[];
@@ -42,6 +42,7 @@ interface CVDataType {
     courses: any[];
     sectionOrder?: any[];
     cvLanguage: CVLanguage;
+    sectionNames?: Record<string, string>;
 }
 
 interface CVEditorData {
@@ -70,6 +71,7 @@ interface CVEditorState {
     courses: any[];
     sectionOrder: any[];
     cvLanguage: CVLanguage;
+    sectionNames?: Record<string, string>;
 }
 
 interface CVEditorProps {
@@ -110,9 +112,9 @@ const getDefaultCVData = (): Omit<CVEditorState, 'id' | 'title' | 'templateId'> 
 });
 
 // Sections configuration
-const getSections = (language: CVLanguage) => {
-    if (language === 'english') {
-        return [
+const getSections = (language: CVLanguage, translatedSectionNames?: Record<string, string>) => {
+    const defaultSections = {
+        english: [
             { id: 'personal', label: 'Personal Information', icon: '👤' },
             { id: 'experience', label: 'Work Experience', icon: '💼' },
             { id: 'education', label: 'Education', icon: '🎓' },
@@ -122,9 +124,8 @@ const getSections = (language: CVLanguage) => {
             { id: 'certifications', label: 'Certifications', icon: '🏆' },
             { id: 'volunteer', label: 'Volunteer Experience', icon: '❤️' },
             { id: 'template', label: 'Template Selection', icon: '🎨' }
-        ];
-    } else {
-        return [
+        ],
+        azerbaijani: [
             { id: 'personal', label: 'Şəxsi Məlumatlar', icon: '👤' },
             { id: 'experience', label: 'İş Təcrübəsi', icon: '💼' },
             { id: 'education', label: 'Təhsil', icon: '🎓' },
@@ -134,8 +135,45 @@ const getSections = (language: CVLanguage) => {
             { id: 'certifications', label: 'Sertifikatlar', icon: '🏆' },
             { id: 'volunteer', label: 'Könüllü Təcrübə', icon: '❤️' },
             { id: 'template', label: 'Şablon Seçimi', icon: '🎨' }
-        ];
+        ]
+    };
+
+    const sections = defaultSections[language] || defaultSections.azerbaijani;
+    
+    // If we have translated section names, use them
+    if (translatedSectionNames) {
+        console.log('🔧 getSections: Using translated section names:', translatedSectionNames);
+        
+        // Map section IDs to API section keys
+        const sectionIdMapping: Record<string, string> = {
+            'personal': 'personalInfo',
+            'experience': 'experience',
+            'education': 'education',
+            'skills': 'skills',
+            'languages': 'languages',
+            'projects': 'projects',
+            'certifications': 'certifications',
+            'volunteer': 'volunteerExperience',
+            'template': 'template'
+        };
+
+        const updatedSections = sections.map(section => {
+            const apiKey = sectionIdMapping[section.id];
+            const translatedLabel = apiKey && translatedSectionNames[apiKey];
+            
+            console.log(`🏷️ Section ${section.id} (${apiKey}): ${section.label} → ${translatedLabel || 'not found'}`);
+            
+            return {
+                ...section,
+                label: translatedLabel || section.label
+            };
+        });
+        
+        console.log('✅ getSections: Final sections with translated names:', updatedSections);
+        return updatedSections;
     }
+    
+    return sections;
 };
 
 const getSectionDescription = (sectionId: string, language: CVLanguage) => {
@@ -220,6 +258,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [showTranslationPanel, setShowTranslationPanel] = useState(false);
     // Disable auto-save for debugging
     // const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
     // const [lastSavedData, setLastSavedData] = useState<any>(null);
@@ -385,7 +424,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
 
 
     // Get sections for current language
-   const allSections = getSections(cv.cvLanguage);
+    const allSections = getSections(cv.cvLanguage, cv.sectionNames || {});
     const mainSections = allSections.filter(s => s.id !== 'template');
     const templateSection = allSections.find(s => s.id === 'template');
 
@@ -423,10 +462,13 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
         switch (activeSection) {
             case 'personal':
                 return (
-                    <PersonalInfoSection
-                        data={cv.personalInfo}
-                        onChange={(data: any) => updateCVData('personalInfo', data)}
-                    />
+                        <PersonalInfoSection
+                            data={cv.personalInfo}
+                            onChange={(data: any) => updateCVData('personalInfo', data)}
+                            userTier={userTier || 'Premium'} // Default to Premium for testing
+                            cvData={cv} // Pass full CV data for AI context
+                            cvId={cv.id}
+                        />
                 );
 
             case 'experience':
@@ -450,6 +492,9 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     <SkillsSection
                         data={cv.skills}
                         onChange={(data: any) => updateCVData('skills', data)}
+                        userTier={userTier || 'Premium'} // Default to Premium for testing
+                        cvData={cv} // Pass full CV data for AI context
+                        cvId={cv.id}
                     />
                 );
 
@@ -492,7 +537,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                         <TemplateSelector
                             selectedTemplateId={cv.templateId}
                             onTemplateSelect={(templateId: string) => setCv(prev => ({ ...prev, templateId }))}
-                            userTier={userTier}
+                            userTier={userTier || 'premium'}
                         />
                     </div>
                 );
@@ -508,15 +553,15 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
 
         return (
         <div className="min-h-screen bg-gray-50">
-            {/* Header */}
-            <div className="bg-white/80 backdrop-blur-lg border-b border-gray-200 sticky top-0 z-20">
+        
+            
+            {/* CV Editor Header */}
+            <div className="bg-white/80 backdrop-blur-lg border-b border-gray-200 sticky top-16 z-10">
                 <div className="max-w-screen-2xl mx-auto px-2 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16 sm:h-20">
+                    <div className="flex items-center justify-between h-12 sm:h-16">
                         
-                        {/* Left side - Title and Language */}
+                        {/* Left side - Title */}
                         <div className="flex items-center min-w-0">
-                         
-                            {/* Title and Language */}
                             <div className="ml-2 sm:ml-4 min-w-0">
                                 <input
                                     type="text"
@@ -525,17 +570,24 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                     placeholder="CV başlığı"
                                     className="text-base sm:text-lg font-bold text-gray-800 bg-transparent border-none p-0 focus:ring-0 w-28 sm:w-48 md:w-auto truncate"
                                 />
-                                <select
-                                    value={cv.cvLanguage}
-                                    onChange={(e) => setCv(prev => ({ ...prev, cvLanguage: e.target.value as CVLanguage }))}
-                                    className="text-xs text-gray-500 border-none bg-transparent p-0 focus:ring-0 -mt-1"
-                                >
-                                    <option value="azerbaijani">Azərbaycan dili</option>
-                                    <option value="english">English</option>
-                                </select>
                             </div>
+                            
+                            {/* AI Translate Button */}
+                            <button
+                                onClick={() => {
+                                    console.log('AI Translate clicked');
+                                    setShowTranslationPanel(true);
+                                }}
+                                className="ml-3 flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-lg transition-all duration-200 border border-white/20"
+                                title="AI ilə tərcümə et"
+                            >
+                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                                </svg>
+                                AI Tərcümə
+                            </button>
                         </div>
-
+                        
                         {/* Right side - Actions & Status */}
                         <div className="flex items-center space-x-1 sm:space-x-2">
                             {/* Status - hidden on small screens */}
@@ -749,6 +801,62 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     </div>
                 </div>
             </div>
-        </div>
+        
+        {showTranslationPanel && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                    <div className="p-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold text-gray-900">AI Tərcümə Paneli</h2>
+                            <button
+                                onClick={() => setShowTranslationPanel(false)}
+                                className="text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6m0 0l6-6m-6 6L6 6" />
+                                </svg>
+                            </button>
+                        </div>
+                        <CVTranslationPanel
+                            cvData={cv}
+                            currentLanguage={cv.cvLanguage as CVLanguage}
+                            onCVUpdate={(updatedCV) => {
+                                console.log('🔄 CVEditor: Receiving translated CV:', updatedCV);
+                                console.log('📝 CVEditor: New language:', updatedCV.cvLanguage);
+                                console.log('🏷️ CVEditor: Section names:', updatedCV.sectionNames);
+                                
+                                // Update CV state with translated content INCLUDING section names
+                                setCv(prevCV => ({
+                                    ...prevCV,
+                                    ...updatedCV,
+                                    sectionNames: updatedCV.sectionNames || {}
+                                }));
+                                
+                                console.log('🔧 CVEditor: Updated CV state with section names');
+                                
+                                // Force re-render by updating active section
+                                setActiveSection(prev => {
+                                    // If current section exists in new section names, keep it
+                                    // Otherwise switch to first available section
+                                    const sections = getSections(updatedCV.cvLanguage as CVLanguage, updatedCV.sectionNames || {});
+                                    console.log('📋 CVEditor: Generated sections with new names:', sections);
+                                    return sections.find(s => s.id === prev)?.id || sections[0]?.id || prev;
+                                });
+                                
+                                setShowTranslationPanel(false);
+                                
+                                console.log('✅ CVEditor: CV state updated with translation and section names');
+                            }}
+                            onLanguageChange={(language) => {
+                                console.log('🌐 CVEditor: Language changed to:', language);
+                                setCv(prev => ({ ...prev, cvLanguage: language as any }));
+                            }}
+                            userTier={userTier}
+                        />
+                    </div>
+                </div>
+            </div>
+        )}
+</div>
     );
 }

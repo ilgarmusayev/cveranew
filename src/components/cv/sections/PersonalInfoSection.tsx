@@ -36,8 +36,8 @@ interface PersonalInfoSectionProps {
 export default function PersonalInfoSection({ data, onChange, userTier = 'Free', cvData, cvId }: PersonalInfoSectionProps) {
   const [imageUploading, setImageUploading] = useState(false);
   const [aiGenerating, setAiGenerating] = useState(false);
-  const isPremium = userTier === 'Premium';
-  const canUseAI = userTier === 'Premium' || userTier === 'Medium';
+  const isPremium = userTier?.toLowerCase() === 'premium';
+  const canUseAI = ['premium', 'populyar', 'medium'].includes(userTier?.toLowerCase());
   const { showSuccess, showError, showWarning, showInfo } = useNotification();
 
   // Clean HTML content for proper display
@@ -177,7 +177,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
     if (!canUseAI) {
       console.log('❌ Cannot use AI. User tier:', userTier);
-      showWarning(`AI Peşəkar Xülasə Premium və Medium istifadəçilər üçün mövcuddur! Sizin tier: ${userTier}`, 'Giriş məhdudiyyəti');
+      showWarning(`AI Peşəkar Xülasə Premium və Populyar istifadəçilər üçün mövcuddur! Sizin tier: ${userTier}`, 'Giriş məhdudiyyəti');
       return;
     }
 
@@ -187,11 +187,16 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
       return;
     }
 
-    if (!cvData || !cvData.personalInfo || !cvData.personalInfo.fullName) {
+    const info = cvData?.personalInfo || {};
+    if (!cvData || !cvData.personalInfo || !(info.fullName || info.firstName || info.lastName || info.email || info.summary)) {
       console.log('❌ Missing CV data:', {
         hasCvData: !!cvData,
         hasPersonalInfo: !!(cvData?.personalInfo),
-        hasFullName: !!(cvData?.personalInfo?.fullName)
+        hasFullName: !!(info.fullName),
+        hasFirstName: !!(info.firstName),
+        hasLastName: !!(info.lastName),
+        hasEmail: !!(info.email),
+        hasSummary: !!(info.summary)
       });
       showWarning('AI summary yaratmaq üçün əvvəlcə əsas məlumatları doldurun', 'Məlumat çatışmır');
       return;
@@ -232,7 +237,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
         if (response.status === 401) {
           showError('Giriş icazəsi yoxdur. Yenidən giriş edin.', 'Autentifikasiya xətası');
         } else if (response.status === 403) {
-          showWarning(result.error || 'AI funksiyalar üçün Premium/Medium planı lazımdır', 'Plan məhdudiyyəti');
+          showWarning(result.error || 'AI funksiyalar üçün Premium/Populyar planı lazımdır', 'Plan məhdudiyyəti');
         } else {
           throw new Error(result.error || 'API xətası');
         }
@@ -243,7 +248,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
         console.log('✅ AI Summary generated successfully:', result.summary.length, 'characters');
         handleChange('summary', result.summary);
         showSuccess(
-          `${userTier === 'Premium' ? 'Executive-level' : 'Professional'} səviyyədə hazırlandı və ATS üçün optimallaşdırıldı.`,
+          `${userTier === 'Premium' ? 'Executive-level' : 'Peşəkar'} səviyyədə hazırlandı və ATS üçün optimallaşdırıldı.`,
           'AI Peşəkar Xülasə Yaradıldı! 🎉'
         );
       } else {
@@ -461,7 +466,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
                   : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600'
                 : 'bg-gray-200 text-gray-500 cursor-not-allowed'
             }`}
-            title={canUseAI ? 'AI ilə avtomatik professional özət yaradın' : 'AI funksiyalar Premium/Medium üçün mövcuddur'}
+            title={canUseAI ? 'AI ilə avtomatik peşəkar xülasə yaradın' : 'AI funksiyalar Premium/Medium üçün mövcuddur'}
           >
             {aiGenerating ? (
               <div className="flex items-center space-x-1">
@@ -471,7 +476,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
             ) : (
               <div className="flex items-center space-x-1">
                 <span>🤖</span>
-                <span>AI Özət</span>
+                <span>AI Xülasə</span>
                 {!canUseAI && <span className="ml-1">🔒</span>}
               </div>
             )}
@@ -607,8 +612,8 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
             }
           }}
           data-placeholder={canUseAI
-            ? "Professional təcrübənizi yazın və ya yuxarıdakı AI butonundan avtomatik yaradın..."
-            : "Professional təcrübənizi və məqsədlərinizi qısaca təsvir edin..."
+            ? "Peşəkar təcrübənizi yazın və ya yuxarıdakı AI butonundan avtomatik yaradın..."
+            : "Peşəkar təcrübənizi və məqsədlərinizi qısaca təsvir edin..."
           }
         />
 

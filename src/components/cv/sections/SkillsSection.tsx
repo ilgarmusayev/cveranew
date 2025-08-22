@@ -9,6 +9,7 @@ interface Skill {
   name: string;
   level?: string;
   type?: 'hard' | 'soft'; // Add skill type
+  description?: string; // AI-generated description
 }
 
 interface SkillsSectionProps {
@@ -33,13 +34,14 @@ interface SkillSuggestion {
 export default function SkillsSection({ data, onChange, userTier = 'Free', cvData, cvId }: SkillsSectionProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [aiSuggesting, setAiSuggesting] = useState(false);
+  const [aiGeneratingSkill, setAiGeneratingSkill] = useState<string | null>(null); // Track which skill is generating AI description
   const [suggestions, setSuggestions] = useState<SkillSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const { showSuccess, showError, showWarning, showInfo } = useNotification();
 
   // AI is available for all users to see, but only works for premium users
-  const canUseAI = userTier === 'Premium' || userTier === 'Medium';
+  const canUseAI = ['premium', 'populyar', 'medium'].includes(userTier?.toLowerCase());
 
   const addSkill = () => {
     const newSkill: Skill = {
@@ -140,8 +142,68 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
         return;
       }
 
-      if (result.success && result.skills && result.skills.length > 0) {
-        console.log('✅ AI Skills received:', result.skills.length, 'skills');
+      // Handle new format with hard and soft skills
+      if (result.success && (result.hardSkills || result.softSkills)) {
+        const hardSkills = result.hardSkills || [];
+        const softSkills = result.softSkills || [];
+        
+        console.log('✅ AI Skills received:', hardSkills.length, 'hard skills,', softSkills.length, 'soft skills');
+
+        // Convert skills to suggestions format
+        const hardSkillSuggestions = hardSkills.map((skillName: string) => ({
+          name: skillName,
+          reason: 'AI tərəfindən təklif edilib (Hard Skill)',
+          category: 'Hard Skills'
+        }));
+
+        const softSkillSuggestions = softSkills.map((skillName: string) => ({
+          name: skillName,
+          reason: 'AI tərəfindən təklif edilib (Soft Skill)',
+          category: 'Soft Skills'
+        }));
+
+        const allSuggestions = [...hardSkillSuggestions, ...softSkillSuggestions];
+        setSuggestions(allSuggestions);
+        setShowSuggestions(true);
+
+        // Add skills directly to CV with appropriate types
+        const existingSkillNames = data.map(s => s.name.toLowerCase());
+        
+        const newHardSkills = hardSkills
+          .filter((skillName: string) =>
+            !existingSkillNames.includes(skillName.toLowerCase())
+          )
+          .map((skillName: string) => ({
+            id: `skill-hard-ai-${Date.now()}-${Math.random()}`,
+            name: skillName,
+            level: 'Intermediate' as const,
+            type: 'hard' as const
+          }));
+
+        const newSoftSkills = softSkills
+          .filter((skillName: string) =>
+            !existingSkillNames.includes(skillName.toLowerCase())
+          )
+          .map((skillName: string) => ({
+            id: `skill-soft-ai-${Date.now()}-${Math.random()}`,
+            name: skillName,
+            level: 'Intermediate' as const,
+            type: 'soft' as const
+          }));
+
+        const allNewSkills = [...newHardSkills, ...newSoftSkills];
+
+        if (allNewSkills.length > 0) {
+          onChange([...data, ...allNewSkills]);
+          showSuccess(
+            `AI tərəfindən ${allNewSkills.length} yeni skill əlavə edildi! (${newHardSkills.length} hard, ${newSoftSkills.length} soft)`,
+            'AI Skills Yaradıldı! 🎉'
+          );
+        }
+      }
+      // Handle legacy format for backward compatibility
+      else if (result.success && result.skills && result.skills.length > 0) {
+        console.log('✅ AI Skills received (legacy format):', result.skills.length, 'skills');
 
         // Convert skills to suggestions format
         const skillSuggestions = result.skills.map((skillName: string) => ({
@@ -162,7 +224,8 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
           .map((skillName: string) => ({
             id: `skill-ai-${Date.now()}-${Math.random()}`,
             name: skillName,
-            level: 'Intermediate' as const
+            level: 'Intermediate' as const,
+            type: 'hard' as const // Default to hard for legacy
           }));
 
         if (newSkills.length > 0) {
@@ -206,6 +269,95 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
 
     // Show success message
     showSuccess(`"${suggestion.name}" bacarığı CV-nizə əlavə edildi! 🎉`);
+  };
+
+  const generateAIDescription = async (skillId: string, skillName: string, skillType?: string) => {
+    // Check if user can use AI
+    if (!canUseAI) {
+      setShowUpgradeModal(true);
+      return;
+    }
+
+    if (!cvId) {
+      showError('AI təsvir yaratmaq üçün CV ID lazımdır', 'Məlumat çatışmır');
+      return;
+    }
+
+    if (!skillName.trim()) {
+      showWarning('AI təsvir yaratmaq üçün bacarıq adı lazımdır');
+      return;
+    }
+
+    setAiGeneratingSkill(skillId);
+    console.log('🤖 Generating AI description for skill:', skillName);
+
+    try {
+      // Get authentication token
+      const token = localStorage.getItem('accessToken') || localStorage.getItem('token') || localStorage.getItem('auth-token');
+
+      if (!token) {
+        showError('Giriş icazəsi yoxdur. Yenidən giriş edin.', 'Autentifikasiya xətası');
+        return;
+      }
+
+      const response = await fetch('/api/generate-ai-skills', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ 
+          cvId, 
+          skillId, 
+          skillName,
+          skillType 
+        }),
+      });
+
+      console.log('📡 AI Skill Description API Response:', {
+        status: response.status,
+        ok: response.ok,
+        statusText: response.statusText
+      });
+
+      const result = await response.json();
+      console.log('📋 AI Skill Description Result:', result);
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          showError('Giriş icazəsi yoxdur. Yenidən giriş edin.', 'Autentifikasiya xətası');
+        } else if (response.status === 403) {
+          setShowUpgradeModal(true);
+        } else {
+          throw new Error(result.error || 'API xətası');
+        }
+        return;
+      }
+
+      if (result.success && result.description) {
+        console.log('✅ AI Skill Description generated successfully:', result.description.length, 'characters');
+        
+        // Update the skill with the AI-generated description
+        const updated = data.map(skill => 
+          skill.id === skillId ? { ...skill, description: result.description } : skill
+        );
+        onChange(updated);
+
+        showSuccess(
+          `${userTier === 'Premium' ? 'Executive-level' : 'Peşəkar'} səviyyədə hazırlandı və ATS üçün optimallaşdırıldı.`,
+          'AI Bacarıq Təsviri Yaradıldı! 🎉'
+        );
+      } else {
+        console.log('❌ API returned success=false or no description');
+        throw new Error('AI bacarıq təsviri yaradıla bilmədi');
+      }
+
+    } catch (error) {
+      console.error('💥 AI Skill Description error:', error);
+      showError('AI bacarıq təsviri yaradarkən xəta baş verdi. Yenidən cəhd edin.', 'AI Xətası');
+    } finally {
+      setAiGeneratingSkill(null);
+    }
   };
 
   return (
@@ -352,6 +504,33 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                               <option value="Ekspert">Ekspert</option>
                             </select>
                           </div>
+                          <div>
+                            <div className="flex items-center justify-between mb-2">
+                              <label className="block text-sm font-medium text-gray-700">
+                                Peşəkar Təsvir {canUseAI && <span className="text-xs text-purple-600">(AI Powered)</span>}
+                              </label>
+                              {canUseAI && skill.name.trim() && (
+                                <button
+                                  onClick={() => generateAIDescription(skill.id, skill.name, skill.type)}
+                                  className="px-3 py-1 text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-md hover:from-purple-600 hover:to-pink-600 transition-colors"
+                                >
+                                  🤖 AI ilə yarat
+                                </button>
+                              )}
+                            </div>
+                            <textarea
+                              value={skill.description || ''}
+                              onChange={(e) => updateSkill(skill.id, 'description', e.target.value)}
+                              rows={3}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                              placeholder={canUseAI ? "AI ilə peşəkar təsvir yaradın və ya əl ilə yazın..." : "Bu bacarığın necə istifadə etdiyinizi qısaca təsvir edin..."}
+                            />
+                            {skill.description && (
+                              <p className="text-xs text-gray-500 mt-1">
+                                {skill.description.length} simvol
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </div>
                     )}
@@ -448,6 +627,33 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                               <option value="Ekspert">Ekspert</option>
                             </select>
                           </div>
+                          <div>
+                            <div className="flex items-center justify-between mb-2">
+                              <label className="block text-sm font-medium text-gray-700">
+                                Peşəkar Təsvir {canUseAI && <span className="text-xs text-purple-600">(AI Powered)</span>}
+                              </label>
+                              {canUseAI && skill.name.trim() && (
+                                <button
+                                  onClick={() => generateAIDescription(skill.id, skill.name, skill.type)}
+                                  className="px-3 py-1 text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-md hover:from-purple-600 hover:to-pink-600 transition-colors"
+                                >
+                                  🤖 AI ilə yarat
+                                </button>
+                              )}
+                            </div>
+                            <textarea
+                              value={skill.description || ''}
+                              onChange={(e) => updateSkill(skill.id, 'description', e.target.value)}
+                              rows={3}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                              placeholder={canUseAI ? "AI ilə peşəkar təsvir yaradın və ya əl ilə yazın..." : "Bu bacarığın necə istifadə etdiyinizi qısaca təsvir edin..."}
+                            />
+                            {skill.description && (
+                              <p className="text-xs text-gray-500 mt-1">
+                                {skill.description.length} simvol
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </div>
                     )}
@@ -477,10 +683,10 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
               <span className="text-white text-lg">🤖</span>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">AI Professional Skills Analyzer</h3>
+              <h3 className="text-lg font-semibold text-gray-900">AI Peşəkar Bacarıqlar Analizçisi</h3>
               <p className="text-sm text-gray-600">
                 {canUseAI ?
-                  `${userTier} üzvü - Professional skills analizi və tövsiyələri` :
+                  `${userTier} üzvü - Peşəkar bacarıqlar analizi və tövsiyələri` :
                   'Premium və Medium üzvlər üçün mövcuddur'
                 }
               </p>
@@ -527,7 +733,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
             ) : (
               <div className="flex items-center justify-center gap-2">
                 <span>🎯</span>
-                <span>Professional Skills Tövsiyələri Al</span>
+                <span>Peşəkar Bacarıqlar Tövsiyələri Al</span>
               </div>
             )}
           </button>
@@ -538,7 +744,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                 <span className="text-purple-600 text-lg">💎</span>
                 <div>
                   <p className="text-sm font-medium text-purple-800 mb-1">
-                    AI Professional Skills Analyzer
+                    AI Peşəkar Bacarıqlar Analizçisi
                   </p>
                   <p className="text-xs text-purple-700">
                     CV məlumatlarınızı dərin analiz edərək karyeranız üçün ən münasib
@@ -554,7 +760,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
             <div className="mt-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h4 className="text-base font-semibold text-gray-900">
-                  🎯 AI Professional Tövsiyələri
+                  🎯 AI Peşəkar Tövsiyələri
                 </h4>
                 <span className="text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
                   {suggestions.length} təklif
@@ -702,13 +908,13 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                 </div>
                 <div>
                   <p className="text-sm font-medium text-purple-800 mb-1">
-                    AI Professional Skills Analyzer
+                    AI Peşəkar Bacarıqlar Analizçisi
                   </p>
                 </div>
               </div>
 
               <p className="text-sm text-gray-700 mb-4">
-                AI Professional Skills Analyzer funksiyasından istifadə etmək üçün
+                AI Peşəkar Bacarıqlar Analizçisi funksiyasından istifadə etmək üçün
                 Premium və ya Medium planına yüksəltməyi düşünün. Bu, CV məlumatlarınıza
                 əsaslanaraq sizə ən uyğun professional skills tövsiyələrini almanıza kömək edəcək.
               </p>
