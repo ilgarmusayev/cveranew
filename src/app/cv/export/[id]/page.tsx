@@ -494,31 +494,50 @@ export default function CVExportPage() {
                         padding: 0 !important;
                     }
                     
-                    /* A4 page setup for perfect printing */
+                    /* A4 page setup with maximum minimal margins for maximum content */
                     @page {
                         size: A4 portrait;
-                        margin: 0;
-                        padding: 0;
+                        margin: 8mm 6mm; /* Maximum minimal CV margins: üst/alt 8mm, sol/sağ 6mm */
                     }
                     
-                    /* Ensure CV container fills page properly */
+                    /* Page break controls */
+                    .cv-section {
+                        page-break-inside: avoid;
+                        margin-bottom: 20px;
+                    }
+                    
+                    .cv-section h2, .cv-section h3 {
+                        page-break-after: avoid;
+                    }
+                    
+                    .avoid-break {
+                        page-break-inside: avoid;
+                    }
+                    
+                    .page-break {
+                        page-break-before: always;
+                    }
+                    
+                    /* Ensure CV container fits within maximum minimal A4 margins */
                     .cv-preview {
-                        width: 210mm !important;
+                        width: 100% !important;
+                        max-width: 198mm !important; /* A4 width (210mm) - maximum minimal margins (12mm total) */
                         height: auto !important;
-                        max-width: 210mm !important;
-                        margin: 0 !important;
+                        margin: 0 auto !important;
                         padding: 0 !important;
                         transform: none !important;
                         scale: 1 !important;
                         border: none !important;
                         box-shadow: none !important;
                         border-radius: 0 !important;
+                        page-break-inside: auto; /* Allow content to break across pages */
                     }
                     
                     /* Ensure fonts are preserved */
                     * {
                         font-family: var(--cv-font-family, Arial, sans-serif) !important;
                     }
+                }
                 }
             `}</style>
         </div>

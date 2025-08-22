@@ -320,7 +320,7 @@ const BasicTemplate: React.FC<{ data: CVData }> = ({ data }) => {
             }}
         >
             {/* Header */}
-            <div className="mb-4 border-b-2 border-blue-600 pb-3">
+            <div className="mb-4 border-b-2 border-blue-600 pb-3 cv-section avoid-break">
                 <h1 className="text-2xl font-bold text-blue-600 mb-2">
                     {getFullName(personalInfo)}
                 </h1>
@@ -362,7 +362,7 @@ const BasicTemplate: React.FC<{ data: CVData }> = ({ data }) => {
 
             {/* Summary */}
             {personalInfo.summary && (
-                <div className="mb-4">
+                <div className="mb-4 cv-section">
                     <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                         {getSectionName('summary', data.cvLanguage, data.sectionNames)}
                     </h2>
@@ -374,13 +374,13 @@ const BasicTemplate: React.FC<{ data: CVData }> = ({ data }) => {
 
             {/* Experience */}
             {experience.length > 0 && (
-                <div className="mb-4">
+                <div className="mb-4 cv-section">
                     <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                         {getSectionName('experience', data.cvLanguage, data.sectionNames)}
                     </h2>
                     <div className="space-y-3">
                         {experience.map((exp) => (
-                            <div key={exp.id} className="border-l-2 border-blue-200 pl-3">
+                            <div key={exp.id} className="border-l-2 border-blue-200 pl-3 avoid-break">
                                 <div className="flex justify-between items-start mb-1">
                                     <h3 className="font-semibold text-gray-900 text-sm">{exp.position}</h3>
                                 </div>
@@ -398,13 +398,13 @@ const BasicTemplate: React.FC<{ data: CVData }> = ({ data }) => {
 
             {/* Education */}
             {education.length > 0 && (
-                <div className="mb-4">
+                <div className="mb-4 cv-section">
                     <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                         {getSectionName('education', data.cvLanguage, data.sectionNames)}
                     </h2>
                     <div className="space-y-2">
                         {education.map((edu) => (
-                            <div key={edu.id} className="border-l-2 border-blue-200 pl-3">
+                            <div key={edu.id} className="border-l-2 border-blue-200 pl-3 avoid-break">
                                 <div className="flex justify-between items-start mb-1">
                                     <h3 className="font-semibold text-gray-900 text-sm">{edu.degree}</h3>
                                 </div>
@@ -422,10 +422,10 @@ const BasicTemplate: React.FC<{ data: CVData }> = ({ data }) => {
 
             {/* Skills - Hard və Soft ayrı-ayrı */}
             {skills.length > 0 && (
-                <div className="mb-4">
+                <div className="mb-4 cv-section">
                     {/* Hard Skills */}
                     {skills.filter(skill => skill.type === 'hard').length > 0 && (
-                        <div className="mb-3">
+                        <div className="mb-3 avoid-break">
                             <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                                 {getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
                             </h2>
@@ -662,7 +662,7 @@ const ModernTemplate: React.FC<{ data: CVData }> = ({ data }) => {
             {/* Left Sidebar */}
             <div className="w-1/3 bg-gray-800 text-white" style={{ padding: '12mm 8mm' }}>
                 {/* Profile */}
-                <div className="mb-4">
+                <div className="mb-4 cv-section avoid-break">
                     <h1 className="text-xl font-bold mb-2">
                         {getFullName(personalInfo)}
                     </h1>
@@ -849,7 +849,7 @@ const ModernTemplate: React.FC<{ data: CVData }> = ({ data }) => {
             <div className="flex-1" style={{ padding: '12mm 10mm' }}>
                 {/* Summary */}
                 {personalInfo.summary && (
-                    <div className="mb-4">
+                    <div className="mb-4 cv-section">
                         <h2 className="text-lg font-bold text-gray-800 mb-2">
                             {getSectionName('summary', data.cvLanguage, data.sectionNames)}
                         </h2>
@@ -861,13 +861,13 @@ const ModernTemplate: React.FC<{ data: CVData }> = ({ data }) => {
 
                 {/* Experience */}
                 {experience.length > 0 && (
-                    <div className="mb-6">
+                    <div className="mb-6 cv-section">
                         <h2 className="text-lg font-bold text-gray-800 mb-3">
                             {getSectionName('experience', data.cvLanguage, data.sectionNames)}
                         </h2>
                         <div className="space-y-4">
                             {experience.map((exp) => (
-                                <div key={exp.id}>
+                                <div key={exp.id} className="avoid-break">
                                     <div className="flex justify-between items-start mb-2">
                                         <div>
                                             <h3 className="text-sm font-semibold text-gray-900">{exp.position}</h3>
@@ -889,13 +889,13 @@ const ModernTemplate: React.FC<{ data: CVData }> = ({ data }) => {
 
                 {/* Education */}
                 {education.length > 0 && (
-                    <div className="mb-6">
+                    <div className="mb-6 cv-section">
                         <h2 className="text-lg font-bold text-gray-800 mb-3">
                             {getSectionName('education', data.cvLanguage, data.sectionNames)}
                         </h2>
                         <div className="space-y-3">
                             {education.map((edu) => (
-                                <div key={edu.id}>
+                                <div key={edu.id} className="avoid-break">
                                     <div className="flex justify-between items-start mb-1">
                                         <div>
                                             <h3 className="text-sm font-semibold text-gray-900">{edu.degree}</h3>

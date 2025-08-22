@@ -120,7 +120,7 @@ export async function POST(
                         
                         body {
                             margin: 0;
-                            padding: 15mm 10mm;  /* İçerik üçün əlavə padding */
+                            padding: 0;  /* PDF margin-lar Puppeteer tərəfindən idarə olunur */
                             background: white;
                             font-family: ${fontSettings?.fontFamily || 'Arial, sans-serif'};
                             
@@ -132,21 +132,45 @@ export async function POST(
                             --cv-small-size: ${fontSettings?.smallSize || 12}px;
                         }
                         
-                        .cv-preview {
-                            width: 100% !important;
-                            max-width: 180mm !important;  /* Margin nəzərə alınaraq */
-                            height: auto !important;
-                            margin: 0 auto !important;
-                            padding: 0 !important;
-                            transform: none !important;
-                            scale: 1 !important;
-                            border: none !important;
-                            box-shadow: none !important;
-                            border-radius: 0 !important;
-                            overflow: visible !important;
+                        /* A4 page break və margin ayarları */
+                        @page {
+                            size: A4;
+                            margin: 20mm;  /* Bütün tərəflərdə 20mm margin */
                         }
                         
-                        ${cssContent}
+                        /* Page break ayarları */
+                        .page-break {
+                            page-break-before: always;
+                        }
+                        
+                        .avoid-break {
+                            page-break-inside: avoid;
+                        }
+                        
+                        /* CV section-lar üçün page break ayarları */
+                        .cv-section {
+                            page-break-inside: avoid;
+                            margin-bottom: 20px;
+                        }
+                        
+                        .cv-section h2, .cv-section h3 {
+                            page-break-after: avoid;
+                        }
+                        
+                    /* Ensure CV container fits within minimal A4 margins */
+                    .cv-preview {
+                        width: 100% !important;
+                        max-width: 186mm !important; /* A4 width (210mm) - minimal margins (24mm total) */
+                        height: auto !important;
+                        margin: 0 auto !important;
+                        padding: 0 !important;
+                        transform: none !important;
+                        scale: 1 !important;
+                        border: none !important;
+                        box-shadow: none !important;
+                        border-radius: 0 !important;
+                        page-break-inside: auto; /* Allow content to break across pages */
+                    }                        ${cssContent}
                     </style>
                 </head>
                 <body>
@@ -165,7 +189,7 @@ export async function POST(
         console.log('HTML səhifəyə yüklənir...');
         await page.setContent(html, { waitUntil: 'networkidle0' });
 
-        // PDF yarat
+        // PDF yarat - Ultra minimal margin-lar, maksimal content sahəsi
         console.log('PDF yaradılır...');
         const pdfBuffer = await page.pdf({
             format: 'A4',
@@ -173,12 +197,16 @@ export async function POST(
             preferCSSPageSize: false,
             displayHeaderFooter: false,
             margin: {
-                top: '20mm',      // 2cm üst boşluq
-                right: '15mm',    // 1.5cm sağ boşluq  
-                bottom: '20mm',   // 2cm alt boşluq
-                left: '15mm'      // 1.5cm sol boşluq
+                top: '8mm',       // 8mm üst boşluq - çox minimal
+                right: '6mm',     // 6mm sağ boşluq - çox minimal  
+                bottom: '8mm',    // 8mm alt boşluq - çox minimal
+                left: '6mm'       // 6mm sol boşluq - çox minimal
             },
-            scale: 1
+            scale: 1,
+            // Page break ayarları
+            pageRanges: '',
+            width: '210mm',   // A4 genişlik
+            height: '297mm'   // A4 hündürlük
         });
 
         console.log('PDF yaradıldı, browser bağlanır...');
@@ -248,17 +276,64 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
 
     // Generate CV HTML based on template
     let cvHTML = '';
+    
+    // Professional PDF üçün CSS style-lar - minimal margins
+    const pdfStyles = `
+        <style>
+            @page {
+                size: A4;
+                margin: 15mm 12mm; /* Minimal CV margins: üst/alt 15mm, sol/sağ 12mm */
+            }
+            
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: ${fonts.fontFamily};
+            }
+            
+            .cv-section {
+                page-break-inside: avoid;
+                margin-bottom: 20px;
+            }
+            
+            .cv-section h2, .cv-section h3 {
+                page-break-after: avoid;
+            }
+            
+            .avoid-break {
+                page-break-inside: avoid;
+            }
+            
+            .page-break {
+                page-break-before: always;
+            }
+            
+            .cv-preview {
+                width: 100%;
+                max-width: 186mm; /* A4 genişlik - minimal margin-lar */
+                margin: 0 auto;
+                padding: 0;
+            }
+        </style>
+    `;
 
     if (templateId === 'modern-centered') {
         cvHTML = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                ${pdfStyles}
+            </head>
+            <body>
             <div class="cv-preview" style="
                 font-family: ${fonts.fontFamily}; 
                 font-size: ${fonts.bodySize}px; 
                 line-height: 1.4; 
                 color: #374151; 
-                max-width: 794px; 
+                max-width: 186mm; 
                 margin: 0 auto; 
-                padding: 20px;
+                padding: 0;
                 --cv-font-family: ${fonts.fontFamily};
                 --cv-heading-size: ${fonts.headingSize}px;
                 --cv-subheading-size: ${fonts.subheadingSize}px;
@@ -273,7 +348,7 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
                     .cv-preview .small-text { font-size: var(--cv-small-size) !important; font-family: var(--cv-font-family) !important; }
                 </style>
                 <!-- Header -->
-                <div style="text-align: center; margin-bottom: 30px; padding: 25px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; border-radius: 12px;">
+                <div class="cv-section avoid-break" style="text-align: center; margin-bottom: 30px; padding: 25px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; border-radius: 12px;">
                     ${personalInfo.profileImage ? `<img src="${personalInfo.profileImage}" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 15px; border: 3px solid white;" />` : ''}
                     <h1 style="font-size: ${fonts.headingSize}px; font-weight: bold; margin: 0 0 10px 0;">${personalInfo.fullName || personalInfo.name || `${personalInfo.firstName || ''} ${personalInfo.lastName || ''}`.trim()}</h1>
                     <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; font-size: ${fonts.smallSize}px;">
@@ -287,7 +362,7 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
 
                 <!-- Summary -->
                 ${personalInfo.summary ? `
-                <div style="margin-bottom: 25px;">
+                <div class="cv-section" style="margin-bottom: 25px;">
                     <h2 style="font-size: 16px; font-weight: bold; color: #3b82f6; margin-bottom: 10px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">
                         Özət
                     </h2>
@@ -299,13 +374,13 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
 
                 <!-- Experience -->
                 ${experience.length > 0 ? `
-                <div style="margin-bottom: 25px;">
+                <div class="cv-section" style="margin-bottom: 25px;">
                     <h2 style="font-size: 16px; font-weight: bold; color: #3b82f6; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">
                         İş Təcrübəsi
                     </h2>
                     <div style="display: flex; flex-direction: column; gap: 15px;">
                         ${experience.map((exp: any) => `
-                        <div style="border-left: 3px solid #dbeafe; padding-left: 15px;">
+                        <div class="avoid-break" style="border-left: 3px solid #dbeafe; padding-left: 15px;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px;">
                                 <div>
                                     <h3 style="font-size: 12px; font-weight: 600; color: #111827; margin: 0;">${exp.position}</h3>
@@ -324,13 +399,13 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
 
                 <!-- Education -->
                 ${education.length > 0 ? `
-                <div style="margin-bottom: 25px;">
+                <div class="cv-section" style="margin-bottom: 25px;">
                     <h2 style="font-size: 16px; font-weight: bold; color: #3b82f6; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">
                         Təhsil
                     </h2>
                     <div style="display: flex; flex-direction: column; gap: 12px;">
                         ${education.map((edu: any) => `
-                        <div style="border-left: 3px solid #dbeafe; padding-left: 15px;">
+                        <div class="avoid-break" style="border-left: 3px solid #dbeafe; padding-left: 15px;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 3px;">
                                 <h3 style="font-size: 12px; font-weight: 600; color: #111827; margin: 0;">${edu.degree}</h3>
                                 <span style="font-size: 9px; color: #6b7280;">
@@ -347,10 +422,10 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
                 ` : ''}
 
                 <!-- Skills & Languages Grid -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 25px;">
+                <div class="cv-section" style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 25px;">
                     <!-- Skills -->
                     ${skills.length > 0 ? `
-                    <div>
+                    <div class="avoid-break">
                         <h2 style="font-size: 16px; font-weight: bold; color: #3b82f6; margin-bottom: 10px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">
                             Bacarıqlar
                         </h2>
@@ -366,7 +441,7 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
 
                     <!-- Languages -->
                     ${languages.length > 0 ? `
-                    <div>
+                    <div class="avoid-break">
                         <h2 style="font-size: 16px; font-weight: bold; color: #3b82f6; margin-bottom: 10px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">
                             Dillər
                         </h2>
@@ -384,13 +459,13 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
 
                 <!-- Projects -->
                 ${projects.length > 0 ? `
-                <div style="margin-bottom: 25px;">
+                <div class="cv-section" style="margin-bottom: 25px;">
                     <h2 style="font-size: 16px; font-weight: bold; color: #3b82f6; margin-bottom: 10px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">
                         Layihələr
                     </h2>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         ${projects.map((project: any) => `
-                        <div style="border-left: 3px solid #dbeafe; padding-left: 15px;">
+                        <div class="avoid-break" style="border-left: 3px solid #dbeafe; padding-left: 15px;">
                             <h3 style="font-size: 12px; font-weight: 600; color: #111827; margin: 0 0 3px 0;">${project.name}</h3>
                             ${project.description ? `<p style="font-size: 9px; color: #6b7280; margin: 0 0 3px 0;">${project.description}</p>` : ''}
                             ${project.skills ? `<p style="font-size: 9px; color: #3b82f6; margin: 0;">Texnologiyalar: ${project.skills}</p>` : ''}
@@ -400,18 +475,27 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
                 </div>
                 ` : ''}
             </div>
+            </body>
+            </html>
         `;
     } else {
         // Default/Traditional template
         cvHTML = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                ${pdfStyles}
+            </head>
+            <body>
             <div class="cv-preview" style="
                 font-family: ${fonts.fontFamily}; 
                 font-size: ${fonts.bodySize}px; 
                 line-height: 1.4; 
                 color: #333; 
-                max-width: 794px; 
+                max-width: 186mm; 
                 margin: 0 auto; 
-                padding: 20px;
+                padding: 0;
                 --cv-font-family: ${fonts.fontFamily};
                 --cv-heading-size: ${fonts.headingSize}px;
                 --cv-subheading-size: ${fonts.subheadingSize}px;
@@ -426,7 +510,7 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
                     .cv-preview .small-text { font-size: var(--cv-small-size) !important; font-family: var(--cv-font-family) !important; }
                 </style>
                 <!-- Header -->
-                <div style="text-align: center; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 15px;">
+                <div class="cv-section avoid-break" style="text-align: center; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 15px;">
                     <h1 style="font-size: ${fonts.headingSize}px; font-weight: bold; margin: 0 0 10px 0; color: #333;">${personalInfo.fullName || personalInfo.name || `${personalInfo.firstName || ''} ${personalInfo.lastName || ''}`.trim()}</h1>
                     <div style="font-size: ${fonts.smallSize}px; color: #666;">
                         ${personalInfo.email ? `${personalInfo.email}` : ''}
@@ -437,7 +521,7 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
 
                 <!-- Summary -->
                 ${personalInfo.summary ? `
-                <div style="margin-bottom: 20px;">
+                <div class="cv-section" style="margin-bottom: 20px;">
                     <h2 style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 8px; border-bottom: 1px solid #ddd; padding-bottom: 3px;">
                         ÖZƏT
                     </h2>
@@ -449,12 +533,12 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
 
                 <!-- Experience -->
                 ${experience.length > 0 ? `
-                <div style="margin-bottom: 20px;">
+                <div class="cv-section" style="margin-bottom: 20px;">
                     <h2 style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 3px;">
                         İŞ TƏCRÜBƏSİ
                     </h2>
                     ${experience.map((exp: any) => `
-                    <div style="margin-bottom: 15px;">
+                    <div class="avoid-break" style="margin-bottom: 15px;">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 3px;">
                             <h3 style="font-size: 12px; font-weight: bold; color: #333; margin: 0;">${exp.position}</h3>
                             <span style="font-size: 10px; color: #666;">
@@ -470,12 +554,14 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
 
                 <!-- Education -->
                 ${education.length > 0 ? `
-                <div style="margin-bottom: 20px;">
-                    <h2 style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 3px;">
+                                <!-- Education -->
+                ${education.length > 0 ? `
+                <div class="cv-section" style="margin-bottom: 20px;">
+                    <h2 style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 8px; border-bottom: 1px solid #ddd; padding-bottom: 3px;">
                         TƏHSİL
                     </h2>
                     ${education.map((edu: any) => `
-                    <div style="margin-bottom: 10px;">
+                    <div class="avoid-break" style="margin-bottom: 10px;">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 3px;">
                             <h3 style="font-size: 12px; font-weight: bold; color: #333; margin: 0;">${edu.degree}</h3>
                             <span style="font-size: 10px; color: #666;">
@@ -488,6 +574,34 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
                     </div>
                     `).join('')}
                 </div>
+                ` : ''}
+
+                <!-- Skills -->
+                ${skills.length > 0 ? `
+                <div class="cv-section avoid-break" style="margin-bottom: 20px;">
+                    <h2 style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 8px; border-bottom: 1px solid #ddd; padding-bottom: 3px;">
+                        BACARIQLAR
+                    </h2>
+                    <p style="font-size: 10px; color: #555; line-height: 1.4; margin: 0;">
+                        ${skills.map((skill: any) => skill.name).join(', ')}
+                    </p>
+                </div>
+                ` : ''}
+
+                <!-- Languages -->
+                ${languages.length > 0 ? `
+                <div class="cv-section avoid-break" style="margin-bottom: 20px;">
+                    <h2 style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 8px; border-bottom: 1px solid #ddd; padding-bottom: 3px;">
+                        DİLLƏR
+                    </h2>
+                    <p style="font-size: 10px; color: #555; line-height: 1.4; margin: 0;">
+                        ${languages.map((lang: any) => `${lang.language} (${lang.level})`).join(', ')}
+                    </p>
+                </div>
+                ` : ''}
+            </div>
+            </body>
+            </html>
                 ` : ''}
 
                 <!-- Skills -->
