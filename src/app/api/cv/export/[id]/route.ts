@@ -48,9 +48,16 @@ export async function POST(
         }
 
         const body = await request.json();
-        const { format, templateId, data } = body;
+        const { format, templateId, data, fontSettings, htmlContent, cssContent } = body;
 
-        console.log('Request body alındı:', { format, templateId, dataKeys: Object.keys(data || {}) });
+        console.log('Request body alındı:', { 
+            format, 
+            templateId, 
+            dataKeys: Object.keys(data || {}),
+            fontSettings: fontSettings ? 'mövcud' : 'yox',
+            htmlContent: htmlContent ? 'mövcud' : 'yox',
+            cssContent: cssContent ? 'mövcud' : 'yox'
+        });
 
         if (format !== 'pdf') {
             return NextResponse.json(
@@ -84,12 +91,74 @@ export async function POST(
         console.log('Browser başladıldı, səhifə yaradılır...');
         const page = await browser.newPage();
 
-        // A4 page ayarları
-        await page.setViewport({ width: 794, height: 1123 }); // A4 in pixels at 96 DPI
+        // A4 page ayarları - 210mm x 297mm at 96 DPI
+        await page.setViewport({ 
+            width: 794,   // 210mm at 96 DPI
+            height: 1123, // 297mm at 96 DPI
+            deviceScaleFactor: 1
+        });
 
         // CV render etmək üçün HTML yarat
         console.log('HTML generasiya edilir...');
-        const html = generateCVHTML(data, templateId);
+        let html;
+        
+        if (htmlContent && cssContent) {
+            // Front-end-dən gələn HTML content istifadə et
+            html = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1">
+                    <title>CV Export</title>
+                    <style>
+                        * {
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        body {
+                            margin: 0;
+                            padding: 15mm 10mm;  /* İçerik üçün əlavə padding */
+                            background: white;
+                            font-family: ${fontSettings?.fontFamily || 'Arial, sans-serif'};
+                            
+                            /* CSS Variables */
+                            --cv-font-family: ${fontSettings?.fontFamily || 'Arial, sans-serif'};
+                            --cv-heading-size: ${fontSettings?.headingSize || 18}px;
+                            --cv-subheading-size: ${fontSettings?.subheadingSize || 16}px;
+                            --cv-body-size: ${fontSettings?.bodySize || 14}px;
+                            --cv-small-size: ${fontSettings?.smallSize || 12}px;
+                        }
+                        
+                        .cv-preview {
+                            width: 100% !important;
+                            max-width: 180mm !important;  /* Margin nəzərə alınaraq */
+                            height: auto !important;
+                            margin: 0 auto !important;
+                            padding: 0 !important;
+                            transform: none !important;
+                            scale: 1 !important;
+                            border: none !important;
+                            box-shadow: none !important;
+                            border-radius: 0 !important;
+                            overflow: visible !important;
+                        }
+                        
+                        ${cssContent}
+                    </style>
+                </head>
+                <body>
+                    ${htmlContent}
+                </body>
+                </html>
+            `;
+        } else {
+            // Fallback: köhnə method
+            html = generateCVHTML(data, templateId, fontSettings);
+        }
+        
         console.log('HTML hazırlandı, uzunluq:', html.length);
 
         // HTML-i səhifəyə yüklə
@@ -101,12 +170,15 @@ export async function POST(
         const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true,
+            preferCSSPageSize: false,
+            displayHeaderFooter: false,
             margin: {
-                top: '0.5cm',
-                right: '0.5cm',
-                bottom: '0.5cm',
-                left: '0.5cm'
-            }
+                top: '20mm',      // 2cm üst boşluq
+                right: '15mm',    // 1.5cm sağ boşluq  
+                bottom: '20mm',   // 2cm alt boşluq
+                left: '15mm'      // 1.5cm sol boşluq
+            },
+            scale: 1
         });
 
         console.log('PDF yaradıldı, browser bağlanır...');
@@ -132,8 +204,19 @@ export async function POST(
     }
 }
 
-function generateCVHTML(cvData: any, templateId: string): string {
+function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): string {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [] } = cvData;
+
+    // Default font settings
+    const defaultFontSettings = {
+        fontFamily: 'Arial, sans-serif',
+        headingSize: 18,
+        subheadingSize: 16,
+        bodySize: 14,
+        smallSize: 12
+    };
+    
+    const fonts = { ...defaultFontSettings, ...fontSettings };
 
     // Utility functions for HTML generation
     const stripHtmlTags = (html: string): string => {
@@ -168,12 +251,32 @@ function generateCVHTML(cvData: any, templateId: string): string {
 
     if (templateId === 'modern-centered') {
         cvHTML = `
-            <div style="font-family: 'Inter', Arial, sans-serif; font-size: 10px; line-height: 1.4; color: #374151; max-width: 794px; margin: 0 auto; padding: 20px;">
+            <div class="cv-preview" style="
+                font-family: ${fonts.fontFamily}; 
+                font-size: ${fonts.bodySize}px; 
+                line-height: 1.4; 
+                color: #374151; 
+                max-width: 794px; 
+                margin: 0 auto; 
+                padding: 20px;
+                --cv-font-family: ${fonts.fontFamily};
+                --cv-heading-size: ${fonts.headingSize}px;
+                --cv-subheading-size: ${fonts.subheadingSize}px;
+                --cv-body-size: ${fonts.bodySize}px;
+                --cv-small-size: ${fonts.smallSize}px;
+            ">
+                <style>
+                    .cv-preview h1 { font-size: var(--cv-heading-size) !important; font-family: var(--cv-font-family) !important; }
+                    .cv-preview h2 { font-size: var(--cv-subheading-size) !important; font-family: var(--cv-font-family) !important; }
+                    .cv-preview h3 { font-size: var(--cv-subheading-size) !important; font-family: var(--cv-font-family) !important; }
+                    .cv-preview p, .cv-preview span, .cv-preview div { font-size: var(--cv-body-size) !important; font-family: var(--cv-font-family) !important; }
+                    .cv-preview .small-text { font-size: var(--cv-small-size) !important; font-family: var(--cv-font-family) !important; }
+                </style>
                 <!-- Header -->
                 <div style="text-align: center; margin-bottom: 30px; padding: 25px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; border-radius: 12px;">
                     ${personalInfo.profileImage ? `<img src="${personalInfo.profileImage}" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 15px; border: 3px solid white;" />` : ''}
-                    <h1 style="font-size: 24px; font-weight: bold; margin: 0 0 10px 0;">${personalInfo.fullName || personalInfo.name || `${personalInfo.firstName || ''} ${personalInfo.lastName || ''}`.trim()}</h1>
-                    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; font-size: 10px;">
+                    <h1 style="font-size: ${fonts.headingSize}px; font-weight: bold; margin: 0 0 10px 0;">${personalInfo.fullName || personalInfo.name || `${personalInfo.firstName || ''} ${personalInfo.lastName || ''}`.trim()}</h1>
+                    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; font-size: ${fonts.smallSize}px;">
                         ${personalInfo.email ? `<span>📧 ${personalInfo.email}</span>` : ''}
                         ${personalInfo.phone ? `<span>📞 ${personalInfo.phone}</span>` : ''}
                         ${personalInfo.location ? `<span>📍 ${personalInfo.location}</span>` : ''}
@@ -301,11 +404,31 @@ function generateCVHTML(cvData: any, templateId: string): string {
     } else {
         // Default/Traditional template
         cvHTML = `
-            <div style="font-family: 'Times New Roman', serif; font-size: 11px; line-height: 1.4; color: #333; max-width: 794px; margin: 0 auto; padding: 20px;">
+            <div class="cv-preview" style="
+                font-family: ${fonts.fontFamily}; 
+                font-size: ${fonts.bodySize}px; 
+                line-height: 1.4; 
+                color: #333; 
+                max-width: 794px; 
+                margin: 0 auto; 
+                padding: 20px;
+                --cv-font-family: ${fonts.fontFamily};
+                --cv-heading-size: ${fonts.headingSize}px;
+                --cv-subheading-size: ${fonts.subheadingSize}px;
+                --cv-body-size: ${fonts.bodySize}px;
+                --cv-small-size: ${fonts.smallSize}px;
+            ">
+                <style>
+                    .cv-preview h1 { font-size: var(--cv-heading-size) !important; font-family: var(--cv-font-family) !important; }
+                    .cv-preview h2 { font-size: var(--cv-subheading-size) !important; font-family: var(--cv-font-family) !important; }
+                    .cv-preview h3 { font-size: var(--cv-subheading-size) !important; font-family: var(--cv-font-family) !important; }
+                    .cv-preview p, .cv-preview span, .cv-preview div { font-size: var(--cv-body-size) !important; font-family: var(--cv-font-family) !important; }
+                    .cv-preview .small-text { font-size: var(--cv-small-size) !important; font-family: var(--cv-font-family) !important; }
+                </style>
                 <!-- Header -->
                 <div style="text-align: center; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 15px;">
-                    <h1 style="font-size: 24px; font-weight: bold; margin: 0 0 10px 0; color: #333;">${personalInfo.fullName || personalInfo.name || `${personalInfo.firstName || ''} ${personalInfo.lastName || ''}`.trim()}</h1>
-                    <div style="font-size: 11px; color: #666;">
+                    <h1 style="font-size: ${fonts.headingSize}px; font-weight: bold; margin: 0 0 10px 0; color: #333;">${personalInfo.fullName || personalInfo.name || `${personalInfo.firstName || ''} ${personalInfo.lastName || ''}`.trim()}</h1>
+                    <div style="font-size: ${fonts.smallSize}px; color: #666;">
                         ${personalInfo.email ? `${personalInfo.email}` : ''}
                         ${personalInfo.phone ? ` | ${personalInfo.phone}` : ''}
                         ${personalInfo.location ? ` | ${personalInfo.location}` : ''}
