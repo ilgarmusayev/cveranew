@@ -1,0 +1,124 @@
+/* CV Font Management CSS Variables */
+
+.cv-preview {
+  /* CSS Variables for font family and sizes */
+  font-family: var(--cv-font-family, 'Arial, sans-serif') !important;
+  --cv-heading-size: 24px;
+  --cv-subheading-size: 18px;
+  --cv-body-size: 14px;
+  --cv-small-size: 12px;
+}
+
+/* Apply font family to everything in CV */
+.cv-preview * {
+  font-family: var(--cv-font-family, 'Arial, sans-serif') !important;
+}
+
+/* Heading styles */
+.cv-preview h1,
+.cv-preview .cv-name,
+.cv-preview .name,
+.cv-preview .full-name {
+  font-size: var(--cv-heading-size) !important;
+  font-weight: bold;
+  line-height: 1.2 !important;
+}
+
+.cv-preview h2,
+.cv-preview .cv-title,
+.cv-preview .job-title,
+.cv-preview .position,
+.cv-preview .section-title {
+  font-size: var(--cv-subheading-size) !important;
+  font-weight: 600;
+  line-height: 1.3 !important;
+}
+
+.cv-preview h3,
+.cv-preview .company-name,
+.cv-preview .school-name,
+.cv-preview .project-title {
+  font-size: var(--cv-subheading-size) !important;
+  font-weight: 600;
+  line-height: 1.3 !important;
+}
+
+.cv-preview p,
+.cv-preview .description,
+.cv-preview .summary,
+.cv-preview .content,
+.cv-preview .text,
+.cv-preview ul li,
+.cv-preview ol li {
+  font-size: var(--cv-body-size) !important;
+  line-height: 1.5 !important;
+}
+
+.cv-preview .date,
+.cv-preview .dates,
+.cv-preview .location,
+.cv-preview .contact-info,
+.cv-preview .email,
+.cv-preview .phone,
+.cv-preview small,
+.cv-preview .small-text,
+.cv-preview .text-xs {
+  font-size: var(--cv-small-size) !important;
+  color: #666;
+}
+
+/* Override Tailwind classes */
+.cv-preview .text-lg {
+  font-size: var(--cv-subheading-size) !important;
+}
+
+.cv-preview .text-xl {
+  font-size: var(--cv-heading-size) !important;
+}
+
+.cv-preview .text-2xl {
+  font-size: var(--cv-heading-size) !important;
+}
+
+.cv-preview .text-base {
+  font-size: var(--cv-subheading-size) !important;
+}
+
+.cv-preview .text-sm {
+  font-size: var(--cv-body-size) !important;
+}
+
+.cv-preview .text-xs {
+  font-size: var(--cv-small-size) !important;
+}
+
+/* Professional template specific */
+.cv-preview .professional-template h1 {
+  font-size: calc(var(--heading-size) + 4px) !important;
+}
+
+.cv-preview .professional-template h2 {
+  font-size: var(--subheading-size) !important;
+}
+
+.cv-preview .professional-template .job-title {
+  font-size: var(--body-size) !important;
+}
+
+/* Modern template specific */
+.cv-preview .modern-template .name {
+  font-size: calc(var(--heading-size) + 6px) !important;
+}
+
+.cv-preview .modern-template .title {
+  font-size: var(--subheading-size) !important;
+}
+
+/* Traditional template specific */
+.cv-preview .traditional-template h1 {
+  font-size: calc(var(--heading-size) + 2px) !important;
+}
+
+.cv-preview .traditional-template h2 {
+  font-size: var(--subheading-size) !important;
+}

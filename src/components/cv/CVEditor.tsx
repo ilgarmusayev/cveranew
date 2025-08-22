@@ -5,7 +5,6 @@ import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
 import { CVTranslationPanel } from '@/components/translation/CVTranslationPanel';
 import { CVLanguage } from '@/lib/cvLanguage';
-
 // Import section components
 import PersonalInfoSection from './sections/PersonalInfoSection';
 import ExperienceSection from './sections/ExperienceSection';
@@ -256,6 +255,14 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [showTranslationPanel, setShowTranslationPanel] = useState(false);
+    const [showFontPanel, setShowFontPanel] = useState(false);
+    const [fontSettings, setFontSettings] = useState({
+        fontFamily: 'Arial, sans-serif',
+        headingSize: 18,      // Başlıqlar üçün
+        subheadingSize: 16,   // Alt başlıqlar üçün  
+        bodySize: 14,         // Əsas mətn üçün
+        smallSize: 12         // Kiçik mətn üçün
+    });
     // Disable auto-save for debugging
     // const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
     // const [lastSavedData, setLastSavedData] = useState<any>(null);
@@ -451,7 +458,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             } as any
         };
 
-        return <CVPreview cv={previewData} template={cv.templateId} />;
+        return <CVPreview cv={previewData} template={cv.templateId} fontSettings={fontSettings} />;
     };
 
     // Render section content
@@ -591,6 +598,18 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
                                 </svg>
                                 AI Tərcümə
+                            </button>
+
+                            {/* Simple Font Button */}
+                            <button
+                                onClick={() => setShowFontPanel(true)}
+                                className="ml-2 flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 rounded-lg transition-all duration-200 border border-white/20"
+                                title="Font tənzimləmələri"
+                            >
+                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.5 12.75l6 6 9-13.5" />
+                                </svg>
+                                Font
                             </button>
                         </div>
                         
@@ -859,6 +878,148 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             }}
                             userTier={userTier}
                         />
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* Simple Font Panel */}
+        {showFontPanel && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-start p-4">
+                <div className="bg-white rounded-lg shadow-xl max-w-md w-full ml-4" style={{ maxWidth: '400px' }}>
+                    <div className="p-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold text-gray-900">Font Tənzimləmələri</h2>
+                            <button
+                                onClick={() => setShowFontPanel(false)}
+                                className="text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            {/* Font Family */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Font Ailəsi
+                                </label>
+                                <select
+                                    value={fontSettings.fontFamily}
+                                    onChange={(e) => setFontSettings(prev => ({ ...prev, fontFamily: e.target.value }))}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="Arial, sans-serif">Arial (Sadə)</option>
+                                    <option value="Georgia, serif">Georgia (Klassik)</option>
+                                    <option value="Verdana, sans-serif">Verdana (Aydın)</option>
+                                    <option value="Times New Roman, serif">Times New Roman (Rəsmi)</option>
+                                </select>
+                            </div>
+
+                            {/* Heading Size */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Başlıq Ölçüsü: {fontSettings.headingSize}px
+                                </label>
+                                <input
+                                    type="range"
+                                    min="16"
+                                    max="24"
+                                    value={fontSettings.headingSize}
+                                    onChange={(e) => setFontSettings(prev => ({ ...prev, headingSize: parseInt(e.target.value) }))}
+                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                />
+                            </div>
+
+                            {/* Subheading Size */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Alt Başlıq Ölçüsü: {fontSettings.subheadingSize}px
+                                </label>
+                                <input
+                                    type="range"
+                                    min="14"
+                                    max="20"
+                                    value={fontSettings.subheadingSize}
+                                    onChange={(e) => setFontSettings(prev => ({ ...prev, subheadingSize: parseInt(e.target.value) }))}
+                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                />
+                            </div>
+
+                            {/* Body Size */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Əsas Mətn Ölçüsü: {fontSettings.bodySize}px
+                                </label>
+                                <input
+                                    type="range"
+                                    min="10"
+                                    max="18"
+                                    value={fontSettings.bodySize}
+                                    onChange={(e) => setFontSettings(prev => ({ ...prev, bodySize: parseInt(e.target.value) }))}
+                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                />
+                            </div>
+
+                            {/* Small Size */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Kiçik Mətn Ölçüsü: {fontSettings.smallSize}px
+                                </label>
+                                <input
+                                    type="range"
+                                    min="8"
+                                    max="14"
+                                    value={fontSettings.smallSize}
+                                    onChange={(e) => setFontSettings(prev => ({ ...prev, smallSize: parseInt(e.target.value) }))}
+                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                />
+                            </div>
+
+                            {/* Preview */}
+                            <div className="p-4 border rounded-lg bg-gray-50">
+                                <div style={{ fontFamily: fontSettings.fontFamily }}>
+                                    <h1 style={{ fontSize: `${fontSettings.headingSize}px`, fontWeight: 'bold', marginBottom: '8px' }}>
+                                        Başlıq Nümunəsi
+                                    </h1>
+                                    <h2 style={{ fontSize: `${fontSettings.subheadingSize}px`, fontWeight: '600', marginBottom: '8px' }}>
+                                        Alt başlıq nümunəsi
+                                    </h2>
+                                    <p style={{ fontSize: `${fontSettings.bodySize}px`, marginBottom: '8px' }}>
+                                        Bu əsas mətn nümunəsidir. CV-nizdə bu ölçüdə mətnlər göstəriləcək.
+                                    </p>
+                                    <small style={{ fontSize: `${fontSettings.smallSize}px`, color: '#666' }}>
+                                        Bu kiçik mətn nümunəsidir (tarixlər, əlavə məlumatlar).
+                                    </small>
+                                </div>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex justify-end space-x-3 pt-4">
+                                <button
+                                    onClick={() => {
+                                        setFontSettings({
+                                            fontFamily: 'Arial, sans-serif',
+                                            headingSize: 18,
+                                            subheadingSize: 16,
+                                            bodySize: 14,
+                                            smallSize: 12
+                                        });
+                                    }}
+                                    className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+                                >
+                                    Sıfırla
+                                </button>
+                                <button
+                                    onClick={() => setShowFontPanel(false)}
+                                    className="px-4 py-2 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                                >
+                                    Tətbiq Et
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

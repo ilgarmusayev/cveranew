@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import '@/styles/cv-fonts.css';
+import '@/styles/cv-fonts.css';
 
 interface PersonalInfo {
     fullName?: string;
@@ -120,6 +122,13 @@ interface CVPreviewProps {
         data: CVData;
     };
     template?: string;
+    fontSettings?: {
+        fontFamily: string;
+        headingSize: number;
+        subheadingSize: number;
+        bodySize: number;
+        smallSize: number;
+    };
 }
 
 // Utility functions
@@ -304,7 +313,12 @@ const BasicTemplate: React.FC<{ data: CVData }> = ({ data }) => {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
     
     return (
-        <div className="w-full h-full bg-white text-gray-900 font-sans" style={{ padding: '15mm 12mm' }}>
+        <div 
+            className="w-full h-full bg-white text-gray-900 font-sans" 
+            style={{ 
+                padding: '15mm 12mm'
+            }}
+        >
             {/* Header */}
             <div className="mb-4 border-b-2 border-blue-600 pb-3">
                 <h1 className="text-2xl font-bold text-blue-600 mb-2">
@@ -1359,7 +1373,17 @@ const ProfessionalTemplate: React.FC<{ data: CVData }> = ({ data }) => {
 };
 
 // Main CVPreview Component
-export default function CVPreview({ cv, template }: CVPreviewProps) {
+export default function CVPreview({ 
+    cv, 
+    template, 
+    fontSettings = {
+        fontFamily: 'Arial, sans-serif',
+        headingSize: 18,
+        subheadingSize: 16,
+        bodySize: 14,
+        smallSize: 12
+    }
+}: CVPreviewProps) {
     const templateId = template || cv.templateId || 'basic';
     const [scale, setScale] = React.useState(1.0);
     
@@ -1446,8 +1470,15 @@ export default function CVPreview({ cv, template }: CVPreviewProps) {
                 borderRadius: '8px',
                 boxShadow: scale >= 0.8 
                     ? '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05)' 
-                    : '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
-            }}
+                    : '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+                // Set CSS Variables for font management
+                ['--cv-font-family' as any]: fontSettings.fontFamily,
+                ['--cv-heading-size' as any]: `${fontSettings.headingSize}px`,
+                ['--cv-subheading-size' as any]: `${fontSettings.subheadingSize}px`,
+                ['--cv-body-size' as any]: `${fontSettings.bodySize}px`,
+                ['--cv-small-size' as any]: `${fontSettings.smallSize}px`,
+                lineHeight: '1.5'
+            } as React.CSSProperties}
         >
             {renderTemplate()}
         </div>
