@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useNotification } from '@/components/ui/Toast';
 import { CVData, PersonalInfo, Experience, Education, Skill, Language, Project, Certification, VolunteerExperience } from '@/types/cv';
 import dynamic from 'next/dynamic';
@@ -15,6 +15,7 @@ import LanguagesSection from './sections/LanguagesSection';
 import ProjectsSection from './sections/ProjectsSection';
 import CertificationsSection from './sections/CertificationsSection';
 import VolunteerExperienceSection from './sections/VolunteerExperienceSection';
+import ElaveSections from './sections/ElaveSections';
 
 // Import preview components
 import CVPreview from './CVPreview';
@@ -40,6 +41,7 @@ interface CVDataType {
     testScores: any[];
     recommendations: any[];
     courses: any[];
+    customSections: any[];
     sectionOrder?: any[];
     cvLanguage: CVLanguage;
     sectionNames?: Record<string, string>;
@@ -69,6 +71,7 @@ interface CVEditorState {
     testScores: any[];
     recommendations: any[];
     courses: any[];
+    customSections: any[];
     sectionOrder: any[];
     cvLanguage: CVLanguage;
     sectionNames?: Record<string, string>;
@@ -107,6 +110,7 @@ const getDefaultCVData = (): Omit<CVEditorState, 'id' | 'title' | 'templateId'> 
     testScores: [],
     recommendations: [],
     courses: [],
+    customSections: [],
     sectionOrder: [],
     cvLanguage: 'azerbaijani'
 });
@@ -123,6 +127,7 @@ const getSections = (language: CVLanguage, translatedSectionNames?: Record<strin
             { id: 'projects', label: 'Projects', icon: '🚀' },
             { id: 'certifications', label: 'Certifications', icon: '🏆' },
             { id: 'volunteer', label: 'Volunteer Experience', icon: '❤️' },
+            { id: 'customSections', label: 'Custom Sections', icon: '📝' },
             { id: 'template', label: 'Template Selection', icon: '🎨' }
         ],
         azerbaijani: [
@@ -134,6 +139,7 @@ const getSections = (language: CVLanguage, translatedSectionNames?: Record<strin
             { id: 'projects', label: 'Layihələr', icon: '🚀' },
             { id: 'certifications', label: 'Sertifikatlar', icon: '🏆' },
             { id: 'volunteer', label: 'Könüllü Təcrübə', icon: '❤️' },
+            { id: 'customSections', label: 'Əlavə Bölmələr', icon: '📝' },
             { id: 'template', label: 'Şablon Seçimi', icon: '🎨' }
         ]
     };
@@ -142,8 +148,6 @@ const getSections = (language: CVLanguage, translatedSectionNames?: Record<strin
     
     // If we have translated section names, use them
     if (translatedSectionNames) {
-        console.log('🔧 getSections: Using translated section names:', translatedSectionNames);
-        
         // Map section IDs to API section keys
         const sectionIdMapping: Record<string, string> = {
             'personal': 'personalInfo',
@@ -161,15 +165,12 @@ const getSections = (language: CVLanguage, translatedSectionNames?: Record<strin
             const apiKey = sectionIdMapping[section.id];
             const translatedLabel = apiKey && translatedSectionNames[apiKey];
             
-            console.log(`🏷️ Section ${section.id} (${apiKey}): ${section.label} → ${translatedLabel || 'not found'}`);
-            
             return {
                 ...section,
                 label: translatedLabel || section.label
             };
         });
         
-        console.log('✅ getSections: Final sections with translated names:', updatedSections);
         return updatedSections;
     }
     
@@ -187,6 +188,7 @@ const getSectionDescription = (sectionId: string, language: CVLanguage) => {
             projects: 'Highlight significant projects you have worked on.',
             certifications: 'Add any relevant certifications you have earned.',
             volunteer: 'Describe your volunteer contributions.',
+            customSections: 'Add custom sections to highlight unique aspects of your profile.',
             template: 'Choose a template that best fits your style.'
         },
         azerbaijani: {
@@ -198,6 +200,7 @@ const getSectionDescription = (sectionId: string, language: CVLanguage) => {
             projects: 'Üzərində işlədiyiniz əhəmiyyətli layihələri qeyd edin.',
             certifications: 'Qazandığınız müvafiq sertifikatları əlavə edin.',
             volunteer: 'Könüllü fəaliyyətinizi təsvir edin.',
+            customSections: 'Profilinizin unikal tərəflərini vurğulamaq üçün xüsusi bölmələr əlavə edin.',
             template: 'Stilinizi ən yaxşı əks etdirən şablonu seçin.'
         }
     };
@@ -208,12 +211,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
     // Initialize CV state
     const [cv, setCv] = useState<CVEditorState>(() => {
         if (initialData) {
-            console.log('🎯 Initializing CV with provided data:', initialData);
-            
             // Check if initialData has a 'data' property (API format)
             const cvData = initialData.data || initialData;
-            console.log('📊 Parsed CV data:', cvData);
-            console.log('👤 Personal Info from data:', cvData.personalInfo);
             
             const result = {
                 id: initialData.id || cvId,
@@ -232,18 +231,16 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 testScores: cvData.testScores || [],
                 recommendations: cvData.recommendations || [],
                 courses: cvData.courses || [],
+                customSections: cvData.customSections || [],
                 sectionOrder: cvData.sectionOrder || [],
                 cvLanguage: cvData.cvLanguage || 'azerbaijani'
             };
 
-            console.log('✅ Final CV state initialized:', result);
-            console.log('🔍 Final personalInfo:', result.personalInfo);
             return result;
         }
         
         // Create new CV with default data
         const defaultData = getDefaultCVData();
-        console.log('🆕 Creating new CV with default data:', defaultData);
         return {
             id: cvId,
             title: 'Yeni CV',
@@ -329,20 +326,17 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     testScores: cv.testScores,
                     recommendations: cv.recommendations,
                     courses: cv.courses,
+                    customSections: cv.customSections,
                     sectionOrder: cv.sectionOrder,
                     cvLanguage: cv.cvLanguage
                 }
             };
-
-            console.log('🔄 Auto-saving CV data:', cvData.data.personalInfo);
 
             await apiClient.put(`/api/cv/${cv.id}`, {
                 title: cvData.title,
                 templateId: cvData.templateId,
                 cv_data: cvData.data
             });
-
-            console.log('✅ Auto-saved CV successfully');
         } catch (error) {
             console.error('❌ Auto-save failed:', error);
         }
@@ -350,14 +344,6 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
 
     // Notification hooks
     const { showSuccess, showError, showWarning } = useNotification();
-
-    console.log('🔄 CV Editor State:', {
-        cvId,
-        hasInitialData: !!initialData,
-        activeSection,
-        templateId: cv.templateId,
-        userTier
-    });
 
    const updateCVData = (section: keyof CVEditorState, data: any) => {
         setCv(prev => ({
@@ -388,6 +374,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     testScores: cv.testScores,
                     recommendations: cv.recommendations,
                     courses: cv.courses,
+                    customSections: cv.customSections,
                     sectionOrder: cv.sectionOrder,
                     cvLanguage: cv.cvLanguage
                 }
@@ -423,10 +410,18 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
     }, [cv, onSave, showSuccess, showError]); // cv obyekti burada hələ də asılılıqdır, amma əsas buglar həll edilib.
 
 
-    // Get sections for current language
-    const allSections = getSections(cv.cvLanguage, cv.sectionNames || {});
-    const mainSections = allSections.filter(s => s.id !== 'template');
-    const templateSection = allSections.find(s => s.id === 'template');
+    // Get sections for current language with memoization
+    const allSections = useMemo(() => {
+        return getSections(cv.cvLanguage, cv.sectionNames || {});
+    }, [cv.cvLanguage, cv.sectionNames]);
+    
+    const mainSections = useMemo(() => {
+        return allSections.filter(s => s.id !== 'template');
+    }, [allSections]);
+    
+    const templateSection = useMemo(() => {
+        return allSections.find(s => s.id === 'template');
+    }, [allSections]);
 
     // Render preview based on template
     const renderPreview = () => {
@@ -449,8 +444,10 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 testScores: cv.testScores,
                 recommendations: cv.recommendations,
                 courses: cv.courses,
+                customSections: cv.customSections,
                 cvLanguage: cv.cvLanguage,
-                sectionOrder: cv.sectionOrder
+                sectionOrder: cv.sectionOrder,
+                sectionNames: cv.sectionNames // Section names də əlavə edildi
             } as any
         };
 
@@ -527,6 +524,15 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     <VolunteerExperienceSection
                         data={cv.volunteerExperience}
                         onChange={(data: any) => updateCVData('volunteerExperience', data)}
+                    />
+                );
+
+            case 'customSections':
+                return (
+                    <ElaveSections
+                        data={cv.customSections}
+                        onChange={(data: any) => updateCVData('customSections', data)}
+                        userTier={userTier}
                     />
                 );
 

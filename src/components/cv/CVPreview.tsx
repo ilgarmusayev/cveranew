@@ -81,6 +81,24 @@ interface VolunteerExperience {
     description?: string;
 }
 
+interface CustomSection {
+    id: string;
+    title: string;
+    items: CustomSectionItem[];
+    order?: number;
+}
+
+interface CustomSectionItem {
+    id: string;
+    title?: string;
+    subtitle?: string;
+    description?: string;
+    url?: string;
+    date?: string;
+    location?: string;
+    tags?: string[];
+}
+
 interface CVData {
     personalInfo: PersonalInfo;
     experience?: Experience[];
@@ -90,6 +108,7 @@ interface CVData {
     projects?: Project[];
     certifications?: Certification[];
     volunteerExperience?: VolunteerExperience[];
+    customSections?: CustomSection[];
     cvLanguage?: string;
     sectionNames?: Record<string, string>;
 }
@@ -282,7 +301,7 @@ const splitContentToPages = (sections: React.ReactNode[], pageHeightPx: number =
 
 // Basic Template Component
 const BasicTemplate: React.FC<{ data: CVData }> = ({ data }) => {
-    const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [] } = data;
+    const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
     
     return (
         <div className="w-full h-full bg-white text-gray-900 font-sans" style={{ padding: '15mm 12mm' }}>
@@ -558,13 +577,71 @@ const BasicTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                 </div>
             )}
 
+            {/* Custom Sections */}
+            {customSections.length > 0 && customSections
+                .sort((a, b) => (a.order || 999) - (b.order || 999))
+                .map((section) => (
+                    <div key={section.id} className="mb-4">
+                        <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
+                            {section.title}
+                        </h2>
+                        <div className="space-y-2">
+                            {section.items.map((item) => (
+                                <div key={item.id} className="border-l-2 border-blue-200 pl-3">
+                                    <div className="flex justify-between items-start mb-1">
+                                        <div className="flex-1">
+                                            {item.title && (
+                                                <h3 className="font-semibold text-gray-900 text-sm">{item.title}</h3>
+                                            )}
+                                            {item.subtitle && (
+                                                <p className="text-blue-600 font-medium text-xs">{item.subtitle}</p>
+                                            )}
+                                            {item.location && (
+                                                <p className="text-gray-600 text-xs">{item.location}</p>
+                                            )}
+                                        </div>
+                                        {item.date && (
+                                            <span className="text-xs text-gray-500">{item.date}</span>
+                                        )}
+                                    </div>
+                                    {item.description && (
+                                        <div className="text-gray-700 text-xs mt-1 leading-relaxed">
+                                            {renderHtmlContent(item.description)}
+                                        </div>
+                                    )}
+                                    {item.tags && item.tags.length > 0 && (
+                                        <div className="flex flex-wrap gap-1 mt-2">
+                                            {item.tags.map((tag, index) => (
+                                                <span 
+                                                    key={index}
+                                                    className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
+                                                >
+                                                    {tag}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {item.url && (
+                                        <p className="text-blue-600 text-xs mt-1">
+                                            <a href={item.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                                                {item.url}
+                                            </a>
+                                        </p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ))
+            }
+
         </div>
     );
 };
 
 // Modern Template Component
 const ModernTemplate: React.FC<{ data: CVData }> = ({ data }) => {
-    const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [] } = data;
+    const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
     
     return (
         <div className="w-full h-full bg-white text-gray-900 font-sans flex">
@@ -880,6 +957,66 @@ const ModernTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                     </div>
                 )}
 
+                {/* Custom Sections */}
+                {customSections.length > 0 && customSections
+                    .sort((a, b) => (a.order || 999) - (b.order || 999))
+                    .map((section) => (
+                        <div key={section.id} className="mb-6">
+                            <h2 className="text-lg font-bold text-gray-800 mb-3">
+                                {section.title}
+                            </h2>
+                            <div className="space-y-3">
+                                {section.items.map((item) => (
+                                    <div key={item.id}>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div className="flex-1">
+                                                {item.title && (
+                                                    <h3 className="text-sm font-semibold text-gray-900">{item.title}</h3>
+                                                )}
+                                                {item.subtitle && (
+                                                    <p className="text-gray-600 font-medium text-xs">{item.subtitle}</p>
+                                                )}
+                                                {item.location && (
+                                                    <p className="text-gray-500 text-xs">{item.location}</p>
+                                                )}
+                                            </div>
+                                            {item.date && (
+                                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                                    {item.date}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {item.description && (
+                                            <div className="text-gray-700 text-xs leading-relaxed">
+                                                {renderHtmlContent(item.description)}
+                                            </div>
+                                        )}
+                                        {item.tags && item.tags.length > 0 && (
+                                            <div className="flex flex-wrap gap-1 mt-2">
+                                                {item.tags.map((tag, index) => (
+                                                    <span 
+                                                        key={index}
+                                                        className="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded"
+                                                    >
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {item.url && (
+                                            <p className="text-gray-600 text-xs mt-1">
+                                                <a href={item.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                                                    {item.url}
+                                                </a>
+                                            </p>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))
+                }
+
             </div>
         </div>
     );
@@ -887,7 +1024,7 @@ const ModernTemplate: React.FC<{ data: CVData }> = ({ data }) => {
 
 // Professional Template Component
 const ProfessionalTemplate: React.FC<{ data: CVData }> = ({ data }) => {
-    const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [] } = data;
+    const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
     
     return (
         <div className="w-full h-full bg-white text-gray-900 font-serif" style={{ padding: '15mm 12mm' }}>
@@ -1158,6 +1295,64 @@ const ProfessionalTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                     </div>
                 </div>
             )}
+
+            {/* Custom Sections */}
+            {customSections.length > 0 && customSections
+                .sort((a, b) => (a.order || 999) - (b.order || 999))
+                .map((section) => (
+                    <div key={section.id} className="mb-6">
+                        <h2 className="text-base font-bold text-gray-800 mb-3 uppercase tracking-wide">
+                            {section.title}
+                        </h2>
+                        <div className="space-y-3">
+                            {section.items.map((item) => (
+                                <div key={item.id}>
+                                    <div className="flex justify-between items-baseline mb-1">
+                                        <div className="flex-1">
+                                            {item.title && (
+                                                <h3 className="font-bold text-gray-900 text-sm">{item.title}</h3>
+                                            )}
+                                            {item.subtitle && (
+                                                <p className="text-gray-700 font-semibold italic text-xs">{item.subtitle}</p>
+                                            )}
+                                            {item.location && (
+                                                <p className="text-gray-600 italic text-xs">{item.location}</p>
+                                            )}
+                                        </div>
+                                        {item.date && (
+                                            <span className="text-xs text-gray-600 font-medium">{item.date}</span>
+                                        )}
+                                    </div>
+                                    {item.description && (
+                                        <div className="text-gray-700 leading-relaxed text-justify text-xs">
+                                            {renderHtmlContent(item.description)}
+                                        </div>
+                                    )}
+                                    {item.tags && item.tags.length > 0 && (
+                                        <div className="flex flex-wrap gap-1 mt-2">
+                                            {item.tags.map((tag, index) => (
+                                                <span 
+                                                    key={index}
+                                                    className="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded border"
+                                                >
+                                                    {tag}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {item.url && (
+                                        <p className="text-gray-600 text-xs mt-1">
+                                            <a href={item.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                                                {item.url}
+                                            </a>
+                                        </p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ))
+            }
 
         </div>
     );

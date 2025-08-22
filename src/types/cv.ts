@@ -173,9 +173,11 @@ export interface CVData {
   testScores?: TestScore[];
   recommendations?: Recommendation[];
   courses?: Course[];
+  customSections?: CustomSection[];
   cvLanguage?: 'azerbaijani' | 'english'; // CV display language
   translationMetadata?: TranslationMetadata;
   sectionOrder?: any[];
+  sectionNames?: Record<string, string>;
 }
 
 export interface CV {
