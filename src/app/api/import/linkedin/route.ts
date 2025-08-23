@@ -2,12 +2,113 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyJWT } from '@/lib/jwt';
 import { PrismaClient } from '@prisma/client';
 import { ScrapingDogLinkedInService } from '@/lib/services/scrapingdog-linkedin';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import axios from 'axios';
 
 const prisma = new PrismaClient();
 
 // ScrapingDog LinkedIn Service instance
 const scrapingDogService = new ScrapingDogLinkedInService();
+
+// Gemini AI for skill generation
+const geminiAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+
+// Generate AI-suggested skills for LinkedIn import
+async function generateLinkedInAISkills(profileData: any, existingSkills: any[]) {
+  try {
+    console.log('🤖 AI skills yaradılır LinkedIn import üçün...');
+
+    const existingSkillNames = existingSkills.map(skill => 
+      typeof skill === 'string' ? skill : skill.name
+    ).filter(Boolean);
+
+    const prompt = `
+    LinkedIn Profil Analizi və Bacarıq Təklifləri
+    ============================================
+    
+    Aşağıdakı LinkedIn profil məlumatlarını analiz edərək DƏQIQ 2 hard skill və 2 soft skill təklif et:
+
+    PROFİL MƏLUMATLARI:
+    - Ad: ${profileData.personalInfo?.fullName || 'Bilinmir'}
+    - Başlıq: ${profileData.personalInfo?.title || 'Bilinmir'}
+    - Yer: ${profileData.personalInfo?.location || 'Bilinmir'}
+    - Xülasə: ${profileData.personalInfo?.summary || 'Bilinmir'}
+    - İş təcrübəsi sayı: ${profileData.experience?.length || 0}
+    - Təhsil sayı: ${profileData.education?.length || 0}
+    - Mövcud bacarıqlar: ${existingSkillNames.join(', ') || 'Heç biri'}
+
+    İŞ TƏCRÜBƏSİ:
+    ${profileData.experience?.map((exp: any, i: number) => 
+      `${i+1}. ${exp.position} @ ${exp.company} (${exp.description?.substring(0, 100) || ''})`
+    ).join('\n') || 'Məlumat yoxdur'}
+
+    TƏHSİL:
+    ${profileData.education?.map((edu: any, i: number) => 
+      `${i+1}. ${edu.degree} - ${edu.institution} (${edu.fieldOfStudy || ''})`
+    ).join('\n') || 'Məlumat yoxdur'}
+
+    TƏLƏBLƏR:
+    1. DƏQIQ 2 hard skill (texniki bacarıqlar)
+    2. DƏQIQ 2 soft skill (şəxsi bacarıqlar)
+    3. Mövcud bacarıqları təkrar etmə
+    4. Profil məlumatlarına uyğun olsun
+    5. İş bazarında axtarılan bacarıqlar olsun
+
+    Nəticəni JSON formatında ver:
+    {
+      "hardSkills": [
+        {"name": "Hard Skill 1", "level": "Başlanğıc|Orta|Təcrübəli"},
+        {"name": "Hard Skill 2", "level": "Başlanğıc|Orta|Təcrübəli"}
+      ],
+      "softSkills": [
+        {"name": "Soft Skill 1", "level": "Başlanğıc|Orta|Təcrübəli"},
+        {"name": "Soft Skill 2", "level": "Başlanğıc|Orta|Təcrübəli"}
+      ]
+    }
+    `;
+
+    const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const result = await model.generateContent(prompt);
+    const aiResponse = result.response.text().trim();
+
+    console.log('🔍 AI Skills Response:', aiResponse);
+
+    // JSON parse et
+    const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('AI response-da JSON tapılmadı');
+    }
+
+    const aiSkills = JSON.parse(jsonMatch[0]);
+    
+    // Skills-ləri format et
+    const formattedSkills = [
+      ...aiSkills.hardSkills.map((skill: any, index: number) => ({
+        id: `ai-hard-skill-${Date.now()}-${index}`,
+        name: skill.name,
+        level: skill.level,
+        type: 'hard',
+        source: 'ai'
+      })),
+      ...aiSkills.softSkills.map((skill: any, index: number) => ({
+        id: `ai-soft-skill-${Date.now()}-${index}`,
+        name: skill.name,
+        level: skill.level,
+        type: 'soft',
+        source: 'ai'
+      }))
+    ];
+
+    console.log(`✅ AI tərəfindən ${formattedSkills.length} skill yaradıldı:`, 
+      formattedSkills.map(s => `${s.name} (${s.type})`));
+
+    return formattedSkills;
+
+  } catch (error) {
+    console.error('❌ AI skills yaradılması xətası:', error);
+    return [];
+  }
+}
 
 // RapidAPI LinkedIn Skills - parallel skills extraction
 async function getRapidAPISkills(linkedinUrl: string) {
@@ -335,6 +436,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Generate AI-suggested skills (2 hard + 2 soft)
+    console.log('🤖 AI skills yaradılır...');
+    const aiSkills = await generateLinkedInAISkills(transformedData, transformedData.skills);
+    if (aiSkills.length > 0) {
+      transformedData.skills = [...transformedData.skills, ...aiSkills];
+      console.log(`✅ ${aiSkills.length} AI skill əlavə edildi (2 hard + 2 soft)`);
+    }
+
     console.log('📋 Combined data preview:', {
       fullName: transformedData.personalInfo?.fullName,
       title: transformedData.personalInfo?.title,
@@ -342,13 +451,14 @@ export async function POST(request: NextRequest) {
       experienceCount: transformedData.experience?.length || 0,
       educationCount: transformedData.education?.length || 0,
       skillsCount: transformedData.skills?.length || 0,
+      aiSkillsAdded: aiSkills.length,
       projectsCount: transformedData.projects?.length || 0,
       awardsCount: transformedData.awards?.length || 0,
       honorsCount: transformedData.honors?.length || 0,
       certificationsCount: transformedData.certifications?.length || 0,
       languagesCount: transformedData.languages?.length || 0,
       volunteeringCount: transformedData.volunteering?.length || 0,
-      dataSource: 'scrapingdog + rapidapi'
+      dataSource: 'scrapingdog + rapidapi + ai'
     });
 
     // Generate a unique CV name
@@ -360,7 +470,7 @@ export async function POST(request: NextRequest) {
                    (firstName && lastName ? `${firstName} ${lastName}` : '') || 
                    'LinkedIn CV';
 
-    console.log(`📝 CV yaradılır: "${cvName}"`);
+    console.log(`📝 CV yaradılır: "${cvName}" - Dil: İngilis`);
 
     // Save CV to database with all imported data
     const newCV = await prisma.cV.create({
@@ -377,7 +487,8 @@ export async function POST(request: NextRequest) {
           honors: transformedData.honors,
           certifications: transformedData.certifications,
           languages: transformedData.languages,
-          volunteering: transformedData.volunteering
+          volunteering: transformedData.volunteering,
+          language: 'en' // CV dili ingilis dili olaraq təyin edilir
         }
       }
     });
@@ -390,6 +501,7 @@ export async function POST(request: NextRequest) {
         data: JSON.stringify({
           cvId: newCV.id,
           profileUrl: linkedinUrl,
+          cvLanguage: 'en',
           importStats: {
             experienceCount: transformedData.experience.length,
             educationCount: transformedData.education.length,
@@ -413,19 +525,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       cvId: newCV.id,
-      message: 'LinkedIn profili uğurla import edildi və CV yaradıldı - bütün məlumatlar dolduruldu',
+      message: 'LinkedIn profili uğurla import edildi və CV yaradıldı - bütün məlumatlar + AI skills dolduruldu (İngilis dilində)',
       summary: {
         name: cvName,
+        language: 'en',
         experienceCount: transformedData.experience.length,
         educationCount: transformedData.education.length,
         skillsCount: transformedData.skills.length,
+        aiSkillsAdded: aiSkills.length,
         projectsCount: transformedData.projects.length,
         awardsCount: transformedData.awards.length,
         honorsCount: transformedData.honors.length,
         certificationsCount: transformedData.certifications.length,
         languagesCount: transformedData.languages.length,
         volunteeringCount: transformedData.volunteering.length,
-        source: 'ScrapingDog + RapidAPI',
+        source: 'ScrapingDog + RapidAPI + AI Skills',
         totalSections: 9
       }
     });

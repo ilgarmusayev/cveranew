@@ -1,18 +1,8 @@
 const axios = require('axios');
 
-async      console.log(`💼 İş təcrübəsi: ${importResponse.data.summary?.experienceCount || 0}`);
-      console.log(`🎓 Təhsil: ${importResponse.data.summary?.educationCount || 0}`);
-      console.log(`🔧 Bacarıqlar: ${importResponse.data.summary?.skillsCount || 0}`);
-      console.log(`🤖 AI Skills əlavə edildi: ${importResponse.data.summary?.aiSkillsAdded || 0}`);
-      console.log(`📂 Layihələr: ${importResponse.data.summary?.projectsCount || 0}`);
-      console.log(`🏆 Mükafatlar: ${importResponse.data.summary?.awardsCount || 0}`);
-      console.log(`🎖️ Şərəf mükafatları: ${importResponse.data.summary?.honorsCount || 0}`);
-      console.log(`📜 Sertifikatlar: ${importResponse.data.summary?.certificationsCount || 0}`);
-      console.log(`🌍 Dillər: ${importResponse.data.summary?.languagesCount || 0}`);
-      console.log(`❤️ Könüllü işlər: ${importResponse.data.summary?.volunteeringCount || 0}`);
-      console.log(`📈 Ümumi bölmələr: ${importResponse.data.summary?.totalSections || 0}`);testComprehensiveLinkedInImport() {
+async function testLinkedInWithAISkills() {
   try {
-    console.log('🔧 LinkedIn-dən tam məlumat import testi...');
+    console.log('🔧 LinkedIn + AI Skills import testi...');
     
     // Test istifadəçisi üçün login edərək token alırıq
     console.log('🔐 Login edilir...');
@@ -28,8 +18,8 @@ async      console.log(`💼 İş təcrübəsi: ${importResponse.data.summary?.e
     const token = loginResponse.data.token;
     console.log('✅ Token alındı');
 
-    // LinkedIn import test
-    console.log('📱 LinkedIn import başlanır...');
+    // LinkedIn import test with AI skills
+    console.log('📱 LinkedIn import + AI skills başlanır...');
     const importResponse = await axios.post('http://localhost:3000/api/import/linkedin', {
       username: 'musayevcreate'
     }, {
@@ -46,12 +36,14 @@ async      console.log(`💼 İş təcrübəsi: ${importResponse.data.summary?.e
       console.log('\n🎉 CV uğurla yaradıldı!');
       console.log(`📋 CV ID: ${importResponse.data.cvId}`);
       console.log(`👤 Ad: ${importResponse.data.summary?.name}`);
+      console.log(`🌐 Dil: ${importResponse.data.summary?.language === 'en' ? 'İngilis' : importResponse.data.summary?.language || 'Bilinmir'}`);
       console.log(`💼 İş təcrübəsi: ${importResponse.data.summary?.experienceCount || 0}`);
       console.log(`🎓 Təhsil: ${importResponse.data.summary?.educationCount || 0}`);
       console.log(`🔧 Bacarıqlar: ${importResponse.data.summary?.skillsCount || 0}`);
+      console.log(`🤖 AI Skills əlavə edildi: ${importResponse.data.summary?.aiSkillsAdded || 0}`);
       console.log(`📂 Layihələr: ${importResponse.data.summary?.projectsCount || 0}`);
       console.log(`🏆 Mükafatlar: ${importResponse.data.summary?.awardsCount || 0}`);
-      console.log(`�️ Şərəf mükafatları: ${importResponse.data.summary?.honorsCount || 0}`);
+      console.log(`🎖️ Şərəf mükafatları: ${importResponse.data.summary?.honorsCount || 0}`);
       console.log(`📜 Sertifikatlar: ${importResponse.data.summary?.certificationsCount || 0}`);
       console.log(`🌍 Dillər: ${importResponse.data.summary?.languagesCount || 0}`);
       console.log(`❤️ Könüllü işlər: ${importResponse.data.summary?.volunteeringCount || 0}`);
@@ -79,6 +71,15 @@ async      console.log(`💼 İş təcrübəsi: ${importResponse.data.summary?.e
         console.log(`- Sertifikat sayı: ${cvData.certifications?.length || 0}`);
         console.log(`- Dil sayı: ${cvData.languages?.length || 0}`);
         console.log(`- Könüllü təcrübə sayı: ${cvData.volunteering?.length || 0}`);
+        
+        // AI Skills-ləri göstər
+        if (cvData.skills?.length > 0) {
+          console.log('\n🤖 AI Skills detalları:');
+          const aiSkills = cvData.skills.filter(skill => skill.source === 'ai');
+          aiSkills.forEach((skill, i) => {
+            console.log(`  ${i+1}. ${skill.name} (${skill.type}) - ${skill.level}`);
+          });
+        }
         
         // Detaylı məlumatları göstər
         if (cvData.personalInfo) {
@@ -108,4 +109,4 @@ async      console.log(`💼 İş təcrübəsi: ${importResponse.data.summary?.e
   }
 }
 
-testComprehensiveLinkedInImport();
+testLinkedInWithAISkills();
