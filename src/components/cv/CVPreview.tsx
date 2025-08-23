@@ -1,119 +1,29 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragStartEvent,
+  DragOverlay,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { CVData, PersonalInfo, Experience, Education, Skill, Language, Project, Certification, VolunteerExperience, CustomSection, CustomSectionItem } from '@/types/cv';
 import '@/styles/cv-fonts.css';
-import '@/styles/cv-fonts.css';
-
-interface PersonalInfo {
-    fullName?: string;
-    name?: string;
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-    phone?: string;
-    website?: string;
-    linkedin?: string;
-    location?: string;
-    summary?: string;
-    profileImage?: string;
-    additionalLinks?: AdditionalLink[];
-}
-
-interface AdditionalLink {
-    id: string;
-    label: string;
-    value: string;
-    type: 'url' | 'text' | 'email' | 'phone';
-}
-
-interface Experience {
-    id: string;
-    company: string;
-    position: string;
-    description: string;
-}
-
-interface Education {
-    id: string;
-    institution: string;
-    degree: string;
-    field?: string;
-    gpa?: string;
-    description?: string;
-}
-
-interface Skill {
-    id: string;
-    name: string;
-    level: string;
-    type?: 'hard' | 'soft';
-    category?: string;
-    description?: string; // For Gemini AI content
-}
-
-interface Language {
-    id: string;
-    language: string;
-    level: string;
-}
-
-interface Project {
-    id: string;
-    name: string;
-    description: string;
-    technologies: string[];
-    url?: string;
-    github?: string;
-    current?: boolean;
-}
-
-interface Certification {
-    id: string;
-    name: string;
-    issuer: string;
-    description?: string;
-    url?: string;
-}
-
-interface VolunteerExperience {
-    id: string;
-    organization: string;
-    role: string;
-    cause?: string;
-    description?: string;
-}
-
-interface CustomSection {
-    id: string;
-    title: string;
-    items: CustomSectionItem[];
-    order?: number;
-}
-
-interface CustomSectionItem {
-    id: string;
-    title?: string;
-    subtitle?: string;
-    description?: string;
-    url?: string;
-    date?: string;
-    location?: string;
-    tags?: string[];
-}
-
-interface CVData {
-    personalInfo: PersonalInfo;
-    experience?: Experience[];
-    education?: Education[];
-    skills?: Skill[];
-    languages?: Language[];
-    projects?: Project[];
-    certifications?: Certification[];
-    volunteerExperience?: VolunteerExperience[];
-    customSections?: CustomSection[];
-    cvLanguage?: string;
-    sectionNames?: Record<string, string>;
-}
 
 interface CVPreviewProps {
     cv: {
@@ -122,6 +32,8 @@ interface CVPreviewProps {
         data: CVData;
     };
     template?: string;
+    onSectionReorder?: (newOrder: string[]) => void;
+    onUpdate?: (updatedCv: any) => void;
     fontSettings?: {
         fontFamily: string;
         headingSize: number;
@@ -164,7 +76,6 @@ const renderHtmlContent = (htmlContent: string) => {
 
 const getFullName = (personalInfo: PersonalInfo): string => {
     if (personalInfo.fullName) return personalInfo.fullName;
-    if (personalInfo.name) return personalInfo.name;
     if (personalInfo.firstName && personalInfo.lastName) {
         return `${personalInfo.firstName} ${personalInfo.lastName}`;
     }
@@ -342,17 +253,480 @@ const splitContentToPages = (sections: React.ReactNode[], pageHeightPx: number =
     return pages.length > 0 ? pages : [[<div key="empty">Məlumat yoxdur</div>]];
 };
 
-// Basic Template Component
-const BasicTemplate: React.FC<{ data: CVData }> = ({ data }) => {
+// Sortable Item Component for DND Kit
+interface SortableItemProps {
+    id: string;
+    children: React.ReactNode;
+}
+
+const SortableItem: React.FC<SortableItemProps> = ({ id, children }) => {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.9 : 1,
+        zIndex: isDragging ? 1000 : 'auto',
+    };
+
+    return (
+        <div 
+            ref={setNodeRef} 
+            style={style} 
+            {...attributes}
+            {...listeners}
+            className={`
+                relative group cursor-grab active:cursor-grabbing
+                ${isDragging 
+                    ? 'shadow-2xl border-2 border-blue-500 bg-blue-50 rounded-lg scale-105 rotate-1' 
+                    : 'hover:shadow-lg hover:border-2 hover:border-blue-300 hover:bg-blue-50/50 hover:scale-[1.02]'
+                }
+                transition-all duration-200 ease-in-out
+                border border-transparent rounded-md
+                before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-blue-100/20 before:to-transparent
+                before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300
+            `}
+            title="Bütün hissəni sürükləyin"
+        >
+            {/* Drag indicator icon - appears on hover */}
+            <div 
+                className="absolute -left-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200"
+                style={{ userSelect: 'none' }}
+            >
+                <div className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-lg hover:bg-blue-700 transition-colors">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </div>
+            </div>
+            
+            {/* Hover instruction */}
+            <div 
+                className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-blue-300 text-white px-3 py-1 rounded text-xs font-medium whitespace-nowrap shadow-lg"
+                style={{ userSelect: 'none' }}
+            >
+                Sürükləyərək yerdəyişmə edin
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-blue-300 text-white"></div>
+            </div>
+            
+            {/* Visual drag lines when dragging */}
+            {isDragging && (
+                <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute left-0 top-1/4 w-1 h-1/2 bg-blue-500 rounded-full animate-pulse"></div>
+                    <div className="absolute right-0 top-1/4 w-1 h-1/2 bg-blue-500 rounded-full animate-pulse"></div>
+                </div>
+            )}
+            
+            {/* Content with padding for drag space */}
+            <div 
+                className={`
+                    ${isDragging ? 'transform rotate-0' : ''}
+                    transition-transform duration-200
+                    pl-2 pr-2 py-1
+                `}
+                style={{ userSelect: isDragging ? 'none' : 'auto' }}
+            >
+                {children}
+            </div>
+        </div>
+    );
+};
+
+// Basic Template Component with DND Kit
+const BasicTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSectionReorder: (newOrder: string[]) => void }> = ({ data, sectionOrder, onSectionReorder }) => {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
+    const [isDragActive, setIsDragActive] = useState(false);
+    const [activeId, setActiveId] = useState<string | null>(null);
+    
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8, // Minimum 8px movement to start drag
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    const handleDragStart = (event: DragStartEvent) => {
+        setIsDragActive(true);
+        setActiveId(event.active.id as string);
+        console.log('=== DRAG STARTED ===');
+        // Add subtle body class for global styling if needed
+        document.body.style.userSelect = 'none';
+        document.body.style.cursor = 'grabbing';
+    };
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        setIsDragActive(false);
+        setActiveId(null);
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+        
+        const { active, over } = event;
+        
+        console.log('=== DRAG ENDED WITH DND KIT ===');
+        console.log('Active:', active.id);
+        console.log('Over:', over?.id);
+        
+        if (over && active.id !== over.id) {
+            const oldIndex = sectionOrder.indexOf(active.id as string);
+            const newIndex = sectionOrder.indexOf(over.id as string);
+            
+            console.log('Old index:', oldIndex, 'New index:', newIndex);
+            
+            const newOrder = arrayMove(sectionOrder, oldIndex, newIndex);
+            console.log('New order:', newOrder);
+            
+            onSectionReorder(newOrder);
+        }
+    };
+    
+    // Section render functions
+    const renderSection = (sectionType: string) => {
+        console.log('Rendering section:', sectionType, 'data available:', {
+            experience: experience.length,
+            education: education.length,
+            skills: skills.length,
+            summary: !!personalInfo.summary
+        });
+        
+        switch (sectionType) {
+            case 'summary':
+                return personalInfo.summary ? (
+                    <div className="mb-4 cv-section">
+                        <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
+                            {getSectionName('summary', data.cvLanguage, data.sectionNames)}
+                        </h2>
+                        <div className="text-gray-700 leading-relaxed text-xs">
+                            {renderHtmlContent(personalInfo.summary)}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="mb-4 cv-section">
+                        <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
+                            {getSectionName('summary', data.cvLanguage, data.sectionNames)}
+                        </h2>
+                        <div className="text-gray-700 leading-relaxed text-xs">
+                            <p>Test xülasə məlumatı yoxdur</p>
+                        </div>
+                    </div>
+                );
+                
+            case 'experience':
+                console.log('Experience data in renderSection:', experience);
+                return (
+                    <div className="mb-4">
+                        <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
+                            {getSectionName('experience', data.cvLanguage, data.sectionNames)}
+                        </h2>
+                        <div className="space-y-3">
+                            {experience && experience.length > 0 ? (
+                                experience.map((exp) => (
+                                    <div key={exp.id} className="border-l-2 border-blue-200 pl-3">
+                                        <div className="flex justify-between items-start mb-1">
+                                            <h3 className="font-semibold text-gray-900 text-sm">{exp.position}</h3>
+                                            <span className="text-xs text-blue-600 font-medium whitespace-nowrap ml-2">
+                                                {exp.startDate} - {exp.current ? 'Davam edir' : exp.endDate}
+                                            </span>
+                                        </div>
+                                        <p className="text-blue-600 font-medium text-xs">{exp.company}</p>
+                                        {exp.description && (
+                                            <div className="text-gray-700 text-xs mt-1 leading-relaxed">
+                                                {renderHtmlContent(exp.description)}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="border-l-2 border-blue-200 pl-3">
+                                    <div className="flex justify-between items-start mb-1">
+                                        <h3 className="font-semibold text-gray-900 text-sm">Test İş Təcrübəsi</h3>
+                                        <span className="text-xs text-blue-600 font-medium whitespace-nowrap ml-2">
+                                            2020 - Davam edir
+                                        </span>
+                                    </div>
+                                    <p className="text-blue-600 font-medium text-xs">Test Şirkəti</p>
+                                    <div className="text-gray-700 text-xs mt-1 leading-relaxed">
+                                        Test iş təcrübəsi təsviri burada olacaq. Bu dummy məlumatdır.
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+                
+            case 'education':
+                return (
+                    <div className="mb-4">
+                        <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
+                            {getSectionName('education', data.cvLanguage, data.sectionNames)}
+                        </h2>
+                        <div className="space-y-2">
+                            {education && education.length > 0 ? (
+                                education.map((edu) => (
+                                    <div key={edu.id} className="border-l-2 border-blue-200 pl-3">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <h3 className="font-semibold text-gray-900 text-sm">{edu.degree}</h3>
+                                                <p className="text-blue-600 font-medium text-xs">{edu.institution}</p>
+                                                {edu.field && <p className="text-gray-600 text-xs">{edu.field}</p>}
+                                                {edu.gpa && <p className="text-gray-600 text-xs">{data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: {edu.gpa}</p>}
+                                            </div>
+                                            <span className="text-xs text-blue-600 font-medium whitespace-nowrap ml-2">
+                                                {edu.startDate} - {edu.current ? 'Davam edir' : edu.endDate}
+                                            </span>
+                                        </div>
+                                        {edu.description && (
+                                            <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(edu.description)}</div>
+                                        )}
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="border-l-2 border-blue-200 pl-3">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <h3 className="font-semibold text-gray-900 text-sm">Test Təhsil Dərəcəsi</h3>
+                                            <p className="text-blue-600 font-medium text-xs">Test Universitet</p>
+                                            <p className="text-gray-600 text-xs">Test Sahə</p>
+                                        </div>
+                                        <span className="text-xs text-blue-600 font-medium whitespace-nowrap ml-2">
+                                            2018 - 2022
+                                        </span>
+                                    </div>
+                                    <div className="text-gray-700 text-xs mt-1">Test təhsil təsviri burada olacaq.</div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+                
+            case 'skills':
+                return (
+                    <div className="mb-4">
+                        <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
+                            {getSectionName('skills', data.cvLanguage, data.sectionNames)}
+                        </h2>
+                        <div className="space-y-2">
+                            {skills && skills.length > 0 ? (
+                                skills.map((skill) => (
+                                    <div key={skill.id} className="border-l-2 border-blue-200 pl-2">
+                                        <div className="mb-1">
+                                            <span className="text-gray-700 text-xs font-medium">{skill.name}</span>
+                                        </div>
+                                        {skill.description && (
+                                            <div className="text-gray-600 text-xs leading-relaxed">
+                                                {renderHtmlContent(skill.description)}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))
+                            ) : (
+                                <>
+                                    <div className="border-l-2 border-blue-200 pl-2">
+                                        <div className="mb-1">
+                                            <span className="text-gray-700 text-xs font-medium">JavaScript</span>
+                                        </div>
+                                        <div className="text-gray-600 text-xs leading-relaxed">
+                                            Test JavaScript bacarığı təsviri
+                                        </div>
+                                    </div>
+                                    <div className="border-l-2 border-blue-200 pl-2">
+                                        <div className="mb-1">
+                                            <span className="text-gray-700 text-xs font-medium">React</span>
+                                        </div>
+                                        <div className="text-gray-600 text-xs leading-relaxed">
+                                            Test React bacarığı təsviri
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                );
+                
+            case 'languages':
+                return (
+                    <div className="mb-4">
+                        <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
+                            {getSectionName('languages', data.cvLanguage, data.sectionNames)}
+                        </h2>
+                        <div className="grid grid-cols-2 gap-1">
+                            {languages && languages.length > 0 ? (
+                                languages.map((lang) => (
+                                    <div key={lang.id} className="flex justify-between items-center">
+                                        <span className="text-gray-700 text-xs">{lang.language}</span>
+                                        <span className="text-xs text-blue-600 font-medium">{getLanguageLevel(lang.level, data.cvLanguage)}</span>
+                                    </div>
+                                ))
+                            ) : (
+                                <>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-700 text-xs">Azərbaycan dili</span>
+                                        <span className="text-xs text-blue-600 font-medium">Ana dili</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-700 text-xs">İngilis dili</span>
+                                        <span className="text-xs text-blue-600 font-medium">Yuxarı</span>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                );
+                
+            case 'projects':
+                return (
+                    <div className="mb-4">
+                        <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
+                            {getSectionName('projects', data.cvLanguage, data.sectionNames)}
+                        </h2>
+                        <div className="space-y-2">
+                            {projects && projects.length > 0 ? (
+                                projects.map((project) => (
+                                    <div key={project.id} className="border-l-2 border-blue-200 pl-3">
+                                        {project.url ? (
+                                            <a 
+                                                href={project.url} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="font-semibold text-gray-900 text-sm underline hover:text-blue-600 transition-colors cursor-pointer"
+                                            >
+                                                {project.name}
+                                            </a>
+                                        ) : (
+                                            <h3 className="font-semibold text-gray-900 text-sm">{project.name}</h3>
+                                        )}
+                                        {project.description && (
+                                            <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(project.description)}</div>
+                                        )}
+                                        {project.technologies && project.technologies.length > 0 && (
+                                            <p className="text-blue-600 text-xs mt-1">Texnologiyalar: {project.technologies.join(', ')}</p>
+                                        )}
+                                        {project.github && (
+                                            <p className="text-gray-600 text-xs mt-1">GitHub: {project.github}</p>
+                                        )}
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="border-l-2 border-blue-200 pl-3">
+                                    <h3 className="font-semibold text-gray-900 text-sm">Test Layihəsi</h3>
+                                    <div className="text-gray-700 text-xs mt-1">Test layihə təsviri burada olacaq. Bu dummy məlumatdır.</div>
+                                    <p className="text-blue-600 text-xs mt-1">Texnologiyalar: React, TypeScript, Node.js</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+                
+            case 'certifications':
+                return (
+                    <div className="mb-4">
+                        <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
+                            {getSectionName('certifications', data.cvLanguage, data.sectionNames)}
+                        </h2>
+                        <div className="space-y-2">
+                            {certifications && certifications.length > 0 ? (
+                                certifications.map((cert) => (
+                                    <div key={cert.id} className="border-l-2 border-blue-200 pl-3">
+                                        <div className="flex justify-between items-start">
+                                            {cert.url ? (
+                                                <a 
+                                                    href={cert.url} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer"
+                                                    className="font-semibold text-gray-900 text-sm underline hover:text-blue-600 transition-colors cursor-pointer"
+                                                >
+                                                    {cert.name}
+                                                </a>
+                                            ) : (
+                                                <h3 className="font-semibold text-gray-900 text-sm">{cert.name}</h3>
+                                            )}
+                                        </div>
+                                        <p className="text-blue-600 font-medium text-xs">{cert.issuer}</p>
+                                        {cert.description && (
+                                            <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(cert.description)}</div>
+                                        )}
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="border-l-2 border-blue-200 pl-3">
+                                    <h3 className="font-semibold text-gray-900 text-sm">Test Sertifikat</h3>
+                                    <p className="text-blue-600 font-medium text-xs">Test Təşkilat</p>
+                                    <div className="text-gray-700 text-xs mt-1">Test sertifikat təsviri burada olacaq.</div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+                
+            case 'volunteer':
+                return (
+                    <div className="mb-4">
+                        <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
+                            {getSectionName('volunteerExperience', data.cvLanguage, data.sectionNames)}
+                        </h2>
+                        <div className="space-y-3">
+                            {volunteerExperience && volunteerExperience.length > 0 ? (
+                                volunteerExperience.map((vol) => (
+                                    <div key={vol.id} className="border-l-2 border-blue-200 pl-3">
+                                        <div className="flex justify-between items-start mb-1">
+                                            <h3 className="font-semibold text-gray-900 text-sm">{vol.role}</h3>
+                                            <span className="text-xs text-blue-600 font-medium whitespace-nowrap ml-2">
+                                                {vol.startDate} - {vol.current ? 'Davam edir' : vol.endDate}
+                                            </span>
+                                        </div>
+                                        <p className="text-blue-600 font-medium text-xs">{vol.organization}</p>
+                                        {vol.description && (
+                                            <div className="text-gray-700 text-xs mt-1 leading-relaxed">
+                                                {renderHtmlContent(vol.description)}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="border-l-2 border-blue-200 pl-3">
+                                    <div className="flex justify-between items-start mb-1">
+                                        <h3 className="font-semibold text-gray-900 text-sm">Test Könüllü İş</h3>
+                                        <span className="text-xs text-blue-600 font-medium whitespace-nowrap ml-2">
+                                            2021 - 2022
+                                        </span>
+                                    </div>
+                                    <p className="text-blue-600 font-medium text-xs">Test Təşkilat</p>
+                                    <div className="text-gray-700 text-xs mt-1 leading-relaxed">
+                                        Test könüllü iş təsviri burada olacaq.
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+                
+            default:
+                return null;
+        }
+    };
     
     return (
         <div 
-            className="w-full h-full bg-white text-gray-900 font-sans" 
+            className={`
+                w-full h-full bg-white text-gray-900 font-sans
+                ${isDragActive ? 'drag-mode' : ''}
+            `}
             style={{ 
                 padding: '15mm 12mm'
             }}
         >
+       
+            
             {/* Header */}
             <div className="mb-4 border-b-2 border-blue-600 pb-3 cv-section avoid-break">
                 <div className="flex items-start gap-4">
@@ -410,259 +784,35 @@ const BasicTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                 </div>
             </div>
 
-            {/* Summary */}
-            {personalInfo.summary && (
-                <div className="mb-4 cv-section">
-                    <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
-                        {getSectionName('summary', data.cvLanguage, data.sectionNames)}
-                    </h2>
-                    <div className="text-gray-700 text-xs leading-relaxed">
-                        {renderHtmlContent(personalInfo.summary)}
+            {/* Draggable Sections */}
+            <DndContext 
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+            >
+                <SortableContext 
+                    items={sectionOrder}
+                    strategy={verticalListSortingStrategy}
+                >
+                    <div className={`space-y-4 transition-all duration-300 ${isDragActive ? 'opacity-95 bg-gradient-to-br from-transparent via-blue-50/30 to-transparent' : ''}`}>
+                        {sectionOrder.map((sectionType) => {
+                            const sectionContent = renderSection(sectionType);
+                            if (!sectionContent) return null;
+                            
+                            return (
+                                <SortableItem key={sectionType} id={sectionType}>
+                                    {sectionContent}
+                                </SortableItem>
+                            );
+                        })}
                     </div>
-                </div>
-            )}
-
-            {/* Experience */}
-            {experience.length > 0 && (
-                <div className="mb-4 cv-section">
-                    <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
-                        {getSectionName('experience', data.cvLanguage, data.sectionNames)}
-                    </h2>
-                    <div className="space-y-3">
-                        {experience.map((exp) => (
-                            <div key={exp.id} className="border-l-2 border-blue-200 pl-3 avoid-break">
-                                <div className="flex justify-between items-start mb-1">
-                                    <h3 className="font-semibold text-gray-900 text-sm">{exp.position}</h3>
-                                </div>
-                                <p className="text-blue-600 font-medium mb-1 text-xs">{exp.company}</p>
-                                {exp.description && (
-                                    <div className="text-gray-700 text-xs leading-relaxed">
-                                        {renderHtmlContent(exp.description)}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* Education */}
-            {education.length > 0 && (
-                <div className="mb-4 cv-section">
-                    <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
-                        {getSectionName('education', data.cvLanguage, data.sectionNames)}
-                    </h2>
-                    <div className="space-y-2">
-                        {education.map((edu) => (
-                            <div key={edu.id} className="border-l-2 border-blue-200 pl-3 avoid-break">
-                                <div className="flex justify-between items-start mb-1">
-                                    <h3 className="font-semibold text-gray-900 text-sm">{edu.degree}</h3>
-                                </div>
-                                <p className="text-blue-600 font-medium text-xs">{edu.institution}</p>
-                                {(edu.field || edu.gpa) && (
-                                    <p className="text-gray-600 text-xs">
-                                        {edu.field && edu.gpa ? `${edu.field} - ${data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: ${edu.gpa}` :
-                                         edu.field ? edu.field :
-                                         edu.gpa ? `${data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: ${edu.gpa}` : ''}
-                                    </p>
-                                )}
-                                {edu.description && (
-                                    <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(edu.description)}</div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* Skills - Hard və Soft ayrı-ayrı */}
-            {skills.length > 0 && (
-                <div className="mb-4 cv-section">
-                    {/* Hard Skills */}
-                    {skills.filter(skill => skill.type === 'hard').length > 0 && (
-                        <div className="mb-3 avoid-break">
-                            <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
-                                {getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
-                            </h2>
-                            <div className="space-y-2">
-                                {skills.filter(skill => skill.type === 'hard').map((skill) => (
-                                    <div key={skill.id} className="border-l-2 border-blue-200 pl-2">
-                                        <div className="mb-1">
-                                            <span className="text-gray-700 text-xs font-medium">{skill.name}</span>
-                                        </div>
-                                        {skill.description && (
-                                            <div className="text-gray-600 text-xs leading-relaxed">
-                                                {renderHtmlContent(skill.description)}
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Soft Skills */}
-                    {skills.filter(skill => skill.type === 'soft').length > 0 && (
-                        <div className="mb-3">
-                            <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
-                                {getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
-                            </h2>
-                            <div className="space-y-2">
-                                {skills.filter(skill => skill.type === 'soft').map((skill) => (
-                                    <div key={skill.id} className="border-l-2 border-blue-200 pl-2">
-                                        <div className="mb-1">
-                                            <span className="text-gray-700 text-xs font-medium">{skill.name}</span>
-                                        </div>
-                                        {skill.description && (
-                                            <div className="text-gray-600 text-xs leading-relaxed">
-                                                {renderHtmlContent(skill.description)}
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Tip göstərilməyən skills (geriyə uyğunluq üçün) */}
-                    {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).length > 0 && (
-                        <div className="mb-3">
-                            <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
-                                {getSectionName('skills', data.cvLanguage, data.sectionNames)}
-                            </h2>
-                            <div className="space-y-2">
-                                {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map((skill) => (
-                                    <div key={skill.id} className="border-l-2 border-blue-200 pl-2">
-                                        <div className="mb-1">
-                                            <span className="text-gray-700 text-xs font-medium">{skill.name}</span>
-                                        </div>
-                                        {skill.description && (
-                                            <div className="text-gray-600 text-xs leading-relaxed">
-                                                {renderHtmlContent(skill.description)}
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* Languages */}
-            {languages.length > 0 && (
-                <div className="mb-4">
-                    <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
-                        {getSectionName('languages', data.cvLanguage, data.sectionNames)}
-                    </h2>
-                    <div className="grid grid-cols-2 gap-1">
-                        {languages.map((lang) => (
-                            <div key={lang.id} className="flex justify-between items-center">
-                                <span className="text-gray-700 text-xs">{lang.language}</span>
-                                <span className="text-xs text-blue-600 font-medium">{getLanguageLevel(lang.level, data.cvLanguage)}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* Projects */}
-            {projects.length > 0 && (
-                <div className="mb-4">
-                    <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
-                        {getSectionName('projects', data.cvLanguage, data.sectionNames)}
-                    </h2>
-                    <div className="space-y-2">
-                        {projects.map((project) => (
-                            <div key={project.id} className="border-l-2 border-blue-200 pl-3">
-                                {project.url ? (
-                                    <a 
-                                        href={project.url} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer"
-                                        className="font-semibold text-gray-900 text-sm underline hover:text-blue-600 transition-colors cursor-pointer"
-                                    >
-                                        {project.name}
-                                    </a>
-                                ) : (
-                                    <h3 className="font-semibold text-gray-900 text-sm">{project.name}</h3>
-                                )}
-                                {project.description && (
-                                    <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(project.description)}</div>
-                                )}
-                                {project.technologies && project.technologies.length > 0 && (
-                                    <p className="text-blue-600 text-xs mt-1">Texnologiyalar: {project.technologies.join(', ')}</p>
-                                )}
-                                {project.github && (
-                                    <p className="text-gray-600 text-xs mt-1">GitHub: {project.github}</p>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* Certifications */}
-            {certifications.length > 0 && (
-                <div className="mb-4">
-                    <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
-                        {getSectionName('certifications', data.cvLanguage, data.sectionNames)}
-                    </h2>
-                    <div className="space-y-2">
-                        {certifications.map((cert) => (
-                            <div key={cert.id} className="border-l-2 border-blue-200 pl-3">
-                                <div className="flex justify-between items-start">
-                                    {cert.url ? (
-                                        <a 
-                                            href={cert.url} 
-                                            target="_blank" 
-                                            rel="noopener noreferrer"
-                                            className="font-semibold text-gray-900 text-sm underline hover:text-blue-600 transition-colors cursor-pointer"
-                                        >
-                                            {cert.name}
-                                        </a>
-                                    ) : (
-                                        <h3 className="font-semibold text-gray-900 text-sm">{cert.name}</h3>
-                                    )}
-                                </div>
-                                <p className="text-blue-600 font-medium text-xs">{cert.issuer}</p>
-                                {cert.description && (
-                                    <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(cert.description)}</div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* Volunteer Experience */}
-            {volunteerExperience.length > 0 && (
-                <div className="mb-4">
-                    <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
-                        {getSectionName('volunteerExperience', data.cvLanguage, data.sectionNames)}
-                    </h2>
-                    <div className="space-y-2">
-                        {volunteerExperience.map((vol) => (
-                            <div key={vol.id} className="border-l-2 border-blue-200 pl-3">
-                                <div className="flex justify-between items-start">
-                                    <h3 className="font-semibold text-gray-900 text-sm">{vol.role}</h3>
-                                    <span className="text-xs text-gray-500">
-                                    </span>
-                                </div>
-                                <p className="text-blue-600 font-medium text-xs">{vol.organization}</p>
-                                {vol.description && (
-                                    <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(vol.description)}</div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
+                </SortableContext>
+            </DndContext>
 
             {/* Custom Sections */}
-            {customSections.length > 0 && customSections
-                .sort((a, b) => (a.order || 999) - (b.order || 999))
-                .map((section) => (
+            {customSections.length > 0 && (
+                customSections.map((section) => (
                     <div key={section.id} className="mb-4">
                         <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                             {section.title}
@@ -670,440 +820,46 @@ const BasicTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                         <div className="space-y-2">
                             {section.items.map((item) => (
                                 <div key={item.id} className="border-l-2 border-blue-200 pl-3">
-                                    <div className="flex justify-between items-start mb-1">
-                                        <div className="flex-1">
-                                            {item.title && (
-                                                <h3 className="font-semibold text-gray-900 text-sm">{item.title}</h3>
-                                            )}
-                                            {item.subtitle && (
-                                                <p className="text-blue-600 font-medium text-xs">{item.subtitle}</p>
-                                            )}
-                                            {item.location && (
-                                                <p className="text-gray-600 text-xs">{item.location}</p>
-                                            )}
-                                        </div>
-                                        {item.date && (
-                                            <span className="text-xs text-gray-500">{item.date}</span>
-                                        )}
-                                    </div>
-                                    {item.description && (
-                                        <div className="text-gray-700 text-xs mt-1 leading-relaxed">
-                                            {renderHtmlContent(item.description)}
-                                        </div>
+                                    <h3 className="font-semibold text-gray-900 text-sm">{item.title}</h3>
+                                    {item.subtitle && (
+                                        <p className="text-blue-600 font-medium text-xs">{item.subtitle}</p>
                                     )}
-                                    {item.tags && item.tags.length > 0 && (
-                                        <div className="flex flex-wrap gap-1 mt-2">
-                                            {item.tags.map((tag, index) => (
-                                                <span 
-                                                    key={index}
-                                                    className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
-                                                >
-                                                    {tag}
-                                                </span>
-                                            ))}
-                                        </div>
+                                    {item.description && (
+                                        <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(item.description)}</div>
+                                    )}
+                                    {item.technologies && item.technologies.length > 0 && (
+                                        <p className="text-blue-600 text-xs mt-1">
+                                            Texnologiyalar: {item.technologies.join(', ')}
+                                        </p>
                                     )}
                                     {item.url && (
-                                        <p className="text-blue-600 text-xs mt-1">
-                                            <a href={item.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                                                {item.url}
-                                            </a>
-                                        </p>
+                                        <p className="text-gray-600 text-xs mt-1">URL: {item.url}</p>
                                     )}
                                 </div>
                             ))}
                         </div>
                     </div>
                 ))
-            }
-
-            {/* Bottom margin for professional standards */}
-            <div className="mt-8"></div>
+            )}
         </div>
     );
 };
 
-// Modern Template Component
-const ModernTemplate: React.FC<{ data: CVData }> = ({ data }) => {
-    const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
-    
+// Modern Template Component (Drag-Drop will be added later)
+const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSectionReorder: (newOrder: string[]) => void }> = ({ data, sectionOrder, onSectionReorder }) => {
     return (
-        <div className="w-full h-full bg-white text-gray-900 font-sans flex">
-            {/* Left Sidebar */}
-            <div className="w-1/3 bg-gray-800 text-white" style={{ padding: '12mm 8mm' }}>
-                {/* Profile */}
-                <div className="mb-4 cv-section avoid-break">
-                    {/* Profile Image */}
-                    {personalInfo.profileImage && (
-                        <div className="flex justify-center mb-4">
-                            <img 
-                                src={personalInfo.profileImage} 
-                                alt="Profile" 
-                                className="w-24 h-24 rounded-full object-cover border-4 border-yellow-400"
-                            />
-                        </div>
-                    )}
-                    
-                    <h1 className="text-xl font-bold mb-2 text-center">
-                        {getFullName(personalInfo)}
-                    </h1>
-                    <div className="space-y-2 text-xs">
-                        {personalInfo.email && (
-                            <div className="flex items-center gap-2">
-                                <span>📧</span> {personalInfo.email}
-                            </div>
-                        )}
-                        {personalInfo.phone && (
-                            <div className="flex items-center gap-2">
-                                <span>📱</span> {personalInfo.phone}
-                            </div>
-                        )}
-                        {personalInfo.location && (
-                            <div className="flex items-center gap-2">
-                                <span>📍</span> {personalInfo.location}
-                            </div>
-                        )}
-                        {personalInfo.linkedin && (
-                            <div className="flex items-center gap-2">
-                                <span>🔗</span> {personalInfo.linkedin}
-                            </div>
-                        )}
-                        {personalInfo.website && (
-                            <div className="flex items-center gap-2">
-                                <span>🌐</span> {personalInfo.website}
-                            </div>
-                        )}
-                        {personalInfo.additionalLinks && personalInfo.additionalLinks.length > 0 && (
-                            personalInfo.additionalLinks.map((link) => (
-                                <div key={link.id} className="flex items-center gap-2">
-                                    <span>📎</span> {link.label}: {link.value}
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </div>
-
-                {/* Skills - Hard və Soft ayrı-ayrı */}
-                {skills.length > 0 && (
-                    <div className="mb-6">
-                        {/* Hard Skills */}
-                        {skills.filter(skill => skill.type === 'hard').length > 0 && (
-                            <div className="mb-4">
-                                <h2 className="text-sm font-semibold mb-3 text-yellow-400">
-                                    {getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
-                                </h2>
-                                <div className="space-y-3">
-                                    {skills.filter(skill => skill.type === 'hard').map((skill) => (
-                                        <div key={skill.id}>
-                                            <div className="text-xs mb-1">
-                                                <span>{skill.name}</span>
-                                            </div>
-                                            {skill.description && (
-                                                <div className="text-gray-300 text-xs leading-relaxed">
-                                                    {renderHtmlContent(skill.description)}
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Soft Skills */}
-                        {skills.filter(skill => skill.type === 'soft').length > 0 && (
-                            <div className="mb-4">
-                                <h2 className="text-sm font-semibold mb-3 text-yellow-400">
-                                    {getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
-                                </h2>
-                                <div className="space-y-3">
-                                    {skills.filter(skill => skill.type === 'soft').map((skill) => (
-                                        <div key={skill.id}>
-                                            <div className="text-xs mb-1">
-                                                <span>{skill.name}</span>
-                                            </div>
-                                            {skill.description && (
-                                                <div className="text-gray-300 text-xs leading-relaxed">
-                                                    {renderHtmlContent(skill.description)}
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Tip göstərilməyən skills (geriyə uyğunluq üçün) */}
-                        {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).length > 0 && (
-                            <div className="mb-4">
-                                <h2 className="text-sm font-semibold mb-3 text-yellow-400">
-                                    {getSectionName('skills', data.cvLanguage, data.sectionNames)}
-                                </h2>
-                                <div className="space-y-2">
-                                    {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map((skill) => (
-                                        <div key={skill.id}>
-                                            <div className="text-xs mb-1">
-                                                <span>{skill.name}</span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* Languages */}
-                {languages.length > 0 && (
-                    <div className="mb-6">
-                        <h2 className="text-sm font-semibold mb-3 text-yellow-400">
-                            {getSectionName('languages', data.cvLanguage, data.sectionNames)}
-                        </h2>
-                        <div className="space-y-1">
-                            {languages.map((lang) => (
-                                <div key={lang.id} className="flex justify-between text-xs">
-                                    <span>{lang.language}</span>
-                                    <span>{getLanguageLevel(lang.level, data.cvLanguage)}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* Certifications */}
-                {certifications.length > 0 && (
-                    <div className="mb-6">
-                        <h2 className="text-sm font-semibold mb-3 text-yellow-400">
-                            {getSectionName('certifications', data.cvLanguage, data.sectionNames)}
-                        </h2>
-                        <div className="space-y-2">
-                            {certifications.map((cert) => (
-                                <div key={cert.id}>
-                                    {cert.url ? (
-                                        <a 
-                                            href={cert.url} 
-                                            target="_blank" 
-                                            rel="noopener noreferrer"
-                                            className="text-xs font-semibold underline hover:text-yellow-400 transition-colors cursor-pointer"
-                                        >
-                                            {cert.name}
-                                        </a>
-                                    ) : (
-                                        <h3 className="text-xs font-semibold">{cert.name}</h3>
-                                    )}
-                                    <p className="text-xs text-gray-300">{cert.issuer}</p>
-                                    {cert.description && (
-                                        <div className="text-gray-300 text-xs mt-1">{renderHtmlContent(cert.description)}</div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* Right Content */}
-            <div className="flex-1" style={{ padding: '12mm 10mm' }}>
-                {/* Summary */}
-                {personalInfo.summary && (
-                    <div className="mb-4 cv-section">
-                        <h2 className="text-lg font-bold text-gray-800 mb-2">
-                            {getSectionName('summary', data.cvLanguage, data.sectionNames)}
-                        </h2>
-                        <div className="text-gray-700 leading-relaxed text-xs">
-                            {renderHtmlContent(personalInfo.summary)}
-                        </div>
-                    </div>
-                )}
-
-                {/* Experience */}
-                {experience.length > 0 && (
-                    <div className="mb-6 cv-section">
-                        <h2 className="text-lg font-bold text-gray-800 mb-3">
-                            {getSectionName('experience', data.cvLanguage, data.sectionNames)}
-                        </h2>
-                        <div className="space-y-4">
-                            {experience.map((exp) => (
-                                <div key={exp.id} className="avoid-break">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <div>
-                                            <h3 className="text-sm font-semibold text-gray-900">{exp.position}</h3>
-                                            <p className="text-gray-600 font-medium text-xs">{exp.company}</p>
-                                        </div>
-                                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                        </span>
-                                    </div>
-                                    {exp.description && (
-                                        <div className="text-gray-700 text-xs leading-relaxed">
-                                            {renderHtmlContent(exp.description)}
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* Education */}
-                {education.length > 0 && (
-                    <div className="mb-6 cv-section">
-                        <h2 className="text-lg font-bold text-gray-800 mb-3">
-                            {getSectionName('education', data.cvLanguage, data.sectionNames)}
-                        </h2>
-                        <div className="space-y-3">
-                            {education.map((edu) => (
-                                <div key={edu.id} className="avoid-break">
-                                    <div className="flex justify-between items-start mb-1">
-                                        <div>
-                                            <h3 className="text-sm font-semibold text-gray-900">{edu.degree}</h3>
-                                            <p className="text-gray-600 font-medium text-xs">{edu.institution}</p>
-                                            {edu.field && <p className="text-gray-500 text-xs">{edu.field}</p>}
-                                            {edu.gpa && <p className="text-gray-500 text-xs">{data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: {edu.gpa}</p>}
-                                        </div>
-                                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                        </span>
-                                    </div>
-                                    {edu.description && (
-                                        <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(edu.description)}</div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* Projects */}
-                {projects.length > 0 && (
-                    <div className="mb-6">
-                        <h2 className="text-lg font-bold text-gray-800 mb-3">
-                            {getSectionName('projects', data.cvLanguage, data.sectionNames)}
-                        </h2>
-                        <div className="space-y-3">
-                            {projects.map((project) => (
-                                <div key={project.id}>
-                                    {project.url ? (
-                                        <a 
-                                            href={project.url} 
-                                            target="_blank" 
-                                            rel="noopener noreferrer"
-                                            className="text-sm font-semibold text-gray-900 underline hover:text-blue-600 transition-colors cursor-pointer"
-                                        >
-                                            {project.name}
-                                        </a>
-                                    ) : (
-                                        <h3 className="text-sm font-semibold text-gray-900">{project.name}</h3>
-                                    )}
-                                    {project.description && (
-                                        <div className="text-gray-700 text-xs mt-1 mb-2">{renderHtmlContent(project.description)}</div>
-                                    )}
-                                    {project.technologies && project.technologies.length > 0 && (
-                                        <p className="text-gray-600 text-xs">
-                                            <span className="font-medium">Texnologiyalar:</span> {project.technologies.join(', ')}
-                                        </p>
-                                    )}
-                                    {project.github && (
-                                        <p className="text-gray-600 text-xs">GitHub: {project.github}</p>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* Volunteer Experience */}
-                {volunteerExperience.length > 0 && (
-                    <div className="mb-6">
-                        <h2 className="text-lg font-bold text-gray-800 mb-3">
-                            {getSectionName('volunteerExperience', data.cvLanguage, data.sectionNames)}
-                        </h2>
-                        <div className="space-y-3">
-                            {volunteerExperience.map((vol) => (
-                                <div key={vol.id}>
-                                    <div className="flex justify-between items-start mb-1">
-                                        <h3 className="text-sm font-semibold text-gray-900">{vol.role}</h3>
-                                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                        </span>
-                                    </div>
-                                    <p className="text-gray-600 text-xs mb-1">{vol.organization}</p>
-                                    {vol.description && (
-                                        <div className="text-gray-700 text-xs leading-relaxed">
-                                            {renderHtmlContent(vol.description)}
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* Custom Sections */}
-                {customSections.length > 0 && customSections
-                    .sort((a, b) => (a.order || 999) - (b.order || 999))
-                    .map((section) => (
-                        <div key={section.id} className="mb-6">
-                            <h2 className="text-lg font-bold text-gray-800 mb-3">
-                                {section.title}
-                            </h2>
-                            <div className="space-y-3">
-                                {section.items.map((item) => (
-                                    <div key={item.id}>
-                                        <div className="flex justify-between items-start mb-2">
-                                            <div className="flex-1">
-                                                {item.title && (
-                                                    <h3 className="text-sm font-semibold text-gray-900">{item.title}</h3>
-                                                )}
-                                                {item.subtitle && (
-                                                    <p className="text-gray-600 font-medium text-xs">{item.subtitle}</p>
-                                                )}
-                                                {item.location && (
-                                                    <p className="text-gray-500 text-xs">{item.location}</p>
-                                                )}
-                                            </div>
-                                            {item.date && (
-                                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                                    {item.date}
-                                                </span>
-                                            )}
-                                        </div>
-                                        {item.description && (
-                                            <div className="text-gray-700 text-xs leading-relaxed">
-                                                {renderHtmlContent(item.description)}
-                                            </div>
-                                        )}
-                                        {item.tags && item.tags.length > 0 && (
-                                            <div className="flex flex-wrap gap-1 mt-2">
-                                                {item.tags.map((tag, index) => (
-                                                    <span 
-                                                        key={index}
-                                                        className="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded"
-                                                    >
-                                                        {tag}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        )}
-                                        {item.url && (
-                                            <p className="text-gray-600 text-xs mt-1">
-                                                <a href={item.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                                                    {item.url}
-                                                </a>
-                                            </p>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    ))
-                }
-
-                {/* Bottom margin for professional standards */}
-                <div className="mt-8"></div>
+        <div className="w-full h-full bg-white flex items-center justify-center">
+            <div className="text-center p-8">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">Modern Template</h2>
+                <p className="text-gray-600 mb-4">Drag-and-drop funksionallığı yalnız Basic Template-də mövcuddur.</p>
+                <p className="text-sm text-blue-600">Basic Template seçin və section-ları sürükləyərək yenidən təşkil edin.</p>
             </div>
         </div>
     );
 };
 
-// ATS-Friendly Professional Template Component
-const ATSFriendlyTemplate: React.FC<{ data: CVData }> = ({ data }) => {
+// ATS-Friendly Professional Template Component with Drag and Drop
+const ATSFriendlyTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSectionReorder: (newOrder: string[]) => void }> = ({ data, sectionOrder, onSectionReorder }) => {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
     
     return (
@@ -1489,8 +1245,8 @@ const ATSFriendlyTemplate: React.FC<{ data: CVData }> = ({ data }) => {
     );
 };
 
-// Professional Template Component
-const ProfessionalTemplate: React.FC<{ data: CVData }> = ({ data }) => {
+// Professional Template Component with Drag and Drop
+const ProfessionalTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSectionReorder: (newOrder: string[]) => void }> = ({ data, sectionOrder, onSectionReorder }) => {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
     
     return (
@@ -1854,7 +1610,9 @@ const ProfessionalTemplate: React.FC<{ data: CVData }> = ({ data }) => {
 // Main CVPreview Component
 export default function CVPreview({ 
     cv, 
-    template, 
+    template,
+    onSectionReorder,
+    onUpdate,
     fontSettings = {
         fontFamily: 'Arial, sans-serif',
         headingSize: 18,
@@ -1869,6 +1627,57 @@ export default function CVPreview({
 }: CVPreviewProps) {
     const templateId = template || cv.templateId || 'basic';
     const [scale, setScale] = React.useState(1.0);
+    
+    // Default section order
+    const defaultSectionOrder = [
+        'summary',
+        'experience', 
+        'education',
+        'skills',
+        'languages',
+        'projects',
+        'certifications',
+        'volunteer'
+    ];
+    
+    // Initialize section order from CV data or use default
+    const [sectionOrder, setSectionOrder] = useState(() => {
+        // Check if CV data has a saved section order
+        if (cv.data.sectionOrder && Array.isArray(cv.data.sectionOrder) && cv.data.sectionOrder.length > 0) {
+            console.log('Using saved section order:', cv.data.sectionOrder);
+            return cv.data.sectionOrder as string[];
+        }
+        console.log('Using default section order:', defaultSectionOrder);
+        return defaultSectionOrder;
+    });
+    
+    // Handle drag end
+    const handleSectionReorder = (newOrder: string[]) => {
+        console.log('=== MAIN HANDLE SECTION REORDER ===');
+        console.log('New order:', newOrder);
+        console.log('Old order:', sectionOrder);
+        
+        setSectionOrder(newOrder);
+        
+        // Update CV data with new section order for persistence
+        const updatedCv = {
+            ...cv,
+            data: {
+                ...cv.data,
+                sectionOrder: newOrder
+            }
+        };
+        
+        // Notify parent component if handler exists
+        onSectionReorder?.(newOrder);
+        
+        // If there's a CV update handler, use it for persistence
+        if (onUpdate) {
+            onUpdate(updatedCv);
+        } else {
+            console.log('No onUpdate handler found, section order will be saved when CV is saved manually');
+        }
+    };
     
     // Get responsive scale based on screen size
     const getResponsiveScale = () => {
@@ -1923,15 +1732,31 @@ export default function CVPreview({
             normalizedTemplate === 'resume-ats' ||
             normalizedTemplate.includes('clean') ||
             normalizedTemplate.includes('minimal-professional')) {
-            return <ATSFriendlyTemplate data={cv.data} />;
+            return (
+                <div className="w-full h-full bg-white flex items-center justify-center">
+                    <div className="text-center p-8">
+                        <h2 className="text-xl font-bold text-gray-800 mb-4">ATS-Friendly Template</h2>
+                        <p className="text-gray-600 mb-4">Drag-and-drop funksionallığı yalnız Basic Template-də mövcuddur.</p>
+                        <p className="text-sm text-blue-600">Basic Template seçin və section-ları sürükləyərək yenidən təşkil edin.</p>
+                    </div>
+                </div>
+            );
         }
         
-        // Modern templates
+        // Modern templates  
         if (normalizedTemplate.includes('modern') || 
             normalizedTemplate.includes('creative') ||
             normalizedTemplate === 'tech-professional' ||
             normalizedTemplate === 'designer-pro') {
-            return <ModernTemplate data={cv.data} />;
+            return (
+                <div className="w-full h-full bg-white flex items-center justify-center">
+                    <div className="text-center p-8">
+                        <h2 className="text-xl font-bold text-gray-800 mb-4">Modern Template</h2>
+                        <p className="text-gray-600 mb-4">Drag-and-drop funksionallığı yalnız Basic Template-də mövcuddur.</p>
+                        <p className="text-sm text-blue-600">Basic Template seçin və section-ları sürükləyərək yenidən təşkil edin.</p>
+                    </div>
+                </div>
+            );
         }
         
         // Professional/Executive templates
@@ -1941,11 +1766,19 @@ export default function CVPreview({
             normalizedTemplate.includes('luxury') ||
             normalizedTemplate.includes('premium') ||
             normalizedTemplate === 'medium') {
-            return <ProfessionalTemplate data={cv.data} />;
+            return (
+                <div className="w-full h-full bg-white flex items-center justify-center">
+                    <div className="text-center p-8">
+                        <h2 className="text-xl font-bold text-gray-800 mb-4">Professional Template</h2>
+                        <p className="text-gray-600 mb-4">Drag-and-drop funksionallığı yalnız Basic Template-də mövcuddur.</p>
+                        <p className="text-sm text-blue-600">Basic Template seçin və section-ları sürükləyərək yenidən təşkil edin.</p>
+                    </div>
+                </div>
+            );
         }
         
         // Basic/Simple templates (default)
-        return <BasicTemplate data={cv.data} />;
+        return <BasicTemplate data={cv.data} sectionOrder={sectionOrder} onSectionReorder={handleSectionReorder} />;
     };
 
     return (

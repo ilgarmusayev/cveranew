@@ -12,6 +12,11 @@ export interface PersonalInfo {
   website?: string;
   profileImage?: string; // Premium feature - profile image URL
   profilePicture?: string; // Alternative field name for profile image
+  additionalLinks?: Array<{
+    id: string;
+    label: string;
+    value: string;
+  }>;
 }
 
 export interface Experience {
@@ -28,10 +33,12 @@ export interface Education {
   id: string;
   degree: string;
   institution: string;
+  field?: string;
   startDate: string;
   endDate?: string;
   current: boolean;
   gpa?: string;
+  description?: string;
 }
 
 export interface Skill {
@@ -40,6 +47,7 @@ export interface Skill {
   type?: 'hard' | 'soft';
   level?: string;
   category?: string;
+  description?: string;
 }
 
 export interface Language {
@@ -134,6 +142,7 @@ export interface CustomSection {
   type?: 'simple' | 'detailed' | 'timeline';
   isVisible?: boolean;
   priority?: number;
+  order?: number;
   icon?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -142,11 +151,14 @@ export interface CustomSection {
 export interface CustomSectionItem {
   id: string;
   title: string;
+  subtitle?: string;
   description?: string;
   date?: string;
   url?: string;
   location?: string;
   skills?: string[];
+  technologies?: string[];
+  tags?: string[];
   metadata?: Record<string, any>;
   priority?: number;
   isVisible?: boolean;

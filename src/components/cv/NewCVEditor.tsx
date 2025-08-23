@@ -331,7 +331,7 @@ export default function NewCVEditor({ cvId, onSave, onCancel, initialData, userT
             case 'personal':
                 return (
                     <PersonalInfoSection
-                        data={cv.personalInfo}
+                        data={cv.personalInfo as any}
                         onChange={(data: any) => updateCVData('personalInfo', data)}
                     />
                 );

@@ -145,9 +145,9 @@ export default function EditCVPage() {
     try {
       console.log('Edit page: CV saved successfully by CVEditor:', cvData);
       
-      // CVEditor already handles the save operation, we just need to navigate
-      // Redirect to dashboard or CV list
-      router.push('/dashboard');
+      // CVEditor already handles the save operation, we just refresh the page to update data
+      // Instead of redirecting to dashboard, refresh the current page
+      window.location.reload();
     } catch (err) {
       console.error('Edit page: CV save error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+// Temporarily disable drag and drop for build
+// import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 interface Template {
   id: string;
@@ -47,8 +48,8 @@ export default function TemplateManagement() {
     fetchTemplates();
   }, []);
 
-  // Handle drag end
-  const onDragEnd = (result: any) => {
+  // Handle drag end - temporarily disabled
+  /* const onDragEnd = (result: any) => {
     if (!result.destination) return;
 
     const newTemplates = Array.from(templates);
@@ -63,7 +64,7 @@ export default function TemplateManagement() {
 
     setTemplates(updatedTemplates);
     saveOrder(updatedTemplates);
-  };
+  }; */
 
   // Save new order to database
   const saveOrder = async (updatedTemplates: Template[]) => {
@@ -132,26 +133,15 @@ export default function TemplateManagement() {
         </div>
       )}
 
-      <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable droppableId="templates">
-          {(provided) => (
-            <div
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-              className="space-y-4"
-            >
-              {templates.map((template, index) => (
-                <Draggable key={template.id} draggableId={template.id} index={index}>
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      className={`bg-white p-4 rounded-lg border shadow-sm transition-shadow ${
-                        snapshot.isDragging ? 'shadow-lg' : 'hover:shadow-md'
-                      } ${!template.isActive ? 'opacity-60' : ''}`}
-                    >
-                      <div className="flex items-center justify-between">
+      {/* Temporarily disabled drag and drop for build */}
+      <div className="space-y-4">
+        {templates.map((template, index) => (
+          <div 
+            key={template.id} 
+            className={`bg-white p-4 rounded-lg border shadow-sm transition-shadow hover:shadow-md ${!template.isActive ? 'opacity-60' : ''}`}
+          >
+
+            <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
                           <div className="text-2xl font-bold text-gray-400 w-8">
                             {template.order}
@@ -211,14 +201,8 @@ export default function TemplateManagement() {
                         </div>
                       </div>
                     </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+        ))}
+      </div>
 
       <div className="mt-8 p-4 bg-gray-50 rounded-lg">
         <h3 className="text-lg font-semibold mb-2">İstifadə qaydaları:</h3>

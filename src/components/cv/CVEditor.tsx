@@ -207,6 +207,18 @@ const getSectionDescription = (sectionId: string, language: CVLanguage) => {
 };
 
 export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier }: CVEditorProps) {
+    // Default section order
+    const defaultSectionOrder = [
+        'summary',
+        'experience', 
+        'education',
+        'skills',
+        'languages',
+        'projects',
+        'certifications',
+        'volunteer'
+    ];
+    
     // Initialize CV state
     const [cv, setCv] = useState<CVEditorState>(() => {
         if (initialData) {
@@ -231,7 +243,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 recommendations: cvData.recommendations || [],
                 courses: cvData.courses || [],
                 customSections: cvData.customSections || [],
-                sectionOrder: cvData.sectionOrder || [],
+                sectionOrder: cvData.sectionOrder && cvData.sectionOrder.length > 0 ? cvData.sectionOrder : defaultSectionOrder,
                 cvLanguage: cvData.cvLanguage || 'azerbaijani'
             };
 
@@ -244,7 +256,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             id: cvId,
             title: 'Yeni CV',
             templateId: 'basic',
-            ...defaultData
+            ...defaultData,
+            sectionOrder: defaultSectionOrder
         };
     });
 
@@ -462,7 +475,23 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             } as any
         };
 
-        return <CVPreview cv={previewData} template={cv.templateId} fontSettings={fontSettings} />;
+        return (
+            <CVPreview 
+                cv={previewData} 
+                template={cv.templateId} 
+                fontSettings={fontSettings}
+                onUpdate={(updatedCv) => {
+                    console.log('CV updated from preview:', updatedCv);
+                    // Update the CV data with the new section order
+                    if (updatedCv.data.sectionOrder) {
+                        setCv(prevCv => ({
+                            ...prevCv,
+                            sectionOrder: updatedCv.data.sectionOrder
+                        }));
+                    }
+                }}
+            />
+        );
     };
 
     // Render section content
@@ -471,7 +500,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             case 'personal':
                 return (
                         <PersonalInfoSection
-                            data={cv.personalInfo}
+                            data={cv.personalInfo as any}
                             onChange={(data: any) => updateCVData('personalInfo', data)}
                             userTier={userTier || 'Premium'} // Default to Premium for testing
                             cvData={cv} // Pass full CV data for AI context
