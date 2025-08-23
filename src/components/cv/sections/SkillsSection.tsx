@@ -166,40 +166,11 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
         setSuggestions(allSuggestions);
         setShowSuggestions(true);
 
-        // Add skills directly to CV with appropriate types
-        const existingSkillNames = data.map(s => s.name.toLowerCase());
-        
-        const newHardSkills = hardSkills
-          .filter((skillName: string) =>
-            !existingSkillNames.includes(skillName.toLowerCase())
-          )
-          .map((skillName: string) => ({
-            id: `skill-hard-ai-${Date.now()}-${Math.random()}`,
-            name: skillName,
-            level: 'Intermediate' as const,
-            type: 'hard' as const
-          }));
-
-        const newSoftSkills = softSkills
-          .filter((skillName: string) =>
-            !existingSkillNames.includes(skillName.toLowerCase())
-          )
-          .map((skillName: string) => ({
-            id: `skill-soft-ai-${Date.now()}-${Math.random()}`,
-            name: skillName,
-            level: 'Intermediate' as const,
-            type: 'soft' as const
-          }));
-
-        const allNewSkills = [...newHardSkills, ...newSoftSkills];
-
-        if (allNewSkills.length > 0) {
-          onChange([...data, ...allNewSkills]);
-          showSuccess(
-            `AI tərəfindən ${allNewSkills.length} yeni skill əlavə edildi! (${newHardSkills.length} hard, ${newSoftSkills.length} soft)`,
-            'AI Skills Yaradıldı! 🎉'
-          );
-        }
+        // Show success message for suggestions received
+        showSuccess(
+          `AI tərəfindən ${allSuggestions.length} skill tövsiyəsi alındı! (${hardSkills.length} hard, ${softSkills.length} soft)`,
+          'AI Tövsiyələri Hazır! 💡'
+        );
       }
       // Handle legacy format for backward compatibility
       else if (result.success && result.skills && result.skills.length > 0) {
@@ -215,23 +186,8 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
         setSuggestions(skillSuggestions);
         setShowSuggestions(true);
 
-        // Also add skills directly to CV
-        const existingSkillNames = data.map(s => s.name.toLowerCase());
-        const newSkills = result.skills
-          .filter((skillName: string) =>
-            !existingSkillNames.includes(skillName.toLowerCase())
-          )
-          .map((skillName: string) => ({
-            id: `skill-ai-${Date.now()}-${Math.random()}`,
-            name: skillName,
-            level: 'Intermediate' as const,
-            type: 'hard' as const // Default to hard for legacy
-          }));
-
-        if (newSkills.length > 0) {
-          onChange([...data, ...newSkills]);
-          showSuccess(`AI tərəfindən ${newSkills.length} yeni skill əlavə edildi!`);
-        }
+        // Show success message for suggestions received
+        showSuccess(`AI tərəfindən ${skillSuggestions.length} skill tövsiyəsi alındı!`, 'AI Tövsiyələri Hazır! 💡');
       } else {
         console.log('❌ No skills received from API');
         throw new Error('AI skills alına bilmədi');
@@ -256,10 +212,15 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
       return;
     }
 
-    // Add the suggested skill
+    // Determine skill type based on category
+    const skillType = suggestion.category === 'Soft Skills' ? 'soft' : 'hard';
+
+    // Add the suggested skill with proper type
     const newSkill: Skill = {
-      id: Date.now().toString(),
-      name: suggestion.name
+      id: `skill-${skillType}-${Date.now()}-${Math.random()}`,
+      name: suggestion.name,
+      level: 'Intermediate' as const,
+      type: skillType as 'hard' | 'soft'
     };
 
     onChange([...data, newSkill]);
