@@ -261,7 +261,11 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
         headingSize: 18,      // Başlıqlar üçün
         subheadingSize: 16,   // Alt başlıqlar üçün  
         bodySize: 14,         // Əsas mətn üçün
-        smallSize: 12         // Kiçik mətn üçün
+        smallSize: 12,        // Kiçik mətn üçün
+        headingWeight: 700,   // Başlıq qalınlığı
+        subheadingWeight: 600, // Alt başlıq qalınlığı
+        bodyWeight: 400,      // Əsas mətn qalınlığı
+        smallWeight: 400      // Kiçik mətn qalınlığı
     });
     // Disable auto-save for debugging
     // const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
@@ -885,7 +889,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
 
         {/* Simple Font Panel */}
         {showFontPanel && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-start p-4">
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-start p-4 ">
                 <div className="bg-white rounded-lg shadow-xl max-w-md w-full ml-4" style={{ maxWidth: '400px' }}>
                     <div className="p-6">
                         <div className="flex justify-between items-center mb-4">
@@ -978,23 +982,91 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                 />
                             </div>
 
-                            {/* Preview */}
-                            <div className="p-4 border rounded-lg bg-gray-50">
-                                <div style={{ fontFamily: fontSettings.fontFamily }}>
-                                    <h1 style={{ fontSize: `${fontSettings.headingSize}px`, fontWeight: 'bold', marginBottom: '8px' }}>
-                                        Başlıq Nümunəsi
-                                    </h1>
-                                    <h2 style={{ fontSize: `${fontSettings.subheadingSize}px`, fontWeight: '600', marginBottom: '8px' }}>
-                                        Alt başlıq nümunəsi
-                                    </h2>
-                                    <p style={{ fontSize: `${fontSettings.bodySize}px`, marginBottom: '8px' }}>
-                                        Bu əsas mətn nümunəsidir. CV-nizdə bu ölçüdə mətnlər göstəriləcək.
-                                    </p>
-                                    <small style={{ fontSize: `${fontSettings.smallSize}px`, color: '#666' }}>
-                                        Bu kiçik mətn nümunəsidir (tarixlər, əlavə məlumatlar).
-                                    </small>
+                            {/* Heading Weight */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Başlıq Qalınlığı: {fontSettings.headingWeight}
+                                </label>
+                                <input
+                                    type="range"
+                                    min="400"
+                                    max="900"
+                                    step="100"
+                                    value={fontSettings.headingWeight}
+                                    onChange={(e) => setFontSettings(prev => ({ ...prev, headingWeight: parseInt(e.target.value) }))}
+                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                />
+                                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>İncə (400)</span>
+                                    <span>Orta (500-600)</span>
+                                    <span>Qalın (700-900)</span>
                                 </div>
                             </div>
+
+                            {/* Subheading Weight */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Alt Başlıq Qalınlığı: {fontSettings.subheadingWeight}
+                                </label>
+                                <input
+                                    type="range"
+                                    min="400"
+                                    max="800"
+                                    step="100"
+                                    value={fontSettings.subheadingWeight}
+                                    onChange={(e) => setFontSettings(prev => ({ ...prev, subheadingWeight: parseInt(e.target.value) }))}
+                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                />
+                                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>İncə (400)</span>
+                                    <span>Orta (500-600)</span>
+                                    <span>Qalın (700-800)</span>
+                                </div>
+                            </div>
+
+                            {/* Body Weight */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Əsas Mətn Qalınlığı: {fontSettings.bodyWeight}
+                                </label>
+                                <input
+                                    type="range"
+                                    min="300"
+                                    max="600"
+                                    step="100"
+                                    value={fontSettings.bodyWeight}
+                                    onChange={(e) => setFontSettings(prev => ({ ...prev, bodyWeight: parseInt(e.target.value) }))}
+                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                />
+                                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>Çox İncə (300)</span>
+                                    <span>Normal (400)</span>
+                                    <span>Orta (500-600)</span>
+                                </div>
+                            </div>
+
+                            {/* Small Weight */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Kiçik Mətn Qalınlığı: {fontSettings.smallWeight}
+                                </label>
+                                <input
+                                    type="range"
+                                    min="300"
+                                    max="600"
+                                    step="100"
+                                    value={fontSettings.smallWeight}
+                                    onChange={(e) => setFontSettings(prev => ({ ...prev, smallWeight: parseInt(e.target.value) }))}
+                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                />
+                                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>Çox İncə (300)</span>
+                                    <span>Normal (400)</span>
+                                    <span>Orta (500-600)</span>
+                                </div>
+                            </div>
+
+                         
 
                             {/* Actions */}
                             <div className="flex justify-end space-x-3 pt-4">
@@ -1005,7 +1077,11 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                             headingSize: 18,
                                             subheadingSize: 16,
                                             bodySize: 14,
-                                            smallSize: 12
+                                            smallSize: 12,
+                                            headingWeight: 700,
+                                            subheadingWeight: 600,
+                                            bodyWeight: 400,
+                                            smallWeight: 400
                                         });
                                     }}
                                     className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"

@@ -47,9 +47,7 @@ const elementTypes = [
   { type: 'text' as ElementType, label: 'Mətn', icon: '📝', description: 'Adi mətn bloku' },
   { type: 'list' as ElementType, label: 'Siyahı', icon: '📋', description: 'Nöqtəli siyahı' },
   { type: 'heading' as ElementType, label: 'Alt Başlıq', icon: '🏷️', description: 'Bölmə daxili başlıq' },
-  { type: 'dateRange' as ElementType, label: 'Tarix Aralığı', icon: '📅', description: 'Başlanğıc və bitiş tarixi' },
   { type: 'achievement' as ElementType, label: 'Nailiyyət', icon: '🏆', description: 'Xüsusi nailiyyət və ya məqam' },
-  { type: 'skill' as ElementType, label: 'Bacarıq', icon: '⭐', description: 'Bacarıq və səviyyə' },
   { type: 'link' as ElementType, label: 'Keçid', icon: '🔗', description: 'Xarici keçid və ya URL' }
 ];
 
@@ -102,8 +100,7 @@ const convertToCVPreviewFormat = (sections: CustomSection[]): CVPreviewCustomSec
         case 'list':
           return {
             ...baseItem,
-            description: element.items?.filter(item => item.trim()).join('\n• ') || '',
-            tags: element.items?.filter(item => item.trim()) || []
+            description: element.items?.filter(item => item.trim()).map(item => `• ${item}`).join('<br>') || ''
           };
         default:
           return {
@@ -183,7 +180,7 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free' }
   const addSection = () => {
     const newSection: CustomSection = {
       id: Date.now().toString(),
-      title: 'Yeni Bölmə',
+      title: '',
       elements: [],
       isExpanded: true
     };
@@ -596,13 +593,23 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free' }
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </button>
-                  <input
-                    type="text"
-                    value={section.title}
-                    onChange={(e) => updateSectionTitle(section.id, e.target.value)}
-                    className="text-lg font-semibold text-gray-900 bg-transparent border-none p-0 focus:ring-0 flex-1"
-                    placeholder="Bölmə başlığı"
-                  />
+                  <div className="flex items-center space-x-2 flex-1 group">
+                    <input
+                      type="text"
+                      value={section.title}
+                      onChange={(e) => updateSectionTitle(section.id, e.target.value)}
+                      className="text-lg font-semibold text-gray-900 bg-transparent border-none p-2 focus:ring-2 focus:ring-blue-500 focus:bg-blue-50 rounded-md transition-all flex-1 hover:bg-gray-50"
+                      placeholder="Yeni bölmə adı yazın..."
+                    />
+                    <svg 
+                      className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </div>
                 </div>
                 <button
                   onClick={() => removeSection(section.id)}

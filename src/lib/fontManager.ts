@@ -33,7 +33,47 @@ export interface FontSettings {
     body: number;
     small: number;
   };
+  colors?: {
+    primary: string;    // Main text color (black/dark gray)
+    secondary: string;  // Dates, locations (medium gray)
+    accent: string;     // Section headers, highlights (blue, green, etc.)
+    background: string; // Background color (white)
+  };
+  spacing?: {
+    sectionMarginTop: number;    // Space before section headers (18pt)
+    sectionMarginBottom: number; // Space after section headers (8pt)
+    paragraphMargin: number;     // Between paragraphs/jobs (8-10pt)
+    bulletMargin: number;        // Between bullet points (4-6pt)
+    itemMargin: number;          // Between work experiences (8-10pt)
+  };
 }
+
+// Professional CV Color Palette
+export const CV_COLOR_PALETTE = {
+  // Text Colors (as per CV standards)
+  text: {
+    primary: '#222222',     // Main content - dark gray (#222)
+    secondary: '#333333',   // Alternative dark gray (#333)  
+    muted: '#666666',       // Dates, locations - medium gray
+    light: '#888888'        // Subtle information
+  },
+  
+  // Accent Colors (single accent color recommendation)
+  accent: {
+    blue: '#2563eb',        // Professional blue
+    navy: '#1e40af',        // Navy blue
+    green: '#059669',       // Professional green
+    teal: '#0891b2',        // Modern teal
+    gray: '#374151',        // Professional dark gray
+    black: '#000000'        // Classic black
+  },
+  
+  // Background
+  background: {
+    white: '#ffffff',       // Clean white
+    light: '#fafafa'        // Very light gray
+  }
+};
 
 // Professional font options for CV - Expanded collection
 export const FONT_OPTIONS: FontOption[] = [
@@ -138,6 +178,19 @@ export const FONT_OPTIONS: FontOption[] = [
     fallback: 'sans-serif',
     loadPriority: 'high',
     suitableFor: ['general', 'business', 'corporate', 'healthcare']
+  },
+  {
+    id: 'calibri',
+    name: 'Calibri',
+    displayName: 'Calibri',
+    category: 'sans-serif',
+    fontFamily: 'Calibri, Arial, sans-serif',
+    weight: ['400', '700'],
+    preview: 'Modern və oxunaqlı Microsoft font',
+    description: 'CV-lər üçün ən ideal font - professional və təmiz görünüş',
+    fallback: 'Arial, sans-serif',
+    loadPriority: 'high',
+    suitableFor: ['business', 'corporate', 'general', 'professional', 'cv', 'resume']
   },
   {
     id: 'helvetica',
@@ -335,22 +388,35 @@ export const FONT_OPTIONS: FontOption[] = [
 ];
 
 export const DEFAULT_FONT_SETTINGS: FontSettings = {
-  headingFont: 'times',
-  bodyFont: 'times',
-  fontSize: 11,
-  lineHeight: 1.4,
+  headingFont: 'calibri', // Calibri as preferred modern font
+  bodyFont: 'calibri',
+  fontSize: 11, // Ideal body text size (10.5-11.5 pt range)
+  lineHeight: 1.15, // Optimal readability range (1.15-1.3)
   letterSpacing: 0,
   fontWeight: {
-    heading: 700,
-    subheading: 600,
-    body: 400,
-    small: 400
+    heading: 700,     // Bold for main heading (Name)
+    subheading: 700,  // Bold for section headers
+    body: 400,        // Regular for body text
+    small: 400        // Regular for dates/locations
   },
   fontSizes: {
-    heading: 14,
-    subheading: 12,
-    body: 11,
-    small: 9
+    heading: 20,      // Name/Main title: 18-22 pt (optimal 20 pt)
+    subheading: 13,   // Section headers: 12-14 pt (optimal 13 pt)
+    body: 11,         // Main content: 10.5-11.5 pt (optimal 11 pt)
+    small: 10         // Dates/locations: 9-10 pt (optimal 10 pt)
+  },
+  colors: {
+    primary: '#222222',     // Main text - dark gray for readability
+    secondary: '#666666',   // Secondary text - medium gray for dates/locations
+    accent: '#2563eb',      // Accent color - professional blue for headers
+    background: '#ffffff'   // Background - clean white
+  },
+  spacing: {
+    sectionMarginTop: 18,     // Space before section headers (18pt)
+    sectionMarginBottom: 8,   // Space after section headers (8pt)
+    paragraphMargin: 9,       // Between paragraphs (8-10pt, optimal 9pt)
+    bulletMargin: 5,          // Between bullet points (4-6pt, optimal 5pt)
+    itemMargin: 10            // Between work experiences (8-10pt, optimal 10pt)
   }
 };
 
@@ -640,6 +706,8 @@ export class FontManager {
     const bodyFont = this.getFontOption(settings.bodyFont);
     const weights = settings.fontWeight || DEFAULT_FONT_SETTINGS.fontWeight!;
     const fontSizes = settings.fontSizes || DEFAULT_FONT_SETTINGS.fontSizes!;
+    const colors = settings.colors || DEFAULT_FONT_SETTINGS.colors!;
+    const spacing = settings.spacing || DEFAULT_FONT_SETTINGS.spacing!;
 
     const headingFallback = headingFont?.fallback || 'Arial, sans-serif';
     const bodyFallback = bodyFont?.fallback || 'Arial, sans-serif';
@@ -651,6 +719,63 @@ export class FontManager {
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        background-color: ${colors.background};
+        color: ${colors.primary};
+      }
+
+      /* CV Section Spacing - Professional Standards */
+      .cv-section {
+        margin-top: ${spacing.sectionMarginTop}pt !important;
+        margin-bottom: ${spacing.sectionMarginBottom}pt !important;
+      }
+
+      .cv-section:first-child {
+        margin-top: 0 !important;
+      }
+
+      .cv-section-header {
+        margin-top: ${spacing.sectionMarginTop}pt !important;
+        margin-bottom: ${spacing.sectionMarginBottom}pt !important;
+        color: ${colors.accent} !important;
+      }
+
+      .cv-section-content {
+        margin-bottom: ${spacing.paragraphMargin}pt !important;
+      }
+
+      /* Work Experience / Education Item Spacing */
+      .cv-experience-item,
+      .cv-education-item,
+      .cv-project-item {
+        margin-bottom: ${spacing.itemMargin}pt !important;
+      }
+
+      .cv-experience-item:last-child,
+      .cv-education-item:last-child,
+      .cv-project-item:last-child {
+        margin-bottom: 0 !important;
+      }
+
+      /* Bullet Points and List Spacing */
+      .cv-bullet-list li,
+      .cv-responsibilities li,
+      .cv-achievements li {
+        margin-bottom: ${spacing.bulletMargin}pt !important;
+      }
+
+      .cv-bullet-list li:last-child,
+      .cv-responsibilities li:last-child,
+      .cv-achievements li:last-child {
+        margin-bottom: 0 !important;
+      }
+
+      /* Paragraph Spacing */
+      .cv-paragraph {
+        margin-bottom: ${spacing.paragraphMargin}pt !important;
+      }
+
+      .cv-paragraph:last-child {
+        margin-bottom: 0 !important;
       }
 
       .cv-heading,
@@ -662,6 +787,7 @@ export class FontManager {
         font-weight: ${weights.heading} !important;
         line-height: ${settings.lineHeight} !important;
         letter-spacing: ${settings.letterSpacing}px !important;
+        color: ${colors.primary} !important;
         margin-bottom: 0.5em;
       }
       
@@ -675,6 +801,7 @@ export class FontManager {
         font-weight: ${weights.subheading} !important;
         line-height: ${settings.lineHeight} !important;
         letter-spacing: ${settings.letterSpacing}px !important;
+        color: ${colors.accent} !important;
         margin-bottom: 0.3em;
       }
       
@@ -687,6 +814,7 @@ export class FontManager {
         font-weight: ${weights.body} !important;
         line-height: ${settings.lineHeight} !important;
         letter-spacing: ${settings.letterSpacing}px !important;
+        color: ${colors.primary} !important;
         margin-bottom: 0.8em;
       }
       
@@ -699,6 +827,7 @@ export class FontManager {
         font-weight: ${weights.body} !important;
         line-height: ${settings.lineHeight * 0.9} !important;
         letter-spacing: ${settings.letterSpacing}px !important;
+        color: ${colors.secondary} !important;
       }
 
       .cv-emphasis,
@@ -709,6 +838,7 @@ export class FontManager {
         font-weight: ${weights.subheading} !important;
         line-height: ${settings.lineHeight} !important;
         letter-spacing: ${settings.letterSpacing}px !important;
+        color: ${colors.primary} !important;
       }
 
       /* Debug styles to ensure fonts are applied */

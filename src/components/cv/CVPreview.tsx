@@ -128,6 +128,10 @@ interface CVPreviewProps {
         subheadingSize: number;
         bodySize: number;
         smallSize: number;
+        headingWeight: number;
+        subheadingWeight: number;
+        bodyWeight: number;
+        smallWeight: number;
     };
 }
 
@@ -649,6 +653,8 @@ const BasicTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                 ))
             }
 
+            {/* Bottom margin for professional standards */}
+            <div className="mt-8"></div>
         </div>
     );
 };
@@ -1031,6 +1037,368 @@ const ModernTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                     ))
                 }
 
+                {/* Bottom margin for professional standards */}
+                <div className="mt-8"></div>
+            </div>
+        </div>
+    );
+};
+
+// ATS-Friendly Professional Template Component
+const ATSFriendlyTemplate: React.FC<{ data: CVData }> = ({ data }) => {
+    const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
+    
+    return (
+        <div className="w-full h-full bg-white text-gray-900 font-sans flex">
+            {/* Left Column - Contact & Skills */}
+            <div className="w-2/5 bg-gray-50 border-r border-gray-200" style={{ padding: '15mm 12mm' }}>
+                {/* Contact Information */}
+                <div className="mb-6 cv-section avoid-break">
+                    <h2 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide border-b border-gray-300 pb-1">
+                        Əlaqə
+                    </h2>
+                    <div className="space-y-2 text-xs">
+                        {personalInfo.email && (
+                            <div className="flex items-start gap-2">
+                                <span className="font-medium text-gray-600 min-w-[40px]">Email:</span>
+                                <span className="text-gray-900">{personalInfo.email}</span>
+                            </div>
+                        )}
+                        {personalInfo.phone && (
+                            <div className="flex items-start gap-2">
+                                <span className="font-medium text-gray-600 min-w-[40px]">Phone:</span>
+                                <span className="text-gray-900">{personalInfo.phone}</span>
+                            </div>
+                        )}
+                        {personalInfo.location && (
+                            <div className="flex items-start gap-2">
+                                <span className="font-medium text-gray-600 min-w-[40px]">Address:</span>
+                                <span className="text-gray-900">{personalInfo.location}</span>
+                            </div>
+                        )}
+                        {personalInfo.linkedin && (
+                            <div className="flex items-start gap-3">
+                                <span className="font-medium text-gray-600 min-w-[40px]">LinkedIn:</span>
+                                <span className="text-gray-900 break-all">{personalInfo.linkedin}</span>
+                            </div>
+                        )}
+                        {personalInfo.website && (
+                            <div className="flex items-start gap-2">
+                                <span className="font-medium text-gray-600 min-w-[40px]">Website:</span>
+                                <span className="text-gray-900 break-all">{personalInfo.website}</span>
+                            </div>
+                        )}
+                        {personalInfo.additionalLinks && personalInfo.additionalLinks.length > 0 && (
+                            personalInfo.additionalLinks.map((link) => (
+                                <div key={link.id} className="flex items-start gap-2">
+                                    <span className="font-medium text-gray-600 min-w-[40px]">{link.label}:</span>
+                                    <span className="text-gray-900 break-all">{link.value}</span>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                {/* Skills */}
+                {skills.length > 0 && (
+                    <div className="mb-6">
+                        {/* Hard Skills */}
+                        {skills.filter(skill => skill.type === 'hard').length > 0 && (
+                            <div className="mb-4">
+                                <h2 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide border-b border-gray-300 pb-1">
+                                    {getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
+                                </h2>
+                                <div className="space-y-2">
+                                    {skills.filter(skill => skill.type === 'hard').map((skill) => (
+                                        <div key={skill.id}>
+                                            <div className="flex justify-between items-center mb-1">
+                                                <span className="text-xs font-medium text-gray-900">{skill.name}</span>
+                                                <span className="text-xs text-gray-600">{skill.level}</span>
+                                            </div>
+                                            {skill.description && (
+                                                <div className="text-gray-700 text-xs leading-relaxed">
+                                                    {renderHtmlContent(skill.description)}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Soft Skills */}
+                        {skills.filter(skill => skill.type === 'soft').length > 0 && (
+                            <div className="mb-4">
+                                <h2 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide border-b border-gray-300 pb-1">
+                                    {getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
+                                </h2>
+                                <div className="space-y-2">
+                                    {skills.filter(skill => skill.type === 'soft').map((skill) => (
+                                        <div key={skill.id}>
+                                            <div className="flex justify-between items-center mb-1">
+                                                <span className="text-xs font-medium text-gray-900">{skill.name}</span>
+                                                <span className="text-xs text-gray-600">{skill.level}</span>
+                                            </div>
+                                            {skill.description && (
+                                                <div className="text-gray-700 text-xs leading-relaxed">
+                                                    {renderHtmlContent(skill.description)}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* General Skills */}
+                        {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).length > 0 && (
+                            <div className="mb-4">
+                                <h2 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide border-b border-gray-300 pb-1">
+                                    {getSectionName('skills', data.cvLanguage, data.sectionNames)}
+                                </h2>
+                                <div className="space-y-2">
+                                    {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map((skill) => (
+                                        <div key={skill.id}>
+                                            <div className="flex justify-between items-center mb-1">
+                                                <span className="text-xs font-medium text-gray-900">{skill.name}</span>
+                                                <span className="text-xs text-gray-600">{skill.level}</span>
+                                            </div>
+                                            {skill.description && (
+                                                <div className="text-gray-700 text-xs leading-relaxed">
+                                                    {renderHtmlContent(skill.description)}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Languages */}
+                {languages.length > 0 && (
+                    <div className="mb-6">
+                        <h2 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide border-b border-gray-300 pb-1">
+                            {getSectionName('languages', data.cvLanguage, data.sectionNames)}
+                        </h2>
+                        <div className="space-y-1">
+                            {languages.map((lang) => (
+                                <div key={lang.id} className="flex justify-between items-center">
+                                    <span className="text-xs font-medium text-gray-900">{lang.language}</span>
+                                    <span className="text-xs text-gray-600">{lang.level}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Certifications */}
+                {certifications.length > 0 && (
+                    <div className="mb-6">
+                        <h2 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide border-b border-gray-300 pb-1">
+                            {getSectionName('certifications', data.cvLanguage, data.sectionNames)}
+                        </h2>
+                        <div className="space-y-2">
+                            {certifications.map((cert) => (
+                                <div key={cert.id}>
+                                    <h3 className="text-xs font-medium text-gray-900">{cert.name}</h3>
+                                    <p className="text-xs text-gray-600">{cert.issuer}</p>
+                                    {cert.description && (
+                                        <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(cert.description)}</div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Right Column - Main Content */}
+            <div className="flex-1" style={{ padding: '15mm 12mm' }}>
+                {/* Header - Name */}
+                <div className="mb-6 cv-section avoid-break">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2 leading-tight">
+                        {getFullName(personalInfo)}
+                    </h1>
+                    {/* Professional title or summary preview */}
+                    {personalInfo.summary && (
+                        <div className="border-b border-gray-200 pb-4">
+                            <h2 className="text-sm font-bold text-gray-900 mb-2 uppercase tracking-wide">
+                                {getSectionName('summary', data.cvLanguage, data.sectionNames)}
+                            </h2>
+                            <div className="text-gray-700 leading-relaxed text-xs">
+                                {renderHtmlContent(personalInfo.summary)}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Professional Experience */}
+                {experience.length > 0 && (
+                    <div className="mb-6 cv-section">
+                        <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-200 pb-1">
+                            {getSectionName('experience', data.cvLanguage, data.sectionNames)}
+                        </h2>
+                        <div className="space-y-4">
+                            {experience.map((exp) => (
+                                <div key={exp.id} className="avoid-break">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div>
+                                            <h3 className="text-sm font-bold text-gray-900">{exp.position}</h3>
+                                            <p className="text-xs font-medium text-gray-700">{exp.company}</p>
+                                        </div>
+                                    </div>
+                                    {exp.description && (
+                                        <div className="text-gray-700 text-xs leading-relaxed">
+                                            {renderHtmlContent(exp.description)}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Education */}
+                {education.length > 0 && (
+                    <div className="mb-6 cv-section">
+                        <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-200 pb-1">
+                            {getSectionName('education', data.cvLanguage, data.sectionNames)}
+                        </h2>
+                        <div className="space-y-3">
+                            {education.map((edu) => (
+                                <div key={edu.id} className="avoid-break">
+                                    <div className="flex justify-between items-start mb-1">
+                                        <div>
+                                            <h3 className="text-sm font-bold text-gray-900">{edu.degree}</h3>
+                                            <p className="text-xs font-medium text-gray-700">{edu.institution}</p>
+                                            {edu.field && <p className="text-xs text-gray-600">{edu.field}</p>}
+                                            {edu.gpa && <p className="text-xs text-gray-600">GPA: {edu.gpa}</p>}
+                                        </div>
+                                    </div>
+                                    {edu.description && (
+                                        <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(edu.description)}</div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Projects */}
+                {projects.length > 0 && (
+                    <div className="mb-6">
+                        <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-200 pb-1">
+                            {getSectionName('projects', data.cvLanguage, data.sectionNames)}
+                        </h2>
+                        <div className="space-y-3">
+                            {projects.map((project) => (
+                                <div key={project.id}>
+                                    <h3 className="text-sm font-bold text-gray-900">{project.name}</h3>
+                                    {project.description && (
+                                        <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(project.description)}</div>
+                                    )}
+                                    {project.technologies && project.technologies.length > 0 && (
+                                        <p className="text-xs text-gray-600 mt-1">
+                                            <span className="font-medium">Technologies:</span> {project.technologies.join(', ')}
+                                        </p>
+                                    )}
+                                    {project.url && (
+                                        <p className="text-xs text-gray-600 mt-1">
+                                            <span className="font-medium">URL:</span> {project.url}
+                                        </p>
+                                    )}
+                                    {project.github && (
+                                        <p className="text-xs text-gray-600 mt-1">
+                                            <span className="font-medium">GitHub:</span> {project.github}
+                                        </p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Volunteer Experience */}
+                {volunteerExperience.length > 0 && (
+                    <div className="mb-6">
+                        <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-200 pb-1">
+                            {getSectionName('volunteerExperience', data.cvLanguage, data.sectionNames)}
+                        </h2>
+                        <div className="space-y-3">
+                            {volunteerExperience.map((vol) => (
+                                <div key={vol.id}>
+                                    <div className="flex justify-between items-start mb-1">
+                                        <div>
+                                            <h3 className="text-sm font-bold text-gray-900">{vol.role}</h3>
+                                            <p className="text-xs font-medium text-gray-700">{vol.organization}</p>
+                                        </div>
+                                    </div>
+                                    {vol.description && (
+                                        <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(vol.description)}</div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Custom Sections */}
+                {customSections.length > 0 && customSections
+                    .sort((a, b) => (a.order || 999) - (b.order || 999))
+                    .map((section) => (
+                        <div key={section.id} className="mb-6">
+                            <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-200 pb-1">
+                                {section.title}
+                            </h2>
+                            <div className="space-y-3">
+                                {section.items.map((item) => (
+                                    <div key={item.id}>
+                                        <div className="flex justify-between items-start mb-1">
+                                            <div className="flex-1">
+                                                {item.title && (
+                                                    <h3 className="text-sm font-bold text-gray-900">{item.title}</h3>
+                                                )}
+                                                {item.subtitle && (
+                                                    <p className="text-xs font-medium text-gray-700">{item.subtitle}</p>
+                                                )}
+                                            </div>
+                                            {item.date && (
+                                                <span className="text-xs text-gray-600 ml-2">{item.date}</span>
+                                            )}
+                                        </div>
+                                        {item.description && (
+                                            <div className="text-gray-700 text-xs mt-1 leading-relaxed">
+                                                {renderHtmlContent(item.description)}
+                                            </div>
+                                        )}
+                                        {item.tags && item.tags.length > 0 && (
+                                            <div className="flex flex-wrap gap-1 mt-2">
+                                                {item.tags.map((tag, index) => (
+                                                    <span 
+                                                        key={index}
+                                                        className="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded"
+                                                    >
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {item.url && (
+                                            <p className="text-xs text-gray-600 mt-1">
+                                                <span className="font-medium">URL:</span> {item.url}
+                                            </p>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))
+                }
+
+                {/* Bottom margin for professional standards */}
+                <div className="mt-8"></div>
             </div>
         </div>
     );
@@ -1368,6 +1736,8 @@ const ProfessionalTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                 ))
             }
 
+            {/* Bottom margin for professional standards */}
+            <div className="mt-8"></div>
         </div>
     );
 };
@@ -1381,7 +1751,11 @@ export default function CVPreview({
         headingSize: 18,
         subheadingSize: 16,
         bodySize: 14,
-        smallSize: 12
+        smallSize: 12,
+        headingWeight: 700,
+        subheadingWeight: 600,
+        bodyWeight: 400,
+        smallWeight: 400
     }
 }: CVPreviewProps) {
     const templateId = template || cv.templateId || 'basic';
@@ -1434,6 +1808,15 @@ export default function CVPreview({
         // Normalize template ID for better matching
         const normalizedTemplate = templateId.toLowerCase();
         
+        // ATS-Friendly Template
+        if (normalizedTemplate.includes('ats') || 
+            normalizedTemplate === 'ats-friendly' ||
+            normalizedTemplate === 'resume-ats' ||
+            normalizedTemplate.includes('clean') ||
+            normalizedTemplate.includes('minimal-professional')) {
+            return <ATSFriendlyTemplate data={cv.data} />;
+        }
+        
         // Modern templates
         if (normalizedTemplate.includes('modern') || 
             normalizedTemplate.includes('creative') ||
@@ -1461,11 +1844,12 @@ export default function CVPreview({
             className="cv-preview border border-gray-300"
             style={{
                 width: '210mm',
-                margin: '0', // Mobile-də margin yoxdur, desktop-da user setup
-                overflow: 'visible',
+                height: '297mm', // Fixed A4 height
+                margin: '0',
+                overflow: 'auto', // Enable scroll when content exceeds A4 height
                 position: 'relative',
                 background: 'white',
-                transformOrigin: 'top left', // Mobile-də top-left, desktop-də center
+                transformOrigin: 'top left',
                 transform: `scale(${scale})`,
                 borderRadius: '8px',
                 boxShadow: scale >= 0.8 
@@ -1477,6 +1861,10 @@ export default function CVPreview({
                 ['--cv-subheading-size' as any]: `${fontSettings.subheadingSize}px`,
                 ['--cv-body-size' as any]: `${fontSettings.bodySize}px`,
                 ['--cv-small-size' as any]: `${fontSettings.smallSize}px`,
+                ['--cv-heading-weight' as any]: fontSettings.headingWeight,
+                ['--cv-subheading-weight' as any]: fontSettings.subheadingWeight,
+                ['--cv-body-weight' as any]: fontSettings.bodyWeight,
+                ['--cv-small-weight' as any]: fontSettings.smallWeight,
                 lineHeight: '1.5'
             } as React.CSSProperties}
         >
@@ -1486,4 +1874,4 @@ export default function CVPreview({
 }
 
 // Export individual templates for direct use if needed
-export { BasicTemplate, ModernTemplate, ProfessionalTemplate };
+export { BasicTemplate, ModernTemplate, ProfessionalTemplate, ATSFriendlyTemplate };
