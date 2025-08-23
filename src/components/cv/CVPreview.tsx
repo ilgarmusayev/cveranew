@@ -171,6 +171,36 @@ const getFullName = (personalInfo: PersonalInfo): string => {
     return personalInfo.firstName || personalInfo.lastName || '';
 };
 
+// Language level translation based on CV language
+const getLanguageLevel = (level: string, cvLanguage?: string): string => {
+    const levelTranslations: Record<string, Record<string, string>> = {
+        az: {
+            Basic: 'Əsas',
+            Conversational: 'Danışıq',
+            Professional: 'Professional',
+            Native: 'Ana dili'
+        },
+        en: {
+            Basic: 'Basic',
+            Conversational: 'Conversational',
+            Professional: 'Professional',
+            Native: 'Native'
+        },
+        tr: {
+            Basic: 'Temel',
+            Conversational: 'Konuşma',
+            Professional: 'Profesyonel',
+            Native: 'Ana Dil'
+        }
+    };
+    
+    const language = cvLanguage?.toLowerCase() || 'az';
+    const languageKey = language.includes('en') ? 'en' : 
+                      language.includes('tr') ? 'tr' : 'az';
+    
+    return levelTranslations[languageKey]?.[level] || level;
+};
+
 // Dynamic section name mapping based on language
 const getSectionName = (sectionKey: string, cvLanguage?: string, customSectionNames?: Record<string, string>): string => {
     // If custom section names exist (from translation), use them
@@ -325,42 +355,58 @@ const BasicTemplate: React.FC<{ data: CVData }> = ({ data }) => {
         >
             {/* Header */}
             <div className="mb-4 border-b-2 border-blue-600 pb-3 cv-section avoid-break">
-                <h1 className="text-2xl font-bold text-blue-600 mb-2">
-                    {getFullName(personalInfo)}
-                </h1>
-                <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-                    {personalInfo.email && (
-                        <span className="flex items-center gap-1">
-                            📧 {personalInfo.email}
-                        </span>
+                <div className="flex items-start gap-4">
+                    {/* Profile Image */}
+                    {personalInfo.profileImage && (
+                        <div className="flex-shrink-0">
+                            <img 
+                                src={personalInfo.profileImage} 
+                                alt="Profile" 
+                                className="w-20 h-20 rounded-full object-cover border-2 border-blue-600"
+                            />
+                        </div>
                     )}
-                    {personalInfo.phone && (
-                        <span className="flex items-center gap-1">
-                            📱 {personalInfo.phone}
-                        </span>
-                    )}
-                    {personalInfo.location && (
-                        <span className="flex items-center gap-1">
-                            📍 {personalInfo.location}
-                        </span>
-                    )}
-                    {personalInfo.linkedin && (
-                        <span className="flex items-center gap-1">
-                            🔗 {personalInfo.linkedin}
-                        </span>
-                    )}
-                    {personalInfo.website && (
-                        <span className="flex items-center gap-1">
-                            🌐 {personalInfo.website}
-                        </span>
-                    )}
-                    {personalInfo.additionalLinks && personalInfo.additionalLinks.length > 0 && (
-                        personalInfo.additionalLinks.map((link) => (
-                            <span key={link.id} className="flex items-center gap-1">
-                                📎 {link.label}: {link.value}
-                            </span>
-                        ))
-                    )}
+                    
+                    {/* Name and Contact Info */}
+                    <div className="flex-1">
+                        <h1 className="text-2xl font-bold text-blue-600 mb-2">
+                            {getFullName(personalInfo)}
+                        </h1>
+                        <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                            {personalInfo.email && (
+                                <span className="flex items-center gap-1">
+                                    📧 {personalInfo.email}
+                                </span>
+                            )}
+                            {personalInfo.phone && (
+                                <span className="flex items-center gap-1">
+                                    📱 {personalInfo.phone}
+                                </span>
+                            )}
+                            {personalInfo.location && (
+                                <span className="flex items-center gap-1">
+                                    📍 {personalInfo.location}
+                                </span>
+                            )}
+                            {personalInfo.linkedin && (
+                                <span className="flex items-center gap-1">
+                                    🔗 {personalInfo.linkedin}
+                                </span>
+                            )}
+                            {personalInfo.website && (
+                                <span className="flex items-center gap-1">
+                                    🌐 {personalInfo.website}
+                                </span>
+                            )}
+                            {personalInfo.additionalLinks && personalInfo.additionalLinks.length > 0 && (
+                                personalInfo.additionalLinks.map((link) => (
+                                    <span key={link.id} className="flex items-center gap-1">
+                                        📎 {link.label}: {link.value}
+                                    </span>
+                                ))
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -413,8 +459,13 @@ const BasicTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                                     <h3 className="font-semibold text-gray-900 text-sm">{edu.degree}</h3>
                                 </div>
                                 <p className="text-blue-600 font-medium text-xs">{edu.institution}</p>
-                                {edu.field && <p className="text-gray-600 text-xs">{edu.field}</p>}
-                                {edu.gpa && <p className="text-gray-600 text-xs">GPA: {edu.gpa}</p>}
+                                {(edu.field || edu.gpa) && (
+                                    <p className="text-gray-600 text-xs">
+                                        {edu.field && edu.gpa ? `${edu.field} - ${data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: ${edu.gpa}` :
+                                         edu.field ? edu.field :
+                                         edu.gpa ? `${data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: ${edu.gpa}` : ''}
+                                    </p>
+                                )}
                                 {edu.description && (
                                     <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(edu.description)}</div>
                                 )}
@@ -436,9 +487,8 @@ const BasicTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                             <div className="space-y-2">
                                 {skills.filter(skill => skill.type === 'hard').map((skill) => (
                                     <div key={skill.id} className="border-l-2 border-blue-200 pl-2">
-                                        <div className="flex justify-between items-center mb-1">
+                                        <div className="mb-1">
                                             <span className="text-gray-700 text-xs font-medium">{skill.name}</span>
-                                            <span className="text-xs text-blue-600 font-medium">{skill.level}</span>
                                         </div>
                                         {skill.description && (
                                             <div className="text-gray-600 text-xs leading-relaxed">
@@ -460,9 +510,8 @@ const BasicTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                             <div className="space-y-2">
                                 {skills.filter(skill => skill.type === 'soft').map((skill) => (
                                     <div key={skill.id} className="border-l-2 border-blue-200 pl-2">
-                                        <div className="flex justify-between items-center mb-1">
+                                        <div className="mb-1">
                                             <span className="text-gray-700 text-xs font-medium">{skill.name}</span>
-                                            <span className="text-xs text-blue-600 font-medium">{skill.level}</span>
                                         </div>
                                         {skill.description && (
                                             <div className="text-gray-600 text-xs leading-relaxed">
@@ -484,9 +533,8 @@ const BasicTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                             <div className="space-y-2">
                                 {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map((skill) => (
                                     <div key={skill.id} className="border-l-2 border-blue-200 pl-2">
-                                        <div className="flex justify-between items-center mb-1">
+                                        <div className="mb-1">
                                             <span className="text-gray-700 text-xs font-medium">{skill.name}</span>
-                                            <span className="text-xs text-blue-600 font-medium">{skill.level}</span>
                                         </div>
                                         {skill.description && (
                                             <div className="text-gray-600 text-xs leading-relaxed">
@@ -511,7 +559,7 @@ const BasicTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                         {languages.map((lang) => (
                             <div key={lang.id} className="flex justify-between items-center">
                                 <span className="text-gray-700 text-xs">{lang.language}</span>
-                                <span className="text-xs text-blue-600 font-medium">{lang.level}</span>
+                                <span className="text-xs text-blue-600 font-medium">{getLanguageLevel(lang.level, data.cvLanguage)}</span>
                             </div>
                         ))}
                     </div>
@@ -527,15 +575,23 @@ const BasicTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                     <div className="space-y-2">
                         {projects.map((project) => (
                             <div key={project.id} className="border-l-2 border-blue-200 pl-3">
-                                <h3 className="font-semibold text-gray-900 text-sm">{project.name}</h3>
+                                {project.url ? (
+                                    <a 
+                                        href={project.url} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="font-semibold text-gray-900 text-sm underline hover:text-blue-600 transition-colors cursor-pointer"
+                                    >
+                                        {project.name}
+                                    </a>
+                                ) : (
+                                    <h3 className="font-semibold text-gray-900 text-sm">{project.name}</h3>
+                                )}
                                 {project.description && (
                                     <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(project.description)}</div>
                                 )}
                                 {project.technologies && project.technologies.length > 0 && (
                                     <p className="text-blue-600 text-xs mt-1">Texnologiyalar: {project.technologies.join(', ')}</p>
-                                )}
-                                {project.url && (
-                                    <p className="text-gray-600 text-xs mt-1">URL: {project.url}</p>
                                 )}
                                 {project.github && (
                                     <p className="text-gray-600 text-xs mt-1">GitHub: {project.github}</p>
@@ -556,14 +612,22 @@ const BasicTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                         {certifications.map((cert) => (
                             <div key={cert.id} className="border-l-2 border-blue-200 pl-3">
                                 <div className="flex justify-between items-start">
-                                    <h3 className="font-semibold text-gray-900 text-sm">{cert.name}</h3>
+                                    {cert.url ? (
+                                        <a 
+                                            href={cert.url} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="font-semibold text-gray-900 text-sm underline hover:text-blue-600 transition-colors cursor-pointer"
+                                        >
+                                            {cert.name}
+                                        </a>
+                                    ) : (
+                                        <h3 className="font-semibold text-gray-900 text-sm">{cert.name}</h3>
+                                    )}
                                 </div>
                                 <p className="text-blue-600 font-medium text-xs">{cert.issuer}</p>
                                 {cert.description && (
                                     <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(cert.description)}</div>
-                                )}
-                                {cert.url && (
-                                    <p className="text-blue-600 text-xs mt-1">URL: {cert.url}</p>
                                 )}
                             </div>
                         ))}
@@ -669,7 +733,18 @@ const ModernTemplate: React.FC<{ data: CVData }> = ({ data }) => {
             <div className="w-1/3 bg-gray-800 text-white" style={{ padding: '12mm 8mm' }}>
                 {/* Profile */}
                 <div className="mb-4 cv-section avoid-break">
-                    <h1 className="text-xl font-bold mb-2">
+                    {/* Profile Image */}
+                    {personalInfo.profileImage && (
+                        <div className="flex justify-center mb-4">
+                            <img 
+                                src={personalInfo.profileImage} 
+                                alt="Profile" 
+                                className="w-24 h-24 rounded-full object-cover border-4 border-yellow-400"
+                            />
+                        </div>
+                    )}
+                    
+                    <h1 className="text-xl font-bold mb-2 text-center">
                         {getFullName(personalInfo)}
                     </h1>
                     <div className="space-y-2 text-xs">
@@ -720,19 +795,8 @@ const ModernTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                                 <div className="space-y-3">
                                     {skills.filter(skill => skill.type === 'hard').map((skill) => (
                                         <div key={skill.id}>
-                                            <div className="flex justify-between text-xs mb-1">
+                                            <div className="text-xs mb-1">
                                                 <span>{skill.name}</span>
-                                                <span>{skill.level}</span>
-                                            </div>
-                                            <div className="w-full bg-gray-600 rounded-full h-1 mb-2">
-                                                <div 
-                                                    className="bg-yellow-400 h-1 rounded-full"
-                                                    style={{ 
-                                                        width: skill.level === 'Expert' ? '100%' : 
-                                                               skill.level === 'Advanced' ? '80%' : 
-                                                               skill.level === 'Intermediate' ? '60%' : '40%' 
-                                                    }}
-                                                ></div>
                                             </div>
                                             {skill.description && (
                                                 <div className="text-gray-300 text-xs leading-relaxed">
@@ -754,19 +818,8 @@ const ModernTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                                 <div className="space-y-3">
                                     {skills.filter(skill => skill.type === 'soft').map((skill) => (
                                         <div key={skill.id}>
-                                            <div className="flex justify-between text-xs mb-1">
+                                            <div className="text-xs mb-1">
                                                 <span>{skill.name}</span>
-                                                <span>{skill.level}</span>
-                                            </div>
-                                            <div className="w-full bg-gray-600 rounded-full h-1 mb-2">
-                                                <div 
-                                                    className="bg-yellow-400 h-1 rounded-full"
-                                                    style={{ 
-                                                        width: skill.level === 'Expert' ? '100%' : 
-                                                               skill.level === 'Advanced' ? '80%' : 
-                                                               skill.level === 'Intermediate' ? '60%' : '40%' 
-                                                    }}
-                                                ></div>
                                             </div>
                                             {skill.description && (
                                                 <div className="text-gray-300 text-xs leading-relaxed">
@@ -788,19 +841,8 @@ const ModernTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                                 <div className="space-y-2">
                                     {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map((skill) => (
                                         <div key={skill.id}>
-                                            <div className="flex justify-between text-xs mb-1">
+                                            <div className="text-xs mb-1">
                                                 <span>{skill.name}</span>
-                                                <span>{skill.level}</span>
-                                            </div>
-                                            <div className="w-full bg-gray-600 rounded-full h-1">
-                                                <div 
-                                                    className="bg-yellow-400 h-1 rounded-full"
-                                                    style={{ 
-                                                        width: skill.level === 'Expert' ? '100%' : 
-                                                               skill.level === 'Advanced' ? '80%' : 
-                                                               skill.level === 'Intermediate' ? '60%' : '40%' 
-                                                    }}
-                                                ></div>
                                             </div>
                                         </div>
                                     ))}
@@ -820,7 +862,7 @@ const ModernTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                             {languages.map((lang) => (
                                 <div key={lang.id} className="flex justify-between text-xs">
                                     <span>{lang.language}</span>
-                                    <span>{lang.level}</span>
+                                    <span>{getLanguageLevel(lang.level, data.cvLanguage)}</span>
                                 </div>
                             ))}
                         </div>
@@ -836,13 +878,21 @@ const ModernTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                         <div className="space-y-2">
                             {certifications.map((cert) => (
                                 <div key={cert.id}>
-                                    <h3 className="text-xs font-semibold">{cert.name}</h3>
+                                    {cert.url ? (
+                                        <a 
+                                            href={cert.url} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="text-xs font-semibold underline hover:text-yellow-400 transition-colors cursor-pointer"
+                                        >
+                                            {cert.name}
+                                        </a>
+                                    ) : (
+                                        <h3 className="text-xs font-semibold">{cert.name}</h3>
+                                    )}
                                     <p className="text-xs text-gray-300">{cert.issuer}</p>
                                     {cert.description && (
                                         <div className="text-gray-300 text-xs mt-1">{renderHtmlContent(cert.description)}</div>
-                                    )}
-                                    {cert.url && (
-                                        <p className="text-gray-300 text-xs mt-1">URL: {cert.url}</p>
                                     )}
                                 </div>
                             ))}
@@ -907,7 +957,7 @@ const ModernTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                                             <h3 className="text-sm font-semibold text-gray-900">{edu.degree}</h3>
                                             <p className="text-gray-600 font-medium text-xs">{edu.institution}</p>
                                             {edu.field && <p className="text-gray-500 text-xs">{edu.field}</p>}
-                                            {edu.gpa && <p className="text-gray-500 text-xs">GPA: {edu.gpa}</p>}
+                                            {edu.gpa && <p className="text-gray-500 text-xs">{data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: {edu.gpa}</p>}
                                         </div>
                                         <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
                                         </span>
@@ -930,7 +980,18 @@ const ModernTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                         <div className="space-y-3">
                             {projects.map((project) => (
                                 <div key={project.id}>
-                                    <h3 className="text-sm font-semibold text-gray-900">{project.name}</h3>
+                                    {project.url ? (
+                                        <a 
+                                            href={project.url} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="text-sm font-semibold text-gray-900 underline hover:text-blue-600 transition-colors cursor-pointer"
+                                        >
+                                            {project.name}
+                                        </a>
+                                    ) : (
+                                        <h3 className="text-sm font-semibold text-gray-900">{project.name}</h3>
+                                    )}
                                     {project.description && (
                                         <div className="text-gray-700 text-xs mt-1 mb-2">{renderHtmlContent(project.description)}</div>
                                     )}
@@ -938,9 +999,6 @@ const ModernTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                                         <p className="text-gray-600 text-xs">
                                             <span className="font-medium">Texnologiyalar:</span> {project.technologies.join(', ')}
                                         </p>
-                                    )}
-                                    {project.url && (
-                                        <p className="text-gray-600 text-xs">URL: {project.url}</p>
                                     )}
                                     {project.github && (
                                         <p className="text-gray-600 text-xs">GitHub: {project.github}</p>
@@ -1052,6 +1110,19 @@ const ATSFriendlyTemplate: React.FC<{ data: CVData }> = ({ data }) => {
         <div className="w-full h-full bg-white text-gray-900 font-sans flex">
             {/* Left Column - Contact & Skills */}
             <div className="w-2/5 bg-gray-50 border-r border-gray-200" style={{ padding: '15mm 12mm' }}>
+                {/* Profile Image */}
+                {personalInfo.profileImage && (
+                    <div className="mb-6 cv-section avoid-break">
+                        <div className="flex justify-center">
+                            <img 
+                                src={personalInfo.profileImage} 
+                                alt="Profile" 
+                                className="w-28 h-28 rounded-full object-cover border-4 border-gray-300 shadow-md"
+                            />
+                        </div>
+                    </div>
+                )}
+                
                 {/* Contact Information */}
                 <div className="mb-6 cv-section avoid-break">
                     <h2 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide border-b border-gray-300 pb-1">
@@ -1111,9 +1182,8 @@ const ATSFriendlyTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                                 <div className="space-y-2">
                                     {skills.filter(skill => skill.type === 'hard').map((skill) => (
                                         <div key={skill.id}>
-                                            <div className="flex justify-between items-center mb-1">
+                                            <div className="mb-1">
                                                 <span className="text-xs font-medium text-gray-900">{skill.name}</span>
-                                                <span className="text-xs text-gray-600">{skill.level}</span>
                                             </div>
                                             {skill.description && (
                                                 <div className="text-gray-700 text-xs leading-relaxed">
@@ -1135,9 +1205,8 @@ const ATSFriendlyTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                                 <div className="space-y-2">
                                     {skills.filter(skill => skill.type === 'soft').map((skill) => (
                                         <div key={skill.id}>
-                                            <div className="flex justify-between items-center mb-1">
+                                            <div className="mb-1">
                                                 <span className="text-xs font-medium text-gray-900">{skill.name}</span>
-                                                <span className="text-xs text-gray-600">{skill.level}</span>
                                             </div>
                                             {skill.description && (
                                                 <div className="text-gray-700 text-xs leading-relaxed">
@@ -1159,9 +1228,8 @@ const ATSFriendlyTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                                 <div className="space-y-2">
                                     {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map((skill) => (
                                         <div key={skill.id}>
-                                            <div className="flex justify-between items-center mb-1">
+                                            <div className="mb-1">
                                                 <span className="text-xs font-medium text-gray-900">{skill.name}</span>
-                                                <span className="text-xs text-gray-600">{skill.level}</span>
                                             </div>
                                             {skill.description && (
                                                 <div className="text-gray-700 text-xs leading-relaxed">
@@ -1186,7 +1254,7 @@ const ATSFriendlyTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                             {languages.map((lang) => (
                                 <div key={lang.id} className="flex justify-between items-center">
                                     <span className="text-xs font-medium text-gray-900">{lang.language}</span>
-                                    <span className="text-xs text-gray-600">{lang.level}</span>
+                                    <span className="text-xs text-gray-600">{getLanguageLevel(lang.level, data.cvLanguage)}</span>
                                 </div>
                             ))}
                         </div>
@@ -1202,7 +1270,18 @@ const ATSFriendlyTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                         <div className="space-y-2">
                             {certifications.map((cert) => (
                                 <div key={cert.id}>
-                                    <h3 className="text-xs font-medium text-gray-900">{cert.name}</h3>
+                                    {cert.url ? (
+                                        <a 
+                                            href={cert.url} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="text-xs font-medium text-gray-900 underline hover:text-blue-600 transition-colors cursor-pointer"
+                                        >
+                                            {cert.name}
+                                        </a>
+                                    ) : (
+                                        <h3 className="text-xs font-medium text-gray-900">{cert.name}</h3>
+                                    )}
                                     <p className="text-xs text-gray-600">{cert.issuer}</p>
                                     {cert.description && (
                                         <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(cert.description)}</div>
@@ -1274,7 +1353,7 @@ const ATSFriendlyTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                                             <h3 className="text-sm font-bold text-gray-900">{edu.degree}</h3>
                                             <p className="text-xs font-medium text-gray-700">{edu.institution}</p>
                                             {edu.field && <p className="text-xs text-gray-600">{edu.field}</p>}
-                                            {edu.gpa && <p className="text-xs text-gray-600">GPA: {edu.gpa}</p>}
+                                            {edu.gpa && <p className="text-xs text-gray-600">{data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: {edu.gpa}</p>}
                                         </div>
                                     </div>
                                     {edu.description && (
@@ -1295,18 +1374,24 @@ const ATSFriendlyTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                         <div className="space-y-3">
                             {projects.map((project) => (
                                 <div key={project.id}>
-                                    <h3 className="text-sm font-bold text-gray-900">{project.name}</h3>
+                                    {project.url ? (
+                                        <a 
+                                            href={project.url} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="text-sm font-bold text-gray-900 underline hover:text-blue-600 transition-colors cursor-pointer"
+                                        >
+                                            {project.name}
+                                        </a>
+                                    ) : (
+                                        <h3 className="text-sm font-bold text-gray-900">{project.name}</h3>
+                                    )}
                                     {project.description && (
                                         <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(project.description)}</div>
                                     )}
                                     {project.technologies && project.technologies.length > 0 && (
                                         <p className="text-xs text-gray-600 mt-1">
                                             <span className="font-medium">Technologies:</span> {project.technologies.join(', ')}
-                                        </p>
-                                    )}
-                                    {project.url && (
-                                        <p className="text-xs text-gray-600 mt-1">
-                                            <span className="font-medium">URL:</span> {project.url}
                                         </p>
                                     )}
                                     {project.github && (
@@ -1412,6 +1497,17 @@ const ProfessionalTemplate: React.FC<{ data: CVData }> = ({ data }) => {
         <div className="w-full h-full bg-white text-gray-900 font-serif" style={{ padding: '15mm 12mm' }}>
             {/* Header */}
             <div className="text-center mb-4 border-b-2 border-gray-300 pb-3">
+                {/* Profile Image */}
+                {personalInfo.profileImage && (
+                    <div className="flex justify-center mb-4">
+                        <img 
+                            src={personalInfo.profileImage} 
+                            alt="Profile" 
+                            className="w-24 h-24 rounded-full object-cover border-4 border-gray-400 shadow-lg"
+                        />
+                    </div>
+                )}
+                
                 <h1 className="text-3xl font-bold text-gray-800 mb-2">
                     {getFullName(personalInfo)}
                 </h1>
@@ -1483,7 +1579,7 @@ const ProfessionalTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                                         <h3 className="text-sm font-bold text-gray-900">{edu.degree}</h3>
                                         <p className="text-gray-700 font-semibold text-xs">{edu.institution}</p>
                                         {edu.field && <p className="text-gray-600 italic text-xs">{edu.field}</p>}
-                                        {edu.gpa && <p className="text-gray-600 text-xs">GPA: {edu.gpa}</p>}
+                                        {edu.gpa && <p className="text-gray-600 text-xs">{data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: {edu.gpa}</p>}
                                     </div>
                                     <span className="text-xs text-gray-600 font-medium">
                                     </span>
@@ -1511,9 +1607,8 @@ const ProfessionalTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                                 <div className="space-y-2">
                                     {skills.filter(skill => skill.type === 'hard').map((skill) => (
                                         <div key={skill.id}>
-                                            <div className="flex justify-between mb-1">
+                                            <div className="mb-1">
                                                 <span className="text-gray-700 text-xs font-medium">{skill.name}</span>
-                                                <span className="text-gray-600 font-medium text-xs">{skill.level}</span>
                                             </div>
                                             {skill.description && (
                                                 <div className="text-gray-600 text-xs leading-relaxed pl-2 border-l-2 border-gray-200">
@@ -1535,9 +1630,8 @@ const ProfessionalTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                                 <div className="space-y-2">
                                     {skills.filter(skill => skill.type === 'soft').map((skill) => (
                                         <div key={skill.id}>
-                                            <div className="flex justify-between mb-1">
+                                            <div className="mb-1">
                                                 <span className="text-gray-700 text-xs font-medium">{skill.name}</span>
-                                                <span className="text-gray-600 font-medium text-xs">{skill.level}</span>
                                             </div>
                                             {skill.description && (
                                                 <div className="text-gray-600 text-xs leading-relaxed pl-2 border-l-2 border-gray-200">
@@ -1559,9 +1653,8 @@ const ProfessionalTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                                 <div className="space-y-2">
                                     {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map((skill) => (
                                         <div key={skill.id}>
-                                            <div className="flex justify-between mb-1">
+                                            <div className="mb-1">
                                                 <span className="text-gray-700 text-xs font-medium">{skill.name}</span>
-                                                <span className="text-gray-600 font-medium text-xs">{skill.level}</span>
                                             </div>
                                             {skill.description && (
                                                 <div className="text-gray-600 text-xs leading-relaxed pl-2 border-l-2 border-gray-200">
@@ -1586,7 +1679,7 @@ const ProfessionalTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                             {languages.map((lang) => (
                                 <div key={lang.id} className="flex justify-between">
                                     <span className="text-gray-700 text-xs">{lang.language}</span>
-                                    <span className="text-gray-600 font-medium text-xs">{lang.level}</span>
+                                    <span className="text-gray-600 font-medium text-xs">{getLanguageLevel(lang.level, data.cvLanguage)}</span>
                                 </div>
                             ))}
                         </div>
@@ -1603,10 +1696,21 @@ const ProfessionalTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                             <h2 className="text-base font-bold text-gray-800 mb-3 uppercase tracking-wide">
                                 {getSectionName('keyProjects', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="space-y-2">
+                                <div className="space-y-2">
                                 {projects.map((project) => (
                                     <div key={project.id}>
-                                        <h3 className="font-bold text-gray-900 text-sm">{project.name}</h3>
+                                        {project.url ? (
+                                            <a 
+                                                href={project.url} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="font-bold text-gray-900 text-sm underline hover:text-blue-600 transition-colors cursor-pointer"
+                                            >
+                                                {project.name}
+                                            </a>
+                                        ) : (
+                                            <h3 className="font-bold text-gray-900 text-sm">{project.name}</h3>
+                                        )}
                                         {project.description && (
                                             <div className="text-gray-700 text-xs">{renderHtmlContent(project.description)}</div>
                                         )}
@@ -1614,9 +1718,6 @@ const ProfessionalTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                                             <p className="text-gray-600 text-xs italic">
                                              {project.technologies.join(', ')}
                                             </p>
-                                        )}
-                                        {project.url && (
-                                            <p className="text-gray-600 text-xs">URL: {project.url}</p>
                                         )}
                                         {project.github && (
                                             <p className="text-gray-600 text-xs">GitHub: {project.github}</p>
@@ -1637,13 +1738,21 @@ const ProfessionalTemplate: React.FC<{ data: CVData }> = ({ data }) => {
                                 {certifications.map((cert) => (
                                     <div key={cert.id} className="flex justify-between">
                                         <div>
-                                            <span className="font-semibold text-gray-900 text-xs">{cert.name}</span>
+                                            {cert.url ? (
+                                                <a 
+                                                    href={cert.url} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer"
+                                                    className="font-semibold text-gray-900 text-xs underline hover:text-blue-600 transition-colors cursor-pointer"
+                                                >
+                                                    {cert.name}
+                                                </a>
+                                            ) : (
+                                                <span className="font-semibold text-gray-900 text-xs">{cert.name}</span>
+                                            )}
                                             <span className="text-gray-700 text-xs"> - {cert.issuer}</span>
                                             {cert.description && (
                                                 <div className="text-gray-600 text-xs mt-1">{renderHtmlContent(cert.description)}</div>
-                                            )}
-                                            {cert.url && (
-                                                <p className="text-gray-600 text-xs mt-1">URL: {cert.url}</p>
                                             )}
                                         </div>
                                     </div>

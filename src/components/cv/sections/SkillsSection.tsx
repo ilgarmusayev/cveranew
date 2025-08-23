@@ -398,11 +398,6 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                           {skill.name || 'Yeni hard skill'}
                         </h4>
                       </div>
-                      {skill.level && (
-                        <p className="text-xs text-gray-500 mt-1">
-                          Səviyyə: {skill.level}
-                        </p>
-                      )}
                     </div>
 
                     {/* Action links moved to bottom of card */}
@@ -449,49 +444,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                               <option value="soft">Soft Skill (Şəxsi bacarıqlar)</option>
                             </select>
                           </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Səviyyə
-                            </label>
-                            <select
-                              value={skill.level || ''}
-                              onChange={(e) => updateSkill(skill.id, 'level', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                            >
-                              <option value="">Səviyyə seçin</option>
-                              <option value="Başlanğıc">Başlanğıc</option>
-                              <option value="Orta">Orta</option>
-                              <option value="İrəliləmiş">İrəliləmiş</option>
-                              <option value="Ekspert">Ekspert</option>
-                            </select>
-                          </div>
-                          <div>
-                            <div className="flex items-center justify-between mb-2">
-                              <label className="block text-sm font-medium text-gray-700">
-                                Peşəkar Təsvir {canUseAI && <span className="text-xs text-purple-600">(AI Powered)</span>}
-                              </label>
-                              {canUseAI && skill.name.trim() && (
-                                <button
-                                  onClick={() => generateAIDescription(skill.id, skill.name, skill.type)}
-                                  className="px-3 py-1 text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-md hover:from-purple-600 hover:to-pink-600 transition-colors"
-                                >
-                                  🤖 AI ilə yarat
-                                </button>
-                              )}
-                            </div>
-                            <textarea
-                              value={skill.description || ''}
-                              onChange={(e) => updateSkill(skill.id, 'description', e.target.value)}
-                              rows={3}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                              placeholder={canUseAI ? "AI ilə peşəkar təsvir yaradın və ya əl ilə yazın..." : "Bu bacarığın necə istifadə etdiyinizi qısaca təsvir edin..."}
-                            />
-                            {skill.description && (
-                              <p className="text-xs text-gray-500 mt-1">
-                                {skill.description.length} simvol
-                              </p>
-                            )}
-                          </div>
+                          
                         </div>
                       </div>
                     )}
@@ -521,11 +474,6 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                           {skill.name || 'Yeni soft skill'}
                         </h4>
                       </div>
-                      {skill.level && (
-                        <p className="text-xs text-gray-500 mt-1">
-                          Səviyyə: {skill.level}
-                        </p>
-                      )}
                     </div>
 
                     {/* Action links moved to bottom of card */}
@@ -572,49 +520,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                               <option value="soft">Soft Skill (Şəxsi bacarıqlar)</option>
                             </select>
                           </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Səviyyə
-                            </label>
-                            <select
-                              value={skill.level || ''}
-                              onChange={(e) => updateSkill(skill.id, 'level', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                            >
-                              <option value="">Səviyyə seçin</option>
-                              <option value="Başlanğıc">Başlanğıc</option>
-                              <option value="Orta">Orta</option>
-                              <option value="İrəliləmiş">İrəliləmiş</option>
-                              <option value="Ekspert">Ekspert</option>
-                            </select>
-                          </div>
-                          <div>
-                            <div className="flex items-center justify-between mb-2">
-                              <label className="block text-sm font-medium text-gray-700">
-                                Peşəkar Təsvir {canUseAI && <span className="text-xs text-purple-600">(AI Powered)</span>}
-                              </label>
-                              {canUseAI && skill.name.trim() && (
-                                <button
-                                  onClick={() => generateAIDescription(skill.id, skill.name, skill.type)}
-                                  className="px-3 py-1 text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-md hover:from-purple-600 hover:to-pink-600 transition-colors"
-                                >
-                                  🤖 AI ilə yarat
-                                </button>
-                              )}
-                            </div>
-                            <textarea
-                              value={skill.description || ''}
-                              onChange={(e) => updateSkill(skill.id, 'description', e.target.value)}
-                              rows={3}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                              placeholder={canUseAI ? "AI ilə peşəkar təsvir yaradın və ya əl ilə yazın..." : "Bu bacarığın necə istifadə etdiyinizi qısaca təsvir edin..."}
-                            />
-                            {skill.description && (
-                              <p className="text-xs text-gray-500 mt-1">
-                                {skill.description.length} simvol
-                              </p>
-                            )}
-                          </div>
+                          
                         </div>
                       </div>
                     )}

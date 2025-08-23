@@ -34,44 +34,220 @@ function initializeGeminiAI() {
   return getGeminiAI();
 }
 
-// Prepare profile text for AI analysis
-function prepareProfileTextForAI(profileData: any): string {
-  let profileText = '';
+// Prepare comprehensive CV data for AI analysis with enhanced structure
+function prepareCVDataForAI(profileData: any): string {
+  let cvText = '';
 
-  if (profileData.name) {
-    profileText += `Ad: ${profileData.name}\n`;
-  }
-
-  if (profileData.headline) {
-    profileText += `Başlıq: ${profileData.headline}\n`;
-  }
-
-  if (profileData.location) {
-    profileText += `Yer: ${profileData.location}\n`;
-  }
-
-  if (profileData.about) {
-    profileText += `Haqqında: ${profileData.about}\n`;
-  }
-
+  // Calculate total years of experience from work history
+  let totalYears = 0;
   if (profileData.experience && Array.isArray(profileData.experience)) {
-    profileText += '\nİş təcrübəsi:\n';
+    totalYears = profileData.experience.length * 1.5; // Rough estimation
+  }
+
+  cvText += `=== CAREER OVERVIEW ===\n`;
+  cvText += `Estimated Total Experience: ${totalYears > 0 ? Math.round(totalYears) + ' years' : 'Entry level'}\n`;
+  cvText += `Number of Positions: ${profileData.experience?.length || 0}\n`;
+  cvText += `Education Level: ${profileData.education?.length > 0 ? 'Higher Education' : 'Not specified'}\n\n`;
+
+  // Work Experience with detailed analysis
+  if (profileData.experience && Array.isArray(profileData.experience) && profileData.experience.length > 0) {
+    cvText += '=== PROFESSIONAL EXPERIENCE (DETAILED) ===\n';
     profileData.experience.forEach((exp: any, index: number) => {
-      profileText += `${index + 1}. ${exp.position || exp.title} - ${exp.company} (${exp.duration || exp.date_range})\n`;
-      if (exp.description) {
-        profileText += `   ${exp.description}\n`;
+      cvText += `POSITION ${index + 1}:\n`;
+      cvText += `• Role: ${exp.position || exp.title || 'Not specified'}\n`;
+      cvText += `• Company: ${exp.company || 'Not specified'}\n`;
+      if (exp.startDate || exp.endDate) {
+        cvText += `• Duration: ${exp.startDate || 'Start date not specified'} - ${exp.endDate || 'Present'}\n`;
       }
+      if (exp.description) {
+        cvText += `• Key Responsibilities & Achievements: ${exp.description}\n`;
+      }
+      cvText += '\n';
     });
   }
 
-  if (profileData.education && Array.isArray(profileData.education)) {
-    profileText += '\nTəhsil:\n';
+  // Education with comprehensive details
+  if (profileData.education && Array.isArray(profileData.education) && profileData.education.length > 0) {
+    cvText += '=== EDUCATIONAL BACKGROUND ===\n';
     profileData.education.forEach((edu: any, index: number) => {
-      profileText += `${index + 1}. ${edu.degree} - ${edu.school || edu.institution} (${edu.duration || edu.date_range})\n`;
+      cvText += `EDUCATION ${index + 1}:\n`;
+      cvText += `• Degree: ${edu.degree || 'Not specified'}\n`;
+      cvText += `• Institution: ${edu.institution || 'Not specified'}\n`;
+      if (edu.field) {
+        cvText += `• Field of Study: ${edu.field}\n`;
+      }
+      if (edu.gpa) {
+        cvText += `• Academic Performance: ${edu.gpa}\n`;
+      }
+      if (edu.description) {
+        cvText += `• Additional Details: ${edu.description}\n`;
+      }
+      cvText += '\n';
     });
   }
 
-  return profileText;
+  // Technical and Soft Skills Analysis
+  if (profileData.skills && Array.isArray(profileData.skills) && profileData.skills.length > 0) {
+    cvText += '=== CORE COMPETENCIES ===\n';
+    
+    const hardSkills = profileData.skills.filter((skill: any) => skill.type === 'hard');
+    const softSkills = profileData.skills.filter((skill: any) => skill.type === 'soft');
+    
+    if (hardSkills.length > 0) {
+      cvText += 'TECHNICAL EXPERTISE:\n';
+      hardSkills.forEach((skill: any) => {
+        cvText += `• ${skill.name}${skill.level ? ` - ${skill.level} level` : ''}${skill.description ? ` (${skill.description})` : ''}\n`;
+      });
+      cvText += '\n';
+    }
+    
+    if (softSkills.length > 0) {
+      cvText += 'PROFESSIONAL SKILLS:\n';
+      softSkills.forEach((skill: any) => {
+        cvText += `• ${skill.name}${skill.level ? ` - ${skill.level} level` : ''}${skill.description ? ` (${skill.description})` : ''}\n`;
+      });
+      cvText += '\n';
+    }
+  }
+
+  // Project Portfolio
+  if (profileData.projects && Array.isArray(profileData.projects) && profileData.projects.length > 0) {
+    cvText += '=== PROJECT PORTFOLIO ===\n';
+    profileData.projects.forEach((project: any, index: number) => {
+      cvText += `PROJECT ${index + 1}: ${project.name || 'Unnamed Project'}\n`;
+      if (project.description) {
+        cvText += `• Description: ${project.description}\n`;
+      }
+      if (project.technologies && Array.isArray(project.technologies)) {
+        cvText += `• Technologies Used: ${project.technologies.join(', ')}\n`;
+      }
+      if (project.url) {
+        cvText += `• Project Link: Available\n`;
+      }
+      cvText += '\n';
+    });
+  }
+
+  // Professional Certifications
+  if (profileData.certifications && Array.isArray(profileData.certifications) && profileData.certifications.length > 0) {
+    cvText += '=== PROFESSIONAL CERTIFICATIONS ===\n';
+    profileData.certifications.forEach((cert: any, index: number) => {
+      cvText += `CERTIFICATION ${index + 1}:\n`;
+      cvText += `• Name: ${cert.name}\n`;
+      if (cert.issuer) {
+        cvText += `• Issuing Authority: ${cert.issuer}\n`;
+      }
+      if (cert.description) {
+        cvText += `• Details: ${cert.description}\n`;
+      }
+      cvText += '\n';
+    });
+  }
+
+  // Language Proficiency
+  if (profileData.languages && Array.isArray(profileData.languages) && profileData.languages.length > 0) {
+    cvText += '=== LANGUAGE PROFICIENCY ===\n';
+    profileData.languages.forEach((lang: any) => {
+      cvText += `• ${lang.language || lang.name}: ${lang.level || lang.proficiency || 'Not specified'}\n`;
+    });
+    cvText += '\n';
+  }
+
+  // Volunteer Experience (if available)
+  if (profileData.volunteerExperience && Array.isArray(profileData.volunteerExperience) && profileData.volunteerExperience.length > 0) {
+    cvText += '=== VOLUNTEER & COMMUNITY INVOLVEMENT ===\n';
+    profileData.volunteerExperience.forEach((vol: any, index: number) => {
+      cvText += `${index + 1}. ${vol.role || 'Volunteer'} at ${vol.organization || 'Organization not specified'}\n`;
+      if (vol.description) {
+        cvText += `   ${vol.description}\n`;
+      }
+      cvText += '\n';
+    });
+  }
+
+  cvText += '=== END OF CV DATA ===\n';
+  cvText += 'INSTRUCTION: Analyze ALL the above information to create a comprehensive, unique professional summary that captures the candidate\'s true value proposition.';
+
+  return cvText;
+}
+
+// Get style-specific instructions for variety in summary generation
+function getStyleInstructions(style: string, isEnglish: boolean): string {
+  const instructions = {
+    achievement_focused: {
+      en: `ACHIEVEMENT-FOCUSED APPROACH:
+- Lead with quantifiable accomplishments and measurable impact
+- Emphasize specific results, improvements, and successful outcomes
+- Highlight awards, recognitions, or standout achievements
+- Structure: "Accomplished [role] who achieved [specific results] through [key skills/methods]"
+- Focus on transformation, growth, and concrete results delivered`,
+      az: `NAİLİYYƏT FOKUSLANDıRıLAN YANAŞMA:
+- Ölçülə bilən nailiyyətlər və təsirlə başla
+- Konkret nəticələr, yaxşılaşmalar və uğurlu nəticələr vurğula
+- Mükafatlar, tanınma və ya diqqətəlayiq nailiyyətlər göstər
+- Struktur: "[konkret nəticələr] əldə edən [rol] [əsas bacarıqlar/metodlar] vasitəsilə"
+- Transformasiya, artım və çatdırılan konkret nəticələrə fokus`
+    },
+    skill_technical: {
+      en: `TECHNICAL SKILL-FOCUSED APPROACH:
+- Emphasize technical expertise and specialized knowledge
+- Highlight cutting-edge technologies, tools, and methodologies
+- Showcase depth of technical competency and innovation
+- Structure: "Technical expert in [domain] with mastery of [specific technologies/tools]"
+- Focus on technical problem-solving capabilities and expertise depth`,
+      az: `TEXNİKİ BACAFıQ FOKUSLANDıRıLAN YANAŞMA:
+- Texniki ekspertiza və ixtisaslaşmış bilik vurğula
+- Müasir texnologiyalar, alətlər və metodologiyalar göstər
+- Texniki səriştənin dərinliyi və innovasiya nümayiş etdir
+- Struktur: "[sahə]də texniki ekspert [konkret texnologiyalar/alətlər] mükəmməlliyi ilə"
+- Texniki problem həlli qabiliyyətləri və ekspertiza dərinliyi fokus`
+    },
+    leadership_strategic: {
+      en: `LEADERSHIP & STRATEGIC APPROACH:
+- Emphasize management, team leadership, and strategic thinking
+- Highlight ability to guide teams, make decisions, and drive organizational goals
+- Showcase vision, planning, and execution capabilities
+- Structure: "Strategic leader who guides [team size/type] to achieve [organizational outcomes]"
+- Focus on influence, direction-setting, and transformational leadership`,
+      az: `LİDERLİK VƏ STRATEJİ YANAŞMA:
+- İdarəetmə, komanda liderliyi və strateji düşüncə vurğula
+- Komandaları idarə etmək, qərar vermək və təşkilati hədəflərə nail olmaq qabiliyyəti göstər
+- Vizyon, planlaşdırma və icra qabiliyyətləri nümayiş etdir
+- Struktur: "[təşkilati nəticələr] əldə etmək üçün [komanda ölçüsü/növü] idarə edən strateji lider"
+- Təsir, istiqamət müəyyənləşdirmə və transformasional liderlik fokus`
+    },
+    innovation_problem_solving: {
+      en: `INNOVATION & PROBLEM-SOLVING APPROACH:
+- Emphasize creative thinking, innovation, and solution development
+- Highlight unique approaches to challenges and breakthrough solutions
+- Showcase adaptability, creativity, and forward-thinking
+- Structure: "Innovative problem-solver who develops [solution types] for [challenge areas]"
+- Focus on creative methodologies, breakthrough thinking, and adaptive solutions`,
+      az: `İNNOVASİYA VƏ PROBLEM HƏLLİ YANAŞMA:
+- Yaradıcı düşüncə, innovasiya və həll inkişafı vurğula
+- Çətinliklərə unikal yanaşmalar və çıraq həlləri göstər
+- Uyğunlaşma, yaradıcılıq və gələcəkə yönəlik düşüncə nümayiş etdir
+- Struktur: "[çətinlik sahələri] üçün [həll növləri] inkişaf etdirən innovativ problem həllədicisi"
+- Yaradıcı metodologiyalar, çıraq düşüncə və uyğunlaşan həlləri fokus`
+    },
+    industry_expertise: {
+      en: `INDUSTRY EXPERTISE APPROACH:
+- Emphasize deep industry knowledge and sector-specific experience
+- Highlight understanding of industry trends, regulations, and best practices
+- Showcase domain expertise and specialized industry insights
+- Structure: "Industry specialist with deep expertise in [sector/domain] and proven track record"
+- Focus on sector knowledge, industry standards, and domain authority`,
+      az: `SAHƏKARLıQ EKSPERTİZASı YANAŞMA:
+- Dərin sahəkarlıq bilik və sektor-spesifik təcrübə vurğula
+- Sahəkarlıq trendləri, qaydalar və ən yaxşı təcrübələr anlayışı göstər
+- Domen ekspertizası və ixtisaslaşmış sahəkarlıq görüşləri nümayiş etdir
+- Struktur: "[sektor/domen]də dərin ekspertiza və sübut edilmiş rekord ilə sahəkarlıq mütəxəssisi"
+- Sektor bilik, sahəkarlıq standartları və domen avtoriteti fokus`
+    }
+  };
+
+  const instruction = instructions[style as keyof typeof instructions];
+  return instruction ? (isEnglish ? instruction.en : instruction.az) : '';
 }
 
 export async function POST(req: NextRequest) {
@@ -91,51 +267,83 @@ export async function POST(req: NextRequest) {
 
     console.log(`🤖 AI Professional Summary generasiya edilir (${targetLanguage})...`);
 
-    // Create profile text for AI analysis
-    const profileText = prepareProfileTextForAI(profileData);
+    // Create comprehensive CV text for AI analysis
+    const cvText = prepareCVDataForAI(profileData);
 
-    // Create language-specific prompt with strict word limits
-    const prompt = isEnglish ? `
-Write a professional CV summary in 4-5 sentences (60-80 words). No names, no "I am", no personal pronouns.
+    // Array of different summary approaches for variety
+    const summaryStyles = [
+      'achievement_focused', 
+      'skill_technical', 
+      'leadership_strategic', 
+      'innovation_problem_solving',
+      'industry_expertise'
+    ];
+    
+    // Randomly select a style to ensure variety
+    const selectedStyle = summaryStyles[Math.floor(Math.random() * summaryStyles.length)];
+    
+    console.log(`🎯 Selected summary style: ${selectedStyle}`);
 
-Profile: ${profileText.substring(0, 500)}
+    // Create enhanced prompt with style variation
+    const basePrompt = isEnglish ? 
+      `Write a professional CV summary based strictly on the information provided in the CV. The text must be written in third-person style (e.g., "An experienced specialist with over 5 years of expertise..."), never in first-person. Avoid clichés such as "responsible" or "result-oriented." The summary should highlight real skills, measurable achievements, and distinctive strengths, while maintaining a polished, credible tone that attracts HR professionals and conveys uniqueness.
 
-Structure format:
-1. "[Field] with [X+] years of experience in [specific areas]"
-2. "Skilled in [2-3 key technical skills] with [specialization/background]"
-3. "Successfully [achievement with metric/result]"
-4. "Seeking to [career goal/contribution] in [type of company/role]"
+FULL CV DATA FOR ANALYSIS:
+${cvText}
 
-Example: "Software engineer with 6+ years of experience in designing and developing scalable web applications. Skilled in JavaScript, React, and Node.js with a strong background in system architecture. Successfully led cross-functional teams and delivered projects that improved efficiency by 25%. Seeking to contribute technical expertise to innovative projects in a growth-oriented company."
+CRITICAL REQUIREMENTS:
+- Analyze ALL sections of the CV thoroughly (experience, education, skills, projects, certifications, languages)
+- Write in third-person perspective ONLY
+- NO names, NO personal pronouns ("I", "my", "me")
+- NO percentage symbols (%) - express improvements as "increased by X times" or "improved X-fold"
+- Avoid generic clichés and buzzwords
+- Focus on specific technical skills and measurable achievements
+- Create a unique value proposition based on the CV data
+- Professional tone that stands out to HR professionals
+- 4-5 sentences, 70-90 words total
 
-STRICT RULES:
-- 60-80 words total
-- 4-5 sentences exactly
-- NO names, NO "I am", NO personal pronouns
-- Include specific metrics when possible
-- Professional third-person perspective
+STYLE FOCUS: ${selectedStyle}
 
-Summary:` : `
-4-5 cümlədən ibarət peşəkar CV xülasəsi yaz (60-80 söz). Ad yox, "Mən" yox, şəxsi zamirlər yox.
+IMPORTANT: Do not use percentage symbols (%). Instead use phrases like:
+- "doubled efficiency" instead of "increased efficiency by 100%"
+- "improved performance significantly" instead of "improved performance by 25%"
+- "reduced costs substantially" instead of "reduced costs by 30%"` :
+      
+      `CV üçün peşəkar xülasə (Professional Summary) hazırla. Xülasə yazılarkən yalnız CV-dəki məlumatlara əsaslan. Mətn 3-cü tərəf üslubunda olsun (məsələn, "5 ildən artıq təcrübəyə malik..." kimi), "mən" formasından istifadə etmə. Klişe ifadələrdən ("məsuliyyətli", "nəticəyönümlü") uzaq dur, HR mütəxəssislərinin diqqətini çəkəcək, inandırıcı və unikallıq hissi verən üslubda yaz. Mətn real bacarıqları, nəticələri və fərqləndirici cəhətləri ön plana çıxarsın.
 
-Profil: ${profileText.substring(0, 500)}
+CV-NİN TAM MƏLUMATLARı ANALİZ ÜÇÜN:
+${cvText}
 
-Struktur format:
-1. "[X+] ildən artıq təcrübəyə malik [sahə] mütəxəssisi [spesifik sahələr]də"
-2. "[2-3 əsas texniki bacarıq]da güclü bacarıqlara sahibdir [ixtisaslaşma/background] ilə"
-3. "[nailiyyət metrik/nəticə ilə] uğurla həyata keçirib"
-4. "[karyera məqsədi/töhfə] istəyir [şirkət tipi/rol]də"
+HƏYATI TƏLƏBLƏR:
+- CV-nin BÜTÜN bölmələrini hərtərəfli analiz et (iş təcrübəsi, təhsil, bacarıqlar, layihələr, sertifikatlar, dillər)
+- YALNIZ 3-cü tərəf baxımından yaz
+- Ad YOX, şəxsi zamirlər YOX ("mən", "mənim")
+- FAİZ simvolu (%) istifadə etmə - yaxşılaşmaları "X dəfə artırdı" və ya "əhəmiyyətli dərəcədə yaxşılaşdırdı" kimi ifadə et
+- Ümumi klişe və buzzword-lərdən çəkin
+- Konkret texniki bacarıqlar və ölçülə bilən nailiyyətlərə fokus
+- CV məlumatları əsasında unikal dəyər təklifi yarat
+- HR mütəxəssislərinin diqqətini çəkəcək peşəkar ton
+- 4-5 cümlə, cəmi 70-90 söz
 
-Nümunə: "6 ildən artıq təcrübəyə malik proqram mühəndisi. Veb tətbiqlərin hazırlanması və miqyaslandırılmasında ixtisaslaşıb. JavaScript, React və Node.js üzrə güclü bacarıqlara sahibdir. Layihələrin effektivliyini 25% artıran komandaları uğurla idarə edib. Dinamik şirkətdə texniki biliklərini tətbiq etməklə innovativ layihələrin inkişafına töhfə vermək istəyir."
+ÜSLUB FOKUS: ${selectedStyle}
 
-QƏTİ QAYDALAR:
-- 60-80 söz
-- Tam 4-5 cümlə
-- AD yox, "Mən" yox, şəxsi zamirlər yox
-- Mümkün olduqda spesifik rəqəmlər daxil et
-- Peşəkar üçüncü şəxs baxımından
+ÖNƏMLİ: Faiz simvolu (%) istifadə etmə. Əvəzinə bu ifadələri işlət:
+- "effektivliyi iki dəfə artırdı" əvəzinə "effektivliyi 100% artırdı"
+- "performansı əhəmiyyətli dərəcədə yaxşılaşdırdı" əvəzinə "performansı 25% yaxşılaşdırdı"
+- "xərcləri kəskin azaldı" əvəzinə "xərcləri 30% azaldı"`;
 
-Xülasə:`;
+    // Add style-specific instructions
+    const styleInstructions = getStyleInstructions(selectedStyle, isEnglish);
+    
+    // Add timestamp and randomness for uniqueness
+    const timestamp = Date.now();
+    const randomSeed = Math.floor(Math.random() * 10000);
+    
+    const uniquenessPrompt = isEnglish ? 
+      `\n\nUNIQUENESS REQUIREMENT: Generate a completely unique summary. Timestamp: ${timestamp}, Seed: ${randomSeed}. Vary sentence structure, word choice, and emphasis points to ensure each generation is distinctly different from previous versions.` :
+      `\n\nUNİKALLıQ TƏLƏBİ: Tamamilə unikal xülasə yarat. Timestamp: ${timestamp}, Seed: ${randomSeed}. Cümlə strukturunu, söz seçimini və vurğu nöqtələrini dəyiş ki, hər generasiya əvvəlki versiyalardan fərqli olsun.`;
+    
+    const prompt = basePrompt + '\n\n' + styleInstructions + uniquenessPrompt;
 
     let lastError: Error | null = null;
     let generatedSummary = '';
@@ -144,7 +352,15 @@ Xülasə:`;
     for (let i = 0; i < geminiAIInstances.length; i++) {
       try {
         const geminiAI = getGeminiAI();
-        const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        const model = geminiAI.getGenerativeModel({ 
+          model: 'gemini-1.5-flash',
+          generationConfig: {
+            temperature: 0.9, // High creativity for variety
+            topP: 0.95, // Diverse token sampling
+            topK: 40, // Token variety
+            maxOutputTokens: 150, // Sufficient for summary
+          }
+        });
 
         const result = await model.generateContent(prompt);
         const response = await result.response;
@@ -187,7 +403,9 @@ Xülasə:`;
       data: {
         professionalSummary: generatedSummary,
         language: targetLanguage,
-        timestamp: new Date().toISOString()
+        style: selectedStyle,
+        timestamp: new Date().toISOString(),
+        uniquenessId: `${timestamp}_${randomSeed}`
       },
       message: isEnglish ? 'Professional Summary generated successfully' : 'Peşəkar Xülasə uğurla generasiya edildi'
     });

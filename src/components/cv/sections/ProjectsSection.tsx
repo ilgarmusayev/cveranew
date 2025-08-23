@@ -63,6 +63,12 @@ interface ProjectsSectionProps {
 export default function ProjectsSection({ data, onChange }: ProjectsSectionProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  // Normalize data to ensure technologies is always an array
+  const normalizedData = data.map(project => ({
+    ...project,
+    technologies: project.technologies || []
+  }));
+
   const addProject = () => {
     const newProject: Project = {
       id: Date.now().toString(),
@@ -73,29 +79,29 @@ export default function ProjectsSection({ data, onChange }: ProjectsSectionProps
       github: '',
       current: false
     };
-    onChange([...data, newProject]);
+    onChange([...normalizedData, newProject]);
     setExpandedId(newProject.id);
   };
 
   const updateProject = (id: string, field: keyof Project, value: string | string[] | boolean) => {
-    const updated = data.map(project => 
+    const updated = normalizedData.map(project => 
       project.id === id ? { ...project, [field]: value } : project
     );
     onChange(updated);
   };
 
   const removeProject = (id: string) => {
-    onChange(data.filter(project => project.id !== id));
+    onChange(normalizedData.filter(project => project.id !== id));
   };
 
   const moveProject = (id: string, direction: 'up' | 'down') => {
-    const index = data.findIndex(project => project.id === id);
+    const index = normalizedData.findIndex(project => project.id === id);
     if (direction === 'up' && index > 0) {
-      const updated = [...data];
+      const updated = [...normalizedData];
       [updated[index], updated[index - 1]] = [updated[index - 1], updated[index]];
       onChange(updated);
-    } else if (direction === 'down' && index < data.length - 1) {
-      const updated = [...data];
+    } else if (direction === 'down' && index < normalizedData.length - 1) {
+      const updated = [...normalizedData];
       [updated[index], updated[index + 1]] = [updated[index + 1], updated[index]];
       onChange(updated);
     }
@@ -120,7 +126,7 @@ export default function ProjectsSection({ data, onChange }: ProjectsSectionProps
         </button>
       </div>
 
-      {data.length === 0 ? (
+      {normalizedData.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
           <div className="text-gray-400 mb-4">
             <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -137,7 +143,7 @@ export default function ProjectsSection({ data, onChange }: ProjectsSectionProps
         </div>
       ) : (
         <div className="space-y-4">
-          {data.map((project, index) => (
+          {normalizedData.map((project, index) => (
             <div key={project.id} className="bg-white border border-gray-200 rounded-lg p-4">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
@@ -227,7 +233,7 @@ export default function ProjectsSection({ data, onChange }: ProjectsSectionProps
                       </label>
                       <input
                         type="text"
-                        value={project.technologies.join(', ')}
+                        value={project.technologies ? project.technologies.join(', ') : ''}
                         onChange={(e) => updateTechnologies(project.id, e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                         placeholder="React, Node.js, PostgreSQL, AWS"
@@ -253,7 +259,7 @@ export default function ProjectsSection({ data, onChange }: ProjectsSectionProps
         </div>
       )}
 
-      {data.length > 0 && (
+      {normalizedData.length > 0 && (
         <div className="text-center">
           <button
             onClick={addProject}

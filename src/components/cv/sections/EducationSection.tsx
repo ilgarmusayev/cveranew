@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { getLabel } from '@/lib/cvLanguage';
+import { getLabel, CVLanguage } from '@/lib/cvLanguage';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 
 interface Education {
@@ -16,9 +16,10 @@ interface Education {
 interface EducationSectionProps {
   data: Education[];
   onChange: (data: Education[]) => void;
+  cvLanguage?: CVLanguage; // Add CV language prop
 }
 
-export default function EducationSection({ data, onChange }: EducationSectionProps) {
+export default function EducationSection({ data, onChange, cvLanguage = 'azerbaijani' }: EducationSectionProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const addEducation = () => {
@@ -187,14 +188,14 @@ export default function EducationSection({ data, onChange }: EducationSectionPro
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        ÜOMG / Qiymət <span className="text-gray-400 text-xs">(ixtiyari)</span>
+                        {cvLanguage === 'english' ? 'GPA / Grade' : 'ÜOMG / Qiymət'} <span className="text-gray-400 text-xs">(ixtiyari)</span>
                       </label>
                       <input
                         type="text"
                         value={education.gpa || ''}
                         onChange={(e) => updateEducation(education.id, 'gpa', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        placeholder="3.8/4.0, Yüksək, və s."
+                        placeholder={cvLanguage === 'english' ? '3.8/4.0, High, etc.' : '3.8/4.0, Yüksək, və s.'}
                       />
                     </div>
                   </div>

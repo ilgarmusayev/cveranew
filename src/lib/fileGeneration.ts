@@ -171,7 +171,7 @@ export class FileGenerationService {
 
   // CVPreviewA4 component-in EXACT template matching - real template-ə uyğun PDF generation
   private static generateReactLikeHTML(cvData: any, templateId?: string): string {
-    const { personalInfo, experience, education, skills, languages, projects, certifications } = cvData;
+    const { personalInfo, experience, education, skills, languages, projects, certifications, cvLanguage } = cvData;
     
     // CVPreviewA4-ün EXACT HTML handling functions
     const sanitizeHtml = (html: string): string => {
@@ -401,7 +401,8 @@ export class FileGenerationService {
           html += '<p class="education-field">' + stripHtmlTags(edu.field) + '</p>';
         }
         if (edu.gpa) {
-          html += '<p class="education-gpa">GPA: ' + stripHtmlTags(edu.gpa) + '</p>';
+          const gpaLabel = cvLanguage === 'english' ? 'GPA' : 'ÜOMG';
+          html += '<p class="education-gpa">' + gpaLabel + ': ' + stripHtmlTags(edu.gpa) + '</p>';
         }
         html += '</div>';
       });

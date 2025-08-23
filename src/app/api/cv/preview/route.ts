@@ -44,6 +44,7 @@ interface CVData {
   volunteerExperience?: any[];
   publications?: any[];
   sectionOrder?: any[];
+  cvLanguage?: string; // Add CV language field
 }
 
 // CV Preview API endpoint for PDF generation
@@ -108,7 +109,7 @@ export async function GET(request: NextRequest) {
 }
 
 function generatePreviewHTML(cvData: any, templateId: string): string {
-  const { personalInfo, experience, education, skills, languages, projects, certifications, volunteerExperience, publications, sectionOrder } = cvData;
+  const { personalInfo, experience, education, skills, languages, projects, certifications, volunteerExperience, publications, sectionOrder, cvLanguage } = cvData;
 
   // Check if it's Traditional CV template
   if (templateId === 'traditional' || templateId === 'Ənənəvi CV') {
@@ -145,7 +146,7 @@ function generatePreviewHTML(cvData: any, templateId: string): string {
       case 'experience':
         return experience && experience.length > 0 ? generateExperienceSection(experience) : '';
       case 'education':
-        return education && education.length > 0 ? generateEducationSection(education) : '';
+        return education && education.length > 0 ? generateEducationSection(education, cvLanguage) : '';
       case 'skills':
         return skills && skills.length > 0 ? generateSkillsSection(skills) : '';
       case 'languages':
@@ -400,7 +401,9 @@ function generateExperienceSection(experience: any[]): string {
   `;
 }
 
-function generateEducationSection(education: any[]): string {
+function generateEducationSection(education: any[], cvLanguage?: string): string {
+  const gpaLabel = cvLanguage === 'english' ? 'GPA' : 'ÜOMG';
+  
   return `
     <div class="cv-section">
         <div class="cv-section-header">
@@ -413,7 +416,7 @@ function generateEducationSection(education: any[]): string {
                 <div class="cv-experience-date">
                     ${edu.startDate || ''} - ${edu.endDate ? edu.endDate : (edu.current ? 'Present' : '')}
                 </div>
-                ${edu.gpa ? `<div class="cv-experience-location">GPA: ${edu.gpa}</div>` : ''}
+                ${edu.gpa ? `<div class="cv-experience-location">${gpaLabel}: ${edu.gpa}</div>` : ''}
             </div>
         `).join('')}
     </div>
@@ -553,7 +556,8 @@ function generatePublicationsSection(publications: any[]): string {
 }
 
 function generateTraditionalPreviewHTML(cvData: any): string {
-  const { personalInfo, experience, education, skills, languages, projects, certifications, volunteerExperience, publications } = cvData;
+  const { personalInfo, experience, education, skills, languages, projects, certifications, volunteerExperience, publications, cvLanguage } = cvData;
+  const gpaLabel = cvLanguage === 'english' ? 'GPA' : 'ÜOMG';
 
   return `
 <!DOCTYPE html>
@@ -780,7 +784,7 @@ function generateTraditionalPreviewHTML(cvData: any): string {
                             ${edu.startDate || ''} - ${edu.endDate ? edu.endDate : (edu.current ? 'Present' : '')}
                         </div>
                     </div>
-                    ${edu.gpa ? `<div class="item-description">GPA: ${edu.gpa}</div>` : ''}
+                    ${edu.gpa ? `<div class="item-description">${gpaLabel}: ${edu.gpa}</div>` : ''}
                 </div>
             `).join('')}
         </div>
