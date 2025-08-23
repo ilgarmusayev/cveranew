@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyJWT } from '@/lib/jwt';
 import { PrismaClient } from '@prisma/client';
+import { ScrapingDogLinkedInService } from '@/lib/services/scrapingdog-linkedin';
+import axios from 'axios';
 
 const prisma = new PrismaClient();
 
-// RapidAPI LinkedIn Skills - paralel skills extraction
-async function getRapidAPISkills(linkedinUrl: string) {
-  const axios = require('axios');
+// ScrapingDog LinkedIn Service instance
+const scrapingDogService = new ScrapingDogLinkedInService();
 
+// RapidAPI LinkedIn Skills - parallel skills extraction
+async function getRapidAPISkills(linkedinUrl: string) {
   console.log(`🎯 RapidAPI skills extraction başladı: ${linkedinUrl}`);
 
   try {
@@ -18,7 +21,7 @@ async function getRapidAPISkills(linkedinUrl: string) {
         url: linkedinUrl
       },
       headers: {
-        'X-RapidAPI-Key': process.env.RAPIDAPI_KEY || 'your-rapidapi-key',
+        'X-RapidAPI-Key': process.env.RAPIDAPI_KEY || 'e69773e8c2msh50ce2f81e481a35p1888abjsn83f1b967cbe4',
         'X-RapidAPI-Host': 'linkedin-data-api.p.rapidapi.com'
       },
       timeout: 20000
@@ -39,143 +42,220 @@ async function getRapidAPISkills(linkedinUrl: string) {
   }
 }
 
-// BrightData LinkedIn Import - optimizə edilmiş sürətli cavab
-async function callBrightDataAPI(linkedinUrl: string) {
-  const axios = require('axios');
+// Transform ScrapingDog data to CV format with complete data mapping
+function transformScrapingDogToCVFormat(scrapingDogData: any) {
+  console.log('🔄 ScrapingDog məlumatları tam CV formatına çevrilir...');
+  
+  // Personal Information - daha ətraflı məlumat dolduruluşu
+  const personalInfo = {
+    fullName: scrapingDogData.name || `${scrapingDogData.firstName || ''} ${scrapingDogData.lastName || ''}`.trim(),
+    firstName: scrapingDogData.firstName || scrapingDogData.name?.split(' ')[0] || '',
+    lastName: scrapingDogData.lastName || scrapingDogData.name?.split(' ').slice(1).join(' ') || '',
+    title: scrapingDogData.headline || '',
+    email: scrapingDogData.email || '',
+    phone: scrapingDogData.phone || '',
+    location: scrapingDogData.location || '',
+    website: scrapingDogData.website || '',
+    linkedin: scrapingDogData.linkedinUrl || scrapingDogData.profileUrl || '',
+    summary: scrapingDogData.summary || scrapingDogData.about || '',
+    profilePicture: scrapingDogData.profilePicture || ''
+  };
 
-  console.log(`🔄 BrightData LinkedIn scraping başladı (optimizə edilmiş): ${linkedinUrl}`);
-  console.log(`⚡ Yalnız lazım olan məlumatlar üçün sürətli sorğu...`);
+  // Work Experience - tam təcrübə məlumatları
+  const experience = (scrapingDogData.experience || []).map((exp: any, index: number) => {
+    // Tarix formatlarını düzəlt
+    let startDate = exp.startDate || exp.starts_at || '';
+    let endDate = exp.endDate || exp.ends_at || '';
+    let current = false;
+    
+    // "Present", "Current", "Hal-hazırda" və ya boş endDate-i yoxla
+    if (!endDate || endDate.toLowerCase().includes('present') || 
+        endDate.toLowerCase().includes('current') || 
+        endDate.toLowerCase().includes('hal-hazırda')) {
+      current = true;
+      endDate = '';
+    }
+
+    return {
+      id: `exp-scrapingdog-${Date.now()}-${index}`,
+      position: exp.title || exp.position || '',
+      company: exp.company || exp.company_name || '',
+      startDate: startDate,
+      endDate: endDate,
+      current: current,
+      description: exp.description || exp.summary || '',
+      location: exp.location || '',
+      employmentType: exp.employmentType || exp.type || '',
+      duration: exp.duration || (startDate && endDate ? `${startDate} - ${endDate}` : '')
+    };
+  });
+
+  // Education - tam təhsil məlumatları
+  const education = (scrapingDogData.education || []).map((edu: any, index: number) => ({
+    id: `edu-scrapingdog-${Date.now()}-${index}`,
+    institution: edu.school || edu.college_name || edu.institution || '',
+    degree: edu.degree || edu.college_degree || '',
+    fieldOfStudy: edu.field || edu.college_degree_field || edu.fieldOfStudy || '',
+    startDate: edu.startDate || edu.start_date || '',
+    endDate: edu.endDate || edu.end_date || '',
+    description: edu.description || edu.activities || '',
+    grade: edu.grade || edu.gpa || '',
+    activities: edu.activities || edu.description || '',
+    duration: edu.duration || edu.college_duration || ''
+  }));
+
+  // Skills - bacarıqlar (RapidAPI-dən əlavə olunacaq)
+  const skills = (scrapingDogData.skills || []).map((skill: any, index: number) => ({
+    id: `skill-scrapingdog-${Date.now()}-${index}`,
+    name: typeof skill === 'string' ? skill : (skill.name || skill.skill || ''),
+    level: typeof skill === 'object' ? (skill.level || skill.proficiency || '') : ''
+  }));
+
+  // Projects - layihələr
+  const projects = (scrapingDogData.projects || []).map((project: any, index: number) => ({
+    id: `project-scrapingdog-${Date.now()}-${index}`,
+    name: project.title || project.name || '',
+    description: project.description || project.summary || '',
+    url: project.link || project.url || project.website || '',
+    startDate: project.startDate || project.start_date || '',
+    endDate: project.endDate || project.end_date || '',
+    skills: project.skills || project.technologies || '',
+    duration: project.duration || ''
+  }));
+
+  // Awards & Honors - mükafatlar və şərəflər
+  const awards = (scrapingDogData.awards || []).map((award: any, index: number) => ({
+    id: `award-scrapingdog-${Date.now()}-${index}`,
+    name: award.name || award.title || '',
+    issuer: award.organization || award.issuer || award.authority || '',
+    date: award.date || award.duration || award.year || award.time || '',
+    description: award.description || award.summary || '',
+    type: 'award' // Award tipini təyin edirik
+  }));
+
+  // Honors - şərəf mükafatları (akademik və peşəkar)
+  const honors = (scrapingDogData.honors || scrapingDogData.achievements || []).map((honor: any, index: number) => ({
+    id: `honor-scrapingdog-${Date.now()}-${index}`,
+    name: honor.name || honor.title || '',
+    issuer: honor.organization || honor.issuer || honor.institution || '',
+    date: honor.date || honor.duration || honor.year || '',
+    description: honor.description || honor.summary || '',
+    type: 'honor' // Honor tipini təyin edirik
+  }));
+
+  // Certifications - professional sertifikatlar
+  const certifications = (scrapingDogData.certifications || scrapingDogData.certificates || []).map((cert: any, index: number) => ({
+    id: `cert-scrapingdog-${Date.now()}-${index}`,
+    name: cert.name || cert.title || cert.certification || '',
+    issuer: cert.organization || cert.issuer || cert.authority || cert.provider || '',
+    issueDate: cert.date || cert.issueDate || cert.startDate || cert.year || '',
+    expiryDate: cert.expiryDate || cert.expires || cert.endDate || '',
+    credentialId: cert.credentialId || cert.id || cert.certificate_id || '',
+    url: cert.url || cert.link || cert.verificationUrl || '',
+    description: cert.description || cert.summary || '',
+    skills: cert.skills || cert.relatedSkills || '',
+    status: cert.status || (cert.expiryDate ? 'active' : 'permanent')
+  }));
+
+  // Languages - dillər
+  const languages = (scrapingDogData.languages || []).map((lang: any, index: number) => ({
+    id: `lang-scrapingdog-${Date.now()}-${index}`,
+    name: typeof lang === 'string' ? lang : (lang.name || lang.language || ''),
+    proficiency: typeof lang === 'object' ? (lang.proficiency || lang.level || '') : ''
+  }));
+
+  // Volunteer Experience - könüllü təcrübə
+  const volunteering = (scrapingDogData.volunteering || []).map((vol: any, index: number) => ({
+    id: `vol-scrapingdog-${Date.now()}-${index}`,
+    organization: vol.organization || vol.company || '',
+    role: vol.role || vol.position || '',
+    cause: vol.cause || vol.field || '',
+    startDate: vol.startDate || vol.start_date || '',
+    endDate: vol.endDate || vol.end_date || '',
+    description: vol.description || vol.summary || '',
+    current: vol.current || false,
+    duration: vol.duration || ''
+  }));
+
+  console.log('✅ ScrapingDog məlumatları tam formata çevrildi:', {
+    personalInfo: personalInfo.fullName,
+    experienceCount: experience.length,
+    educationCount: education.length,
+    skillsCount: skills.length,
+    projectsCount: projects.length,
+    awardsCount: awards.length,
+    honorsCount: honors.length,
+    certificationsCount: certifications.length,
+    languagesCount: languages.length,
+    volunteeringCount: volunteering.length
+  });
+
+  return {
+    personalInfo,
+    experience,
+    education,
+    skills,
+    projects,
+    awards,
+    honors,
+    certifications,
+    languages,
+    volunteering
+  };
+}
+
+// Extract enhanced skills and additional data from RapidAPI response
+function extractRapidAPISkills(rapidApiData: any) {
+  if (!rapidApiData) return [];
 
   try {
-    // BrightData API konfigurasiyası
-    const api_key = 'da77d05e80aa038856c04cb0e96d34a267be39e89a46c03ed15e68b38353eaae';
-    const dataset_id = 'gd_l1viktl72bvl7bjuj0';
+    // RapidAPI skills can be in different locations
+    let skills = rapidApiData.skills || 
+                 rapidApiData.data?.skills || 
+                 rapidApiData.profile?.skills || 
+                 [];
 
-    console.log(`🔍 BrightData optimizə edilmiş request: ${linkedinUrl}`);
-    console.log(`⚡ include_errors=false aktiv - sürətli cavab üçün`);
-
-    // BrightData üçün düzgün request formatı
-    const requestData = [{
-      url: linkedinUrl
-    }];
-
-    // include_errors=false və format=json - sürətli cavab üçün
-    const triggerUrl = `https://api.brightdata.com/datasets/v3/trigger?dataset_id=${dataset_id}&include_errors=false&format=json`;
-    console.log(`📡 Trigger URL: ${triggerUrl}`);
-
-    const response = await axios.post(
-      triggerUrl,
-      requestData,
-      {
-        headers: {
-          'Authorization': `Bearer ${api_key}`,
-          'Content-Type': 'application/json'
-        },
-        timeout: 25000 // Azaldılmış timeout
+    if (!Array.isArray(skills)) {
+      // Sometimes skills come as object with different structure
+      if (typeof skills === 'object') {
+        skills = Object.values(skills) || [];
+      } else {
+        return [];
       }
-    );
-
-    console.log('✅ BrightData sürətli trigger response:', response.data);
-
-    if (response.status === 200 && response.data.snapshot_id) {
-      const snapshotId = response.data.snapshot_id;
-      console.log(`⚡ Snapshot yaradıldı (sürətli). Snapshot ID: ${snapshotId}`);
-
-      // Optimizə edilmiş snapshot gözlə
-      return await waitForBrightDataSnapshot(snapshotId, api_key);
-    } else {
-      console.log('Request failed with status code: ' + response.status);
-      throw new Error(`BrightData API error: ${response.status}`);
     }
 
-  } catch (error: any) {
-    console.error('Error making the request: ' + error.message);
-    throw new Error(`BrightData import uğursuz oldu: ${error.message}`);
+    const enhancedSkills = skills
+      .filter((skill: any) => skill && (typeof skill === 'string' || skill.name || skill.skill))
+      .map((skill: any, index: number) => {
+        if (typeof skill === 'string') {
+          return {
+            id: `skill-rapidapi-${Date.now()}-${index}`,
+            name: skill.trim(),
+            level: ''
+          };
+        }
+
+        return {
+          id: `skill-rapidapi-${Date.now()}-${index}`,
+          name: (skill.name || skill.skill || skill.title || '').trim(),
+          level: skill.level || skill.proficiency || skill.rating || ''
+        };
+      })
+      .filter((skill: any) => skill.name.length > 0);
+
+    console.log(`✅ RapidAPI-dən ${enhancedSkills.length} bacarıq əlavə edildi`);
+    return enhancedSkills;
+
+  } catch (error) {
+    console.error('❌ RapidAPI skills extraction xətası:', error);
+    return [];
   }
 }
 
-// BrightData snapshot cavabını gözlə - optimizə edilmiş
-async function waitForBrightDataSnapshot(snapshotId: string, apiKey: string) {
-  const axios = require('axios');
-  let attempts = 0;
-  const maxAttempts = 15; // Azaldılmış cəhd sayı
-  const pollInterval = 8000; // 8 saniyə - daha sürətli yoxlama
-
-  console.log(`⚡ BrightData snapshot sürətli cavab gözlənilir... Snapshot ID: ${snapshotId}`);
-
-  while (attempts < maxAttempts) {
-    try {
-      const elapsedTime = Math.round((attempts * pollInterval) / 1000);
-      console.log(`🔄 Sürətli snapshot yoxlama ${attempts + 1}/${maxAttempts} (${elapsedTime}s keçdi)...`);
-      console.log(`⚡ include_errors=false aktiv - snapshot polling`);
-
-      // include_errors=false və format=json - sürətli cavab
-      const snapshotUrl = `https://api.brightdata.com/datasets/v3/snapshot/${snapshotId}?format=json`;
-      console.log(`📡 Snapshot URL: ${snapshotUrl}`);
-
-      const response = await axios.get(
-        snapshotUrl,
-        {
-          headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json'
-          },
-          timeout: 15000 // Azaldılmış timeout
-        }
-      );
-
-      console.log(`📊 Snapshot status: ${response.status}`);
-
-      if (response.status === 200) {
-        const data = response.data;
-
-        if (data && Array.isArray(data) && data.length > 0) {
-          const profileData = data[0];
-
-          if (profileData && Object.keys(profileData).length > 0) {
-            console.log('⚡ BrightData sürətli məlumat alındı!');
-            console.log(`👤 Profile məlumatları hazır:`, {
-              name: profileData.name || profileData.full_name,
-              experience: profileData.experience?.length || 0,
-              education: profileData.educations_details?.length || 0,
-              skills: profileData.skills?.length || 0
-            });
-
-            return profileData;
-          }
-        }
-      } else if (response.status === 202) {
-        console.log('⏳ Snapshot işlənir (202)...');
-      } else if (response.status === 404) {
-        console.log('⏳ Snapshot hazırlanır (404)...');
-      }
-
-      console.log(`⏳ ${pollInterval / 1000}s gözləyirik (optimizə edilmiş)...`);
-      await new Promise(resolve => setTimeout(resolve, pollInterval));
-      attempts++;
-
-    } catch (error: any) {
-      console.error(`❌ Snapshot xətası: ${error.message}`);
-
-      if (error.response?.status === 404 || error.response?.status === 202) {
-        console.log('⏳ Snapshot hələ hazırlanır...');
-      }
-
-      if (attempts === maxAttempts - 1) {
-        throw new Error(`BrightData snapshot ${maxAttempts} cəhd sonra timeout`);
-      }
-
-      await new Promise(resolve => setTimeout(resolve, pollInterval));
-      attempts++;
-    }
-  }
-
-  throw new Error(`BrightData snapshot timeout: sürətli məlumat alınmadı`);
-}
-
+// ScrapingDog LinkedIn Profile Scraping - Primary Service
 export async function POST(request: NextRequest) {
   try {
-    console.log('🚀 LinkedIn import - BrightData + RapidAPI paralel');
+    console.log('🚀 LinkedIn import - ScrapingDog + RapidAPI paralel');
 
     // Verify JWT token
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
@@ -204,29 +284,30 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('📝 LinkedIn URL:', linkedinUrl);
+    console.log('👤 User ID:', decoded.userId);
 
-    // Paralel olaraq BrightData və RapidAPI çağır
-    console.log('📡 BrightData və RapidAPI paralel başlayır...');
+    // Parallel execution of ScrapingDog and RapidAPI
+    console.log('📡 ScrapingDog və RapidAPI paralel başlayır...');
 
-    const [brightDataResponse, rapidApiResponse] = await Promise.allSettled([
-      callBrightDataAPI(linkedinUrl),
+    const [scrapingDogResponse, rapidApiResponse] = await Promise.allSettled([
+      scrapingDogService.scrapeLinkedInProfile(linkedinUrl),
       getRapidAPISkills(linkedinUrl)
     ]);
 
-    // BrightData nəticəsini yoxla
-    let brightDataResult = null;
-    if (brightDataResponse.status === 'fulfilled' && brightDataResponse.value) {
-      brightDataResult = brightDataResponse.value;
-      console.log('✅ BrightData uğurludur!');
+    // Check ScrapingDog result
+    let scrapingDogResult = null;
+    if (scrapingDogResponse.status === 'fulfilled' && scrapingDogResponse.value) {
+      scrapingDogResult = scrapingDogResponse.value;
+      console.log('✅ ScrapingDog uğurludur!');
     } else {
-      console.error('❌ BrightData xətası:', brightDataResponse.status === 'rejected' ? brightDataResponse.reason : 'No data');
+      console.error('❌ ScrapingDog xətası:', scrapingDogResponse.status === 'rejected' ? scrapingDogResponse.reason : 'No data');
       return NextResponse.json({
         success: false,
-        error: `BrightData import uğursuz: ${brightDataResponse.status === 'rejected' ? brightDataResponse.reason.message : 'No data received'}`
+        error: `ScrapingDog import uğursuz: ${scrapingDogResponse.status === 'rejected' ? scrapingDogResponse.reason.message : 'No data received'}`
       }, { status: 500 });
     }
 
-    // RapidAPI nəticəsini yoxla (optional)
+    // Check RapidAPI result (optional)
     let rapidApiResult = null;
     if (rapidApiResponse.status === 'fulfilled' && rapidApiResponse.value) {
       rapidApiResult = rapidApiResponse.value;
@@ -235,18 +316,18 @@ export async function POST(request: NextRequest) {
       console.log('⚠️ RapidAPI skills alınmadı (optional):', rapidApiResponse.status === 'rejected' ? rapidApiResponse.reason : 'No data');
     }
 
-    // BrightData məlumatlarını CV formatına çevir
-    console.log('📍 BrightData məlumatları formatlanır...');
-    const transformedData = transformBrightDataToCVFormat(brightDataResult);
+    // Transform ScrapingDog data to CV format
+    console.log('📍 ScrapingDog məlumatları formatlanır...');
+    const transformedData = transformScrapingDogToCVFormat(scrapingDogResult);
 
-    // RapidAPI skills-ləri əlavə et (əgər varsa)
+    // Add RapidAPI skills if available
     if (rapidApiResult) {
       console.log('🎯 RapidAPI skills birləşdirilir...');
       const rapidApiSkills = extractRapidAPISkills(rapidApiResult);
       if (rapidApiSkills.length > 0) {
-        // Mövcud skills-lərlə birləşdir, duplikatları çıxar
-        const existingSkills = transformedData.skills.map(s => s.name.toLowerCase());
-        const newSkills = rapidApiSkills.filter(skill =>
+        // Merge with existing skills, remove duplicates
+        const existingSkills = transformedData.skills.map((s: any) => s.name.toLowerCase());
+        const newSkills = rapidApiSkills.filter((skill: any) =>
           !existingSkills.includes(skill.name.toLowerCase())
         );
         transformedData.skills = [...transformedData.skills, ...newSkills];
@@ -261,244 +342,100 @@ export async function POST(request: NextRequest) {
       experienceCount: transformedData.experience?.length || 0,
       educationCount: transformedData.education?.length || 0,
       skillsCount: transformedData.skills?.length || 0,
-      dataSource: 'brightdata + rapidapi'
-    });
-
-    // Ad-soyad yoxlanışı - mütləq şərt
-    const fullName = transformedData.personalInfo?.fullName?.trim();
-    const firstName = brightDataResult.first_name?.trim();
-    const lastName = brightDataResult.last_name?.trim();
-    const name = brightDataResult.name?.trim();
-
-    // Müxtəlif ad formatlarını yoxla
-    const hasValidName = fullName || name || (firstName && lastName);
-
-    if (!hasValidName) {
-      console.log('❌ Heç bir ad formatı tapılmadı:', {
-        fullName,
-        name,
-        firstName,
-        lastName
-      });
-      return NextResponse.json({
-        success: false,
-        error: 'Ad və soyad məlumatı tapılmadı. CV yaratmaq üçün ən azından ad-soyad lazımdır.'
-      }, { status: 400 });
-    }
-
-    // Ən yaxşı adı seç
-    const finalName = fullName || name || `${firstName} ${lastName}`.trim();
-    console.log(`✅ Ad tapıldı: ${finalName}`);
-
-    // Final adı yenidən təyin et
-    if (!transformedData.personalInfo.fullName) {
-      transformedData.personalInfo.fullName = finalName;
-    }
-
-    console.log('🎉 Bütün məlumatlar hazır:', {
-      name: transformedData.personalInfo.fullName,
-      experienceCount: transformedData.experience?.length || 0,
-      educationCount: transformedData.education?.length || 0,
-      skillsCount: transformedData.skills?.length || 0,
-      languagesCount: transformedData.languages?.length || 0,
-      certificationsCount: transformedData.certifications?.length || 0,
       projectsCount: transformedData.projects?.length || 0,
-      volunteerCount: transformedData.volunteerExperience?.length || 0,
-      dataSource: 'brightdata + rapidapi'
+      awardsCount: transformedData.awards?.length || 0,
+      honorsCount: transformedData.honors?.length || 0,
+      certificationsCount: transformedData.certifications?.length || 0,
+      languagesCount: transformedData.languages?.length || 0,
+      volunteeringCount: transformedData.volunteering?.length || 0,
+      dataSource: 'scrapingdog + rapidapi'
     });
 
-    // CV yarad - bütün məlumatlarla
-    console.log('💾 CV yaradılır (BrightData + RapidAPI)...');
-    const cvData = {
-      userId: decoded.userId,
-      title: `${transformedData.personalInfo.fullName} - CV`,
-      ...transformedData,
-      templateId: 'basic' // İlk yaradılarkən basic template
-    };
+    // Generate a unique CV name
+    const firstName = scrapingDogResult.firstName?.trim();
+    const lastName = scrapingDogResult.lastName?.trim();
+    const name = scrapingDogResult.name?.trim();
+    
+    const cvName = name || 
+                   (firstName && lastName ? `${firstName} ${lastName}` : '') || 
+                   'LinkedIn CV';
 
+    console.log(`📝 CV yaradılır: "${cvName}"`);
+
+    // Save CV to database with all imported data
     const newCV = await prisma.cV.create({
       data: {
+        title: cvName,
         userId: decoded.userId,
-        title: cvData.title,
-        cv_data: cvData,
-        templateId: 'basic' // Database-də də basic template
+        cv_data: {
+          personalInfo: transformedData.personalInfo,
+          experience: transformedData.experience,
+          education: transformedData.education,
+          skills: transformedData.skills,
+          projects: transformedData.projects,
+          awards: transformedData.awards,
+          honors: transformedData.honors,
+          certifications: transformedData.certifications,
+          languages: transformedData.languages,
+          volunteering: transformedData.volunteering
+        }
       }
     });
 
-    console.log('✅ CV uğurla yaradıldı (BrightData + RapidAPI):', newCV.id);
+    // Log successful import with detailed statistics
+    await prisma.importSession.create({
+      data: {
+        userId: decoded.userId,
+        type: 'linkedin_success',
+        data: JSON.stringify({
+          cvId: newCV.id,
+          profileUrl: linkedinUrl,
+          importStats: {
+            experienceCount: transformedData.experience.length,
+            educationCount: transformedData.education.length,
+            skillsCount: transformedData.skills.length,
+            projectsCount: transformedData.projects.length,
+            awardsCount: transformedData.awards.length,
+            honorsCount: transformedData.honors.length,
+            certificationsCount: transformedData.certifications.length,
+            languagesCount: transformedData.languages.length,
+            volunteeringCount: transformedData.volunteering.length
+          },
+          dataSource: 'scrapingdog + rapidapi'
+        }),
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+      }
+    });
+
+    console.log('✅ LinkedIn import və CV yaradılması uğurla tamamlandı!');
+    console.log('📋 Yaradılan CV ID:', newCV.id);
 
     return NextResponse.json({
       success: true,
-      message: 'LinkedIn profili uğurla import edildi və CV yaradıldı (BrightData + RapidAPI)',
       cvId: newCV.id,
-      profileData: {
-        name: transformedData.personalInfo.fullName,
-        headline: transformedData.personalInfo.title,
-        location: transformedData.personalInfo.location,
-        experienceCount: transformedData.experience?.length || 0,
-        educationCount: transformedData.education?.length || 0,
-        skillsCount: transformedData.skills?.length || 0,
-        projectsCount: transformedData.projects?.length || 0,
-        certificationsCount: transformedData.certifications?.length || 0,
-        volunteerCount: transformedData.volunteerExperience?.length || 0,
-        languagesCount: transformedData.languages?.length || 0,
-        dataSource: 'brightdata + rapidapi'
-      },
-      transformedData: transformedData
+      message: 'LinkedIn profili uğurla import edildi və CV yaradıldı - bütün məlumatlar dolduruldu',
+      summary: {
+        name: cvName,
+        experienceCount: transformedData.experience.length,
+        educationCount: transformedData.education.length,
+        skillsCount: transformedData.skills.length,
+        projectsCount: transformedData.projects.length,
+        awardsCount: transformedData.awards.length,
+        honorsCount: transformedData.honors.length,
+        certificationsCount: transformedData.certifications.length,
+        languagesCount: transformedData.languages.length,
+        volunteeringCount: transformedData.volunteering.length,
+        source: 'ScrapingDog + RapidAPI',
+        totalSections: 9
+      }
     });
 
   } catch (error: any) {
-    console.error('❌ LinkedIn import critical error:', error);
-
+    console.error('❌ LinkedIn import general error:', error);
+    
     return NextResponse.json({
       success: false,
-      error: `LinkedIn import xətası: ${error.message}`
+      error: error.message || 'LinkedIn import zamanı xəta baş verdi'
     }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
-  }
-}
-
-// BrightData məlumatlarını CV formatına çevir
-function transformBrightDataToCVFormat(rawData: any) {
-  return {
-    personalInfo: {
-      fullName: rawData.name || rawData.full_name || '',
-      title: rawData.headline || rawData.position || '',
-      email: rawData.email || '',
-      phone: rawData.phone || '',
-      location: rawData.location || rawData.geo_location || rawData.city || '',
-      linkedin: rawData.url || rawData.input_url || '',
-      summary: rawData.summary || rawData.about || ''
-    },
-    experience: formatExperience(rawData.experience || []),
-    education: formatEducation(rawData.educations_details || rawData.education || []),
-    skills: formatSkills(rawData.skills || []),
-    languages: formatLanguages(rawData.languages || []),
-    certifications: [
-      ...formatCertifications(rawData.certifications || []),
-      ...formatCertifications(rawData.honors_and_awards || [])
-    ],
-    volunteerExperience: formatVolunteerExperience(rawData.volunteering || rawData.volunteer_experience || []),
-    projects: formatProjects(rawData.projects || []),
-    importSource: 'brightdata',
-    importDate: new Date().toISOString()
-  };
-}
-
-// Format functions for BrightData data
-function formatExperience(experiences: any[]) {
-  if (!Array.isArray(experiences)) return [];
-  return experiences.map((exp, index) => ({
-    id: `exp-brightdata-${Date.now()}-${index}`,
-    position: exp.title || exp.position || '',
-    company: exp.company || exp.company_name || '',
-    location: exp.location || '',
-    startDate: formatDate(exp.start_date || exp.startDate),
-    endDate: formatDate(exp.end_date || exp.endDate),
-    current: exp.current || exp.is_current || false,
-    description: exp.description || ''
-  })).filter(exp => exp.position || exp.company);
-}
-
-function formatEducation(education: any[]) {
-  if (!Array.isArray(education)) return [];
-  return education.map((edu, index) => ({
-    id: `edu-brightdata-${Date.now()}-${index}`,
-    degree: edu.degree || '',
-    institution: edu.school || edu.institution || edu.university || '',
-    field: edu.field || edu.field_of_study || '',
-    startDate: formatDate(edu.start_date || edu.startDate),
-    endDate: formatDate(edu.end_date || edu.endDate),
-    current: edu.current || false,
-    gpa: edu.gpa || ''
-  })).filter(edu => edu.degree || edu.institution);
-}
-
-function formatSkills(skills: any[]) {
-  if (!Array.isArray(skills)) return [];
-  return skills.map((skill, index) => ({
-    id: `skill-brightdata-${Date.now()}-${index}`,
-    name: typeof skill === 'string' ? skill : (skill.name || skill.skill || ''),
-    level: skill.level || ''
-  })).filter(skill => skill.name);
-}
-
-function formatLanguages(languages: any[]) {
-  if (!Array.isArray(languages)) return [];
-  return languages.map((lang, index) => ({
-    id: `lang-brightdata-${Date.now()}-${index}`,
-    language: typeof lang === 'string' ? lang : (lang.name || lang.language || ''),
-    proficiency: lang.proficiency || lang.level || ''
-  })).filter(lang => lang.language);
-}
-
-function formatCertifications(certifications: any[]) {
-  if (!Array.isArray(certifications)) return [];
-  return certifications.map((cert, index) => ({
-    id: `cert-brightdata-${Date.now()}-${index}`,
-    name: cert.name || cert.title || '',
-    issuer: cert.issuer || cert.organization || '',
-    date: formatDate(cert.date || cert.issue_date),
-    url: cert.url || ''
-  })).filter(cert => cert.name);
-}
-
-function formatVolunteerExperience(volunteer: any[]) {
-  if (!Array.isArray(volunteer)) return [];
-  return volunteer.map((vol, index) => ({
-    id: `vol-brightdata-${Date.now()}-${index}`,
-    role: vol.role || vol.title || '',
-    organization: vol.organization || vol.company || '',
-    cause: vol.cause || '',
-    startDate: formatDate(vol.start_date || vol.startDate),
-    endDate: formatDate(vol.end_date || vol.endDate),
-    current: vol.current || false,
-    description: vol.description || ''
-  })).filter(vol => vol.role || vol.organization);
-}
-
-function formatProjects(projects: any[]) {
-  if (!Array.isArray(projects)) return [];
-  return projects.map((project, index) => ({
-    id: `proj-brightdata-${Date.now()}-${index}`,
-    name: project.name || project.title || '',
-    description: project.description || '',
-    url: project.url || project.link || '',
-    startDate: formatDate(project.start_date || project.startDate),
-    endDate: formatDate(project.end_date || project.endDate),
-    technologies: project.technologies || project.skills || []
-  })).filter(project => project.name);
-}
-
-function formatDate(dateInput: any): string {
-  if (!dateInput) return '';
-  if (typeof dateInput === 'string') return dateInput;
-  if (typeof dateInput === 'object' && dateInput.year) {
-    const month = dateInput.month ? String(dateInput.month).padStart(2, '0') : '01';
-    return `${dateInput.year}-${month}`;
-  }
-  return String(dateInput);
-}
-
-// RapidAPI skills-ləri extract et
-function extractRapidAPISkills(rapidApiData: any) {
-  if (!rapidApiData) return [];
-
-  try {
-    // RapidAPI-dən skills-ləri çıxar
-    const skills = rapidApiData.skills || rapidApiData.data?.skills || [];
-
-    if (!Array.isArray(skills)) return [];
-
-    return skills.map((skill, index) => ({
-      id: `skill-rapidapi-${Date.now()}-${index}`,
-      name: typeof skill === 'string' ? skill : (skill.name || skill.skill || ''),
-      level: skill.level || skill.proficiency || ''
-    })).filter(skill => skill.name && skill.name.trim().length > 0);
-
-  } catch (error) {
-    console.error('❌ RapidAPI skills extract xətası:', error);
-    return [];
   }
 }
