@@ -53,6 +53,8 @@ interface Project {
   url?: string;
   github?: string;
   current?: boolean;
+  startDate?: string;
+  endDate?: string;
 }
 
 interface ProjectsSectionProps {
@@ -77,9 +79,11 @@ export default function ProjectsSection({ data, onChange }: ProjectsSectionProps
       technologies: [],
       url: '',
       github: '',
-      current: false
+      current: false,
+      startDate: '',
+      endDate: ''
     };
-    onChange([...normalizedData, newProject]);
+    onChange([newProject, ...normalizedData]);
     setExpandedId(newProject.id);
   };
 
@@ -87,7 +91,7 @@ export default function ProjectsSection({ data, onChange }: ProjectsSectionProps
     const updated = normalizedData.map(project => 
       project.id === id ? { ...project, [field]: value } : project
     );
-    onChange(updated);
+    onChange([...updated]);
   };
 
   const removeProject = (id: string) => {
@@ -238,6 +242,50 @@ export default function ProjectsSection({ data, onChange }: ProjectsSectionProps
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                         placeholder="React, Node.js, PostgreSQL, AWS"
                       />
+                    </div>
+                  </div>
+
+                  {/* Date Fields */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Başlama tarixi
+                      </label>
+                      <input
+                        type="month"
+                        value={project.startDate || ''}
+                        onChange={(e) => updateProject(project.id, 'startDate', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Bitirmə tarixi
+                      </label>
+                      <input
+                        type="month"
+                        value={project.current ? '' : (project.endDate || '')}
+                        onChange={(e) => updateProject(project.id, 'endDate', e.target.value)}
+                        disabled={project.current}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:bg-gray-100 disabled:text-gray-500"
+                      />
+                    </div>
+                    <div className="flex items-end">
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(project.current)}
+                          onChange={(e) => {
+                            const isChecked = e.target.checked;
+                            updateProject(project.id, 'current', isChecked);
+                            if (isChecked) {
+                              updateProject(project.id, 'endDate', '');
+                            }
+                          }}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">Davam edir</span>
+                      </label>
                     </div>
                   </div>
 

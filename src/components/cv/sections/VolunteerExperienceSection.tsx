@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { getLabel } from '@/lib/cvLanguage';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 
 interface VolunteerExperience {
@@ -10,12 +9,14 @@ interface VolunteerExperience {
   role: string;
   description?: string;
   cause?: string;
+  startDate?: string;
+  endDate?: string;
+  current?: boolean;
 }
 
 interface VolunteerExperienceSectionProps {
   data: VolunteerExperience[];
   onChange: (data: VolunteerExperience[]) => void;
-  
 }
 
 export default function VolunteerExperienceSection({ data, onChange }: VolunteerExperienceSectionProps) {
@@ -29,17 +30,21 @@ export default function VolunteerExperienceSection({ data, onChange }: Volunteer
       organization: '',
       role: '',
       description: '',
-      cause: ''
+      cause: '',
+      startDate: '',
+      endDate: '',
+      current: false
     };
-    onChange([...data, newVolunteerExperience]);
-    setEditingIndex(data.length);
+    onChange([newVolunteerExperience, ...data]);
+    setEditingIndex(0);
   };
 
-  const updateVolunteerExperience = (index: number, field: keyof VolunteerExperience, value: string | boolean) => {
-    const updated = [...data];
-    updated[index] = { ...updated[index], [field]: value };
-    
-    onChange(updated);
+  const updateVolunteerExperience = (index: number, updates: Partial<VolunteerExperience>) => {
+    const updated = data.map((item, i) =>
+      i === index ? { ...item, ...updates } : item
+    );
+    // DÜZƏLİŞ: React-in dəyişikliyi görməsi üçün yeni massiv referansı yaradırıq
+    onChange([...updated]);
   };
 
   const removeVolunteerExperience = (index: number) => {
@@ -98,7 +103,6 @@ export default function VolunteerExperienceSection({ data, onChange }: Volunteer
                 )}
               </div>
 
-              {/* Action links moved to bottom of card */}
               <div className="flex items-center justify-end gap-4 mt-4 pt-2 border-t border-gray-100">
                 <button
                   onClick={() => setEditingIndex(editingIndex === index ? null : index)}
@@ -124,7 +128,7 @@ export default function VolunteerExperienceSection({ data, onChange }: Volunteer
                       <input
                         type="text"
                         value={volunteer.role}
-                        onChange={(e) => updateVolunteerExperience(index, 'role', e.target.value)}
+                        onChange={(e) => updateVolunteerExperience(index, { role: e.target.value })}
                         placeholder="Könüllü koordinator"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       />
@@ -136,7 +140,7 @@ export default function VolunteerExperienceSection({ data, onChange }: Volunteer
                       <input
                         type="text"
                         value={volunteer.organization}
-                        onChange={(e) => updateVolunteerExperience(index, 'organization', e.target.value)}
+                        onChange={(e) => updateVolunteerExperience(index, { organization: e.target.value })}
                         placeholder="Kinder MTM"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       />
@@ -150,10 +154,53 @@ export default function VolunteerExperienceSection({ data, onChange }: Volunteer
                     <input
                       type="text"
                       value={volunteer.cause || ''}
-                      onChange={(e) => updateVolunteerExperience(index, 'cause', e.target.value)}
+                      onChange={(e) => updateVolunteerExperience(index, { cause: e.target.value })}
                       placeholder="Uşaq təhsili, ekoloji mühafizə, sosial yardım"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                     />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Başlama tarixi
+                      </label>
+                      <input
+                        type="month"
+                        value={volunteer.startDate || ''}
+                        onChange={(e) => updateVolunteerExperience(index, { startDate: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Bitirmə tarixi
+                      </label>
+                      <input
+                        type="month"
+                        value={volunteer.current ? '' : (volunteer.endDate || '')}
+                        onChange={(e) => updateVolunteerExperience(index, { endDate: e.target.value })}
+                        disabled={Boolean(volunteer.current)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:bg-gray-100 disabled:text-gray-500"
+                      />
+                    </div>
+                    <div className="flex items-end">
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(volunteer.current)}
+                          onChange={(e) => {
+                            const isChecked = e.target.checked;
+                            updateVolunteerExperience(index, {
+                              current: isChecked,
+                              endDate: isChecked ? '' : volunteer.endDate,
+                            });
+                          }}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">Davam edir</span>
+                      </label>
+                    </div>
                   </div>
 
                   <div>
@@ -162,7 +209,7 @@ export default function VolunteerExperienceSection({ data, onChange }: Volunteer
                     </label>
                     <RichTextEditor
                       value={volunteer.description || ''}
-                      onChange={(value) => updateVolunteerExperience(index, 'description', value)}
+                      onChange={(value) => updateVolunteerExperience(index, { description: value })}
                       placeholder="Könüllü fəaliyyətiniz haqqında qısa məlumat verin..."
                       minHeight="100px"
                     />

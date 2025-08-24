@@ -258,7 +258,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
     } catch (error) {
       console.error('💥 AI Summary error:', error);
-      showError('AI summary yaradarkən xəta baş verdi. Yenidən cəhd edin.', 'AI Xətası');
+      showError('Süni intellekt ilə peşəkar xülasə yaratmaq üçün bacarıq əlavə edin', 'AI Xətası');
     } finally {
       setAiGenerating(false);
     }

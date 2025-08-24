@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 // Multiple Gemini API Keys for load balancing and failover
 const GEMINI_API_KEYS = [
@@ -37,17 +40,10 @@ function initializeGeminiAI() {
 // Prepare comprehensive CV data for AI analysis with enhanced structure
 function prepareCVDataForAI(profileData: any): string {
   let cvText = '';
-
-  // Calculate total years of experience from work history
-  let totalYears = 0;
-  if (profileData.experience && Array.isArray(profileData.experience)) {
-    totalYears = profileData.experience.length * 1.5; // Rough estimation
-  }
-
-  cvText += `=== CAREER OVERVIEW ===\n`;
-  cvText += `Estimated Total Experience: ${totalYears > 0 ? Math.round(totalYears) + ' years' : 'Entry level'}\n`;
-  cvText += `Number of Positions: ${profileData.experience?.length || 0}\n`;
-  cvText += `Education Level: ${profileData.education?.length > 0 ? 'Higher Education' : 'Not specified'}\n\n`;
+   cvText += `=== CAREER OVERVIEW ===\n`;
+   cvText += `Number of Positions: ${profileData.experience?.length || 0}\n`;
+   cvText += `Education Level: ${profileData.education?.length > 0 ? 'Higher Education' : 'Not specified'}\n\n`;
+ 
 
   // Work Experience with detailed analysis
   if (profileData.experience && Array.isArray(profileData.experience) && profileData.experience.length > 0) {
@@ -175,74 +171,24 @@ function prepareCVDataForAI(profileData: any): string {
 function getStyleInstructions(style: string, isEnglish: boolean): string {
   const instructions = {
     achievement_focused: {
-      en: `ACHIEVEMENT-FOCUSED APPROACH:
-- Lead with quantifiable accomplishments and measurable impact
-- Emphasize specific results, improvements, and successful outcomes
-- Highlight awards, recognitions, or standout achievements
-- Structure: "Accomplished [role] who achieved [specific results] through [key skills/methods]"
-- Focus on transformation, growth, and concrete results delivered`,
-      az: `NAİLİYYƏT FOKUSLANDıRıLAN YANAŞMA:
-- Ölçülə bilən nailiyyətlər və təsirlə başla
-- Konkret nəticələr, yaxşılaşmalar və uğurlu nəticələr vurğula
-- Mükafatlar, tanınma və ya diqqətəlayiq nailiyyətlər göstər
-- Struktur: "[konkret nəticələr] əldə edən [rol] [əsas bacarıqlar/metodlar] vasitəsilə"
-- Transformasiya, artım və çatdırılan konkret nəticələrə fokus`
+      en: `Focus on specific accomplishments and measurable results. Start with what the person achieved.`,
+      az: `Konkret nailiyyətlər və ölçülə bilən nəticələrə fokuslan. Şəxsin nə əldə etdiyi ilə başla.`
     },
     skill_technical: {
-      en: `TECHNICAL SKILL-FOCUSED APPROACH:
-- Emphasize technical expertise and specialized knowledge
-- Highlight cutting-edge technologies, tools, and methodologies
-- Showcase depth of technical competency and innovation
-- Structure: "Technical expert in [domain] with mastery of [specific technologies/tools]"
-- Focus on technical problem-solving capabilities and expertise depth`,
-      az: `TEXNİKİ BACAFıQ FOKUSLANDıRıLAN YANAŞMA:
-- Texniki ekspertiza və ixtisaslaşmış bilik vurğula
-- Müasir texnologiyalar, alətlər və metodologiyalar göstər
-- Texniki səriştənin dərinliyi və innovasiya nümayiş etdir
-- Struktur: "[sahə]də texniki ekspert [konkret texnologiyalar/alətlər] mükəmməlliyi ilə"
-- Texniki problem həlli qabiliyyətləri və ekspertiza dərinliyi fokus`
+      en: `Highlight technical expertise and practical application of skills. Show how they solve problems.`,
+      az: `Texniki ekspertiza və bacarıqların praktiki tətbiqini vurğula. Problemləri necə həll etdiklərini göstər.`
     },
     leadership_strategic: {
-      en: `LEADERSHIP & STRATEGIC APPROACH:
-- Emphasize management, team leadership, and strategic thinking
-- Highlight ability to guide teams, make decisions, and drive organizational goals
-- Showcase vision, planning, and execution capabilities
-- Structure: "Strategic leader who guides [team size/type] to achieve [organizational outcomes]"
-- Focus on influence, direction-setting, and transformational leadership`,
-      az: `LİDERLİK VƏ STRATEJİ YANAŞMA:
-- İdarəetmə, komanda liderliyi və strateji düşüncə vurğula
-- Komandaları idarə etmək, qərar vermək və təşkilati hədəflərə nail olmaq qabiliyyəti göstər
-- Vizyon, planlaşdırma və icra qabiliyyətləri nümayiş etdir
-- Struktur: "[təşkilati nəticələr] əldə etmək üçün [komanda ölçüsü/növü] idarə edən strateji lider"
-- Təsir, istiqamət müəyyənləşdirmə və transformasional liderlik fokus`
+      en: `Emphasize leadership impact and strategic thinking. Show how they guide and influence.`,
+      az: `Liderlik təsiri və strateji düşüncəni vurğula. Necə rəhbərlik etdiklərini və təsir göstərdiklərini göstər.`
     },
     innovation_problem_solving: {
-      en: `INNOVATION & PROBLEM-SOLVING APPROACH:
-- Emphasize creative thinking, innovation, and solution development
-- Highlight unique approaches to challenges and breakthrough solutions
-- Showcase adaptability, creativity, and forward-thinking
-- Structure: "Innovative problem-solver who develops [solution types] for [challenge areas]"
-- Focus on creative methodologies, breakthrough thinking, and adaptive solutions`,
-      az: `İNNOVASİYA VƏ PROBLEM HƏLLİ YANAŞMA:
-- Yaradıcı düşüncə, innovasiya və həll inkişafı vurğula
-- Çətinliklərə unikal yanaşmalar və çıraq həlləri göstər
-- Uyğunlaşma, yaradıcılıq və gələcəkə yönəlik düşüncə nümayiş etdir
-- Struktur: "[çətinlik sahələri] üçün [həll növləri] inkişaf etdirən innovativ problem həllədicisi"
-- Yaradıcı metodologiyalar, çıraq düşüncə və uyğunlaşan həlləri fokus`
+      en: `Focus on creative solutions and innovative approaches. Highlight unique problem-solving methods.`,
+      az: `Yaradıcı həllər və innovativ yanaşmalara fokuslan. Unikal problem həlli metodlarını vurğula.`
     },
     industry_expertise: {
-      en: `INDUSTRY EXPERTISE APPROACH:
-- Emphasize deep industry knowledge and sector-specific experience
-- Highlight understanding of industry trends, regulations, and best practices
-- Showcase domain expertise and specialized industry insights
-- Structure: "Industry specialist with deep expertise in [sector/domain] and proven track record"
-- Focus on sector knowledge, industry standards, and domain authority`,
-      az: `SAHƏKARLıQ EKSPERTİZASı YANAŞMA:
-- Dərin sahəkarlıq bilik və sektor-spesifik təcrübə vurğula
-- Sahəkarlıq trendləri, qaydalar və ən yaxşı təcrübələr anlayışı göstər
-- Domen ekspertizası və ixtisaslaşmış sahəkarlıq görüşləri nümayiş etdir
-- Struktur: "[sektor/domen]də dərin ekspertiza və sübut edilmiş rekord ilə sahəkarlıq mütəxəssisi"
-- Sektor bilik, sahəkarlıq standartları və domen avtoriteti fokus`
+      en: `Emphasize deep domain knowledge and industry-specific achievements. Show specialized expertise.`,
+      az: `Dərin sahə bilik və sahə-spesifik nailiyyətləri vurğula. İxtisaslaşmış ekspertizanı göstər.`
     }
   };
 
@@ -252,23 +198,64 @@ function getStyleInstructions(style: string, isEnglish: boolean): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { profileData, cvLanguage } = await req.json();
+    const { cvId, profileData, cvLanguage, structurePattern, openingStyle, requestId } = await req.json();
 
-    if (!profileData) {
+    // Handle both scenarios: direct profileData or cvId to fetch data
+    let actualProfileData = profileData;
+    let actualCvLanguage = cvLanguage;
+
+    if (cvId && !profileData) {
+      // Fetch CV data from database using cvId
+      try {
+        const cv = await prisma.cV.findUnique({
+          where: { id: cvId }
+        });
+
+        if (!cv || !cv.cv_data) {
+          throw new Error('CV tapılmadı');
+        }
+
+        // Parse the JSON CV data
+        const cvData = cv.cv_data as any;
+        actualProfileData = cvData;
+        actualCvLanguage = cvData.cvLanguage || 'azerbaijani';
+      } catch (fetchError) {
+        console.error('CV data fetch error:', fetchError);
+        return NextResponse.json({
+          success: false,
+          error: 'CV məlumatları alına bilmədi'
+        }, { status: 400 });
+      }
+    }
+
+    if (!actualProfileData) {
       return NextResponse.json({
         success: false,
         error: 'Profile data tapılmadı'
       }, { status: 400 });
     }
 
+    // ❌ Skills olmayan CV-lər üçün AI summary yaradılmamalıdır
+    const hasSkills = actualProfileData.skills && Array.isArray(actualProfileData.skills) && actualProfileData.skills.length > 0;
+    
+    if (!hasSkills) {
+      console.log('⚠️ Skills olmayan CV üçün AI summary yaradılmadı');
+      return NextResponse.json({
+        success: false,
+        error: 'Bacarıq əlavə edin',
+        errorEn: 'Please add skills first',
+        requiresSkills: true
+      }, { status: 400 });
+    }
+
     // Determine language for summary generation
-    const targetLanguage = cvLanguage || 'azerbaijani';
+    const targetLanguage = actualCvLanguage || 'azerbaijani';
     const isEnglish = targetLanguage === 'english';
 
-    console.log(`🤖 AI Professional Summary generasiya edilir (${targetLanguage})...`);
+    console.log(`🤖 AI Professional Summary generasiya edilir (${targetLanguage})... (Skills: ${actualProfileData.skills.length})`);
 
     // Create comprehensive CV text for AI analysis
-    const cvText = prepareCVDataForAI(profileData);
+    const cvText = prepareCVDataForAI(actualProfileData);
 
     // Array of different summary approaches for variety
     const summaryStyles = [
@@ -286,51 +273,35 @@ export async function POST(req: NextRequest) {
 
     // Create enhanced prompt with style variation
     const basePrompt = isEnglish ? 
-      `Write a professional CV summary based strictly on the information provided in the CV. The text must be written in third-person style (e.g., "An experienced specialist with over 5 years of expertise..."), never in first-person. Avoid clichés such as "responsible" or "result-oriented." The summary should highlight real skills, measurable achievements, and distinctive strengths, while maintaining a polished, credible tone that attracts HR professionals and conveys uniqueness.
+      `Write a professional CV summary strictly based on the information provided in the CV. The text must be in third-person style (not first-person). Avoid phrases like "with X years of experience." Instead, emphasize the quality of experience, tangible outcomes, and unique strengths of the candidate. Do not use clichés such as "responsible" or "results-driven." The summary should feel authentic, highlight practical application of skills and measurable impact, and clearly show the value the candidate can bring to an organization.
 
-FULL CV DATA FOR ANALYSIS:
+CV DATA:
 ${cvText}
 
-CRITICAL REQUIREMENTS:
-- Analyze ALL sections of the CV thoroughly (experience, education, skills, projects, certifications, languages)
-- Write in third-person perspective ONLY
-- NO names, NO personal pronouns ("I", "my", "me")
-- NO percentage symbols (%) - express improvements as "increased by X times" or "improved X-fold"
-- Avoid generic clichés and buzzwords
-- Focus on specific technical skills and measurable achievements
-- Create a unique value proposition based on the CV data
-- Professional tone that stands out to HR professionals
-- 4-5 sentences, 70-90 words total
+Requirements:
+- Third-person perspective only
+- No time-based phrases or experience years
+- Focus on achievements and practical impact
+- Highlight unique value proposition
+- Professional and authentic tone
+- 70-90 words, 4-5 sentences
 
-STYLE FOCUS: ${selectedStyle}
-
-IMPORTANT: Do not use percentage symbols (%). Instead use phrases like:
-- "doubled efficiency" instead of "increased efficiency by 100%"
-- "improved performance significantly" instead of "improved performance by 25%"
-- "reduced costs substantially" instead of "reduced costs by 30%"` :
+Generate the summary:` :
       
-      `CV üçün peşəkar xülasə (Professional Summary) hazırla. Xülasə yazılarkən yalnız CV-dəki məlumatlara əsaslan. Mətn 3-cü tərəf üslubunda olsun (məsələn, "5 ildən artıq təcrübəyə malik..." kimi), "mən" formasından istifadə etmə. Klişe ifadələrdən ("məsuliyyətli", "nəticəyönümlü") uzaq dur, HR mütəxəssislərinin diqqətini çəkəcək, inandırıcı və unikallıq hissi verən üslubda yaz. Mətn real bacarıqları, nəticələri və fərqləndirici cəhətləri ön plana çıxarsın.
+      `CV üçün peşəkar xülasə (Professional Summary) yaz. Yalnız CV-dəki məlumatlara əsaslan. Mətn 3-cü tərəf üslubunda olsun, "mən" formasından istifadə etmə. "X il təcrübəyə malikdir" tipli ifadələr işlətmə. Onun əvəzinə namizədin təcrübəsinin keyfiyyətini, nəticələrini və fərqləndirici tərəflərini vurğula. Klişe ifadələrdən ("məsuliyyətli", "nəticəyönümlü") uzaq dur. Mətn HR mütəxəssislərinin diqqətini çəkəcək, inandırıcı və unikallıq hissi verən üslubda yazılsın. Fokus – bacarıqların praktik tətbiqi, əldə olunan nəticələr və namizədin şirkətə əlavə edə biləcəyi dəyər üzərində olsun.
 
-CV-NİN TAM MƏLUMATLARı ANALİZ ÜÇÜN:
+CV MƏLUMATLARı:
 ${cvText}
 
-HƏYATI TƏLƏBLƏR:
-- CV-nin BÜTÜN bölmələrini hərtərəfli analiz et (iş təcrübəsi, təhsil, bacarıqlar, layihələr, sertifikatlar, dillər)
-- YALNIZ 3-cü tərəf baxımından yaz
-- Ad YOX, şəxsi zamirlər YOX ("mən", "mənim")
-- FAİZ simvolu (%) istifadə etmə - yaxşılaşmaları "X dəfə artırdı" və ya "əhəmiyyətli dərəcədə yaxşılaşdırdı" kimi ifadə et
-- Ümumi klişe və buzzword-lərdən çəkin
-- Konkret texniki bacarıqlar və ölçülə bilən nailiyyətlərə fokus
-- CV məlumatları əsasında unikal dəyər təklifi yarat
-- HR mütəxəssislərinin diqqətini çəkəcək peşəkar ton
-- 4-5 cümlə, cəmi 70-90 söz
+Tələblər:
+- Yalnız 3-cü tərəf baxımından
+- Vaxt əsaslı ifadələr və təcrübə ili yox
+- Nailiyyətlər və praktik təsirə fokus
+- Unikal dəyər təklifini vurğula
+- Peşəkar və həqiqi ton
+- 70-90 söz, 4-5 cümlə
 
-ÜSLUB FOKUS: ${selectedStyle}
-
-ÖNƏMLİ: Faiz simvolu (%) istifadə etmə. Əvəzinə bu ifadələri işlət:
-- "effektivliyi iki dəfə artırdı" əvəzinə "effektivliyi 100% artırdı"
-- "performansı əhəmiyyətli dərəcədə yaxşılaşdırdı" əvəzinə "performansı 25% yaxşılaşdırdı"
-- "xərcləri kəskin azaldı" əvəzinə "xərcləri 30% azaldı"`;
+Xülasəni generasiya et:`;
 
     // Add style-specific instructions
     const styleInstructions = getStyleInstructions(selectedStyle, isEnglish);
@@ -401,6 +372,7 @@ HƏYATI TƏLƏBLƏR:
     return NextResponse.json({
       success: true,
       data: {
+        summary: generatedSummary,
         professionalSummary: generatedSummary,
         language: targetLanguage,
         style: selectedStyle,

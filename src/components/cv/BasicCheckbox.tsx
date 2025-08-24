@@ -49,6 +49,7 @@ export default function BasicCheckbox({ checked, onChange, label }: BasicCheckbo
       {/* Visual checkbox button */}
       <button
         type="button"
+        role="checkbox"
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         className={`checkbox-button w-5 h-5 rounded border-2 flex items-center justify-center transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ${

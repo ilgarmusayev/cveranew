@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { getLabel } from '@/lib/cvLanguage';
 import { useNotification } from '@/components/ui/Toast';
+import { apiClient } from '@/lib/api-client';
 
 interface Skill {
   id: string;
@@ -49,7 +50,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
       name: '',
       type: 'hard' // Default to hard skill
     };
-    onChange([...data, newSkill]);
+    onChange([newSkill, ...data]);
     setExpandedId(newSkill.id);
   };
 
@@ -113,89 +114,65 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
         return;
       }
 
-      const response = await fetch('/api/ai/generate-skills', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ cvData }),
-      });
+      const response = await apiClient.post('/api/ai/generate-skills', { cvData });
 
       console.log('📡 AI Skills API Response:', {
-        status: response.status,
-        ok: response.ok,
-        statusText: response.statusText
+        success: response.success,
+        hasData: !!response.data,
+        error: response.error
       });
 
-      const result = await response.json();
-      console.log('📋 AI Skills Result:', result);
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          showError('Giriş icazəsi yoxdur. Yenidən giriş edin.');
-        } else if (response.status === 403) {
-          setShowUpgradeModal(true);
-        } else {
-          throw new Error(result.error || 'API xətası');
-        }
-        return;
-      }
-
-      // Handle new format with hard and soft skills
-      if (result.success && (result.hardSkills || result.softSkills)) {
-        const hardSkills = result.hardSkills || [];
-        const softSkills = result.softSkills || [];
+      if (response.success && response.data) {
+        const { skills, hardSkills, softSkills, message } = response.data;
         
-        console.log('✅ AI Skills received:', hardSkills.length, 'hard skills,', softSkills.length, 'soft skills');
-
-        // Convert skills to suggestions format
-        const hardSkillSuggestions = hardSkills.map((skillName: string) => ({
-          name: skillName,
-          reason: 'AI tərəfindən təklif edilib (Hard Skill)',
-          category: 'Hard Skills'
-        }));
-
-        const softSkillSuggestions = softSkills.map((skillName: string) => ({
-          name: skillName,
-          reason: 'AI tərəfindən təklif edilib (Soft Skill)',
-          category: 'Soft Skills'
-        }));
-
-        const allSuggestions = [...hardSkillSuggestions, ...softSkillSuggestions];
-        setSuggestions(allSuggestions);
-        setShowSuggestions(true);
-
-        // Show success message for suggestions received
-        showSuccess(
-          `AI tərəfindən ${allSuggestions.length} skill tövsiyəsi alındı! (${hardSkills.length} hard, ${softSkills.length} soft)`,
-          'AI Tövsiyələri Hazır! 💡'
-        );
-      }
-      // Handle legacy format for backward compatibility
-      else if (result.success && result.skills && result.skills.length > 0) {
-        console.log('✅ AI Skills received (legacy format):', result.skills.length, 'skills');
-
-        // Convert skills to suggestions format
-        const skillSuggestions = result.skills.map((skillName: string) => ({
-          name: skillName,
-          reason: 'AI tərəfindən təklif edilib',
-          category: 'AI Generated'
-        }));
-
-        setSuggestions(skillSuggestions);
-        setShowSuggestions(true);
-
-        // Show success message for suggestions received
-        showSuccess(`AI tərəfindən ${skillSuggestions.length} skill tövsiyəsi alındı!`, 'AI Tövsiyələri Hazır! 💡');
+        // Handle new format with hardSkills and softSkills
+        let allSkills: any[] = [];
+        if (hardSkills && softSkills) {
+          // New format
+          allSkills = [
+            ...hardSkills.map((skill: string) => ({ name: skill, type: 'hard' })),
+            ...softSkills.map((skill: string) => ({ name: skill, type: 'soft' }))
+          ];
+        } else if (skills) {
+          // Legacy format
+          allSkills = skills.map((skill: any) => ({
+            name: typeof skill === 'string' ? skill : skill.name,
+            type: skill.type || 'hard'
+          }));
+        }
+        
+        console.log('✅ AI Skills Generated:', allSkills.length, 'skills');
+        
+        if (allSkills && allSkills.length > 0) {
+          // Add suggested skills to existing ones (avoid duplicates)
+          const existingSkillNames = data.map(skill => skill.name.toLowerCase());
+          const newSkills = allSkills
+            .filter((skill: any) => !existingSkillNames.includes(skill.name.toLowerCase()))
+            .map((skill: any) => ({
+              id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+              name: skill.name,
+              level: skill.level || '',
+              type: skill.type || 'hard',
+              description: skill.description || ''
+            }));
+          
+          if (newSkills.length > 0) {
+            onChange([...newSkills, ...data]);
+            showSuccess(message || `${newSkills.length} AI bacarıq təklif edildi!`);
+          } else {
+            showInfo('Bütün təklif edilən bacarıqlar artıq mövcuddur.');
+          }
+        } else {
+          showInfo('AI hazırda əlavə bacarıq təklif etmir.');
+        }
       } else {
-        console.log('❌ No skills received from API');
-        throw new Error('AI skills alına bilmədi');
+        const errorMessage = response.error || 'AI bacarıq təklifi almaq mümkün olmadı';
+        console.error('❌ AI Skills Error:', errorMessage);
+        showError(errorMessage);
       }
-
     } catch (error) {
-      console.error('💥 AI Skills error:', error);
-      showError('AI skills alarkən xəta baş verdi. Yenidən cəhd edin.');
+      console.error('� AI Skills Generation Error:', error);
+      showError('AI bacarıq təklifi zamanı xəta baş verdi.');
     } finally {
       setAiSuggesting(false);
     }

@@ -20,7 +20,7 @@ function CustomSectionsSection({ data, onChange, userTier = 'Free' }: CustomSect
       title: 'Yeni Bölmə',
       items: []
     };
-    onChange([...data, newSection]);
+    onChange([newSection, ...data]);
     setExpandedSectionId(newSection.id);
   };
 
@@ -46,7 +46,7 @@ function CustomSectionsSection({ data, onChange, userTier = 'Free' }: CustomSect
     };
     const updated = data.map(section =>
       section.id === sectionId
-        ? { ...section, items: [...section.items, newItem] }
+        ? { ...section, items: [newItem, ...section.items] }
         : section
     );
     onChange(updated);

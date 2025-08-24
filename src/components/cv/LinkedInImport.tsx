@@ -137,6 +137,17 @@ export default function LinkedInImport({ onImport, onCancel, cvLanguage = 'azerb
   const generateAiSummary = async () => {
     if (!importedData || !canUseAiFeatures) return;
 
+    // ❌ Skills olmayan CV-lər üçün AI summary yaradılmamalıdır
+    const hasSkills = importedData.skills && Array.isArray(importedData.skills) && importedData.skills.length > 0;
+    
+    if (!hasSkills) {
+      setError(cvLanguage === 'english' ? 
+        'Please add skills first' :
+        'Bacarıq əlavə edin'
+      );
+      return;
+    }
+
     setAiSummaryLoading(true);
     setError('');
 
@@ -179,10 +190,18 @@ export default function LinkedInImport({ onImport, onCancel, cvLanguage = 'azerb
         setShowAiSummary(true);
         console.log(`✅ AI Professional Summary generated (${cvLanguage})`);
       } else {
-        setError(cvLanguage === 'english' ? 
-          'AI Summary generation error: ' + (data.error || 'Unknown error') :
-          'AI Summary generasiya xətası: ' + (data.error || 'Bilinməyən xəta')
-        );
+        // Skills yoxlaması və xüsusi mesaj
+        if (data.requiresSkills) {
+          setError(cvLanguage === 'english' ? 
+            'Please add skills first' :
+            'Bacarıq əlavə edin'
+          );
+        } else {
+          setError(cvLanguage === 'english' ? 
+            'AI Summary generation error: ' + (data.error || 'Unknown error') :
+            'AI Summary generasiya xətası: ' + (data.error || 'Bilinməyən xəta')
+          );
+        }
       }
     } catch (error: any) {
       console.error('💥 AI Summary xətası:', error);
@@ -436,8 +455,8 @@ export default function LinkedInImport({ onImport, onCancel, cvLanguage = 'azerb
                         {userTier}
                       </span>
                     </h5>
-                    
-                    {!showAiSummary && (
+                    {/* ❌ Skills olmayan halda AI Summary düyməsi göstərilməsin */}
+                    {!showAiSummary && importedData.skills && importedData.skills.length > 0 && (
                       <button
                         onClick={generateAiSummary}
                         disabled={aiSummaryLoading}
@@ -460,6 +479,13 @@ export default function LinkedInImport({ onImport, onCancel, cvLanguage = 'azerb
                           </>
                         )}
                       </button>
+                    )}
+
+                    {/* Skills olmayan halda bilgilendirici mesaj */}
+                    {!showAiSummary && (!importedData.skills || importedData.skills.length === 0) && (
+                      <div className="text-sm text-gray-500 italic">
+                        Ai ilə peşəkar xülasə üçün bacarıqlar bölməsi lazımdır
+                      </div>
                     )}
                   </div>
 

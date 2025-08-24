@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useNotification } from '@/components/ui/Toast';
+import { apiClient } from '@/lib/api-client';
 
 interface AISummaryGeneratorProps {
   cvId: string;
@@ -31,22 +32,70 @@ export function AISummaryGenerator({
     setIsGenerating(true);
 
     try {
-      const response = await fetch('/api/ai/generate-summary', {
-        method: 'POST',
+      // ❌ Əvvəlcə CV data-sını çəkib skills yoxlayaq
+      const cvResponse = await fetch(`/api/cv/${cvId}`, {
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        },
-        body: JSON.stringify({ cvId })
+        }
       });
 
-      const data = await response.json();
-      if (data.success) {
-        setGeneratedSummary(data.summary);
-        onSummaryGenerated?.(data.summary);
+      if (!cvResponse.ok) {
+        throw new Error('CV məlumatları alına bilmədi');
+      }
+
+      const cvData = await cvResponse.json();
+      
+      // Skills yoxlaması
+      const hasSkills = cvData.skills && Array.isArray(cvData.skills) && cvData.skills.length > 0;
+      
+      if (!hasSkills) {
+        showWarning('Bacarıq əlavə edin');
+        setIsGenerating(false);
+        return;
+      }
+
+      // Generate a random structure pattern for variety
+      const structurePatterns = [
+        'results_first', // Start with achievements/results
+        'expertise_first', // Start with expertise/specialization
+        'experience_first', // Start with years of experience
+        'passion_first', // Start with passion/motivation
+        'leadership_first', // Start with leadership qualities
+        'problem_solver_first' // Start with problem-solving approach
+      ];
+      
+      const openingStyles = [
+        'dynamic_professional', // "Dynamic [role] with..."
+        'seasoned_expert', // "Seasoned [role] bringing..."
+        'results_driven', // "Results-driven [role] who..."
+        'innovative_leader', // "Innovative [role] specialized in..."
+        'accomplished_specialist', // "Accomplished [role] with proven..."
+        'strategic_thinker' // "Strategic [role] focused on..."
+      ];
+
+      const randomStructure = structurePatterns[Math.floor(Math.random() * structurePatterns.length)];
+      const randomOpening = openingStyles[Math.floor(Math.random() * openingStyles.length)];
+      const timestamp = Date.now(); // Add timestamp for uniqueness
+
+      const response = await apiClient.post('/api/ai/generate-summary', { 
+        cvId,
+        structurePattern: randomStructure,
+        openingStyle: randomOpening,
+        requestId: timestamp // Ensure each request is unique
+      });
+
+      if (response.success && response.data) {
+        setGeneratedSummary(response.data.summary);
+        onSummaryGenerated?.(response.data.summary);
         showSuccess('AI summary generated successfully!');
       } else {
-        showError(data.error || 'Failed to generate AI summary');
+        const errorMessage = response.error || 'AI Summary yaratmada xəta baş verdi';
+        console.error('AI Summary Error:', errorMessage);
+        if (errorMessage.includes('skills') || errorMessage.includes('Bacarıq')) {
+          showWarning('Bacarıq əlavə edin');
+        } else {
+          showError(errorMessage);
+        }
       }
     } catch (error) {
       console.error('AI summary generation error:', error);

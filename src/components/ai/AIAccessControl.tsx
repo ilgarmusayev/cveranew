@@ -133,7 +133,7 @@ export function AISummaryGenerator({
       const data = await response.json();
       onSummaryGenerated(data.data.professionalSummary);
     } catch (err) {
-      setError(err instanceof Error ? err.message : (cvLanguage === 'english' ? 'An error occurred' : 'Xəta baş verdi'));
+      setError(err instanceof Error ? err.message : (cvLanguage === 'english' ? 'An error occurred' : 'Bacarıq əlavə edin'));
     } finally {
       setLoading(false);
     }

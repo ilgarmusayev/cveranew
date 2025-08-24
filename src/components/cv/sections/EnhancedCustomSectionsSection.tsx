@@ -153,7 +153,7 @@ export default function EnhancedCustomSectionsSection({
       }));
     }
 
-    onChange([...data, newSection]);
+    onChange([newSection, ...data]);
     setExpandedSectionId(newSection.id);
     setShowTemplates(false);
   };
@@ -209,7 +209,7 @@ export default function EnhancedCustomSectionsSection({
 
     const updated = data.map(section =>
       section.id === sectionId
-        ? { ...section, items: [...(section.items || []), newItem] }
+        ? { ...section, items: [newItem, ...(section.items || [])] }
         : section
     );
     onChange(updated);

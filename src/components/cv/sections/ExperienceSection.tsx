@@ -9,6 +9,9 @@ interface Experience {
   company: string;
   position: string;
   description: string;
+  startDate?: string;
+  endDate?: string;
+  current?: boolean;
 }
 
 interface ExperienceSectionProps {
@@ -24,17 +27,20 @@ export default function ExperienceSection({ data, onChange }: ExperienceSectionP
       id: crypto.randomUUID(),
       company: '',
       position: '',
-      description: ''
+      description: '',
+      startDate: '',
+      endDate: '',
+      current: false
     };
-    onChange([...data, newExperience]);
+    onChange([newExperience, ...data]);
     setExpandedId(newExperience.id);
   };
 
-  const updateExperience = (id: string, field: keyof Experience, value: string) => {
-    const updated = data.map(exp => 
-      exp.id === id ? { ...exp, [field]: value } : exp
+  const updateExperience = (id: string, updates: Partial<Experience>) => {
+    const updated = data.map(exp =>
+      exp.id === id ? { ...exp, ...updates } : exp
     );
-    onChange(updated);
+    onChange([...updated]);
   };
 
   const removeExperience = (id: string) => {
@@ -125,7 +131,7 @@ export default function ExperienceSection({ data, onChange }: ExperienceSectionP
                       <input
                         type="text"
                         value={experience.position}
-                        onChange={(e) => updateExperience(experience.id, 'position', e.target.value)}
+                        onChange={(e) => updateExperience(experience.id, { position: e.target.value })}
                         placeholder="Məsələn, Proqram təminatı mühəndisi"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       />
@@ -137,10 +143,54 @@ export default function ExperienceSection({ data, onChange }: ExperienceSectionP
                       <input
                         type="text"
                         value={experience.company}
-                        onChange={(e) => updateExperience(experience.id, 'company', e.target.value)}
+                        onChange={(e) => updateExperience(experience.id, { company: e.target.value })}
                         placeholder="Məsələn, Tech Solutions Inc."
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       />
+                    </div>
+                  </div>
+
+                  {/* Date Fields */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Başlama tarixi
+                      </label>
+                      <input
+                        type="month"
+                        value={experience.startDate || ''}
+                        onChange={(e) => updateExperience(experience.id, { startDate: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Bitirmə tarixi
+                      </label>
+                      <input
+                        type="month"
+                        value={experience.current ? '' : (experience.endDate || '')}
+                        onChange={(e) => updateExperience(experience.id, { endDate: e.target.value })}
+                        disabled={experience.current}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:bg-gray-100 disabled:text-gray-500"
+                      />
+                    </div>
+                    <div className="flex items-end">
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(experience.current)}
+                          onChange={(e) => {
+                            const isChecked = e.target.checked;
+                            updateExperience(experience.id, {
+                              current: isChecked,
+                              endDate: isChecked ? '' : experience.endDate,
+                            });
+                          }}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">Davam edir</span>
+                      </label>
                     </div>
                   </div>
 
@@ -150,7 +200,7 @@ export default function ExperienceSection({ data, onChange }: ExperienceSectionP
                     </label>
                     <RichTextEditor
                       value={experience.description}
-                      onChange={(value) => updateExperience(experience.id, 'description', value)}
+                      onChange={(value) => updateExperience(experience.id, { description: value })}
                       placeholder="Vəzifə öhdəlikləriniz və nailiyyətləriniz haqqında məlumat verin..."
                       minHeight="120px"
                     />

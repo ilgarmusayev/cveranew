@@ -78,7 +78,7 @@ export default function LanguagesSection({ data, onChange }: LanguagesSectionPro
       level: 'Conversational'
     };
 
-    const updatedLanguages = [...languages, newLanguage];
+    const updatedLanguages = [newLanguage, ...languages];
     updateParentData(updatedLanguages);
     setExpandedId(newLanguage.id);
   };

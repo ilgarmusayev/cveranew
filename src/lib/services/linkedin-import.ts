@@ -697,6 +697,14 @@ export class LinkedInImportService {
    */
   private async generateProfessionalSummary(profile: LinkedInProfile): Promise<string> {
     try {
+      // ❌ Skills olmayan profile-lər üçün AI summary yaradılmamalıdır
+      const hasSkills = profile.skills && Array.isArray(profile.skills) && profile.skills.length > 0;
+      
+      if (!hasSkills) {
+        console.log('⚠️ Skills olmayan LinkedIn profile üçün AI summary yaradılmadı, fallback istifadə olunur');
+        return profile.summary || `${profile.name} - Professional with expertise in ${profile.headline}`;
+      }
+
       let lastError: Error | null = null;
       let summary = '';
 
@@ -1053,6 +1061,17 @@ export class LinkedInImportService {
       const awards = cvData.awards || [];
       const languages = cvData.languages || [];
 
+      // ❌ Skills olmayan CV-lər üçün AI summary yaradılmamalıdır
+      const hasSkills = skills && Array.isArray(skills) && skills.length > 0;
+      
+      if (!hasSkills) {
+        console.log('⚠️ Skills olmayan CV üçün AI summary yaradılmadı');
+        return {
+          success: false,
+          error: 'Bacarıq əlavə edin'
+        };
+      }
+
       // Detect CV language - with improved detection
       let cvLanguage = cvData.cvLanguage || 'azerbaijani';
       
@@ -1098,72 +1117,36 @@ export class LinkedInImportService {
 
       if (user.tier === 'Medium') {
         if (isEnglish) {
-          prompt = `
-          Write a professional CV summary in 4-5 sentences (60-80 words). No names, no "I am", no personal pronouns.
+          prompt = `Write a professional CV summary strictly based on the information provided. The text must be in third-person style (not first-person). Avoid phrases like "with X years of experience." Instead, emphasize the quality of experience, tangible outcomes, and unique strengths. Do not use clichés such as "responsible" or "results-driven." The summary should feel authentic, highlight practical application of skills and measurable impact, and clearly show the value the candidate can bring to an organization.
 
-          Profile:
-          Title: ${personalInfo.title || experience[0]?.position || 'Professional'}
-          Location: ${personalInfo.location || ''}
-          
-          Experience: ${experience.slice(0, 2).map((exp: any) => 
-            `${exp.position} at ${exp.company}`
-          ).join(', ')}
+CV Data:
+Title: ${personalInfo.title || experience[0]?.position || 'Professional'}
+Location: ${personalInfo.location || ''}
 
-          Skills: ${skills.slice(0, 6).map((skill: any) => skill.name || skill).join(', ')}
+Experience: ${experience.slice(0, 2).map((exp: any) => `${exp.position} at ${exp.company}`).join(', ')}
 
-          Structure format:
-          1. "[Field] with [X+] years of experience in [specific areas]"
-          2. "Skilled in [2-3 key technical skills] with [specialization/background]"
-          3. "Successfully [achievement with metric/result]"
-          4. "Seeking to [career goal/contribution] in [type of company/role]"
+Skills: ${skills.slice(0, 6).map((skill: any) => skill.name || skill).join(', ')}
 
-          Example: "Software engineer with 6+ years of experience in designing and developing scalable web applications. Skilled in JavaScript, React, and Node.js with a strong background in system architecture. Successfully led cross-functional teams and delivered projects that improved efficiency by 25%. Seeking to contribute technical expertise to innovative projects in a growth-oriented company."
-
-          STRICT RULES:
-          - 60-80 words total
-          - 4-5 sentences exactly
-          - NO names, NO "I am", NO personal pronouns
-          - Include specific metrics when possible
-          - Professional third-person perspective
-
-          Summary:`;
+Requirements: Third-person perspective only, no time-based phrases or experience years, focus on achievements and practical impact, highlight unique value proposition, professional and authentic tone, 60-80 words, 4-5 sentences. Generate the summary:`;
         } else {
-          prompt = `
-          4-5 cümlədən ibarət peşəkar CV xülasəsi yaz (60-80 söz). Ad yox, "Mən" yox, şəxsi zamirlər yox.
+          prompt = `CV üçün peşəkar xülasə yaz. Yalnız CV-dəki məlumatlara əsaslan. Mətn 3-cü tərəf üslubunda olsun, "mən" formasından istifadə etmə. "X il təcrübəyə malikdir" tipli ifadələr işlətmə. Onun əvəzinə namizədin təcrübəsinin keyfiyyətini, nəticələrini və fərqləndirici tərəflərini vurğula. Klişe ifadələrdən ("məsuliyyətli", "nəticəyönümlü") uzaq dur. Mətn HR mütəxəssislərinin diqqətini çəkəcək, inandırıcı və unikallıq hissi verən üslubda yazılsın.
 
-          Profil:
-          Vəzifə: ${personalInfo.title || experience[0]?.position || 'Peşəkar'}
-          Yer: ${personalInfo.location || ''}
-          
-          Təcrübə: ${experience.slice(0, 2).map((exp: any) => 
-            `${exp.position} - ${exp.company}`
-          ).join(', ')}
+CV Məlumatları:
+Vəzifə: ${personalInfo.title || experience[0]?.position || 'Peşəkar'}
+Yer: ${personalInfo.location || ''}
 
-          Bacarıqlar: ${skills.slice(0, 6).map((skill: any) => skill.name || skill).join(', ')}
+Təcrübə: ${experience.slice(0, 2).map((exp: any) => `${exp.position} - ${exp.company}`).join(', ')}
 
-          Struktur format:
-          1. "[X+] ildən artıq təcrübəyə malik [sahə] mütəxəssisi [spesifik sahələr]də"
-          2. "[2-3 əsas texniki bacarıq]da güclü bacarıqlara sahibdir [ixtisaslaşma/background] ilə"
-          3. "[nailiyyət metrik/nəticə ilə] uğurla həyata keçirib"
-          4. "[karyera məqsədi/töhfə] istəyir [şirkət tipi/rol]də"
+Bacarıqlar: ${skills.slice(0, 6).map((skill: any) => skill.name || skill).join(', ')}
 
-          Nümunə: "6 ildən artıq təcrübəyə malik proqram mühəndisi. Veb tətbiqlərin hazırlanması və miqyaslandırılmasında ixtisaslaşıb. JavaScript, React və Node.js üzrə güclü bacarıqlara sahibdir. Layihələrin effektivliyini 25% artıran komandaları uğurla idarə edib. Dinamik şirkətdə texniki biliklərini tətbiq etməklə innovativ layihələrin inkişafına töhfə vermək istəyir."
-
-          QƏTİ QAYDALAR:
-          - 60-80 söz
-          - Tam 4-5 cümlə
-          - AD yox, "Mən" yox, şəxsi zamirlər yox
-          - Mümkün olduqda spesifik rəqəmlər daxil et
-          - Peşəkar üçüncü şəxs baxımından
-
-          Xülasə:`;
+Tələblər: Yalnız 3-cü tərəf baxımından, vaxt əsaslı ifadələr yox, nailiyyətlər və praktik təsirə fokus, unikal dəyər təklifini vurğula, peşəkar və həqiqi ton, 60-80 söz, 4-5 cümlə. Xülasəni generasiya et:`;
         }
       } else if (user.tier === 'Premium') {
         if (isEnglish) {
           prompt = `
-          Write a professional executive CV summary in 4-5 sentences (60-80 words). No names, no "I am", no personal pronouns.
+          Write a professional executive CV summary strictly based on the information provided. The text must be in third-person style (not first-person). Avoid phrases like "with X years of experience." Instead, emphasize the quality of experience, tangible outcomes, and unique strengths. Do not use clichés such as "responsible" or "results-driven." The summary should feel authentic, highlight practical application of skills and measurable impact, and clearly show the value the candidate can bring to an organization.
 
-          Executive Profile:
+          Executive CV Data:
           Title: ${personalInfo.title || experience[0]?.position || 'Senior Professional'}
           Location: ${personalInfo.location || ''}
           
@@ -1173,54 +1156,27 @@ export class LinkedInImportService {
 
           Skills: ${skills.slice(0, 6).map((skill: any) => skill.name || skill).join(', ')}
 
-          Executive Structure format:
-          1. "[Field] executive with [X+] years of experience in [specific leadership areas]"
-          2. "Expert in [2-3 key strategic skills] with [specialization/industry background]"
-          3. "Successfully [leadership achievement with quantifiable impact/metric]"
-          4. "Seeking to [strategic goal/contribution] in [type of organization/role]"
+          Requirements:
+          - Third-person executive perspective only
+          - No time-based phrases or experience years
+          - Focus on leadership achievements and strategic impact
+          - Highlight unique executive value proposition
+          - Executive-level professional tone
+          - 60-80 words, 4-5 sentences
 
-          Example: "Technology executive with 10+ years of experience in leading digital transformation and scaling engineering teams. Expert in cloud architecture, agile methodologies, and strategic planning with a strong background in fintech. Successfully delivered enterprise solutions that increased revenue by 40% and reduced operational costs by 30%. Seeking to drive innovation and business growth in a forward-thinking organization."
-
-          STRICT RULES:
-          - 60-80 words total
-          - 4-5 sentences exactly
-          - NO names, NO "I am", NO personal pronouns
-          - Executive-level language and achievements
-          - Include quantifiable leadership impact
-          - Professional third-person perspective
-
-          Summary:`;
+          Generate the executive summary:`;
         } else {
-          prompt = `
-          4-5 cümlədən ibarət peşəkar icraçı CV xülasəsi yaz (60-80 söz). Ad yox, "Mən" yox, şəxsi zamirlər yox.
+          prompt = `CV üçün peşəkar icraçı xülasəsi yaz. Yalnız CV-dəki məlumatlara əsaslan. Mətn 3-cü tərəf üslubunda olsun, "mən" formasından istifadə etmə. "X il təcrübəyə malikdir" tipli ifadələr işlətmə. Onun əvəzinə namizədin təcrübəsinin keyfiyyətini, rəhbərlik nailiyyətlərini və strateji təsirini vurğula. İcraçı səviyyəli dil istifadə et və rəqəmlərlə dəstəklənən nəticələri göstər.
 
-          İcraçı Profil:
-          Vəzifə: ${personalInfo.title || experience[0]?.position || 'Ali Səviyyəli Peşəkar'}
-          Yer: ${personalInfo.location || ''}
-          
-          Təcrübə: ${experience.slice(0, 2).map((exp: any) => 
-            `${exp.position} - ${exp.company}`
-          ).join(', ')}
+İcraçı CV Məlumatları:
+Vəzifə: ${personalInfo.title || experience[0]?.position || 'Ali Səviyyəli Peşəkar'}
+Yer: ${personalInfo.location || ''}
 
-          Bacarıqlar: ${skills.slice(0, 6).map((skill: any) => skill.name || skill).join(', ')}
+Təcrübə: ${experience.slice(0, 2).map((exp: any) => `${exp.position} - ${exp.company}`).join(', ')}
 
-          İcraçı Struktur format:
-          1. "[X+] ildən artıq təcrübəyə malik [sahə] icraçısı [spesifik rəhbərlik sahələr]də"
-          2. "[2-3 əsas strateji bacarıq]da ekspert [ixtisaslaşma/sənaye background] ilə"
-          3. "[rəhbərlik nailiyyəti ölçülə bilən təsir/metrik ilə] uğurla həyata keçirib"
-          4. "[strateji məqsəd/töhfə] istəyir [təşkilat tipi/rol]də"
+Bacarıqlar: ${skills.slice(0, 6).map((skill: any) => skill.name || skill).join(', ')}
 
-          Nümunə: "10 ildən artıq təcrübəyə malik texnologiya icraçısı rəqəmsal transformasiya və mühəndislik komandalarının idarəetməsində. Bulud arxitekturası, çevik metodologiya və strateji planlaşdırmada ekspert fintech sahəsində güclü background ilə. Gəliri 40% artıran və əməliyyat xərclərini 30% azaldan enterprise həlləri uğurla təqdim edib. İrəligedən düşünən təşkilatda innovasiya və biznes artımını həyata keçirmək istəyir."
-
-          QƏTİ QAYDALAR:
-          - 60-80 söz
-          - Tam 4-5 cümlə
-          - AD yox, "Mən" yox, şəxsi zamirlər yox
-          - İcraçı səviyyəli dil və nailiyyətlər
-          - Ölçülə bilən rəhbərlik təsiri daxil et
-          - Peşəkar üçüncü şəxs baxımından
-
-          Xülasə:`;
+Tələblər: 3-cü tərəf icraçı baxımından, vaxt əsaslı ifadələr yox, rəhbərlik nailiyyətləri və strateji təsirə fokus, unikal icraçı dəyər təklifini vurğula, icraçı səviyyəli peşəkar ton, 60-80 söz, 4-5 cümlə. İcraçı xülasəni generasiya et:`;
         }
       }
 

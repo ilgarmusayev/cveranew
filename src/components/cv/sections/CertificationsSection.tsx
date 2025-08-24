@@ -9,6 +9,7 @@ interface Certification {
   issuer: string;
   description?: string;
   url?: string;
+  date?: string;
 }
 
 interface CertificationsSectionProps {
@@ -54,9 +55,10 @@ export default function CertificationsSection({ data, onChange }: Certifications
       name: '',
       issuer: '',
       description: '',
-      url: ''
+      url: '',
+      date: ''
     };
-    onChange([...data, newCertification]);
+    onChange([newCertification, ...data]);
     setExpandedId(newCertification.id);
   };
 
@@ -190,6 +192,18 @@ export default function CertificationsSection({ data, onChange }: Certifications
                         onChange={(e) => updateCertification(certification.id, 'url', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                         placeholder="https://www.credly.com/badges/..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Verilmə tarixi
+                      </label>
+                      <input
+                        type="month"
+                        value={certification.date || ''}
+                        onChange={(e) => updateCertification(certification.id, 'date', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       />
                     </div>
                   </div>

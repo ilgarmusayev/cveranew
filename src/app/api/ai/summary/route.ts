@@ -82,8 +82,20 @@ export async function POST(req: NextRequest) {
       hasSkills: !!cvData.skills?.length
     });
 
+    // ❌ Skills olmayan CV-lər üçün AI summary yaradılmamalıdır
+    const hasSkills = cvData.skills && Array.isArray(cvData.skills) && cvData.skills.length > 0;
+    
+    if (!hasSkills) {
+      console.log('⚠️ Skills olmayan CV üçün AI summary yaradılmadı');
+      return NextResponse.json({
+        error: 'Bacarıq əlavə edin',
+        errorEn: 'Please add skills first',
+        requiresSkills: true
+      }, { status: 400 });
+    }
+
     // Generate AI-powered professional summary with language detection
-    console.log('🧠 AI Summary yaradılır, CV data:', cvData);
+    console.log('🧠 AI Summary yaradılır, CV data:', cvData, `(Skills: ${cvData.skills?.length || 0})`);
     const summary = await generateProfessionalSummary(cvData);    if (!summary) {
       return NextResponse.json(
         { error: "Failed to generate summary" },

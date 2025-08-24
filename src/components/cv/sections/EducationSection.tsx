@@ -11,6 +11,9 @@ interface Education {
   field?: string;
   gpa?: string;
   description?: string;
+  startDate?: string;
+  endDate?: string;
+  current?: boolean;
 }
 
 interface EducationSectionProps {
@@ -29,17 +32,20 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
       degree: '',
       field: '',
       gpa: '',
-      description: ''
+      description: '',
+      startDate: '',
+      endDate: '',
+      current: false
     };
-    onChange([...data, newEducation]);
+    onChange([newEducation, ...data]);
     setExpandedId(newEducation.id);
   };
 
-  const updateEducation = (id: string, field: keyof Education, value: string | boolean) => {
-    const updated = data.map(edu => 
-      edu.id === id ? { ...edu, [field]: value } : edu
+  const updateEducation = (id: string, updates: Partial<Education>) => {
+    const updated = data.map(edu =>
+      edu.id === id ? { ...edu, ...updates } : edu
     );
-    onChange(updated);
+    onChange([...updated]);
   };
 
   const removeEducation = (id: string) => {
@@ -97,15 +103,15 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-blue-500">🎓</span>
                   <h4 className="font-medium text-gray-900">
-                    {education.degree || 'Yeni təhsil'}
+                    {education.degree ? education.degree : (education.institution || 'Yeni təhsil')}
                   </h4>
                 </div>
                 <p className="text-sm text-gray-600">
                   {education.institution || 'Təhsil müəssisəsi'}
                 </p>
-                {education.field && (
+                {(education.field || education.gpa) && (
                   <p className="text-xs text-gray-500 mt-1">
-                    {education.field}
+                    {[education.field, education.gpa].filter(Boolean).join(' - ')}
                   </p>
                 )}
               </div>
@@ -135,8 +141,8 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                       </label>
                       <input
                         type="text"
-                        value={education.institution}
-                        onChange={(e) => updateEducation(education.id, 'institution', e.target.value)}
+                        value={education.institution || ''}
+                        onChange={(e) => updateEducation(education.id, { institution: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                         placeholder="Universitet adı"
                       />
@@ -149,12 +155,12 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                           </svg>
-                          <span>Dərəcə <span className="text-red-500">*</span></span>
+                          <span>Dərəcə <span className="text-gray-400 text-xs">(ixtiyari)</span></span>
                         </span>
                       </label>
                       <select
-                        value={education.degree}
-                        onChange={(e) => updateEducation(education.id, 'degree', e.target.value)}
+                        value={education.degree || ''}
+                        onChange={(e) => updateEducation(education.id, { degree: e.target.value })}
                         className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 shadow-sm hover:shadow-md appearance-none cursor-pointer"
                         style={{
                           backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
@@ -172,15 +178,17 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                         <option value="Digər">📚 Digər</option>
                       </select>
                     </div>
+                  </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Sahə <span className="text-gray-400 text-xs">(ixtiyari)</span>
                       </label>
                       <input
                         type="text"
-                        value={education.field}
-                        onChange={(e) => updateEducation(education.id, 'field', e.target.value)}
+                        value={education.field || ''}
+                        onChange={(e) => updateEducation(education.id, { field: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                         placeholder="Kompüter Elmi, Biznes İdarəetməsi, və s."
                       />
@@ -193,10 +201,54 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                       <input
                         type="text"
                         value={education.gpa || ''}
-                        onChange={(e) => updateEducation(education.id, 'gpa', e.target.value)}
+                        onChange={(e) => updateEducation(education.id, { gpa: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                         placeholder={cvLanguage === 'english' ? '3.8/4.0, High, etc.' : '3.8/4.0, Yüksək, və s.'}
                       />
+                    </div>
+                  </div>
+
+                  {/* Date Fields */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Başlama tarixi
+                      </label>
+                      <input
+                        type="month"
+                        value={education.startDate || ''}
+                        onChange={(e) => updateEducation(education.id, { startDate: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Bitirmə tarixi
+                      </label>
+                      <input
+                        type="month"
+                        value={education.current ? '' : (education.endDate || '')}
+                        onChange={(e) => updateEducation(education.id, { endDate: e.target.value })}
+                        disabled={education.current}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:bg-gray-100 disabled:text-gray-500"
+                      />
+                    </div>
+                    <div className="flex items-end">
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(education.current)}
+                          onChange={(e) => {
+                            const isChecked = e.target.checked;
+                            updateEducation(education.id, {
+                              current: isChecked,
+                              endDate: isChecked ? '' : education.endDate,
+                            });
+                          }}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">Davam edir</span>
+                      </label>
                     </div>
                   </div>
 
@@ -206,7 +258,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                     </label>
                     <RichTextEditor
                       value={education.description ?? ''}
-                      onChange={(value) => updateEducation(education.id, 'description', value)}
+                      onChange={(value) => updateEducation(education.id, { description: value })}
                       placeholder="Təhsiliniz haqqında məlumat verin..."
                       minHeight="120px"
                     />

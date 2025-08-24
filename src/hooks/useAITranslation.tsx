@@ -5,6 +5,7 @@
 
 import { useState, useCallback } from 'react';
 import { CVLanguage } from '@/lib/cvLanguage';
+import { apiClient } from '@/lib/api-client';
 
 export interface TranslationState {
   isTranslating: boolean;
@@ -63,26 +64,19 @@ export function useAITranslation(): UseAITranslationReturn {
       }));
 
       // Call the enhanced translation API
-      const response = await fetch('/api/ai/translate-cv', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          cvData: cvData,
-          targetLanguage: toLang,
-          sourceLanguage: fromLang,
-          saveToDatabase: true // Ensure it saves to database
-        })
+      const response = await apiClient.post('/api/ai/translate-cv', {
+        cvData: cvData,
+        targetLanguage: toLang,
+        sourceLanguage: fromLang,
+        saveToDatabase: true // Ensure it saves to database
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Translation failed with status: ${response.status}`);
+      if (!response.success) {
+        const errorMessage = response.error || 'Translation failed';
+        throw new Error(errorMessage);
       }
 
-      const result = await response.json();
+      const result = response.data;
 
       console.log('✅ useAITranslation: Translation API response:', {
         success: result.success,
@@ -172,26 +166,19 @@ export function useAITranslation(): UseAITranslationReturn {
       }
 
       // For section translation, we can use the same API but with specific section data
-      const response = await fetch('/api/ai/translate-cv', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          cvData: { sectionData },
-          targetLanguage: toLang,
-          sourceLanguage: fromLang,
-          saveToDatabase: false // Don't save partial translations
-        })
+      const response = await apiClient.post('/api/ai/translate-cv', {
+        cvData: { sectionData },
+        targetLanguage: toLang,
+        sourceLanguage: fromLang,
+        saveToDatabase: false // Don't save partial translations
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Section translation failed with status: ${response.status}`);
+      if (!response.success) {
+        const errorMessage = response.error || 'Section translation failed';
+        throw new Error(errorMessage);
       }
 
-      const result = await response.json();
+      const result = response.data;
 
       if (!result.success) {
         throw new Error(result.error || 'Section translation failed');
