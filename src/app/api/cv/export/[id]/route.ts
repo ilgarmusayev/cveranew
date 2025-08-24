@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verify } from 'jsonwebtoken';
 import puppeteer from 'puppeteer';
+import chromium from '@sparticuz/chromium';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key';
 
@@ -15,6 +16,8 @@ export async function POST(
     { params }: { params: Promise<{ id: string }> }
 ) {
     console.log('=== PDF Export API başladı ===');
+    
+    let browser: any;
     
     try {
         const { id } = await params;
@@ -68,25 +71,124 @@ export async function POST(
 
         // Browser başlat
         console.log('Puppeteer browser başladılır...');
-        const browser = await puppeteer.launch({
-            headless: true,
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-accelerated-2d-canvas',
-                '--no-first-run',
-                '--no-zygote',
-                '--disable-gpu',
-                '--disable-background-timer-throttling',
-                '--disable-backgrounding-occluded-windows',
-                '--disable-renderer-backgrounding',
-                '--disable-features=TranslateUI',
-                '--disable-ipc-flooding-protection'
-            ],
-            // Chrome binary auto-detection
-            executablePath: process.env.CHROME_BIN || undefined
+        
+        // Environment detection
+        const isProduction = process.env.NODE_ENV === 'production';
+        const isServerless = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NETLIFY);
+        const isLocal = !isServerless;
+        
+        let executablePath: string | undefined;
+        let browserArgs = [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--disable-gpu',
+            '--disable-background-timer-throttling',
+            '--disable-backgrounding-occluded-windows',
+            '--disable-renderer-backgrounding',
+            '--disable-features=TranslateUI',
+            '--disable-ipc-flooding-protection',
+            '--disable-extensions',
+            '--disable-default-apps',
+            '--disable-component-extensions-with-background-pages'
+        ];
+
+        if (isLocal) {
+            // Local development - try multiple fallback options
+            const os = require('os');
+            const path = require('path');
+            const fs = require('fs');
+            const puppeteerChrome = path.join(os.homedir(), '.cache/puppeteer/chrome/linux-139.0.7258.138/chrome-linux64/chrome');
+            
+            executablePath = process.env.CHROME_BIN || process.env.PUPPETEER_EXECUTABLE_PATH;
+            
+            // Check if puppeteer chrome exists
+            if (!executablePath && fs.existsSync(puppeteerChrome)) {
+                executablePath = puppeteerChrome;
+                console.log('Found Puppeteer Chrome at:', puppeteerChrome);
+            }
+            
+            console.log('Local environment detected, executablePath:', executablePath);
+        } else {
+            // Production serverless - use @sparticuz/chromium
+            try {
+                executablePath = await chromium.executablePath();
+                browserArgs = [...browserArgs, ...chromium.args];
+                console.log('Serverless Chromium path obtained:', executablePath);
+            } catch (error) {
+                console.error('Error getting serverless Chromium path:', error);
+                throw new Error('Serverless Chromium could not be loaded');
+            }
+        }
+
+        console.log('Browser configuration:', {
+            isProduction,
+            isServerless,
+            isLocal,
+            executablePath: executablePath ? 'set' : 'undefined',
+            argsCount: browserArgs.length
         });
+
+        try {
+            browser = await puppeteer.launch({
+                headless: true,
+                args: browserArgs,
+                executablePath: executablePath
+            });
+            console.log('Browser başladıldı successfully');
+        } catch (browserError) {
+            console.error('Browser launch error:', browserError);
+            
+            // Fallback strategy for local development
+            if (isLocal) {
+                console.log('Trying multiple fallback strategies...');
+                
+                // Strategy 1: Try with minimal args
+                try {
+                    console.log('Fallback 1: Minimal args without executablePath');
+                    browser = await puppeteer.launch({
+                        headless: true,
+                        args: ['--no-sandbox', '--disable-setuid-sandbox']
+                    });
+                    console.log('Browser started with minimal args');
+                } catch (fallback1Error) {
+                    console.log('Fallback 1 failed, trying strategy 2...');
+                    
+                    // Strategy 2: Try @sparticuz/chromium even in local
+                    try {
+                        console.log('Fallback 2: Using @sparticuz/chromium in local');
+                        const chromiumPath = await chromium.executablePath();
+                        browser = await puppeteer.launch({
+                            headless: true,
+                            args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
+                            executablePath: chromiumPath
+                        });
+                        console.log('Browser started with @sparticuz/chromium in local');
+                    } catch (fallback2Error) {
+                        console.log('Fallback 2 failed, trying strategy 3...');
+                        
+                        // Strategy 3: Try puppeteer bundled chromium
+                        try {
+                            console.log('Fallback 3: Using bundled Chromium');
+                            browser = await puppeteer.launch({
+                                headless: true,
+                                args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+                            });
+                            console.log('Browser started with bundled Chromium');
+                        } catch (fallback3Error) {
+                            console.error('All fallback strategies failed');
+                            throw new Error('Could not start browser with any strategy. Please install Chrome/Chromium or set CHROME_BIN environment variable.');
+                        }
+                    }
+                }
+            } else {
+                const errorMsg = browserError instanceof Error ? browserError.message : 'Unknown error';
+                throw new Error(`Serverless browser launch failed: ${errorMsg}`);
+            }
+        }
 
         console.log('Browser başladıldı, səhifə yaradılır...');
         const page = await browser.newPage();
@@ -225,8 +327,20 @@ export async function POST(
 
     } catch (error) {
         console.error('PDF export xətası:', error);
+        
+        // Browser cleanup if it was opened
+        if (browser) {
+            try {
+                await browser.close();
+                console.log('Browser cleaned up after error');
+            } catch (cleanupError) {
+                console.error('Browser cleanup error:', cleanupError);
+            }
+        }
+        
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
         return NextResponse.json(
-            { error: 'PDF export xətası baş verdi' }, 
+            { error: `PDF export xətası: ${errorMsg}` }, 
             { status: 500 }
         );
     }

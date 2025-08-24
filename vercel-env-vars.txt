@@ -1,0 +1,20 @@
+# Vercel Environment Variables
+# Bu environment variable-ları Vercel dashboard-da təyin etmək lazımdır:
+
+# Database
+DATABASE_URL=postgres://admincvera:ilqarilqar1M%40@cvera.postgres.database.azure.com:5432/cvera?sslmode=require
+
+# JWT
+JWT_SECRET=az8V!hjkJHKL1231jklADJKU2389@qweTFD
+JWT_REFRESH_SECRET=refresh_az8V!hjkJHKL1231jklADJKU2389@qweTFD
+
+# LinkedIn OAuth
+LINKEDIN_CLIENT_ID=78gi6jtz8ue28i
+LINKEDIN_CLIENT_SECRET=WPL_AP1.tYUQHKB0hjwn5uFV.JqoY8g==
+LINKEDIN_REDIRECT_URI=https://cvera.net/api/auth/linkedin/callback
+
+# PDF Export üçün (optional - serverless Chromium üçün)
+NODE_ENV=production
+
+# ScrapingDog API (yeni key lazımdır)
+SCRAPINGDOG_API_KEY=YENİ_API_KEY_BURAYA_YAZIN
