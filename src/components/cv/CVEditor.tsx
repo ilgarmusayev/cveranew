@@ -370,6 +370,12 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
     const { showSuccess, showError, showWarning } = useNotification();
 
    const updateCVData = (section: keyof CVEditorState, data: any) => {
+        console.log('📝 CVEditor updateCVData called:', {
+            section,
+            dataType: typeof data,
+            dataLength: Array.isArray(data) ? data.length : 'not array',
+            data: section === 'customSections' ? data : 'other section'
+        });
         setCv(prev => ({
             ...prev,
             [section]: data

@@ -27,7 +27,8 @@ const DEFAULT_SECTIONS = [
     { id: 'projects', name: 'projects', displayName: 'Layihələr', icon: '🚀', alwaysVisible: false },
     { id: 'certifications', name: 'certifications', displayName: 'Sertifikatlar', icon: '🏆', alwaysVisible: false },
     { id: 'languages', name: 'languages', displayName: 'Dillər', icon: '🌍', alwaysVisible: false },
-    { id: 'volunteerExperience', name: 'volunteerExperience', displayName: 'Könüllü İş', icon: '❤️', alwaysVisible: false }
+    { id: 'volunteerExperience', name: 'volunteerExperience', displayName: 'Könüllü İş', icon: '❤️', alwaysVisible: false },
+    { id: 'customSections', name: 'customSections', displayName: 'Əlavə Bölmələr', icon: '✨', alwaysVisible: false }
 ];
 
 export default function CVSectionManager({ cvData, onSectionOrderChange, language = 'az' }: SectionManagerProps) {
@@ -48,6 +49,9 @@ export default function CVSectionManager({ cvData, onSectionOrderChange, languag
     const hasData = (sectionId: string): boolean => {
         if (sectionId === 'personalInfo') return true;
         if (sectionId === 'summary') return !!cvData?.personalInfo?.summary;
+        if (sectionId === 'customSections') {
+            return Array.isArray(cvData?.customSections) && cvData.customSections.length > 0;
+        }
 
         const sectionData = cvData?.[sectionId];
         if (Array.isArray(sectionData)) {

@@ -410,11 +410,7 @@ const SortableItem: React.FC<SortableItemProps> = ({ id, children }) => {
 };
 
 // Basic Template Component with DND Kit
-const BasicTemplate: React.FC<{ 
-    data: CVData; 
-    sectionOrder: string[]; 
-    onSectionReorder: (newOrder: string[]) => void;
-}> = ({ data, sectionOrder, onSectionReorder }) => {
+const BasicTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSectionReorder: (newOrder: string[]) => void }> = ({ data, sectionOrder, onSectionReorder }) => {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
     const [isDragActive, setIsDragActive] = useState(false);
     const [activeId, setActiveId] = useState<string | null>(null);
@@ -466,11 +462,10 @@ const BasicTemplate: React.FC<{
     
     // Section render functions
     const renderSection = (sectionType: string) => {
-        console.log('Rendering section:', sectionType, 'data available:', {
-            experience: experience.length,
-            education: education.length,
-            skills: skills.length,
-            summary: !!personalInfo.summary
+        console.log('🎯 BasicTemplate renderSection called:', sectionType, 'customSections data:', {
+            available: !!customSections,
+            length: customSections?.length || 0,
+            data: customSections
         });
         
         switch (sectionType) {
@@ -660,9 +655,9 @@ const BasicTemplate: React.FC<{
                                         )}
                                         {(project.startDate || project.endDate) && (
                                             <span className="text-xs text-blue-600 font-medium whitespace-nowrap ml-2">
-                                                {project.startDate ? 
-                                                    `${formatDate(project.startDate, data.cvLanguage)} - ${project.current ? getCurrentText(data.cvLanguage) : formatDate(project.endDate || '', data.cvLanguage)}` :
-                                                    formatDate(project.endDate || '', data.cvLanguage)
+                                                {project.startDate && project.endDate ? 
+                                                    `${formatDate(project.startDate, data.cvLanguage)} - ${project.current ? getCurrentText(data.cvLanguage) : formatDate(project.endDate, data.cvLanguage)}` :
+                                                    formatDate(project.startDate || project.endDate || '', data.cvLanguage)
                                                 }
                                             </span>
                                         )}
@@ -671,9 +666,7 @@ const BasicTemplate: React.FC<{
                                         <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(project.description)}</div>
                                     )}
                                     {project.technologies && project.technologies.length > 0 && (
-                                        <p className="text-blue-600 text-xs mt-1">
-                                            {data.cvLanguage?.includes('en') ? 'Technologies' : 'Texnologiyalar'}: {project.technologies.join(', ')}
-                                        </p>
+                                        <p className="text-blue-600 text-xs mt-1">Texnologiyalar: {project.technologies.join(', ')}</p>
                                     )}
                                     {project.github && (
                                         <p className="text-gray-600 text-xs mt-1">GitHub: {project.github}</p>
@@ -752,38 +745,99 @@ const BasicTemplate: React.FC<{
                 ) : null;
 
             case 'customSections':
-                return customSections && customSections.length > 0 ? (
-                    <div className="mb-4">
-                        {customSections.map((section) => (
-                            <div key={section.id} className="mb-4">
-                                <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
-                                    {section.title}
-                                </h2>
-                                <div className="space-y-2">
-                                    {section.items.map((item) => (
-                                        <div key={item.id} className="border-l-2 border-blue-200 pl-3">
-                                            <h3 className="font-semibold text-gray-900 text-sm">{item.title}</h3>
-                                            {item.subtitle && (
-                                                <p className="text-blue-600 font-medium text-xs">{item.subtitle}</p>
-                                            )}
-                                            {item.description && (
-                                                <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(item.description)}</div>
-                                            )}
-                                            {item.technologies && item.technologies.length > 0 && (
-                                                <p className="text-blue-600 text-xs mt-1">
-                                                    {data.cvLanguage?.includes('en') ? 'Technologies' : 'Texnologiyalar'}: {item.technologies.join(', ')}
-                                                </p>
-                                            )}
-                                            {item.url && (
-                                                <p className="text-gray-600 text-xs mt-1">URL: {item.url}</p>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
+                console.log('🔍 BasicTemplate customSections case triggered:', {
+                    available: !!customSections,
+                    length: customSections?.length || 0,
+                    hasData: customSections && customSections.length > 0,
+                    rawData: customSections,
+                    firstSection: customSections?.[0],
+                    templateCheck: 'BASIC_TEMPLATE'
+                });
+                
+                // Show debug info even if no custom sections
+                if (!customSections || customSections.length === 0) {
+                    return (
+                        <div className="mb-4 border border-dashed border-gray-300 p-3 rounded">
+                            <div className="text-gray-400 text-xs italic">
+                                🚫 BasicTemplate: Custom sections boşdur (length: {customSections?.length || 0})
                             </div>
-                        ))}
+                            <div className="text-gray-500 text-xs mt-1">
+                                ElaveSections-dan yeni bölmə əlavə edin
+                            </div>
+                        </div>
+                    );
+                }
+                
+                return (
+                    <div className="mb-4">
+                        {customSections.map((section, sectionIndex) => {
+                            console.log(`🎨 BasicTemplate rendering custom section ${sectionIndex}:`, section);
+                            
+                            // Show section even if title is empty
+                            const sectionTitle = section.title || `Bölmə ${sectionIndex + 1}`;
+                            
+                            return (
+                                <div key={section.id} className="mb-4 border border-blue-100 p-3 rounded">
+                                    <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
+                                        {sectionTitle}
+                                    </h2>
+                                    <div className="space-y-2">
+                                        {section.items && section.items.length > 0 ? section.items.map((item, itemIndex) => {
+                                            console.log(`🔹 BasicTemplate rendering item ${itemIndex}:`, item);
+                                            return (
+                                                <div key={item.id || itemIndex} className="border-l-2 border-blue-200 pl-3">
+                                                    {item.title && (
+                                                        <h3 className="font-semibold text-gray-900 text-sm">{item.title}</h3>
+                                                    )}
+                                                    {item.subtitle && (
+                                                        <p className="text-blue-600 font-medium text-xs">{item.subtitle}</p>
+                                                    )}
+                                                    {item.description && (
+                                                        <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(item.description)}</div>
+                                                    )}
+                                                    {item.tags && item.tags.length > 0 && (
+                                                        <div className="flex flex-wrap gap-1 mt-2">
+                                                            {item.tags.map((tag, tagIndex) => (
+                                                                <span 
+                                                                    key={tagIndex}
+                                                                    className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
+                                                                >
+                                                                    {tag}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                    {item.date && (
+                                                        <p className="text-gray-600 text-xs mt-1">
+                                                            Tarix: {item.date}
+                                                        </p>
+                                                    )}
+                                                    {item.url && (
+                                                        <p className="text-gray-600 text-xs mt-1">
+                                                            <a href={item.url} target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-600">
+                                                                {item.url}
+                                                            </a>
+                                                        </p>
+                                                    )}
+                                                    {/* Show placeholder if item is completely empty */}
+                                                    {!item.title && !item.subtitle && !item.description && !item.url && !item.date && (!item.tags || item.tags.length === 0) && (
+                                                        <div className="text-gray-400 text-xs italic">
+                                                            Boş element - məlumat əlavə edin
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        }) : (
+                                            <div className="text-gray-500 text-xs italic border border-dashed border-gray-200 p-2 rounded">
+                                                Bu bölmədə hələ məlumat yoxdur - element əlavə edin
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
-                ) : null;
+                );
                 
             default:
                 return null;
@@ -871,16 +925,23 @@ const BasicTemplate: React.FC<{
                     strategy={verticalListSortingStrategy}
                 >
                     <div className={`space-y-4 transition-all duration-300 ${isDragActive ? 'opacity-95 bg-gradient-to-br from-transparent via-blue-50/30 to-transparent' : ''}`}>
-                        {sectionOrder.map((sectionType) => {
-                            const sectionContent = renderSection(sectionType);
-                            if (!sectionContent) return null;
-                            
-                            return (
-                                <SortableItem key={sectionType} id={sectionType}>
-                                    {sectionContent}
-                                </SortableItem>
-                            );
-                        })}
+                        {(() => {
+                            console.log('🔄 BasicTemplate rendering sections with order:', sectionOrder);
+                            return sectionOrder.map((sectionType) => {
+                                const sectionContent = renderSection(sectionType);
+                                if (!sectionContent) {
+                                    console.log('❌ No content for section:', sectionType);
+                                    return null;
+                                }
+                                
+                                console.log('✅ Rendering section:', sectionType);
+                                return (
+                                    <SortableItem key={sectionType} id={sectionType}>
+                                        {sectionContent}
+                                    </SortableItem>
+                                );
+                            });
+                        })()}
                     </div>
                 </SortableContext>
             </DndContext>
@@ -1328,6 +1389,276 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
 // ATS-Friendly Professional Template Component with Drag and Drop
 const ATSFriendlyTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSectionReorder: (newOrder: string[]) => void }> = ({ data, sectionOrder, onSectionReorder }) => {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
+    const [isDragActive, setIsDragActive] = useState(false);
+    const [activeId, setActiveId] = useState<string | null>(null);
+    
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    const handleDragStart = (event: DragStartEvent) => {
+        setIsDragActive(true);
+        setActiveId(event.active.id as string);
+        console.log('=== ATS TEMPLATE DRAG STARTED ===');
+        document.body.style.userSelect = 'none';
+        document.body.style.cursor = 'grabbing';
+    };
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        setIsDragActive(false);
+        setActiveId(null);
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+        
+        const { active, over } = event;
+        
+        console.log('=== ATS TEMPLATE DRAG ENDED ===');
+        console.log('Active:', active.id);
+        console.log('Over:', over?.id);
+        
+        if (over && active.id !== over.id) {
+            const oldIndex = sectionOrder.indexOf(active.id as string);
+            const newIndex = sectionOrder.indexOf(over.id as string);
+            
+            if (oldIndex !== -1 && newIndex !== -1) {
+                const newOrder = arrayMove(sectionOrder, oldIndex, newIndex);
+                onSectionReorder(newOrder);
+                console.log('✅ ATS template section reordered:', newOrder);
+            }
+        }
+    };
+
+    // Section render function for main content sections
+    const renderATSSection = (sectionType: string) => {
+        console.log('🎯 ATSFriendlyTemplate renderATSSection called:', sectionType, 'customSections data:', {
+            available: !!customSections,
+            length: customSections?.length || 0,
+            hasData: customSections && customSections.length > 0,
+            rawData: customSections,
+            templateCheck: 'ATS_TEMPLATE'
+        });
+
+        switch (sectionType) {
+            case 'summary':
+                return personalInfo.summary ? (
+                    <div className="mb-6 cv-section">
+                        <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-200 pb-1">
+                            {getSectionName('summary', data.cvLanguage, data.sectionNames)}
+                        </h2>
+                        <div className="text-gray-700 leading-relaxed text-xs">
+                            {renderHtmlContent(personalInfo.summary)}
+                        </div>
+                    </div>
+                ) : null;
+
+            case 'experience':
+                return experience.length > 0 ? (
+                    <div className="mb-6 cv-section">
+                        <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-200 pb-1">
+                            {getSectionName('experience', data.cvLanguage, data.sectionNames)}
+                        </h2>
+                        <div className="space-y-4">
+                            {experience.map((exp) => (
+                                <div key={exp.id}>
+                                    <div className="flex justify-between items-start mb-1">
+                                        <div className="flex-1">
+                                            <h3 className="text-sm font-bold text-gray-900">{exp.position}</h3>
+                                            <p className="text-xs font-medium text-gray-700">{exp.company}</p>
+                                        </div>
+                                        <span className="text-xs text-gray-600 ml-2">
+                                            {formatDate(exp.startDate, data.cvLanguage)} - {exp.current ? getCurrentText(data.cvLanguage) : formatDate(exp.endDate, data.cvLanguage)}
+                                        </span>
+                                    </div>
+                                    {exp.description && (
+                                        <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(exp.description)}</div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ) : null;
+
+            case 'education':
+                return education.length > 0 ? (
+                    <div className="mb-6 cv-section">
+                        <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-200 pb-1">
+                            {getSectionName('education', data.cvLanguage, data.sectionNames)}
+                        </h2>
+                        <div className="space-y-3">
+                            {education.map((edu) => (
+                                <div key={edu.id}>
+                                    <div className="flex justify-between items-start mb-1">
+                                        <div className="flex-1">
+                                            <h3 className="text-sm font-bold text-gray-900">{edu.degree}</h3>
+                                            <p className="text-xs font-medium text-gray-700">{edu.institution}</p>
+                                        </div>
+                                        <span className="text-xs text-gray-600 ml-2">
+                                            {formatDate(edu.startDate, data.cvLanguage)} - {edu.current ? getCurrentText(data.cvLanguage) : formatDate(edu.endDate, data.cvLanguage)}
+                                        </span>
+                                    </div>
+                                    {edu.description && (
+                                        <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(edu.description)}</div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ) : null;
+
+            case 'projects':
+                return projects.length > 0 ? (
+                    <div className="mb-6">
+                        <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-200 pb-1">
+                            {getSectionName('projects', data.cvLanguage, data.sectionNames)}
+                        </h2>
+                        <div className="space-y-3">
+                            {projects.map((project) => (
+                                <div key={project.id}>
+                                    <div className="flex justify-between items-start mb-1">
+                                        <div className="flex-1">
+                                            <h3 className="text-sm font-bold text-gray-900">{project.name}</h3>
+                                            {project.description && (
+                                                <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(project.description)}</div>
+                                            )}
+                                            {project.technologies && project.technologies.length > 0 && (
+                                                <p className="text-gray-600 text-xs mt-1">
+                                                    {project.technologies.join(', ')}
+                                                </p>
+                                            )}
+                                        </div>
+                                        {project.date && (
+                                            <span className="text-xs text-gray-600 ml-2">{formatDate(project.date, data.cvLanguage)}</span>
+                                        )}
+                                    </div>
+                                    {project.url && (
+                                        <p className="text-gray-600 text-xs mt-1">URL: {project.url}</p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ) : null;
+
+            case 'volunteer':
+                return volunteerExperience.length > 0 ? (
+                    <div className="mb-6">
+                        <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-200 pb-1">
+                            {getSectionName('volunteerExperience', data.cvLanguage, data.sectionNames)}
+                        </h2>
+                        <div className="space-y-3">
+                            {volunteerExperience.map((vol) => (
+                                <div key={vol.id}>
+                                    <div className="flex justify-between items-start mb-1">
+                                        <div className="flex-1">
+                                            <h3 className="text-sm font-bold text-gray-900">{vol.role}</h3>
+                                            <p className="text-xs font-medium text-gray-700">{vol.organization}</p>
+                                        </div>
+                                        <span className="text-xs text-gray-600 ml-2">
+                                            {formatDate(vol.startDate, data.cvLanguage)} - {vol.current ? getCurrentText(data.cvLanguage) : formatDate(vol.endDate, data.cvLanguage)}
+                                        </span>
+                                    </div>
+                                    {vol.description && (
+                                        <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(vol.description)}</div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ) : null;
+
+            case 'customSections':
+                console.log('🔍 ATSFriendlyTemplate customSections case triggered:', {
+                    available: !!customSections,
+                    length: customSections?.length || 0,
+                    hasData: customSections && customSections.length > 0,
+                    rawData: customSections,
+                    templateCheck: 'ATS_TEMPLATE'
+                });
+                
+                // Show debug info even if no custom sections
+                if (!customSections || customSections.length === 0) {
+                    return (
+                        <div className="mb-6 border border-dashed border-gray-300 p-3 rounded">
+                            <h2 className="text-sm font-bold text-gray-900 mb-2 uppercase tracking-wide border-b border-gray-200 pb-1">
+                                🎯 ATS Template Debug: Custom Sections
+                            </h2>
+                            <p className="text-xs text-gray-600">
+                                Custom sections məlumatı yoxdur. Length: {customSections?.length || 0}
+                            </p>
+                        </div>
+                    );
+                }
+                
+                return (
+                    <div className="mb-6">
+                        {customSections
+                            .sort((a, b) => (a.order || 999) - (b.order || 999))
+                            .map((section, sectionIndex) => {
+                                console.log(`🎨 ATSFriendlyTemplate rendering custom section ${sectionIndex}:`, section);
+                                
+                                const sectionTitle = section.title || `Bölmə ${sectionIndex + 1}`;
+                                
+                                return (
+                                    <div key={section.id} className="mb-6 border border-blue-200 p-2 rounded">
+                                        <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-200 pb-1">
+                                            🎯 {sectionTitle}
+                                        </h2>
+                                        <div className="space-y-3">
+                                            {section.items && section.items.length > 0 ? (
+                                                section.items.map((item, itemIndex) => {
+                                                    console.log(`🔸 ATSFriendlyTemplate rendering item ${itemIndex}:`, item);
+                                                    return (
+                                                        <div key={item.id || itemIndex} className="border-l-2 border-blue-300 pl-3">
+                                                            <div className="flex justify-between items-start mb-1">
+                                                                <div className="flex-1">
+                                                                    {item.title && (
+                                                                        <h3 className="text-sm font-bold text-gray-900">{item.title}</h3>
+                                                                    )}
+                                                                    {item.subtitle && (
+                                                                        <p className="text-xs font-medium text-gray-700">{item.subtitle}</p>
+                                                                    )}
+                                                                </div>
+                                                                {item.date && (
+                                                                    <span className="text-xs text-gray-600 ml-2">{formatDate(item.date, data.cvLanguage)}</span>
+                                                                )}
+                                                            </div>
+                                                            {item.description && (
+                                                                <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(item.description)}</div>
+                                                            )}
+                                                            {item.technologies && item.technologies.length > 0 && (
+                                                                <p className="text-gray-600 text-xs mt-1">
+                                                                    Texnologiyalar: {item.technologies.join(', ')}
+                                                                </p>
+                                                            )}
+                                                            {item.url && (
+                                                                <p className="text-gray-600 text-xs mt-1">URL: {item.url}</p>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })
+                                            ) : (
+                                                <div className="text-xs text-gray-500 italic p-2 bg-gray-50 rounded">
+                                                    Bu bölmədə heç bir məlumat yoxdur. Məlumat əlavə edin.
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                    </div>
+                );
+
+            default:
+                return null;
+        }
+    };
     
     return (
         <div className="w-full h-full bg-white text-gray-900 font-sans flex">
@@ -1526,7 +1857,7 @@ const ATSFriendlyTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSe
 
             {/* Right Column - Main Content */}
             <div className="flex-1" style={{ padding: '15mm 12mm' }}>
-                {/* Header - Name */}
+                {/* Header - Name (Non-draggable) */}
                 <div className="mb-6 cv-section avoid-break">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2 leading-tight">
                         {getFullName(personalInfo)}
@@ -1544,8 +1875,44 @@ const ATSFriendlyTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSe
                     )}
                 </div>
 
-                {/* Professional Experience */}
-                {experience.length > 0 && (
+                {/* Draggable Main Content Sections */}
+                <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragStart={handleDragStart}
+                    onDragEnd={handleDragEnd}
+                >
+                    <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
+                        <div className={`space-y-6 transition-all duration-300 ${isDragActive ? 'opacity-95 bg-gradient-to-br from-transparent via-blue-50/30 to-transparent' : ''}`}>
+                            {sectionOrder.map((sectionType) => {
+                                const sectionContent = renderATSSection(sectionType);
+                                
+                                if (!sectionContent) return null;
+                                
+                                return (
+                                    <SortableItem key={sectionType} id={sectionType}>
+                                        {sectionContent}
+                                    </SortableItem>
+                                );
+                            })}
+                        </div>
+                    </SortableContext>
+                    
+                    <DragOverlay>
+                        {activeId ? (
+                            <div className="bg-blue-100 border-2 border-blue-300 rounded-lg p-4 opacity-90 rotate-2 scale-105 shadow-lg">
+                                <div className="text-gray-700 font-medium">📦 {activeId} section</div>
+                            </div>
+                        ) : null}
+                    </DragOverlay>
+                </DndContext>
+
+                {/* Bottom margin for professional standards */}
+                <div className="mt-8"></div>
+            </div>
+        </div>
+    );
+};
                     <div className="mb-6 cv-section">
                         <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-200 pb-1">
                             {getSectionName('experience', data.cvLanguage, data.sectionNames)}
@@ -1645,7 +2012,7 @@ const ATSFriendlyTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSe
                                             )}
                                             {project.technologies && project.technologies.length > 0 && (
                                                 <p className="text-xs text-gray-600 mt-1">
-                                                    <span className="font-medium">{data.cvLanguage?.includes('en') ? 'Technologies' : 'Texnologiyalar'}:</span> {project.technologies.join(', ')}
+                                                    <span className="font-medium">Technologies:</span> {project.technologies.join(', ')}
                                                 </p>
                                             )}
                                             {project.github && (
@@ -1656,10 +2023,11 @@ const ATSFriendlyTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSe
                                         </div>
                                         {(project.startDate || project.endDate) && (
                                             <span className="text-xs text-gray-600 font-medium whitespace-nowrap ml-2">
-                                                {project.startDate ? 
-                                                    `${formatDate(project.startDate, data.cvLanguage)} - ${project.current ? getCurrentText(data.cvLanguage) : formatDate(project.endDate || '', data.cvLanguage)}` :
-                                                    formatDate(project.endDate || '', data.cvLanguage)
-                                                }
+                                                {project.startDate && project.endDate ? (
+                                                    project.current ? `${formatDate(project.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : `${formatDate(project.startDate, data.cvLanguage)} - ${formatDate(project.endDate, data.cvLanguage)}`
+                                                ) : (
+                                                    formatDate((project.startDate || project.endDate) || '', data.cvLanguage)
+                                                )}
                                             </span>
                                         )}
                                     </div>
@@ -1703,22 +2071,34 @@ const ATSFriendlyTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSe
                 )}
 
                 {/* Custom Sections */}
-                {customSections.length > 0 && customSections
-                    .sort((a, b) => (a.order || 999) - (b.order || 999))
-                    .map((section) => (
-                        <div key={section.id} className="mb-6">
-                            <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-200 pb-1">
-                                {section.title}
-                            </h2>
-                            <div className="space-y-3">
-                                {section.items.map((item) => (
-                                    <div key={item.id}>
-                                        <div className="flex justify-between items-start mb-1">
-                                            <div className="flex-1">
-                                                {item.title && (
-                                                    <h3 className="text-sm font-bold text-gray-900">{item.title}</h3>
-                                                )}
-                                                {item.subtitle && (
+                {(() => {
+                    console.log('🏆 ATSFriendlyTemplate custom sections check:', {
+                        available: !!customSections,
+                        length: customSections?.length || 0,
+                        hasData: customSections && customSections.length > 0,
+                        rawData: customSections,
+                        templateCheck: 'ATS_TEMPLATE'
+                    });
+                    return customSections.length > 0 && customSections
+                        .sort((a, b) => (a.order || 999) - (b.order || 999))
+                        .map((section, sectionIndex) => {
+                            console.log(`🎯 ATSFriendlyTemplate rendering custom section ${sectionIndex}:`, section);
+                            return (
+                                <div key={section.id} className="mb-6">
+                                    <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-200 pb-1">
+                                        {section.title}
+                                    </h2>
+                                    <div className="space-y-3">
+                                        {section.items.map((item, itemIndex) => {
+                                            console.log(`🔸 ATSFriendlyTemplate rendering item ${itemIndex}:`, item);
+                                            return (
+                                                <div key={item.id}>
+                                                    <div className="flex justify-between items-start mb-1">
+                                                        <div className="flex-1">
+                                                            {item.title && (
+                                                                <h3 className="text-sm font-bold text-gray-900">{item.title}</h3>
+                                                            )}
+                                                            {item.subtitle && (
                                                     <p className="text-xs font-medium text-gray-700">{item.subtitle}</p>
                                                 )}
                                             </div>
@@ -1749,11 +2129,13 @@ const ATSFriendlyTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSe
                                             </p>
                                         )}
                                     </div>
-                                ))}
-                            </div>
-                        </div>
-                    ))
-                }
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            );
+                        });
+                })()}
 
                 {/* Bottom margin for professional standards */}
                 <div className="mt-8"></div>
@@ -2005,10 +2387,11 @@ const ProfessionalTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onS
                                         </div>
                                         {(project.startDate || project.endDate) && (
                                             <span className="text-xs text-gray-600 font-medium whitespace-nowrap ml-2">
-                                                {project.startDate ? 
-                                                    `${formatDate(project.startDate, data.cvLanguage)} - ${project.current ? getCurrentText(data.cvLanguage).toLowerCase() : formatDate(project.endDate || '', data.cvLanguage)}` :
-                                                    formatDate(project.endDate || '', data.cvLanguage)
-                                                }
+                                                {project.startDate && project.endDate ? (
+                                                    project.current ? `${formatDate(project.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage).toLowerCase()}` : `${formatDate(project.startDate, data.cvLanguage)} - ${formatDate(project.endDate, data.cvLanguage)}`
+                                                ) : (
+                                                    formatDate((project.startDate || project.endDate) || '', data.cvLanguage)
+                                                )}
                                             </span>
                                         )}
                                     </div>
@@ -2085,6 +2468,40 @@ const ProfessionalTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onS
                                 </div>
                             ))}
                         </div>
+                    </div>
+                ) : null;
+
+            case 'customSections':
+                return customSections.length > 0 ? (
+                    <div className="mb-6">
+                        {customSections.map((section) => (
+                            <div key={section.id} className="mb-6">
+                                <h2 className="text-base font-bold text-gray-800 mb-3 uppercase tracking-wide">
+                                    {section.title}
+                                </h2>
+                                <div className="space-y-2">
+                                    {section.items.map((item) => (
+                                        <div key={item.id} className="border-l-2 border-gray-300 pl-3">
+                                            <h3 className="font-bold text-gray-900 text-sm">{item.title}</h3>
+                                            {item.subtitle && (
+                                                <p className="text-gray-700 font-medium text-xs">{item.subtitle}</p>
+                                            )}
+                                            {item.description && (
+                                                <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(item.description)}</div>
+                                            )}
+                                            {item.technologies && item.technologies.length > 0 && (
+                                                <p className="text-gray-600 text-xs mt-1">
+                                                    Texnologiyalar: {item.technologies.join(', ')}
+                                                </p>
+                                            )}
+                                            {item.url && (
+                                                <p className="text-gray-600 text-xs mt-1">URL: {item.url}</p>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 ) : null;
 
@@ -2182,6 +2599,17 @@ export default function CVPreview({
         smallWeight: 400
     }
 }: CVPreviewProps) {
+    console.log('🎯 CVPreview rendered with CV data:', {
+        template: template || cv.templateId || 'basic',
+        templateNormalized: (template || cv.templateId || 'basic').toLowerCase(),
+        customSections: cv.data.customSections,
+        customSectionsLength: cv.data.customSections?.length || 0,
+        hasCustomSections: cv.data.customSections && cv.data.customSections.length > 0,
+        customSectionsData: cv.data.customSections,
+        allDataKeys: Object.keys(cv.data),
+        savedSectionOrder: cv.data.sectionOrder
+    });
+    
     const templateId = template || cv.templateId || 'basic';
     const [scale, setScale] = React.useState(1.0);
     
@@ -2194,7 +2622,8 @@ export default function CVPreview({
         'languages',
         'projects',
         'certifications',
-        'volunteer'
+        'volunteer',
+        'customSections'
     ];
     
     // Initialize section order from CV data or use default
@@ -2311,11 +2740,7 @@ export default function CVPreview({
         }
         
         // Basic/Simple templates (default)
-        return <BasicTemplate 
-            data={cv.data} 
-            sectionOrder={sectionOrder} 
-            onSectionReorder={handleSectionReorder}
-        />;
+        return <BasicTemplate data={cv.data} sectionOrder={sectionOrder} onSectionReorder={handleSectionReorder} />;
     };
 
     return (

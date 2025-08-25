@@ -94,6 +94,13 @@ export default function ProjectsSection({ data, onChange }: ProjectsSectionProps
     onChange([...updated]);
   };
 
+  const updateProjectMultiple = (id: string, updates: Partial<Project>) => {
+    const updated = normalizedData.map(project =>
+      project.id === id ? { ...project, ...updates } : project
+    );
+    onChange([...updated]);
+  };
+
   const removeProject = (id: string) => {
     onChange(normalizedData.filter(project => project.id !== id));
   };
@@ -277,10 +284,10 @@ export default function ProjectsSection({ data, onChange }: ProjectsSectionProps
                           checked={Boolean(project.current)}
                           onChange={(e) => {
                             const isChecked = e.target.checked;
-                            updateProject(project.id, 'current', isChecked);
-                            if (isChecked) {
-                              updateProject(project.id, 'endDate', '');
-                            }
+                            updateProjectMultiple(project.id, {
+                              current: isChecked,
+                              endDate: isChecked ? '' : project.endDate,
+                            });
                           }}
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />

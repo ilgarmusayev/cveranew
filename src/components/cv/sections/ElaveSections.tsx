@@ -174,17 +174,29 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free' }
   // Update parent when sections change, converting to CVPreview format
   useEffect(() => {
     const cvPreviewFormat = convertToCVPreviewFormat(sections);
+    console.log('🔄 ElaveSections onChange triggered:', {
+      sectionsLength: sections.length,
+      cvPreviewFormatLength: cvPreviewFormat.length,
+      cvPreviewFormat: cvPreviewFormat,
+      hasOnChange: !!onChange
+    });
     onChange?.(cvPreviewFormat);
   }, [sections]); // Remove onChange from dependencies to avoid infinite loop
 
   const addSection = () => {
+    console.log('🆕 Adding new section in ElaveSections');
     const newSection: CustomSection = {
       id: Date.now().toString(),
       title: '',
       elements: [],
       isExpanded: true
     };
-    setSections(prev => [...prev, newSection]);
+    console.log('🆕 New section created:', newSection);
+    setSections(prev => {
+      const newSections = [...prev, newSection];
+      console.log('🆕 Updated sections:', newSections);
+      return newSections;
+    });
   };
 
   const removeSection = (sectionId: string) => {
