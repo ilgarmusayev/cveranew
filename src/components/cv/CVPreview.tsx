@@ -327,9 +327,11 @@ const splitContentToPages = (sections: React.ReactNode[], pageHeightPx: number =
 interface SortableItemProps {
     id: string;
     children: React.ReactNode;
+    showDragInstruction?: boolean; // New prop to control instruction visibility
+    dragIconPosition?: 'left' | 'right'; // New prop to control icon position
 }
 
-const SortableItem: React.FC<SortableItemProps> = ({ id, children }) => {
+const SortableItem: React.FC<SortableItemProps> = ({ id, children, showDragInstruction = true, dragIconPosition = 'left' }) => {
     const {
         attributes,
         listeners,
@@ -343,7 +345,7 @@ const SortableItem: React.FC<SortableItemProps> = ({ id, children }) => {
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? 0.9 : 1,
-        zIndex: isDragging ? 1000 : 'auto',
+        zIndex: isDragging ? 9999 : 'auto',
     };
 
     return (
@@ -356,7 +358,7 @@ const SortableItem: React.FC<SortableItemProps> = ({ id, children }) => {
                 relative group cursor-grab active:cursor-grabbing
                 ${isDragging 
                     ? 'shadow-2xl border-2 border-blue-500 bg-blue-50 rounded-lg scale-105 rotate-1' 
-                    : 'hover:shadow-lg hover:border-2 hover:border-blue-300 hover:bg-blue-50/50 hover:scale-[1.02]'
+                    : 'hover:shadow-lg hover:border-2 hover:border-blue-300 hover:bg-blue-50/50 hover:scale-[1.02] hover:z-50'
                 }
                 transition-all duration-200 ease-in-out
                 border border-transparent rounded-md
@@ -367,28 +369,30 @@ const SortableItem: React.FC<SortableItemProps> = ({ id, children }) => {
         >
             {/* Drag indicator icon - appears on hover */}
             <div 
-                className="absolute -left-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200"
-                style={{ userSelect: 'none' }}
+                className={`absolute ${dragIconPosition === 'right' ? '-right-3' : '-left-3'} top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200`}
+                style={{ userSelect: 'none', zIndex: 99999 }}
             >
-                <div className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-lg hover:bg-blue-700 transition-colors">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <div className="bg-blue-600 text-white rounded-full w-7 h-7 flex items-center justify-center shadow-xl hover:bg-blue-700 transition-colors border-2 border-white">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
                     </svg>
                 </div>
             </div>
             
-            {/* Hover instruction */}
-            <div 
-                className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-blue-300 text-white px-3 py-1 rounded text-xs font-medium whitespace-nowrap shadow-lg"
-                style={{ userSelect: 'none' }}
-            >
-                Sürükləyərək yerdəyişmə edin
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-blue-300 text-white"></div>
-            </div>
+            {/* Hover instruction - only show if showDragInstruction is true */}
+            {showDragInstruction && (
+                <div 
+                    className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-blue-300 text-white px-3 py-1 rounded text-xs font-medium whitespace-nowrap shadow-lg"
+                    style={{ userSelect: 'none', zIndex: 99999 }}
+                >
+                    Sürükləyərək yerdəyişmə edin
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-blue-300 text-white"></div>
+                </div>
+            )}
             
             {/* Visual drag lines when dragging */}
             {isDragging && (
-                <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 99998 }}>
                     <div className="absolute left-0 top-1/4 w-1 h-1/2 bg-blue-500 rounded-full animate-pulse"></div>
                     <div className="absolute right-0 top-1/4 w-1 h-1/2 bg-blue-500 rounded-full animate-pulse"></div>
                 </div>
@@ -399,7 +403,7 @@ const SortableItem: React.FC<SortableItemProps> = ({ id, children }) => {
                 className={`
                     ${isDragging ? 'transform rotate-0' : ''}
                     transition-transform duration-200
-                    pl-2 pr-2 py-1
+                    ${dragIconPosition === 'right' ? 'pl-2 pr-8 py-1' : 'pl-8 pr-2 py-1'}
                 `}
                 style={{ userSelect: isDragging ? 'none' : 'auto' }}
             >
@@ -414,7 +418,9 @@ const BasicTemplate: React.FC<{
     data: CVData; 
     sectionOrder: string[]; 
     onSectionReorder: (newOrder: string[]) => void;
-}> = ({ data, sectionOrder, onSectionReorder }) => {
+    cv: any;
+    onUpdate?: (updatedCv: any) => void;
+}> = ({ data, sectionOrder, onSectionReorder, cv, onUpdate }) => {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
     const [isDragActive, setIsDragActive] = useState(false);
     const [activeId, setActiveId] = useState<string | null>(null);
@@ -660,9 +666,9 @@ const BasicTemplate: React.FC<{
                                         )}
                                         {(project.startDate || project.endDate) && (
                                             <span className="text-xs text-blue-600 font-medium whitespace-nowrap ml-2">
-                                                {project.startDate ? 
-                                                    `${formatDate(project.startDate, data.cvLanguage)} - ${project.current ? getCurrentText(data.cvLanguage) : formatDate(project.endDate || '', data.cvLanguage)}` :
-                                                    formatDate(project.endDate || '', data.cvLanguage)
+                                                {project.startDate && project.endDate ? 
+                                                    `${formatDate(project.startDate, data.cvLanguage)} - ${project.current ? getCurrentText(data.cvLanguage) : formatDate(project.endDate, data.cvLanguage)}` :
+                                                    formatDate(project.startDate || project.endDate || '', data.cvLanguage)
                                                 }
                                             </span>
                                         )}
@@ -671,9 +677,7 @@ const BasicTemplate: React.FC<{
                                         <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(project.description)}</div>
                                     )}
                                     {project.technologies && project.technologies.length > 0 && (
-                                        <p className="text-blue-600 text-xs mt-1">
-                                            {data.cvLanguage?.includes('en') ? 'Technologies' : 'Texnologiyalar'}: {project.technologies.join(', ')}
-                                        </p>
+                                        <p className="text-blue-600 text-xs mt-1">{data.cvLanguage === 'azerbaijani' ? 'Texnologiyalar' : 'Technologies'}: {project.technologies.join(', ')}</p>
                                     )}
                                     {project.github && (
                                         <p className="text-gray-600 text-xs mt-1">GitHub: {project.github}</p>
@@ -771,7 +775,7 @@ const BasicTemplate: React.FC<{
                                             )}
                                             {item.technologies && item.technologies.length > 0 && (
                                                 <p className="text-blue-600 text-xs mt-1">
-                                                    {data.cvLanguage?.includes('en') ? 'Technologies' : 'Texnologiyalar'}: {item.technologies.join(', ')}
+                                                    {data.cvLanguage === 'azerbaijani' ? 'Texnologiyalar' : 'Technologies'}: {item.technologies.join(', ')}
                                                 </p>
                                             )}
                                             {item.url && (
@@ -1314,9 +1318,9 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
                 </SortableContext>
             </div>
             
-            <DragOverlay>
+            <DragOverlay style={{ zIndex: 99999 }}>
                 {activeId ? (
-                    <div className="bg-blue-100 border-2 border-blue-300 rounded-lg p-4 opacity-90 rotate-2 scale-105 shadow-lg">
+                    <div className="bg-blue-100 border-2 border-blue-300 rounded-lg p-4 opacity-90 rotate-2 scale-105 shadow-lg" style={{ zIndex: 99999 }}>
                         <div className="text-gray-700 font-medium">📦 {activeId} section</div>
                     </div>
                 ) : null}
@@ -1645,7 +1649,7 @@ const ATSFriendlyTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSe
                                             )}
                                             {project.technologies && project.technologies.length > 0 && (
                                                 <p className="text-xs text-gray-600 mt-1">
-                                                    <span className="font-medium">{data.cvLanguage?.includes('en') ? 'Technologies' : 'Texnologiyalar'}:</span> {project.technologies.join(', ')}
+                                                    <span className="font-medium">Technologies:</span> {project.technologies.join(', ')}
                                                 </p>
                                             )}
                                             {project.github && (
@@ -1656,10 +1660,11 @@ const ATSFriendlyTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSe
                                         </div>
                                         {(project.startDate || project.endDate) && (
                                             <span className="text-xs text-gray-600 font-medium whitespace-nowrap ml-2">
-                                                {project.startDate ? 
-                                                    `${formatDate(project.startDate, data.cvLanguage)} - ${project.current ? getCurrentText(data.cvLanguage) : formatDate(project.endDate || '', data.cvLanguage)}` :
-                                                    formatDate(project.endDate || '', data.cvLanguage)
-                                                }
+                                                {project.startDate && project.endDate ? (
+                                                    project.current ? `${formatDate(project.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : `${formatDate(project.startDate, data.cvLanguage)} - ${formatDate(project.endDate, data.cvLanguage)}`
+                                                ) : (
+                                                    formatDate((project.startDate || project.endDate) || '', data.cvLanguage)
+                                                )}
                                             </span>
                                         )}
                                     </div>
@@ -2005,10 +2010,11 @@ const ProfessionalTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onS
                                         </div>
                                         {(project.startDate || project.endDate) && (
                                             <span className="text-xs text-gray-600 font-medium whitespace-nowrap ml-2">
-                                                {project.startDate ? 
-                                                    `${formatDate(project.startDate, data.cvLanguage)} - ${project.current ? getCurrentText(data.cvLanguage).toLowerCase() : formatDate(project.endDate || '', data.cvLanguage)}` :
-                                                    formatDate(project.endDate || '', data.cvLanguage)
-                                                }
+                                                {project.startDate && project.endDate ? (
+                                                    project.current ? `${formatDate(project.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage).toLowerCase()}` : `${formatDate(project.startDate, data.cvLanguage)} - ${formatDate(project.endDate, data.cvLanguage)}`
+                                                ) : (
+                                                    formatDate((project.startDate || project.endDate) || '', data.cvLanguage)
+                                                )}
                                             </span>
                                         )}
                                     </div>
@@ -2185,6 +2191,13 @@ export default function CVPreview({
     const templateId = template || cv.templateId || 'basic';
     const [scale, setScale] = React.useState(1.0);
     
+    // Debug: Check what custom sections data we have
+    console.log('=== CV PREVIEW DEBUG ===');
+    console.log('CV Data:', cv.data);
+    console.log('Custom Sections:', cv.data.customSections);
+    console.log('Custom Sections Length:', cv.data.customSections?.length);
+    console.log('Template ID:', templateId);
+    
     // Default section order
     const defaultSectionOrder = [
         'summary',
@@ -2194,7 +2207,8 @@ export default function CVPreview({
         'languages',
         'projects',
         'certifications',
-        'volunteer'
+        'volunteer',
+        'customSections'
     ];
     
     // Initialize section order from CV data or use default
@@ -2202,10 +2216,26 @@ export default function CVPreview({
         // Check if CV data has a saved section order
         if (cv.data.sectionOrder && Array.isArray(cv.data.sectionOrder) && cv.data.sectionOrder.length > 0) {
             console.log('Using saved section order:', cv.data.sectionOrder);
-            return cv.data.sectionOrder as string[];
+            let order = cv.data.sectionOrder as string[];
+            
+            // If customSections exist but are not in the saved order, add them
+            if (cv.data.customSections && cv.data.customSections.length > 0 && !order.includes('customSections')) {
+                order = [...order, 'customSections'];
+                console.log('Added customSections to saved order:', order);
+            }
+            
+            return order;
         }
-        console.log('Using default section order:', defaultSectionOrder);
-        return defaultSectionOrder;
+        
+        // Use default order, but check if we need to include customSections
+        let order = [...defaultSectionOrder];
+        if (cv.data.customSections && cv.data.customSections.length > 0 && !order.includes('customSections')) {
+            // customSections is already in defaultSectionOrder now, but just in case
+            console.log('Custom sections exist in data:', cv.data.customSections.length);
+        }
+        
+        console.log('Using default section order:', order);
+        return order;
     });
     
     // Handle drag end
@@ -2225,14 +2255,17 @@ export default function CVPreview({
             }
         };
         
-        // Notify parent component if handler exists
-        onSectionReorder?.(newOrder);
+        // Notify parent component if handler exists - pass the updated CV
+        if (onSectionReorder) {
+            onSectionReorder(newOrder);
+        }
         
-        // If there's a CV update handler, use it for persistence
+        // Always update the parent with new CV data
         if (onUpdate) {
             onUpdate(updatedCv);
+            console.log('✅ Section order updated in parent component');
         } else {
-            console.log('No onUpdate handler found, section order will be saved when CV is saved manually');
+            console.log('⚠️ No onUpdate handler found, section order changes won\'t persist');
         }
     };
     
@@ -2315,6 +2348,8 @@ export default function CVPreview({
             data={cv.data} 
             sectionOrder={sectionOrder} 
             onSectionReorder={handleSectionReorder}
+            cv={cv}
+            onUpdate={onUpdate}
         />;
     };
 

@@ -252,6 +252,26 @@ export default function EnhancedCustomSectionsSection({
     }
   };
 
+  // Item-i köçür
+  const moveItem = (sectionId: string, itemId: string, direction: 'up' | 'down') => {
+    const updated = data.map(section => {
+      if (section.id === sectionId) {
+        const itemIndex = section.items.findIndex(item => item.id === itemId);
+        if (direction === 'up' && itemIndex > 0) {
+          const updatedItems = [...section.items];
+          [updatedItems[itemIndex], updatedItems[itemIndex - 1]] = [updatedItems[itemIndex - 1], updatedItems[itemIndex]];
+          return { ...section, items: updatedItems };
+        } else if (direction === 'down' && itemIndex < section.items.length - 1) {
+          const updatedItems = [...section.items];
+          [updatedItems[itemIndex], updatedItems[itemIndex + 1]] = [updatedItems[itemIndex + 1], updatedItems[itemIndex]];
+          return { ...section, items: updatedItems };
+        }
+      }
+      return section;
+    });
+    onChange(updated);
+  };
+
   const validateAllSections = () => {
     const errors: Record<string, string> = {};
     data.forEach(section => {
@@ -495,21 +515,56 @@ export default function EnhancedCustomSectionsSection({
               </div>
 
               {/* Action links moved to bottom of card */}
-              <div className="flex items-center justify-end gap-4 mt-4 pt-2 border-t border-gray-100">
-                <button
-                  onClick={() => setExpandedSectionId(
-                    expandedSectionId === section.id ? null : section.id
-                  )}
-                  className="text-blue-600 hover:text-blue-800 transition-colors text-sm cursor-pointer"
-                >
-                  {expandedSectionId === section.id ? 'Bağlayın' : 'Redaktə edin'}
-                </button>
-                <button
-                  onClick={() => removeSection(section.id)}
-                  className="text-red-600 hover:text-red-800 transition-colors text-sm cursor-pointer"
-                >
-                  Silin
-                </button>
+              <div className="flex items-center justify-between mt-4 pt-2 border-t border-gray-100">
+                {/* Move buttons */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => moveSection(section.id, 'up')}
+                    disabled={data.indexOf(section) === 0}
+                    className={`p-1 rounded transition-colors ${
+                      data.indexOf(section) === 0
+                        ? 'text-gray-300 cursor-not-allowed'
+                        : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                    }`}
+                    title="Yuxarı"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => moveSection(section.id, 'down')}
+                    disabled={data.indexOf(section) === data.length - 1}
+                    className={`p-1 rounded transition-colors ${
+                      data.indexOf(section) === data.length - 1
+                        ? 'text-gray-300 cursor-not-allowed'
+                        : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                    }`}
+                    title="Aşağı"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Edit and remove buttons */}
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => setExpandedSectionId(
+                      expandedSectionId === section.id ? null : section.id
+                    )}
+                    className="text-blue-600 hover:text-blue-800 transition-colors text-sm cursor-pointer"
+                  >
+                    {expandedSectionId === section.id ? 'Bağlayın' : 'Redaktə edin'}
+                  </button>
+                  <button
+                    onClick={() => removeSection(section.id)}
+                    className="text-red-600 hover:text-red-800 transition-colors text-sm cursor-pointer"
+                  >
+                    Silin
+                  </button>
+                </div>
               </div>
 
               {/* Section Content Preview (when collapsed) */}
@@ -631,6 +686,36 @@ export default function EnhancedCustomSectionsSection({
                                 </span>
                               </div>
                               <div className="flex items-center gap-1">
+                                {/* Move buttons for items */}
+                                <button
+                                  onClick={() => moveItem(section.id, item.id, 'up')}
+                                  disabled={itemIndex === 0}
+                                  className={`p-1 rounded transition-colors ${
+                                    itemIndex === 0
+                                      ? 'text-gray-300 cursor-not-allowed'
+                                      : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                                  }`}
+                                  title="Yuxarı"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                  </svg>
+                                </button>
+                                <button
+                                  onClick={() => moveItem(section.id, item.id, 'down')}
+                                  disabled={itemIndex === section.items.length - 1}
+                                  className={`p-1 rounded transition-colors ${
+                                    itemIndex === section.items.length - 1
+                                      ? 'text-gray-300 cursor-not-allowed'
+                                      : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                                  }`}
+                                  title="Aşağı"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                  </svg>
+                                </button>
+
                                 <button
                                   onClick={() => setExpandedItemId(
                                     expandedItemId === item.id ? null : item.id

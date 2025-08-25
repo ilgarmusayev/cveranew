@@ -117,19 +117,54 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
               </div>
 
               {/* Action links moved to bottom of card */}
-              <div className="flex items-center justify-end gap-4 mt-4 pt-2 border-t border-gray-100">
-                <button
-                  onClick={() => setExpandedId(expandedId === education.id ? null : education.id)}
-                  className="text-blue-600 hover:text-blue-800 transition-colors text-sm cursor-pointer"
-                >
-                  {expandedId === education.id ? 'Bağlayın' : 'Redaktə edin'}
-                </button>
-                <button
-                  onClick={() => removeEducation(education.id)}
-                  className="text-red-600 hover:text-red-800 transition-colors text-sm cursor-pointer"
-                >
-                  Silin
-                </button>
+              <div className="flex items-center justify-between mt-4 pt-2 border-t border-gray-100">
+                {/* Move buttons */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => moveEducation(education.id, 'up')}
+                    disabled={index === 0}
+                    className={`p-1 rounded transition-colors ${
+                      index === 0
+                        ? 'text-gray-300 cursor-not-allowed'
+                        : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                    }`}
+                    title="Yuxarı"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => moveEducation(education.id, 'down')}
+                    disabled={index === data.length - 1}
+                    className={`p-1 rounded transition-colors ${
+                      index === data.length - 1
+                        ? 'text-gray-300 cursor-not-allowed'
+                        : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                    }`}
+                    title="Aşağı"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Edit and remove buttons */}
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => setExpandedId(expandedId === education.id ? null : education.id)}
+                    className="text-blue-600 hover:text-blue-800 transition-colors text-sm cursor-pointer"
+                  >
+                    {expandedId === education.id ? 'Bağlayın' : 'Redaktə edin'}
+                  </button>
+                  <button
+                    onClick={() => removeEducation(education.id)}
+                    className="text-red-600 hover:text-red-800 transition-colors text-sm cursor-pointer"
+                  >
+                    Silin
+                  </button>
+                </div>
               </div>
 
               {expandedId === education.id && (

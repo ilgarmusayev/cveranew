@@ -63,6 +63,40 @@ function CustomSectionsSection({ data, onChange, userTier = 'Free' }: CustomSect
     onChange(updated);
   };
 
+  // Section-ı köçür
+  const moveSection = (sectionId: string, direction: 'up' | 'down') => {
+    const index = data.findIndex(section => section.id === sectionId);
+    if (direction === 'up' && index > 0) {
+      const updated = [...data];
+      [updated[index], updated[index - 1]] = [updated[index - 1], updated[index]];
+      onChange(updated);
+    } else if (direction === 'down' && index < data.length - 1) {
+      const updated = [...data];
+      [updated[index], updated[index + 1]] = [updated[index + 1], updated[index]];
+      onChange(updated);
+    }
+  };
+
+  // Item-i köçür
+  const moveItem = (sectionId: string, itemId: string, direction: 'up' | 'down') => {
+    const updated = data.map(section => {
+      if (section.id === sectionId) {
+        const itemIndex = section.items.findIndex(item => item.id === itemId);
+        if (direction === 'up' && itemIndex > 0) {
+          const updatedItems = [...section.items];
+          [updatedItems[itemIndex], updatedItems[itemIndex - 1]] = [updatedItems[itemIndex - 1], updatedItems[itemIndex]];
+          return { ...section, items: updatedItems };
+        } else if (direction === 'down' && itemIndex < section.items.length - 1) {
+          const updatedItems = [...section.items];
+          [updatedItems[itemIndex], updatedItems[itemIndex + 1]] = [updatedItems[itemIndex + 1], updatedItems[itemIndex]];
+          return { ...section, items: updatedItems };
+        }
+      }
+      return section;
+    });
+    onChange(updated);
+  };
+
   // Item yenilə
   const updateItem = (sectionId: string, itemId: string, field: keyof CustomSectionItem, value: string) => {
     const updated = data.map(section =>
@@ -131,6 +165,36 @@ function CustomSectionsSection({ data, onChange, userTier = 'Free' }: CustomSect
                     />
                   </div>
                   <div className="flex items-center space-x-2">
+                    {/* Move buttons for sections */}
+                    <button
+                      onClick={() => moveSection(section.id, 'up')}
+                      disabled={data.indexOf(section) === 0}
+                      className={`p-1 rounded transition-colors ${
+                        data.indexOf(section) === 0
+                          ? 'text-gray-300 cursor-not-allowed'
+                          : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                      }`}
+                      title="Yuxarı"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => moveSection(section.id, 'down')}
+                      disabled={data.indexOf(section) === data.length - 1}
+                      className={`p-1 rounded transition-colors ${
+                        data.indexOf(section) === data.length - 1
+                          ? 'text-gray-300 cursor-not-allowed'
+                          : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                      }`}
+                      title="Aşağı"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+
                     <button
                       onClick={() => addItem(section.id)}
                       className="flex items-center px-3 py-1.5 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
@@ -192,6 +256,36 @@ function CustomSectionsSection({ data, onChange, userTier = 'Free' }: CustomSect
                               placeholder="Element başlığı"
                             />
                             <div className="flex items-center space-x-2 ml-4">
+                              {/* Move buttons for items */}
+                              <button
+                                onClick={() => moveItem(section.id, item.id, 'up')}
+                                disabled={section.items.indexOf(item) === 0}
+                                className={`p-1 rounded transition-colors ${
+                                  section.items.indexOf(item) === 0
+                                    ? 'text-gray-300 cursor-not-allowed'
+                                    : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                                }`}
+                                title="Yuxarı"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => moveItem(section.id, item.id, 'down')}
+                                disabled={section.items.indexOf(item) === section.items.length - 1}
+                                className={`p-1 rounded transition-colors ${
+                                  section.items.indexOf(item) === section.items.length - 1
+                                    ? 'text-gray-300 cursor-not-allowed'
+                                    : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                                }`}
+                                title="Aşağı"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                              </button>
+
                               <button
                                 onClick={() => setExpandedItemId(expandedItemId === item.id ? null : item.id)}
                                 className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
