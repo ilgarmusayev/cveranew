@@ -109,15 +109,25 @@ export const SimpleFontManager: React.FC<SimpleFontManagerProps> = ({ cvId, clas
             <span>📢 Əsas Başlıq (Title)</span>
             <span className="text-xs text-gray-500">{fontSettings.titleSize}px</span>
           </label>
-          <input
-            type="range"
-            min="24"
-            max="48"
-            step="2"
-            value={fontSettings.titleSize}
-            onChange={(e) => handleTitleSizeChange(Number(e.target.value))}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-blue"
-          />
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => handleTitleSizeChange(Math.max(24, fontSettings.titleSize - 2))}
+              disabled={fontSettings.titleSize <= 24}
+              className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+            >
+              -
+            </button>
+            <div className="flex-1 text-center">
+              <span className="text-sm font-medium">{fontSettings.titleSize}px</span>
+            </div>
+            <button
+              onClick={() => handleTitleSizeChange(Math.min(48, fontSettings.titleSize + 2))}
+              disabled={fontSettings.titleSize >= 48}
+              className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+            >
+              +
+            </button>
+          </div>
           <div className="flex justify-between text-xs text-gray-400">
             <span>24px</span>
             <span>48px</span>
@@ -130,15 +140,25 @@ export const SimpleFontManager: React.FC<SimpleFontManagerProps> = ({ cvId, clas
             <span>📋 Alt Başlıq (Subtitle)</span>
             <span className="text-xs text-gray-500">{fontSettings.subtitleSize}px</span>
           </label>
-          <input
-            type="range"
-            min="16"
-            max="32"
-            step="1"
-            value={fontSettings.subtitleSize}
-            onChange={(e) => handleSubtitleSizeChange(Number(e.target.value))}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-green"
-          />
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => handleSubtitleSizeChange(Math.max(16, fontSettings.subtitleSize - 1))}
+              disabled={fontSettings.subtitleSize <= 16}
+              className="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center hover:bg-green-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+            >
+              -
+            </button>
+            <div className="flex-1 text-center">
+              <span className="text-sm font-medium">{fontSettings.subtitleSize}px</span>
+            </div>
+            <button
+              onClick={() => handleSubtitleSizeChange(Math.min(32, fontSettings.subtitleSize + 1))}
+              disabled={fontSettings.subtitleSize >= 32}
+              className="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center hover:bg-green-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+            >
+              +
+            </button>
+          </div>
           <div className="flex justify-between text-xs text-gray-400">
             <span>16px</span>
             <span>32px</span>
@@ -151,15 +171,25 @@ export const SimpleFontManager: React.FC<SimpleFontManagerProps> = ({ cvId, clas
             <span>🏷️ Bölmə Başlıqları (Heading)</span>
             <span className="text-xs text-gray-500">{fontSettings.headingSize}px</span>
           </label>
-          <input
-            type="range"
-            min="14"
-            max="24"
-            step="1"
-            value={fontSettings.headingSize}
-            onChange={(e) => handleHeadingSizeChange(Number(e.target.value))}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-purple"
-          />
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => handleHeadingSizeChange(Math.max(14, fontSettings.headingSize - 1))}
+              disabled={fontSettings.headingSize <= 14}
+              className="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center hover:bg-purple-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+            >
+              -
+            </button>
+            <div className="flex-1 text-center">
+              <span className="text-sm font-medium">{fontSettings.headingSize}px</span>
+            </div>
+            <button
+              onClick={() => handleHeadingSizeChange(Math.min(24, fontSettings.headingSize + 1))}
+              disabled={fontSettings.headingSize >= 24}
+              className="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center hover:bg-purple-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+            >
+              +
+            </button>
+          </div>
           <div className="flex justify-between text-xs text-gray-400">
             <span>14px</span>
             <span>24px</span>
@@ -172,15 +202,25 @@ export const SimpleFontManager: React.FC<SimpleFontManagerProps> = ({ cvId, clas
             <span>📄 Əsas Mətn (Body)</span>
             <span className="text-xs text-gray-500">{fontSettings.bodySize}px</span>
           </label>
-          <input
-            type="range"
-            min="10"
-            max="18"
-            step="1"
-            value={fontSettings.bodySize}
-            onChange={(e) => handleBodySizeChange(Number(e.target.value))}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-orange"
-          />
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => handleBodySizeChange(Math.max(10, fontSettings.bodySize - 1))}
+              disabled={fontSettings.bodySize <= 10}
+              className="w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center hover:bg-orange-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+            >
+              -
+            </button>
+            <div className="flex-1 text-center">
+              <span className="text-sm font-medium">{fontSettings.bodySize}px</span>
+            </div>
+            <button
+              onClick={() => handleBodySizeChange(Math.min(18, fontSettings.bodySize + 1))}
+              disabled={fontSettings.bodySize >= 18}
+              className="w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center hover:bg-orange-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+            >
+              +
+            </button>
+          </div>
           <div className="flex justify-between text-xs text-gray-400">
             <span>10px</span>
             <span>18px</span>
@@ -193,15 +233,25 @@ export const SimpleFontManager: React.FC<SimpleFontManagerProps> = ({ cvId, clas
             <span>📝 Kiçik Mətn (Small)</span>
             <span className="text-xs text-gray-500">{fontSettings.smallSize}px</span>
           </label>
-          <input
-            type="range"
-            min="8"
-            max="14"
-            step="1"
-            value={fontSettings.smallSize}
-            onChange={(e) => handleSmallSizeChange(Number(e.target.value))}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-teal"
-          />
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => handleSmallSizeChange(Math.max(8, fontSettings.smallSize - 1))}
+              disabled={fontSettings.smallSize <= 8}
+              className="w-8 h-8 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center hover:bg-teal-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+            >
+              -
+            </button>
+            <div className="flex-1 text-center">
+              <span className="text-sm font-medium">{fontSettings.smallSize}px</span>
+            </div>
+            <button
+              onClick={() => handleSmallSizeChange(Math.min(14, fontSettings.smallSize + 1))}
+              disabled={fontSettings.smallSize >= 14}
+              className="w-8 h-8 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center hover:bg-teal-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+            >
+              +
+            </button>
+          </div>
           <div className="flex justify-between text-xs text-gray-400">
             <span>8px</span>
             <span>14px</span>
@@ -214,15 +264,25 @@ export const SimpleFontManager: React.FC<SimpleFontManagerProps> = ({ cvId, clas
             <span>🔍 Ən Kiçik Mətn (XS)</span>
             <span className="text-xs text-gray-500">{fontSettings.xsSize}px</span>
           </label>
-          <input
-            type="range"
-            min="6"
-            max="12"
-            step="1"
-            value={fontSettings.xsSize}
-            onChange={(e) => handleXsSizeChange(Number(e.target.value))}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-red"
-          />
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => handleXsSizeChange(Math.max(6, fontSettings.xsSize - 1))}
+              disabled={fontSettings.xsSize <= 6}
+              className="w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center hover:bg-red-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+            >
+              -
+            </button>
+            <div className="flex-1 text-center">
+              <span className="text-sm font-medium">{fontSettings.xsSize}px</span>
+            </div>
+            <button
+              onClick={() => handleXsSizeChange(Math.min(12, fontSettings.xsSize + 1))}
+              disabled={fontSettings.xsSize >= 12}
+              className="w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center hover:bg-red-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+            >
+              +
+            </button>
+          </div>
           <div className="flex justify-between text-xs text-gray-400">
             <span>6px</span>
             <span>12px</span>
@@ -260,25 +320,6 @@ export const SimpleFontManager: React.FC<SimpleFontManagerProps> = ({ cvId, clas
         🔧 Status: CV ID: {cvId || 'N/A'} | Font: {fontSettings.fontFamily.split(',')[0]} | 
         Base: {fontSettings.fontSize}px | Title: {fontSettings.titleSize}px
       </div>
-
-      <style jsx>{`
-        .slider-blue::-webkit-slider-thumb { background: #3B82F6; }
-        .slider-green::-webkit-slider-thumb { background: #10B981; }
-        .slider-purple::-webkit-slider-thumb { background: #8B5CF6; }
-        .slider-orange::-webkit-slider-thumb { background: #F59E0B; }
-        .slider-teal::-webkit-slider-thumb { background: #14B8A6; }
-        .slider-red::-webkit-slider-thumb { background: #EF4444; }
-        
-        input[type="range"]::-webkit-slider-thumb {
-          appearance: none;
-          width: 18px;
-          height: 18px;
-          border-radius: 50%;
-          cursor: pointer;
-          border: 2px solid white;
-          box-shadow: 0 0 4px rgba(0,0,0,0.2);
-        }
-      `}</style>
     </div>
   );
 };

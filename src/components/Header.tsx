@@ -42,7 +42,7 @@ export default function Header({
   };
 
   return (
-    <header className="bg-gradient-to-r from-blue-600 to-blue-700 border-b border-blue-800 sticky top-0 z-40 shadow-lg">
+    <header className="bg-gradient-to-r from-blue-600 to-blue-700 border-b border-blue-800 top-0 z-40 shadow-lg">
       {/* Enhanced responsive container with better edge spacing */}
       <div className="w-full max-w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20">
         <div className="flex justify-between items-center h-16 sm:h-18 md:h-20">
@@ -232,16 +232,16 @@ export default function Header({
       
       {/* AI Translation Panel */}
       {showTranslationPanel && showAITranslate && cvData && onCVUpdate && onLanguageChange && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-gray-900">AI Tərcümə Paneli</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 sm:p-4 lg:p-6">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-full sm:max-w-2xl lg:max-w-4xl xl:max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+            <div className="p-3 sm:p-4 lg:p-6">
+              <div className="flex justify-between items-center mb-3 sm:mb-4">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900">AI Tərcümə Paneli</h2>
                 <button
                   onClick={() => setShowTranslationPanel(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-400 hover:text-gray-600 transition-colors p-1"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6m0 0l6-6m-6 6L6 6" />
                   </svg>
                 </button>
@@ -251,6 +251,7 @@ export default function Header({
                 currentLanguage={currentLanguage}
                 onCVUpdate={onCVUpdate}
                 onLanguageChange={onLanguageChange}
+                onClose={() => setShowTranslationPanel(false)}
                 userTier={userTier}
               />
             </div>

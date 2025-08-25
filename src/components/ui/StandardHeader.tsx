@@ -210,7 +210,7 @@ export default function StandardHeader() {
   };
 
   return (
-    <header className="bg-gradient-to-r from-blue-600 to-blue-700 border-b border-blue-800 sticky top-0 z-40 shadow-lg">
+    <header className="bg-gradient-to-r from-blue-600 to-blue-700 border-b border-blue-800 top-0 z-40 shadow-lg">
       {/* Enhanced responsive container with better edge spacing */}
       <div className="w-full max-w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20">
         <div className="flex justify-between items-center h-16 sm:h-18 md:h-20">

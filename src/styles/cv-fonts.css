@@ -1,8 +1,9 @@
 /* CV Font Management CSS Variables with Professional Spacing Standards */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap');
 
 .cv-preview {
-  /* CSS Variables for font family and sizes */
-  font-family: var(--cv-font-family, 'Calibri, Arial, sans-serif') !important;
+  /* CSS Variables for font family and sizes - Azərbaycan dili dəstəyi ilə */
+  font-family: var(--cv-font-family, 'Roboto', 'DejaVu Sans', 'Calibri', Arial, sans-serif) !important;
   --cv-heading-size: 16pt;
   --cv-subheading-size: 12pt;
   --cv-body-size: 10pt;
@@ -25,7 +26,11 @@
   --cv-small-margin: 2pt;
   --cv-line-height: 1.2;
   
-
+  /* Azərbaycan dili üçün xüsusi text rendering */
+  text-rendering: optimizeLegibility;
+  -webkit-font-feature-settings: "liga", "clig";
+  font-feature-settings: "liga", "clig";
+  unicode-bidi: normal;
 }
 
 /* Apply font family to everything in CV */
@@ -134,6 +139,9 @@
   line-height: var(--cv-line-height) !important;
   color: var(--cv-text-primary) !important;
   margin-bottom: 0.5em !important;
+  font-family: var(--cv-font-family, 'Roboto', 'DejaVu Sans', 'Calibri', Arial, sans-serif) !important;
+  text-rendering: optimizeLegibility !important;
+  unicode-bidi: normal !important;
 }
 
 .cv-preview h2,
@@ -146,6 +154,9 @@
   line-height: var(--cv-line-height) !important;
   color: var(--cv-text-accent) !important;
   margin-bottom: 0.3em !important;
+  font-family: var(--cv-font-family, 'Roboto', 'DejaVu Sans', 'Calibri', Arial, sans-serif) !important;
+  text-rendering: optimizeLegibility !important;
+  unicode-bidi: normal !important;
 }
 
 .cv-preview h3,
@@ -154,6 +165,9 @@
 .cv-preview .project-title {
   font-size: var(--cv-subheading-size) !important;
   font-weight: var(--cv-subheading-weight, 600) !important;
+  font-family: var(--cv-font-family, 'Roboto', 'DejaVu Sans', 'Calibri', Arial, sans-serif) !important;
+  text-rendering: optimizeLegibility !important;
+  unicode-bidi: normal !important;
   line-height: var(--cv-line-height) !important;
   color: var(--cv-text-accent) !important;
   margin-bottom: 0.3em !important;
@@ -170,6 +184,9 @@
   font-weight: var(--cv-body-weight, 400) !important;
   line-height: var(--cv-line-height) !important;
   color: var(--cv-text-primary) !important;
+  font-family: var(--cv-font-family, 'Roboto', 'DejaVu Sans', 'Calibri', Arial, sans-serif) !important;
+  text-rendering: optimizeLegibility !important;
+  unicode-bidi: normal !important;
 }
 
 .cv-preview .date,

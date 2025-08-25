@@ -135,10 +135,17 @@ export async function POST(
         try {
             browser = await puppeteer.launch({
                 headless: true,
-                args: browserArgs,
+                args: [
+                    ...browserArgs,
+                    '--font-render-hinting=none',
+                    '--enable-font-antialiasing',
+                    '--force-device-scale-factor=1',
+                    '--default-encoding=utf-8',
+                    '--lang=az'
+                ],
                 executablePath: executablePath
             });
-            console.log('Browser başladıldı successfully');
+            console.log('Browser başladıldı successfully with unicode support');
         } catch (browserError) {
             console.error('Browser launch error:', browserError);
             
@@ -208,16 +215,40 @@ export async function POST(
             // Front-end-dən gələn HTML content istifadə et
             html = `
                 <!DOCTYPE html>
-                <html>
+                <html lang="az">
                 <head>
-                    <meta charset="utf-8">
+                    <meta charset="UTF-8">
+                    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1">
                     <title>CV Export</title>
                     <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+                        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+                        
                         * {
                             -webkit-print-color-adjust: exact !important;
                             color-adjust: exact !important;
                             print-color-adjust: exact !important;
+                            font-family: 'Roboto', 'Noto Sans', 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif !important;
+                            unicode-bidi: normal !important;
+                            direction: ltr !important;
+                        }
+                        
+                        /* Azərbaycan dili üçün genişləndirilmiş font support */
+                        body, html {
+                            font-family: 'Roboto', 'Noto Sans', 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif !important;
+                            -webkit-font-feature-settings: "liga", "kern", "clig" !important;
+                            font-feature-settings: "liga", "kern", "clig" !important;
+                            text-rendering: optimizeLegibility;
+                            unicode-bidi: normal;
+                        }
+                        
+                        /* Specific support for Azerbaijani characters */
+                        h1, h2, h3, h4, h5, h6, p, span, div, li {
+                            font-family: 'Roboto', 'DejaVu Sans', Arial, sans-serif !important;
+                            unicode-bidi: normal;
+                            text-rendering: optimizeLegibility;
+                        }
                         }
                         
                         body {
@@ -287,17 +318,92 @@ export async function POST(
         
         console.log('HTML hazırlandı, uzunluq:', html.length);
 
-        // HTML-i səhifəyə yüklə
+        // Browser səhifəsini güclü UTF-8 encoding və font dəstəyi ilə set et
         console.log('HTML səhifəyə yüklənir...');
-        await page.setContent(html, { waitUntil: 'networkidle0' });
+        await page.setExtraHTTPHeaders({
+            'Accept-Language': 'az,az-AZ,en',
+            'Accept-Charset': 'utf-8',
+            'Content-Type': 'text/html; charset=UTF-8'
+        });
+        
+        // Azərbaycan dili üçün düzgün encoding və font rendering
+        await page.evaluateOnNewDocument(() => {
+            // Set proper encoding for Azerbaijani characters
+            document.documentElement.setAttribute('lang', 'az');
+            document.documentElement.setAttribute('dir', 'ltr');
+            
+            const meta = document.createElement('meta');
+            meta.setAttribute('charset', 'UTF-8');
+            meta.setAttribute('http-equiv', 'Content-Type');
+            meta.setAttribute('content', 'text/html; charset=UTF-8');
+            document.head?.appendChild(meta);
+            
+            // Font rendering optimizasyonu
+            const style = document.createElement('style');
+            style.textContent = `
+                * {
+                    font-synthesis: weight style !important;
+                    font-variant-ligatures: common-ligatures !important;
+                    unicode-bidi: normal !important;
+                    direction: ltr !important;
+                }
+            `;
+            document.head?.appendChild(style);
+        });
+        
+        await page.setContent(html, { 
+            waitUntil: 'networkidle0',
+            timeout: 30000
+        });
 
         // PDF yarat - Ultra minimal margin-lar, maksimal content sahəsi
         console.log('PDF yaradılır...');
+        
+        // Azərbaycan hərfləri üçün font-ları yüklə və unicode dəstəyini artır
+        await page.addStyleTag({
+            content: `
+                @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+                
+                * {
+                    font-family: 'Roboto', 'Noto Sans', 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif !important;
+                    -webkit-font-feature-settings: "liga", "kern" !important;
+                    font-feature-settings: "liga", "kern" !important;
+                    text-rendering: optimizeLegibility !important;
+                    unicode-bidi: normal !important;
+                    font-variant-ligatures: common-ligatures !important;
+                    font-synthesis: weight style !important;
+                }
+                
+                /* Azərbaycan dili xüsusi hərfləri üçün */
+                body, h1, h2, h3, h4, h5, h6, p, span, div, li, td, th {
+                    font-family: 'Roboto', 'Noto Sans', 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif !important;
+                    unicode-bidi: normal !important;
+                    direction: ltr !important;
+                }
+            `
+        });
+        
+        // Unicode və font rendering üçün əlavə ayarlar
+        await page.evaluateOnNewDocument(() => {
+            // Force UTF-8 encoding
+            if (document.characterSet !== 'UTF-8') {
+                const meta = document.querySelector('meta[charset]') || document.createElement('meta');
+                meta.setAttribute('charset', 'UTF-8');
+                if (!document.head.contains(meta)) {
+                    document.head.appendChild(meta);
+                }
+            }
+        });
+        
         const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true,
             preferCSSPageSize: false,
             displayHeaderFooter: false,
+            // Unicode və font support üçün əlavə ayarlar
+            tagged: true,  // PDF/A accessibility və unicode dəstəyi
+            outline: false,
             margin: {
                 top: '8mm',       // 8mm üst boşluq - çox minimal
                 right: '6mm',     // 6mm sağ boşluq - çox minimal  
@@ -402,7 +508,22 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
             body {
                 margin: 0;
                 padding: 0;
-                font-family: ${fonts.fontFamily};
+                font-family: 'Roboto', 'Noto Sans', 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif;
+                -webkit-font-feature-settings: "liga", "kern", "clig" !important;
+                font-feature-settings: "liga", "kern", "clig" !important;
+                text-rendering: optimizeLegibility;
+                unicode-bidi: normal;
+                direction: ltr;
+                font-variant-ligatures: common-ligatures;
+                font-synthesis: weight style;
+            }
+            
+            h1, h2, h3, h4, h5, h6, p, span, div, li, td, th {
+                font-family: 'Roboto', 'Noto Sans', 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif !important;
+                unicode-bidi: normal !important;
+                text-rendering: optimizeLegibility !important;
+                direction: ltr !important;
+                font-variant-ligatures: common-ligatures !important;
             }
             
             .cv-section {
@@ -434,9 +555,15 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
     if (templateId === 'modern-centered') {
         cvHTML = `
             <!DOCTYPE html>
-            <html>
+            <html lang="az">
             <head>
-                <meta charset="utf-8">
+                <meta charset="UTF-8">
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+                    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+                </style>
                 ${pdfStyles}
             </head>
             <body>

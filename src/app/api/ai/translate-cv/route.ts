@@ -41,9 +41,13 @@ async function translateCVContent(content: any, targetLanguage: string, sourceLa
 Siz peşəkar CV tərcümə mütəxəssisiniz. Aşağıdakı CV məzmununu ${sourceLangName} dilindən ${targetLangName} dilinə tam və dəqiq tərcümə edin.
 
 🔥 MÜTLƏQ QAYDALAR:
-1. ✅ HƏR ŞEYİ tərcümə edin: ad/soyad, işlər, təhsil, bacarıqlar, layihələr, təsvirlər, xülasələr
-2. ❌ TƏRCÜMƏ ETMƏYIN: email, telefon, website, linkedin linkləri
+1. 📧 Email, telefon nömrəsi, URL-lər olduğu kimi saxla
+2. 📅 Tarixlər (dates) olduğu kimi saxla - dəyişmə! 
 3. 🎯 MÜTLƏQ: "sectionNames" bölməsindəki BÜTÜN dəyərləri tərcümə edin
+4. 💼 MÜTLƏQ: Skills hissəsində "category" və ya "type" olan skillsləri olduğu kimi AYRI saxla:
+   - Soft skills → ayrı qrup (məs: category: "soft" və ya type: "soft")
+   - Hard skills → ayrı qrup (məs: category: "hard", "technical", "programming" və ya type: "hard")
+   - Skills-in strukturunu və category/type-ını heç vaxt qarışdırma!
 4. 📋 JSON strukturunu dəqiq saxlayın - heç bir field silinməsin
 5. 🔒 Boş/null dəyərləri olduğu kimi saxlayın
 
@@ -94,10 +98,21 @@ ${targetLanguage === 'az' ? `
 Əgər "University of Technology" varsa → olduğu kimi saxla
 Əgər "john@email.com" varsa → olduğu kimi saxla
 
+🎯 SKILLS NÜMUNƏ (MÜTLƏQ bu formata uyğun):
+INPUT: [
+  {name: "JavaScript", category: "technical"},
+  {name: "Communication", type: "soft"}
+]
+OUTPUT: [
+  {name: ${targetLanguage === 'az' ? '"JavaScript"' : '"JavaScript"'}, category: "technical"},
+  {name: ${targetLanguage === 'az' ? '"Kommunikasiya"' : '"Communication"'}, type: "soft"}
+]
+
 INPUT JSON:
 ${JSON.stringify(content, null, 2)}
 
 ⚠️ ÇOX ÖNƏMLİ: Cavabınızda "sectionNames" obyektini MÜTLƏQ daxil edin!
+⚠️ SKILLS XƏBƏRDARLıĞı: Skills array-də hər skill-in category/type-ini (soft/hard/technical) heç vaxt dəyişmə və qarışdırma!
 🎯 YALNIZ tərcümə edilmiş JSON qaytarın, başqa heç nə yazmayın:`;
 
   try {
@@ -232,7 +247,8 @@ function getTranslatableFields(cvData: any): any {
         id: skill.id,
         name: skill.name,
         level: skill.level,
-        category: skill.category
+        category: skill.category || skill.type, // Support both 'category' and 'type' fields
+        type: skill.type // Keep original type field if it exists
       };
     });
   }

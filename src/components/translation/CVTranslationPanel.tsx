@@ -12,6 +12,7 @@ interface CVTranslationPanelProps {
   currentLanguage: CVLanguage;
   onCVUpdate: (updatedCV: any) => void;
   onLanguageChange: (language: CVLanguage) => void;
+  onClose?: () => void;
   userTier?: string;
 }
 
@@ -20,6 +21,7 @@ export function CVTranslationPanel({
   currentLanguage,
   onCVUpdate,
   onLanguageChange,
+  onClose,
   userTier = 'Free'
 }: CVTranslationPanelProps) {
   const { translationState, translateFullCV, resetTranslationState } = useAITranslation();
@@ -125,6 +127,11 @@ export function CVTranslationPanel({
           <h3 className="text-lg font-semibold text-gray-900">{content.title}</h3>
           <p className="text-sm text-gray-600">{content.description}</p>
         </div>
+        {onClose && (
+          <div className="flex-shrink-0">
+          
+          </div>
+        )}
       </div>
 
       {/* Language Status */}
@@ -144,12 +151,12 @@ export function CVTranslationPanel({
         </div>
       </div>
 
-      {/* Language Selection Options - FIXED VERSION */}
+      {/* Language Selection Options - VERTICAL LAYOUT */}
       <div className="mb-6">
         <h4 className="text-sm font-semibold text-gray-900 mb-3">
           {currentLanguage === 'azerbaijani' ? 'Tərcümə edil:' : 'Translate to:'}
         </h4>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3">
           {/* Azerbaijani Option */}
           <button
             onClick={() => handleFullTranslation('azerbaijani')}

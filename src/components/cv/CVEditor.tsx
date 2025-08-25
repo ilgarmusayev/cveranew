@@ -609,7 +609,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
         
             
             {/* CV Editor Header */}
-            <div className="bg-white/80 backdrop-blur-lg border-b border-gray-200 sticky top-16 z-10">
+            <div className="bg-white/80 backdrop-blur-lg border-b border-gray-200  top-16 z-[0]">
                 <div className="max-w-screen-2xl mx-auto px-2 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-12 sm:h-16">
                         
@@ -625,32 +625,35 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                 />
                             </div>
                             
-                            {/* AI Translate Button */}
-                            <button
-                                onClick={() => {
-                                    console.log('AI Translate clicked');
-                                    setShowTranslationPanel(true);
-                                }}
-                                className="ml-3 flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-lg transition-all duration-200 border border-white/20"
-                                title="AI ilə tərcümə et"
-                            >
-                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-                                </svg>
-                                AI Tərcümə
-                            </button>
+                            {/* Desktop AI & Font Buttons - Hidden on mobile */}
+                            <div className="hidden lg:flex items-center">
+                                {/* AI Translate Button */}
+                                <button
+                                    onClick={() => {
+                                        console.log('AI Translate clicked');
+                                        setShowTranslationPanel(true);
+                                    }}
+                                    className="ml-3 flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-lg transition-all duration-200 border border-white/20"
+                                    title="AI ilə tərcümə et"
+                                >
+                                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                                    </svg>
+                                    AI Tərcümə
+                                </button>
 
-                            {/* Simple Font Button */}
-                            <button
-                                onClick={() => setShowFontPanel(true)}
-                                className="ml-2 flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 rounded-lg transition-all duration-200 border border-white/20"
-                                title="Font tənzimləmələri"
-                            >
-                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.5 12.75l6 6 9-13.5" />
-                                </svg>
-                                Font
-                            </button>
+                                {/* Simple Font Button */}
+                                <button
+                                    onClick={() => setShowFontPanel(true)}
+                                    className="ml-2 flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 rounded-lg transition-all duration-200 border border-white/20"
+                                    title="Font tənzimləmələri"
+                                >
+                                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                    Font İdarə
+                                </button>
+                            </div>
                         </div>
                         
                         {/* Right side - Actions & Status */}
@@ -677,7 +680,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                     aria-label="Export CV"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-                                    <span className="hidden sm:inline ml-2">Export</span>
+                                    <span className="hidden sm:inline ml-2">Yükləyin</span>
                                 </button>
                             )}
                             
@@ -700,6 +703,56 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                     <span className="sm:hidden">Saxla</span>
                                 </>}
                             </button>
+                        </div>
+                    </div>
+
+                    {/* Mobile AI & Font Tools Panel - Only shown on mobile */}
+                    <div className="lg:hidden border-t border-gray-100 py-3">
+                        <div className="flex items-center justify-center gap-3">
+                            {/* AI Translate Button */}
+                            <button
+                                onClick={() => {
+                                    console.log('AI Translate clicked');
+                                    setShowTranslationPanel(true);
+                                }}
+                                className="flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-lg transition-all duration-200 shadow-md"
+                                title="AI ilə tərcümə et"
+                            >
+                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                                </svg>
+                                AI Tərcümə
+                            </button>
+
+                            {/* Font Manager Button */}
+                            <button
+                                onClick={() => setShowFontPanel(true)}
+                                className="flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 rounded-lg transition-all duration-200 shadow-md"
+                                title="Font tənzimləmələri"
+                            >
+                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+                                </svg>
+                                Font İdarə
+                            </button>
+
+                            {/* Mobile Status Indicator */}
+                            <div className="md:hidden flex items-center ml-auto">
+                                {saving && (
+                                    <div className="flex items-center text-xs text-blue-600">
+                                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600 mr-1"></div>
+                                        Saxlanır...
+                                    </div>
+                                )}
+                                {success && (
+                                    <span className="text-xs text-green-600 flex items-center">
+                                        <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                        </svg>
+                                        Saxlanıldı
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -868,19 +921,23 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             </div>
         
         {showTranslationPanel && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                    <div className="p-6">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-bold text-gray-900">AI Tərcümə Paneli</h2>
-                            <button
-                                onClick={() => setShowTranslationPanel(false)}
-                                className="text-gray-400 hover:text-gray-600 transition-colors"
-                            >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6m0 0l6-6m-6 6L6 6" />
-                                </svg>
-                            </button>
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 sm:p-4 lg:p-6">
+                <div className="bg-white rounded-lg shadow-xl w-full max-w-full sm:max-w-2xl lg:max-w-4xl xl:max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+                    <div className="p-3 sm:p-4 lg:p-6">
+                        <div className="flex justify-between items-center mb-3 sm:mb-4">
+                            <h2 className="text-lg sm:text-xl font-bold text-gray-900">AI Tərcümə Paneli</h2>
+                              <button
+              onClick={() => setShowTranslationPanel(false)}
+              className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors duration-200 group"
+              
+            >
+              <svg className="w-5 h-5 text-gray-500 group-hover:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+                            
+                            
+                          
                         </div>
                         <CVTranslationPanel
                             cvData={cv}
@@ -916,6 +973,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                 console.log('🌐 CVEditor: Language changed to:', language);
                                 setCv(prev => ({ ...prev, cvLanguage: language as any }));
                             }}
+                            onClose={() => setShowTranslationPanel(false)}
                             userTier={userTier}
                         />
                     </div>
@@ -923,13 +981,22 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             </div>
         )}
 
-        {/* Simple Font Panel */}
+        {/* Font Manager Panel - Responsive positioning */}
         {showFontPanel && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-start p-4 ">
-                <div className="bg-white rounded-lg shadow-xl max-w-md w-full ml-4" style={{ maxWidth: '400px' }}>
+            <div 
+                className="fixed inset-0 bg-black bg-opacity-50 z-[999999] flex items-center justify-start lg:justify-start p-4 lg:p-8"
+                onClick={() => setShowFontPanel(false)}
+            >
+                <div 
+                    className="bg-white rounded-lg shadow-xl w-full max-w-sm lg:max-w-md relative z-[1000000] 
+                               /* Mobile: Full width modal */ 
+                               lg:w-96 lg:ml-4 lg:mt-24
+                               /* Desktop: Left side positioning */"
+                    onClick={(e) => e.stopPropagation()}
+                >
                     <div className="p-6">
                         <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-bold text-gray-900">Font Tənzimləmələri</h2>
+                            <h2 className="text-xl font-bold text-gray-900">Font Manager</h2>
                             <button
                                 onClick={() => setShowFontPanel(false)}
                                 className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -940,172 +1007,236 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             </button>
                         </div>
                         
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             {/* Font Family */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-1.5">
                                     Font Ailəsi
                                 </label>
                                 <select
                                     value={fontSettings.fontFamily}
                                     onChange={(e) => setFontSettings(prev => ({ ...prev, fontFamily: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
-                                    <option value="Arial, sans-serif">Arial (Sadə)</option>
-                                    <option value="Georgia, serif">Georgia (Klassik)</option>
-                                    <option value="Verdana, sans-serif">Verdana (Aydın)</option>
-                                    <option value="Times New Roman, serif">Times New Roman (Rəsmi)</option>
+                                    <option value="Arial, sans-serif">Arial</option>
+                                    <option value="Georgia, serif">Georgia</option>
+                                    <option value="Verdana, sans-serif">Verdana</option>
+                                    <option value="Times New Roman, serif">Times New Roman</option>
                                 </select>
                             </div>
 
                             {/* Heading Size */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Başlıq Ölçüsü: {fontSettings.headingSize}px
+                                <label className="block text-sm font-medium text-gray-700 mb-1.5 text-center">
+                                    Başlıq Ölçüsü
                                 </label>
-                                <input
-                                    type="range"
-                                    min="16"
-                                    max="24"
-                                    value={fontSettings.headingSize}
-                                    onChange={(e) => setFontSettings(prev => ({ ...prev, headingSize: parseInt(e.target.value) }))}
-                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                                />
+                                <div className="flex items-center gap-0 justify-center max-w-18 mx-auto">
+                                    <button
+                                        onClick={() => setFontSettings(prev => ({ ...prev, headingSize: Math.max(16, prev.headingSize - 1) }))}
+                                        disabled={fontSettings.headingSize <= 16}
+                                        className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors text-sm"
+                                    >
+                                        -
+                                    </button>
+                                    <div className="flex-1 text-center min-w-5">
+                                        <span className="text-sm font-medium">{fontSettings.headingSize}px</span>
+                                    </div>
+                                    <button
+                                        onClick={() => setFontSettings(prev => ({ ...prev, headingSize: Math.min(24, prev.headingSize + 1) }))}
+                                        disabled={fontSettings.headingSize >= 24}
+                                        className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors text-sm"
+                                    >
+                                        +
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Subheading Size */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Alt Başlıq Ölçüsü: {fontSettings.subheadingSize}px
+                                <label className="block text-sm font-medium text-gray-700 mb-1.5 text-center">
+                                    Alt Başlıq Ölçüsü
                                 </label>
-                                <input
-                                    type="range"
-                                    min="14"
-                                    max="20"
-                                    value={fontSettings.subheadingSize}
-                                    onChange={(e) => setFontSettings(prev => ({ ...prev, subheadingSize: parseInt(e.target.value) }))}
-                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                                />
+                                <div className="flex items-center gap-0 justify-center max-w-18 mx-auto">
+                                    <button
+                                        onClick={() => setFontSettings(prev => ({ ...prev, subheadingSize: Math.max(14, prev.subheadingSize - 1) }))}
+                                        disabled={fontSettings.subheadingSize <= 14}
+                                        className="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center hover:bg-green-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors text-sm"
+                                    >
+                                        -
+                                    </button>
+                                    <div className="flex-1 text-center min-w-5">
+                                        <span className="text-sm font-medium">{fontSettings.subheadingSize}px</span>
+                                    </div>
+                                    <button
+                                        onClick={() => setFontSettings(prev => ({ ...prev, subheadingSize: Math.min(20, prev.subheadingSize + 1) }))}
+                                        disabled={fontSettings.subheadingSize >= 20}
+                                        className="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center hover:bg-green-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors text-sm"
+                                    >
+                                        +
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Body Size */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Əsas Mətn Ölçüsü: {fontSettings.bodySize}px
+                                <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
+                                    Əsas Mətn Ölçüsü
                                 </label>
-                                <input
-                                    type="range"
-                                    min="10"
-                                    max="18"
-                                    value={fontSettings.bodySize}
-                                    onChange={(e) => setFontSettings(prev => ({ ...prev, bodySize: parseInt(e.target.value) }))}
-                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                                />
+                                <div className="flex items-center gap-0 justify-center max-w-20 mx-auto">
+                                    <button
+                                        onClick={() => setFontSettings(prev => ({ ...prev, bodySize: Math.max(10, prev.bodySize - 1) }))}
+                                        disabled={fontSettings.bodySize <= 10}
+                                        className="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center hover:bg-purple-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        -
+                                    </button>
+                                    <div className="flex-1 text-center min-w-6">
+                                        <span className="text-sm font-medium">{fontSettings.bodySize}px</span>
+                                    </div>
+                                    <button
+                                        onClick={() => setFontSettings(prev => ({ ...prev, bodySize: Math.min(18, prev.bodySize + 1) }))}
+                                        disabled={fontSettings.bodySize >= 18}
+                                        className="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center hover:bg-purple-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        +
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Small Size */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Kiçik Mətn Ölçüsü: {fontSettings.smallSize}px
+                                <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
+                                    Kiçik Mətn Ölçüsü
                                 </label>
-                                <input
-                                    type="range"
-                                    min="8"
-                                    max="14"
-                                    value={fontSettings.smallSize}
-                                    onChange={(e) => setFontSettings(prev => ({ ...prev, smallSize: parseInt(e.target.value) }))}
-                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                                />
+                                <div className="flex items-center gap-0 justify-center max-w-20 mx-auto">
+                                    <button
+                                        onClick={() => setFontSettings(prev => ({ ...prev, smallSize: Math.max(8, prev.smallSize - 1) }))}
+                                        disabled={fontSettings.smallSize <= 8}
+                                        className="w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center hover:bg-orange-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        -
+                                    </button>
+                                    <div className="flex-1 text-center min-w-6">
+                                        <span className="text-sm font-medium">{fontSettings.smallSize}px</span>
+                                    </div>
+                                    <button
+                                        onClick={() => setFontSettings(prev => ({ ...prev, smallSize: Math.min(14, prev.smallSize + 1) }))}
+                                        disabled={fontSettings.smallSize >= 14}
+                                        className="w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center hover:bg-orange-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        +
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Heading Weight */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Başlıq Qalınlığı: {fontSettings.headingWeight}
+                                <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
+                                    Başlıq Qalınlığı
                                 </label>
-                                <input
-                                    type="range"
-                                    min="400"
-                                    max="900"
-                                    step="100"
-                                    value={fontSettings.headingWeight}
-                                    onChange={(e) => setFontSettings(prev => ({ ...prev, headingWeight: parseInt(e.target.value) }))}
-                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                                />
-                                <div className="flex justify-between text-xs text-gray-500 mt-1">
-                                    <span>İncə (400)</span>
-                                    <span>Orta (500-600)</span>
-                                    <span>Qalın (700-900)</span>
+                                <div className="flex items-center gap-0 justify-center max-w-20 mx-auto">
+                                    <button
+                                        onClick={() => setFontSettings(prev => ({ ...prev, headingWeight: Math.max(400, prev.headingWeight - 100) }))}
+                                        disabled={fontSettings.headingWeight <= 400}
+                                        className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        -
+                                    </button>
+                                    <div className="flex-1 text-center min-w-6">
+                                        <span className="text-sm font-medium">{fontSettings.headingWeight}</span>
+                                    </div>
+                                    <button
+                                        onClick={() => setFontSettings(prev => ({ ...prev, headingWeight: Math.min(900, prev.headingWeight + 100) }))}
+                                        disabled={fontSettings.headingWeight >= 900}
+                                        className="w-8 h-8 bg-blue-100 text-teal-600 rounded-full flex items-center justify-center hover:bg-teal-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        +
+                                    </button>
                                 </div>
                             </div>
 
                             {/* Subheading Weight */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Alt Başlıq Qalınlığı: {fontSettings.subheadingWeight}
+                                <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
+                                    Alt Başlıq Qalınlığı
                                 </label>
-                                <input
-                                    type="range"
-                                    min="400"
-                                    max="800"
-                                    step="100"
-                                    value={fontSettings.subheadingWeight}
-                                    onChange={(e) => setFontSettings(prev => ({ ...prev, subheadingWeight: parseInt(e.target.value) }))}
-                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                                />
-                                <div className="flex justify-between text-xs text-gray-500 mt-1">
-                                    <span>İncə (400)</span>
-                                    <span>Orta (500-600)</span>
-                                    <span>Qalın (700-800)</span>
+                                <div className="flex items-center gap-0 justify-center max-w-20 mx-auto">
+                                    <button
+                                        onClick={() => setFontSettings(prev => ({ ...prev, subheadingWeight: Math.max(400, prev.subheadingWeight - 100) }))}
+                                        disabled={fontSettings.subheadingWeight <= 400}
+                                        className="w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center hover:bg-red-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        -
+                                    </button>
+                                    <div className="flex-1 text-center min-w-6">
+                                        <span className="text-sm font-medium">{fontSettings.subheadingWeight}</span>
+                                    </div>
+                                    <button
+                                        onClick={() => setFontSettings(prev => ({ ...prev, subheadingWeight: Math.min(800, prev.subheadingWeight + 100) }))}
+                                        disabled={fontSettings.subheadingWeight >= 800}
+                                        className="w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center hover:bg-red-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        +
+                                    </button>
                                 </div>
                             </div>
 
                             {/* Body Weight */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Əsas Mətn Qalınlığı: {fontSettings.bodyWeight}
+                                <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
+                                    Əsas Mətn Qalınlığı
                                 </label>
-                                <input
-                                    type="range"
-                                    min="300"
-                                    max="600"
-                                    step="100"
-                                    value={fontSettings.bodyWeight}
-                                    onChange={(e) => setFontSettings(prev => ({ ...prev, bodyWeight: parseInt(e.target.value) }))}
-                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                                />
-                                <div className="flex justify-between text-xs text-gray-500 mt-1">
-                                    <span>Çox İncə (300)</span>
-                                    <span>Normal (400)</span>
-                                    <span>Orta (500-600)</span>
+                                <div className="flex items-center gap-0 justify-center max-w-20 mx-auto">
+                                    <button
+                                        onClick={() => setFontSettings(prev => ({ ...prev, bodyWeight: Math.max(300, prev.bodyWeight - 100) }))}
+                                        disabled={fontSettings.bodyWeight <= 300}
+                                        className="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center hover:bg-indigo-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        -
+                                    </button>
+                                    <div className="flex-1 text-center min-w-6">
+                                        <span className="text-sm font-medium">{fontSettings.bodyWeight}</span>
+                                    </div>
+                                    <button
+                                        onClick={() => setFontSettings(prev => ({ ...prev, bodyWeight: Math.min(600, prev.bodyWeight + 100) }))}
+                                        disabled={fontSettings.bodyWeight >= 600}
+                                        className="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center hover:bg-indigo-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        +
+                                    </button>
                                 </div>
                             </div>
 
                             {/* Small Weight */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Kiçik Mətn Qalınlığı: {fontSettings.smallWeight}
+                                <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
+                                    Kiçik Mətn Qalınlığı
                                 </label>
-                                <input
-                                    type="range"
-                                    min="300"
-                                    max="600"
-                                    step="100"
-                                    value={fontSettings.smallWeight}
-                                    onChange={(e) => setFontSettings(prev => ({ ...prev, smallWeight: parseInt(e.target.value) }))}
-                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                                />
-                                <div className="flex justify-between text-xs text-gray-500 mt-1">
-                                    <span>Çox İncə (300)</span>
-                                    <span>Normal (400)</span>
-                                    <span>Orta (500-600)</span>
+                                <div className="flex items-center gap-0 justify-center max-w-20 mx-auto">
+                                    <button
+                                        onClick={() => setFontSettings(prev => ({ ...prev, smallWeight: Math.max(300, prev.smallWeight - 100) }))}
+                                        disabled={fontSettings.smallWeight <= 300}
+                                        className="w-8 h-8 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center hover:bg-pink-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        -
+                                    </button>
+                                    <div className="flex-1 text-center min-w-6">
+                                        <span className="text-sm font-medium">{fontSettings.smallWeight}</span>
+                                    </div>
+                                    <button
+                                        onClick={() => setFontSettings(prev => ({ ...prev, smallWeight: Math.min(600, prev.smallWeight + 100) }))}
+                                        disabled={fontSettings.smallWeight >= 600}
+                                        className="w-8 h-8 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center hover:bg-pink-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        +
+                                    </button>
                                 </div>
                             </div>
 
                          
 
                             {/* Actions */}
-                            <div className="flex justify-end space-x-3 pt-4">
+                            <div className="flex justify-end space-x-2 pt-3">
                                 <button
                                     onClick={() => {
                                         setFontSettings({
@@ -1120,13 +1251,13 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                             smallWeight: 400
                                         });
                                     }}
-                                    className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+                                    className="px-3 py-1.5 text-sm text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
                                 >
                                     Sıfırla
                                 </button>
                                 <button
                                     onClick={() => setShowFontPanel(false)}
-                                    className="px-4 py-2 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                                    className="px-3 py-1.5 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
                                 >
                                     Tətbiq Et
                                 </button>
