@@ -6,6 +6,7 @@ import {
   closestCenter,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   DragEndEvent,
@@ -341,11 +342,15 @@ const SortableItem: React.FC<SortableItemProps> = ({ id, children, showDragInstr
         isDragging,
     } = useSortable({ id });
 
-    const style = {
+    const style: React.CSSProperties = {
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? 0.9 : 1,
         zIndex: isDragging ? 9999 : 'auto',
+        touchAction: 'manipulation',
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        WebkitTouchCallout: 'none',
     };
 
     return (
@@ -364,12 +369,19 @@ const SortableItem: React.FC<SortableItemProps> = ({ id, children, showDragInstr
                 border border-transparent rounded-md
                 before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-blue-100/20 before:to-transparent
                 before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300
+                touch-manipulation
+                select-none
             `}
             title="Bütün hissəni sürükləyin"
         >
-            {/* Drag indicator icon - appears on hover */}
+            {/* Drag indicator icon - appears on hover and touch */}
             <div 
-                className={`absolute ${dragIconPosition === 'right' ? '-right-3' : '-left-3'} top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200`}
+                className={`absolute ${dragIconPosition === 'right' ? '-right-3' : '-left-3'} top-1/2 transform -translate-y-1/2 
+                           opacity-0 group-hover:opacity-100 md:group-hover:opacity-100 
+                           transition-all duration-200
+                           /* Mobile: Always show drag handle */
+                           md:opacity-0 opacity-60
+                           `}
                 style={{ userSelect: 'none', zIndex: 99999 }}
             >
                 <div className="bg-blue-600 text-white rounded-full w-7 h-7 flex items-center justify-center shadow-xl hover:bg-blue-700 transition-colors border-2 border-white">
@@ -431,6 +443,12 @@ const BasicTemplate: React.FC<{
                 distance: 8, // Minimum 8px movement to start drag
             },
         }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 100, // Reduced delay for better mobile experience
+                tolerance: 12, // Increased tolerance for touch precision
+            },
+        }),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
         })
@@ -440,6 +458,8 @@ const BasicTemplate: React.FC<{
         setIsDragActive(true);
         setActiveId(event.active.id as string);
         console.log('=== DRAG STARTED ===');
+        console.log('Device type:', 'ontouchstart' in window ? 'Touch Device' : 'Mouse Device');
+        console.log('Active element:', event.active.id);
         // Add subtle body class for global styling if needed
         document.body.style.userSelect = 'none';
         document.body.style.cursor = 'grabbing';
@@ -902,6 +922,12 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
         useSensor(PointerSensor, {
             activationConstraint: {
                 distance: 8,
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 100, // Reduced delay for better mobile experience
+                tolerance: 12, // Increased tolerance for touch precision
             },
         }),
         useSensor(KeyboardSensor, {
@@ -1779,6 +1805,12 @@ const ProfessionalTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onS
                 distance: 8,
             },
         }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 100, // Reduced delay for better mobile experience
+                tolerance: 12, // Increased tolerance for touch precision
+            },
+        }),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
         })
@@ -2379,7 +2411,10 @@ export default function CVPreview({
                 ['--cv-subheading-weight' as any]: fontSettings.subheadingWeight,
                 ['--cv-body-weight' as any]: fontSettings.bodyWeight,
                 ['--cv-small-weight' as any]: fontSettings.smallWeight,
-                lineHeight: '1.5'
+                lineHeight: '1.5',
+                // Mobile touch optimization
+                touchAction: 'pan-y',
+                overscrollBehavior: 'contain',
             } as React.CSSProperties}
         >
             {renderTemplate()}
