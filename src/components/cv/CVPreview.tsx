@@ -374,13 +374,14 @@ const SortableItem: React.FC<SortableItemProps> = ({ id, children, showDragInstr
             `}
             title="Bütün hissəni sürükləyin"
         >
-            {/* Drag indicator icon - appears on hover and touch */}
+            {/* Drag indicator icon - hover only on desktop, always visible on mobile */}
             <div 
                 className={`absolute ${dragIconPosition === 'right' ? '-right-3' : '-left-3'} top-1/2 transform -translate-y-1/2 
-                           opacity-0 group-hover:opacity-100 md:group-hover:opacity-100 
+                           /* Desktop: Only show on hover */
+                           hidden md:block opacity-0 md:group-hover:opacity-100 
+                           /* Mobile: Always show with reduced opacity */
+                           sm:block sm:opacity-60
                            transition-all duration-200
-                           /* Mobile: Always show drag handle */
-                           md:opacity-0 opacity-60
                            `}
                 style={{ userSelect: 'none', zIndex: 99999 }}
             >
@@ -391,10 +392,13 @@ const SortableItem: React.FC<SortableItemProps> = ({ id, children, showDragInstr
                 </div>
             </div>
             
-            {/* Hover instruction - only show if showDragInstruction is true */}
+            {/* Hover instruction - desktop only on hover, hidden on mobile */}
             {showDragInstruction && (
                 <div 
-                    className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-blue-300 text-white px-3 py-1 rounded text-xs font-medium whitespace-nowrap shadow-lg"
+                    className="absolute -top-8 left-1/2 transform -translate-x-1/2 
+                             /* Desktop: Show only on hover */
+                             hidden md:block opacity-0 hover:opacity-100
+                             transition-all duration-200 bg-blue-300 text-white px-3 py-1 rounded text-xs font-medium whitespace-nowrap shadow-lg"
                     style={{ userSelect: 'none', zIndex: 99999 }}
                 >
                     Sürükləyərək yerdəyişmə edin
