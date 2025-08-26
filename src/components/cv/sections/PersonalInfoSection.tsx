@@ -317,13 +317,26 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
                   <span className="text-gray-400 text-xs text-center">Şəkil<br/>yox</span>
                 </div>
                 <div className="flex-1">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    disabled={imageUploading}
-                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer cursor-pointer"
-                  />
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={imageUploading}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                      id="profile-image-upload"
+                    />
+                    <label
+                      htmlFor="profile-image-upload"
+                      className={`block w-28 px-4 py-2 text-sm text-center border border-gray-300 rounded-lg cursor-pointer transition-colors ${
+                        imageUploading
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200'
+                          : 'bg-white text-gray-700 hover:bg-gray-50 hover:border-blue-300'
+                      }`}
+                    >
+                      {imageUploading ? 'Yüklənir...' : 'Şəkil seçin'}
+                    </label>
+                  </div>
                   {imageUploading && (
                     <div className="mt-2 flex items-center space-x-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>

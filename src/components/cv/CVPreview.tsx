@@ -687,12 +687,15 @@ const BasicTemplate: React.FC<{
                                         ) : (
                                             <h3 className="font-semibold text-gray-900 text-sm">{project.name}</h3>
                                         )}
-                                        {(project.startDate || project.endDate) && (
+                                        {(project.startDate || project.endDate || project.current) && (
                                             <span className="text-xs text-blue-600 font-medium whitespace-nowrap ml-2">
-                                                {project.startDate && project.endDate ?
-                                                    `${formatDate(project.startDate, data.cvLanguage)} - ${project.current ? getCurrentText(data.cvLanguage) : formatDate(project.endDate, data.cvLanguage)}` :
+                                                {project.current ? (
+                                                    project.startDate ? `${formatDate(project.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : getCurrentText(data.cvLanguage)
+                                                ) : project.startDate && project.endDate ? (
+                                                    `${formatDate(project.startDate, data.cvLanguage)} - ${formatDate(project.endDate, data.cvLanguage)}`
+                                                ) : (
                                                     formatDate(project.startDate || project.endDate || '', data.cvLanguage)
-                                                }
+                                                )}
                                             </span>
                                         )}
                                     </div>
@@ -1694,10 +1697,12 @@ const ATSFriendlyTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSe
                                                 </p>
                                             )}
                                         </div>
-                                        {(project.startDate || project.endDate) && (
+                                        {(project.startDate || project.endDate || project.current) && (
                                             <span className="text-xs text-gray-600 font-medium whitespace-nowrap ml-2">
-                                                {project.startDate && project.endDate ? (
-                                                    project.current ? `${formatDate(project.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : `${formatDate(project.startDate, data.cvLanguage)} - ${formatDate(project.endDate, data.cvLanguage)}`
+                                                {project.current ? (
+                                                    project.startDate ? `${formatDate(project.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : getCurrentText(data.cvLanguage)
+                                                ) : project.startDate && project.endDate ? (
+                                                    `${formatDate(project.startDate, data.cvLanguage)} - ${formatDate(project.endDate, data.cvLanguage)}`
                                                 ) : (
                                                     formatDate((project.startDate || project.endDate) || '', data.cvLanguage)
                                                 )}
@@ -2050,10 +2055,12 @@ const ProfessionalTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onS
                                                 </div>
                                             )}
                                         </div>
-                                        {(project.startDate || project.endDate) && (
+                                        {(project.startDate || project.endDate || project.current) && (
                                             <span className="text-xs text-gray-600 font-medium whitespace-nowrap ml-2">
-                                                {project.startDate && project.endDate ? (
-                                                    project.current ? `${formatDate(project.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage).toLowerCase()}` : `${formatDate(project.startDate, data.cvLanguage)} - ${formatDate(project.endDate, data.cvLanguage)}`
+                                                {project.current ? (
+                                                    project.startDate ? `${formatDate(project.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage).toLowerCase()}` : getCurrentText(data.cvLanguage).toLowerCase()
+                                                ) : project.startDate && project.endDate ? (
+                                                    `${formatDate(project.startDate, data.cvLanguage)} - ${formatDate(project.endDate, data.cvLanguage)}`
                                                 ) : (
                                                     formatDate((project.startDate || project.endDate) || '', data.cvLanguage)
                                                 )}
