@@ -99,6 +99,16 @@ ${targetLanguage === 'az' ? `
 Əgər "john@email.com" varsa → olduğu kimi saxla
 
 🎯 SKILLS NÜMUNƏ (MÜTLƏQ bu formata uyğun):
+${targetLanguage === 'az' ? `
+📋 Azərbaycan dilində skill nümunələri:
+Hard Skills: "JavaScript", "Python", "React", "Node.js", "SQL", "AWS", "Docker"
+Soft Skills: "Komanda ilə işləmə", "Liderlik", "Kommunikasiya", "Problem həll etmə", "Vaxt idarəetməsi", "Kreativlik"
+` : `
+📋 English skill examples:
+Hard Skills: "JavaScript", "Python", "React", "Node.js", "SQL", "AWS", "Docker"  
+Soft Skills: "Team Collaboration", "Leadership", "Communication", "Problem Solving", "Time Management", "Creativity"
+`}
+
 INPUT: [
   {name: "JavaScript", category: "technical"},
   {name: "Communication", type: "soft"}
@@ -113,6 +123,7 @@ ${JSON.stringify(content, null, 2)}
 
 ⚠️ ÇOX ÖNƏMLİ: Cavabınızda "sectionNames" obyektini MÜTLƏQ daxil edin!
 ⚠️ SKILLS XƏBƏRDARLıĞı: Skills array-də hər skill-in category/type-ini (soft/hard/technical) heç vaxt dəyişmə və qarışdırma!
+🚫 ÖNƏMLİ: Mövcud olmayan yeni skill-lər əlavə etmə - YALNIZ mövcud skill-ləri tərcümə et!
 🎯 YALNIZ tərcümə edilmiş JSON qaytarın, başqa heç nə yazmayın:`;
 
   try {

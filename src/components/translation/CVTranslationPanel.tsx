@@ -101,7 +101,7 @@ export function CVTranslationPanel({
       currentLang: 'Current language: English',
       targetLang: 'Target language: Azerbaijani',
       features: [
-        'Peşəkar terminologiya tərcüməsi',
+        'Professional terminology translation',
         'Context-aware translation',
         'Accurate job titles and skills translation',
         'Technical terms preservation'

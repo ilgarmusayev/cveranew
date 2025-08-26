@@ -102,6 +102,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
 
     setAiSuggesting(true);
     setShowSuggestions(false);
+    setSuggestions([]); // Clear previous suggestions
     console.log('🤖 Getting AI skill suggestions...');
 
     try {
@@ -114,7 +115,10 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
         return;
       }
 
-      const response = await apiClient.post('/api/ai/generate-skills', { cvData });
+      const response = await apiClient.post('/api/ai/generate-skills', { 
+        cvData,
+        targetLanguage: cvData?.cvLanguage || 'azerbaijani' // Pass CV language for appropriate suggestions
+      });
 
       console.log('📡 AI Skills API Response:', {
         success: response.success,
@@ -144,21 +148,25 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
         console.log('✅ AI Skills Generated:', allSkills.length, 'skills');
         
         if (allSkills && allSkills.length > 0) {
-          // Add suggested skills to existing ones (avoid duplicates)
+          // Store suggested skills for user to manually choose from (avoid duplicates)
           const existingSkillNames = data.map(skill => skill.name.toLowerCase());
-          const newSkills = allSkills
+          const newSuggestions = allSkills
             .filter((skill: any) => !existingSkillNames.includes(skill.name.toLowerCase()))
             .map((skill: any) => ({
-              id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
               name: skill.name,
-              level: skill.level || '',
-              type: skill.type || 'hard',
-              description: skill.description || ''
+              reason: skill.description || `Recommended ${skill.type === 'soft' ? 'soft skill' : 'technical skill'} based on your profile`,
+              category: skill.type === 'soft' ? 'Soft Skills' : 'Hard Skills',
+              relevanceScore: 8,
+              marketDemand: 'High',
+              implementation: 'Add to your skillset',
+              timeToMaster: skill.type === 'soft' ? '3-6 months' : '6-12 months',
+              industryTrend: 'Growing'
             }));
           
-          if (newSkills.length > 0) {
-            onChange([...newSkills, ...data]);
-            showSuccess(message || `${newSkills.length} AI bacarıq təklif edildi!`);
+          if (newSuggestions.length > 0) {
+            setSuggestions(newSuggestions);
+            setShowSuggestions(true);
+            showSuccess(message || `${newSuggestions.length} AI bacarıq təklifi hazırlandı! Seçib əlavə edin.`);
           } else {
             showInfo('Bütün təklif edilən bacarıqlar artıq mövcuddur.');
           }

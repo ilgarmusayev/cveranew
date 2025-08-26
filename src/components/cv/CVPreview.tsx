@@ -37,6 +37,8 @@ interface CVPreviewProps {
     onUpdate?: (updatedCv: any) => void;
     fontSettings?: {
         fontFamily: string;
+        nameSize: number;
+        titleSize: number;
         headingSize: number;
         subheadingSize: number;
         bodySize: number;
@@ -45,6 +47,7 @@ interface CVPreviewProps {
         subheadingWeight: number;
         bodyWeight: number;
         smallWeight: number;
+        sectionSpacing: number;
     };
 }
 
@@ -894,7 +897,14 @@ const BasicTemplate: React.FC<{
                     items={sectionOrder}
                     strategy={verticalListSortingStrategy}
                 >
-                    <div className={`space-y-4 transition-all duration-300 ${isDragActive ? 'opacity-95 bg-gradient-to-br from-transparent via-blue-50/30 to-transparent' : ''}`}>
+                    <div 
+                        className={`transition-all duration-300 ${isDragActive ? 'opacity-95 bg-gradient-to-br from-transparent via-blue-50/30 to-transparent' : ''}`}
+                        style={{ 
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 'var(--cv-section-spacing, 16px)'
+                        }}
+                    >
                         {sectionOrder.map((sectionType) => {
                             const sectionContent = renderSection(sectionType);
                             if (!sectionContent) return null;
@@ -2216,6 +2226,8 @@ export default function CVPreview({
     onUpdate,
     fontSettings = {
         fontFamily: 'Arial, sans-serif',
+        nameSize: 24,
+        titleSize: 16,
         headingSize: 18,
         subheadingSize: 16,
         bodySize: 14,
@@ -2223,7 +2235,8 @@ export default function CVPreview({
         headingWeight: 700,
         subheadingWeight: 600,
         bodyWeight: 400,
-        smallWeight: 400
+        smallWeight: 400,
+        sectionSpacing: 16
     }
 }: CVPreviewProps) {
     const templateId = template || cv.templateId || 'basic';
@@ -2409,6 +2422,8 @@ export default function CVPreview({
                     : '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.05)',
                 // Set CSS Variables for font management
                 ['--cv-font-family' as any]: fontSettings.fontFamily,
+                ['--cv-name-size' as any]: `${fontSettings.nameSize}px`,
+                ['--cv-title-size' as any]: `${fontSettings.titleSize}px`,
                 ['--cv-heading-size' as any]: `${fontSettings.headingSize}px`,
                 ['--cv-subheading-size' as any]: `${fontSettings.subheadingSize}px`,
                 ['--cv-body-size' as any]: `${fontSettings.bodySize}px`,
@@ -2417,6 +2432,7 @@ export default function CVPreview({
                 ['--cv-subheading-weight' as any]: fontSettings.subheadingWeight,
                 ['--cv-body-weight' as any]: fontSettings.bodyWeight,
                 ['--cv-small-weight' as any]: fontSettings.smallWeight,
+                ['--cv-section-spacing' as any]: `${fontSettings.sectionSpacing}px`,
                 lineHeight: '1.5',
                 // Mobile touch optimization
                 touchAction: 'pan-y',

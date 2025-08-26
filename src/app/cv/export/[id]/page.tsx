@@ -40,6 +40,8 @@ export default function CVExportPage() {
     // Font settings state (default values matching CVEditor)
     const [fontSettings, setFontSettings] = useState({
         fontFamily: 'Arial, sans-serif',
+        nameSize: 24,
+        titleSize: 20,
         headingSize: 18,
         subheadingSize: 16,
         bodySize: 14,
@@ -47,7 +49,8 @@ export default function CVExportPage() {
         headingWeight: 700,
         subheadingWeight: 600,
         bodyWeight: 400,
-        smallWeight: 400
+        smallWeight: 400,
+        sectionSpacing: 8
     });
 
     useEffect(() => {
@@ -546,6 +549,8 @@ export default function CVExportPage() {
                                         onClick={() => {
                                             setFontSettings({
                                                 fontFamily: 'Arial, sans-serif',
+                                                nameSize: 24,
+                                                titleSize: 20,
                                                 headingSize: 18,
                                                 subheadingSize: 16,
                                                 bodySize: 14,
@@ -553,7 +558,8 @@ export default function CVExportPage() {
                                                 headingWeight: 700,
                                                 subheadingWeight: 600,
                                                 bodyWeight: 400,
-                                                smallWeight: 400
+                                                smallWeight: 400,
+                                                sectionSpacing: 8
                                             });
                                         }}
                                         className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"

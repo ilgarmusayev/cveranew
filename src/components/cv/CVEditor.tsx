@@ -271,6 +271,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
     const [showFontPanel, setShowFontPanel] = useState(false);
     const [fontSettings, setFontSettings] = useState({
         fontFamily: 'Arial, sans-serif',
+        nameSize: 24,         // İsim üçün
+        titleSize: 16,        // Başlıq üçün
         headingSize: 18,      // Başlıqlar üçün
         subheadingSize: 16,   // Alt başlıqlar üçün  
         bodySize: 14,         // Əsas mətn üçün
@@ -278,7 +280,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
         headingWeight: 700,   // Başlıq qalınlığı
         subheadingWeight: 600, // Alt başlıq qalınlığı
         bodyWeight: 400,      // Əsas mətn qalınlığı
-        smallWeight: 400      // Kiçik mətn qalınlığı
+        smallWeight: 400,     // Kiçik mətn qalınlığı
+        sectionSpacing: 8    // Bölmələr arası məsafə (px)
     });
     // Disable auto-save for debugging
     // const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
@@ -1008,7 +1011,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                 <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
                                 </svg>
-                                Font Manager
+                                Font Idarə
                             </h2>
                             <button
                                 onClick={() => setShowFontPanel(false)}
@@ -1267,6 +1270,32 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                 </div>
                             </div>
 
+                            {/* Section Spacing Control */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
+                                    Bölmələr Arası Məsafə
+                                </label>
+                                <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
+                                    <button
+                                        onClick={() => setFontSettings(prev => ({ ...prev, sectionSpacing: Math.max(4, prev.sectionSpacing - 2) }))}
+                                        disabled={fontSettings.sectionSpacing <= 4}
+                                        className="w-8 h-8 sm:w-9 sm:h-9 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center hover:bg-emerald-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base font-semibold"
+                                    >
+                                        -
+                                    </button>
+                                    <div className="flex-1 text-center min-w-12 sm:min-w-14">
+                                        <span className="text-sm sm:text-base font-medium text-gray-700">{fontSettings.sectionSpacing}px</span>
+                                    </div>
+                                    <button
+                                        onClick={() => setFontSettings(prev => ({ ...prev, sectionSpacing: Math.min(32, prev.sectionSpacing + 2) }))}
+                                        disabled={fontSettings.sectionSpacing >= 32}
+                                        className="w-8 h-8 sm:w-9 sm:h-9 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center hover:bg-emerald-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base font-semibold"
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+
                         </div>
 
                     {/* Professional Action Buttons */}
@@ -1278,6 +1307,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             onClick={() => {
                                 setFontSettings({
                                     fontFamily: 'Arial, sans-serif',
+                                    nameSize: 24,
+                                    titleSize: 16,
                                     headingSize: 18,
                                     subheadingSize: 16,
                                     bodySize: 14,
@@ -1285,7 +1316,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                     headingWeight: 700,
                                     subheadingWeight: 600,
                                     bodyWeight: 400,
-                                    smallWeight: 400
+                                    smallWeight: 400,
+                                    sectionSpacing: 16
                                 });
                             }}
                             className="w-full sm:w-auto px-6 py-3 text-sm font-semibold text-gray-700 
