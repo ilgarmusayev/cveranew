@@ -41,14 +41,118 @@ interface ElaveSectionsProps {
   data?: CustomSection[];
   onChange?: (data: CVPreviewCustomSection[]) => void;
   userTier?: string;
+  cvLanguage?: 'english' | 'azerbaijani';
 }
 
-const elementTypes = [
-  { type: 'text' as ElementType, label: 'Mətn', icon: '📝', description: 'Adi mətn bloku' },
-  { type: 'list' as ElementType, label: 'Siyahı', icon: '📋', description: 'Nöqtəli siyahı' },
-  { type: 'heading' as ElementType, label: 'Alt Başlıq', icon: '🏷️', description: 'Bölmə daxili başlıq' },
-  { type: 'achievement' as ElementType, label: 'Nailiyyət', icon: '🏆', description: 'Xüsusi nailiyyət və ya məqam' },
-  { type: 'link' as ElementType, label: 'Keçid', icon: '🔗', description: 'Xarici keçid və ya URL' }
+// Translation helper function
+const getTranslation = (cvLanguage: 'english' | 'azerbaijani', key: string): any => {
+  const translations = {
+    english: {
+      sectionTitle: 'Additional Sections',
+      sectionDescription: 'Add custom sections and elements to your CV',
+      addSection: 'Add Section',
+      addSectionMobile: '+',
+      noSectionsTitle: 'No additional sections yet',
+      noSectionsDescription: 'Click "Add Section" to add custom sections to your CV',
+      addFirstSection: 'Add First Section',
+      newSectionPlaceholder: 'Enter new section name...',
+      addElement: 'Add element:',
+      listItemAdd: '+ Add Item',
+      text: 'Text',
+      list: 'List',
+      heading: 'Subheading',
+      achievement: 'Achievement',
+      link: 'Link',
+      dateRange: 'Date Range',
+      skill: 'Skill',
+      textPlaceholder: 'Enter text...',
+      listItemPlaceholder: 'List item',
+      headingPlaceholder: 'Heading text',
+      startDatePlaceholder: 'Start date',
+      endDatePlaceholder: 'End date',
+      achievementTitlePlaceholder: 'Achievement title',
+      achievementDetailsPlaceholder: 'Achievement details',
+      skillNamePlaceholder: 'Skill name',
+      linkTitlePlaceholder: 'Link title',
+      linkUrlPlaceholder: 'https://example.com',
+      skillLevels: {
+        beginner: 'Beginner',
+        intermediate: 'Intermediate',
+        advanced: 'Advanced',
+        expert: 'Expert'
+      }
+    },
+    azerbaijani: {
+      sectionTitle: 'Əlavə Bölmələr',
+      sectionDescription: 'CV-nizə xüsusi bölmələr və elementlər əlavə edin',
+      addSection: 'Bölmə Əlavə Et',
+      addSectionMobile: '+',
+      noSectionsTitle: 'Hələ əlavə bölmə yoxdur',
+      noSectionsDescription: 'CV-nizə xüsusi bölmələr əlavə etmək üçün "Bölmə Əlavə Et" düyməsini basın',
+      addFirstSection: 'İlk Bölməni Əlavə Et',
+      newSectionPlaceholder: 'Yeni bölmə adı yazın...',
+      addElement: 'Element əlavə et:',
+      listItemAdd: '+ Element əlavə et',
+      text: 'Mətn',
+      list: 'Siyahı',
+      heading: 'Alt Başlıq',
+      achievement: 'Nailiyyət',
+      link: 'Keçid',
+      dateRange: 'Tarix Aralığı',
+      skill: 'Bacarıq',
+      textPlaceholder: 'Mətn daxil edin...',
+      listItemPlaceholder: 'Siyahı elementi',
+      headingPlaceholder: 'Başlıq mətni',
+      startDatePlaceholder: 'Başlanğıc tarixi',
+      endDatePlaceholder: 'Bitiş tarixi',
+      achievementTitlePlaceholder: 'Nailiyyət başlığı',
+      achievementDetailsPlaceholder: 'Nailiyyət təfərrüatları',
+      skillNamePlaceholder: 'Bacarıq adı',
+      linkTitlePlaceholder: 'Keçid başlığı',
+      linkUrlPlaceholder: 'https://example.com',
+      skillLevels: {
+        beginner: 'Başlanğıc',
+        intermediate: 'Orta',
+        advanced: 'Yüksək',
+        expert: 'Expert'
+      }
+    }
+  } as const;
+  
+  return (translations[cvLanguage] as any)[key] || (translations['azerbaijani'] as any)[key];
+};
+
+const getElementTypes = (cvLanguage: 'english' | 'azerbaijani') => [
+  { 
+    type: 'text' as ElementType, 
+    label: getTranslation(cvLanguage, 'text'), 
+    icon: '📝', 
+    description: cvLanguage === 'english' ? 'Plain text block' : 'Adi mətn bloku' 
+  },
+  { 
+    type: 'list' as ElementType, 
+    label: getTranslation(cvLanguage, 'list'), 
+    icon: '📋', 
+    description: cvLanguage === 'english' ? 'Bullet point list' : 'Nöqtəli siyahı' 
+  },
+  { 
+    type: 'heading' as ElementType, 
+    label: getTranslation(cvLanguage, 'heading'), 
+    icon: '🏷️', 
+    description: cvLanguage === 'english' ? 'Section heading' : 'Bölmə daxili başlıq' 
+  },
+  { 
+    type: 'achievement' as ElementType, 
+    label: getTranslation(cvLanguage, 'achievement'), 
+    icon: '🏆', 
+    description: cvLanguage === 'english' ? 'Special achievement or milestone' : 'Xüsusi nailiyyət və ya məqam' 
+  },
+  { 
+    type: 'link' as ElementType, 
+    label: getTranslation(cvLanguage, 'link'), 
+    icon: '🔗', 
+    description: cvLanguage === 'english' ? 'External link or URL' : 'Xarici keçid və ya URL' 
+  }
 ];
 
 // Convert internal format to CVPreview compatible format
@@ -112,7 +216,7 @@ const convertToCVPreviewFormat = (sections: CustomSection[]): CVPreviewCustomSec
   }));
 };
 
-export default function ElaveSections({ data = [], onChange, userTier = 'Free' }: ElaveSectionsProps) {
+export default function ElaveSections({ data = [], onChange, userTier = 'Free', cvLanguage = 'azerbaijani' }: ElaveSectionsProps) {
   // Convert from CVPreview format to internal format for initial data
   const convertFromCVPreviewFormat = (cvPreviewSections: any[]): CustomSection[] => {
     if (!Array.isArray(cvPreviewSections)) return [];
@@ -307,10 +411,10 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free' }
     switch (element.type) {
       case 'text':
         return (
-          <div key={element.id} className="border border-gray-200 rounded-lg p-4">
+          <div key={element.id} className="border border-gray-200 rounded-lg p-3 sm:p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-700 flex items-center">
-                📝 Mətn
+                📝 {getTranslation(cvLanguage, 'text')}
               </span>
               <button
                 onClick={() => removeElement(sectionId, element.id)}
@@ -324,8 +428,8 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free' }
             <textarea
               value={element.content}
               onChange={(e) => updateElement(sectionId, element.id, { content: e.target.value })}
-              placeholder="Mətn daxil edin..."
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              placeholder={getTranslation(cvLanguage, 'textPlaceholder')}
+              className="w-full p-2 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none min-h-[60px] sm:min-h-[80px]"
               rows={3}
             />
           </div>
@@ -333,10 +437,10 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free' }
 
       case 'list':
         return (
-          <div key={element.id} className="border border-gray-200 rounded-lg p-4">
+          <div key={element.id} className="border border-gray-200 rounded-lg p-3 sm:p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-700 flex items-center">
-                📋 Siyahı
+                📋 {getTranslation(cvLanguage, 'list')}
               </span>
               <button
                 onClick={() => removeElement(sectionId, element.id)}
@@ -354,12 +458,12 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free' }
                     type="text"
                     value={item}
                     onChange={(e) => updateListItem(sectionId, element.id, index, e.target.value)}
-                    placeholder={`Siyahı elementi ${index + 1}`}
-                    className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder={`${getTranslation(cvLanguage, 'listItemPlaceholder')} ${index + 1}`}
+                    className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-0"
                   />
                   <button
                     onClick={() => removeListItem(sectionId, element.id, index)}
-                    className="text-red-400 hover:text-red-600 transition-colors p-1"
+                    className="text-red-400 hover:text-red-600 transition-colors p-1 flex-shrink-0"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -369,9 +473,9 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free' }
               ))}
               <button
                 onClick={() => addListItem(sectionId, element.id)}
-                className="w-full p-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:text-gray-700 hover:border-gray-400 transition-colors"
+                className="w-full p-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:text-gray-700 hover:border-gray-400 transition-colors text-sm"
               >
-                + Element əlavə et
+                {getTranslation(cvLanguage, 'listItemAdd')}
               </button>
             </div>
           </div>
@@ -379,10 +483,10 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free' }
 
       case 'heading':
         return (
-          <div key={element.id} className="border border-gray-200 rounded-lg p-4">
+          <div key={element.id} className="border border-gray-200 rounded-lg p-3 sm:p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-700 flex items-center">
-                🏷️ Alt Başlıq
+                🏷️ {getTranslation(cvLanguage, 'heading')}
               </span>
               <button
                 onClick={() => removeElement(sectionId, element.id)}
@@ -397,18 +501,18 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free' }
               type="text"
               value={element.content}
               onChange={(e) => updateElement(sectionId, element.id, { content: e.target.value })}
-              placeholder="Başlıq mətni"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-semibold"
+              placeholder={getTranslation(cvLanguage, 'headingPlaceholder')}
+              className="w-full p-2 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-semibold text-sm sm:text-base"
             />
           </div>
         );
 
       case 'dateRange':
         return (
-          <div key={element.id} className="border border-gray-200 rounded-lg p-4">
+          <div key={element.id} className="border border-gray-200 rounded-lg p-3 sm:p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-700 flex items-center">
-                📅 Tarix Aralığı
+                📅 {getTranslation(cvLanguage, 'dateRange')}
               </span>
               <button
                 onClick={() => removeElement(sectionId, element.id)}
@@ -419,20 +523,20 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free' }
                 </svg>
               </button>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
               <input
                 type="text"
                 value={element.content}
                 onChange={(e) => updateElement(sectionId, element.id, { content: e.target.value })}
-                placeholder="Başlanğıc tarixi"
-                className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder={getTranslation(cvLanguage, 'startDatePlaceholder')}
+                className="p-2 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
               />
               <input
                 type="text"
                 value={element.subContent || ''}
                 onChange={(e) => updateElement(sectionId, element.id, { subContent: e.target.value })}
-                placeholder="Bitiş tarixi"
-                className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder={getTranslation(cvLanguage, 'endDatePlaceholder')}
+                className="p-2 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
               />
             </div>
           </div>
@@ -440,10 +544,10 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free' }
 
       case 'achievement':
         return (
-          <div key={element.id} className="border border-gray-200 rounded-lg p-4">
+          <div key={element.id} className="border border-gray-200 rounded-lg p-3 sm:p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-700 flex items-center">
-                🏆 Nailiyyət
+                🏆 {getTranslation(cvLanguage, 'achievement')}
               </span>
               <button
                 onClick={() => removeElement(sectionId, element.id)}
@@ -458,14 +562,14 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free' }
               type="text"
               value={element.content}
               onChange={(e) => updateElement(sectionId, element.id, { content: e.target.value })}
-              placeholder="Nailiyyət başlığı"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-2 font-medium"
+              placeholder={getTranslation(cvLanguage, 'achievementTitlePlaceholder')}
+              className="w-full p-2 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-2 font-medium text-sm sm:text-base"
             />
             <textarea
               value={element.subContent || ''}
               onChange={(e) => updateElement(sectionId, element.id, { subContent: e.target.value })}
-              placeholder="Nailiyyət təfərrüatları"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              placeholder={getTranslation(cvLanguage, 'achievementDetailsPlaceholder')}
+              className="w-full p-2 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm sm:text-base"
               rows={2}
             />
           </div>
@@ -473,10 +577,10 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free' }
 
       case 'skill':
         return (
-          <div key={element.id} className="border border-gray-200 rounded-lg p-4">
+          <div key={element.id} className="border border-gray-200 rounded-lg p-3 sm:p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-700 flex items-center">
-                ⭐ Bacarıq
+                ⭐ {getTranslation(cvLanguage, 'skill')}
               </span>
               <button
                 onClick={() => removeElement(sectionId, element.id)}
@@ -487,23 +591,23 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free' }
                 </svg>
               </button>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
               <input
                 type="text"
                 value={element.content}
                 onChange={(e) => updateElement(sectionId, element.id, { content: e.target.value })}
-                placeholder="Bacarıq adı"
-                className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder={getTranslation(cvLanguage, 'skillNamePlaceholder')}
+                className="p-2 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
               />
               <select
-                value={element.subContent || 'Başlanğıc'}
+                value={element.subContent || getTranslation(cvLanguage, 'skillLevels').beginner}
                 onChange={(e) => updateElement(sectionId, element.id, { subContent: e.target.value })}
-                className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="p-2 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
               >
-                <option value="Başlanğıc">Başlanğıc</option>
-                <option value="Orta">Orta</option>
-                <option value="Yüksək">Yüksək</option>
-                <option value="Expert">Expert</option>
+                <option value={getTranslation(cvLanguage, 'skillLevels').beginner}>{getTranslation(cvLanguage, 'skillLevels').beginner}</option>
+                <option value={getTranslation(cvLanguage, 'skillLevels').intermediate}>{getTranslation(cvLanguage, 'skillLevels').intermediate}</option>
+                <option value={getTranslation(cvLanguage, 'skillLevels').advanced}>{getTranslation(cvLanguage, 'skillLevels').advanced}</option>
+                <option value={getTranslation(cvLanguage, 'skillLevels').expert}>{getTranslation(cvLanguage, 'skillLevels').expert}</option>
               </select>
             </div>
           </div>
@@ -511,10 +615,10 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free' }
 
       case 'link':
         return (
-          <div key={element.id} className="border border-gray-200 rounded-lg p-4">
+          <div key={element.id} className="border border-gray-200 rounded-lg p-3 sm:p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-700 flex items-center">
-                🔗 Keçid
+                🔗 {getTranslation(cvLanguage, 'link')}
               </span>
               <button
                 onClick={() => removeElement(sectionId, element.id)}
@@ -525,20 +629,20 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free' }
                 </svg>
               </button>
             </div>
-            <div className="grid grid-cols-1 gap-3">
+            <div className="grid grid-cols-1 gap-2 sm:gap-3">
               <input
                 type="text"
                 value={element.content}
                 onChange={(e) => updateElement(sectionId, element.id, { content: e.target.value })}
-                placeholder="Keçid başlığı"
-                className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder={getTranslation(cvLanguage, 'linkTitlePlaceholder')}
+                className="p-2 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
               />
               <input
                 type="url"
                 value={element.subContent || ''}
                 onChange={(e) => updateElement(sectionId, element.id, { subContent: e.target.value })}
-                placeholder="https://example.com"
-                className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder={getTranslation(cvLanguage, 'linkUrlPlaceholder')}
+                className="p-2 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base break-all"
               />
             </div>
           </div>
@@ -552,37 +656,42 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free' }
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">Əlavə Bölmələr</h3>
-          <p className="text-sm text-gray-600">CV-nizə xüsusi bölmələr və elementlər əlavə edin</p>
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="min-w-0 flex-1">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900">{getTranslation(cvLanguage, 'sectionTitle')}</h3>
+          <p className="text-xs sm:text-sm text-gray-600 break-words">{getTranslation(cvLanguage, 'sectionDescription')}</p>
         </div>
         <button
           onClick={addSection}
-          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap flex-shrink-0"
         >
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 mr-2 sm:mr-2 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          Bölmə Əlavə Et
+          <span className="hidden sm:inline text-sm">
+            {getTranslation(cvLanguage, 'addSection')}
+          </span>
+          <span className="sm:hidden text-sm">
+            {getTranslation(cvLanguage, 'addSectionMobile')}
+          </span>
         </button>
       </div>
 
       {/* Sections */}
       {sections.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-          <div className="mx-auto w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-            <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="text-center py-8 sm:py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3 sm:mb-4 mx-auto">
+            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Hələ əlavə bölmə yoxdur</h3>
-          <p className="text-gray-600 mb-4">CV-nizə xüsusi bölmələr əlavə etmək üçün "Bölmə Əlavə Et" düyməsini basın</p>
+          <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">{getTranslation(cvLanguage, 'noSectionsTitle')}</h3>
+          <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4 px-4 break-words">{getTranslation(cvLanguage, 'noSectionsDescription')}</p>
           <button
             onClick={addSection}
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
           >
-            İlk Bölməni Əlavə Et
+            {getTranslation(cvLanguage, 'addFirstSection')}
           </button>
         </div>
       ) : (
@@ -590,11 +699,11 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free' }
           {sections.map((section) => (
             <div key={section.id} className="bg-white border border-gray-200 rounded-lg shadow-sm">
               {/* Section Header */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                <div className="flex items-center space-x-3 flex-1">
+              <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200">
+                <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
                   <button
                     onClick={() => toggleSection(section.id)}
-                    className="p-1 rounded-md hover:bg-gray-100 transition-colors"
+                    className="p-1 rounded-md hover:bg-gray-100 transition-colors flex-shrink-0"
                   >
                     <svg 
                       className={`w-4 h-4 transform transition-transform ${section.isExpanded ? 'rotate-90' : ''}`} 
@@ -605,16 +714,16 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free' }
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </button>
-                  <div className="flex items-center space-x-2 flex-1 group">
+                  <div className="flex items-center space-x-1 sm:space-x-2 flex-1 min-w-0 group">
                     <input
                       type="text"
                       value={section.title}
                       onChange={(e) => updateSectionTitle(section.id, e.target.value)}
-                      className="text-lg font-semibold text-gray-900 bg-transparent border-none p-2 focus:ring-2 focus:ring-blue-500 focus:bg-blue-50 rounded-md transition-all flex-1 hover:bg-gray-50"
-                      placeholder="Yeni bölmə adı yazın..."
+                      className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 bg-transparent border-none p-1 sm:p-2 focus:ring-2 focus:ring-blue-500 focus:bg-blue-50 rounded-md transition-all flex-1 min-w-0 hover:bg-gray-50"
+                      placeholder={getTranslation(cvLanguage, 'newSectionPlaceholder')}
                     />
                     <svg 
-                      className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors" 
+                      className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 group-hover:text-gray-600 transition-colors flex-shrink-0" 
                       fill="none" 
                       stroke="currentColor" 
                       viewBox="0 0 24 24"
@@ -625,9 +734,9 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free' }
                 </div>
                 <button
                   onClick={() => removeSection(section.id)}
-                  className="p-2 text-red-400 hover:text-red-600 transition-colors"
+                  className="p-1.5 sm:p-2 text-red-400 hover:text-red-600 transition-colors flex-shrink-0"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
                 </button>
@@ -635,24 +744,24 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free' }
 
               {/* Section Content */}
               {section.isExpanded && (
-                <div className="p-4">
+                <div className="p-3 sm:p-4">
                   <div className="space-y-4">
                     {/* Elements */}
                     {section.elements.map((element) => renderElement(section.id, element))}
 
                     {/* Add Element Buttons */}
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                      <h4 className="text-sm font-medium text-gray-700 mb-3">Element əlavə et:</h4>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-                        {elementTypes.map((type) => (
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 sm:p-4">
+                      <h4 className="text-xs sm:text-sm font-medium text-gray-700 mb-3">{getTranslation(cvLanguage, 'addElement')}</h4>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+                        {getElementTypes(cvLanguage).map((type) => (
                           <button
                             key={type.type}
                             onClick={() => addElement(section.id, type.type)}
-                            className="flex flex-col items-center p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200 hover:border-blue-300"
+                            className="flex flex-col items-center p-2 sm:p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200 hover:border-blue-300 min-h-[45px] sm:min-h-[60px] justify-center text-center"
                             title={type.description}
                           >
-                            <span className="text-lg mb-1">{type.icon}</span>
-                            <span className="text-xs font-medium text-gray-700">{type.label}</span>
+                            <span className="text-sm sm:text-lg mb-1 flex-shrink-0">{type.icon}</span>
+                            <span className="text-xs font-medium text-gray-700 leading-tight truncate w-full px-1">{type.label}</span>
                           </button>
                         ))}
                       </div>

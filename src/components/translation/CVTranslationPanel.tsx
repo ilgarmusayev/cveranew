@@ -95,7 +95,7 @@ export function CVTranslationPanel({
     },
     english: {
       title: 'AI Translation',
-      description: 'Translate your entire CV content peşəkar şəkildə AI vasitəsilə',
+      description: 'Translate your entire CV content with AI',
       fullTranslation: 'Full CV Translation',
       advancedOptions: 'Advanced Options',
       currentLang: 'Current language: English',

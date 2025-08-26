@@ -152,10 +152,10 @@ const formatDate = (dateString: string, cvLanguage?: string): string => {
         },
         en: {
             'Yan': 'Jan', 'Fev': 'Feb', 'Mar': 'Mar', 'Apr': 'Apr',
-            'May': 'May', 'İyn': 'Jun', 'İyl': 'Jul', 'Avq': 'Aug',
+            'May': 'May', 'Iyn': 'Jun', 'Iyl': 'Jul', 'Avq': 'Aug',
             'Sen': 'Sep', 'Okt': 'Oct', 'Noy': 'Nov', 'Dek': 'Dec',
             'Yanvar': 'January', 'Fevral': 'February', 'Mart': 'March', 'Aprel': 'April',
-            'İyun': 'June', 'İyul': 'July', 'Avqust': 'August', 'Sentyabr': 'September',
+            'Iyun': 'June', 'Iyul': 'July', 'Avqust': 'August', 'Sentyabr': 'September',
             'Oktyabr': 'October', 'Noyabr': 'November', 'Dekabr': 'December'
         }
     };
@@ -232,7 +232,7 @@ const getSectionName = (sectionKey: string, cvLanguage?: string, customSectionNa
         tr: {
             summary: 'Özet',
             professionalSummary: 'Profesyonel Özet',
-            experience: 'İş Deneyimi',
+            experience: 'Is Deneyimi',
             professionalExperience: 'Profesyonel Deneyim',
             education: 'Eğitim',
             skills: 'Yetenekler',
@@ -270,14 +270,14 @@ const splitContentToPages = (sections: React.ReactNode[], pageHeightPx: number =
 
         // Estimate heights based on section type
         const nodeString = String(node);
-        if (nodeString.includes('Xülasə') || nodeString.includes('Özət') || nodeString.includes('summary')) return 120;
-        if (nodeString.includes('İş Təcrübəsi') || nodeString.includes('experience')) return 200;
-        if (nodeString.includes('Təhsil') || nodeString.includes('education')) return 140;
-        if (nodeString.includes('Bacarıqlar') || nodeString.includes('skills')) return 100;
-        if (nodeString.includes('Dillər') || nodeString.includes('languages')) return 80;
-        if (nodeString.includes('Layihələr') || nodeString.includes('projects')) return 120;
-        if (nodeString.includes('Sertifikatlar') || nodeString.includes('certifications')) return 80;
-        if (nodeString.includes('Könüllü') || nodeString.includes('volunteer')) return 80;
+        if (nodeString.includes('Xülasə') || nodeString.includes('Özet') || nodeString.includes('Summary')) return 120;
+        if (nodeString.includes('İş Təcrübəsi') || nodeString.includes('Is Deneyimi') || nodeString.includes('Work Experience')) return 200;
+        if (nodeString.includes('Təhsil') || nodeString.includes('Eğitim') || nodeString.includes('Education')) return 140;
+        if (nodeString.includes('Bacarıqlar') || nodeString.includes('Yetenekler') || nodeString.includes('Skills')) return 100;
+        if (nodeString.includes('Dillər') || nodeString.includes('Diller') || nodeString.includes('Languages')) return 80;
+        if (nodeString.includes('Layihələr') || nodeString.includes('Projeler') || nodeString.includes('Projects')) return 120;
+        if (nodeString.includes('Sertifikatlar') || nodeString.includes('Sertifikalar') || nodeString.includes('Certifications')) return 80;
+        if (nodeString.includes('Könüllü') || nodeString.includes('Gönüllü') || nodeString.includes('Volunteer')) return 80;
         return 100;
     };
 
@@ -554,7 +554,7 @@ const BasicTemplate: React.FC<{
                                 <div key={edu.id} className="border-l-2 border-blue-200 pl-3">
                                     <div className="flex justify-between items-start">
                                         <div>
-                                            <h3 className="font-semibold text-gray-900 text-sm">{edu.degree}</h3>
+                                            {edu.degree && <h3 className="font-semibold text-gray-900 text-sm">{edu.degree}</h3>}
                                             <p className="text-blue-600 font-medium text-xs">{edu.institution}</p>
                                             {(edu.field || edu.gpa) && (
                                                 <p className="text-gray-600 text-xs">
@@ -1091,7 +1091,7 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
                                     <div key={edu.id} className="border-l-4 border-green-400 pl-4 bg-green-50 p-4 rounded-r-lg">
                                         <div className="flex justify-between items-start mb-1">
                                             <div className="flex-1">
-                                                <h3 className="font-bold text-gray-900">{edu.degree}</h3>
+                                                {edu.degree && <h3 className="font-bold text-gray-900">{edu.degree}</h3>}
                                                 <p className="text-green-600 font-medium">{edu.institution}</p>
                                                 {(edu.field || edu.gpa) && (
                                                     <p className="text-gray-600 text-sm">

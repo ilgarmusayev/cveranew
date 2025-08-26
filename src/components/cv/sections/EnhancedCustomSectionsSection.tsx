@@ -432,11 +432,11 @@ export default function EnhancedCustomSectionsSection({
       {/* Empty State */}
       {data.length === 0 ? (
         <div className="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center  mb-6">
             <span className="text-3xl">📝</span>
           </div>
           <h3 className="text-xl font-medium text-gray-900 mb-3">Öz Bölmələrinizi Yaradın</h3>
-          <p className="text-gray-600 mb-6 max-w-lg mx-auto">
+          <p className="text-gray-600 mb-6 max-w-lg ">
             CV-nizə xüsusi bölmələr əlavə edin: hobbi, sertifikatlar, mükafatlar,
             fəaliyyət sahələri və digər məlumatları daxil edin
           </p>
@@ -659,7 +659,7 @@ export default function EnhancedCustomSectionsSection({
 
                     {(!section.items || section.items.length === 0) ? (
                       <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                        <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center  mb-3">
                           <span className="text-gray-400">📄</span>
                         </div>
                         <p className="text-gray-500 text-sm mb-3">

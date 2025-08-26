@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
@@ -41,10 +41,34 @@ export default function Header({
     logout();
   };
 
+  // Handle mobile menu interactions
+  useEffect(() => {
+    // Close mobile menu on escape key
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    // Prevent body scroll when mobile menu is open
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+      document.addEventListener('keydown', handleEscapeKey);
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    // Cleanup
+    return () => {
+      document.body.style.overflow = 'unset';
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [isMobileMenuOpen]);
+
   return (
-    <header className="bg-gradient-to-r from-blue-600 to-blue-700 border-b border-blue-800 top-0 z-30 shadow-lg">
+    <header className="bg-gradient-to-r from-blue-600 to-blue-700 border-b border-blue-800 sticky top-0 z-30 shadow-lg">
       {/* Enhanced responsive container with better edge spacing */}
-      <div className="w-full max-w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20">
+      <div className="relative w-full max-w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20">
         <div className="flex justify-between items-center h-16 sm:h-18 md:h-20">
           {/* Logo - Simplified approach for guaranteed display */}
           <div className="flex-shrink-0">
@@ -157,76 +181,91 @@ export default function Header({
           </div>
         </div>
 
-        {/* Mobile Navigation - Improved */}
+        {/* Mobile Navigation - Full width under header */}
         {isMobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-blue-500 w-full">
-            <div className="flex flex-col space-y-3">
-              {/* AI Translate Button for Mobile */}
-              {showAITranslate && cvData && onCVUpdate && onLanguageChange && (
-                <button
-                  onClick={() => {
-                    setShowTranslationPanel(!showTranslationPanel);
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-3 rounded-lg font-medium transition-all duration-200 text-center flex items-center justify-center"
-                >
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-                  </svg>
-                  AI Tərcümə
-                </button>
-              )}
-              
-              {user ? (
-                // Authenticated user mobile menu
-                <div className="space-y-3">
-                  <div className="px-4 py-2 text-blue-100 text-sm">
-                    Xoş gəlmisiniz, {user.name}
-                  </div>
-                  <Link
-                    href="/dashboard"
-                    className="block bg-blue-500 hover:bg-blue-400 text-white font-bold px-4 py-3 rounded-lg transition-colors duration-200 text-center"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Dashboard
-                  </Link>
-                  <button
-                    onClick={() => {
-                      handleLogout();
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="w-full bg-blue-500 text-white px-4 py-3 rounded-lg  transition-colors duration-200 text-center"
-                  >
-                    Çıxış
-                  </button>
+          <>
+            {/* Backdrop overlay - only covers content below header */}
+            <div 
+              className="fixed inset-x-0 bottom-0 bg-black bg-opacity-25 z-40 md:hidden"
+              style={{ top: 'calc(100% + 1px)' }}
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            
+            {/* Mobile menu - Full width, positioned directly under header */}
+            <div className="absolute top-full left-0 right-0 bg-gradient-to-r from-blue-600 to-blue-700 border-t border-blue-500 shadow-lg z-50 md:hidden w-full">
+              <div className="px-4 py-4 w-full">
+                <div className="flex flex-col space-y-3 w-full max-w-none">
+                  {/* AI Translate Button for Mobile */}
+                  {showAITranslate && cvData && onCVUpdate && onLanguageChange && (
+                    <button
+                      onClick={() => {
+                        setShowTranslationPanel(!showTranslationPanel);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-3 rounded-lg font-medium transition-all duration-200 text-center flex items-center justify-center"
+                    >
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                      </svg>
+                      AI Tərcümə
+                    </button>
+                  )}
+                  
+                  {user ? (
+                    // Authenticated user mobile menu
+                    <div className="space-y-3">
+                      <div className="px-4 py-2 text-blue-100 text-sm border-b border-blue-500">
+                        Xoş gəlmisiniz, {user.name}
+                      </div>
+                      <Link
+                        href="/dashboard"
+                        className="block bg-white/10 hover:bg-white/20 text-white font-medium px-4 py-3 rounded-lg transition-colors duration-200 text-center border border-white/20"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        İdarəetmə Paneli
+                      </Link>
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="w-full bg-white/10 hover:bg-white/20 text-white px-4 py-3 rounded-lg transition-colors duration-200 text-center border border-white/20 flex items-center justify-center"
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Çıxış
+                      </button>
+                    </div>
+                  ) : (
+                    // Guest user mobile menu
+                    showAuthButtons && (
+                      <div className="space-y-3">
+                        {currentPage !== 'login' && (
+                          <Link
+                            href="/auth/login"
+                            className="block bg-white/10 hover:bg-white/20 text-white px-4 py-3 rounded-lg font-medium transition-colors duration-200 text-center border border-white/20"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                          >
+                            Giriş
+                          </Link>
+                        )}
+                        {currentPage !== 'register' && (
+                          <Link
+                            href="/auth/register"
+                            className="block bg-white text-blue-600 hover:bg-blue-50 px-4 py-3 rounded-lg font-semibold transition-colors duration-200 text-center"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                          >
+                            Qeydiyyat
+                          </Link>
+                        )}
+                      </div>
+                    )
+                  )}
                 </div>
-              ) : (
-                // Guest user mobile menu
-                showAuthButtons && (
-                  <div className="space-y-3">
-                    {currentPage !== 'login' && (
-                      <Link
-                        href="/auth/login"
-                        className="block bg-blue-500 hover:bg-blue-400 text-white px-4 py-3 rounded-lg font-medium transition-colors duration-200 text-center"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        Giriş
-                      </Link>
-                    )}
-                    {currentPage !== 'register' && (
-                      <Link
-                        href="/auth/register"
-                        className="block bg-white text-blue-600 hover:bg-blue-50 px-4 py-3 rounded-lg font-semibold transition-colors duration-200 text-center"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        Qeydiyyat
-                      </Link>
-                    )}
-                  </div>
-                )
-              )}
+              </div>
             </div>
-          </div>
+          </>
         )}
       </div>
       

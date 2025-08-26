@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getLabel } from '@/lib/cvLanguage';
 
 interface Certification {
   id: string;
@@ -15,11 +14,87 @@ interface Certification {
 interface CertificationsSectionProps {
   data: Certification[];
   onChange: (data: Certification[]) => void;
-  
+  cvLanguage?: 'english' | 'azerbaijani';
 }
 
-export default function CertificationsSection({ data, onChange }: CertificationsSectionProps) {
+// Translation helper function
+const getTranslation = (cvLanguage: 'english' | 'azerbaijani', key: string): any => {
+  const translations = {
+    english: {
+      sectionTitle: 'Certifications',
+      addButton: '+ Add',
+      addButtonMobile: '+',
+      emptyStateTitle: 'No certifications added yet',
+      emptyStateDescription: 'Add your professional certifications to showcase your expertise',
+      addFirstButton: 'Add your first certification',
+      newCertification: 'New certification',
+      issuingOrganization: 'Issuing organization',
+      moveUp: 'Move up',
+      moveDown: 'Move down',
+      edit: 'Edit',
+      close: 'Close',
+      delete: 'Delete',
+      certificationName: 'Certification Name',
+      issuingOrg: 'Issuing Organization',
+      certificateUrl: 'Certificate URL',
+      issueDate: 'Issue Date',
+      description: 'Description',
+      viewCertificate: 'View Certificate',
+      addAnother: '+ Add another certification',
+      placeholders: {
+        certName: 'AWS Cloud Practitioner',
+        orgName: 'Amazon Web Services',
+        url: 'https://www.credly.com/badges/...',
+        description: 'Description of the certification and skills gained...'
+      }
+    },
+    azerbaijani: {
+      sectionTitle: 'Sertifikatlar',
+      addButton: '+ Əlavə edin',
+      addButtonMobile: '+',
+      emptyStateTitle: 'Hələ heç bir sertifikat əlavə etməmisiniz',
+      emptyStateDescription: 'Peşəkar ekspertizanızı nümayiş etdirmək üçün sertifikatlarınızı əlavə edin',
+      addFirstButton: 'İlk sertifikatınızı əlavə edin',
+      newCertification: 'Yeni sertifikat',
+      issuingOrganization: 'Verən təşkilat',
+      moveUp: 'Yuxarı',
+      moveDown: 'Aşağı',
+      edit: 'Redaktə edin',
+      close: 'Bağlayın',
+      delete: 'Silin',
+      certificationName: 'Sertifikat adı',
+      issuingOrg: 'Verən təşkilat',
+      certificateUrl: 'Sertifikat URL-i',
+      issueDate: 'Verilmə tarixi',
+      description: 'Təsvir',
+      viewCertificate: 'Sertifikatı görüntüləyin',
+      addAnother: '+ Başqa sertifikat əlavə edin',
+      placeholders: {
+        certName: 'AWS Cloud Practitioner',
+        orgName: 'Amazon Web Services',
+        url: 'https://www.credly.com/badges/...',
+        description: 'Sertifikatın təsviri və əldə edilən bacarıqlar...'
+      }
+    }
+  } as const;
+  
+  // Debug logging
+  console.log('🔍 Translation request:', { cvLanguage, key });
+  const result = (translations[cvLanguage] as any)[key] || (translations['azerbaijani'] as any)[key];
+  console.log('🔍 Translation result:', result);
+  
+  return result;
+};
+interface CertificationsSectionProps {
+  data: Certification[];
+  onChange: (data: Certification[]) => void;
+  cvLanguage?: 'english' | 'azerbaijani';
+}
+export default function CertificationsSection({ data, onChange, cvLanguage = 'azerbaijani' }: CertificationsSectionProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  // Debug: Check what language is being used
+  console.log('🔍 CertificationsSection language:', cvLanguage);
 
   // Create a more robust unique ID generator
   const generateUniqueId = () => {
@@ -88,57 +163,62 @@ export default function CertificationsSection({ data, onChange }: Certifications
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="min-w-0 flex-1">
           <h3 className="text-lg font-semibold text-gray-900">
-            {getLabel('certifications', 'azerbaijani')}
+            {getTranslation(cvLanguage, 'sectionTitle')}
           </h3>
         </div>
         <button
           onClick={addCertification}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap flex-shrink-0"
         >
-          + Əlavə edin
+          <span className="hidden sm:inline">
+            {getTranslation(cvLanguage, 'addButton')}
+          </span>
+          <span className="sm:hidden">
+            {getTranslation(cvLanguage, 'addButtonMobile')}
+          </span>
         </button>
       </div>
 
       {data.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
           <div className="text-gray-400 mb-4">
-            <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
             </svg>
           </div>
-          <p className="text-gray-500 mb-4">
-            Hələ heç bir sertifikat əlavə etməmisiniz
+          <p className="text-gray-500 mb-4 px-4">
+            {getTranslation(cvLanguage, 'emptyStateDescription')}
           </p>
           <button
             onClick={addCertification}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            İlk sertifikatınızı əlavə edin
+            {getTranslation(cvLanguage, 'addFirstButton')}
           </button>
         </div>
       ) : (
         <div className="space-y-4">
           {data.map((certification, index) => (
             <div key={`${certification.id}-${index}`} className="bg-white border border-gray-200 rounded-lg p-4">
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-blue-500">🏆</span>
-                  <h4 className="font-medium text-gray-900">
-                    {certification.name || 'Yeni sertifikat'}
+                  <span className="text-blue-500 flex-shrink-0">🏆</span>
+                  <h4 className="font-medium text-gray-900 truncate">
+                    {certification.name || getTranslation(cvLanguage, 'newCertification')}
                   </h4>
                 </div>
-                <p className="text-sm text-gray-600">
-                  {certification.issuer || 'Verən təşkilat'}
+                <p className="text-sm text-gray-600 truncate">
+                  {certification.issuer || getTranslation(cvLanguage, 'issuingOrganization')}
                 </p>
               </div>
 
               {/* Action links moved to bottom of card */}
-              <div className="flex items-center justify-between mt-4 pt-2 border-t border-gray-100">
+              <div className="flex items-center justify-between mt-4 pt-2 border-t border-gray-100 flex-wrap gap-2">
                 {/* Move buttons */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0">
                   <button
                     onClick={() => moveCertification(certification.id, 'up')}
                     disabled={index === 0}
@@ -147,7 +227,7 @@ export default function CertificationsSection({ data, onChange }: Certifications
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                     }`}
-                    title="Yuxarı"
+                    title={getTranslation(cvLanguage, 'moveUp')}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -161,7 +241,7 @@ export default function CertificationsSection({ data, onChange }: Certifications
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                     }`}
-                    title="Aşağı"
+                    title={getTranslation(cvLanguage, 'moveDown')}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -170,69 +250,70 @@ export default function CertificationsSection({ data, onChange }: Certifications
                 </div>
 
                 {/* Edit and remove buttons */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 flex-shrink-0">
                   <button
                     onClick={() => setExpandedId(expandedId === certification.id ? null : certification.id)}
                     className="text-blue-600 hover:text-blue-800 transition-colors text-sm cursor-pointer"
                   >
-                    {expandedId === certification.id ? 'Bağlayın' : 'Redaktə edin'}
+                    {expandedId === certification.id 
+                      ? getTranslation(cvLanguage, 'close')
+                      : getTranslation(cvLanguage, 'edit')
+                    }
                   </button>
                   <button
                     onClick={() => removeCertification(certification.id)}
                     className="text-red-600 hover:text-red-800 transition-colors text-sm cursor-pointer"
                   >
-                    Silin
+                    {getTranslation(cvLanguage, 'delete')}
                   </button>
                 </div>
               </div>
 
               {expandedId === certification.id && (
-                <div className="space-y-4 border-t border-gray-200 pt-4">
-                  <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-4 border-t border-gray-200 pt-4 mt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {getLabel('name', 'azerbaijani')} <span className="text-red-500">*</span>
+                        {getTranslation(cvLanguage, 'certificationName')} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         value={certification.name}
                         onChange={(e) => updateCertification(certification.id, 'name', e.target.value)}
-                        placeholder="AWS Cloud Practitioner"
+                        placeholder={getTranslation(cvLanguage, 'placeholders').certName}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Verən təşkilat <span className="text-red-500">*</span>
+                        {getTranslation(cvLanguage, 'issuingOrg')} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         value={certification.issuer}
                         onChange={(e) => updateCertification(certification.id, 'issuer', e.target.value)}
-                        placeholder="Amazon Web Services"
+                        placeholder={getTranslation(cvLanguage, 'placeholders').orgName}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       />
                     </div>
 
-
-
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Sertifikat URL-i
+                        {getTranslation(cvLanguage, 'certificateUrl')}
                       </label>
                       <input
                         type="url"
                         value={certification.url || ''}
                         onChange={(e) => updateCertification(certification.id, 'url', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        placeholder="https://www.credly.com/badges/..."
+                        placeholder={getTranslation(cvLanguage, 'placeholders').url}
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Verilmə tarixi
+                        {getTranslation(cvLanguage, 'issueDate')}
                       </label>
                       <input
                         type="month"
@@ -245,12 +326,12 @@ export default function CertificationsSection({ data, onChange }: Certifications
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {getLabel('description', 'azerbaijani')}
+                      {getTranslation(cvLanguage, 'description')}
                     </label>
                     <textarea
                       value={certification.description || ''}
                       onChange={(e) => updateCertification(certification.id, 'description', e.target.value)}
-                      placeholder="Sertifikatın təsviri və əldə edilən bacarıqlar..."
+                      placeholder={getTranslation(cvLanguage, 'placeholders').description}
                       rows={3}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                     />
@@ -266,7 +347,7 @@ export default function CertificationsSection({ data, onChange }: Certifications
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:text-blue-800 underline"
                           >
-                            Sertifikatı görüntüləyin
+                            {getTranslation(cvLanguage, 'viewCertificate')}
                           </a>
                         </div>
                       )}
@@ -284,7 +365,7 @@ export default function CertificationsSection({ data, onChange }: Certifications
             onClick={addCertification}
             className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
           >
-            + Başqa sertifikat əlavə edin
+            {getTranslation(cvLanguage, 'addAnother')}
           </button>
         </div>
       )}

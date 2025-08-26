@@ -381,6 +381,7 @@ export default function NewCVEditor({ cvId, onSave, onCancel, initialData, userT
                     <CertificationsSection
                         data={cv.certifications}
                         onChange={(data: any) => updateCVData('certifications', data)}
+                        cvLanguage={cv.cvLanguage}
                     />
                 );
 

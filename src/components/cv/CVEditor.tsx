@@ -283,58 +283,83 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
         smallWeight: 400,     // Kiçik mətn qalınlığı
         sectionSpacing: 8    // Bölmələr arası məsafə (px)
     });
-    // Disable auto-save for debugging
-    // const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
-    // const [lastSavedData, setLastSavedData] = useState<any>(null);
+    
+    // Auto-save states - hybrid system (debounced + periodic)
+    const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
+    const [periodicSaveTimer, setPeriodicSaveTimer] = useState<NodeJS.Timeout | null>(null);
+    const [lastSavedHash, setLastSavedHash] = useState<string>('');
+    const [isDirty, setIsDirty] = useState(false);
+    const [lastSaveTime, setLastSaveTime] = useState<number>(Date.now());
 
-    // Auto-save effect disabled for debugging
-    /*
+    // Simple hash function for performance - much faster than JSON.stringify
+    const generateDataHash = useCallback((data: any) => {
+        const str = `${data.personalInfo?.fullName || ''}|${data.personalInfo?.email || ''}|${data.personalInfo?.summary || ''}|${data.experience?.length || 0}|${data.education?.length || 0}|${data.skills?.length || 0}|${data.languages?.length || 0}|${data.projects?.length || 0}|${data.certifications?.length || 0}|${data.volunteerExperience?.length || 0}|${data.customSections?.length || 0}`;
+        return str;
+    }, []);
+
+    // Mark as dirty when data changes
     useEffect(() => {
-        // Clear previous timer
+        const currentHash = generateDataHash(cv);
+        
+        if (!lastSavedHash) {
+            setLastSavedHash(currentHash);
+        } else if (currentHash !== lastSavedHash) {
+            setIsDirty(true);
+        }
+    }, [cv.personalInfo, cv.experience, cv.education, cv.skills, cv.languages, cv.projects, cv.certifications, cv.volunteerExperience, cv.customSections, generateDataHash, lastSavedHash]);
+
+    // Debounced auto-save - triggers 1 second after last change
+    useEffect(() => {
         if (autoSaveTimer) {
             clearTimeout(autoSaveTimer);
         }
 
-        // Don't auto-save if no meaningful data changes
-        const currentDataString = JSON.stringify({
-            personalInfo: cv.personalInfo,
-            experience: cv.experience,
-            education: cv.education,
-            skills: cv.skills,
-            languages: cv.languages,
-            projects: cv.projects,
-            certifications: cv.certifications,
-            volunteerExperience: cv.volunteerExperience
-        });
-
-        if (lastSavedData && currentDataString === lastSavedData) {
-            return; // No changes, skip auto-save
-        }
-
-        // Set new timer for auto-save (only if CV has an ID)
-        if (cv.id && currentDataString !== lastSavedData) {
+        if (cv.id && isDirty && !saving) {
             const timer = setTimeout(() => {
-                handleAutoSave();
-                setLastSavedData(currentDataString);
-            }, 8000); // Increased to 8 seconds delay
+                handleAutoSave('debounced');
+            }, 1000); // Very fast response - 1 second
 
             setAutoSaveTimer(timer);
         }
 
-        // Cleanup on unmount
         return () => {
             if (autoSaveTimer) {
                 clearTimeout(autoSaveTimer);
             }
         };
-    }, [cv.personalInfo, cv.experience, cv.education, cv.skills, cv.languages, cv.projects, cv.certifications, cv.volunteerExperience]); // Only watch data fields
-    */
+    }, [isDirty, cv.id, saving]);
 
-    // Auto save function
-    const handleAutoSave = useCallback(async () => {
-        if (!cv.id || saving) return;
+    // Periodic backup save - every 15 seconds regardless
+    useEffect(() => {
+        if (!cv.id) return;
+
+        const timer = setInterval(() => {
+            const timeSinceLastSave = Date.now() - lastSaveTime;
+            if (timeSinceLastSave >= 14000 && isDirty && !saving) { // 14 seconds to be safe
+                handleAutoSave('periodic');
+            }
+        }, 15000); // Check every 15 seconds
+
+        setPeriodicSaveTimer(timer);
+
+        return () => {
+            if (timer) {
+                clearInterval(timer);
+            }
+        };
+    }, [cv.id, lastSaveTime, isDirty, saving]);
+
+    // Auto save function - hybrid system with performance optimization
+    const handleAutoSave = useCallback(async (trigger: 'debounced' | 'periodic' = 'debounced') => {
+        if (!cv.id || saving || !isDirty) return;
 
         try {
+            // Update states before saving
+            const currentHash = generateDataHash(cv);
+            setLastSavedHash(currentHash);
+            setIsDirty(false);
+            setLastSaveTime(Date.now());
+
             const cvData: CVEditorData = {
                 id: cv.id,
                 title: cv.title || 'Untitled CV',
@@ -364,10 +389,15 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 templateId: cvData.templateId,
                 cv_data: cvData.data
             });
+            
+            // Silent auto-save with trigger info
+            console.log(`✅ CV auto-saved (${trigger}) at ${new Date().toLocaleTimeString()}`);
         } catch (error) {
             console.error('❌ Auto-save failed:', error);
+            // Reset states on error so it can retry
+            setIsDirty(true);
         }
-    }, [cv, saving]);
+    }, [cv, saving, isDirty, generateDataHash]);
 
     // Notification hooks
     const { showSuccess, showError, showWarning } = useNotification();
@@ -514,6 +544,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             userTier={userTier || 'Premium'} // Default to Premium for testing
                             cvData={cv} // Pass full CV data for AI context
                             cvId={cv.id}
+                            cvLanguage={cv.cvLanguage}
                         />
                 );
 
@@ -522,6 +553,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     <ExperienceSection
                         data={cv.experience as any}
                         onChange={(data: any) => updateCVData('experience', data)}
+                        cvLanguage={cv.cvLanguage}
                     />
                 );
 
@@ -542,6 +574,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                         userTier={userTier || 'Premium'} // Default to Premium for testing
                         cvData={cv} // Pass full CV data for AI context
                         cvId={cv.id}
+                        cvLanguage={cv.cvLanguage}
                     />
                 );
 
@@ -550,6 +583,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     <LanguagesSection
                         data={cv.languages}
                         onChange={(data: any) => updateCVData('languages', data)}
+                        cvLanguage={cv.cvLanguage}
                     />
                 );
 
@@ -558,6 +592,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     <ProjectsSection
                         data={cv.projects as any}
                         onChange={(data: any) => updateCVData('projects', data)}
+                        cvLanguage={cv.cvLanguage}
                     />
                 );
 
@@ -566,6 +601,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     <CertificationsSection
                         data={cv.certifications}
                         onChange={(data: any) => updateCVData('certifications', data)}
+                        cvLanguage={cv.cvLanguage}
                     />
                 );
 
@@ -574,6 +610,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     <VolunteerExperienceSection
                         data={cv.volunteerExperience}
                         onChange={(data: any) => updateCVData('volunteerExperience', data)}
+                        cvLanguage={cv.cvLanguage}
                     />
                 );
 
@@ -583,17 +620,21 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                         data={cv.customSections}
                         onChange={(data: any) => updateCVData('customSections', data)}
                         userTier={userTier}
+                        cvLanguage={cv.cvLanguage}
                     />
                 );
 
             case 'template':
                 return (
                     <div>
-                        <h3 className="text-lg font-semibold mb-4 text-gray-800">Şablon Seçimi</h3>
+                        <h3 className="text-lg font-semibold mb-4 text-gray-800">
+                            {cv.cvLanguage === 'english' ? 'Template Selection' : 'Şablon Seçimi'}
+                        </h3>
                         <TemplateSelector
                             selectedTemplateId={cv.templateId}
                             onTemplateSelect={(templateId: string) => setCv(prev => ({ ...prev, templateId }))}
                             userTier={userTier || 'premium'}
+                            cvLanguage={cv.cvLanguage}
                         />
                     </div>
                 );
@@ -601,7 +642,9 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             default:
                 return (
                     <div className="text-center py-8">
-                        <p className="text-gray-500">Bölmə seçin</p>
+                        <p className="text-gray-500">
+                            {cv.cvLanguage === 'english' ? 'Select a section' : 'Bölmə seçin'}
+                        </p>
                     </div>
                 );
         }
@@ -623,7 +666,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                     type="text"
                                     value={cv.title}
                                     onChange={(e) => setCv(prev => ({ ...prev, title: e.target.value }))}
-                                    placeholder="CV başlığı"
+                                    placeholder={cv.cvLanguage === 'english' ? 'CV Title' : 'CV başlığı'}
                                     className="text-base sm:text-lg font-bold text-gray-800 bg-transparent border-none p-0 focus:ring-0 w-28 sm:w-48 md:w-auto truncate"
                                 />
                             </div>
@@ -637,24 +680,24 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                         setShowTranslationPanel(true);
                                     }}
                                     className="ml-3 flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-lg transition-all duration-200 border border-white/20"
-                                    title="AI ilə tərcümə et"
+                                    title={cv.cvLanguage === 'english' ? 'Translate with AI' : 'AI ilə tərcümə et'}
                                 >
                                     <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
                                     </svg>
-                                    AI Tərcümə
+                                    {cv.cvLanguage === 'english' ? 'AI Translate' : 'AI Tərcümə'}
                                 </button>
 
                                 {/* Simple Font Button */}
                                 <button
                                     onClick={() => setShowFontPanel(true)}
                                     className="ml-2 flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 rounded-lg transition-all duration-200 border border-white/20"
-                                    title="Font tənzimləmələri"
+                                    title={cv.cvLanguage === 'english' ? 'Font settings' : 'Font tənzimləmələri'}
                                 >
                                     <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.5 12.75l6 6 9-13.5" />
                                     </svg>
-                                    Font İdarə
+                                    {cv.cvLanguage === 'english' ? 'Font Manager' : 'Font İdarə'}
                                 </button>
                             </div>
                         </div>
@@ -665,12 +708,12 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             <div className="hidden md:flex items-center space-x-3">
                                 {saving && (
                                     <span className="text-xs text-blue-600 animate-pulse">
-                                        Yadda saxlanılır...
+                                        {cv.cvLanguage === 'english' ? 'Saving...' : 'Yadda saxlanılır...'}
                                     </span>
                                 )}
                                 {success && (
                                     <span className="text-xs text-green-600">
-                                        ✓ Yadda saxlanıldı
+                                        ✓ {cv.cvLanguage === 'english' ? 'Saved' : 'Yadda saxlanıldı'}
                                     </span>
                                 )}
                             </div>
@@ -680,20 +723,24 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                 <button
                                     onClick={() => window.open(`/cv/export/${cv.id}`, '_blank')}
                                     className="flex items-center justify-center h-10 w-10 sm:h-auto sm:w-auto sm:px-3 sm:py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-transparent rounded-lg hover:bg-gray-200 transition-colors"
-                                    aria-label="Export CV"
+                                    aria-label={cv.cvLanguage === 'english' ? 'Export CV' : 'CV-ni yüklə'}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-                                    <span className="hidden sm:inline ml-2">Yükləyin</span>
+                                    <span className="hidden sm:inline ml-2">
+                                        {cv.cvLanguage === 'english' ? 'Export' : 'Yükləyin'}
+                                    </span>
                                 </button>
                             )}
                             
                             <button
                                 onClick={onCancel}
                                 className="flex items-center justify-center h-10 w-10 sm:h-auto sm:w-auto sm:px-3 sm:py-2 text-sm font-medium text-gray-700 bg-transparent border border-transparent rounded-lg hover:bg-gray-100 transition-colors"
-                                aria-label="Geri qayıdın"
+                                aria-label={cv.cvLanguage === 'english' ? 'Go Back' : 'Geri qayıdın'}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
-                                <span className="hidden sm:inline ml-2">Geri qayıdın</span>
+                                <span className="hidden sm:inline ml-2">
+                                    {cv.cvLanguage === 'english' ? 'Go Back' : 'Geri qayıdın'}
+                                </span>
                             </button>
                             
                             <button
@@ -702,8 +749,12 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                 className="px-4 sm:px-6 py-2 sm:py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105"
                             >
                                 {saving ? '...' : <>
-                                    <span className="hidden sm:inline">Yadda Saxlayın</span>
-                                    <span className="sm:hidden">Saxla</span>
+                                    <span className="hidden sm:inline">
+                                        {cv.cvLanguage === 'english' ? 'Save' : 'Yadda Saxlayın'}
+                                    </span>
+                                    <span className="sm:hidden">
+                                        {cv.cvLanguage === 'english' ? 'Save' : 'Saxla'}
+                                    </span>
                                 </>}
                             </button>
                         </div>
@@ -719,24 +770,24 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                     setShowTranslationPanel(true);
                                 }}
                                 className="flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-lg transition-all duration-200 shadow-md"
-                                title="AI ilə tərcümə et"
+                                title={cv.cvLanguage === 'english' ? 'Translate with AI' : 'AI ilə tərcümə et'}
                             >
                                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
                                 </svg>
-                                AI Tərcümə
+                                {cv.cvLanguage === 'english' ? 'AI Translate' : 'AI Tərcümə'}
                             </button>
 
                             {/* Font Manager Button */}
                             <button
                                 onClick={() => setShowFontPanel(true)}
                                 className="flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 rounded-lg transition-all duration-200 shadow-md"
-                                title="Font tənzimləmələri"
+                                title={cv.cvLanguage === 'english' ? 'Font settings' : 'Font tənzimləmələri'}
                             >
                                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
                                 </svg>
-                                Font İdarə
+                                {cv.cvLanguage === 'english' ? 'Font Manager' : 'Font İdarə'}
                             </button>
 
                             {/* Mobile Status Indicator */}
@@ -744,7 +795,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                 {saving && (
                                     <div className="flex items-center text-xs text-blue-600">
                                         <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600 mr-1"></div>
-                                        Saxlanır...
+                                        {cv.cvLanguage === 'english' ? 'Saving...' : 'Saxlanır...'}
                                     </div>
                                 )}
                                 {success && (
@@ -752,7 +803,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                         </svg>
-                                        Saxlanıldı
+                                        {cv.cvLanguage === 'english' ? 'Saved' : 'Saxlanıldı'}
                                     </span>
                                 )}
                             </div>
@@ -770,7 +821,9 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                         {/* Section Navigation */}
                         <div className="mb-8">
                             <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                                <h3 className="text-sm font-semibold text-gray-800 mb-4 px-2">CV Bölmələri</h3>
+                                <h3 className="text-sm font-semibold text-gray-800 mb-4 px-2">
+                                    {cv.cvLanguage === 'english' ? 'CV Sections' : 'CV Bölmələri'}
+                                </h3>
                                 
                                 {/* Scrollable Main Sections */}
                                 <div className="space-y-1 max-h-[250px] overflow-y-auto pr-2">
@@ -871,7 +924,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                         <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                                         <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
                                     </svg>
-                                    <span>Önizləmə</span>
+                                    <span>{cv.cvLanguage === 'english' ? 'Preview' : 'Önizləmə'}</span>
                                 </h3>
                                 <div className="flex items-center space-x-3">
                                     <span className="text-xs font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
@@ -928,7 +981,9 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 <div className="bg-white rounded-lg shadow-xl w-full max-w-full sm:max-w-2xl lg:max-w-4xl xl:max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
                     <div className="p-3 sm:p-4 lg:p-6">
                         <div className="flex justify-between items-center mb-3 sm:mb-4">
-                            <h2 className="text-lg sm:text-xl font-bold text-gray-900">AI Tərcümə Paneli</h2>
+                            <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+                                {cv.cvLanguage === 'english' ? 'AI Translation Panel' : 'AI Tərcümə Paneli'}
+                            </h2>
                               <button
               onClick={() => setShowTranslationPanel(false)}
               className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors duration-200 group"
@@ -1011,7 +1066,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                 <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
                                 </svg>
-                                Font Idarə
+                                {cv.cvLanguage === 'english' ? 'Font Manager' : 'Font İdarə'}
                             </h2>
                             <button
                                 onClick={() => setShowFontPanel(false)}
@@ -1019,7 +1074,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                          bg-white hover:bg-gray-100 rounded-full shadow-sm border border-gray-200
                                          text-gray-500 hover:text-gray-700 transition-all duration-200
                                          hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                aria-label="Bağla"
+                                aria-label={cv.cvLanguage === 'english' ? 'Close' : 'Bağla'}
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
@@ -1048,7 +1103,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                         {/* Font Family */}
                         <div>
                             <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
-                                Font Ailəsi
+                                {cv.cvLanguage === 'english' ? 'Font Family' : 'Font Ailəsi'}
                             </label>
                             <select
                                 value={fontSettings.fontFamily}
@@ -1065,7 +1120,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Heading Size */}
                             <div>
                                 <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-1.5 text-center">
-                                    Başlıq Ölçüsü
+                                    {cv.cvLanguage === 'english' ? 'Heading Size' : 'Başlıq Ölçüsü'}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1091,7 +1146,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Subheading Size */}
                             <div>
                                 <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-1.5 text-center">
-                                    Alt Başlıq Ölçüsü
+                                    {cv.cvLanguage === 'english' ? 'Subheading Size' : 'Alt Başlıq Ölçüsü'}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1117,7 +1172,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Body Size */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
-                                    Əsas Mətn Ölçüsü
+                                    {cv.cvLanguage === 'english' ? 'Body Text Size' : 'Əsas Mətn Ölçüsü'}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1143,7 +1198,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Small Size */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
-                                    Kiçik Mətn Ölçüsü
+                                    {cv.cvLanguage === 'english' ? 'Small Text Size' : 'Kiçik Mətn Ölçüsü'}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1169,7 +1224,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Heading Weight */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
-                                    Başlıq Qalınlığı
+                                    {cv.cvLanguage === 'english' ? 'Heading Weight' : 'Başlıq Qalınlığı'}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1195,7 +1250,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Subheading Weight */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
-                                    Alt Başlıq Qalınlığı
+                                    {cv.cvLanguage === 'english' ? 'Subheading Weight' : 'Alt Başlıq Qalınlığı'}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1218,36 +1273,10 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                 </div>
                             </div>
 
-                            {/* Body Weight */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
-                                    Əsas Mətn Qalınlığı
-                                </label>
-                                <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
-                                    <button
-                                        onClick={() => setFontSettings(prev => ({ ...prev, bodyWeight: Math.max(300, prev.bodyWeight - 100) }))}
-                                        disabled={fontSettings.bodyWeight <= 300}
-                                        className="w-8 h-8 sm:w-9 sm:h-9 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center hover:bg-indigo-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base font-semibold"
-                                    >
-                                        -
-                                    </button>
-                                    <div className="flex-1 text-center min-w-12 sm:min-w-14">
-                                        <span className="text-sm sm:text-base font-medium text-gray-700">{fontSettings.bodyWeight}</span>
-                                    </div>
-                                    <button
-                                        onClick={() => setFontSettings(prev => ({ ...prev, bodyWeight: Math.min(600, prev.bodyWeight + 100) }))}
-                                        disabled={fontSettings.bodyWeight >= 600}
-                                        className="w-8 h-8 sm:w-9 sm:h-9 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center hover:bg-indigo-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base font-semibold"
-                                    >
-                                        +
-                                    </button>
-                                </div>
-                            </div>
-
                             {/* Small Weight */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
-                                    Kiçik Mətn Qalınlığı
+                                    {cv.cvLanguage === 'english' ? 'Small Text Weight' : 'Kiçik Mətn Qalınlığı'}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1273,7 +1302,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Section Spacing Control */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
-                                    Bölmələr Arası Məsafə
+                                    {cv.cvLanguage === 'english' ? 'Section Spacing' : 'Bölmələr Arası Məsafə'}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1326,7 +1355,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                                      transition-all duration-200 shadow-sm"
                         >
-                            Sıfırla
+                            {cv.cvLanguage === 'english' ? 'Reset' : 'Sıfırla'}
                         </button>
                         <button
                             onClick={() => setShowFontPanel(false)}
@@ -1336,7 +1365,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
                                      transition-all duration-200 shadow-lg"
                         >
-                            Tətbiq Et
+                            {cv.cvLanguage === 'english' ? 'Apply' : 'Tətbiq Et'}
                         </button>
                     </div>
                 </div>

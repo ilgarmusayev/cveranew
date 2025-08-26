@@ -17,9 +17,10 @@ interface TemplateSelectorProps {
   selectedTemplateId: string;
   onTemplateSelect: (templateId: string) => void;
   userTier?: string;
+  cvLanguage?: 'english' | 'azerbaijani';
 }
 
-export default function TemplateSelector({ selectedTemplateId, onTemplateSelect, userTier = 'Free' }: TemplateSelectorProps) {
+export default function TemplateSelector({ selectedTemplateId, onTemplateSelect, userTier = 'Free', cvLanguage = 'azerbaijani' }: TemplateSelectorProps) {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -114,9 +115,11 @@ export default function TemplateSelector({ selectedTemplateId, onTemplateSelect,
     <>
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
         <div className="p-4 border-b border-gray-200">
-          <h3 className="font-semibold text-gray-900">Şablon Seç</h3>
+          <h3 className="font-semibold text-gray-900">
+            {cvLanguage === 'english' ? 'Select Template' : 'Şablon Seç'}
+          </h3>
           <p className="text-sm text-gray-600 mt-1">
-            CV-niz üçün uyğun şablonu seçin
+            {cvLanguage === 'english' ? 'Choose a suitable template for your CV' : 'CV-niz üçün uyğun şablonu seçin'}
           </p>
         </div>
 
@@ -153,10 +156,14 @@ export default function TemplateSelector({ selectedTemplateId, onTemplateSelect,
                       {tierLabels[template.tier]}
                     </span>
                     {!template.hasAccess && (
-                      <span className="text-red-600 text-xs">🔒 Kiliddə</span>
+                      <span className="text-red-600 text-xs">
+                        🔒 {cvLanguage === 'english' ? 'Locked' : 'Kiliddə'}
+                      </span>
                     )}
                     {selectedTemplateId === template.id && template.hasAccess && (
-                      <span className="text-blue-600 text-sm">✓ Seçildi</span>
+                      <span className="text-blue-600 text-sm">
+                        ✓ {cvLanguage === 'english' ? 'Selected' : 'Seçildi'}
+                      </span>
                     )}
                   </div>
                 </div>
@@ -167,7 +174,7 @@ export default function TemplateSelector({ selectedTemplateId, onTemplateSelect,
                     onClick={(e) => handlePreviewClick(template, e)}
                     className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border transition-colors"
                   >
-                    👁️ Önizləmə
+                    👁️ {cvLanguage === 'english' ? 'Preview' : 'Önizləmə'}
                   </button>
                   
                   {template.preview_url && (
@@ -193,7 +200,7 @@ export default function TemplateSelector({ selectedTemplateId, onTemplateSelect,
 
         {(!Array.isArray(templates) || templates.length === 0) && !loading && (
           <div className="p-4 text-center text-gray-500">
-            <p>Şablon tapılmadı</p>
+            <p>{cvLanguage === 'english' ? 'No templates found' : 'Şablon tapılmadı'}</p>
           </div>
         )}
 
@@ -201,15 +208,15 @@ export default function TemplateSelector({ selectedTemplateId, onTemplateSelect,
           <div className="text-xs text-gray-600 space-y-1">
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 bg-green-100 border border-green-200 rounded"></span>
-              <span>Pulsuz - Əsas şablonlar</span>
+              <span>{cvLanguage === 'english' ? 'Free - Basic templates' : 'Pulsuz - Əsas şablonlar'}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 bg-blue-100 border border-blue-200 rounded"></span>
-              <span>Orta - Daha çox xüsusiyyətlər</span>
+              <span>{cvLanguage === 'english' ? 'Medium - More features' : 'Orta - Daha çox xüsusiyyətlər'}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 bg-purple-100 border border-purple-200 rounded"></span>
-              <span>Premium - Ən yaxşı şablonlar</span>
+              <span>{cvLanguage === 'english' ? 'Premium - Best templates' : 'Premium - Ən yaxşı şablonlar'}</span>
             </div>
           </div>
         </div>
@@ -227,7 +234,9 @@ export default function TemplateSelector({ selectedTemplateId, onTemplateSelect,
                     {tierLabels[previewTemplate.tier]}
                   </span>
                   {!previewTemplate.hasAccess && (
-                    <span className="text-red-600 text-xs">🔒 Kiliddə</span>
+                    <span className="text-red-600 text-xs">
+                      🔒 {cvLanguage === 'english' ? 'Locked' : 'Kiliddə'}
+                    </span>
                   )}
                 </div>
               </div>

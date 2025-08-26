@@ -29,11 +29,12 @@ interface PersonalInfoSectionProps {
   data: PersonalInfo;
   onChange: (data: PersonalInfo) => void;
   userTier?: string; // User tier for premium features
-  cvData?: any; // Full CV data for AI summary
+  cvData?: any; // Full CV data for AI context
   cvId?: string; // Add CV ID for AI summary generation
+  cvLanguage?: 'english' | 'azerbaijani'; // Add CV language prop
 }
 
-export default function PersonalInfoSection({ data, onChange, userTier = 'Free', cvData, cvId }: PersonalInfoSectionProps) {
+export default function PersonalInfoSection({ data, onChange, userTier = 'Free', cvData, cvId, cvLanguage = 'azerbaijani' }: PersonalInfoSectionProps) {
   const [imageUploading, setImageUploading] = useState(false);
   const [aiGenerating, setAiGenerating] = useState(false);
   const isPremium = userTier?.toLowerCase() === 'premium';
@@ -97,9 +98,9 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
         emailInput.oninvalid = function(e) {
           const target = e.target as HTMLInputElement;
           if (target.validity.valueMissing) {
-            target.setCustomValidity('Zəhmət olmasa bu sahəni doldurun');
+            target.setCustomValidity(cvLanguage === 'english' ? 'Please fill out this field' : 'Zəhmət olmasa bu sahəni doldurun');
           } else if (target.validity.typeMismatch) {
-            target.setCustomValidity('Zəhmət olmasa düzgün email ünvanı daxil edin');
+            target.setCustomValidity(cvLanguage === 'english' ? 'Please enter a valid email address' : 'Zəhmət olmasa düzgün email ünvanı daxil edin');
           }
         };
         emailInput.oninput = function(e) {
@@ -283,7 +284,9 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Şəxsi məlumatlar</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            {cvLanguage === 'english' ? 'Personal Information' : 'Şəxsi məlumatlar'}
+          </h3>
         </div>
       </div>
 
@@ -291,7 +294,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
         {isPremium && (
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Profil Şəkli <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full">Premium</span>
+              {cvLanguage === 'english' ? 'Profile Image' : 'Profil Şəkli'} <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full">Premium</span>
             </label>
             {data.profileImage ? (
               <div className="flex items-center space-x-4">
@@ -301,20 +304,24 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
                   className="w-24 h-24 rounded-full object-cover border-4 border-gray-300 shadow-md"
                 />
                 <div className="flex flex-col space-y-2">
-                  <p className="text-sm text-gray-600">Profil şəkli yükləndi</p>
+                  <p className="text-sm text-gray-600">
+                    {cvLanguage === 'english' ? 'Profile image uploaded' : 'Profil şəkli yükləndi'}
+                  </p>
                   <button
                     type="button"
                     onClick={removeImage}
                     className="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                   >
-                    Şəkli sil
+                    {cvLanguage === 'english' ? 'Remove Image' : 'Şəkli sil'}
                   </button>
                 </div>
               </div>
             ) : (
               <div className="flex items-center space-x-4">
                 <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300">
-                  <span className="text-gray-400 text-xs text-center">Şəkil<br/>yox</span>
+                  <span className="text-gray-400 text-xs text-center">
+                    {cvLanguage === 'english' ? 'No\nImage' : 'Şəkil\nyox'}
+                  </span>
                 </div>
                 <div className="flex-1">
                   <div className="relative">
@@ -334,17 +341,25 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
                           : 'bg-white text-gray-700 hover:bg-gray-50 hover:border-blue-300'
                       }`}
                     >
-                      {imageUploading ? 'Yüklənir...' : 'Şəkil seçin'}
+                      {imageUploading 
+                        ? (cvLanguage === 'english' ? 'Uploading...' : 'Yüklənir...') 
+                        : (cvLanguage === 'english' ? 'Choose Image' : 'Şəkil seçin')
+                      }
                     </label>
                   </div>
                   {imageUploading && (
                     <div className="mt-2 flex items-center space-x-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-                      <span className="text-sm text-gray-500">Yüklənir...</span>
+                      <span className="text-sm text-gray-500">
+                        {cvLanguage === 'english' ? 'Uploading...' : 'Yüklənir...'}
+                      </span>
                     </div>
                   )}
                   <p className="text-xs text-gray-500 mt-1">
-                    JPG, PNG formatında, maksimum 2MB
+                    {cvLanguage === 'english' 
+                      ? 'JPG, PNG format, maximum 2MB' 
+                      : 'JPG, PNG formatında, maksimum 2MB'
+                    }
                   </p>
                 </div>
               </div>
@@ -354,7 +369,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Ad <span className="text-red-500">*</span>
+            {cvLanguage === 'english' ? 'First Name' : 'Ad'} <span className="text-red-500">*</span>
           </label>
           <input
             id="first_name"
@@ -362,10 +377,10 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
             value={safeData.firstName}
             onChange={(e) => handleChange('firstName', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder="Adınız"
+            placeholder={cvLanguage === 'english' ? 'Your Name' : 'Adınız'}
             required
             onInvalid={(e) => {
-              (e.target as HTMLInputElement).setCustomValidity('Ad sahəsi məcburidir');
+              (e.target as HTMLInputElement).setCustomValidity(cvLanguage === 'english' ? 'Name field is required' : 'Ad sahəsi məcburidir');
             }}
             onInput={(e) => {
               (e.target as HTMLInputElement).setCustomValidity('');
@@ -375,7 +390,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Soyad <span className="text-red-500">*</span>
+            {cvLanguage === 'english' ? 'Last Name' : 'Soyad'} <span className="text-red-500">*</span>
           </label>
           <input
             id="last_name"
@@ -383,10 +398,10 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
             value={safeData.lastName}
             onChange={(e) => handleChange('lastName', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder="Soyadınız"
+            placeholder={cvLanguage === 'english' ? 'Your Surname' : 'Soyadınız'}
             required
             onInvalid={(e) => {
-              (e.target as HTMLInputElement).setCustomValidity('Soyad sahəsi məcburidir');
+              (e.target as HTMLInputElement).setCustomValidity(cvLanguage === 'english' ? 'Surname field is required' : 'Soyad sahəsi məcburidir');
             }}
             onInput={(e) => {
               (e.target as HTMLInputElement).setCustomValidity('');
@@ -398,7 +413,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {getLabel('email', 'azerbaijani')} <span className="text-gray-400 text-xs">({getLabel('optional', 'azerbaijani')})</span>
+            {cvLanguage === 'english' ? 'Email' : 'E-poçt'} <span className="text-gray-400 text-xs">({cvLanguage === 'english' ? 'optional' : 'ixtiyari'})</span>
           </label>
           <input
             id="email"
@@ -412,20 +427,20 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {getLabel('phone', 'azerbaijani')} <span className="text-gray-400 text-xs">({getLabel('optional', 'azerbaijani')})</span>
+            {cvLanguage === 'english' ? 'Phone' : 'Telefon'} <span className="text-gray-400 text-xs">({cvLanguage === 'english' ? 'optional' : 'ixtiyari'})</span>
           </label>
           <input
             type="tel"
             value={safeData.phone}
             onChange={(e) => handleChange('phone', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder="+994 XX XXX XX XX"
+            placeholder={cvLanguage === 'english' ? '+1 XXX XXX XXXX' : '+994 XX XXX XX XX'}
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {getLabel('website', 'azerbaijani')}
+            {cvLanguage === 'english' ? 'Website' : 'Veb sayt'}
           </label>
           <input
             type="url"
@@ -438,7 +453,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {getLabel('linkedin', 'azerbaijani')}
+            {cvLanguage === 'english' ? 'LinkedIn' : 'LinkedIn'}
           </label>
           <input
             type="url"
@@ -451,14 +466,14 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Yer (Ölkə, şəhər) <span className="text-gray-400 text-xs">(ixtiyari)</span>
+            {cvLanguage === 'english' ? 'Location (Country, city)' : 'Yer (Ölkə, şəhər)'} <span className="text-gray-400 text-xs">{cvLanguage === 'english' ? '(optional)' : '(ixtiyari)'}</span>
           </label>
           <input
             type="text"
             value={safeData.location || ''}
             onChange={(e) => handleChange('location', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder="Azərbaycan, Bakı"
+            placeholder={cvLanguage === 'english' ? 'United States, New York' : 'Azərbaycan, Bakı'}
           />
         </div>
       </div>
@@ -466,7 +481,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="block text-sm font-medium text-gray-700">
-            Peşəkar Xülasə
+            {cvLanguage === 'english' ? 'Professional Summary' : 'Peşəkar Xülasə'}
           </label>
           <button
             type="button"
@@ -479,17 +494,20 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
                   : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600'
                 : 'bg-gray-200 text-gray-500 cursor-not-allowed'
             }`}
-            title={canUseAI ? 'AI ilə avtomatik peşəkar xülasə yaradın' : 'AI funksiyalar Premium/Medium üçün mövcuddur'}
+            title={canUseAI 
+              ? (cvLanguage === 'english' ? 'Generate automatic professional summary with AI' : 'AI ilə avtomatik peşəkar xülasə yaradın')
+              : (cvLanguage === 'english' ? 'AI features available for Premium/Medium' : 'AI funksiyalar Premium/Medium üçün mövcuddur')
+            }
           >
             {aiGenerating ? (
               <div className="flex items-center space-x-1">
                 <div className="animate-spin rounded-full h-3 w-3 border-b border-white"></div>
-                <span>AI yaradır...</span>
+                <span>{cvLanguage === 'english' ? 'AI generating...' : 'AI yaradır...'}</span>
               </div>
             ) : (
               <div className="flex items-center space-x-1">
                 <span>🤖</span>
-                <span>AI Xülasə</span>
+                <span>{cvLanguage === 'english' ? 'AI Summary' : 'AI Xülasə'}</span>
                 {!canUseAI && <span className="ml-1">🔒</span>}
               </div>
             )}
@@ -501,10 +519,18 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
             <div className="flex items-center space-x-2">
               <span className="text-purple-600">🤖</span>
               <div>
-                <p className="text-sm font-medium text-purple-800">AI Peşəkar Xülasə</p>
+                <p className="text-sm font-medium text-purple-800">
+                  {cvLanguage === 'english' ? 'AI Professional Summary' : 'AI Peşəkar Xülasə'}
+                </p>
                 <p className="text-xs text-purple-600">
-                  LinkedIn məlumatlarınızdan avtomatik Peşəkar Xülasə yaradın!
-                  <span className="font-semibold"> Premium və Medium </span> istifadəçilər üçün mövcuddur.
+                  {cvLanguage === 'english' 
+                    ? 'Generate automatic Professional Summary from your LinkedIn data! Available for '
+                    : 'LinkedIn məlumatlarınızdan avtomatik Peşəkar Xülasə yaradın! '
+                  }
+                  <span className="font-semibold">
+                    {cvLanguage === 'english' ? 'Premium and Medium' : 'Premium və Medium'}
+                  </span>
+                  {cvLanguage === 'english' ? ' users.' : ' istifadəçilər üçün mövcuddur.'}
                 </p>
               </div>
             </div>
@@ -625,8 +651,14 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
             }
           }}
           data-placeholder={canUseAI
-            ? "Peşəkar təcrübənizi yazın və ya yuxarıdakı AI butonundan avtomatik yaradın..."
-            : "Peşəkar təcrübənizi və məqsədlərinizi qısaca təsvir edin..."
+            ? (cvLanguage === 'english' 
+              ? "Write your professional experience or generate automatically with the AI button above..."
+              : "Peşəkar təcrübənizi yazın və ya yuxarıdakı AI butonundan avtomatik yaradın..."
+            )
+            : (cvLanguage === 'english'
+              ? "Briefly describe your professional experience and goals..."
+              : "Peşəkar təcrübənizi və məqsədlərinizi qısaca təsvir edin..."
+            )
           }
         />
 

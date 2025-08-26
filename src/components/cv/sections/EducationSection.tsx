@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { getLabel, CVLanguage } from '@/lib/cvLanguage';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 
 interface Education {
@@ -19,7 +18,7 @@ interface Education {
 interface EducationSectionProps {
   data: Education[];
   onChange: (data: Education[]) => void;
-  cvLanguage?: CVLanguage; // Add CV language prop
+  cvLanguage?: 'english' | 'azerbaijani'; // Updated CV language prop
 }
 
 export default function EducationSection({ data, onChange, cvLanguage = 'azerbaijani' }: EducationSectionProps) {
@@ -69,13 +68,20 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Təhsil</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            {cvLanguage === 'english' ? 'Education' : 'Təhsil'}
+          </h3>
         </div>
         <button
           onClick={addEducation}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
         >
-          + Əlavə edin
+          <span className="hidden sm:inline">
+            {cvLanguage === 'english' ? '+ Add' : '+ Əlavə edin'}
+          </span>
+          <span className="sm:hidden">
+            {cvLanguage === 'english' ? '+' : '+'}
+          </span>
         </button>
       </div>
 
@@ -87,12 +93,20 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
             </svg>
           </div>
-          <p className="text-gray-500 mb-4">Hələ heç bir təhsil məlumatı əlavə etməmisiniz</p>
+          <p className="text-gray-500 mb-4">
+            {cvLanguage === 'english' 
+              ? 'No education information added yet' 
+              : 'Hələ heç bir təhsil məlumatı əlavə etməmisiniz'
+            }
+          </p>
           <button
             onClick={addEducation}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            İlk təhsilinizi əlavə edin
+            {cvLanguage === 'english' 
+              ? 'Add your first education' 
+              : 'İlk təhsilinizi əlavə edin'
+            }
           </button>
         </div>
       ) : (
@@ -103,11 +117,11 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-blue-500">🎓</span>
                   <h4 className="font-medium text-gray-900">
-                    {education.degree ? education.degree : (education.institution || 'Yeni təhsil')}
+                    {education.degree || (cvLanguage === 'english' ? 'New education' : 'Yeni təhsil')}
                   </h4>
                 </div>
                 <p className="text-sm text-gray-600">
-                  {education.institution || 'Təhsil müəssisəsi'}
+                  {education.institution || (cvLanguage === 'english' ? 'Educational institution' : 'Təhsil müəssisəsi')}
                 </p>
                 {(education.field || education.gpa) && (
                   <p className="text-xs text-gray-500 mt-1">
@@ -128,7 +142,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                     }`}
-                    title="Yuxarı"
+                    title={cvLanguage === 'english' ? 'Move up' : 'Yuxarı'}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -142,7 +156,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                     }`}
-                    title="Aşağı"
+                    title={cvLanguage === 'english' ? 'Move down' : 'Aşağı'}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -156,13 +170,16 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                     onClick={() => setExpandedId(expandedId === education.id ? null : education.id)}
                     className="text-blue-600 hover:text-blue-800 transition-colors text-sm cursor-pointer"
                   >
-                    {expandedId === education.id ? 'Bağlayın' : 'Redaktə edin'}
+                    {expandedId === education.id 
+                      ? (cvLanguage === 'english' ? 'Close' : 'Bağlayın')
+                      : (cvLanguage === 'english' ? 'Edit' : 'Redaktə edin')
+                    }
                   </button>
                   <button
                     onClick={() => removeEducation(education.id)}
                     className="text-red-600 hover:text-red-800 transition-colors text-sm cursor-pointer"
                   >
-                    Silin
+                    {cvLanguage === 'english' ? 'Delete' : 'Silin'}
                   </button>
                 </div>
               </div>
@@ -172,14 +189,14 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Təhsil müəssisəsi <span className="text-red-500">*</span>
+                        {cvLanguage === 'english' ? 'Educational Institution' : 'Təhsil müəssisəsi'} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         value={education.institution || ''}
                         onChange={(e) => updateEducation(education.id, { institution: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        placeholder="Universitet adı"
+                        placeholder={cvLanguage === 'english' ? 'University name' : 'Universitet adı'}
                       />
                     </div>
 
@@ -190,7 +207,9 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                           </svg>
-                          <span>Dərəcə <span className="text-gray-400 text-xs">(ixtiyari)</span></span>
+                          <span>
+                            {cvLanguage === 'english' ? 'Degree' : 'Dərəcə'} <span className="text-gray-400 text-xs">({cvLanguage === 'english' ? 'optional' : 'ixtiyari'})</span>
+                          </span>
                         </span>
                       </label>
                       <select
@@ -204,13 +223,27 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                           backgroundSize: '1.5em 1.5em'
                         }}
                       >
-                        <option value="">🎓 Dərəcə seçin</option>
-                        <option value="Bakalavr">🎓 Bakalavr</option>
-                        <option value="Magistr">🎓 Magistr</option>
-                        <option value="Doktorantura">🎓 Doktorantura</option>
-                        <option value="Diploma">📜 Diploma</option>
-                        <option value="Sertifikat">📋 Sertifikat</option>
-                        <option value="Digər">📚 Digər</option>
+                        <option value="">
+                          {cvLanguage === 'english' ? '🎓 Select degree' : '🎓 Dərəcə seçin'}
+                        </option>
+                        <option value={cvLanguage === 'english' ? 'Bachelor' : 'Bakalavr'}>
+                          🎓 {cvLanguage === 'english' ? 'Bachelor' : 'Bakalavr'}
+                        </option>
+                        <option value={cvLanguage === 'english' ? 'Master' : 'Magistr'}>
+                          🎓 {cvLanguage === 'english' ? 'Master' : 'Magistr'}
+                        </option>
+                        <option value={cvLanguage === 'english' ? 'PhD' : 'Doktorantura'}>
+                          🎓 {cvLanguage === 'english' ? 'PhD' : 'Doktorantura'}
+                        </option>
+                        <option value={cvLanguage === 'english' ? 'Diploma' : 'Diploma'}>
+                          📜 {cvLanguage === 'english' ? 'Diploma' : 'Diploma'}
+                        </option>
+                        <option value={cvLanguage === 'english' ? 'Certificate' : 'Sertifikat'}>
+                          📋 {cvLanguage === 'english' ? 'Certificate' : 'Sertifikat'}
+                        </option>
+                        <option value={cvLanguage === 'english' ? 'Other' : 'Digər'}>
+                          📚 {cvLanguage === 'english' ? 'Other' : 'Digər'}
+                        </option>
                       </select>
                     </div>
                   </div>
@@ -218,14 +251,17 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Sahə <span className="text-gray-400 text-xs">(ixtiyari)</span>
+                        {cvLanguage === 'english' ? 'Field of Study' : 'Sahə'} <span className="text-gray-400 text-xs">({cvLanguage === 'english' ? 'optional' : 'ixtiyari'})</span>
                       </label>
                       <input
                         type="text"
                         value={education.field || ''}
                         onChange={(e) => updateEducation(education.id, { field: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        placeholder="Kompüter Elmi, Biznes İdarəetməsi, və s."
+                        placeholder={cvLanguage === 'english' 
+                          ? 'Computer Science, Business Administration, etc.'
+                          : 'Kompüter Elmi, Biznes İdarəetməsi, və s.'
+                        }
                       />
                     </div>
 
@@ -247,7 +283,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Başlama tarixi
+                        {cvLanguage === 'english' ? 'Start Date' : 'Başlama tarixi'}
                       </label>
                       <input
                         type="month"
@@ -258,7 +294,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Bitirmə tarixi
+                        {cvLanguage === 'english' ? 'End Date' : 'Bitirmə tarixi'}
                       </label>
                       <input
                         type="month"
@@ -282,19 +318,24 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                           }}
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />
-                        <span className="ml-2 text-sm text-gray-700">Davam edir</span>
+                        <span className="ml-2 text-sm text-gray-700">
+                          {cvLanguage === 'english' ? 'Currently studying' : 'Davam edir'}
+                        </span>
                       </label>
                     </div>
                   </div>
 
                <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Təsvir (ixtiyari)
+                      {cvLanguage === 'english' ? 'Description (optional)' : 'Təsvir (ixtiyari)'}
                     </label>
                     <RichTextEditor
                       value={education.description ?? ''}
                       onChange={(value) => updateEducation(education.id, { description: value })}
-                      placeholder="Təhsiliniz haqqında məlumat verin..."
+                      placeholder={cvLanguage === 'english' 
+                        ? 'Provide information about your education...'
+                        : 'Təhsiliniz haqqında məlumat verin...'
+                      }
                       minHeight="120px"
                     />
                   </div>
@@ -311,7 +352,10 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
             onClick={addEducation}
             className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
           >
-            + Başqa təhsil əlavə edin
+            {cvLanguage === 'english' 
+              ? '+ Add another education' 
+              : '+ Başqa təhsil əlavə edin'
+            }
           </button>
         </div>
       )}

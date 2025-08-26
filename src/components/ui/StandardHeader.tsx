@@ -130,6 +130,21 @@ export default function StandardHeader() {
     }
   }, [isProfileMenuOpen]);
 
+  // Close mobile menu with ESC key
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsMobileMenuOpen(false);
+        setIsProfileMenuOpen(false);
+      }
+    };
+
+    if (isMobileMenuOpen || isProfileMenuOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isMobileMenuOpen, isProfileMenuOpen]);
+
   // Function to get display name for tier
   const getTierDisplayName = (tier: string) => {
     const tierNames: { [key: string]: string } = {
@@ -365,7 +380,7 @@ export default function StandardHeader() {
 
         {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden absolute left-0 right-0 top-full bg-gradient-to-r from-blue-600 to-blue-700 border-t border-blue-500/50 shadow-xl z-50">
+          <div className="md:hidden w-full bg-gradient-to-r from-blue-600 to-blue-700 border-t border-blue-500/50 shadow-xl">
             <div className="px-4 py-4 space-y-3">
               {/* Mobile Navigation Links */}
               <Link
