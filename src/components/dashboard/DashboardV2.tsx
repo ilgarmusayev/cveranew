@@ -421,18 +421,19 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
           </div>
         </div>
 
-        {/* Existing CVs Section */}
+        {/* Existing CVs Section - Fully Responsive */}
         {cvs.length > 0 && (
           <div>
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold text-gray-900">Mövcud CV-lər</h2>
-              <div className="flex items-center space-x-4">
+            {/* Section Header - Responsive Stack */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Mövcud CV-lər</h2>
+              <div className="flex flex-col xs:flex-row items-start xs:items-center gap-3 xs:gap-4">
                 <div className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
                   {cvs.length} CV
                 </div>
                 <Link
                   href="/cv-list"
-                  className="text-blue-600 font-medium text-sm flex items-center"
+                  className="text-blue-600 font-medium text-sm flex items-center hover:text-blue-700 transition-colors"
                 >
                   Hamısını gör
                   <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -442,27 +443,28 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* CV Grid - Enhanced Responsive Layout */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
               {cvs.slice(0, 3).map((cv) => (
                 <div
                   key={cv.id}
-                  className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 cursor-pointer hover:shadow-xl transition-all duration-300 group"
+                  className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 border border-gray-200 cursor-pointer hover:shadow-xl transition-all duration-300 group"
                   onClick={() => onEditCV(cv.id)}
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1 min-w-0 pr-4">
-                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors truncate max-w-full overflow-hidden whitespace-nowrap">
+                  <div className="flex items-start justify-between mb-3 sm:mb-4">
+                    <div className="flex-1 min-w-0 pr-3 sm:pr-4">
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors truncate">
                         {cv.title}
                       </h3>
-                      <div className="mt-2 space-y-1 text-sm text-gray-600">
+                      <div className="mt-2 space-y-1 text-xs sm:text-sm text-gray-600">
                         <p className="flex items-center">
-                          <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-4 8v2m0-2v2m0-2h8a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h8z" />
                           </svg>
                           <span className="truncate">{new Date(cv.createdAt).toLocaleDateString('az-AZ')}</span>
                         </p>
                         <p className="flex items-center">
-                          <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                           </svg>
                           <span className="truncate">{new Date(cv.updatedAt).toLocaleDateString('az-AZ')}</span>
@@ -470,30 +472,31 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
                       </div>
                     </div>
                     <div className="flex-shrink-0">
-                      <svg className="w-6 h-6 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                  <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-gray-200">
                     <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">CV</span>
                     <span className="text-xs text-blue-600 font-medium group-hover:text-blue-700 transition-colors">
-                      Redaktə et →
+                      Redaktə edin →
                     </span>
                   </div>
                 </div>
               ))}
             </div>
 
+            {/* Show All Button - Responsive */}
             {cvs.length > 3 && (
-              <div className="mt-8 text-center">
+              <div className="mt-6 sm:mt-8 text-center">
                 <Link
                   href="/cv-list"
-                  className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-medium"
+                  className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg font-medium text-sm sm:text-base hover:bg-blue-700 transition-colors"
                 >
-                  Bütün CV-ləri gör ({cvs.length})
-                  <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  Bütün CV-lərə baxın ({cvs.length})
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </Link>
