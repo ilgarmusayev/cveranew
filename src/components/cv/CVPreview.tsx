@@ -327,15 +327,72 @@ const splitContentToPages = (sections: React.ReactNode[], pageHeightPx: number =
     return pages.length > 0 ? pages : [[<div key="empty">Məlumat yoxdur</div>]];
 };
 
-// Sortable Item Component for DND Kit
+// Responsive Item Component - DND for Desktop, Buttons for Mobile
 interface SortableItemProps {
     id: string;
     children: React.ReactNode;
-    showDragInstruction?: boolean; // New prop to control instruction visibility
-    dragIconPosition?: 'left' | 'right'; // New prop to control icon position
+    showDragInstruction?: boolean;
+    dragIconPosition?: 'left' | 'right';
+    sectionOrder: string[];
+    onSectionReorder: (newOrder: string[]) => void;
+    activeSection?: string | null;
+    onSetActiveSection?: (sectionId: string | null) => void;
 }
 
-const SortableItem: React.FC<SortableItemProps> = ({ id, children, showDragInstruction = true, dragIconPosition = 'left' }) => {
+const SortableItem: React.FC<SortableItemProps> = ({ 
+    id, 
+    children, 
+    showDragInstruction = true, 
+    dragIconPosition = 'left',
+    sectionOrder,
+    onSectionReorder,
+    activeSection,
+    onSetActiveSection
+}) => {
+    const [isMobile, setIsMobile] = useState(false);
+    const [isPressed, setIsPressed] = useState(false);
+    const [autoDeactivateTimer, setAutoDeactivateTimer] = useState<NodeJS.Timeout | null>(null);
+    const [isMoving, setIsMoving] = useState(false);
+    
+    // Check if this section is active
+    const isActive = activeSection === id;
+    
+    // Detect mobile on mount
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 1024); // lg breakpoint
+        };
+        
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    // Auto-deactivate section after 10 seconds of inactivity (mobile only)
+    useEffect(() => {
+        if (isMobile && isActive) {
+            // Clear existing timer
+            if (autoDeactivateTimer) {
+                clearTimeout(autoDeactivateTimer);
+            }
+            
+            // Set new timer
+            const timer = setTimeout(() => {
+                if (onSetActiveSection) {
+                    onSetActiveSection(null);
+                }
+            }, 10000); // 10 seconds
+            
+            setAutoDeactivateTimer(timer);
+            
+            return () => {
+                if (timer) {
+                    clearTimeout(timer);
+                }
+            };
+        }
+    }, [isActive, isMobile, onSetActiveSection, autoDeactivateTimer]);
+
     const {
         attributes,
         listeners,
@@ -350,77 +407,225 @@ const SortableItem: React.FC<SortableItemProps> = ({ id, children, showDragInstr
         transition,
         opacity: isDragging ? 0.9 : 1,
         zIndex: isDragging ? 9999 : 'auto',
-        touchAction: 'manipulation',
+        touchAction: isMobile ? 'auto' : 'manipulation',
         userSelect: 'none',
         WebkitUserSelect: 'none',
         WebkitTouchCallout: 'none',
+    };
+
+    // Handle mobile button actions with enhanced feedback
+    const moveUp = (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent section click
+        e.preventDefault();
+        
+        const currentIndex = sectionOrder.indexOf(id);
+        if (currentIndex > 0) {
+            setIsMoving(true);
+            
+            const newOrder = [...sectionOrder];
+            [newOrder[currentIndex], newOrder[currentIndex - 1]] = [newOrder[currentIndex - 1], newOrder[currentIndex]];
+            onSectionReorder(newOrder);
+            
+            // Provide haptic feedback if available
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+            
+            // Reset moving state after animation
+            setTimeout(() => setIsMoving(false), 300);
+        }
+    };
+
+    const moveDown = (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent section click
+        e.preventDefault();
+        
+        const currentIndex = sectionOrder.indexOf(id);
+        if (currentIndex < sectionOrder.length - 1) {
+            setIsMoving(true);
+            
+            const newOrder = [...sectionOrder];
+            [newOrder[currentIndex], newOrder[currentIndex + 1]] = [newOrder[currentIndex + 1], newOrder[currentIndex]];
+            onSectionReorder(newOrder);
+            
+            // Provide haptic feedback if available
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+            
+            // Reset moving state after animation
+            setTimeout(() => setIsMoving(false), 300);
+        }
+    };
+
+    const currentIndex = sectionOrder.indexOf(id);
+    const isFirst = currentIndex === 0;
+    const isLast = currentIndex === sectionOrder.length - 1;
+
+    // Handle section click to activate
+    const handleSectionClick = (e: React.MouseEvent) => {
+        if (isMobile && onSetActiveSection) {
+            e.preventDefault();
+            e.stopPropagation();
+            onSetActiveSection(isActive ? null : id);
+        }
+    };
+
+    // Handle touch events for better mobile experience
+    const handleTouchStart = (e: React.TouchEvent) => {
+        if (isMobile) {
+            setIsPressed(true);
+            // Prevent default scroll behavior when selecting sections
+            e.preventDefault();
+        }
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        if (isMobile) {
+            setIsPressed(false);
+            // Activate section on touch with better responsiveness
+            if (onSetActiveSection) {
+                e.preventDefault();
+                e.stopPropagation();
+                // Toggle active state
+                onSetActiveSection(isActive ? null : id);
+            }
+        }
+    };
+
+    // Prevent accidental activation during scrolling
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (isMobile && isPressed) {
+            // If user moves finger significantly, don't activate
+            setIsPressed(false);
+        }
     };
 
     return (
         <div
             ref={setNodeRef}
             style={style}
-            {...attributes}
-            {...listeners}
+            {...(isMobile ? {} : { ...attributes, ...listeners })}
+            onClick={handleSectionClick}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
             className={`
-                relative group cursor-grab active:cursor-grabbing
-                ${isDragging
+                relative group
+                ${isMobile ? 'cursor-pointer' : 'cursor-grab active:cursor-grabbing'}
+                ${isDragging && !isMobile
                     ? 'shadow-2xl border-2 border-blue-500 bg-blue-50 rounded-lg scale-105 rotate-1'
                     : 'hover:shadow-lg hover:border-2 hover:border-blue-300 hover:bg-blue-50/50 hover:scale-[1.02] hover:z-50'
                 }
+                ${isActive && isMobile ? 'border-2 border-blue-500 bg-blue-100/50 shadow-md' : ''}
+                ${isPressed && isMobile ? 'scale-95 bg-blue-200/30' : ''}
+                ${isMoving && isMobile ? 'animate-pulse bg-green-100/50 border-green-400' : ''}
                 transition-all duration-200 ease-in-out
                 border border-transparent rounded-md
                 before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-blue-100/20 before:to-transparent
                 before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300
-                touch-manipulation
+                ${isMobile ? 'touch-manipulation py-3' : 'touch-manipulation'}
                 select-none
+                ${isMobile ? 'min-h-[56px]' : ''}
             `}
-            title="Bütün hissəni sürükləyin"
+            title={isMobile ? "Hissəyə toxunun, düymələr görünsün" : "Bütün hissəni sürükləyin"}
         >
-            {/* Drag indicator icon - appears on hover and touch */}
-            <div
-                className={`absolute ${dragIconPosition === 'right' ? '-right-3' : '-left-3'} top-1/2 transform -translate-y-1/2
-                            opacity-0 group-hover:opacity-100 md:group-hover:opacity-100
-                            transition-all duration-200
-                            /* Mobile: Always show drag handle */
-                            md:opacity-0 opacity-60
-                            `}
-                style={{ userSelect: 'none', zIndex: 99999 }}
-            >
-                <div className="bg-blue-600 text-white rounded-full w-7 h-7 flex items-center justify-center shadow-xl hover:bg-blue-700 transition-colors border-2 border-white">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-                    </svg>
-                </div>
-            </div>
-
-            {/* Hover instruction - only show if showDragInstruction is true */}
-            {showDragInstruction && (
-                <div
-                    className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-blue-300 text-white px-3 py-1 rounded text-xs font-medium whitespace-nowrap shadow-lg"
-                    style={{ userSelect: 'none', zIndex: 99999 }}
-                >
-                    Sürükləyərək yerdəyişmə edin
-                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-blue-300 text-white"></div>
+            {/* Mobile Controls - Show only on mobile when section is active */}
+            {isMobile && isActive && (
+                <div className="absolute -left-3 top-1/2 transform -translate-y-1/2 flex flex-col gap-3 z-50 animate-in slide-in-from-left-2 duration-300">
+                    <button
+                        onClick={moveUp}
+                        disabled={isFirst}
+                        className={`
+                            w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-base shadow-2xl transition-all duration-200
+                            ${isFirst 
+                                ? 'bg-gray-400 cursor-not-allowed opacity-50' 
+                                : 'bg-blue-600 hover:bg-blue-700 active:scale-90 hover:shadow-2xl hover:scale-110 active:bg-blue-800'
+                            }
+                            border-3 border-white ring-2 ring-blue-200
+                        `}
+                        title="Yuxarı aparın"
+                        style={{ touchAction: 'manipulation' }}
+                    >
+                        ↑
+                    </button>
+                    <button
+                        onClick={moveDown}
+                        disabled={isLast}
+                        className={`
+                            w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-base shadow-2xl transition-all duration-200
+                            ${isLast 
+                                ? 'bg-gray-400 cursor-not-allowed opacity-50' 
+                                : 'bg-blue-600 hover:bg-blue-700 active:scale-90 hover:shadow-2xl hover:scale-110 active:bg-blue-800'
+                            }
+                            border-3 border-white ring-2 ring-blue-200
+                        `}
+                        title="Aşağı aparın"
+                        style={{ touchAction: 'manipulation' }}
+                    >
+                        ↓
+                    </button>
                 </div>
             )}
 
-            {/* Visual drag lines when dragging */}
-            {isDragging && (
+            {/* Desktop Drag Handle - Show only on desktop */}
+            {!isMobile && (
+                <div
+                    className={`absolute ${dragIconPosition === 'right' ? '-right-3' : '-left-3'} top-1/2 transform -translate-y-1/2
+                                opacity-0 group-hover:opacity-100 transition-all duration-200`}
+                    style={{ userSelect: 'none', zIndex: 99999 }}
+                >
+                    <div className="bg-blue-600 text-white rounded-full w-7 h-7 flex items-center justify-center shadow-xl hover:bg-blue-700 transition-colors border-2 border-white">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                        </svg>
+                    </div>
+                </div>
+            )}
+
+            {/* Desktop Hover instruction */}
+            {!isMobile && showDragInstruction && (
+                <div
+                    className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium whitespace-nowrap shadow-lg"
+                    style={{ userSelect: 'none', zIndex: 99999 }}
+                >
+                    Sürükləyərək yerdəyişmə edin
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-blue-600"></div>
+                </div>
+            )}
+
+            {/* Visual drag lines when dragging (desktop only) */}
+            {isDragging && !isMobile && (
                 <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 99998 }}>
                     <div className="absolute left-0 top-1/4 w-1 h-1/2 bg-blue-500 rounded-full animate-pulse"></div>
                     <div className="absolute right-0 top-1/4 w-1 h-1/2 bg-blue-500 rounded-full animate-pulse"></div>
                 </div>
             )}
 
-            {/* Content with padding for drag space */}
+            {/* Mobile selection indicator with improved visibility */}
+            {isMobile && isActive && (
+                <div className="absolute -right-3 top-1/2 transform -translate-y-1/2 z-40 animate-in slide-in-from-right-2 duration-300">
+                    <div className="w-4 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-l-lg shadow-lg animate-pulse ring-2 ring-blue-200"></div>
+                </div>
+            )}
+
+            {/* Mobile tap instruction for inactive sections */}
+            {isMobile && !isActive && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="bg-blue-600/90 text-white px-4 py-2 rounded-lg text-sm font-medium opacity-0 transition-opacity duration-300 group-hover:opacity-90 backdrop-blur-sm">
+                        📱 Toxunaraq aktivləşdirin
+                    </div>
+                </div>
+            )}
+
+            {/* Content with responsive padding */}
             <div
                 className={`
-                    ${isDragging ? 'transform rotate-0' : ''}
+                    ${isDragging && !isMobile ? 'transform rotate-0' : ''}
                     transition-transform duration-200
-                    ${dragIconPosition === 'right' ? 'pr-8 py-1' : 'pr-2 py-1'}
+                    ${isMobile ? 'py-1' : dragIconPosition === 'right' ? 'pr-8 py-1' : 'pr-2 py-1'}
                 `}
-                style={{ userSelect: isDragging ? 'none' : 'auto' }}
+                style={{ userSelect: isDragging && !isMobile ? 'none' : 'auto' }}
             >
                 {children}
             </div>
@@ -439,6 +644,19 @@ const BasicTemplate: React.FC<{
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
     const [isDragActive, setIsDragActive] = useState(false);
     const [activeId, setActiveId] = useState<string | null>(null);
+    const [activeSection, setActiveSection] = useState<string | null>(null);
+    const [isMobile, setIsMobile] = useState(false);
+
+    // Detect mobile device
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 1024);
+        };
+        
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -448,8 +666,8 @@ const BasicTemplate: React.FC<{
         }),
         useSensor(TouchSensor, {
             activationConstraint: {
-                delay: 100, // Reduced delay for better mobile experience
-                tolerance: 12, // Increased tolerance for touch precision
+                delay: 150, // Slightly longer delay for mobile to prevent accidental drags
+                tolerance: 15, // More tolerance for better touch experience
             },
         }),
         useSensor(KeyboardSensor, {
@@ -900,6 +1118,26 @@ const BasicTemplate: React.FC<{
                     items={sectionOrder}
                     strategy={verticalListSortingStrategy}
                 >
+                    {/* Mobile instruction banner */}
+                    {isMobile && !activeSection && (
+                        <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg text-center shadow-sm">
+                            <p className="text-sm text-blue-700 font-medium flex items-center justify-center gap-2">
+                                <span className="text-lg">📱</span>
+                                <span>Hissəyə toxunaraq yerdəyişmə düymələrini görün</span>
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Active section instruction */}
+                    {isMobile && activeSection && (
+                        <div className="mb-4 p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg text-center shadow-sm">
+                            <p className="text-sm text-green-700 font-medium flex items-center justify-center gap-2">
+                                <span className="text-lg">✅</span>
+                                <span>Sol tərəfdəki düymələrlə yerdəyişmə edin</span>
+                            </p>
+                        </div>
+                    )}
+                    
                     <div 
                         className={`transition-all duration-300 ${isDragActive ? 'opacity-95 bg-gradient-to-br from-transparent via-blue-50/30 to-transparent' : ''}`}
                         style={{ 
@@ -913,7 +1151,16 @@ const BasicTemplate: React.FC<{
                             if (!sectionContent) return null;
 
                             return (
-                                <SortableItem key={sectionType} id={sectionType}>
+                                <SortableItem 
+                                    key={sectionType} 
+                                    id={sectionType}
+                                    showDragInstruction={!isMobile}
+                                    dragIconPosition="left"
+                                    sectionOrder={sectionOrder}
+                                    onSectionReorder={onSectionReorder}
+                                    activeSection={activeSection}
+                                    onSetActiveSection={setActiveSection}
+                                >
                                     {sectionContent}
                                 </SortableItem>
                             );
@@ -984,7 +1231,12 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
         switch (sectionType) {
             case 'personalInfo':
                 return (
-                    <SortableItem key="personalInfo" id="personalInfo">
+                    <SortableItem 
+                        key="personalInfo" 
+                        id="personalInfo"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                    >
                         {/* Personal Info */}
                         <div className="text-center pb-6 border-b-2 border-blue-500 mb-6">
                             {personalInfo.profileImage && (
@@ -1041,7 +1293,12 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
 
             case 'experience':
                 return experience.length > 0 ? (
-                    <SortableItem key="experience" id="experience">
+                    <SortableItem 
+                        key="experience" 
+                        id="experience"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                    >
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
                                 <span className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">💼</span>
@@ -1080,7 +1337,12 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
 
             case 'education':
                 return education.length > 0 ? (
-                    <SortableItem key="education" id="education">
+                    <SortableItem 
+                        key="education" 
+                        id="education"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                    >
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
                                 <span className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">🎓</span>
@@ -1121,7 +1383,12 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
 
             case 'skills':
                 return skills.length > 0 ? (
-                    <SortableItem key="skills" id="skills">
+                    <SortableItem 
+                        key="skills" 
+                        id="skills"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                    >
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
                                 <span className="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">🚀</span>
@@ -1150,7 +1417,12 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
 
             case 'projects':
                 return projects.length > 0 ? (
-                    <SortableItem key="projects" id="projects">
+                    <SortableItem 
+                        key="projects" 
+                        id="projects"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                    >
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
                                 <span className="bg-orange-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">🚀</span>
@@ -1197,7 +1469,12 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
 
             case 'languages':
                 return languages.length > 0 ? (
-                    <SortableItem key="languages" id="languages">
+                    <SortableItem 
+                        key="languages" 
+                        id="languages"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                    >
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
                                 <span className="bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">🌍</span>
@@ -1217,7 +1494,12 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
 
             case 'certifications':
                 return certifications.length > 0 ? (
-                    <SortableItem key="certifications" id="certifications">
+                    <SortableItem 
+                        key="certifications" 
+                        id="certifications"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                    >
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
                                 <span className="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">🏆</span>
@@ -1251,7 +1533,12 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
 
             case 'volunteerExperience':
                 return volunteerExperience.length > 0 ? (
-                    <SortableItem key="volunteerExperience" id="volunteerExperience">
+                    <SortableItem 
+                        key="volunteerExperience" 
+                        id="volunteerExperience"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                    >
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
                                 <span className="bg-pink-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">❤️</span>
@@ -1287,7 +1574,12 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
 
             case 'customSections':
                 return customSections.length > 0 ? (
-                    <SortableItem key="customSections" id="customSections">
+                    <SortableItem 
+                        key="customSections" 
+                        id="customSections"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                    >
                         <div className="mb-6">
                             {customSections.map((section) => (
                                 <div key={section.id} className="mb-6">
@@ -2214,7 +2506,12 @@ const ProfessionalTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onS
                         if (!sectionContent) return null;
 
                         return (
-                            <SortableItem key={sectionType} id={sectionType}>
+                            <SortableItem 
+                                key={sectionType} 
+                                id={sectionType}
+                                sectionOrder={sectionOrder}
+                                onSectionReorder={onSectionReorder}
+                            >
                                 {sectionContent}
                             </SortableItem>
                         );
@@ -2248,6 +2545,13 @@ export default function CVPreview({
 }: CVPreviewProps) {
     const templateId = template || cv.templateId || 'basic';
     const [scale, setScale] = React.useState(1.0);
+    
+    // Mobile swipe states
+    const [isMobile, setIsMobile] = React.useState(false);
+    const [touchStartX, setTouchStartX] = React.useState(0);
+    const [touchStartY, setTouchStartY] = React.useState(0);
+    const [currentTranslateX, setCurrentTranslateX] = React.useState(0);
+    const [isDragging, setIsDragging] = React.useState(false);
 
     // Debug: Check what custom sections data we have
     console.log('=== CV PREVIEW DEBUG ===');
@@ -2357,9 +2661,10 @@ export default function CVPreview({
     React.useEffect(() => {
         const handleResize = () => {
             setScale(getResponsiveScale());
+            setIsMobile(window.innerWidth < 1024);
         };
 
-        // Set initial scale
+        // Set initial scale and mobile state
         handleResize();
 
         // Add event listener
@@ -2368,6 +2673,41 @@ export default function CVPreview({
         // Cleanup
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    // Mobile touch handlers
+    const handleTouchStart = (e: React.TouchEvent) => {
+        if (!isMobile) return;
+        
+        const touch = e.touches[0];
+        setTouchStartX(touch.clientX);
+        setTouchStartY(touch.clientY);
+        setIsDragging(true);
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (!isMobile || !isDragging) return;
+        
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - touchStartX;
+        const deltaY = touch.clientY - touchStartY;
+        
+        // Only allow horizontal scrolling if horizontal movement is greater than vertical
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            e.preventDefault();
+            setCurrentTranslateX(deltaX);
+        }
+    };
+
+    const handleTouchEnd = () => {
+        if (!isMobile) return;
+        
+        setIsDragging(false);
+        
+        // Reset position with smooth animation
+        setTimeout(() => {
+            setCurrentTranslateX(0);
+        }, 100);
+    };
 
     // Template selection logic
     const renderTemplate = () => {
@@ -2414,6 +2754,9 @@ export default function CVPreview({
     return (
         <div
             className="cv-preview border border-gray-300"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
             style={{
                 width: '210mm',
                 height: '297mm', // Fixed A4 height
@@ -2422,7 +2765,7 @@ export default function CVPreview({
                 position: 'relative',
                 background: 'white',
                 transformOrigin: 'top left',
-                transform: `scale(${scale})`,
+                transform: `scale(${scale}) translateX(${isMobile ? currentTranslateX : 0}px)`,
                 borderRadius: '8px',
                 boxShadow: scale >= 0.8
                     ? '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05)'
@@ -2442,8 +2785,9 @@ export default function CVPreview({
                 ['--cv-section-spacing' as any]: `${fontSettings.sectionSpacing}px`,
                 lineHeight: '1.5',
                 // Mobile touch optimization
-                touchAction: 'pan-y',
+                touchAction: isMobile ? 'pan-x pan-y' : 'pan-y',
                 overscrollBehavior: 'contain',
+                transition: isDragging ? 'none' : 'transform 0.3s ease-out',
             } as React.CSSProperties}
         >
             {renderTemplate()}
