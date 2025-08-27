@@ -368,7 +368,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    // Auto-deactivate section after 10 seconds of inactivity (mobile only)
+    // Auto-deactivate section after 8 seconds of inactivity (mobile only)
     useEffect(() => {
         if (isMobile && isActive) {
             // Clear existing timer
@@ -381,7 +381,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
                 if (onSetActiveSection) {
                     onSetActiveSection(null);
                 }
-            }, 10000); // 10 seconds
+            }, 8000); // 8 seconds
             
             autoDeactivateTimerRef.current = timer;
             
@@ -426,6 +426,11 @@ const SortableItem: React.FC<SortableItemProps> = ({
         e.stopPropagation();
         e.preventDefault();
         
+        // Don't allow parent section to be activated when button is clicked
+        if (e.currentTarget !== e.target) {
+            return;
+        }
+        
         const currentIndex = sectionOrder.indexOf(id);
         if (currentIndex > 0) {
             setIsMoving(true);
@@ -447,6 +452,11 @@ const SortableItem: React.FC<SortableItemProps> = ({
     const moveDown = (e: React.MouseEvent | React.TouchEvent) => {
         e.stopPropagation();
         e.preventDefault();
+        
+        // Don't allow parent section to be activated when button is clicked
+        if (e.currentTarget !== e.target) {
+            return;
+        }
         
         const currentIndex = sectionOrder.indexOf(id);
         if (currentIndex < sectionOrder.length - 1) {
@@ -482,8 +492,10 @@ const SortableItem: React.FC<SortableItemProps> = ({
                 autoDeactivateTimerRef.current = null;
             }
             
-            // Toggle active state
-            onSetActiveSection(isActive ? null : id);
+            // Toggle active state - only for mouse clicks, not touch events
+            if (e.type === 'click') {
+                onSetActiveSection(isActive ? null : id);
+            }
         }
     };
 
@@ -500,15 +512,13 @@ const SortableItem: React.FC<SortableItemProps> = ({
     };
 
     const handleTouchEnd = (e: React.TouchEvent) => {
-        if (isMobile) {
+        if (isMobile && onSetActiveSection) {
             setIsPressed(false);
             // Activate section on touch end for better UX
-            if (onSetActiveSection) {
-                e.preventDefault();
-                e.stopPropagation();
-                // Toggle active state
-                onSetActiveSection(isActive ? null : id);
-            }
+            e.preventDefault();
+            e.stopPropagation();
+            // Toggle active state
+            onSetActiveSection(isActive ? null : id);
         }
     };
 
@@ -536,7 +546,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
                     ? 'shadow-2xl border-2 border-blue-500 bg-blue-50 rounded-lg scale-105 rotate-1'
                     : 'hover:shadow-lg hover:border-2 hover:border-blue-300 hover:bg-blue-50/50 hover:scale-[1.01] hover:z-50'
                 }
-                ${isActive && isMobile ? 'border-2 border-blue-500 bg-blue-100/50 shadow-lg scale-[1.02]' : ''}
+                ${isActive && isMobile ? 'border-2 border-blue-500 bg-blue-100/70 shadow-xl scale-[1.02] ring-2 ring-blue-300' : ''}
                 ${isPressed && isMobile ? 'scale-[0.98] bg-blue-200/40' : ''}
                 ${isMoving && isMobile ? 'animate-pulse bg-green-100/60 border-green-400 shadow-green-200' : ''}
                 transition-all duration-300 ease-out
@@ -547,23 +557,28 @@ const SortableItem: React.FC<SortableItemProps> = ({
                 select-none
                 ${isMobile ? 'min-h-[64px]' : ''}
             `}
-            title={isMobile ? "Hissəyə toxunun, düymələr görünsün" : "Bütün hissəni sürükləyin"}
+            title={isMobile ? "" : "Bütün hissəni sürükləyin"}
         >
             {/* Mobile Controls - Enhanced for better UX */}
             {isMobile && isActive && (
-                <div className="absolute -left-4 top-1/2 transform -translate-y-1/2 flex flex-col gap-3 z-50 animate-in slide-in-from-left-3 duration-200">
+                <div className="absolute -left-4 top-1/2 transform -translate-y-1/2 flex flex-col gap-3 z-50 animate-in slide-in-from-left-3 duration-300 ease-out">
                     {/* Up Button */}
                     <button
                         onClick={moveUp}
-                        onTouchEnd={moveUp}
+                        onTouchStart={(e) => e.stopPropagation()}
+                        onTouchEnd={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            moveUp(e);
+                        }}
                         disabled={isFirst}
                         className={`
-                            w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-2xl transition-all duration-200 transform
+                            w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-2xl transition-all duration-200 transform
                             ${isFirst 
                                 ? 'bg-gray-400 cursor-not-allowed opacity-50 scale-90' 
-                                : 'bg-blue-600 hover:bg-blue-700 active:scale-95 hover:scale-105 active:bg-blue-800 hover:shadow-2xl'
+                                : 'bg-blue-600 hover:bg-blue-700 active:scale-95 hover:scale-105 active:bg-blue-800 hover:shadow-2xl animate-pulse'
                             }
-                            border-4 border-white ring-2 ring-blue-200 backdrop-blur-sm
+                            border-4 border-white ring-4 ring-blue-200 backdrop-blur-sm
                         `}
                         title="Yuxarı aparın"
                         style={{ 
@@ -571,21 +586,26 @@ const SortableItem: React.FC<SortableItemProps> = ({
                             WebkitTapHighlightColor: 'transparent'
                         }}
                     >
-                        <span className="text-xl">↑</span>
+                        <span className="text-2xl">↑</span>
                     </button>
                     
                     {/* Down Button */}
                     <button
                         onClick={moveDown}
-                        onTouchEnd={moveDown}
+                        onTouchStart={(e) => e.stopPropagation()}
+                        onTouchEnd={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            moveDown(e);
+                        }}
                         disabled={isLast}
                         className={`
-                            w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-2xl transition-all duration-200 transform
+                            w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-2xl transition-all duration-200 transform
                             ${isLast 
                                 ? 'bg-gray-400 cursor-not-allowed opacity-50 scale-90' 
-                                : 'bg-blue-600 hover:bg-blue-700 active:scale-95 hover:scale-105 active:bg-blue-800 hover:shadow-2xl'
+                                : 'bg-blue-600 hover:bg-blue-700 active:scale-95 hover:scale-105 active:bg-blue-800 hover:shadow-2xl animate-pulse'
                             }
-                            border-4 border-white ring-2 ring-blue-200 backdrop-blur-sm
+                            border-4 border-white ring-4 ring-blue-200 backdrop-blur-sm
                         `}
                         title="Aşağı aparın"
                         style={{ 
@@ -593,7 +613,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
                             WebkitTapHighlightColor: 'transparent'
                         }}
                     >
-                        <span className="text-xl">↓</span>
+                        <span className="text-2xl">↓</span>
                     </button>
                 </div>
             )}
@@ -636,18 +656,6 @@ const SortableItem: React.FC<SortableItemProps> = ({
             {isMobile && isActive && (
                 <div className="absolute -right-4 top-1/2 transform -translate-y-1/2 z-40 animate-in slide-in-from-right-3 duration-200">
                     <div className="w-5 h-12 bg-gradient-to-b from-blue-500 via-blue-600 to-blue-700 rounded-l-xl shadow-lg ring-2 ring-blue-200 animate-pulse"></div>
-                </div>
-            )}
-
-            {/* Enhanced mobile tap instruction */}
-            {isMobile && !isActive && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
-                    <div className="bg-blue-600/95 text-white px-6 py-3 rounded-xl text-sm font-medium opacity-0 transition-all duration-300 group-hover:opacity-100 backdrop-blur-md shadow-lg border border-blue-400/30">
-                        <div className="flex items-center gap-2">
-                            <span className="text-lg">📱</span>
-                            <span>Toxunaraq aktivləşdirin</span>
-                        </div>
-                    </div>
                 </div>
             )}
 
@@ -1151,32 +1159,6 @@ const BasicTemplate: React.FC<{
                     items={sectionOrder}
                     strategy={verticalListSortingStrategy}
                 >
-                    {/* Enhanced mobile instruction banners */}
-                    {isMobile && !activeSection && (
-                        <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 border-2 border-blue-200 rounded-xl text-center shadow-sm">
-                            <div className="flex items-center justify-center gap-3 mb-2">
-                                <span className="text-2xl">📱</span>
-                                <span className="text-lg font-semibold text-blue-800">Mobil İdarəetmə</span>
-                            </div>
-                            <p className="text-sm text-blue-700 font-medium">
-                                Hissəyə toxunaraq yerdəyişmə düymələrini görün
-                            </p>
-                        </div>
-                    )}
-
-                    {/* Active section guidance */}
-                    {isMobile && activeSection && (
-                        <div className="mb-4 p-4 bg-gradient-to-r from-green-50 via-emerald-50 to-green-50 border-2 border-green-200 rounded-xl text-center shadow-sm">
-                            <div className="flex items-center justify-center gap-3 mb-2">
-                                <span className="text-2xl animate-bounce">✅</span>
-                                <span className="text-lg font-semibold text-green-800">Hissə Seçildi</span>
-                            </div>
-                            <p className="text-sm text-green-700 font-medium">
-                                Sol tərəfdəki ↑↓ düymələri ilə yerdəyişmə edin
-                            </p>
-                        </div>
-                    )}
-                    
                     <div 
                         className={`transition-all duration-300 ${isDragActive ? 'opacity-95 bg-gradient-to-br from-transparent via-blue-50/30 to-transparent' : ''}`}
                         style={{ 
@@ -1715,32 +1697,6 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
         >
             <div className="w-full h-full bg-white text-gray-900" style={{ padding: '20mm 15mm' }}>
                 <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
-                    {/* Enhanced mobile instruction banners */}
-                    {isMobile && !activeSection && (
-                        <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 border-2 border-blue-200 rounded-xl text-center shadow-sm">
-                            <div className="flex items-center justify-center gap-3 mb-2">
-                                <span className="text-2xl">📱</span>
-                                <span className="text-lg font-semibold text-blue-800">Mobil İdarəetmə</span>
-                            </div>
-                            <p className="text-sm text-blue-700 font-medium">
-                                Hissəyə toxunaraq yerdəyişmə düymələrini görün
-                            </p>
-                        </div>
-                    )}
-
-                    {/* Active section guidance */}
-                    {isMobile && activeSection && (
-                        <div className="mb-4 p-4 bg-gradient-to-r from-green-50 via-emerald-50 to-green-50 border-2 border-green-200 rounded-xl text-center shadow-sm">
-                            <div className="flex items-center justify-center gap-3 mb-2">
-                                <span className="text-2xl animate-bounce">✅</span>
-                                <span className="text-lg font-semibold text-green-800">Hissə Seçildi</span>
-                            </div>
-                            <p className="text-sm text-green-700 font-medium">
-                                Sol tərəfdəki ↑↓ düymələri ilə yerdəyişmə edin
-                            </p>
-                        </div>
-                    )}
-                    
                     {sectionOrder.map((sectionType) => renderModernSection(sectionType)).filter(Boolean)}
                 </SortableContext>
             </div>
