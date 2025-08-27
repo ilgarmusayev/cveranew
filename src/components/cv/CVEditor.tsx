@@ -17,7 +17,7 @@ import VolunteerExperienceSection from './sections/VolunteerExperienceSection';
 import ElaveSections from './sections/ElaveSections';
 
 // Import preview components
-import CVPreview from './CVPreview';
+import CVPreview, { getSectionName } from './CVPreview';
 
 // Import template selector
 import TemplateSelector from './TemplateSelector';
@@ -291,6 +291,64 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
     const [isDirty, setIsDirty] = useState(false);
     const [lastSaveTime, setLastSaveTime] = useState<number>(Date.now());
 
+    // Mobile states for section reordering
+    const [isMobile, setIsMobile] = useState(false);
+    const [activeMobileSection, setActiveMobileSection] = useState<string | null>(null);
+
+    // Mobile section reorder hook
+    const sectionOrder = cv.sectionOrder || [
+        'summary', 'experience', 'education', 'skills', 
+        'languages', 'projects', 'certifications', 'volunteer', 'customSections'
+    ];
+    
+    // Define mobile section movement function that will use direct CV state updates
+    const moveSection = useCallback((activeSection: string, direction: 'up' | 'down') => {
+        if (!activeSection) {
+            console.log('❌ No active section to move');
+            return;
+        }
+        
+        console.log('📱 CVEditor Moving section:', { activeSection, direction, currentOrder: sectionOrder });
+        
+        const currentIndex = sectionOrder.indexOf(activeSection);
+        if (currentIndex === -1) {
+            console.log('❌ Section not found in order:', activeSection);
+            return;
+        }
+        
+        const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+        
+        if (newIndex >= 0 && newIndex < sectionOrder.length) {
+            const newOrder = [...sectionOrder];
+            [newOrder[currentIndex], newOrder[newIndex]] = [newOrder[newIndex], newOrder[currentIndex]];
+            
+            console.log('✅ CVEditor updating CV with new section order:', newOrder);
+            setCv(prevCv => ({
+                ...prevCv,
+                sectionOrder: newOrder
+            }));
+            setIsDirty(true);
+            
+            // Provide haptic feedback if available
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        } else {
+            console.log('❌ Cannot move section - out of bounds:', { currentIndex, newIndex, sectionOrderLength: sectionOrder.length });
+        }
+    }, [sectionOrder, setCv, setIsDirty]);
+
+    // Detect mobile device
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 1024);
+        };
+        
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
     // Simple hash function for performance - much faster than JSON.stringify
     const generateDataHash = useCallback((data: any) => {
         const str = `${data.personalInfo?.fullName || ''}|${data.personalInfo?.email || ''}|${data.personalInfo?.summary || ''}|${data.experience?.length || 0}|${data.education?.length || 0}|${data.skills?.length || 0}|${data.languages?.length || 0}|${data.projects?.length || 0}|${data.certifications?.length || 0}|${data.volunteerExperience?.length || 0}|${data.customSections?.length || 0}`;
@@ -519,6 +577,16 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 cv={previewData} 
                 template={cv.templateId} 
                 fontSettings={fontSettings}
+                activeSection={activeMobileSection}
+                onSectionSelect={setActiveMobileSection}
+                onSectionReorder={(newOrder: string[]) => {
+                    console.log('📋 Section reorder from CVPreview:', newOrder);
+                    setCv(prevCv => ({
+                        ...prevCv,
+                        sectionOrder: newOrder
+                    }));
+                    setIsDirty(true);
+                }}
                 onUpdate={(updatedCv) => {
                     console.log('CV updated from preview:', updatedCv);
                     // Update the CV data with the new section order
@@ -527,6 +595,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             ...prevCv,
                             sectionOrder: updatedCv.data.sectionOrder
                         }));
+                        setIsDirty(true);
                     }
                 }}
             />
@@ -969,6 +1038,119 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 </div>
             </div>
         </div>
+
+        {/* Mobile External Section Reorder Buttons - Below Preview */}
+        {isMobile && activeMobileSection && (
+            <div className="bg-white border-t border-gray-200 p-4 shadow-lg">
+                <div className="max-w-lg mx-auto">
+                    {/* Selected Section Info */}
+                    <div className="text-center mb-4">
+                        <div className="text-sm text-gray-600 mb-1">Seçilmiş Bölmə:</div>
+                        <div className="text-lg font-semibold text-gray-800 bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
+                            {getSectionName(activeMobileSection, cv.cvLanguage, cv.sectionNames)}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                            Cari sıra: {sectionOrder.indexOf(activeMobileSection) + 1} / {sectionOrder.length}
+                        </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center justify-center gap-3">
+                        {/* Move Up Button */}
+                        <button
+                            onClick={() => {
+                                console.log('🔼 Move up clicked for:', activeMobileSection);
+                                moveSection(activeMobileSection, 'up');
+                                // Provide immediate haptic feedback
+                                if (navigator.vibrate) {
+                                    navigator.vibrate(50);
+                                }
+                            }}
+                            disabled={sectionOrder.indexOf(activeMobileSection) === 0}
+                            className={`
+                                flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 transform
+                                ${sectionOrder.indexOf(activeMobileSection) === 0
+                                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                    : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl active:scale-95 active:bg-blue-800'
+                                }
+                            `}
+                            style={{ 
+                                touchAction: 'manipulation',
+                                WebkitTapHighlightColor: 'transparent'
+                            }}
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 4l-8 8h6v8h4v-8h6l-8-8z"/>
+                            </svg>
+                            Yuxarı
+                        </button>
+
+                        {/* Move Down Button */}
+                        <button
+                            onClick={() => {
+                                console.log('🔽 Move down clicked for:', activeMobileSection);
+                                moveSection(activeMobileSection, 'down');
+                                // Provide immediate haptic feedback
+                                if (navigator.vibrate) {
+                                    navigator.vibrate(50);
+                                }
+                            }}
+                            disabled={sectionOrder.indexOf(activeMobileSection) === sectionOrder.length - 1}
+                            className={`
+                                flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 transform
+                                ${sectionOrder.indexOf(activeMobileSection) === sectionOrder.length - 1
+                                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                    : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl active:scale-95 active:bg-blue-800'
+                                }
+                            `}
+                            style={{ 
+                                touchAction: 'manipulation',
+                                WebkitTapHighlightColor: 'transparent'
+                            }}
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 20l8-8h-6V4H8v8H2l8 8z"/>
+                            </svg>
+                            Aşağı
+                        </button>
+
+                        {/* Close Selection Button */}
+                        <button
+                            onClick={() => setActiveMobileSection(null)}
+                            className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium text-sm bg-gray-500 hover:bg-gray-600 text-white transition-all duration-200 transform hover:shadow-lg active:scale-95"
+                            style={{ 
+                                touchAction: 'manipulation',
+                                WebkitTapHighlightColor: 'transparent'
+                            }}
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                            </svg>
+                            Bağla
+                        </button>
+                    </div>
+
+                    {/* Helper Text */}
+                    <div className="text-center text-xs text-gray-500 mt-3">
+                        📱 CV bölməsinin yerini dəyişmək üçün yuxarı və ya aşağı düymələrini istifadə edin
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* Mobile instruction when no section selected */}
+        {isMobile && !activeMobileSection && (
+            <div className="bg-blue-50 border-t border-blue-200 p-4">
+                <div className="text-center">
+                    <div className="text-sm text-blue-700 font-medium">
+                        📋 Sırasını dəyişmək istədiyiniz bölməni seçin
+                    </div>
+                    <div className="text-xs text-blue-600 mt-1">
+                        CV-də istənilən bölməyə toxunaraq seçə bilərsiniz
+                    </div>
+                </div>
+            </div>
+        )}
     </div>
 </div>
 </div>

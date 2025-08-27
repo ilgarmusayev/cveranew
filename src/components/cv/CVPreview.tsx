@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
     DndContext,
     closestCenter,
@@ -17,8 +17,10 @@ import {
     arrayMove,
     SortableContext,
     sortableKeyboardCoordinates,
-    useSortable,
     verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+    useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { CVData, PersonalInfo, Experience, Education, Skill, Language, Project, Certification, VolunteerExperience, CustomSection, CustomSectionItem } from '@/types/cv';
@@ -33,6 +35,9 @@ interface CVPreviewProps {
     template?: string;
     onSectionReorder?: (newOrder: string[]) => void;
     onUpdate?: (updatedCv: any) => void;
+    // Mobile section selection props
+    activeSection?: string | null;
+    onSectionSelect?: (sectionId: string | null) => void;
     fontSettings?: {
         fontFamily: string;
         nameSize: number;
@@ -325,7 +330,7 @@ const splitContentToPages = (sections: React.ReactNode[], pageHeightPx: number =
     return pages.length > 0 ? pages : [[<div key="empty">Məlumat yoxdur</div>]];
 };
 
-// Enhanced Responsive Item Component - Complete Rewrite
+// Responsive Item Component - DND for Desktop, Buttons for Mobile
 interface SortableItemProps {
     id: string;
     children: React.ReactNode;
@@ -347,87 +352,58 @@ const SortableItem: React.FC<SortableItemProps> = ({
     activeSection,
     onSetActiveSection
 }) => {
-    // State management for responsive behavior
-    const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
-    const [isInteracting, setIsInteracting] = useState(false);
-    const [isReordering, setIsReordering] = useState(false);
-    const [lastTouchTime, setLastTouchTime] = useState(0);
+    const [isMobile, setIsMobile] = useState(false);
+    const [isPressed, setIsPressed] = useState(false);
+    const [isMoving, setIsMoving] = useState(false);
+    const autoDeactivateTimerRef = useRef<NodeJS.Timeout | null>(null);
     
-    // Refs for touch tracking
-    const touchStartPos = useRef({ x: 0, y: 0 });
-    const interactionTimer = useRef<NodeJS.Timeout | null>(null);
-    
-    // Check if this section is currently selected
+    // Check if this section is active
     const isActive = activeSection === id;
     
-    // Enhanced device detection with better breakpoints
+    // Detect mobile on mount
     useEffect(() => {
-        const detectDevice = () => {
-            const width = window.innerWidth;
-            const height = window.innerHeight;
-            const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-            const isPortrait = height > width;
-            
-            // Determine device type based on comprehensive criteria
-            if (width < 768 || (hasTouch && width < 1024 && isPortrait)) {
-                setDeviceType('mobile');
-            } else if (width < 1024 || (hasTouch && width < 1280)) {
-                setDeviceType('tablet');
-            } else {
-                setDeviceType('desktop');
-            }
-            
-            console.log('Device detected:', {
-                width,
-                height,
-                hasTouch,
-                isPortrait,
-                deviceType: width < 768 ? 'mobile' : width < 1024 ? 'tablet' : 'desktop'
-            });
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 1024); // lg breakpoint
         };
         
-        detectDevice();
-        
-        // Listen for resize and orientation changes
-        const handleResize = () => {
-            clearTimeout(interactionTimer.current!);
-            detectDevice();
-        };
-        
-        window.addEventListener('resize', handleResize);
-        window.addEventListener('orientationchange', handleResize);
-        
-        return () => {
-            window.removeEventListener('resize', handleResize);
-            window.removeEventListener('orientationchange', handleResize);
-            if (interactionTimer.current) clearTimeout(interactionTimer.current);
-        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    // Auto-deactivate section after inactivity (mobile/tablet only)
+    // Auto-deactivate section after 10 seconds of inactivity (mobile only)
     useEffect(() => {
-        if ((deviceType === 'mobile' || deviceType === 'tablet') && isActive && !isInteracting) {
-            if (interactionTimer.current) clearTimeout(interactionTimer.current);
+        if (isMobile && isActive) {
+            // Clear existing timer
+            if (autoDeactivateTimerRef.current) {
+                clearTimeout(autoDeactivateTimerRef.current);
+            }
             
-            const timeout = deviceType === 'mobile' ? 6000 : 8000; // Different timeouts for mobile vs tablet
-            
-            interactionTimer.current = setTimeout(() => {
+            // Set new timer
+            const timer = setTimeout(() => {
                 if (onSetActiveSection) {
                     onSetActiveSection(null);
                 }
-            }, timeout);
+            }, 10000); // 10 seconds
+            
+            autoDeactivateTimerRef.current = timer;
             
             return () => {
-                if (interactionTimer.current) clearTimeout(interactionTimer.current);
+                if (timer) {
+                    clearTimeout(timer);
+                }
             };
         }
         
+        // Cleanup timer when section becomes inactive
         return () => {
-            if (interactionTimer.current) clearTimeout(interactionTimer.current);
+            if (autoDeactivateTimerRef.current) {
+                clearTimeout(autoDeactivateTimerRef.current);
+                autoDeactivateTimerRef.current = null;
+            }
         };
-    }, [isActive, isInteracting, deviceType, onSetActiveSection]);
+    }, [isActive, isMobile, onSetActiveSection]);
 
-    // DND Kit setup (for desktop only)
     const {
         attributes,
         listeners,
@@ -435,249 +411,183 @@ const SortableItem: React.FC<SortableItemProps> = ({
         transform,
         transition,
         isDragging,
-    } = useSortable({ 
-        id,
-        disabled: deviceType !== 'desktop' // Disable DND on mobile/tablet
-    });
+    } = useSortable({ id });
 
-    const dndStyle: React.CSSProperties = {
+    const style: React.CSSProperties = {
         transform: CSS.Transform.toString(transform),
         transition,
-        opacity: isDragging ? 0.8 : 1,
+        opacity: isDragging ? 0.9 : 1,
         zIndex: isDragging ? 9999 : 'auto',
+        touchAction: isMobile ? 'auto' : 'manipulation',
         userSelect: 'none',
         WebkitUserSelect: 'none',
+        WebkitTouchCallout: 'none',
     };
 
-    // Get current section index and navigation state
-    const currentIndex = sectionOrder.indexOf(id);
-    const isFirst = currentIndex === 0;
-    const isLast = currentIndex === sectionOrder.length - 1;
-
-    // Enhanced section reordering function
-    const reorderSection = (direction: 'up' | 'down') => {
-        const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-        
-        if (newIndex < 0 || newIndex >= sectionOrder.length) return;
-        
-        setIsReordering(true);
-        
-        const newOrder = [...sectionOrder];
-        [newOrder[currentIndex], newOrder[newIndex]] = [newOrder[newIndex], newOrder[currentIndex]];
-        
-        onSectionReorder(newOrder);
-        
-        // Haptic feedback for supported devices
-        if (navigator.vibrate) {
-            navigator.vibrate(40);
+    // Handle section click to activate
+    const handleSectionClick = (e: React.MouseEvent | React.TouchEvent) => {
+        if (isMobile && onSetActiveSection) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Clear any existing auto-deactivate timer
+            if (autoDeactivateTimerRef.current) {
+                clearTimeout(autoDeactivateTimerRef.current);
+                autoDeactivateTimerRef.current = null;
+            }
+            
+            // Toggle active state
+            onSetActiveSection(isActive ? null : id);
         }
-        
-        console.log(`✅ Section moved ${direction}:`, { id, from: currentIndex, to: newIndex });
-        
-        // Reset reordering state
-        setTimeout(() => setIsReordering(false), 300);
     };
 
-    // Enhanced touch event handlers for mobile/tablet
+    // Handle touch events for better mobile experience
     const handleTouchStart = (e: React.TouchEvent) => {
-        if (deviceType === 'desktop') return;
-        
-        const touch = e.touches[0];
-        touchStartPos.current = { x: touch.clientX, y: touch.clientY };
-        setLastTouchTime(Date.now());
-        setIsInteracting(true);
-        
-        // Clear any existing timers
-        if (interactionTimer.current) {
-            clearTimeout(interactionTimer.current);
-        }
-    };
-
-    const handleTouchMove = (e: React.TouchEvent) => {
-        if (deviceType === 'desktop') return;
-        
-        const touch = e.touches[0];
-        const deltaX = Math.abs(touch.clientX - touchStartPos.current.x);
-        const deltaY = Math.abs(touch.clientY - touchStartPos.current.y);
-        
-        // If significant movement detected, cancel interaction
-        if (deltaX > 10 || deltaY > 10) {
-            setIsInteracting(false);
+        if (isMobile) {
+            setIsPressed(true);
+            // Clear any movement timeout
+            if (autoDeactivateTimerRef.current) {
+                clearTimeout(autoDeactivateTimerRef.current);
+                autoDeactivateTimerRef.current = null;
+            }
         }
     };
 
     const handleTouchEnd = (e: React.TouchEvent) => {
-        if (deviceType === 'desktop' || !onSetActiveSection) return;
-        
-        const touchDuration = Date.now() - lastTouchTime;
-        const touch = e.changedTouches[0];
-        const deltaX = Math.abs(touch.clientX - touchStartPos.current.x);
-        const deltaY = Math.abs(touch.clientY - touchStartPos.current.y);
-        
-        // Only register as tap if it's quick and minimal movement
-        const isTap = touchDuration < 400 && deltaX < 15 && deltaY < 15;
-        
-        if (isTap) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            // Toggle active state
-            onSetActiveSection(isActive ? null : id);
-            
-            // Haptic feedback
-            if (navigator.vibrate) {
-                navigator.vibrate(30);
+        if (isMobile) {
+            setIsPressed(false);
+            // Activate section on touch end for better UX
+            if (onSetActiveSection) {
+                e.stopPropagation();
+                e.preventDefault();
+                // Toggle active state with immediate feedback
+                onSetActiveSection(isActive ? null : id);
+                
+                // Haptic feedback if available
+                if (navigator.vibrate) {
+                    navigator.vibrate(30);
+                }
             }
-            
-            console.log('📱 Section tapped:', { id, wasActive: isActive, nowActive: !isActive });
-        }
-        
-        setIsInteracting(false);
-    };
-
-    // Handle mouse click for desktop
-    const handleClick = (e: React.MouseEvent) => {
-        if (deviceType !== 'desktop' || !onSetActiveSection) return;
-        
-        e.preventDefault();
-        e.stopPropagation();
-        
-        // On desktop, clicking toggles active state (for testing)
-        onSetActiveSection(isActive ? null : id);
-    };
-
-    // Responsive styles based on device type
-    const getContainerStyles = () => {
-        const baseStyles = "relative transition-all duration-300 ease-out rounded-lg";
-        
-        switch (deviceType) {
-            case 'mobile':
-                return `${baseStyles} 
-                    ${isActive ? 'bg-blue-50 border-2 border-blue-500 shadow-lg scale-[1.02] ring-2 ring-blue-200' : 'hover:bg-gray-50'} 
-                    ${isReordering ? 'animate-pulse bg-green-50 border-green-400' : ''}
-                    py-4 px-3 my-2 cursor-pointer touch-manipulation
-                    min-h-[70px]`;
-                    
-            case 'tablet':
-                return `${baseStyles}
-                    ${isActive ? 'bg-blue-50 border-2 border-blue-500 shadow-xl scale-[1.03] ring-2 ring-blue-200' : 'hover:bg-gray-50'} 
-                    ${isReordering ? 'animate-pulse bg-green-50 border-green-400' : ''}
-                    py-5 px-4 my-3 cursor-pointer touch-manipulation
-                    min-h-[80px]`;
-                    
-            case 'desktop':
-                return `${baseStyles}
-                    ${isDragging ? 'shadow-2xl border-2 border-blue-500 bg-blue-50 scale-105 rotate-1 z-[9999]' : 'hover:shadow-lg hover:border-2 hover:border-blue-300 hover:bg-blue-50/50 hover:scale-[1.01]'}
-                    ${isActive ? 'bg-blue-50 border-2 border-blue-500 shadow-lg' : ''}
-                    py-3 px-2 my-1 cursor-grab active:cursor-grabbing
-                    group`;
-                    
-            default:
-                return baseStyles;
         }
     };
 
-    return (
+    // Prevent accidental activation during scrolling
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (isMobile && isPressed) {
+            // Cancel selection if user is scrolling
+            setIsPressed(false);
+        }
+    };
+
+        return (
         <div
             ref={setNodeRef}
-            {...(deviceType === 'desktop' ? { ...attributes, ...listeners } : {})}
-            onClick={handleClick}
+            style={style}
+            {...(isMobile ? {} : { ...attributes, ...listeners })}
+            onClick={handleSectionClick}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
-            className={getContainerStyles()}
-            title={deviceType === 'desktop' ? "Sürükləyərək yerdəyişmə edin" : "Seçmək üçün toxunun"}
-            style={{
-                ...dndStyle,
-                touchAction: deviceType === 'desktop' ? 'none' : 'pan-y',
-                userSelect: 'none',
-                WebkitUserSelect: 'none',
-                WebkitTouchCallout: 'none',
-                position: 'relative',
-                overflow: 'visible'
-            }}
+            className={`
+                relative group
+                ${isMobile ? 'cursor-pointer' : 'cursor-grab active:cursor-grabbing'}
+                ${isDragging && !isMobile
+                    ? 'shadow-2xl border-2 border-blue-500 bg-blue-50 rounded-lg scale-105 rotate-1'
+                    : 'hover:shadow-lg hover:border-2 hover:border-blue-300 hover:bg-blue-50/50 hover:scale-[1.01] hover:z-50'
+                }
+                ${isActive && isMobile ? 'bg-blue-50/70 shadow-xl scale-[1.02] border-blue-400' : ''}
+                ${isPressed && isMobile ? 'scale-[0.98] bg-blue-100/50' : ''}
+                ${isMoving && isMobile ? 'animate-pulse bg-green-100/60 border-green-400 shadow-green-200' : ''}
+                transition-all duration-200 ease-out
+                rounded-lg border-2 border-transparent
+                ${isMobile ? 'touch-manipulation py-6 px-4 my-2' : 'touch-manipulation'}
+                select-none
+                ${isMobile ? 'min-h-[80px]' : ''}
+            `}
+            title={isMobile ? "Hissəni seçmək üçün toxunun" : "Bütün hissəni sürükləyin"}
         >
-            {/* Mobile/Tablet Controls - Modern floating buttons */}
-            {(deviceType === 'mobile' || deviceType === 'tablet') && isActive && (
-                <div className="absolute -left-14 sm:-left-16 top-1/2 transform -translate-y-1/2 flex flex-col gap-3 z-[99999]">
-                    {/* Up Button */}
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            reorderSection('up');
-                        }}
-                        disabled={isFirst}
-                        className={`
-                            w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center
-                            text-white font-bold shadow-lg transition-all duration-200
-                            ${isFirst 
-                                ? 'bg-gray-400 opacity-50 cursor-not-allowed' 
-                                : 'bg-blue-600 hover:bg-blue-700 active:scale-95 hover:scale-110 hover:shadow-xl'
-                            }
-                            border-2 border-white ring-2 ring-blue-200
-                        `}
-                        style={{ 
-                            touchAction: 'manipulation',
-                            WebkitTapHighlightColor: 'transparent'
-                        }}
-                    >
-                        <span className="text-lg leading-none">↑</span>
-                    </button>
-                    
-                    {/* Down Button */}
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            reorderSection('down');
-                        }}
-                        disabled={isLast}
-                        className={`
-                            w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center
-                            text-white font-bold shadow-lg transition-all duration-200
-                            ${isLast 
-                                ? 'bg-gray-400 opacity-50 cursor-not-allowed' 
-                                : 'bg-blue-600 hover:bg-blue-700 active:scale-95 hover:scale-110 hover:shadow-xl'
-                            }
-                            border-2 border-white ring-2 ring-blue-200
-                        `}
-                        style={{ 
-                            touchAction: 'manipulation',
-                            WebkitTapHighlightColor: 'transparent'
-                        }}
-                    >
-                        <span className="text-lg leading-none">↓</span>
-                    </button>
-                </div>
-            )}
 
-            {/* Active indicator for mobile/tablet */}
-            {(deviceType === 'mobile' || deviceType === 'tablet') && isActive && (
-                <div className="absolute -right-3 top-1/2 transform -translate-y-1/2 z-[99998]">
-                    <div className="w-5 h-10 bg-gradient-to-b from-green-500 to-green-600 rounded-l-lg shadow-lg animate-pulse"></div>
-                </div>
-            )}
-
-            {/* Desktop drag handle */}
-            {deviceType === 'desktop' && (
-                <div className={`absolute ${dragIconPosition === 'right' ? '-right-3' : '-left-3'} top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200`}>
+            {/* Desktop Drag Handle - Show only on desktop */}
+            {!isMobile && (
+                <div
+                    className={`absolute ${dragIconPosition === 'right' ? '-right-3' : '-left-3'} top-1/2 transform -translate-y-1/2
+                                opacity-0 group-hover:opacity-100 transition-all duration-200`}
+                    style={{ userSelect: 'none', zIndex: 99999 }}
+                >
                     <div className="bg-blue-600 text-white rounded-full w-7 h-7 flex items-center justify-center shadow-xl hover:bg-blue-700 transition-colors border-2 border-white">
-                        <span className="text-xs">⋮⋮</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                        </svg>
                     </div>
                 </div>
             )}
 
-            {/* Desktop hover instruction */}
-            {deviceType === 'desktop' && showDragInstruction && (
-                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium whitespace-nowrap shadow-lg z-[99999]">
+            {/* Desktop Hover instruction */}
+            {!isMobile && showDragInstruction && (
+                <div
+                    className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium whitespace-nowrap shadow-lg"
+                    style={{ userSelect: 'none', zIndex: 99999 }}
+                >
                     Sürükləyərək yerdəyişmə edin
                     <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-blue-600"></div>
                 </div>
             )}
 
-            {/* Content wrapper */}
-            <div className={`${deviceType === 'desktop' && isDragging ? 'pointer-events-none' : ''}`}>
+            {/* Visual drag lines when dragging (desktop only) */}
+            {isDragging && !isMobile && (
+                <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 99998 }}>
+                    <div className="absolute left-0 top-1/4 w-1 h-1/2 bg-blue-500 rounded-full animate-pulse"></div>
+                    <div className="absolute right-0 top-1/4 w-1 h-1/2 bg-blue-500 rounded-full animate-pulse"></div>
+                </div>
+            )}
+
+            {/* Mobile checkbox and selection indicator */}
+            {isMobile && (
+                <div className="absolute -left-2 top-2 z-40">
+                    <div className={`
+                        w-6 h-6 rounded border-2 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-md
+                        ${isActive 
+                            ? 'bg-blue-600 border-blue-600 text-white scale-110' 
+                            : 'bg-white border-gray-300 hover:border-blue-400'
+                        }
+                    `}>
+                        {isActive && (
+                            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Mobile selection border indicator */}
+            {isMobile && isActive && (
+                <div className="absolute inset-0 border-2 border-blue-500 rounded-lg pointer-events-none animate-in fade-in duration-200">
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                </div>
+            )}
+
+            {/* Enhanced mobile tap instruction */}
+            {isMobile && !isActive && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
+                    <div className="bg-blue-600/95 text-white px-6 py-3 rounded-xl text-sm font-medium opacity-0 transition-all duration-300 group-hover:opacity-100 backdrop-blur-md shadow-lg border border-blue-400/30">
+                        <div className="flex items-center gap-2">
+                            <span className="text-lg">📱</span>
+                            <span>Toxunaraq aktivləşdirin</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Content with responsive padding */}
+            <div
+                className={`
+                    ${isDragging && !isMobile ? 'transform rotate-0' : ''}
+                    transition-transform duration-200
+                    ${isMobile ? 'py-1' : dragIconPosition === 'right' ? 'pr-8 py-1' : 'pr-2 py-1'}
+                `}
+                style={{ userSelect: isDragging && !isMobile ? 'none' : 'auto' }}
+            >
                 {children}
             </div>
         </div>
@@ -692,8 +602,8 @@ const BasicTemplate: React.FC<{
     cv: any;
     onUpdate?: (updatedCv: any) => void;
     activeSection?: string | null;
-    setActiveSection?: React.Dispatch<React.SetStateAction<string | null>>;
-}> = ({ data, sectionOrder, onSectionReorder, cv, onUpdate, activeSection, setActiveSection }) => {
+    onSectionSelect?: (sectionId: string | null) => void;
+}> = ({ data, sectionOrder, onSectionReorder, cv, onUpdate, activeSection, onSectionSelect }) => {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
     const [isDragActive, setIsDragActive] = useState(false);
     const [activeId, setActiveId] = useState<string | null>(null);
@@ -1170,6 +1080,9 @@ const BasicTemplate: React.FC<{
                     items={sectionOrder}
                     strategy={verticalListSortingStrategy}
                 >
+                   
+                  
+                    
                     <div 
                         className={`transition-all duration-300 ${isDragActive ? 'opacity-95 bg-gradient-to-br from-transparent via-blue-50/30 to-transparent' : ''}`}
                         style={{ 
@@ -1191,7 +1104,7 @@ const BasicTemplate: React.FC<{
                                     sectionOrder={sectionOrder}
                                     onSectionReorder={onSectionReorder}
                                     activeSection={activeSection}
-                                    onSetActiveSection={setActiveSection}
+                                    onSetActiveSection={onSectionSelect}
                                 >
                                     {sectionContent}
                                 </SortableItem>
@@ -1210,36 +1123,22 @@ const ModernTemplate: React.FC<{
     sectionOrder: string[]; 
     onSectionReorder: (newOrder: string[]) => void;
     activeSection?: string | null;
-    setActiveSection?: React.Dispatch<React.SetStateAction<string | null>>;
-}> = ({ data, sectionOrder, onSectionReorder, activeSection, setActiveSection }) => {
+    onSectionSelect?: (sectionId: string | null) => void;
+}> = ({ data, sectionOrder, onSectionReorder, activeSection, onSectionSelect }) => {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
     const [isDragActive, setIsDragActive] = useState(false);
     const [activeId, setActiveId] = useState<string | null>(null);
     const [isMobile, setIsMobile] = useState(false);
 
-    // Enhanced mobile device detection for ModernTemplate
+    // Detect mobile device
     useEffect(() => {
         const checkMobile = () => {
-            const width = window.innerWidth;
-            const height = window.innerHeight;
-            const isPortrait = height > width;
-            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-            
-            // Comprehensive mobile/tablet detection
-            const isMobileDevice = width < 1024 || (isTouchDevice && width < 1200) || 
-                                 (isPortrait && width < 768);
-            
-            setIsMobile(isMobileDevice);
+            setIsMobile(window.innerWidth < 1024);
         };
         
         checkMobile();
         window.addEventListener('resize', checkMobile);
-        window.addEventListener('orientationchange', checkMobile);
-        
-        return () => {
-            window.removeEventListener('resize', checkMobile);
-            window.removeEventListener('orientationchange', checkMobile);
-        };
+        return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
     const sensors = useSensors(
@@ -1301,7 +1200,7 @@ const ModernTemplate: React.FC<{
                         sectionOrder={sectionOrder}
                         onSectionReorder={onSectionReorder}
                         activeSection={activeSection}
-                        onSetActiveSection={setActiveSection}
+                        onSetActiveSection={onSectionSelect}
                     >
                         {/* Personal Info */}
                         <div className="text-center pb-6 border-b-2 border-blue-500 mb-6">
@@ -1365,7 +1264,7 @@ const ModernTemplate: React.FC<{
                         sectionOrder={sectionOrder}
                         onSectionReorder={onSectionReorder}
                         activeSection={activeSection}
-                        onSetActiveSection={setActiveSection}
+                        onSetActiveSection={onSectionSelect}
                     >
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
@@ -1411,7 +1310,7 @@ const ModernTemplate: React.FC<{
                         sectionOrder={sectionOrder}
                         onSectionReorder={onSectionReorder}
                         activeSection={activeSection}
-                        onSetActiveSection={setActiveSection}
+                        onSetActiveSection={onSectionSelect}
                     >
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
@@ -1459,7 +1358,7 @@ const ModernTemplate: React.FC<{
                         sectionOrder={sectionOrder}
                         onSectionReorder={onSectionReorder}
                         activeSection={activeSection}
-                        onSetActiveSection={setActiveSection}
+                        onSetActiveSection={onSectionSelect}
                     >
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
@@ -1495,7 +1394,7 @@ const ModernTemplate: React.FC<{
                         sectionOrder={sectionOrder}
                         onSectionReorder={onSectionReorder}
                         activeSection={activeSection}
-                        onSetActiveSection={setActiveSection}
+                        onSetActiveSection={onSectionSelect}
                     >
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
@@ -1549,7 +1448,7 @@ const ModernTemplate: React.FC<{
                         sectionOrder={sectionOrder}
                         onSectionReorder={onSectionReorder}
                         activeSection={activeSection}
-                        onSetActiveSection={setActiveSection}
+                        onSetActiveSection={onSectionSelect}
                     >
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
@@ -1576,7 +1475,7 @@ const ModernTemplate: React.FC<{
                         sectionOrder={sectionOrder}
                         onSectionReorder={onSectionReorder}
                         activeSection={activeSection}
-                        onSetActiveSection={setActiveSection}
+                        onSetActiveSection={onSectionSelect}
                     >
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
@@ -1617,7 +1516,7 @@ const ModernTemplate: React.FC<{
                         sectionOrder={sectionOrder}
                         onSectionReorder={onSectionReorder}
                         activeSection={activeSection}
-                        onSetActiveSection={setActiveSection}
+                        onSetActiveSection={onSectionSelect}
                     >
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
@@ -1660,7 +1559,7 @@ const ModernTemplate: React.FC<{
                         sectionOrder={sectionOrder}
                         onSectionReorder={onSectionReorder}
                         activeSection={activeSection}
-                        onSetActiveSection={setActiveSection}
+                        onSetActiveSection={onSectionSelect}
                     >
                         <div className="mb-6">
                             {customSections.map((section) => (
@@ -1748,8 +1647,8 @@ const ATSFriendlyTemplate: React.FC<{
     sectionOrder: string[]; 
     onSectionReorder: (newOrder: string[]) => void;
     activeSection?: string | null;
-    setActiveSection?: React.Dispatch<React.SetStateAction<string | null>>;
-}> = ({ data, sectionOrder, onSectionReorder, activeSection, setActiveSection }) => {
+    onSectionSelect?: (sectionId: string | null) => void;
+}> = ({ data, sectionOrder, onSectionReorder, activeSection, onSectionSelect }) => {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
 
     return (
@@ -2194,37 +2093,11 @@ const ProfessionalTemplate: React.FC<{
     sectionOrder: string[]; 
     onSectionReorder: (newOrder: string[]) => void;
     activeSection?: string | null;
-    setActiveSection?: React.Dispatch<React.SetStateAction<string | null>>;
-}> = ({ data, sectionOrder, onSectionReorder, activeSection, setActiveSection }) => {
+    onSectionSelect?: (sectionId: string | null) => void;
+}> = ({ data, sectionOrder, onSectionReorder, activeSection, onSectionSelect }) => {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
 
     const [activeId, setActiveId] = useState<string | null>(null);
-    const [isMobile, setIsMobile] = useState(false);
-
-    // Enhanced mobile device detection for ProfessionalTemplate
-    useEffect(() => {
-        const checkMobile = () => {
-            const width = window.innerWidth;
-            const height = window.innerHeight;
-            const isPortrait = height > width;
-            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-            
-            // Comprehensive mobile/tablet detection
-            const isMobileDevice = width < 1024 || (isTouchDevice && width < 1200) || 
-                                 (isPortrait && width < 768);
-            
-            setIsMobile(isMobileDevice);
-        };
-        
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        window.addEventListener('orientationchange', checkMobile);
-        
-        return () => {
-            window.removeEventListener('resize', checkMobile);
-            window.removeEventListener('orientationchange', checkMobile);
-        };
-    }, []);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -2648,6 +2521,8 @@ export default function CVPreview({
     template,
     onSectionReorder,
     onUpdate,
+    activeSection: externalActiveSection,
+    onSectionSelect: externalOnSectionSelect,
     fontSettings = {
         fontFamily: 'Arial, sans-serif',
         nameSize: 24,
@@ -2666,15 +2541,17 @@ export default function CVPreview({
     const templateId = template || cv.templateId || 'basic';
     const [scale, setScale] = React.useState(1.0);
     
-    // Mobile section selection state
-    const [activeSection, setActiveSection] = React.useState<string | null>(null);
-    
     // Mobile swipe states
     const [isMobile, setIsMobile] = React.useState(false);
     const [touchStartX, setTouchStartX] = React.useState(0);
     const [touchStartY, setTouchStartY] = React.useState(0);
     const [currentTranslateX, setCurrentTranslateX] = React.useState(0);
     const [isDragging, setIsDragging] = React.useState(false);
+    
+    // Mobile states - use external props if provided, otherwise internal state
+    const [internalActiveSection, setInternalActiveSection] = React.useState<string | null>(null);
+    const activeSection = externalActiveSection !== undefined ? externalActiveSection : internalActiveSection;
+    const setActiveSection = externalOnSectionSelect || setInternalActiveSection;
 
     // Debug: Check what custom sections data we have
     console.log('=== CV PREVIEW DEBUG ===');
@@ -2696,11 +2573,11 @@ export default function CVPreview({
         'customSections'
     ];
 
-    // Initialize section order from CV data or use default
-    const [sectionOrder, setSectionOrder] = useState(() => {
+    // Get section order from CV data (don't use local state)
+    const getSectionOrderFromCV = () => {
         // Check if CV data has a saved section order
         if (cv.data.sectionOrder && Array.isArray(cv.data.sectionOrder) && cv.data.sectionOrder.length > 0) {
-            console.log('Using saved section order:', cv.data.sectionOrder);
+            console.log('Using saved section order from CV:', cv.data.sectionOrder);
             let order = cv.data.sectionOrder as string[];
 
             // If customSections exist but are not in the saved order, add them
@@ -2721,15 +2598,19 @@ export default function CVPreview({
 
         console.log('Using default section order:', order);
         return order;
-    });
+    };
 
-    // Handle drag end
-    const handleSectionReorder = (newOrder: string[]) => {
+    // Get current section order (no local state)
+    const sectionOrder = getSectionOrderFromCV();
+    console.log('📊 CVPreview sectionOrder from CV:', sectionOrder);
+
+    // Handle section reorder with optimized callbacks
+    const handleSectionReorder = React.useCallback((newOrder: string[]) => {
         console.log('=== MAIN HANDLE SECTION REORDER ===');
         console.log('New order:', newOrder);
         console.log('Old order:', sectionOrder);
 
-        setSectionOrder(newOrder);
+        // Don't use local setSectionOrder - let parent manage the state
 
         // Update CV data with new section order for persistence
         const updatedCv = {
@@ -2740,130 +2621,104 @@ export default function CVPreview({
             }
         };
 
-        // Notify parent component if handler exists - pass the updated CV
+        // Notify parent component if handler exists - pass the new order
         if (onSectionReorder) {
+            console.log('📋 Calling parent onSectionReorder with:', newOrder);
             onSectionReorder(newOrder);
         }
 
         // Always update the parent with new CV data
         if (onUpdate) {
+            console.log('📋 Calling parent onUpdate with CV:', updatedCv);
             onUpdate(updatedCv);
             console.log('✅ Section order updated in parent component');
         } else {
             console.log('⚠️ No onUpdate handler found, section order changes won\'t persist');
         }
-    };
+    }, [cv, onSectionReorder, onUpdate, sectionOrder]);
 
-    // Enhanced responsive scale for all device types
+    const handleSectionSelect = React.useCallback((sectionId: string | null) => {
+        if (isMobile) {
+            const newValue = sectionId === activeSection ? null : sectionId;
+            setActiveSection(newValue);
+        }
+    }, [isMobile, activeSection, setActiveSection]);
+
+    // Get responsive scale based on screen size
     const getResponsiveScale = () => {
         if (typeof window !== 'undefined') {
             const width = window.innerWidth;
             const height = window.innerHeight;
-            const isPortrait = height > width;
 
-            // Mobile: Enhanced scaling system for all mobile devices
+            // Mobile: Sadə və effektiv scale sistemi
             if (width < 1024) {
-                // Different scaling for different mobile sizes
-                if (width <= 375) {
-                    // Small phones (iPhone SE, older Android)
-                    const scale = Math.min(0.75, (width - 32) / (210 * 3.779));
-                    return Math.max(0.35, scale);
-                } else if (width <= 414) {
-                    // Medium phones (iPhone 12/13/14, most Android)
-                    const scale = Math.min(0.85, (width - 40) / (210 * 3.779));
-                    return Math.max(0.4, scale);
-                } else if (width <= 768) {
-                    // Large phones and small tablets
-                    const scale = Math.min(0.95, (width - 48) / (210 * 3.779));
-                    return Math.max(0.5, scale);
-                } else {
-                    // Large tablets in portrait
-                    const scale = Math.min(1.0, (width - 64) / (210 * 3.779));
-                    return Math.max(0.6, scale);
-                }
+                // Mobile ekran eni əsasında optimal scale
+                const mobileScale = Math.min(0.9, (width - 64) / (210 * 3.779)); // 64px padding üçün
+                return Math.max(0.4, mobileScale); // Minimum 0.4, maksimum 0.9
             }
 
-            // Tablet landscape mode
-            if (width >= 1024 && width < 1280 && !isPortrait) {
-                return 0.8;
-            }
-
-            // Desktop: Enhanced scaling
+            // Desktop: User-ın mövcud setup-ını saxlayırıq
             if (width < 1280) return 0.8;     // Small desktop
             if (width < 1536) return 0.9;     // Medium desktop
 
-            // Large desktop: A4 optimal fit
-            const containerHeight = height - 160; // navbar və padding
-            const a4Height = 297 * 3.779; // A4 height in pixels
+            // Large desktop: A4 tam görünməsi üçün screen height-ə əsasən
+            const containerHeight = height - 160; // navbar və padding üçün yer
+            const a4Height = 297 * 3.779; // 297mm to pixels (rough conversion)
             const maxScale = Math.min(1.3, containerHeight / a4Height);
 
-            return Math.max(1.0, maxScale);
+            return Math.max(1.0, maxScale);   // Minimum 1.0, maksimum container-ə sığacaq qədər
         }
-        return 1.0; // SSR default
+        return 1.0; // default for SSR - real size
     };
 
     React.useEffect(() => {
         const handleResize = () => {
             setScale(getResponsiveScale());
-            
-            // Enhanced mobile detection for main component
-            const width = window.innerWidth;
-            const height = window.innerHeight;
-            const isPortrait = height > width;
-            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-            
-            // Comprehensive mobile/tablet detection
-            const isMobileDevice = width < 1024 || (isTouchDevice && width < 1200) || 
-                                 (isPortrait && width < 768);
-            
-            setIsMobile(isMobileDevice);
+            setIsMobile(window.innerWidth < 1024);
         };
 
         // Set initial scale and mobile state
         handleResize();
 
-        // Add event listeners for better device detection
+        // Add event listener
         window.addEventListener('resize', handleResize);
-        window.addEventListener('orientationchange', handleResize);
 
         // Cleanup
-        return () => {
-            window.removeEventListener('resize', handleResize);
-            window.removeEventListener('orientationchange', handleResize);
-        };
+        return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Mobile touch handlers - Prevent horizontal scrolling
+    // Mobile touch handlers
     const handleTouchStart = (e: React.TouchEvent) => {
         if (!isMobile) return;
         
         const touch = e.touches[0];
         setTouchStartX(touch.clientX);
         setTouchStartY(touch.clientY);
-        setIsDragging(false); // Don't set dragging immediately
+        setIsDragging(true);
     };
 
     const handleTouchMove = (e: React.TouchEvent) => {
-        if (!isMobile) return;
+        if (!isMobile || !isDragging) return;
         
         const touch = e.touches[0];
         const deltaX = touch.clientX - touchStartX;
         const deltaY = touch.clientY - touchStartY;
         
-        // Prevent any horizontal movement - only allow vertical scroll
+        // Only allow horizontal scrolling if horizontal movement is greater than vertical
         if (Math.abs(deltaX) > Math.abs(deltaY)) {
-            e.preventDefault(); // Block horizontal scroll completely
+            setCurrentTranslateX(deltaX);
         }
-        
-        // Reset any horizontal translation
-        setCurrentTranslateX(0);
     };
 
     const handleTouchEnd = () => {
         if (!isMobile) return;
         
         setIsDragging(false);
-        setCurrentTranslateX(0); // Always reset to 0
+        
+        // Reset position with smooth animation
+        setTimeout(() => {
+            setCurrentTranslateX(0);
+        }, 100);
     };
 
     // Template selection logic
@@ -2882,7 +2737,7 @@ export default function CVPreview({
                 sectionOrder={sectionOrder} 
                 onSectionReorder={handleSectionReorder}
                 activeSection={activeSection}
-                setActiveSection={setActiveSection} 
+                onSectionSelect={handleSectionSelect}
             />;
         }
 
@@ -2896,7 +2751,7 @@ export default function CVPreview({
                 sectionOrder={sectionOrder} 
                 onSectionReorder={handleSectionReorder}
                 activeSection={activeSection}
-                setActiveSection={setActiveSection} 
+                onSectionSelect={handleSectionSelect}
             />;
         }
 
@@ -2912,7 +2767,7 @@ export default function CVPreview({
                 sectionOrder={sectionOrder} 
                 onSectionReorder={handleSectionReorder}
                 activeSection={activeSection}
-                setActiveSection={setActiveSection} 
+                onSectionSelect={handleSectionSelect}
             />;
         }
 
@@ -2924,32 +2779,23 @@ export default function CVPreview({
             cv={cv}
             onUpdate={onUpdate}
             activeSection={activeSection}
-            setActiveSection={setActiveSection}
+            onSectionSelect={handleSectionSelect}
         />;
     };
 
     return (
-        <>
-            {/* Mobile Debug Info - Only on mobile */}
-            {isMobile && (
-                <div 
-                    className="fixed top-4 left-4 bg-black/80 text-white p-2 rounded text-xs z-[100001] max-w-xs"
-                    style={{
-                        position: 'fixed',
-                        zIndex: 100001,
-                        fontSize: '10px',
-                        lineHeight: '1.2'
-                    }}
-                >
-                   
-                </div>
-            )}
-            
+        <div className="relative">
+
+            {/* CV Preview Container */}
             <div
                 className="cv-preview border border-gray-300"
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
+                onClick={(e) => {
+                    // Stop propagation to prevent closing external buttons
+                    e.stopPropagation();
+                }}
                 style={{
                     width: '210mm',
                     height: '297mm', // Fixed A4 height
@@ -2958,12 +2804,12 @@ export default function CVPreview({
                     position: 'relative',
                     background: 'white',
                     transformOrigin: 'top left',
-                    transform: `scale(${scale})`,
-                    borderRadius: isMobile ? '4px' : '8px', // Smaller radius on mobile
+                    transform: `scale(${scale}) translateX(${isMobile ? currentTranslateX : 0}px)`,
+                    borderRadius: '8px',
                     boxShadow: scale >= 0.8
                         ? '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05)'
                         : '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.05)',
-                    // Enhanced CSS Variables for font management
+                    // Set CSS Variables for font management
                     ['--cv-font-family' as any]: fontSettings.fontFamily,
                     ['--cv-name-size' as any]: `${fontSettings.nameSize}px`,
                     ['--cv-title-size' as any]: `${fontSettings.titleSize}px`,
@@ -2977,28 +2823,59 @@ export default function CVPreview({
                     ['--cv-small-weight' as any]: fontSettings.smallWeight,
                     ['--cv-section-spacing' as any]: `${fontSettings.sectionSpacing}px`,
                     lineHeight: '1.5',
-                    // Enhanced touch optimization for all mobile devices
-                    touchAction: 'pan-y',
+                    // Mobile touch optimization
+                    touchAction: isMobile ? 'pan-x pan-y' : 'pan-y',
                     overscrollBehavior: 'contain',
-                    overflowX: 'hidden', // Always prevent horizontal scroll
-                    overflowY: 'auto', // Allow vertical scroll
                     transition: isDragging ? 'none' : 'transform 0.3s ease-out',
-                    // Cross-browser touch optimization
-                    WebkitOverflowScrolling: 'touch',
-                    WebkitTouchCallout: 'none',
-                    WebkitUserSelect: 'none',
-                    KhtmlUserSelect: 'none',
-                    MozUserSelect: 'none',
-                    msUserSelect: 'none',
-                    userSelect: 'none',
-                    // Performance optimization
-                    willChange: 'transform',
-                    backfaceVisibility: 'hidden',
-                    WebkitBackfaceVisibility: 'hidden'
-                }}
+                } as React.CSSProperties}
             >
                 {renderTemplate()}
             </div>
-        </>
+        </div>
     );
 }
+
+// Export individual templates for direct use if needed
+export { BasicTemplate, ModernTemplate, ProfessionalTemplate, ATSFriendlyTemplate };
+
+// Export mobile helper functions for external use
+export const useMobileSectionReorder = (sectionOrder: string[], onSectionReorder: (newOrder: string[]) => void) => {
+    console.log('🔧 useMobileSectionReorder initialized with:', { sectionOrder, hasCallback: !!onSectionReorder });
+    
+    const moveSection = React.useCallback((activeSection: string, direction: 'up' | 'down') => {
+        if (!activeSection) {
+            console.log('❌ No active section to move');
+            return;
+        }
+        
+        console.log('📱 useMobileSectionReorder Moving section:', { activeSection, direction, currentOrder: sectionOrder });
+        
+        const currentIndex = sectionOrder.indexOf(activeSection);
+        if (currentIndex === -1) {
+            console.log('❌ Section not found in order:', activeSection);
+            return;
+        }
+        
+        const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+        
+        if (newIndex >= 0 && newIndex < sectionOrder.length) {
+            const newOrder = [...sectionOrder];
+            [newOrder[currentIndex], newOrder[newIndex]] = [newOrder[newIndex], newOrder[currentIndex]];
+            
+            console.log('✅ useMobileSectionReorder calling callback with new order:', newOrder);
+            onSectionReorder(newOrder);
+            
+            // Provide haptic feedback if available
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        } else {
+            console.log('❌ Cannot move section - out of bounds:', { currentIndex, newIndex, sectionOrderLength: sectionOrder.length });
+        }
+    }, [sectionOrder, onSectionReorder]);
+
+    return { moveSection };
+};
+
+// Export getSectionName utility for external use
+export { getSectionName };
