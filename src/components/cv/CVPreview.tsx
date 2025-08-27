@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
     DndContext,
     closestCenter,
@@ -351,8 +351,8 @@ const SortableItem: React.FC<SortableItemProps> = ({
 }) => {
     const [isMobile, setIsMobile] = useState(false);
     const [isPressed, setIsPressed] = useState(false);
-    const [autoDeactivateTimer, setAutoDeactivateTimer] = useState<NodeJS.Timeout | null>(null);
     const [isMoving, setIsMoving] = useState(false);
+    const autoDeactivateTimerRef = useRef<NodeJS.Timeout | null>(null);
     
     // Check if this section is active
     const isActive = activeSection === id;
@@ -372,8 +372,8 @@ const SortableItem: React.FC<SortableItemProps> = ({
     useEffect(() => {
         if (isMobile && isActive) {
             // Clear existing timer
-            if (autoDeactivateTimer) {
-                clearTimeout(autoDeactivateTimer);
+            if (autoDeactivateTimerRef.current) {
+                clearTimeout(autoDeactivateTimerRef.current);
             }
             
             // Set new timer
@@ -383,7 +383,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
                 }
             }, 10000); // 10 seconds
             
-            setAutoDeactivateTimer(timer);
+            autoDeactivateTimerRef.current = timer;
             
             return () => {
                 if (timer) {
@@ -391,7 +391,15 @@ const SortableItem: React.FC<SortableItemProps> = ({
                 }
             };
         }
-    }, [isActive, isMobile, onSetActiveSection, autoDeactivateTimer]);
+        
+        // Cleanup timer when section becomes inactive
+        return () => {
+            if (autoDeactivateTimerRef.current) {
+                clearTimeout(autoDeactivateTimerRef.current);
+                autoDeactivateTimerRef.current = null;
+            }
+        };
+    }, [isActive, isMobile, onSetActiveSection]);
 
     const {
         attributes,
@@ -414,8 +422,8 @@ const SortableItem: React.FC<SortableItemProps> = ({
     };
 
     // Handle mobile button actions with enhanced feedback
-    const moveUp = (e: React.MouseEvent) => {
-        e.stopPropagation(); // Prevent section click
+    const moveUp = (e: React.MouseEvent | React.TouchEvent) => {
+        e.stopPropagation();
         e.preventDefault();
         
         const currentIndex = sectionOrder.indexOf(id);
@@ -432,12 +440,12 @@ const SortableItem: React.FC<SortableItemProps> = ({
             }
             
             // Reset moving state after animation
-            setTimeout(() => setIsMoving(false), 300);
+            setTimeout(() => setIsMoving(false), 400);
         }
     };
 
-    const moveDown = (e: React.MouseEvent) => {
-        e.stopPropagation(); // Prevent section click
+    const moveDown = (e: React.MouseEvent | React.TouchEvent) => {
+        e.stopPropagation();
         e.preventDefault();
         
         const currentIndex = sectionOrder.indexOf(id);
@@ -454,7 +462,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
             }
             
             // Reset moving state after animation
-            setTimeout(() => setIsMoving(false), 300);
+            setTimeout(() => setIsMoving(false), 400);
         }
     };
 
@@ -463,10 +471,18 @@ const SortableItem: React.FC<SortableItemProps> = ({
     const isLast = currentIndex === sectionOrder.length - 1;
 
     // Handle section click to activate
-    const handleSectionClick = (e: React.MouseEvent) => {
+    const handleSectionClick = (e: React.MouseEvent | React.TouchEvent) => {
         if (isMobile && onSetActiveSection) {
             e.preventDefault();
             e.stopPropagation();
+            
+            // Clear any existing auto-deactivate timer
+            if (autoDeactivateTimerRef.current) {
+                clearTimeout(autoDeactivateTimerRef.current);
+                autoDeactivateTimerRef.current = null;
+            }
+            
+            // Toggle active state
             onSetActiveSection(isActive ? null : id);
         }
     };
@@ -475,15 +491,18 @@ const SortableItem: React.FC<SortableItemProps> = ({
     const handleTouchStart = (e: React.TouchEvent) => {
         if (isMobile) {
             setIsPressed(true);
-            // Prevent default scroll behavior when selecting sections
-            e.preventDefault();
+            // Clear any movement timeout
+            if (autoDeactivateTimerRef.current) {
+                clearTimeout(autoDeactivateTimerRef.current);
+                autoDeactivateTimerRef.current = null;
+            }
         }
     };
 
     const handleTouchEnd = (e: React.TouchEvent) => {
         if (isMobile) {
             setIsPressed(false);
-            // Activate section on touch with better responsiveness
+            // Activate section on touch end for better UX
             if (onSetActiveSection) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -496,7 +515,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
     // Prevent accidental activation during scrolling
     const handleTouchMove = (e: React.TouchEvent) => {
         if (isMobile && isPressed) {
-            // If user moves finger significantly, don't activate
+            // Cancel selection if user is scrolling
             setIsPressed(false);
         }
     };
@@ -515,55 +534,66 @@ const SortableItem: React.FC<SortableItemProps> = ({
                 ${isMobile ? 'cursor-pointer' : 'cursor-grab active:cursor-grabbing'}
                 ${isDragging && !isMobile
                     ? 'shadow-2xl border-2 border-blue-500 bg-blue-50 rounded-lg scale-105 rotate-1'
-                    : 'hover:shadow-lg hover:border-2 hover:border-blue-300 hover:bg-blue-50/50 hover:scale-[1.02] hover:z-50'
+                    : 'hover:shadow-lg hover:border-2 hover:border-blue-300 hover:bg-blue-50/50 hover:scale-[1.01] hover:z-50'
                 }
-                ${isActive && isMobile ? 'border-2 border-blue-500 bg-blue-100/50 shadow-md' : ''}
-                ${isPressed && isMobile ? 'scale-95 bg-blue-200/30' : ''}
-                ${isMoving && isMobile ? 'animate-pulse bg-green-100/50 border-green-400' : ''}
-                transition-all duration-200 ease-in-out
-                border border-transparent rounded-md
+                ${isActive && isMobile ? 'border-2 border-blue-500 bg-blue-100/50 shadow-lg scale-[1.02]' : ''}
+                ${isPressed && isMobile ? 'scale-[0.98] bg-blue-200/40' : ''}
+                ${isMoving && isMobile ? 'animate-pulse bg-green-100/60 border-green-400 shadow-green-200' : ''}
+                transition-all duration-300 ease-out
+                 rounded-lg
                 before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-blue-100/20 before:to-transparent
                 before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300
-                ${isMobile ? 'touch-manipulation py-3' : 'touch-manipulation'}
+                ${isMobile ? 'touch-manipulation py-4 px-2' : 'touch-manipulation'}
                 select-none
-                ${isMobile ? 'min-h-[56px]' : ''}
+                ${isMobile ? 'min-h-[64px]' : ''}
             `}
             title={isMobile ? "Hissəyə toxunun, düymələr görünsün" : "Bütün hissəni sürükləyin"}
         >
-            {/* Mobile Controls - Show only on mobile when section is active */}
+            {/* Mobile Controls - Enhanced for better UX */}
             {isMobile && isActive && (
-                <div className="absolute -left-3 top-1/2 transform -translate-y-1/2 flex flex-col gap-3 z-50 animate-in slide-in-from-left-2 duration-300">
+                <div className="absolute -left-4 top-1/2 transform -translate-y-1/2 flex flex-col gap-3 z-50 animate-in slide-in-from-left-3 duration-200">
+                    {/* Up Button */}
                     <button
                         onClick={moveUp}
+                        onTouchEnd={moveUp}
                         disabled={isFirst}
                         className={`
-                            w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-base shadow-2xl transition-all duration-200
+                            w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-2xl transition-all duration-200 transform
                             ${isFirst 
-                                ? 'bg-gray-400 cursor-not-allowed opacity-50' 
-                                : 'bg-blue-600 hover:bg-blue-700 active:scale-90 hover:shadow-2xl hover:scale-110 active:bg-blue-800'
+                                ? 'bg-gray-400 cursor-not-allowed opacity-50 scale-90' 
+                                : 'bg-blue-600 hover:bg-blue-700 active:scale-95 hover:scale-105 active:bg-blue-800 hover:shadow-2xl'
                             }
-                            border-3 border-white ring-2 ring-blue-200
+                            border-4 border-white ring-2 ring-blue-200 backdrop-blur-sm
                         `}
                         title="Yuxarı aparın"
-                        style={{ touchAction: 'manipulation' }}
+                        style={{ 
+                            touchAction: 'manipulation',
+                            WebkitTapHighlightColor: 'transparent'
+                        }}
                     >
-                        ↑
+                        <span className="text-xl">↑</span>
                     </button>
+                    
+                    {/* Down Button */}
                     <button
                         onClick={moveDown}
+                        onTouchEnd={moveDown}
                         disabled={isLast}
                         className={`
-                            w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-base shadow-2xl transition-all duration-200
+                            w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-2xl transition-all duration-200 transform
                             ${isLast 
-                                ? 'bg-gray-400 cursor-not-allowed opacity-50' 
-                                : 'bg-blue-600 hover:bg-blue-700 active:scale-90 hover:shadow-2xl hover:scale-110 active:bg-blue-800'
+                                ? 'bg-gray-400 cursor-not-allowed opacity-50 scale-90' 
+                                : 'bg-blue-600 hover:bg-blue-700 active:scale-95 hover:scale-105 active:bg-blue-800 hover:shadow-2xl'
                             }
-                            border-3 border-white ring-2 ring-blue-200
+                            border-4 border-white ring-2 ring-blue-200 backdrop-blur-sm
                         `}
                         title="Aşağı aparın"
-                        style={{ touchAction: 'manipulation' }}
+                        style={{ 
+                            touchAction: 'manipulation',
+                            WebkitTapHighlightColor: 'transparent'
+                        }}
                     >
-                        ↓
+                        <span className="text-xl">↓</span>
                     </button>
                 </div>
             )}
@@ -602,18 +632,21 @@ const SortableItem: React.FC<SortableItemProps> = ({
                 </div>
             )}
 
-            {/* Mobile selection indicator with improved visibility */}
+            {/* Mobile selection indicator with improved design */}
             {isMobile && isActive && (
-                <div className="absolute -right-3 top-1/2 transform -translate-y-1/2 z-40 animate-in slide-in-from-right-2 duration-300">
-                    <div className="w-4 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-l-lg shadow-lg animate-pulse ring-2 ring-blue-200"></div>
+                <div className="absolute -right-4 top-1/2 transform -translate-y-1/2 z-40 animate-in slide-in-from-right-3 duration-200">
+                    <div className="w-5 h-12 bg-gradient-to-b from-blue-500 via-blue-600 to-blue-700 rounded-l-xl shadow-lg ring-2 ring-blue-200 animate-pulse"></div>
                 </div>
             )}
 
-            {/* Mobile tap instruction for inactive sections */}
+            {/* Enhanced mobile tap instruction */}
             {isMobile && !isActive && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="bg-blue-600/90 text-white px-4 py-2 rounded-lg text-sm font-medium opacity-0 transition-opacity duration-300 group-hover:opacity-90 backdrop-blur-sm">
-                        📱 Toxunaraq aktivləşdirin
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
+                    <div className="bg-blue-600/95 text-white px-6 py-3 rounded-xl text-sm font-medium opacity-0 transition-all duration-300 group-hover:opacity-100 backdrop-blur-md shadow-lg border border-blue-400/30">
+                        <div className="flex items-center gap-2">
+                            <span className="text-lg">📱</span>
+                            <span>Toxunaraq aktivləşdirin</span>
+                        </div>
                     </div>
                 </div>
             )}
@@ -1118,22 +1151,28 @@ const BasicTemplate: React.FC<{
                     items={sectionOrder}
                     strategy={verticalListSortingStrategy}
                 >
-                    {/* Mobile instruction banner */}
+                    {/* Enhanced mobile instruction banners */}
                     {isMobile && !activeSection && (
-                        <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg text-center shadow-sm">
-                            <p className="text-sm text-blue-700 font-medium flex items-center justify-center gap-2">
-                                <span className="text-lg">📱</span>
-                                <span>Hissəyə toxunaraq yerdəyişmə düymələrini görün</span>
+                        <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 border-2 border-blue-200 rounded-xl text-center shadow-sm">
+                            <div className="flex items-center justify-center gap-3 mb-2">
+                                <span className="text-2xl">📱</span>
+                                <span className="text-lg font-semibold text-blue-800">Mobil İdarəetmə</span>
+                            </div>
+                            <p className="text-sm text-blue-700 font-medium">
+                                Hissəyə toxunaraq yerdəyişmə düymələrini görün
                             </p>
                         </div>
                     )}
 
-                    {/* Active section instruction */}
+                    {/* Active section guidance */}
                     {isMobile && activeSection && (
-                        <div className="mb-4 p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg text-center shadow-sm">
-                            <p className="text-sm text-green-700 font-medium flex items-center justify-center gap-2">
-                                <span className="text-lg">✅</span>
-                                <span>Sol tərəfdəki düymələrlə yerdəyişmə edin</span>
+                        <div className="mb-4 p-4 bg-gradient-to-r from-green-50 via-emerald-50 to-green-50 border-2 border-green-200 rounded-xl text-center shadow-sm">
+                            <div className="flex items-center justify-center gap-3 mb-2">
+                                <span className="text-2xl animate-bounce">✅</span>
+                                <span className="text-lg font-semibold text-green-800">Hissə Seçildi</span>
+                            </div>
+                            <p className="text-sm text-green-700 font-medium">
+                                Sol tərəfdəki ↑↓ düymələri ilə yerdəyişmə edin
                             </p>
                         </div>
                     )}
