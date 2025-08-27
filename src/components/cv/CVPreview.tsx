@@ -1216,6 +1216,19 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
     const [isDragActive, setIsDragActive] = useState(false);
     const [activeId, setActiveId] = useState<string | null>(null);
+    const [activeSection, setActiveSection] = useState<string | null>(null);
+    const [isMobile, setIsMobile] = useState(false);
+
+    // Detect mobile device
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 1024);
+        };
+        
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -1275,6 +1288,8 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
                         id="personalInfo"
                         sectionOrder={sectionOrder}
                         onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={setActiveSection}
                     >
                         {/* Personal Info */}
                         <div className="text-center pb-6 border-b-2 border-blue-500 mb-6">
@@ -1337,6 +1352,8 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
                         id="experience"
                         sectionOrder={sectionOrder}
                         onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={setActiveSection}
                     >
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
@@ -1381,6 +1398,8 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
                         id="education"
                         sectionOrder={sectionOrder}
                         onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={setActiveSection}
                     >
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
@@ -1427,6 +1446,8 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
                         id="skills"
                         sectionOrder={sectionOrder}
                         onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={setActiveSection}
                     >
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
@@ -1461,6 +1482,8 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
                         id="projects"
                         sectionOrder={sectionOrder}
                         onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={setActiveSection}
                     >
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
@@ -1513,6 +1536,8 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
                         id="languages"
                         sectionOrder={sectionOrder}
                         onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={setActiveSection}
                     >
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
@@ -1538,6 +1563,8 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
                         id="certifications"
                         sectionOrder={sectionOrder}
                         onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={setActiveSection}
                     >
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
@@ -1577,6 +1604,8 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
                         id="volunteerExperience"
                         sectionOrder={sectionOrder}
                         onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={setActiveSection}
                     >
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
@@ -1618,6 +1647,8 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
                         id="customSections"
                         sectionOrder={sectionOrder}
                         onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={setActiveSection}
                     >
                         <div className="mb-6">
                             {customSections.map((section) => (
@@ -1684,6 +1715,32 @@ const ModernTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onSection
         >
             <div className="w-full h-full bg-white text-gray-900" style={{ padding: '20mm 15mm' }}>
                 <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
+                    {/* Enhanced mobile instruction banners */}
+                    {isMobile && !activeSection && (
+                        <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 border-2 border-blue-200 rounded-xl text-center shadow-sm">
+                            <div className="flex items-center justify-center gap-3 mb-2">
+                                <span className="text-2xl">📱</span>
+                                <span className="text-lg font-semibold text-blue-800">Mobil İdarəetmə</span>
+                            </div>
+                            <p className="text-sm text-blue-700 font-medium">
+                                Hissəyə toxunaraq yerdəyişmə düymələrini görün
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Active section guidance */}
+                    {isMobile && activeSection && (
+                        <div className="mb-4 p-4 bg-gradient-to-r from-green-50 via-emerald-50 to-green-50 border-2 border-green-200 rounded-xl text-center shadow-sm">
+                            <div className="flex items-center justify-center gap-3 mb-2">
+                                <span className="text-2xl animate-bounce">✅</span>
+                                <span className="text-lg font-semibold text-green-800">Hissə Seçildi</span>
+                            </div>
+                            <p className="text-sm text-green-700 font-medium">
+                                Sol tərəfdəki ↑↓ düymələri ilə yerdəyişmə edin
+                            </p>
+                        </div>
+                    )}
+                    
                     {sectionOrder.map((sectionType) => renderModernSection(sectionType)).filter(Boolean)}
                 </SortableContext>
             </div>
@@ -2144,6 +2201,19 @@ const ProfessionalTemplate: React.FC<{ data: CVData; sectionOrder: string[]; onS
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
 
     const [activeId, setActiveId] = useState<string | null>(null);
+    const [activeSection, setActiveSection] = useState<string | null>(null);
+    const [isMobile, setIsMobile] = useState(false);
+
+    // Detect mobile device
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 1024);
+        };
+        
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {

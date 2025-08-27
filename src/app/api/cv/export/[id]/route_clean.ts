@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verify } from 'jsonwebtoken';
 import puppeteer from 'puppeteer';
 import chromium from '@sparticuz/chromium';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, Header, Footer } from 'docx';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key';
 
@@ -15,14 +16,14 @@ export async function POST(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    console.log('=== PDF Export API başladı ===');
+    console.log('=== Export API başladı ===');
     
     let browser: any;
     
     try {
         const { id } = await params;
         const cvId = id;
-        console.log('PDF Export başladı - CV ID:', cvId);
+        console.log('Export başladı - CV ID:', cvId);
         
         // JWT token doğrulama
         const authHeader = request.headers.get('authorization');
@@ -62,16 +63,21 @@ export async function POST(
             cssContent: cssContent ? 'mövcud' : 'yox'
         });
 
-        if (!format || format !== 'pdf') {
+        if (!format || (format !== 'pdf' && format !== 'docx')) {
             return NextResponse.json(
-                { error: 'Yalnız PDF format dəstəklənir' }, 
+                { error: 'Yalnız PDF və DOCX format dəstəklənir' }, 
                 { status: 400 }
             );
         }
 
-        // Browser başlat və PDF generate et
-        browser = await initializeBrowser();
-        return await generatePDF(browser, data, templateId, fontSettings, htmlContent, cssContent, cvId);
+        // Format-based processing
+        if (format === 'docx') {
+            return await generateDOCX(data, templateId, fontSettings, cvId);
+        } else {
+            // Browser başlat
+            browser = await initializeBrowser();
+            return await generatePDF(browser, data, templateId, fontSettings, htmlContent, cssContent, cvId);
+        }
 
     } catch (error) {
         console.error('Export xətası:', error);
@@ -224,6 +230,377 @@ async function initializeBrowser() {
             const errorMsg = browserError instanceof Error ? browserError.message : 'Unknown error';
             throw new Error(`Serverless browser launch failed: ${errorMsg}`);
         }
+    }
+}
+
+async function generateDOCX(cvData: any, templateId: string, fontSettings: any, cvId: string) {
+    console.log('=== DOCX Export başladı ===');
+    
+    try {
+        const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [] } = cvData;
+        
+        // Default font settings for DOCX
+        const defaultFontSettings = {
+            fontFamily: 'Arial',
+            headingSize: 16,
+            subheadingSize: 14,
+            bodySize: 11,
+            smallSize: 10
+        };
+        
+        const fonts = { ...defaultFontSettings, ...fontSettings };
+        
+        // Create DOCX document
+        const doc = new Document({
+            styles: {
+                paragraphStyles: [
+                    {
+                        id: "heading1",
+                        name: "Heading 1",
+                        basedOn: "Normal",
+                        next: "Normal",
+                        run: {
+                            size: fonts.headingSize * 2, // DOCX uses half-points
+                            bold: true,
+                            color: "2563EB",
+                        },
+                        paragraph: {
+                            spacing: { after: 240 },
+                        },
+                    },
+                    {
+                        id: "heading2",
+                        name: "Heading 2",
+                        basedOn: "Normal",
+                        next: "Normal",
+                        run: {
+                            size: fonts.subheadingSize * 2,
+                            bold: true,
+                            color: "1F2937",
+                        },
+                        paragraph: {
+                            spacing: { after: 120 },
+                            border: {
+                                bottom: {
+                                    color: "auto",
+                                    space: 1,
+                                    style: BorderStyle.SINGLE,
+                                    size: 6,
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            sections: [
+                {
+                    properties: {},
+                    children: [
+                        // Header - Name and Contact Info
+                        new Paragraph({
+                            children: [
+                                new TextRun({
+                                    text: personalInfo.fullName || personalInfo.name || `${personalInfo.firstName || ''} ${personalInfo.lastName || ''}`.trim(),
+                                    bold: true,
+                                    size: fonts.headingSize * 2,
+                                    color: "2563EB",
+                                }),
+                            ],
+                            alignment: AlignmentType.CENTER,
+                            spacing: { after: 200 },
+                        }),
+                        
+                        // Contact Information
+                        ...(personalInfo.email || personalInfo.phone || personalInfo.location ? [
+                            new Paragraph({
+                                children: [
+                                    new TextRun({
+                                        text: [
+                                            personalInfo.email,
+                                            personalInfo.phone,
+                                            personalInfo.location,
+                                            personalInfo.linkedin,
+                                            personalInfo.website
+                                        ].filter(Boolean).join(' | '),
+                                        size: fonts.smallSize * 2,
+                                        color: "6B7280",
+                                    }),
+                                ],
+                                alignment: AlignmentType.CENTER,
+                                spacing: { after: 240 },
+                            }),
+                        ] : []),
+                        
+                        // Summary Section
+                        ...(personalInfo.summary ? [
+                            new Paragraph({
+                                children: [
+                                    new TextRun({
+                                        text: "ÖZƏT",
+                                        bold: true,
+                                        size: fonts.subheadingSize * 2,
+                                        color: "1F2937",
+                                    }),
+                                ],
+                                spacing: { after: 120 },
+                            }),
+                            new Paragraph({
+                                children: [
+                                    new TextRun({
+                                        text: personalInfo.summary.replace(/<[^>]*>/g, ''),
+                                        size: fonts.bodySize * 2,
+                                        color: "374151",
+                                    }),
+                                ],
+                                spacing: { after: 240 },
+                            }),
+                        ] : []),
+                        
+                        // Experience Section
+                        ...(experience.length > 0 ? [
+                            new Paragraph({
+                                children: [
+                                    new TextRun({
+                                        text: "İŞ TƏCRÜBƏSİ",
+                                        bold: true,
+                                        size: fonts.subheadingSize * 2,
+                                        color: "1F2937",
+                                    }),
+                                ],
+                                spacing: { after: 120 },
+                            }),
+                            ...experience.flatMap((exp: any) => [
+                                new Paragraph({
+                                    children: [
+                                        new TextRun({
+                                            text: exp.position,
+                                            bold: true,
+                                            size: fonts.bodySize * 2,
+                                            color: "111827",
+                                        }),
+                                        new TextRun({
+                                            text: ` - ${exp.company}`,
+                                            size: fonts.bodySize * 2,
+                                            color: "2563EB",
+                                        }),
+                                    ],
+                                    spacing: { after: 60 },
+                                }),
+                                new Paragraph({
+                                    children: [
+                                        new TextRun({
+                                            text: `${formatDateForDOCX(exp.startDate)} - ${exp.current ? 'Hazırda' : formatDateForDOCX(exp.endDate || '')}`,
+                                            size: fonts.smallSize * 2,
+                                            color: "6B7280",
+                                            italics: true,
+                                        }),
+                                    ],
+                                    spacing: { after: 60 },
+                                }),
+                                ...(exp.description ? [
+                                    new Paragraph({
+                                        children: [
+                                            new TextRun({
+                                                text: exp.description.replace(/<[^>]*>/g, ''),
+                                                size: fonts.smallSize * 2,
+                                                color: "4B5563",
+                                            }),
+                                        ],
+                                        spacing: { after: 160 },
+                                    }),
+                                ] : []),
+                            ]),
+                        ] : []),
+                        
+                        // Education Section
+                        ...(education.length > 0 ? [
+                            new Paragraph({
+                                children: [
+                                    new TextRun({
+                                        text: "TƏHSİL",
+                                        bold: true,
+                                        size: fonts.subheadingSize * 2,
+                                        color: "1F2937",
+                                    }),
+                                ],
+                                spacing: { after: 120 },
+                            }),
+                            ...education.flatMap((edu: any) => [
+                                new Paragraph({
+                                    children: [
+                                        new TextRun({
+                                            text: edu.degree,
+                                            bold: true,
+                                            size: fonts.bodySize * 2,
+                                            color: "111827",
+                                        }),
+                                    ],
+                                    spacing: { after: 60 },
+                                }),
+                                new Paragraph({
+                                    children: [
+                                        new TextRun({
+                                            text: edu.institution,
+                                            size: fonts.bodySize * 2,
+                                            color: "2563EB",
+                                        }),
+                                    ],
+                                    spacing: { after: 60 },
+                                }),
+                                new Paragraph({
+                                    children: [
+                                        new TextRun({
+                                            text: `${formatDateForDOCX(edu.startDate)} - ${edu.current ? 'Hazırda' : formatDateForDOCX(edu.endDate || '')}`,
+                                            size: fonts.smallSize * 2,
+                                            color: "6B7280",
+                                            italics: true,
+                                        }),
+                                    ],
+                                    spacing: { after: 160 },
+                                }),
+                            ]),
+                        ] : []),
+                        
+                        // Skills Section
+                        ...(skills.length > 0 ? [
+                            new Paragraph({
+                                children: [
+                                    new TextRun({
+                                        text: "BACARIQLAR",
+                                        bold: true,
+                                        size: fonts.subheadingSize * 2,
+                                        color: "1F2937",
+                                    }),
+                                ],
+                                spacing: { after: 120 },
+                            }),
+                            new Paragraph({
+                                children: [
+                                    new TextRun({
+                                        text: skills.map((skill: any) => skill.name).join(', '),
+                                        size: fonts.bodySize * 2,
+                                        color: "374151",
+                                    }),
+                                ],
+                                spacing: { after: 160 },
+                            }),
+                        ] : []),
+                        
+                        // Languages Section
+                        ...(languages.length > 0 ? [
+                            new Paragraph({
+                                children: [
+                                    new TextRun({
+                                        text: "DİLLƏR",
+                                        bold: true,
+                                        size: fonts.subheadingSize * 2,
+                                        color: "1F2937",
+                                    }),
+                                ],
+                                spacing: { after: 120 },
+                            }),
+                            new Paragraph({
+                                children: [
+                                    new TextRun({
+                                        text: languages.map((lang: any) => `${lang.language} (${lang.level})`).join(', '),
+                                        size: fonts.bodySize * 2,
+                                        color: "374151",
+                                    }),
+                                ],
+                                spacing: { after: 160 },
+                            }),
+                        ] : []),
+                        
+                        // Projects Section
+                        ...(projects.length > 0 ? [
+                            new Paragraph({
+                                children: [
+                                    new TextRun({
+                                        text: "LAYİHƏLƏR",
+                                        bold: true,
+                                        size: fonts.subheadingSize * 2,
+                                        color: "1F2937",
+                                    }),
+                                ],
+                                spacing: { after: 120 },
+                            }),
+                            ...projects.flatMap((project: any) => [
+                                new Paragraph({
+                                    children: [
+                                        new TextRun({
+                                            text: project.name,
+                                            bold: true,
+                                            size: fonts.bodySize * 2,
+                                            color: "111827",
+                                        }),
+                                    ],
+                                    spacing: { after: 60 },
+                                }),
+                                ...(project.description ? [
+                                    new Paragraph({
+                                        children: [
+                                            new TextRun({
+                                                text: project.description,
+                                                size: fonts.smallSize * 2,
+                                                color: "4B5563",
+                                            }),
+                                        ],
+                                        spacing: { after: 60 },
+                                    }),
+                                ] : []),
+                                ...(project.skills ? [
+                                    new Paragraph({
+                                        children: [
+                                            new TextRun({
+                                                text: `Texnologiyalar: ${project.skills}`,
+                                                size: fonts.smallSize * 2,
+                                                color: "2563EB",
+                                            }),
+                                        ],
+                                        spacing: { after: 160 },
+                                    }),
+                                ] : []),
+                            ]),
+                        ] : []),
+                    ],
+                },
+            ],
+        });
+        
+        // Generate DOCX buffer
+        const buffer = await Packer.toBuffer(doc);
+        
+        console.log('DOCX yaradıldı, ölçü:', buffer.length, 'bytes');
+        
+        return new NextResponse(Buffer.from(buffer), {
+            status: 200,
+            headers: {
+                'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'Content-Disposition': `attachment; filename="CV-${cvId}.docx"`,
+                'Cache-Control': 'no-cache'
+            }
+        });
+        
+    } catch (error) {
+        console.error('DOCX export xətası:', error);
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+        return NextResponse.json(
+            { error: `DOCX export xətası: ${errorMsg}` }, 
+            { status: 500 }
+        );
+    }
+}
+
+function formatDateForDOCX(dateStr: string): string {
+    if (!dateStr) return '';
+    if (dateStr.toLowerCase() === 'present' || dateStr.toLowerCase() === 'hazırda') {
+        return 'Hazırda';
+    }
+    try {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('az-AZ', { month: 'short', year: 'numeric' });
+    } catch {
+        return dateStr;
     }
 }
 
