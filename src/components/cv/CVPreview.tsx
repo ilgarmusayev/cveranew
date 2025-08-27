@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     DndContext,
     closestCenter,
@@ -17,10 +17,8 @@ import {
     arrayMove,
     SortableContext,
     sortableKeyboardCoordinates,
-    verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import {
     useSortable,
+    verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { CVData, PersonalInfo, Experience, Education, Skill, Language, Project, Certification, VolunteerExperience, CustomSection, CustomSectionItem } from '@/types/cv';
@@ -327,7 +325,7 @@ const splitContentToPages = (sections: React.ReactNode[], pageHeightPx: number =
     return pages.length > 0 ? pages : [[<div key="empty">Məlumat yoxdur</div>]];
 };
 
-// Responsive Item Component - DND for Desktop, Buttons for Mobile
+// Enhanced Responsive Item Component - Complete Rewrite
 interface SortableItemProps {
     id: string;
     children: React.ReactNode;
@@ -349,58 +347,87 @@ const SortableItem: React.FC<SortableItemProps> = ({
     activeSection,
     onSetActiveSection
 }) => {
-    const [isMobile, setIsMobile] = useState(false);
-    const [isPressed, setIsPressed] = useState(false);
-    const [isMoving, setIsMoving] = useState(false);
-    const autoDeactivateTimerRef = useRef<NodeJS.Timeout | null>(null);
+    // State management for responsive behavior
+    const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
+    const [isInteracting, setIsInteracting] = useState(false);
+    const [isReordering, setIsReordering] = useState(false);
+    const [lastTouchTime, setLastTouchTime] = useState(0);
     
-    // Check if this section is active
+    // Refs for touch tracking
+    const touchStartPos = useRef({ x: 0, y: 0 });
+    const interactionTimer = useRef<NodeJS.Timeout | null>(null);
+    
+    // Check if this section is currently selected
     const isActive = activeSection === id;
     
-    // Detect mobile on mount
+    // Enhanced device detection with better breakpoints
     useEffect(() => {
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth < 1024); // lg breakpoint
-        };
-        
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
-    }, []);
-
-    // Auto-deactivate section after 8 seconds of inactivity (mobile only)
-    useEffect(() => {
-        if (isMobile && isActive) {
-            // Clear existing timer
-            if (autoDeactivateTimerRef.current) {
-                clearTimeout(autoDeactivateTimerRef.current);
+        const detectDevice = () => {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            const isPortrait = height > width;
+            
+            // Determine device type based on comprehensive criteria
+            if (width < 768 || (hasTouch && width < 1024 && isPortrait)) {
+                setDeviceType('mobile');
+            } else if (width < 1024 || (hasTouch && width < 1280)) {
+                setDeviceType('tablet');
+            } else {
+                setDeviceType('desktop');
             }
             
-            // Set new timer
-            const timer = setTimeout(() => {
+            console.log('Device detected:', {
+                width,
+                height,
+                hasTouch,
+                isPortrait,
+                deviceType: width < 768 ? 'mobile' : width < 1024 ? 'tablet' : 'desktop'
+            });
+        };
+        
+        detectDevice();
+        
+        // Listen for resize and orientation changes
+        const handleResize = () => {
+            clearTimeout(interactionTimer.current!);
+            detectDevice();
+        };
+        
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('orientationchange', handleResize);
+        
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('orientationchange', handleResize);
+            if (interactionTimer.current) clearTimeout(interactionTimer.current);
+        };
+    }, []);
+
+    // Auto-deactivate section after inactivity (mobile/tablet only)
+    useEffect(() => {
+        if ((deviceType === 'mobile' || deviceType === 'tablet') && isActive && !isInteracting) {
+            if (interactionTimer.current) clearTimeout(interactionTimer.current);
+            
+            const timeout = deviceType === 'mobile' ? 6000 : 8000; // Different timeouts for mobile vs tablet
+            
+            interactionTimer.current = setTimeout(() => {
                 if (onSetActiveSection) {
                     onSetActiveSection(null);
                 }
-            }, 8000); // 8 seconds
-            
-            autoDeactivateTimerRef.current = timer;
+            }, timeout);
             
             return () => {
-                if (timer) {
-                    clearTimeout(timer);
-                }
+                if (interactionTimer.current) clearTimeout(interactionTimer.current);
             };
         }
         
-        // Cleanup timer when section becomes inactive
         return () => {
-            if (autoDeactivateTimerRef.current) {
-                clearTimeout(autoDeactivateTimerRef.current);
-                autoDeactivateTimerRef.current = null;
-            }
+            if (interactionTimer.current) clearTimeout(interactionTimer.current);
         };
-    }, [isActive, isMobile, onSetActiveSection]);
+    }, [isActive, isInteracting, deviceType, onSetActiveSection]);
 
+    // DND Kit setup (for desktop only)
     const {
         attributes,
         listeners,
@@ -408,319 +435,249 @@ const SortableItem: React.FC<SortableItemProps> = ({
         transform,
         transition,
         isDragging,
-    } = useSortable({ id });
+    } = useSortable({ 
+        id,
+        disabled: deviceType !== 'desktop' // Disable DND on mobile/tablet
+    });
 
-    const style: React.CSSProperties = {
+    const dndStyle: React.CSSProperties = {
         transform: CSS.Transform.toString(transform),
         transition,
-        opacity: isDragging ? 0.9 : 1,
+        opacity: isDragging ? 0.8 : 1,
         zIndex: isDragging ? 9999 : 'auto',
-        touchAction: isMobile ? 'auto' : 'manipulation',
         userSelect: 'none',
         WebkitUserSelect: 'none',
-        WebkitTouchCallout: 'none',
     };
 
-    // Handle mobile button actions with enhanced feedback
-    const moveUp = (e: React.MouseEvent | React.TouchEvent) => {
-        e.stopPropagation();
-        e.preventDefault();
-        
-        console.log('=== MOVE UP CLICKED ===');
-        console.log('Section ID:', id);
-        console.log('Current index:', sectionOrder.indexOf(id));
-        
-        // Don't allow parent section to be activated when button is clicked
-        if (e.currentTarget !== e.target) {
-            return;
-        }
-        
-        const currentIndex = sectionOrder.indexOf(id);
-        if (currentIndex > 0) {
-            setIsMoving(true);
-            
-            const newOrder = [...sectionOrder];
-            [newOrder[currentIndex], newOrder[currentIndex - 1]] = [newOrder[currentIndex - 1], newOrder[currentIndex]];
-            onSectionReorder(newOrder);
-            
-            console.log('✅ Moved up - New order:', newOrder);
-            
-            // Provide haptic feedback if available
-            if (navigator.vibrate) {
-                navigator.vibrate(50);
-            }
-            
-            // Reset moving state after animation
-            setTimeout(() => setIsMoving(false), 400);
-        }
-    };
-
-    const moveDown = (e: React.MouseEvent | React.TouchEvent) => {
-        e.stopPropagation();
-        e.preventDefault();
-        
-        console.log('=== MOVE DOWN CLICKED ===');
-        console.log('Section ID:', id);
-        console.log('Current index:', sectionOrder.indexOf(id));
-        
-        // Don't allow parent section to be activated when button is clicked
-        if (e.currentTarget !== e.target) {
-            return;
-        }
-        
-        const currentIndex = sectionOrder.indexOf(id);
-        if (currentIndex < sectionOrder.length - 1) {
-            setIsMoving(true);
-            
-            const newOrder = [...sectionOrder];
-            [newOrder[currentIndex], newOrder[currentIndex + 1]] = [newOrder[currentIndex + 1], newOrder[currentIndex]];
-            onSectionReorder(newOrder);
-            
-            console.log('✅ Moved down - New order:', newOrder);
-            
-            // Provide haptic feedback if available
-            if (navigator.vibrate) {
-                navigator.vibrate(50);
-            }
-            
-            // Reset moving state after animation
-            setTimeout(() => setIsMoving(false), 400);
-        }
-    };
-
+    // Get current section index and navigation state
     const currentIndex = sectionOrder.indexOf(id);
     const isFirst = currentIndex === 0;
     const isLast = currentIndex === sectionOrder.length - 1;
 
-    // Handle section click to activate
-    const handleSectionClick = (e: React.MouseEvent | React.TouchEvent) => {
-        if (isMobile && onSetActiveSection) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            // Clear any existing auto-deactivate timer
-            if (autoDeactivateTimerRef.current) {
-                clearTimeout(autoDeactivateTimerRef.current);
-                autoDeactivateTimerRef.current = null;
-            }
-            
-            // Toggle active state - only for mouse clicks, not touch events
-            if (e.type === 'click') {
-                onSetActiveSection(isActive ? null : id);
-            }
+    // Enhanced section reordering function
+    const reorderSection = (direction: 'up' | 'down') => {
+        const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+        
+        if (newIndex < 0 || newIndex >= sectionOrder.length) return;
+        
+        setIsReordering(true);
+        
+        const newOrder = [...sectionOrder];
+        [newOrder[currentIndex], newOrder[newIndex]] = [newOrder[newIndex], newOrder[currentIndex]];
+        
+        onSectionReorder(newOrder);
+        
+        // Haptic feedback for supported devices
+        if (navigator.vibrate) {
+            navigator.vibrate(40);
+        }
+        
+        console.log(`✅ Section moved ${direction}:`, { id, from: currentIndex, to: newIndex });
+        
+        // Reset reordering state
+        setTimeout(() => setIsReordering(false), 300);
+    };
+
+    // Enhanced touch event handlers for mobile/tablet
+    const handleTouchStart = (e: React.TouchEvent) => {
+        if (deviceType === 'desktop') return;
+        
+        const touch = e.touches[0];
+        touchStartPos.current = { x: touch.clientX, y: touch.clientY };
+        setLastTouchTime(Date.now());
+        setIsInteracting(true);
+        
+        // Clear any existing timers
+        if (interactionTimer.current) {
+            clearTimeout(interactionTimer.current);
         }
     };
 
-    // Handle touch events for better mobile experience
-    const handleTouchStart = (e: React.TouchEvent) => {
-        if (isMobile) {
-            setIsPressed(true);
-            // Clear any movement timeout
-            if (autoDeactivateTimerRef.current) {
-                clearTimeout(autoDeactivateTimerRef.current);
-                autoDeactivateTimerRef.current = null;
-            }
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (deviceType === 'desktop') return;
+        
+        const touch = e.touches[0];
+        const deltaX = Math.abs(touch.clientX - touchStartPos.current.x);
+        const deltaY = Math.abs(touch.clientY - touchStartPos.current.y);
+        
+        // If significant movement detected, cancel interaction
+        if (deltaX > 10 || deltaY > 10) {
+            setIsInteracting(false);
         }
     };
 
     const handleTouchEnd = (e: React.TouchEvent) => {
-        if (isMobile && onSetActiveSection) {
-            setIsPressed(false);
-            // Activate section on touch end for better UX
+        if (deviceType === 'desktop' || !onSetActiveSection) return;
+        
+        const touchDuration = Date.now() - lastTouchTime;
+        const touch = e.changedTouches[0];
+        const deltaX = Math.abs(touch.clientX - touchStartPos.current.x);
+        const deltaY = Math.abs(touch.clientY - touchStartPos.current.y);
+        
+        // Only register as tap if it's quick and minimal movement
+        const isTap = touchDuration < 400 && deltaX < 15 && deltaY < 15;
+        
+        if (isTap) {
             e.preventDefault();
             e.stopPropagation();
             
-            console.log('=== MOBILE TOUCH END ===');
-            console.log('Section ID:', id);
-            console.log('Current active section:', activeSection);
-            console.log('Will toggle to:', isActive ? null : id);
-            
             // Toggle active state
             onSetActiveSection(isActive ? null : id);
+            
+            // Haptic feedback
+            if (navigator.vibrate) {
+                navigator.vibrate(30);
+            }
+            
+            console.log('📱 Section tapped:', { id, wasActive: isActive, nowActive: !isActive });
         }
+        
+        setIsInteracting(false);
     };
 
-    // Prevent accidental activation during scrolling
-    const handleTouchMove = (e: React.TouchEvent) => {
-        if (isMobile && isPressed) {
-            // Cancel selection if user is scrolling
-            setIsPressed(false);
+    // Handle mouse click for desktop
+    const handleClick = (e: React.MouseEvent) => {
+        if (deviceType !== 'desktop' || !onSetActiveSection) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // On desktop, clicking toggles active state (for testing)
+        onSetActiveSection(isActive ? null : id);
+    };
+
+    // Responsive styles based on device type
+    const getContainerStyles = () => {
+        const baseStyles = "relative transition-all duration-300 ease-out rounded-lg";
+        
+        switch (deviceType) {
+            case 'mobile':
+                return `${baseStyles} 
+                    ${isActive ? 'bg-blue-50 border-2 border-blue-500 shadow-lg scale-[1.02] ring-2 ring-blue-200' : 'hover:bg-gray-50'} 
+                    ${isReordering ? 'animate-pulse bg-green-50 border-green-400' : ''}
+                    py-4 px-3 my-2 cursor-pointer touch-manipulation
+                    min-h-[70px]`;
+                    
+            case 'tablet':
+                return `${baseStyles}
+                    ${isActive ? 'bg-blue-50 border-2 border-blue-500 shadow-xl scale-[1.03] ring-2 ring-blue-200' : 'hover:bg-gray-50'} 
+                    ${isReordering ? 'animate-pulse bg-green-50 border-green-400' : ''}
+                    py-5 px-4 my-3 cursor-pointer touch-manipulation
+                    min-h-[80px]`;
+                    
+            case 'desktop':
+                return `${baseStyles}
+                    ${isDragging ? 'shadow-2xl border-2 border-blue-500 bg-blue-50 scale-105 rotate-1 z-[9999]' : 'hover:shadow-lg hover:border-2 hover:border-blue-300 hover:bg-blue-50/50 hover:scale-[1.01]'}
+                    ${isActive ? 'bg-blue-50 border-2 border-blue-500 shadow-lg' : ''}
+                    py-3 px-2 my-1 cursor-grab active:cursor-grabbing
+                    group`;
+                    
+            default:
+                return baseStyles;
         }
     };
 
     return (
         <div
             ref={setNodeRef}
-            {...(isMobile ? {} : { ...attributes, ...listeners })}
-            onClick={handleSectionClick}
+            {...(deviceType === 'desktop' ? { ...attributes, ...listeners } : {})}
+            onClick={handleClick}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
-            className={`
-                relative group
-                ${isMobile ? 'cursor-pointer' : 'cursor-grab active:cursor-grabbing'}
-                ${isDragging && !isMobile
-                    ? 'shadow-2xl border-2 border-blue-500 bg-blue-50 rounded-lg scale-105 rotate-1'
-                    : 'hover:shadow-lg hover:border-2 hover:border-blue-300 hover:bg-blue-50/50 hover:scale-[1.01] hover:z-50'
-                }
-                ${isActive && isMobile ? 'border-4 border-red-500 bg-red-100/70 shadow-2xl scale-[1.05] ring-4 ring-red-300' : ''}
-                ${isPressed && isMobile ? 'scale-[0.98] bg-blue-200/40' : ''}
-                ${isMoving && isMobile ? 'animate-pulse bg-green-100/60 border-green-400 shadow-green-200' : ''}
-                transition-all duration-300 ease-out
-                 rounded-lg
-                before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-blue-100/20 before:to-transparent
-                before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300
-                ${isMobile ? 'touch-manipulation py-6 px-4' : 'touch-manipulation'}
-                select-none
-                ${isMobile ? 'min-h-[80px]' : ''}
-            `}
-            title={isMobile ? "" : "Bütün hissəni sürükləyin"}
+            className={getContainerStyles()}
+            title={deviceType === 'desktop' ? "Sürükləyərək yerdəyişmə edin" : "Seçmək üçün toxunun"}
             style={{
-                ...style,
-                // iPhone Safari fix
-                WebkitOverflowScrolling: 'touch',
-                overflow: 'visible',
-                position: 'relative'
+                ...dndStyle,
+                touchAction: deviceType === 'desktop' ? 'none' : 'pan-y',
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
+                WebkitTouchCallout: 'none',
+                position: 'relative',
+                overflow: 'visible'
             }}
         >
-            {/* Mobile Controls - Positioned relative to section */}
-            {isMobile && isActive && (
-                <div className="absolute -left-16 top-1/2 transform -translate-y-1/2 flex flex-col gap-3 z-[99999] animate-in slide-in-from-left-3 duration-300 ease-out"
-                     style={{
-                         position: 'absolute',
-                         left: '-64px',
-                         zIndex: 99999,
-                         pointerEvents: 'auto',
-                         // iPhone Safari specific fixes
-                         WebkitBackfaceVisibility: 'hidden',
-                         backfaceVisibility: 'hidden',
-                         WebkitTransform: 'translateZ(0)',
-                         transform: 'translateZ(0)',
-                         WebkitPerspective: 1000,
-                         perspective: 1000,
-                         willChange: 'transform'
-                     }}>
+            {/* Mobile/Tablet Controls - Modern floating buttons */}
+            {(deviceType === 'mobile' || deviceType === 'tablet') && isActive && (
+                <div className="absolute -left-14 sm:-left-16 top-1/2 transform -translate-y-1/2 flex flex-col gap-3 z-[99999]">
                     {/* Up Button */}
                     <button
-                        onClick={moveUp}
-                        onTouchStart={(e) => {
+                        onClick={(e) => {
                             e.stopPropagation();
                             e.preventDefault();
-                        }}
-                        onTouchEnd={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            moveUp(e);
+                            reorderSection('up');
                         }}
                         disabled={isFirst}
                         className={`
-                            w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-2xl transition-all duration-200 transform
+                            w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center
+                            text-white font-bold shadow-lg transition-all duration-200
                             ${isFirst 
-                                ? 'bg-gray-400 cursor-not-allowed opacity-50 scale-90' 
-                                : 'bg-blue-600 hover:bg-blue-700 active:scale-95 hover:scale-105 active:bg-blue-800 hover:shadow-2xl'
+                                ? 'bg-gray-400 opacity-50 cursor-not-allowed' 
+                                : 'bg-blue-600 hover:bg-blue-700 active:scale-95 hover:scale-110 hover:shadow-xl'
                             }
-                            border-2 border-white ring-2 ring-blue-200 backdrop-blur-sm
+                            border-2 border-white ring-2 ring-blue-200
                         `}
-                        title="Yuxarı aparın"
                         style={{ 
                             touchAction: 'manipulation',
-                            WebkitTapHighlightColor: 'transparent',
-                            position: 'relative',
-                            zIndex: 99999
+                            WebkitTapHighlightColor: 'transparent'
                         }}
                     >
-                        <span className="text-xl">↑</span>
+                        <span className="text-lg leading-none">↑</span>
                     </button>
                     
                     {/* Down Button */}
                     <button
-                        onClick={moveDown}
-                        onTouchStart={(e) => {
+                        onClick={(e) => {
                             e.stopPropagation();
                             e.preventDefault();
-                        }}
-                        onTouchEnd={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            moveDown(e);
+                            reorderSection('down');
                         }}
                         disabled={isLast}
                         className={`
-                            w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-2xl transition-all duration-200 transform
+                            w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center
+                            text-white font-bold shadow-lg transition-all duration-200
                             ${isLast 
-                                ? 'bg-gray-400 cursor-not-allowed opacity-50 scale-90' 
-                                : 'bg-blue-600 hover:bg-blue-700 active:scale-95 hover:scale-105 active:bg-blue-800 hover:shadow-2xl'
+                                ? 'bg-gray-400 opacity-50 cursor-not-allowed' 
+                                : 'bg-blue-600 hover:bg-blue-700 active:scale-95 hover:scale-110 hover:shadow-xl'
                             }
-                            border-2 border-white ring-2 ring-blue-200 backdrop-blur-sm
+                            border-2 border-white ring-2 ring-blue-200
                         `}
-                        title="Aşağı aparın"
                         style={{ 
                             touchAction: 'manipulation',
-                            WebkitTapHighlightColor: 'transparent',
-                            position: 'relative',
-                            zIndex: 99999
+                            WebkitTapHighlightColor: 'transparent'
                         }}
                     >
-                        <span className="text-xl">↓</span>
+                        <span className="text-lg leading-none">↓</span>
                     </button>
                 </div>
             )}
 
-            {/* Desktop Drag Handle - Show only on desktop */}
-            {!isMobile && (
-                <div
-                    className={`absolute ${dragIconPosition === 'right' ? '-right-3' : '-left-3'} top-1/2 transform -translate-y-1/2
-                                opacity-0 group-hover:opacity-100 transition-all duration-200`}
-                    style={{ userSelect: 'none', zIndex: 99999 }}
-                >
+            {/* Active indicator for mobile/tablet */}
+            {(deviceType === 'mobile' || deviceType === 'tablet') && isActive && (
+                <div className="absolute -right-3 top-1/2 transform -translate-y-1/2 z-[99998]">
+                    <div className="w-5 h-10 bg-gradient-to-b from-green-500 to-green-600 rounded-l-lg shadow-lg animate-pulse"></div>
+                </div>
+            )}
+
+            {/* Desktop drag handle */}
+            {deviceType === 'desktop' && (
+                <div className={`absolute ${dragIconPosition === 'right' ? '-right-3' : '-left-3'} top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200`}>
                     <div className="bg-blue-600 text-white rounded-full w-7 h-7 flex items-center justify-center shadow-xl hover:bg-blue-700 transition-colors border-2 border-white">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-                        </svg>
+                        <span className="text-xs">⋮⋮</span>
                     </div>
                 </div>
             )}
 
-            {/* Desktop Hover instruction */}
-            {!isMobile && showDragInstruction && (
-                <div
-                    className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium whitespace-nowrap shadow-lg"
-                    style={{ userSelect: 'none', zIndex: 99999 }}
-                >
+            {/* Desktop hover instruction */}
+            {deviceType === 'desktop' && showDragInstruction && (
+                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium whitespace-nowrap shadow-lg z-[99999]">
                     Sürükləyərək yerdəyişmə edin
                     <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-blue-600"></div>
                 </div>
             )}
 
-            {/* Visual drag lines when dragging (desktop only) */}
-            {isDragging && !isMobile && (
-                <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 99998 }}>
-                    <div className="absolute left-0 top-1/4 w-1 h-1/2 bg-blue-500 rounded-full animate-pulse"></div>
-                    <div className="absolute right-0 top-1/4 w-1 h-1/2 bg-blue-500 rounded-full animate-pulse"></div>
-                </div>
-            )}
-
-            {/* Mobile selection indicator positioned relative to section */}
-            {isMobile && isActive && (
-                <div className="absolute -right-4 top-1/2 transform -translate-y-1/2 z-[99998] animate-in slide-in-from-right-3 duration-200"
-                     style={{
-                         position: 'absolute',
-                         right: '-16px',
-                         zIndex: 99998
-                     }}>
-                    <div className="w-6 h-12 bg-gradient-to-b from-green-500 via-green-600 to-green-700 rounded-l-xl shadow-lg ring-2 ring-green-200 animate-pulse"></div>
-                </div>
-            )}
-
-            {/* Content with responsive padding */}
-            <div
-                className={`
-                    ${isDragging && !isMobile ? 'transform rotate-0' : ''}
-                    transition-transform duration-200
-                    ${isMobile ? 'py-1' : dragIconPosition === 'right' ? 'pr-8 py-1' : 'pr-2 py-1'}
-                `}
-                style={{ userSelect: isDragging && !isMobile ? 'none' : 'auto' }}
-            >
+            {/* Content wrapper */}
+            <div className={`${deviceType === 'desktop' && isDragging ? 'pointer-events-none' : ''}`}>
                 {children}
             </div>
         </div>
@@ -1260,15 +1217,29 @@ const ModernTemplate: React.FC<{
     const [activeId, setActiveId] = useState<string | null>(null);
     const [isMobile, setIsMobile] = useState(false);
 
-    // Detect mobile device
+    // Enhanced mobile device detection for ModernTemplate
     useEffect(() => {
         const checkMobile = () => {
-            setIsMobile(window.innerWidth < 1024);
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const isPortrait = height > width;
+            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            
+            // Comprehensive mobile/tablet detection
+            const isMobileDevice = width < 1024 || (isTouchDevice && width < 1200) || 
+                                 (isPortrait && width < 768);
+            
+            setIsMobile(isMobileDevice);
         };
         
         checkMobile();
         window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
+        window.addEventListener('orientationchange', checkMobile);
+        
+        return () => {
+            window.removeEventListener('resize', checkMobile);
+            window.removeEventListener('orientationchange', checkMobile);
+        };
     }, []);
 
     const sensors = useSensors(
@@ -2230,15 +2201,29 @@ const ProfessionalTemplate: React.FC<{
     const [activeId, setActiveId] = useState<string | null>(null);
     const [isMobile, setIsMobile] = useState(false);
 
-    // Detect mobile device
+    // Enhanced mobile device detection for ProfessionalTemplate
     useEffect(() => {
         const checkMobile = () => {
-            setIsMobile(window.innerWidth < 1024);
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const isPortrait = height > width;
+            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            
+            // Comprehensive mobile/tablet detection
+            const isMobileDevice = width < 1024 || (isTouchDevice && width < 1200) || 
+                                 (isPortrait && width < 768);
+            
+            setIsMobile(isMobileDevice);
         };
         
         checkMobile();
         window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
+        window.addEventListener('orientationchange', checkMobile);
+        
+        return () => {
+            window.removeEventListener('resize', checkMobile);
+            window.removeEventListener('orientationchange', checkMobile);
+        };
     }, []);
 
     const sensors = useSensors(
@@ -2769,47 +2754,83 @@ export default function CVPreview({
         }
     };
 
-    // Get responsive scale based on screen size
+    // Enhanced responsive scale for all device types
     const getResponsiveScale = () => {
         if (typeof window !== 'undefined') {
             const width = window.innerWidth;
             const height = window.innerHeight;
+            const isPortrait = height > width;
 
-            // Mobile: Sadə və effektiv scale sistemi
+            // Mobile: Enhanced scaling system for all mobile devices
             if (width < 1024) {
-                // Mobile ekran eni əsasında optimal scale
-                const mobileScale = Math.min(0.9, (width - 64) / (210 * 3.779)); // 64px padding üçün
-                return Math.max(0.4, mobileScale); // Minimum 0.4, maksimum 0.9
+                // Different scaling for different mobile sizes
+                if (width <= 375) {
+                    // Small phones (iPhone SE, older Android)
+                    const scale = Math.min(0.75, (width - 32) / (210 * 3.779));
+                    return Math.max(0.35, scale);
+                } else if (width <= 414) {
+                    // Medium phones (iPhone 12/13/14, most Android)
+                    const scale = Math.min(0.85, (width - 40) / (210 * 3.779));
+                    return Math.max(0.4, scale);
+                } else if (width <= 768) {
+                    // Large phones and small tablets
+                    const scale = Math.min(0.95, (width - 48) / (210 * 3.779));
+                    return Math.max(0.5, scale);
+                } else {
+                    // Large tablets in portrait
+                    const scale = Math.min(1.0, (width - 64) / (210 * 3.779));
+                    return Math.max(0.6, scale);
+                }
             }
 
-            // Desktop: User-ın mövcud setup-ını saxlayırıq
+            // Tablet landscape mode
+            if (width >= 1024 && width < 1280 && !isPortrait) {
+                return 0.8;
+            }
+
+            // Desktop: Enhanced scaling
             if (width < 1280) return 0.8;     // Small desktop
             if (width < 1536) return 0.9;     // Medium desktop
 
-            // Large desktop: A4 tam görünməsi üçün screen height-ə əsasən
-            const containerHeight = height - 160; // navbar və padding üçün yer
-            const a4Height = 297 * 3.779; // 297mm to pixels (rough conversion)
+            // Large desktop: A4 optimal fit
+            const containerHeight = height - 160; // navbar və padding
+            const a4Height = 297 * 3.779; // A4 height in pixels
             const maxScale = Math.min(1.3, containerHeight / a4Height);
 
-            return Math.max(1.0, maxScale);   // Minimum 1.0, maksimum container-ə sığacaq qədər
+            return Math.max(1.0, maxScale);
         }
-        return 1.0; // default for SSR - real size
+        return 1.0; // SSR default
     };
 
     React.useEffect(() => {
         const handleResize = () => {
             setScale(getResponsiveScale());
-            setIsMobile(window.innerWidth < 1024);
+            
+            // Enhanced mobile detection for main component
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const isPortrait = height > width;
+            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            
+            // Comprehensive mobile/tablet detection
+            const isMobileDevice = width < 1024 || (isTouchDevice && width < 1200) || 
+                                 (isPortrait && width < 768);
+            
+            setIsMobile(isMobileDevice);
         };
 
         // Set initial scale and mobile state
         handleResize();
 
-        // Add event listener
+        // Add event listeners for better device detection
         window.addEventListener('resize', handleResize);
+        window.addEventListener('orientationchange', handleResize);
 
         // Cleanup
-        return () => window.removeEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('orientationchange', handleResize);
+        };
     }, []);
 
     // Mobile touch handlers - Prevent horizontal scrolling
@@ -2937,12 +2958,12 @@ export default function CVPreview({
                     position: 'relative',
                     background: 'white',
                     transformOrigin: 'top left',
-                    transform: `scale(${scale})`, // Remove translateX completely
-                    borderRadius: '8px',
+                    transform: `scale(${scale})`,
+                    borderRadius: isMobile ? '4px' : '8px', // Smaller radius on mobile
                     boxShadow: scale >= 0.8
                         ? '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05)'
                         : '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.05)',
-                    // Set CSS Variables for font management
+                    // Enhanced CSS Variables for font management
                     ['--cv-font-family' as any]: fontSettings.fontFamily,
                     ['--cv-name-size' as any]: `${fontSettings.nameSize}px`,
                     ['--cv-title-size' as any]: `${fontSettings.titleSize}px`,
@@ -2956,19 +2977,28 @@ export default function CVPreview({
                     ['--cv-small-weight' as any]: fontSettings.smallWeight,
                     ['--cv-section-spacing' as any]: `${fontSettings.sectionSpacing}px`,
                     lineHeight: '1.5',
-                    // Mobile touch optimization - only vertical scroll
-                    touchAction: isMobile ? 'pan-y' : 'pan-y',
-                    overscrollBehavior: isMobile ? 'contain' : 'contain',
-                    overflowX: isMobile ? 'hidden' : 'auto', // Prevent horizontal scroll on mobile
+                    // Enhanced touch optimization for all mobile devices
+                    touchAction: 'pan-y',
+                    overscrollBehavior: 'contain',
+                    overflowX: 'hidden', // Always prevent horizontal scroll
                     overflowY: 'auto', // Allow vertical scroll
                     transition: isDragging ? 'none' : 'transform 0.3s ease-out',
-                } as React.CSSProperties}
+                    // Cross-browser touch optimization
+                    WebkitOverflowScrolling: 'touch',
+                    WebkitTouchCallout: 'none',
+                    WebkitUserSelect: 'none',
+                    KhtmlUserSelect: 'none',
+                    MozUserSelect: 'none',
+                    msUserSelect: 'none',
+                    userSelect: 'none',
+                    // Performance optimization
+                    willChange: 'transform',
+                    backfaceVisibility: 'hidden',
+                    WebkitBackfaceVisibility: 'hidden'
+                }}
             >
                 {renderTemplate()}
             </div>
         </>
     );
 }
-
-// Export individual templates for direct use if needed
-export { BasicTemplate, ModernTemplate, ProfessionalTemplate, ATSFriendlyTemplate };
