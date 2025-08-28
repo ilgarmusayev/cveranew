@@ -12,6 +12,7 @@ import {
     DragEndEvent,
     DragStartEvent,
     DragOverlay,
+    DragOverEvent,
 } from '@dnd-kit/core';
 import {
     arrayMove,
@@ -74,11 +75,20 @@ const stripHtmlTags = (html: string): string => {
 };
 
 // Function to render HTML content safely
-const renderHtmlContent = (htmlContent: string, isDarkBackground = false) => {
+const renderHtmlContent = (htmlContent: string, isDarkBackground = false, cvLanguage?: string) => {
     if (!htmlContent) return null;
+    
+    let processedContent = htmlContent;
+    
+    // Replace capital İ with I for English language
+    const language = cvLanguage?.toLowerCase() || 'az';
+    if (language.includes('en')) {
+        processedContent = processedContent.replace(/İ/g, 'I');
+    }
+    
     return (
         <div
-            dangerouslySetInnerHTML={{ __html: htmlContent }}
+            dangerouslySetInnerHTML={{ __html: processedContent }}
             className={`prose prose-xs max-w-none [&>p]:mb-2 [&>ul]:mb-2 [&>ol]:mb-2 [&>h1]:mb-2 [&>h2]:mb-2 [&>h3]:mb-2 [&>strong]:font-semibold [&>em]:italic [&>ul]:list-disc [&>ul]:ml-4 [&>ol]:list-decimal [&>ol]:ml-4 ${
                 isDarkBackground 
                     ? '[&>*]:text-blue-100 [&>p]:text-blue-100 [&>div]:text-blue-100 [&>span]:text-blue-100 [&>strong]:text-white [&>em]:text-blue-200 [&>li]:text-blue-100' 
@@ -88,12 +98,24 @@ const renderHtmlContent = (htmlContent: string, isDarkBackground = false) => {
     );
 };
 
-const getFullName = (personalInfo: PersonalInfo): string => {
-    if (personalInfo.fullName) return personalInfo.fullName;
-    if (personalInfo.firstName && personalInfo.lastName) {
-        return `${personalInfo.firstName} ${personalInfo.lastName}`;
+const getFullName = (personalInfo: PersonalInfo, cvLanguage?: string): string => {
+    let fullName = '';
+    
+    if (personalInfo.fullName) {
+        fullName = personalInfo.fullName;
+    } else if (personalInfo.firstName && personalInfo.lastName) {
+        fullName = `${personalInfo.firstName} ${personalInfo.lastName}`;
+    } else {
+        fullName = personalInfo.firstName || personalInfo.lastName || '';
     }
-    return personalInfo.firstName || personalInfo.lastName || '';
+
+    // Replace capital İ with I for English language
+    const language = cvLanguage?.toLowerCase() || 'az';
+    if (language.includes('en')) {
+        fullName = fullName.replace(/İ/g, 'I');
+    }
+
+    return fullName;
 };
 
 // Language level translation based on CV language
@@ -123,7 +145,14 @@ const getLanguageLevel = (level: string, cvLanguage?: string): string => {
     const languageKey = language.includes('en') ? 'en' :
                         language.includes('tr') ? 'tr' : 'az';
 
-    return levelTranslations[languageKey]?.[level] || level;
+    let translatedLevel = levelTranslations[languageKey]?.[level] || level;
+    
+    // Replace capital İ with I for English language
+    if (languageKey === 'en') {
+        translatedLevel = translatedLevel.replace(/İ/g, 'I');
+    }
+
+    return translatedLevel;
 };
 
 // Date formatting based on CV language
@@ -180,6 +209,11 @@ const formatDate = (dateString: string, cvLanguage?: string): string => {
         });
     }
 
+    // Replace capital İ with I for English language
+    if (isEnglish) {
+        formattedDate = formattedDate.replace(/İ/g, 'I');
+    }
+
     return formattedDate;
 };
 
@@ -187,13 +221,21 @@ const formatDate = (dateString: string, cvLanguage?: string): string => {
 const getCurrentText = (cvLanguage?: string): string => {
     const language = cvLanguage?.toLowerCase() || 'az';
 
+    let currentText = '';
     if (language.includes('en')) {
-        return 'Present';
+        currentText = 'Present';
     } else if (language.includes('tr')) {
-        return 'Devam ediyor';
+        currentText = 'Devam ediyor';
     } else {
-        return 'Davam edir';
+        currentText = 'Davam edir';
     }
+
+    // Replace capital İ with I for English language
+    if (language.includes('en')) {
+        currentText = currentText.replace(/İ/g, 'I');
+    }
+
+    return currentText;
 };
 
 // Dynamic section name mapping based on language
@@ -247,7 +289,7 @@ const getSectionName = (sectionKey: string, cvLanguage?: string, customSectionNa
             education: 'Eğitim',
             skills: 'Yetenekler',
             technicalSkills: 'Teknik Yetenekler',
-            softSkills: 'Kişisel Yetenekler',
+            softSkills: 'Kisisel Yetenekler',
             coreCompetencies: 'Temel Yetkinlikler',
             languages: 'Diller',
             projects: 'Projeler',
@@ -263,7 +305,58 @@ const getSectionName = (sectionKey: string, cvLanguage?: string, customSectionNa
     const languageKey = language.includes('en') ? 'en' :
                         language.includes('tr') ? 'tr' : 'az';
 
-    return sectionNames[languageKey]?.[sectionKey] || sectionNames['az'][sectionKey] || sectionKey;
+    let sectionName = sectionNames[languageKey]?.[sectionKey] || sectionNames['az'][sectionKey] || sectionKey;
+    
+    // Replace capital İ with I for English language
+    if (languageKey === 'en') {
+        sectionName = sectionName.replace(/İ/g, 'I');
+    }
+
+    return sectionName;
+};
+
+// Helper function to properly uppercase section names for English
+const getUppercaseSectionName = (sectionKey: string, cvLanguage?: string, customSectionNames?: Record<string, string>): string => {
+    const sectionName = getSectionName(sectionKey, cvLanguage, customSectionNames);
+    
+    // For English, manually uppercase to handle İ -> I conversion
+    if (cvLanguage?.toLowerCase().includes('en')) {
+        return sectionName.replace(/İ/g, 'I').toUpperCase();
+    }
+    
+    return sectionName;
+};
+
+// Helper function to extract LinkedIn username from URL
+const getLinkedInDisplay = (linkedinInput: string): { displayText: string; url: string } => {
+    if (!linkedinInput) return { displayText: '', url: '' };
+    
+    // If it's already a full URL, extract username
+    if (linkedinInput.includes('linkedin.com/in/')) {
+        const match = linkedinInput.match(/linkedin\.com\/in\/([^\/\?]+)/);
+        if (match) {
+            const username = match[1];
+            return {
+                displayText: `${username}`,
+                url: linkedinInput
+            };
+        }
+    }
+    
+    // If it's just a username (with or without @)
+    const cleanUsername = linkedinInput.replace('@', '');
+    if (!linkedinInput.includes('http')) {
+        return {
+            displayText: `${cleanUsername}`,
+            url: `https://www.linkedin.com/in/${cleanUsername}/`
+        };
+    }
+    
+    // Fallback: display as is
+    return {
+        displayText: linkedinInput,
+        url: linkedinInput.includes('http') ? linkedinInput : `https://www.linkedin.com/in/${linkedinInput}/`
+    };
 };
 
 // Utility function to split content into A4 pages
@@ -348,6 +441,7 @@ interface LeftPanelSortableItemProps {
     activeSection?: string | null;
     onSetActiveSection?: (sectionId: string | null) => void;
     alwaysShowDragHandle?: boolean;
+    isDropTarget?: boolean;
 }
 
 const LeftPanelSortableItem: React.FC<LeftPanelSortableItemProps> = ({ 
@@ -359,7 +453,8 @@ const LeftPanelSortableItem: React.FC<LeftPanelSortableItemProps> = ({
     onSectionReorder,
     activeSection,
     onSetActiveSection,
-    alwaysShowDragHandle = true
+    alwaysShowDragHandle = true,
+    isDropTarget = false
 }) => {
     const [isMobile, setIsMobile] = useState(false);
     const [isPressed, setIsPressed] = useState(false);
@@ -426,9 +521,7 @@ const LeftPanelSortableItem: React.FC<LeftPanelSortableItemProps> = ({
     });
 
     const style: React.CSSProperties = {
-        transform: CSS.Transform.toString(transform),
         transition,
-        opacity: isDragging ? 0.9 : 1,
         zIndex: isDragging ? 9999 : 'auto',
         touchAction: 'none', // Let DnD handle touch
         userSelect: 'none',
@@ -480,11 +573,12 @@ const LeftPanelSortableItem: React.FC<LeftPanelSortableItemProps> = ({
                 relative group
                 cursor-grab active:cursor-grabbing
                 ${isDragging
-                    ? 'shadow-2xl border-2 border-blue-500 bg-blue-50 rounded-lg scale-105 rotate-1'
-                    : 'hover:shadow-lg hover:border-2 hover:border-blue-300 hover:bg-blue-700/30 hover:scale-[1.01] hover:z-50'
+                    ? 'border-2 border-blue-500 bg-blue-50/20'
+                    : 'hover:shadow-sm hover:border hover:border-blue-300'
                 }
-                ${isActive && isMobile ? 'bg-blue-50/70 shadow-xl scale-[1.02] border-blue-400' : ''}
-                ${isPressed && isMobile ? 'scale-[0.98] bg-blue-800/50' : ''}
+                ${isActive && isMobile ? 'bg-blue-50/30 border-blue-400' : ''}
+                ${isPressed && isMobile ? 'bg-blue-800/20' : ''}
+                ${isDropTarget ? 'bg-blue-700/30 border-2 border-white border-dashed' : ''}
                 transition-all duration-200 ease-out
                 rounded-lg border-2 border-transparent
                 ${isMobile ? 'touch-manipulation' : 'touch-manipulation'}
@@ -493,13 +587,21 @@ const LeftPanelSortableItem: React.FC<LeftPanelSortableItemProps> = ({
             `}
             title={isMobile ? "Sol panel - sürükləyin və ya toxunun" : "Sol panel hissəni sürükləyin"}
         >
+            {/* Drop Indicator Text */}
+            {isDropTarget && (
+                <div className="absolute inset-0 flex items-center justify-center bg-blue-800/90 rounded-lg z-50">
+                    <div className="bg-white text-blue-900 px-4 py-2 rounded-lg text-sm font-bold shadow-lg border-2 border-blue-600">
+                        ↓ Bura Buraxın ↓
+                    </div>
+                </div>
+            )}
             {/* Desktop & Mobile Drag Handle - Only show on hover since left panels don't get selected */}
             <div
                 className={`absolute ${dragIconPosition === 'right' ? '-right-3' : '-left-3'} top-1/2 transform -translate-y-1/2
                             opacity-0 group-hover:opacity-70 hover:opacity-100 transition-all duration-200`}
                 style={{ userSelect: 'none', zIndex: 99999 }}
             >
-                <div className={`bg-blue-200 hover:bg-white text-blue-900 rounded-full ${isMobile ? 'w-8 h-8' : 'w-6 h-6'} flex items-center justify-center shadow-xl transition-colors border-2 border-blue-300`}>
+                <div className={`bg-blue-200 hover:bg-blue-100 text-blue-900 rounded-full ${isMobile ? 'w-8 h-8' : 'w-6 h-6'} flex items-center justify-center shadow-sm transition-colors border border-blue-300`}>
                     <span className={`${isMobile ? 'text-sm' : 'text-xs'}`}>≡</span>
                 </div>
             </div>
@@ -526,7 +628,6 @@ const LeftPanelSortableItem: React.FC<LeftPanelSortableItemProps> = ({
             {/* Content with responsive padding */}
             <div
                 className={`
-                    ${isDragging ? 'transform rotate-0' : ''}
                     transition-transform duration-200
                     ${dragIconPosition === 'right' ? 'pr-6' : 'pr-2'}
                 `}
@@ -549,6 +650,7 @@ interface SortableItemProps {
     activeSection?: string | null;
     onSetActiveSection?: (sectionId: string | null) => void;
     alwaysShowDragHandle?: boolean; // New prop for left panel sections
+    isDropTarget?: boolean;
 }
 
 const SortableItem: React.FC<SortableItemProps> = ({ 
@@ -560,7 +662,8 @@ const SortableItem: React.FC<SortableItemProps> = ({
     onSectionReorder,
     activeSection,
     onSetActiveSection,
-    alwaysShowDragHandle = false
+    alwaysShowDragHandle = false,
+    isDropTarget = false
 }) => {
     const [isMobile, setIsMobile] = useState(false);
     const [isPressed, setIsPressed] = useState(false);
@@ -627,9 +730,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
     });
 
     const style: React.CSSProperties = {
-        transform: isMobile ? undefined : CSS.Transform.toString(transform), // Mobil üçün transform yox
         transition,
-        opacity: isDragging ? 0.9 : 1,
         zIndex: isDragging ? 9999 : 'auto',
         touchAction: isMobile ? 'manipulation' : 'none', // Mobil üçün normal touch
         userSelect: isMobile ? 'auto' : 'none',
@@ -681,11 +782,12 @@ const SortableItem: React.FC<SortableItemProps> = ({
                 relative group
                 ${isMobile ? 'cursor-pointer' : 'cursor-grab active:cursor-grabbing'}
                 ${isDragging && !isMobile
-                    ? 'shadow-2xl border-2 border-blue-500 bg-blue-50 rounded-lg scale-105 rotate-1'
-                    : 'hover:shadow-lg hover:border-2 hover:border-blue-300 hover:bg-blue-50/50 hover:scale-[1.01] hover:z-50'
+                    ? 'border-2 border-blue-500 bg-blue-50/20'
+                    : 'hover:shadow-sm hover:border hover:border-blue-300 hover:bg-blue-50/10'
                 }
-                ${isActive && isMobile ? 'bg-blue-50/70 shadow-xl scale-[1.02] border-blue-400' : ''}
-                ${isPressed && isMobile ? 'scale-[0.98] bg-blue-100/50' : ''}
+                ${isActive && isMobile ? 'bg-blue-50/70 shadow-xl border-blue-400' : ''}
+                ${isPressed && isMobile ? 'bg-blue-100/50' : ''}
+                ${isDropTarget ? 'bg-blue-200/50 border-2 border-blue-400 border-dashed' : ''}
                 transition-all duration-200 ease-out
                 rounded-lg border-2 border-transparent
                 ${isMobile ? 'touch-manipulation' : 'touch-manipulation'}
@@ -694,6 +796,14 @@ const SortableItem: React.FC<SortableItemProps> = ({
             `}
             title={isMobile ? "Hissəni seçmək üçün toxunun" : "Bütün hissəni sürükləyin"}
         >
+            {/* Drop Indicator Text */}
+            {isDropTarget && (
+                <div className="absolute inset-0 flex items-center justify-center bg-blue-200/90 rounded-lg z-50">
+                    <div className="bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-lg border border-blue-500">
+                        ↓ Bura Buraxın ↓
+                    </div>
+                </div>
+            )}
 
             {/* Desktop Drag Handle - Show based on alwaysShowDragHandle or hover */}
             {!isMobile && (
@@ -705,7 +815,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
                                 } transition-all duration-200`}
                     style={{ userSelect: 'none', zIndex: 99999 }}
                 >
-                    <div className={`bg-blue-600 text-white rounded-full w-7 h-7 flex items-center justify-center shadow-xl hover:bg-blue-700 transition-colors border-2 border-white ${alwaysShowDragHandle ? 'ring-2 ring-blue-200' : ''}`}>
+                    <div className={`bg-blue-600 text-white rounded-full w-7 h-7 flex items-center justify-center shadow-sm hover:bg-blue-700 transition-colors border border-white ${alwaysShowDragHandle ? 'ring-1 ring-blue-200' : ''}`}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
                         </svg>
@@ -716,7 +826,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
             {/* Desktop Hover instruction */}
             {!isMobile && showDragInstruction && (
                 <div
-                    className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium whitespace-nowrap shadow-lg"
+                    className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-blue-600 text-gray-100 px-3 py-1 rounded text-xs font-medium whitespace-nowrap shadow-lg"
                     style={{ userSelect: 'none', zIndex: 99999 }}
                 >
                     Sürükləyərək yerdəyişmə edin
@@ -735,7 +845,6 @@ const SortableItem: React.FC<SortableItemProps> = ({
             {/* Content with responsive padding */}
             <div
                 className={`
-                    ${isDragging && !isMobile ? 'transform rotate-0' : ''}
                     transition-transform duration-200
                     ${dragIconPosition === 'right' ? 'pr-8' : 'pr-2'}
                 `}
@@ -760,6 +869,7 @@ const BasicTemplate: React.FC<{
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
     const [isDragActive, setIsDragActive] = useState(false);
     const [activeId, setActiveId] = useState<string | null>(null);
+    const [dropTargetId, setDropTargetId] = useState<string | null>(null);
     const [isMobile, setIsMobile] = useState(false);
 
     // Detect mobile device
@@ -809,6 +919,7 @@ const BasicTemplate: React.FC<{
     const handleDragEnd = (event: DragEndEvent) => {
         setIsDragActive(false);
         setActiveId(null);
+        setDropTargetId(null);
         document.body.style.userSelect = '';
         document.body.style.cursor = '';
 
@@ -831,6 +942,11 @@ const BasicTemplate: React.FC<{
         }
     };
 
+    const handleDragOver = (event: DragOverEvent) => {
+        const { over } = event;
+        setDropTargetId(over ? over.id as string : null);
+    };
+
     // Section render functions
     const renderSection = (sectionType: string) => {
         console.log('Rendering section:', sectionType, 'data available:', {
@@ -848,7 +964,7 @@ const BasicTemplate: React.FC<{
                             {getSectionName('summary', data.cvLanguage, data.sectionNames)}
                         </h2>
                         <div className="text-gray-700 leading-relaxed text-xs">
-                            {renderHtmlContent(personalInfo.summary)}
+                            {renderHtmlContent(personalInfo.summary, false, data.cvLanguage)}
                         </div>
                     </div>
                 ) : null;
@@ -872,7 +988,7 @@ const BasicTemplate: React.FC<{
                                     <p className="text-blue-600 font-medium text-xs">{exp.company}</p>
                                     {exp.description && (
                                         <div className="text-gray-700 text-xs mt-1 leading-relaxed">
-                                            {renderHtmlContent(exp.description)}
+                                            {renderHtmlContent(exp.description, false, data.cvLanguage)}
                                         </div>
                                     )}
                                 </div>
@@ -1187,7 +1303,7 @@ const BasicTemplate: React.FC<{
                     {/* Name and Contact Info */}
                     <div className="flex-1">
                         <h1 className="text-2xl font-bold text-blue-600 mb-2">
-                            {getFullName(personalInfo)}
+                            {getFullName(personalInfo, data.cvLanguage)}
                         </h1>
                         <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
                             {personalInfo.email && (
@@ -1207,7 +1323,14 @@ const BasicTemplate: React.FC<{
                             )}
                             {personalInfo.linkedin && (
                                 <span className="flex items-center gap-1">
-                                    🔗 {personalInfo.linkedin}
+                                    🔗 <a
+                                        href={getLinkedInDisplay(personalInfo.linkedin).url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer underline"
+                                    >
+                                        {getLinkedInDisplay(personalInfo.linkedin).displayText}
+                                    </a>
                                 </span>
                             )}
                             {personalInfo.website && (
@@ -1233,6 +1356,7 @@ const BasicTemplate: React.FC<{
                 collisionDetection={closestCenter}
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
+                onDragOver={handleDragOver}
             >
                 <SortableContext
                     items={sectionOrder}
@@ -1263,6 +1387,7 @@ const BasicTemplate: React.FC<{
                                     onSectionReorder={onSectionReorder}
                                     activeSection={activeSection}
                                     onSetActiveSection={onSectionSelect}
+                                    isDropTarget={dropTargetId === sectionType}
                                 >
                                     {sectionContent}
                                 </SortableItem>
@@ -1286,6 +1411,7 @@ const ModernTemplate: React.FC<{
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
     const [isDragActive, setIsDragActive] = useState(false);
     const [activeId, setActiveId] = useState<string | null>(null);
+    const [dropTargetId, setDropTargetId] = useState<string | null>(null);
     const [isMobile, setIsMobile] = useState(false);
 
     // Detect mobile device
@@ -1332,6 +1458,7 @@ const ModernTemplate: React.FC<{
     const handleDragEnd = (event: DragEndEvent) => {
         setIsDragActive(false);
         setActiveId(null);
+        setDropTargetId(null);
         document.body.style.userSelect = '';
         document.body.style.cursor = '';
 
@@ -1351,6 +1478,11 @@ const ModernTemplate: React.FC<{
                 console.log('✅ Modern template section reordered:', newOrder);
             }
         }
+    };
+
+    const handleDragOver = (event: DragOverEvent) => {
+        const { over } = event;
+        setDropTargetId(over ? over.id as string : null);
     };
 
     const renderModernSection = (sectionType: string) => {
@@ -1590,7 +1722,7 @@ const ModernTemplate: React.FC<{
                                                     href={project.url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm hover:bg-orange-200 ml-4"
+                                                    className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm hover:bg-orange-50 ml-4"
                                                 >
                                                     🔗 Link
                                                 </a>
@@ -1760,7 +1892,7 @@ const ModernTemplate: React.FC<{
                                                             href={item.url}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm hover:bg-indigo-200 ml-4"
+                                                            className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm hover:bg-indigo-50 ml-4"
                                                         >
                                                             🔗 Link
                                                         </a>
@@ -1792,14 +1924,6 @@ const ModernTemplate: React.FC<{
                     {sectionOrder.map((sectionType) => renderModernSection(sectionType)).filter(Boolean)}
                 </SortableContext>
             </div>
-
-            <DragOverlay style={{ zIndex: 99999 }}>
-                {activeId ? (
-                    <div className="bg-blue-100 border-2 border-blue-300 rounded-lg p-4 opacity-90 rotate-2 scale-105 shadow-lg" style={{ zIndex: 99999 }}>
-                        <div className="text-gray-700 font-medium">📦 {activeId} section</div>
-                    </div>
-                ) : null}
-            </DragOverlay>
         </DndContext>
     );
 };
@@ -1818,11 +1942,13 @@ const ATSFriendlyTemplate: React.FC<{
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
     const [isDragActive, setIsDragActive] = useState(false);
     const [activeId, setActiveId] = useState<string | null>(null);
+    const [dropTargetId, setDropTargetId] = useState<string | null>(null);
     const [isMobile, setIsMobile] = useState(false);
     
     // Separate state for left column drag
     const [isLeftDragActive, setIsLeftDragActive] = useState(false);
     const [leftActiveId, setLeftActiveId] = useState<string | null>(null);
+    const [leftDropTargetId, setLeftDropTargetId] = useState<string | null>(null);
     
     // Left column section order state - use external if provided
     const [internalLeftColumnOrder, setInternalLeftColumnOrder] = useState(['leftSkills', 'leftLanguages', 'leftCertifications']);
@@ -1938,6 +2064,7 @@ const ATSFriendlyTemplate: React.FC<{
     const handleLeftDragEnd = (event: DragEndEvent) => {
         setIsLeftDragActive(false);
         setLeftActiveId(null);
+        setLeftDropTargetId(null);
         document.body.style.userSelect = '';
         document.body.style.cursor = '';
 
@@ -1979,6 +2106,11 @@ const ATSFriendlyTemplate: React.FC<{
                 console.log('❌ active.id:', active.id, 'over.id:', over.id);
             }
         }
+    };
+
+    const handleLeftDragOver = (event: DragOverEvent) => {
+        const { over } = event;
+        setLeftDropTargetId(over ? over.id as string : null);
     };
 
     // Function to move sections for mobile left column
@@ -2033,6 +2165,7 @@ const ATSFriendlyTemplate: React.FC<{
     const handleDragEnd = (event: DragEndEvent) => {
         setIsDragActive(false);
         setActiveId(null);
+        setDropTargetId(null);
         document.body.style.userSelect = '';
         document.body.style.cursor = '';
 
@@ -2055,6 +2188,11 @@ const ATSFriendlyTemplate: React.FC<{
         }
     };
 
+    const handleDragOver = (event: DragOverEvent) => {
+        const { over } = event;
+        setDropTargetId(over ? over.id as string : null);
+    };
+
     // Section render functions for draggable content
     const renderATSSection = (sectionType: string) => {
         console.log('Rendering ATS section:', sectionType);
@@ -2069,10 +2207,11 @@ const ATSFriendlyTemplate: React.FC<{
                         onSectionReorder={onSectionReorder}
                         activeSection={activeSection}
                         onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'summary'}
                     >
                         <div className="mb-6 cv-section">
-                            <h2 className="text-sm font-bold text-gray-900 mb-2 uppercase tracking-wide">
-                                {getSectionName('summary', data.cvLanguage, data.sectionNames)}
+                            <h2 className="text-sm font-bold text-gray-900 mb-2 tracking-wide" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
+                                {getUppercaseSectionName('summary', data.cvLanguage, data.sectionNames)}
                             </h2>
                             <div className="text-gray-700 leading-relaxed text-xs">
                                 {renderHtmlContent(personalInfo.summary)}
@@ -2090,10 +2229,11 @@ const ATSFriendlyTemplate: React.FC<{
                         onSectionReorder={onSectionReorder}
                         activeSection={activeSection}
                         onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'experience'}
                     >
                         <div className="mb-6 cv-section">
-                            <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-200 pb-1">
-                                {getSectionName('experience', data.cvLanguage, data.sectionNames)}
+                            <h2 className="text-sm font-bold text-gray-900 mb-4 tracking-wide border-b border-gray-200 pb-1" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
+                                {getUppercaseSectionName('experience', data.cvLanguage, data.sectionNames)}
                             </h2>
                             <div className="space-y-4">
                                 {experience.map((exp) => (
@@ -2134,6 +2274,7 @@ const ATSFriendlyTemplate: React.FC<{
                         onSectionReorder={onSectionReorder}
                         activeSection={activeSection}
                         onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'education'}
                     >
                         <div className="mb-6 cv-section">
                             <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-200 pb-1">
@@ -2181,6 +2322,7 @@ const ATSFriendlyTemplate: React.FC<{
                         onSectionReorder={onSectionReorder}
                         activeSection={activeSection}
                         onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'projects'}
                     >
                         <div className="mb-6">
                             <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-200 pb-1">
@@ -2208,7 +2350,10 @@ const ATSFriendlyTemplate: React.FC<{
                                                 )}
                                                 {project.technologies && project.technologies.length > 0 && (
                                                     <p className="text-xs text-gray-600 mt-1">
-                                                        <span className="font-medium">Technologies:</span> {project.technologies.join(', ')}
+                                                        <span className="font-medium">
+                                                            {data.cvLanguage?.includes('en') ? 'Technologies:' : 
+                                                             data.cvLanguage?.includes('tr') ? 'Teknolojiler:' : 'Texnologiyalar:'}
+                                                        </span> {project.technologies.join(', ')}
                                                     </p>
                                                 )}
                                                 {project.github && (
@@ -2245,6 +2390,7 @@ const ATSFriendlyTemplate: React.FC<{
                         onSectionReorder={onSectionReorder}
                         activeSection={activeSection}
                         onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'volunteer'}
                     >
                         <div className="mb-6">
                             <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-200 pb-1">
@@ -2287,6 +2433,7 @@ const ATSFriendlyTemplate: React.FC<{
                         onSectionReorder={onSectionReorder}
                         activeSection={activeSection}
                         onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'customSections'}
                     >
                         <div className="mb-6">
                             {customSections
@@ -2331,7 +2478,10 @@ const ATSFriendlyTemplate: React.FC<{
                                                     )}
                                                     {item.url && (
                                                         <p className="text-xs text-gray-600 mt-1">
-                                                            <span className="font-medium">URL:</span> {item.url}
+                                                            <span className="font-medium">
+                                                                {data.cvLanguage?.includes('en') ? 'URL:' : 
+                                                                 data.cvLanguage?.includes('tr') ? 'Bağlantı:' : 'Link:'}
+                                                            </span> {item.url}
                                                         </p>
                                                     )}
                                                 </div>
@@ -2385,37 +2535,57 @@ const ATSFriendlyTemplate: React.FC<{
 
                 {/* Contact Information */}
                 <div className="mb-6 cv-section avoid-break">
-                    <h2 className="text-sm font-bold text-white mb-3 uppercase tracking-wide border-b border-blue-300 pb-1">
-                        Əlaqə
+                    <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
+                        {data.cvLanguage?.includes('en') ? 'CONTACT' : 
+                         data.cvLanguage?.includes('tr') ? 'ILETISIM' : 'ƏLAQƏ'}
                     </h2>
                     <div className="space-y-2 text-xs">
                         {personalInfo.email && (
                             <div className="flex items-start gap-2">
-                                <span className="font-medium text-blue-200 min-w-[40px]">Email:</span>
+                                <span className="font-medium text-blue-200 min-w-[40px]">
+                                    {data.cvLanguage?.includes('en') ? 'Email:' : 
+                                     data.cvLanguage?.includes('tr') ? 'E-posta:' : 'Email:'}
+                                </span>
                                 <span className="text-white">{personalInfo.email}</span>
                             </div>
                         )}
                         {personalInfo.phone && (
                             <div className="flex items-start gap-2">
-                                <span className="font-medium text-blue-200 min-w-[40px]">Phone:</span>
+                                <span className="font-medium text-blue-200 min-w-[40px]">
+                                    {data.cvLanguage?.includes('en') ? 'Phone:' : 
+                                     data.cvLanguage?.includes('tr') ? 'Telefon:' : 'Telefon:'}
+                                </span>
                                 <span className="text-white">{personalInfo.phone}</span>
                             </div>
                         )}
                         {personalInfo.location && (
                             <div className="flex items-start gap-2">
-                                <span className="font-medium text-blue-200 min-w-[40px]">Address:</span>
+                                <span className="font-medium text-blue-200 min-w-[40px]">
+                                    {data.cvLanguage?.includes('en') ? 'Address:' : 
+                                     data.cvLanguage?.includes('tr') ? 'Adres:' : 'Ünvan:'}
+                                </span>
                                 <span className="text-white">{personalInfo.location}</span>
                             </div>
                         )}
                         {personalInfo.linkedin && (
                             <div className="flex items-start gap-3">
                                 <span className="font-medium text-blue-200 min-w-[40px]">LinkedIn:</span>
-                                <span className="text-white break-all">{personalInfo.linkedin}</span>
+                                <a
+                                    href={getLinkedInDisplay(personalInfo.linkedin).url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-white break-all hover:text-blue-200 transition-colors cursor-pointer underline"
+                                >
+                                    {getLinkedInDisplay(personalInfo.linkedin).displayText}
+                                </a>
                             </div>
                         )}
                         {personalInfo.website && (
                             <div className="flex items-start gap-2">
-                                <span className="font-medium text-blue-200 min-w-[40px]">Website:</span>
+                                <span className="font-medium text-blue-200 min-w-[40px]">
+                                    {data.cvLanguage?.includes('en') ? 'Website:' : 
+                                     data.cvLanguage?.includes('tr') ? 'Web Sitesi:' : 'Veb sayt:'}
+                                </span>
                                 <span className="text-white break-all">{personalInfo.website}</span>
                             </div>
                         )}
@@ -2436,6 +2606,7 @@ const ATSFriendlyTemplate: React.FC<{
                     collisionDetection={closestCenter}
                     onDragStart={handleLeftDragStart}
                     onDragEnd={handleLeftDragEnd}
+                    onDragOver={handleLeftDragOver}
                 >
                     <SortableContext
                         items={filteredLeftColumnOrder}
@@ -2471,13 +2642,14 @@ const ATSFriendlyTemplate: React.FC<{
                                                 showDragInstruction={true}
                                                 dragIconPosition="right"
                                                 alwaysShowDragHandle={true}
+                                                isDropTarget={leftDropTargetId === 'leftSkills'}
                                             >
                                                 <div className="mb-6">
                                                     {/* Hard Skills */}
                                                     {skills.filter(skill => skill.type === 'hard').length > 0 && (
                                                         <div className="mb-4">
-                                                            <h2 className="text-sm font-bold text-white mb-3 uppercase tracking-wide border-b border-blue-300 pb-1">
-                                                                {getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
+                                                            <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                                {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('technicalSkills', data.cvLanguage, data.sectionNames) : getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
                                                             </h2>
                                                             <div className="space-y-2">
                                                                 {skills.filter(skill => skill.type === 'hard').map((skill) => (
@@ -2499,8 +2671,8 @@ const ATSFriendlyTemplate: React.FC<{
                                                     {/* Soft Skills */}
                                                     {skills.filter(skill => skill.type === 'soft').length > 0 && (
                                                         <div className="mb-4">
-                                                            <h2 className="text-sm font-bold text-white mb-3 uppercase tracking-wide border-b border-blue-300 pb-1">
-                                                                {getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
+                                                            <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                                {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('softSkills', data.cvLanguage, data.sectionNames) : getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
                                                             </h2>
                                                             <div className="space-y-2">
                                                                 {skills.filter(skill => skill.type === 'soft').map((skill) => (
@@ -2522,8 +2694,8 @@ const ATSFriendlyTemplate: React.FC<{
                                                     {/* General Skills */}
                                                     {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).length > 0 && (
                                                         <div className="mb-4">
-                                                            <h2 className="text-sm font-bold text-white mb-3 uppercase tracking-wide border-b border-blue-300 pb-1">
-                                                                {getSectionName('skills', data.cvLanguage, data.sectionNames)}
+                                                            <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                                {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('skills', data.cvLanguage, data.sectionNames) : getSectionName('skills', data.cvLanguage, data.sectionNames)}
                                                             </h2>
                                                             <div className="space-y-2">
                                                                 {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map((skill) => (
@@ -2560,10 +2732,11 @@ const ATSFriendlyTemplate: React.FC<{
                                                 showDragInstruction={true}
                                                 dragIconPosition="right"
                                                 alwaysShowDragHandle={true}
+                                                isDropTarget={leftDropTargetId === 'leftLanguages'}
                                             >
                                                 <div className="mb-6">
-                                                    <h2 className="text-sm font-bold text-white mb-3 uppercase tracking-wide border-b border-blue-300 pb-1">
-                                                        {getSectionName('languages', data.cvLanguage, data.sectionNames)}
+                                                    <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                        {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('languages', data.cvLanguage, data.sectionNames) : getSectionName('languages', data.cvLanguage, data.sectionNames)}
                                                     </h2>
                                                     <div className={languages.length <= 2 ? "space-y-1" : "grid grid-cols-4 gap-x-2 gap-y-1"}>
                                                         {languages.map((lang) => (
@@ -2591,10 +2764,11 @@ const ATSFriendlyTemplate: React.FC<{
                                                 showDragInstruction={true}
                                                 dragIconPosition="right"
                                                 alwaysShowDragHandle={true}
+                                                isDropTarget={leftDropTargetId === 'leftCertifications'}
                                             >
                                                 <div className="mb-6">
-                                                    <h2 className="text-sm font-bold text-white mb-3 uppercase tracking-wide border-b border-blue-300 pb-1">
-                                                        {getSectionName('certifications', data.cvLanguage, data.sectionNames)}
+                                                    <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                        {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('certifications', data.cvLanguage, data.sectionNames) : getSectionName('certifications', data.cvLanguage, data.sectionNames)}
                                                     </h2>
                                                     <div className="space-y-2">
                                                         {certifications.map((cert) => (
@@ -2645,7 +2819,7 @@ const ATSFriendlyTemplate: React.FC<{
                 {/* Header - Name */}
                 <div className="mb-6 cv-section avoid-break">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2 leading-tight">
-                        {getFullName(personalInfo)}
+                        {getFullName(personalInfo, data.cvLanguage)}
                     </h1>
                 </div>
 
@@ -2657,6 +2831,7 @@ const ATSFriendlyTemplate: React.FC<{
                     onDragEnd={(event) => {
                         setIsDragActive(false);
                         setActiveId(null);
+                        setDropTargetId(null);
                         document.body.style.userSelect = '';
                         document.body.style.cursor = '';
 
@@ -2679,6 +2854,7 @@ const ATSFriendlyTemplate: React.FC<{
                             }
                         }
                     }}
+                    onDragOver={handleDragOver}
                 >
                     <SortableContext
                         items={sectionOrder}
@@ -3104,14 +3280,30 @@ const ProfessionalTemplate: React.FC<{
                     )}
 
                     <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                        {getFullName(personalInfo)}
+                        {getFullName(personalInfo, data.cvLanguage)}
                     </h1>
                     <div className="flex justify-center gap-4 text-xs text-gray-600 flex-wrap">
                         {personalInfo.email && <span>{personalInfo.email}</span>}
                         {personalInfo.phone && <span>{personalInfo.phone}</span>}
                         {personalInfo.location && <span>{personalInfo.location}</span>}
-                        {personalInfo.linkedin && <span>{personalInfo.linkedin}</span>}
-                        {personalInfo.website && <span>{personalInfo.website}</span>}
+                        {personalInfo.linkedin && (
+                            <span>
+                                LinkedIn: <a
+                                    href={getLinkedInDisplay(personalInfo.linkedin).url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer underline"
+                                >
+                                    {getLinkedInDisplay(personalInfo.linkedin).displayText}
+                                </a>
+                            </span>
+                        )}
+                        {personalInfo.website && (
+                            <span>
+                                {data.cvLanguage?.includes('en') ? 'Website:' : 
+                                 data.cvLanguage?.includes('tr') ? 'Web Sitesi:' : 'Veb sayt:'} {personalInfo.website}
+                            </span>
+                        )}
                         {personalInfo.additionalLinks && personalInfo.additionalLinks.length > 0 && (
                             personalInfo.additionalLinks.map((link) => (
                                 <span key={link.id}>{link.label}: {link.value}</span>
