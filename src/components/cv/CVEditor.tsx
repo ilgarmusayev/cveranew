@@ -294,9 +294,15 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
     // Mobile states for section reordering
     const [isMobile, setIsMobile] = useState(false);
     const [activeMobileSection, setActiveMobileSection] = useState<string | null>(null);
+
+    // ATS Template Left Column Order State
+    const [leftColumnOrder, setLeftColumnOrder] = useState<string[]>(['skills', 'languages', 'certifications']);
     
-    // Left column order for ATS template
-    const [leftColumnOrder, setLeftColumnOrder] = useState(['leftSkills', 'leftLanguages', 'leftCertifications']);
+    // Check if current template is ATS
+    const isATSTemplate = cv.templateId?.toLowerCase().includes('ats') || 
+                         cv.templateId?.toLowerCase().includes('resume-ats') || 
+                         cv.templateId?.toLowerCase().includes('clean') ||
+                         cv.templateId?.toLowerCase().includes('minimal-professional');
 
     // Mobile section reorder hook
     const sectionOrder = cv.sectionOrder || [
@@ -340,6 +346,33 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             console.log('❌ Cannot move section - out of bounds:', { currentIndex, newIndex, sectionOrderLength: sectionOrder.length });
         }
     }, [sectionOrder, setCv, setIsDirty]);
+
+    // Move function for left panel sections (ATS template)
+    const moveLeftSection = useCallback((sectionId: string, direction: 'up' | 'down') => {
+        console.log('📱 CVEditor Moving left section:', { sectionId, direction, currentOrder: leftColumnOrder });
+        
+        const currentIndex = leftColumnOrder.indexOf(sectionId);
+        if (currentIndex === -1) {
+            console.log('❌ Left section not found in order:', sectionId);
+            return;
+        }
+        
+        const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+        
+        if (newIndex >= 0 && newIndex < leftColumnOrder.length) {
+            const newOrder = [...leftColumnOrder];
+            [newOrder[currentIndex], newOrder[newIndex]] = [newOrder[newIndex], newOrder[currentIndex]];
+            
+            console.log('✅ CVEditor updating left column order:', newOrder);
+            setLeftColumnOrder(newOrder);
+            setIsDirty(true);
+            
+            // Provide haptic feedback
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+    }, [leftColumnOrder, setIsDirty]);
 
     // Detect mobile device
     useEffect(() => {
@@ -547,6 +580,26 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
         return allSections.find(s => s.id === 'template');
     }, [allSections]);
 
+    // Custom section select handler to prevent left panel sections from showing selection UI
+    const handleMobileSectionSelect = useCallback((sectionId: string | null) => {
+        // Check if this is a left panel section (ATS template)
+        const leftPanelSections = ['leftSkills', 'leftLanguages', 'leftCertifications'];
+        
+        if (sectionId && leftPanelSections.includes(sectionId)) {
+            // For left panel sections, show drag instruction instead of selection
+            console.log('🚫 Left panel section selected - showing drag instruction instead of selection UI');
+            
+            // Show a temporary notification instead of selection UI
+            showWarning('Sol panel bölməsi - Sürükləyərək yerdəyişmə edin');
+            
+            // Don't set activeMobileSection for left panel sections
+            return;
+        }
+        
+        // For regular sections, use normal selection behavior
+        setActiveMobileSection(sectionId);
+    }, [showWarning]);
+
     // Render preview based on template
     const renderPreview = () => {
         const previewData = {
@@ -581,8 +634,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 template={cv.templateId} 
                 fontSettings={fontSettings}
                 activeSection={activeMobileSection}
-                onSectionSelect={setActiveMobileSection}
-                leftColumnOrder={leftColumnOrder}
+                onSectionSelect={handleMobileSectionSelect}
                 onSectionReorder={(newOrder: string[]) => {
                     console.log('📋 Section reorder from CVPreview:', newOrder);
                     setCv(prevCv => ({
@@ -590,40 +642,6 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                         sectionOrder: newOrder
                     }));
                     setIsDirty(true);
-                }}
-                onLeftSectionReorder={(activeSection: string, direction: 'up' | 'down') => {
-                    console.log('🔄 Left section reorder from CVPreview:', { activeSection, direction });
-                    
-                    // Get available left sections
-                    const availableLeftSections: string[] = [];
-                    if (cv.skills && cv.skills.length > 0) availableLeftSections.push('leftSkills');
-                    if (cv.languages && cv.languages.length > 0) availableLeftSections.push('leftLanguages');
-                    if (cv.certifications && cv.certifications.length > 0) availableLeftSections.push('leftCertifications');
-                    
-                    // Filter current order to only include available sections
-                    const filteredOrder = leftColumnOrder.filter(section => availableLeftSections.includes(section));
-                    
-                    const currentIndex = filteredOrder.indexOf(activeSection);
-                    if (currentIndex === -1) {
-                        console.log('❌ Section not found in left order:', activeSection);
-                        return;
-                    }
-                    
-                    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-                    
-                    if (newIndex >= 0 && newIndex < filteredOrder.length) {
-                        const newOrder = [...filteredOrder];
-                        [newOrder[currentIndex], newOrder[newIndex]] = [newOrder[newIndex], newOrder[currentIndex]];
-                        
-                        console.log('✅ New left column order from CVEditor:', newOrder);
-                        setLeftColumnOrder(newOrder);
-                        setIsDirty(true);
-                        
-                        // Provide haptic feedback
-                        if (navigator.vibrate) navigator.vibrate(50);
-                    } else {
-                        console.log('❌ Cannot move - out of bounds:', { currentIndex, newIndex, totalSections: filteredOrder.length });
-                    }
                 }}
                 onUpdate={(updatedCv) => {
                     console.log('CV updated from preview:', updatedCv);
@@ -919,12 +937,10 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 </div>
             </div>
             {/* Main Content */}
-              <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="flex flex-col xl:flex-row gap-8">
-                 
+            <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="flex flex-col xl:flex-row gap-8">
                     {/* Left Panel - Sections */}
-          
-                    <div className=" mx-auto xl:w-2/5 xl:max-w-xl">
+                    <div className="xl:w-2/5 xl:max-w-xl">
                         {/* Section Navigation */}
                         <div className="mb-8">
                             <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
@@ -1022,8 +1038,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
              
 
                     {/* Right Panel - Preview */}
-                    <div className=" xl:w-3/5">
-                        <div className=" mx-auto sticky top-24">
+                    <div className="xl:w-3/5">
+                        <div className="sticky top-24">
                             {/* Preview Header */}
                             <div className="flex justify-between items-center mb-4 px-2">
                                 <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
@@ -1045,10 +1061,10 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
 
                     {/* A4 Preview Container */}
 <div className="bg-slate-50 rounded-xl border border-dashed border-slate-300 transition-all duration-300 overflow-hidden">
-    {/* Desktop: Current user setup - don't touch */}
-    <div className="hidden lg:block h-auto p-4 sm:p-8 flex justify-center items-start border border-white overflow-visible">
+    {/* Desktop: Vertical scrolling enabled for long CVs */}
+    <div className="hidden lg:block h-[calc(100vh-12rem)] p-4 sm:p-8 flex justify-center items-start border border-white overflow-y-auto">
         <div 
-            className="bg-white rounded-xl border border-white shadow-2xl shadow-slate-300/60 transition-transform duration-300"
+            className="bg-white rounded-xl border border-white shadow-2xl shadow-slate-300/60 transition-transform duration-300 mb-8"
         >
             {renderPreview()}
         </div>
@@ -1190,228 +1206,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             </div>
         )}
 
-        {/* ATS Template Mobile Panel Controls - Separate Left/Right Panel Controls */}
-        {isMobile && cv.templateId && (cv.templateId.toLowerCase().includes('ats') || cv.templateId.toLowerCase().includes('clean')) && activeMobileSection && (
-            <div className="bg-white border-t border-gray-200 p-4 shadow-lg">
-                <div className="max-w-lg mx-auto">
-                    {/* Check if selected section is left panel (ATS template) */}
-                    {['leftSkills', 'leftLanguages', 'leftCertifications'].includes(activeMobileSection) ? (
-                        // Left Panel Controls
-                        <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-                            <div className="text-center mb-4">
-                                <div className="text-sm text-blue-600 font-medium mb-1">Sol Panel Bölməsi</div>
-                                <div className="text-lg font-semibold text-blue-800">
-                                    {(() => {
-                                        // Get available left sections
-                                        const availableLeftSections = [];
-                                        if (cv.skills && cv.skills.length > 0) availableLeftSections.push('leftSkills');
-                                        if (cv.languages && cv.languages.length > 0) availableLeftSections.push('leftLanguages');
-                                        if (cv.certifications && cv.certifications.length > 0) availableLeftSections.push('leftCertifications');
-                                        
-                                        // Get section name
-                                        const sectionNames = {
-                                            leftSkills: cv.cvLanguage === 'english' ? 'Skills' : 'Bacarıqlar',
-                                            leftLanguages: cv.cvLanguage === 'english' ? 'Languages' : 'Dillər',
-                                            leftCertifications: cv.cvLanguage === 'english' ? 'Certifications' : 'Sertifikatlar'
-                                        };
-                                        
-                                        return sectionNames[activeMobileSection as keyof typeof sectionNames] || activeMobileSection;
-                                    })()}
-                                </div>
-                                <div className="text-xs text-blue-600 mt-1">
-                                    {(() => {
-                                        const availableLeftSections = [];
-                                        if (cv.skills && cv.skills.length > 0) availableLeftSections.push('leftSkills');
-                                        if (cv.languages && cv.languages.length > 0) availableLeftSections.push('leftLanguages');
-                                        if (cv.certifications && cv.certifications.length > 0) availableLeftSections.push('leftCertifications');
-                                        
-                                        const currentPos = availableLeftSections.indexOf(activeMobileSection) + 1;
-                                        const total = availableLeftSections.length;
-                                        
-                                        return `Sol Panel Sırası: ${currentPos} / ${total}`;
-                                    })()}
-                                </div>
-                            </div>
-
-                            {/* Left Panel Action Buttons */}
-                            <div className="flex items-center justify-center gap-3">
-                                <button
-                                    onClick={() => {
-                                        // Move left section up using available sections logic
-                                        const availableLeftSections: string[] = [];
-                                        if (cv.skills && cv.skills.length > 0) availableLeftSections.push('leftSkills');
-                                        if (cv.languages && cv.languages.length > 0) availableLeftSections.push('leftLanguages');
-                                        if (cv.certifications && cv.certifications.length > 0) availableLeftSections.push('leftCertifications');
-                                        
-                                        const filteredOrder = leftColumnOrder.filter(section => availableLeftSections.includes(section));
-                                        const currentIndex = filteredOrder.indexOf(activeMobileSection);
-                                        
-                                        if (currentIndex > 0 && activeMobileSection) {
-                                            console.log('🔼 CVEditor: Moving left section up:', activeMobileSection);
-                                            
-                                            const newOrder = [...filteredOrder];
-                                            [newOrder[currentIndex], newOrder[currentIndex - 1]] = [newOrder[currentIndex - 1], newOrder[currentIndex]];
-                                            
-                                            setLeftColumnOrder(newOrder);
-                                            setIsDirty(true);
-                                            
-                                            if (navigator.vibrate) navigator.vibrate(50);
-                                        }
-                                    }}
-                                    disabled={(() => {
-                                        const availableLeftSections: string[] = [];
-                                        if (cv.skills && cv.skills.length > 0) availableLeftSections.push('leftSkills');
-                                        if (cv.languages && cv.languages.length > 0) availableLeftSections.push('leftLanguages');
-                                        if (cv.certifications && cv.certifications.length > 0) availableLeftSections.push('leftCertifications');
-                                        const filteredOrder = leftColumnOrder.filter(section => availableLeftSections.includes(section));
-                                        return filteredOrder.indexOf(activeMobileSection) === 0;
-                                    })()}
-                                    className={`
-                                        flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 transform
-                                        ${(() => {
-                                            const availableLeftSections: string[] = [];
-                                            if (cv.skills && cv.skills.length > 0) availableLeftSections.push('leftSkills');
-                                            if (cv.languages && cv.languages.length > 0) availableLeftSections.push('leftLanguages');
-                                            if (cv.certifications && cv.certifications.length > 0) availableLeftSections.push('leftCertifications');
-                                            const filteredOrder = leftColumnOrder.filter(section => availableLeftSections.includes(section));
-                                            return filteredOrder.indexOf(activeMobileSection) === 0;
-                                        })()
-                                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                            : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl active:scale-95'
-                                        }
-                                    `}
-                                >
-                                    ↑ Yuxarı
-                                </button>
-
-                                <button
-                                    onClick={() => {
-                                        // Move left section down using available sections logic
-                                        const availableLeftSections: string[] = [];
-                                        if (cv.skills && cv.skills.length > 0) availableLeftSections.push('leftSkills');
-                                        if (cv.languages && cv.languages.length > 0) availableLeftSections.push('leftLanguages');
-                                        if (cv.certifications && cv.certifications.length > 0) availableLeftSections.push('leftCertifications');
-                                        
-                                        const filteredOrder = leftColumnOrder.filter(section => availableLeftSections.includes(section));
-                                        const currentIndex = filteredOrder.indexOf(activeMobileSection);
-                                        
-                                        if (currentIndex < filteredOrder.length - 1 && activeMobileSection) {
-                                            console.log('🔽 CVEditor: Moving left section down:', activeMobileSection);
-                                            
-                                            const newOrder = [...filteredOrder];
-                                            [newOrder[currentIndex], newOrder[currentIndex + 1]] = [newOrder[currentIndex + 1], newOrder[currentIndex]];
-                                            
-                                            setLeftColumnOrder(newOrder);
-                                            setIsDirty(true);
-                                            
-                                            if (navigator.vibrate) navigator.vibrate(50);
-                                        }
-                                    }}
-                                    disabled={(() => {
-                                        const availableLeftSections: string[] = [];
-                                        if (cv.skills && cv.skills.length > 0) availableLeftSections.push('leftSkills');
-                                        if (cv.languages && cv.languages.length > 0) availableLeftSections.push('leftLanguages');
-                                        if (cv.certifications && cv.certifications.length > 0) availableLeftSections.push('leftCertifications');
-                                        const filteredOrder = leftColumnOrder.filter(section => availableLeftSections.includes(section));
-                                        return filteredOrder.indexOf(activeMobileSection) === filteredOrder.length - 1;
-                                    })()}
-                                    className={`
-                                        flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 transform
-                                        ${(() => {
-                                            const availableLeftSections: string[] = [];
-                                            if (cv.skills && cv.skills.length > 0) availableLeftSections.push('leftSkills');
-                                            if (cv.languages && cv.languages.length > 0) availableLeftSections.push('leftLanguages');
-                                            if (cv.certifications && cv.certifications.length > 0) availableLeftSections.push('leftCertifications');
-                                            const filteredOrder = leftColumnOrder.filter(section => availableLeftSections.includes(section));
-                                            return filteredOrder.indexOf(activeMobileSection) === filteredOrder.length - 1;
-                                        })()
-                                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                            : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl active:scale-95'
-                                        }
-                                    `}
-                                >
-                                    ↓ Aşağı
-                                </button>
-
-                                <button
-                                    onClick={() => setActiveMobileSection(null)}
-                                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium text-sm bg-gray-500 hover:bg-gray-600 text-white transition-all duration-200 transform hover:shadow-lg active:scale-95"
-                                >
-                                    Bağla
-                                </button>
-                            </div>
-
-                            <div className="text-center text-xs text-blue-600 mt-3">
-                                📱 Sol paneldəki bölmələrin sırasını dəyişmək üçün yuxarı/aşağı düymələrini istifadə edin
-                            </div>
-                        </div>
-                    ) : (
-                        // Right Panel Controls (existing logic)
-                        <div className="bg-green-50 rounded-xl p-4 border border-green-200">
-                            <div className="text-center mb-4">
-                                <div className="text-sm text-green-600 font-medium mb-1">Sağ Panel Bölməsi</div>
-                                <div className="text-lg font-semibold text-green-800">
-                                    {getSectionName(activeMobileSection, cv.cvLanguage, cv.sectionNames)}
-                                </div>
-                                <div className="text-xs text-green-600 mt-1">
-                                    Sağ Panel Sırası: {sectionOrder.indexOf(activeMobileSection) + 1} / {sectionOrder.length}
-                                </div>
-                            </div>
-
-                            {/* Right Panel Action Buttons */}
-                            <div className="flex items-center justify-center gap-3">
-                                <button
-                                    onClick={() => {
-                                        console.log('🔼 Move up clicked for:', activeMobileSection);
-                                        moveSection(activeMobileSection, 'up');
-                                        if (navigator.vibrate) navigator.vibrate(50);
-                                    }}
-                                    disabled={sectionOrder.indexOf(activeMobileSection) === 0}
-                                    className={`
-                                        flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 transform
-                                        ${sectionOrder.indexOf(activeMobileSection) === 0
-                                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                            : 'bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl active:scale-95'
-                                        }
-                                    `}
-                                >
-                                    ↑ Yuxarı
-                                </button>
-
-                                <button
-                                    onClick={() => {
-                                        console.log('🔽 Move down clicked for:', activeMobileSection);
-                                        moveSection(activeMobileSection, 'down');
-                                        if (navigator.vibrate) navigator.vibrate(50);
-                                    }}
-                                    disabled={sectionOrder.indexOf(activeMobileSection) === sectionOrder.length - 1}
-                                    className={`
-                                        flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 transform
-                                        ${sectionOrder.indexOf(activeMobileSection) === sectionOrder.length - 1
-                                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                            : 'bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl active:scale-95'
-                                        }
-                                    `}
-                                >
-                                    ↓ Aşağı
-                                </button>
-
-                                <button
-                                    onClick={() => setActiveMobileSection(null)}
-                                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium text-sm bg-gray-500 hover:bg-gray-600 text-white transition-all duration-200 transform hover:shadow-lg active:scale-95"
-                                >
-                                    Bağla
-                                </button>
-                            </div>
-
-                            <div className="text-center text-xs text-green-600 mt-3">
-                                📱 Sağ paneldəki bölmələrin sırasını dəyişmək üçün yuxarı/aşağı düymələrini istifadə edin
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-        )}
+      
     </div>
 </div>
 </div>

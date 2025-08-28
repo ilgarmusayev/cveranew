@@ -74,12 +74,16 @@ const stripHtmlTags = (html: string): string => {
 };
 
 // Function to render HTML content safely
-const renderHtmlContent = (htmlContent: string) => {
+const renderHtmlContent = (htmlContent: string, isDarkBackground = false) => {
     if (!htmlContent) return null;
     return (
         <div
             dangerouslySetInnerHTML={{ __html: htmlContent }}
-            className="prose prose-xs max-w-none [&>p]:mb-2 [&>ul]:mb-2 [&>ol]:mb-2 [&>h1]:mb-2 [&>h2]:mb-2 [&>h3]:mb-2 [&>strong]:font-semibold [&>em]:italic [&>ul]:list-disc [&>ul]:ml-4 [&>ol]:list-decimal [&>ol]:ml-4"
+            className={`prose prose-xs max-w-none [&>p]:mb-2 [&>ul]:mb-2 [&>ol]:mb-2 [&>h1]:mb-2 [&>h2]:mb-2 [&>h3]:mb-2 [&>strong]:font-semibold [&>em]:italic [&>ul]:list-disc [&>ul]:ml-4 [&>ol]:list-decimal [&>ol]:ml-4 ${
+                isDarkBackground 
+                    ? '[&>*]:text-blue-100 [&>p]:text-blue-100 [&>div]:text-blue-100 [&>span]:text-blue-100 [&>strong]:text-white [&>em]:text-blue-200 [&>li]:text-blue-100' 
+                    : ''
+            }`}
         />
     );
 };
@@ -333,8 +337,8 @@ const splitContentToPages = (sections: React.ReactNode[], pageHeightPx: number =
     return pages.length > 0 ? pages : [[<div key="empty">Məlumat yoxdur</div>]];
 };
 
-// Responsive Item Component - DND for Desktop, Buttons for Mobile
-interface SortableItemProps {
+// Special SortableItem for Left Panel - mobile drag enabled
+interface LeftPanelSortableItemProps {
     id: string;
     children: React.ReactNode;
     showDragInstruction?: boolean;
@@ -343,23 +347,22 @@ interface SortableItemProps {
     onSectionReorder: (newOrder: string[]) => void;
     activeSection?: string | null;
     onSetActiveSection?: (sectionId: string | null) => void;
-    alwaysShowDragHandle?: boolean; // New prop for left panel sections
+    alwaysShowDragHandle?: boolean;
 }
 
-const SortableItem: React.FC<SortableItemProps> = ({ 
+const LeftPanelSortableItem: React.FC<LeftPanelSortableItemProps> = ({ 
     id, 
     children, 
     showDragInstruction = true, 
-    dragIconPosition = 'left',
+    dragIconPosition = 'right',
     sectionOrder,
     onSectionReorder,
     activeSection,
     onSetActiveSection,
-    alwaysShowDragHandle = false
+    alwaysShowDragHandle = true
 }) => {
     const [isMobile, setIsMobile] = useState(false);
     const [isPressed, setIsPressed] = useState(false);
-    const [isMoving, setIsMoving] = useState(false);
     const autoDeactivateTimerRef = useRef<NodeJS.Timeout | null>(null);
     
     // Check if this section is active
@@ -409,6 +412,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
         };
     }, [isActive, isMobile, onSetActiveSection]);
 
+    // LEFT PANEL: Enable drag & drop for both mobile and desktop
     const {
         attributes,
         listeners,
@@ -416,52 +420,43 @@ const SortableItem: React.FC<SortableItemProps> = ({
         transform,
         transition,
         isDragging,
-    } = useSortable({ id });
+    } = useSortable({ 
+        id,
+        disabled: false // Enable drag for both mobile and desktop
+    });
 
     const style: React.CSSProperties = {
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? 0.9 : 1,
         zIndex: isDragging ? 9999 : 'auto',
-        touchAction: 'none', // Always disable browser touch handling for DnD
+        touchAction: 'none', // Let DnD handle touch
         userSelect: 'none',
         WebkitUserSelect: 'none',
         WebkitTouchCallout: 'none',
         pointerEvents: isDragging ? 'none' : 'auto',
     };
 
-    // Handle section click to activate (simplified for mobile)
-    const handleSectionClick = (e: React.MouseEvent | React.TouchEvent) => {
-        // Only handle click activation, not drag
+    // Mobile click for selection when not dragging
+    const handleMobileClick = (e: React.MouseEvent | React.TouchEvent) => {
         if (isMobile && onSetActiveSection && !isDragging) {
-            // Small delay to ensure this doesn't interfere with drag start
-            setTimeout(() => {
-                if (!isDragging) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    // Clear any existing auto-deactivate timer
-                    if (autoDeactivateTimerRef.current) {
-                        clearTimeout(autoDeactivateTimerRef.current);
-                        autoDeactivateTimerRef.current = null;
-                    }
-                    
-                    // Toggle active state
-                    onSetActiveSection(isActive ? null : id);
-                    
-                    // Light haptic feedback for activation
-                    if (navigator.vibrate) {
-                        navigator.vibrate(20);
-                    }
-                }
-            }, 50);
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Clear any existing auto-deactivate timer
+            if (autoDeactivateTimerRef.current) {
+                clearTimeout(autoDeactivateTimerRef.current);
+                autoDeactivateTimerRef.current = null;
+            }
+            
+            // Toggle active state
+            onSetActiveSection(isActive ? null : id);
         }
     };
 
-    // Minimal touch handlers to avoid DnD conflicts
+    // Touch feedback
     const handleTouchStart = (e: React.TouchEvent) => {
         if (isMobile) {
-            // Just visual feedback, don't interfere with DnD
             setIsPressed(true);
         }
     };
@@ -469,26 +464,218 @@ const SortableItem: React.FC<SortableItemProps> = ({
     const handleTouchEnd = (e: React.TouchEvent) => {
         if (isMobile) {
             setIsPressed(false);
-            // Let DnD kit handle everything else
         }
     };
 
-    const handleTouchMove = (e: React.TouchEvent) => {
-        if (isMobile && isPressed) {
-            // Reset visual state when moving
-            setIsPressed(false);
-        }
-    };
-
-        return (
+    return (
         <div
             ref={setNodeRef}
             style={style}
             {...attributes}
             {...listeners}
-            onClick={handleSectionClick}
+            onClick={isMobile ? handleMobileClick : undefined}
             onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            className={`
+                relative group
+                cursor-grab active:cursor-grabbing
+                ${isDragging
+                    ? 'shadow-2xl border-2 border-blue-500 bg-blue-50 rounded-lg scale-105 rotate-1'
+                    : 'hover:shadow-lg hover:border-2 hover:border-blue-300 hover:bg-blue-700/30 hover:scale-[1.01] hover:z-50'
+                }
+                ${isActive && isMobile ? 'bg-blue-50/70 shadow-xl scale-[1.02] border-blue-400' : ''}
+                ${isPressed && isMobile ? 'scale-[0.98] bg-blue-800/50' : ''}
+                transition-all duration-200 ease-out
+                rounded-lg border-2 border-transparent
+                ${isMobile ? 'touch-manipulation' : 'touch-manipulation'}
+                select-none
+                ${isMobile ? 'min-h-[60px]' : ''}
+            `}
+            title={isMobile ? "Sol panel - sürükləyin və ya toxunun" : "Sol panel hissəni sürükləyin"}
+        >
+            {/* Desktop & Mobile Drag Handle - Only show on hover since left panels don't get selected */}
+            <div
+                className={`absolute ${dragIconPosition === 'right' ? '-right-3' : '-left-3'} top-1/2 transform -translate-y-1/2
+                            opacity-0 group-hover:opacity-70 hover:opacity-100 transition-all duration-200`}
+                style={{ userSelect: 'none', zIndex: 99999 }}
+            >
+                <div className={`bg-blue-200 hover:bg-white text-blue-900 rounded-full ${isMobile ? 'w-8 h-8' : 'w-6 h-6'} flex items-center justify-center shadow-xl transition-colors border-2 border-blue-300`}>
+                    <span className={`${isMobile ? 'text-sm' : 'text-xs'}`}>≡</span>
+                </div>
+            </div>
+
+            {/* Desktop & Mobile instruction */}
+            {showDragInstruction && (
+                <div
+                    className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-blue-800 text-white px-3 py-1 rounded text-xs font-medium whitespace-nowrap shadow-lg"
+                    style={{ userSelect: 'none', zIndex: 99999 }}
+                >
+                    Sol panel - sürükləyin
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-blue-800"></div>
+                </div>
+            )}
+
+            {/* Visual drag lines when dragging */}
+            {isDragging && (
+                <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 99998 }}>
+                    <div className="absolute left-0 top-1/4 w-1 h-1/2 bg-blue-300 rounded-full animate-pulse"></div>
+                    <div className="absolute right-0 top-1/4 w-1 h-1/2 bg-blue-300 rounded-full animate-pulse"></div>
+                </div>
+            )}
+
+            {/* Content with responsive padding */}
+            <div
+                className={`
+                    ${isDragging ? 'transform rotate-0' : ''}
+                    transition-transform duration-200
+                    ${dragIconPosition === 'right' ? 'pr-6' : 'pr-2'}
+                `}
+                style={{ userSelect: isDragging ? 'none' : 'auto' }}
+            >
+                {children}
+            </div>
+        </div>
+    );
+};
+
+// Responsive Item Component - DND for Desktop, Buttons for Mobile
+interface SortableItemProps {
+    id: string;
+    children: React.ReactNode;
+    showDragInstruction?: boolean;
+    dragIconPosition?: 'left' | 'right';
+    sectionOrder: string[];
+    onSectionReorder: (newOrder: string[]) => void;
+    activeSection?: string | null;
+    onSetActiveSection?: (sectionId: string | null) => void;
+    alwaysShowDragHandle?: boolean; // New prop for left panel sections
+}
+
+const SortableItem: React.FC<SortableItemProps> = ({ 
+    id, 
+    children, 
+    showDragInstruction = true, 
+    dragIconPosition = 'left',
+    sectionOrder,
+    onSectionReorder,
+    activeSection,
+    onSetActiveSection,
+    alwaysShowDragHandle = false
+}) => {
+    const [isMobile, setIsMobile] = useState(false);
+    const [isPressed, setIsPressed] = useState(false);
+    const autoDeactivateTimerRef = useRef<NodeJS.Timeout | null>(null);
+    
+    // Check if this section is active
+    const isActive = activeSection === id;
+    
+    // Detect mobile on mount
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 1024); // lg breakpoint
+        };
+        
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    // Auto-deactivate section after 10 seconds of inactivity (mobile only)
+    useEffect(() => {
+        if (isMobile && isActive) {
+            // Clear existing timer
+            if (autoDeactivateTimerRef.current) {
+                clearTimeout(autoDeactivateTimerRef.current);
+            }
+            
+            // Set new timer
+            const timer = setTimeout(() => {
+                if (onSetActiveSection) {
+                    onSetActiveSection(null);
+                }
+            }, 10000); // 10 seconds
+            
+            autoDeactivateTimerRef.current = timer;
+            
+            return () => {
+                if (timer) {
+                    clearTimeout(timer);
+                }
+            };
+        }
+        
+        // Cleanup timer when section becomes inactive
+        return () => {
+            if (autoDeactivateTimerRef.current) {
+                clearTimeout(autoDeactivateTimerRef.current);
+                autoDeactivateTimerRef.current = null;
+            }
+        };
+    }, [isActive, isMobile, onSetActiveSection]);
+
+    // Mobil üçün drag & drop yox, sadəcə desktop üçün
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ 
+        id,
+        disabled: isMobile // Mobil üçün drag & drop söndürülüb
+    });
+
+    const style: React.CSSProperties = {
+        transform: isMobile ? undefined : CSS.Transform.toString(transform), // Mobil üçün transform yox
+        transition,
+        opacity: isDragging ? 0.9 : 1,
+        zIndex: isDragging ? 9999 : 'auto',
+        touchAction: isMobile ? 'manipulation' : 'none', // Mobil üçün normal touch
+        userSelect: isMobile ? 'auto' : 'none',
+        WebkitUserSelect: isMobile ? 'auto' : 'none',
+        WebkitTouchCallout: isMobile ? 'default' : 'none',
+        pointerEvents: isDragging ? 'none' : 'auto',
+    };
+
+    // Mobil üçün sadəcə section seçimi
+    const handleMobileClick = (e: React.MouseEvent | React.TouchEvent) => {
+        if (isMobile && onSetActiveSection) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Clear any existing auto-deactivate timer
+            if (autoDeactivateTimerRef.current) {
+                clearTimeout(autoDeactivateTimerRef.current);
+                autoDeactivateTimerRef.current = null;
+            }
+            
+            // Toggle active state
+            onSetActiveSection(isActive ? null : id);
+        }
+    };
+
+    // Mobil üçün sadə touch feedback
+    const handleTouchStart = (e: React.TouchEvent) => {
+        if (isMobile) {
+            setIsPressed(true);
+        }
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        if (isMobile) {
+            setIsPressed(false);
+        }
+    };
+
+    return (
+        <div
+            ref={isMobile ? undefined : setNodeRef} // Mobil üçün ref yox
+            style={style}
+            {...(isMobile ? {} : attributes)} // Mobil üçün attributes yox
+            {...(isMobile ? {} : listeners)} // Mobil üçün listeners yox
+            onClick={isMobile ? handleMobileClick : undefined} // Mobil üçün sadəcə click
+            onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
             className={`
                 relative group
@@ -499,10 +686,9 @@ const SortableItem: React.FC<SortableItemProps> = ({
                 }
                 ${isActive && isMobile ? 'bg-blue-50/70 shadow-xl scale-[1.02] border-blue-400' : ''}
                 ${isPressed && isMobile ? 'scale-[0.98] bg-blue-100/50' : ''}
-                ${isMoving && isMobile ? 'animate-pulse bg-green-100/60 border-green-400 shadow-green-200' : ''}
                 transition-all duration-200 ease-out
                 rounded-lg border-2 border-transparent
-                ${isMobile ? 'touch-manipulation py-6 px-4 my-2' : 'touch-manipulation'}
+                ${isMobile ? 'touch-manipulation' : 'touch-manipulation'}
                 select-none
                 ${isMobile ? 'min-h-[80px]' : ''}
             `}
@@ -551,7 +737,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
                 className={`
                     ${isDragging && !isMobile ? 'transform rotate-0' : ''}
                     transition-transform duration-200
-                    ${isMobile ? 'py-1' : dragIconPosition === 'right' ? 'pr-8 py-1' : 'pr-2 py-1'}
+                    ${dragIconPosition === 'right' ? 'pr-8' : 'pr-2'}
                 `}
                 style={{ userSelect: isDragging && !isMobile ? 'none' : 'auto' }}
             >
@@ -605,6 +791,11 @@ const BasicTemplate: React.FC<{
     );
 
     const handleDragStart = (event: DragStartEvent) => {
+        // Mobil üçün drag & drop söndürülüb
+        if (isMobile) {
+            return;
+        }
+        
         setIsDragActive(true);
         setActiveId(event.active.id as string);
         console.log('=== DRAG STARTED ===');
@@ -1126,6 +1317,11 @@ const ModernTemplate: React.FC<{
     );
 
     const handleDragStart = (event: DragStartEvent) => {
+        // Mobil üçün drag & drop söndürülüb
+        if (isMobile) {
+            return;
+        }
+        
         setIsDragActive(true);
         setActiveId(event.active.id as string);
         console.log('=== MODERN TEMPLATE DRAG STARTED ===');
@@ -1690,7 +1886,7 @@ const ATSFriendlyTemplate: React.FC<{
         })
     );
 
-    // Separate sensors for left column to avoid conflicts
+    // Separate sensors for left column to avoid conflicts - mobile enabled
     const leftColumnSensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: {
@@ -1699,8 +1895,8 @@ const ATSFriendlyTemplate: React.FC<{
         }),
         useSensor(TouchSensor, {
             activationConstraint: {
-                delay: 25, // Super fast response for left column mobile
-                tolerance: 3, // Very precise for left column sections
+                delay: 150, // Longer delay for mobile to allow selection vs drag
+                tolerance: 8, // Better touch precision for left column sections
             },
         }),
         useSensor(KeyboardSensor, {
@@ -1709,6 +1905,11 @@ const ATSFriendlyTemplate: React.FC<{
     );
 
     const handleDragStart = (event: DragStartEvent) => {
+        // Mobil üçün drag & drop söndürülüb
+        if (isMobile) {
+            return;
+        }
+        
         setIsDragActive(true);
         setActiveId(event.active.id as string);
         console.log('=== ATS TEMPLATE DRAG STARTED ===');
@@ -1729,6 +1930,7 @@ const ATSFriendlyTemplate: React.FC<{
         console.log('Window width:', window.innerWidth);
         console.log('Active left element:', event.active.id);
         console.log('Current leftColumnOrder:', leftColumnOrder);
+        console.log('✅ LEFT PANEL MOBILE DRAG ENABLED!');
         document.body.style.userSelect = 'none';
         document.body.style.cursor = 'grabbing';
     };
@@ -2156,7 +2358,7 @@ const ATSFriendlyTemplate: React.FC<{
         >
             {/* Left Column - Contact & Skills */}
             <div 
-                className="w-2/5 bg-gray-50 border-r border-gray-200" 
+                className="w-2/5 bg-blue-900 text-white border-r border-blue-800" 
                 style={{ 
                     padding: '15mm 12mm',
                     touchAction: 'none', // Force DnD kit control
@@ -2175,7 +2377,7 @@ const ATSFriendlyTemplate: React.FC<{
                             <img
                                 src={personalInfo.profileImage}
                                 alt="Profile"
-                                className="w-28 h-28 rounded-full object-cover border-4 border-gray-300 shadow-md"
+                                className="w-28 h-28 rounded-full object-cover border-4 border-blue-300 shadow-md"
                             />
                         </div>
                     </div>
@@ -2183,45 +2385,45 @@ const ATSFriendlyTemplate: React.FC<{
 
                 {/* Contact Information */}
                 <div className="mb-6 cv-section avoid-break">
-                    <h2 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide border-b border-gray-300 pb-1">
+                    <h2 className="text-sm font-bold text-white mb-3 uppercase tracking-wide border-b border-blue-300 pb-1">
                         Əlaqə
                     </h2>
                     <div className="space-y-2 text-xs">
                         {personalInfo.email && (
                             <div className="flex items-start gap-2">
-                                <span className="font-medium text-gray-600 min-w-[40px]">Email:</span>
-                                <span className="text-gray-900">{personalInfo.email}</span>
+                                <span className="font-medium text-blue-200 min-w-[40px]">Email:</span>
+                                <span className="text-white">{personalInfo.email}</span>
                             </div>
                         )}
                         {personalInfo.phone && (
                             <div className="flex items-start gap-2">
-                                <span className="font-medium text-gray-600 min-w-[40px]">Phone:</span>
-                                <span className="text-gray-900">{personalInfo.phone}</span>
+                                <span className="font-medium text-blue-200 min-w-[40px]">Phone:</span>
+                                <span className="text-white">{personalInfo.phone}</span>
                             </div>
                         )}
                         {personalInfo.location && (
                             <div className="flex items-start gap-2">
-                                <span className="font-medium text-gray-600 min-w-[40px]">Address:</span>
-                                <span className="text-gray-900">{personalInfo.location}</span>
+                                <span className="font-medium text-blue-200 min-w-[40px]">Address:</span>
+                                <span className="text-white">{personalInfo.location}</span>
                             </div>
                         )}
                         {personalInfo.linkedin && (
                             <div className="flex items-start gap-3">
-                                <span className="font-medium text-gray-600 min-w-[40px]">LinkedIn:</span>
-                                <span className="text-gray-900 break-all">{personalInfo.linkedin}</span>
+                                <span className="font-medium text-blue-200 min-w-[40px]">LinkedIn:</span>
+                                <span className="text-white break-all">{personalInfo.linkedin}</span>
                             </div>
                         )}
                         {personalInfo.website && (
                             <div className="flex items-start gap-2">
-                                <span className="font-medium text-gray-600 min-w-[40px]">Website:</span>
-                                <span className="text-gray-900 break-all">{personalInfo.website}</span>
+                                <span className="font-medium text-blue-200 min-w-[40px]">Website:</span>
+                                <span className="text-white break-all">{personalInfo.website}</span>
                             </div>
                         )}
                         {personalInfo.additionalLinks && personalInfo.additionalLinks.length > 0 && (
                             personalInfo.additionalLinks.map((link) => (
                                 <div key={link.id} className="flex items-start gap-2">
-                                    <span className="font-medium text-gray-600 min-w-[40px]">{link.label}:</span>
-                                    <span className="text-gray-900 break-all">{link.value}</span>
+                                    <span className="font-medium text-blue-200 min-w-[40px]">{link.label}:</span>
+                                    <span className="text-white break-all">{link.value}</span>
                                 </div>
                             ))
                         )}
@@ -2239,17 +2441,7 @@ const ATSFriendlyTemplate: React.FC<{
                         items={filteredLeftColumnOrder}
                         strategy={verticalListSortingStrategy}
                     >
-                        {/* Left Panel Header with Drag Instructions */}
-                        {filteredLeftColumnOrder.length > 1 && (
-                            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                                <div className="text-xs text-blue-700 font-medium text-center">
-                                    📍 Sol Panel Bölmələri
-                                </div>
-                                <div className="text-xs text-blue-600 text-center mt-1">
-                                    Sırasını dəyişmək üçün sürükləyin
-                                </div>
-                            </div>
-                        )}
+                   
                         
                         <div 
                             className={`transition-all duration-300 ${isLeftDragActive ? 'opacity-95 bg-gradient-to-br from-transparent via-blue-50/30 to-transparent' : ''}`}
@@ -2266,7 +2458,7 @@ const ATSFriendlyTemplate: React.FC<{
                                     case 'leftSkills':
                                         console.log('🎯 Rendering leftSkills, skills.length:', skills.length);
                                         return skills.length > 0 && (
-                                            <SortableItem 
+                                            <LeftPanelSortableItem 
                                                 key="leftSkills" 
                                                 id="leftSkills"
                                                 sectionOrder={filteredLeftColumnOrder}
@@ -2284,18 +2476,18 @@ const ATSFriendlyTemplate: React.FC<{
                                                     {/* Hard Skills */}
                                                     {skills.filter(skill => skill.type === 'hard').length > 0 && (
                                                         <div className="mb-4">
-                                                            <h2 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide border-b border-gray-300 pb-1">
+                                                            <h2 className="text-sm font-bold text-white mb-3 uppercase tracking-wide border-b border-blue-300 pb-1">
                                                                 {getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
                                                             </h2>
                                                             <div className="space-y-2">
                                                                 {skills.filter(skill => skill.type === 'hard').map((skill) => (
                                                                     <div key={skill.id}>
                                                                         <div className="mb-1">
-                                                                            <span className="text-xs font-medium text-gray-900">{skill.name}</span>
+                                                                            <span className="text-xs font-medium text-white">{skill.name}</span>
                                                                         </div>
                                                                         {skill.description && (
-                                                                            <div className="text-gray-700 text-xs leading-relaxed">
-                                                                                {renderHtmlContent(skill.description)}
+                                                                            <div className="text-blue-100 text-xs leading-relaxed">
+                                                                                {renderHtmlContent(skill.description, true)}
                                                                             </div>
                                                                         )}
                                                                     </div>
@@ -2307,18 +2499,18 @@ const ATSFriendlyTemplate: React.FC<{
                                                     {/* Soft Skills */}
                                                     {skills.filter(skill => skill.type === 'soft').length > 0 && (
                                                         <div className="mb-4">
-                                                            <h2 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide border-b border-gray-300 pb-1">
+                                                            <h2 className="text-sm font-bold text-white mb-3 uppercase tracking-wide border-b border-blue-300 pb-1">
                                                                 {getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
                                                             </h2>
                                                             <div className="space-y-2">
                                                                 {skills.filter(skill => skill.type === 'soft').map((skill) => (
                                                                     <div key={skill.id}>
                                                                         <div className="mb-1">
-                                                                            <span className="text-xs font-medium text-gray-900">{skill.name}</span>
+                                                                            <span className="text-xs font-medium text-white">{skill.name}</span>
                                                                         </div>
                                                                         {skill.description && (
-                                                                            <div className="text-gray-700 text-xs leading-relaxed">
-                                                                                {renderHtmlContent(skill.description)}
+                                                                            <div className="text-blue-100 text-xs leading-relaxed">
+                                                                                {renderHtmlContent(skill.description, true)}
                                                                             </div>
                                                                         )}
                                                                     </div>
@@ -2330,18 +2522,18 @@ const ATSFriendlyTemplate: React.FC<{
                                                     {/* General Skills */}
                                                     {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).length > 0 && (
                                                         <div className="mb-4">
-                                                            <h2 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide border-b border-gray-300 pb-1">
+                                                            <h2 className="text-sm font-bold text-white mb-3 uppercase tracking-wide border-b border-blue-300 pb-1">
                                                                 {getSectionName('skills', data.cvLanguage, data.sectionNames)}
                                                             </h2>
                                                             <div className="space-y-2">
                                                                 {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map((skill) => (
                                                                     <div key={skill.id}>
                                                                         <div className="mb-1">
-                                                                            <span className="text-xs font-medium text-gray-900">{skill.name}</span>
+                                                                            <span className="text-xs font-medium text-white">{skill.name}</span>
                                                                         </div>
                                                                         {skill.description && (
-                                                                            <div className="text-gray-700 text-xs leading-relaxed">
-                                                                                {renderHtmlContent(skill.description)}
+                                                                            <div className="text-blue-100 text-xs leading-relaxed">
+                                                                                {renderHtmlContent(skill.description, true)}
                                                                             </div>
                                                                         )}
                                                                     </div>
@@ -2350,12 +2542,12 @@ const ATSFriendlyTemplate: React.FC<{
                                                         </div>
                                                     )}
                                                 </div>
-                                            </SortableItem>
+                                            </LeftPanelSortableItem>
                                         );
 
                                     case 'leftLanguages':
                                         return languages.length > 0 && (
-                                            <SortableItem 
+                                            <LeftPanelSortableItem 
                                                 key="leftLanguages" 
                                                 id="leftLanguages"
                                                 sectionOrder={filteredLeftColumnOrder}
@@ -2370,23 +2562,23 @@ const ATSFriendlyTemplate: React.FC<{
                                                 alwaysShowDragHandle={true}
                                             >
                                                 <div className="mb-6">
-                                                    <h2 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide border-b border-gray-300 pb-1">
+                                                    <h2 className="text-sm font-bold text-white mb-3 uppercase tracking-wide border-b border-blue-300 pb-1">
                                                         {getSectionName('languages', data.cvLanguage, data.sectionNames)}
                                                     </h2>
                                                     <div className={languages.length <= 2 ? "space-y-1" : "grid grid-cols-4 gap-x-2 gap-y-1"}>
                                                         {languages.map((lang) => (
-                                                            <div key={lang.id} className="text-xs text-gray-700 break-words">
+                                                            <div key={lang.id} className="text-xs text-white break-words">
                                                                 {lang.language} ({getLanguageLevel(lang.level, data.cvLanguage)})
                                                             </div>
                                                         ))}
                                                     </div>
                                                 </div>
-                                            </SortableItem>
+                                            </LeftPanelSortableItem>
                                         );
 
                                     case 'leftCertifications':
                                         return certifications.length > 0 && (
-                                            <SortableItem 
+                                            <LeftPanelSortableItem 
                                                 key="leftCertifications" 
                                                 id="leftCertifications"
                                                 sectionOrder={filteredLeftColumnOrder}
@@ -2401,7 +2593,7 @@ const ATSFriendlyTemplate: React.FC<{
                                                 alwaysShowDragHandle={true}
                                             >
                                                 <div className="mb-6">
-                                                    <h2 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide border-b border-gray-300 pb-1">
+                                                    <h2 className="text-sm font-bold text-white mb-3 uppercase tracking-wide border-b border-blue-300 pb-1">
                                                         {getSectionName('certifications', data.cvLanguage, data.sectionNames)}
                                                     </h2>
                                                     <div className="space-y-2">
@@ -2414,20 +2606,20 @@ const ATSFriendlyTemplate: React.FC<{
                                                                                 href={cert.url}
                                                                                 target="_blank"
                                                                                 rel="noopener noreferrer"
-                                                                                className="text-xs font-medium text-gray-900 underline hover:text-blue-600 transition-colors cursor-pointer"
+                                                                                className="text-xs font-medium text-white underline hover:text-blue-200 transition-colors cursor-pointer"
                                                                             >
                                                                                 {cert.name}
                                                                             </a>
                                                                         ) : (
-                                                                            <h3 className="text-xs font-medium text-gray-900">{cert.name}</h3>
+                                                                            <h3 className="text-xs font-medium text-white">{cert.name}</h3>
                                                                         )}
-                                                                        <p className="text-xs text-gray-600">{cert.issuer}</p>
+                                                                        <p className="text-xs text-blue-200">{cert.issuer}</p>
                                                                         {cert.description && (
-                                                                            <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(cert.description)}</div>
+                                                                            <div className="text-blue-100 text-xs mt-1">{renderHtmlContent(cert.description, true)}</div>
                                                                         )}
                                                                     </div>
                                                                     {cert.date && (
-                                                                        <span className="text-xs text-gray-600 font-medium whitespace-nowrap ml-2">
+                                                                        <span className="text-xs text-blue-200 font-medium whitespace-nowrap ml-2">
                                                                             {formatDate(cert.date, data.cvLanguage)}
                                                                         </span>
                                                                     )}
@@ -2436,7 +2628,7 @@ const ATSFriendlyTemplate: React.FC<{
                                                         ))}
                                                     </div>
                                                 </div>
-                                            </SortableItem>
+                                            </LeftPanelSortableItem>
                                         );
 
                                     default:
@@ -2529,6 +2721,7 @@ const ProfessionalTemplate: React.FC<{
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
 
     const [activeId, setActiveId] = useState<string | null>(null);
+    const isMobile = window.innerWidth <= 768;
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -2548,6 +2741,11 @@ const ProfessionalTemplate: React.FC<{
     );
 
     const handleDragStart = (event: DragStartEvent) => {
+        // Mobil üçün drag & drop söndürülüb
+        if (isMobile) {
+            return;
+        }
+        
         setActiveId(event.active.id as string);
     };
 
@@ -3219,11 +3417,21 @@ export default function CVPreview({
     };
 
     return (
-        <div className="relative">
+        <div 
+            className="relative"
+            style={{
+                width: isMobile ? '100%' : '210mm',
+                height: isMobile ? '100%' : 'auto', // Desktop: auto height for long CVs
+                maxWidth: '210mm', // CV eni ilə limitli
+                minHeight: '297mm', // Minimum A4 hündürlüyü
+                overflow: isMobile ? 'hidden' : 'visible', // Desktop: allow content to overflow container
+                background: 'transparent',
+            }}
+        >
 
             {/* CV Preview Container */}
             <div
-                className="cv-preview border border-gray-300"
+                className="cv-preview"
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
@@ -3233,17 +3441,17 @@ export default function CVPreview({
                 }}
                 style={{
                     width: '210mm',
-                    height: '297mm', // Fixed A4 height
+                    height: isMobile ? 'fit-content' : 'auto', // Desktop: auto height for long content
+                    minHeight: '297mm', // Minimum A4 hündürlüyü
+                    maxWidth: '210mm', // CV enindən artıq olmaz
+                    maxHeight: isMobile ? 'none' : 'none', // Desktop: no height limit for long CVs
                     margin: '0',
-                    overflow: 'auto', // Enable scroll when content exceeds A4 height
+                    overflow: isMobile ? 'auto' : 'visible', // Desktop: allow content to be visible
                     position: 'relative',
                     background: 'white',
                     transformOrigin: 'top left',
                     transform: `scale(${scale}) translateX(${isMobile ? currentTranslateX : 0}px)`,
-                    borderRadius: '8px',
-                    boxShadow: scale >= 0.8
-                        ? '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05)'
-                        : '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+                    boxSizing: 'border-box',
                     // Set CSS Variables for font management
                     ['--cv-font-family' as any]: fontSettings.fontFamily,
                     ['--cv-name-size' as any]: `${fontSettings.nameSize}px`,
@@ -3258,10 +3466,12 @@ export default function CVPreview({
                     ['--cv-small-weight' as any]: fontSettings.smallWeight,
                     ['--cv-section-spacing' as any]: `${fontSettings.sectionSpacing}px`,
                     lineHeight: '1.5',
-                    // Mobile touch optimization
-                    touchAction: isMobile ? 'pan-x pan-y' : 'pan-y',
-                    overscrollBehavior: 'contain',
-                    transition: isDragging ? 'none' : 'transform 0.3s ease-out',
+                    // Enhanced mobile touch optimization for smooth scroll
+                    touchAction: isMobile ? 'pan-x pan-y pinch-zoom' : 'pan-y',
+                    overscrollBehavior: isMobile ? 'none' : 'contain',
+                    WebkitOverflowScrolling: 'touch', // iOS smooth scrolling
+                    scrollBehavior: 'smooth',
+                    transition: isDragging ? 'none' : 'transform 0.2s ease-out',
                 } as React.CSSProperties}
             >
                 {renderTemplate()}
