@@ -38,6 +38,9 @@ interface CVPreviewProps {
     // Mobile section selection props
     activeSection?: string | null;
     onSectionSelect?: (sectionId: string | null) => void;
+    // Left panel section reordering (for ATS template)
+    onLeftSectionReorder?: (activeSection: string, direction: 'up' | 'down') => void;
+    leftColumnOrder?: string[];
     fontSettings?: {
         fontFamily: string;
         nameSize: number;
@@ -340,6 +343,7 @@ interface SortableItemProps {
     onSectionReorder: (newOrder: string[]) => void;
     activeSection?: string | null;
     onSetActiveSection?: (sectionId: string | null) => void;
+    alwaysShowDragHandle?: boolean; // New prop for left panel sections
 }
 
 const SortableItem: React.FC<SortableItemProps> = ({ 
@@ -350,7 +354,8 @@ const SortableItem: React.FC<SortableItemProps> = ({
     sectionOrder,
     onSectionReorder,
     activeSection,
-    onSetActiveSection
+    onSetActiveSection,
+    alwaysShowDragHandle = false
 }) => {
     const [isMobile, setIsMobile] = useState(false);
     const [isPressed, setIsPressed] = useState(false);
@@ -418,63 +423,59 @@ const SortableItem: React.FC<SortableItemProps> = ({
         transition,
         opacity: isDragging ? 0.9 : 1,
         zIndex: isDragging ? 9999 : 'auto',
-        touchAction: isMobile ? 'auto' : 'manipulation',
+        touchAction: 'none', // Always disable browser touch handling for DnD
         userSelect: 'none',
         WebkitUserSelect: 'none',
         WebkitTouchCallout: 'none',
+        pointerEvents: isDragging ? 'none' : 'auto',
     };
 
-    // Handle section click to activate
+    // Handle section click to activate (simplified for mobile)
     const handleSectionClick = (e: React.MouseEvent | React.TouchEvent) => {
-        if (isMobile && onSetActiveSection) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            // Clear any existing auto-deactivate timer
-            if (autoDeactivateTimerRef.current) {
-                clearTimeout(autoDeactivateTimerRef.current);
-                autoDeactivateTimerRef.current = null;
-            }
-            
-            // Toggle active state
-            onSetActiveSection(isActive ? null : id);
+        // Only handle click activation, not drag
+        if (isMobile && onSetActiveSection && !isDragging) {
+            // Small delay to ensure this doesn't interfere with drag start
+            setTimeout(() => {
+                if (!isDragging) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Clear any existing auto-deactivate timer
+                    if (autoDeactivateTimerRef.current) {
+                        clearTimeout(autoDeactivateTimerRef.current);
+                        autoDeactivateTimerRef.current = null;
+                    }
+                    
+                    // Toggle active state
+                    onSetActiveSection(isActive ? null : id);
+                    
+                    // Light haptic feedback for activation
+                    if (navigator.vibrate) {
+                        navigator.vibrate(20);
+                    }
+                }
+            }, 50);
         }
     };
 
-    // Handle touch events for better mobile experience
+    // Minimal touch handlers to avoid DnD conflicts
     const handleTouchStart = (e: React.TouchEvent) => {
         if (isMobile) {
+            // Just visual feedback, don't interfere with DnD
             setIsPressed(true);
-            // Clear any movement timeout
-            if (autoDeactivateTimerRef.current) {
-                clearTimeout(autoDeactivateTimerRef.current);
-                autoDeactivateTimerRef.current = null;
-            }
         }
     };
 
     const handleTouchEnd = (e: React.TouchEvent) => {
         if (isMobile) {
             setIsPressed(false);
-            // Activate section on touch end for better UX
-            if (onSetActiveSection) {
-                e.stopPropagation();
-                e.preventDefault();
-                // Toggle active state with immediate feedback
-                onSetActiveSection(isActive ? null : id);
-                
-                // Haptic feedback if available
-                if (navigator.vibrate) {
-                    navigator.vibrate(30);
-                }
-            }
+            // Let DnD kit handle everything else
         }
     };
 
-    // Prevent accidental activation during scrolling
     const handleTouchMove = (e: React.TouchEvent) => {
         if (isMobile && isPressed) {
-            // Cancel selection if user is scrolling
+            // Reset visual state when moving
             setIsPressed(false);
         }
     };
@@ -485,11 +486,15 @@ const SortableItem: React.FC<SortableItemProps> = ({
             style={style}
             {...attributes}
             {...listeners}
+            onClick={handleSectionClick}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
             className={`
                 relative group
-                cursor-grab active:cursor-grabbing
-                ${isDragging
-                    ? 'shadow-2xl border-2 border-blue-500 bg-blue-50 rounded-lg scale-105 rotate-1 z-50'
+                ${isMobile ? 'cursor-pointer' : 'cursor-grab active:cursor-grabbing'}
+                ${isDragging && !isMobile
+                    ? 'shadow-2xl border-2 border-blue-500 bg-blue-50 rounded-lg scale-105 rotate-1'
                     : 'hover:shadow-lg hover:border-2 hover:border-blue-300 hover:bg-blue-50/50 hover:scale-[1.01] hover:z-50'
                 }
                 ${isActive && isMobile ? 'bg-blue-50/70 shadow-xl scale-[1.02] border-blue-400' : ''}
@@ -497,21 +502,24 @@ const SortableItem: React.FC<SortableItemProps> = ({
                 ${isMoving && isMobile ? 'animate-pulse bg-green-100/60 border-green-400 shadow-green-200' : ''}
                 transition-all duration-200 ease-out
                 rounded-lg border-2 border-transparent
-                touch-manipulation
+                ${isMobile ? 'touch-manipulation py-6 px-4 my-2' : 'touch-manipulation'}
                 select-none
-                ${isMobile ? 'min-h-[80px] py-4 px-2' : 'py-2'}
+                ${isMobile ? 'min-h-[80px]' : ''}
             `}
-            title={isMobile ? "Sürükləyərək yerdəyişmə edin" : "Bütün hissəni sürükləyin"}
+            title={isMobile ? "Hissəni seçmək üçün toxunun" : "Bütün hissəni sürükləyin"}
         >
 
-            {/* Drag Handle - Show only on desktop */}
+            {/* Desktop Drag Handle - Show based on alwaysShowDragHandle or hover */}
             {!isMobile && (
                 <div
                     className={`absolute ${dragIconPosition === 'right' ? '-right-3' : '-left-3'} top-1/2 transform -translate-y-1/2
-                                opacity-0 group-hover:opacity-100 transition-all duration-200`}
+                                ${alwaysShowDragHandle 
+                                    ? 'opacity-70 hover:opacity-100' 
+                                    : 'opacity-0 group-hover:opacity-100'
+                                } transition-all duration-200`}
                     style={{ userSelect: 'none', zIndex: 99999 }}
                 >
-                    <div className="bg-blue-600 text-white rounded-full w-7 h-7 flex items-center justify-center shadow-xl hover:bg-blue-700 transition-colors border-2 border-white">
+                    <div className={`bg-blue-600 text-white rounded-full w-7 h-7 flex items-center justify-center shadow-xl hover:bg-blue-700 transition-colors border-2 border-white ${alwaysShowDragHandle ? 'ring-2 ring-blue-200' : ''}`}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
                         </svg>
@@ -519,8 +527,8 @@ const SortableItem: React.FC<SortableItemProps> = ({
                 </div>
             )}
 
-            {/* Hover instruction */}
-            {showDragInstruction && (
+            {/* Desktop Hover instruction */}
+            {!isMobile && showDragInstruction && (
                 <div
                     className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium whitespace-nowrap shadow-lg"
                     style={{ userSelect: 'none', zIndex: 99999 }}
@@ -530,8 +538,8 @@ const SortableItem: React.FC<SortableItemProps> = ({
                 </div>
             )}
 
-            {/* Visual drag lines when dragging */}
-            {isDragging && (
+            {/* Visual drag lines when dragging (desktop only) */}
+            {isDragging && !isMobile && (
                 <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 99998 }}>
                     <div className="absolute left-0 top-1/4 w-1 h-1/2 bg-blue-500 rounded-full animate-pulse"></div>
                     <div className="absolute right-0 top-1/4 w-1 h-1/2 bg-blue-500 rounded-full animate-pulse"></div>
@@ -541,11 +549,11 @@ const SortableItem: React.FC<SortableItemProps> = ({
             {/* Content with responsive padding */}
             <div
                 className={`
-                    ${isDragging ? 'transform rotate-0' : ''}
+                    ${isDragging && !isMobile ? 'transform rotate-0' : ''}
                     transition-transform duration-200
-                    ${dragIconPosition === 'right' ? 'pr-8 py-1' : 'pr-2 py-1'}
+                    ${isMobile ? 'py-1' : dragIconPosition === 'right' ? 'pr-8 py-1' : 'pr-2 py-1'}
                 `}
-                style={{ userSelect: isDragging ? 'none' : 'auto' }}
+                style={{ userSelect: isDragging && !isMobile ? 'none' : 'auto' }}
             >
                 {children}
             </div>
@@ -1608,14 +1616,51 @@ const ATSFriendlyTemplate: React.FC<{
     onSectionReorder: (newOrder: string[]) => void;
     activeSection?: string | null;
     onSectionSelect?: (sectionId: string | null) => void;
-}> = ({ data, sectionOrder, onSectionReorder, activeSection, onSectionSelect }) => {
+    onLeftSectionReorder?: (activeSection: string, direction: 'up' | 'down') => void;
+    leftColumnOrder?: string[];
+}> = ({ data, sectionOrder, onSectionReorder, activeSection, onSectionSelect, onLeftSectionReorder, leftColumnOrder: externalLeftColumnOrder }) => {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
     const [isDragActive, setIsDragActive] = useState(false);
     const [activeId, setActiveId] = useState<string | null>(null);
     const [isMobile, setIsMobile] = useState(false);
     
-    // Left column section order state
-    const [leftColumnOrder, setLeftColumnOrder] = useState(['leftSkills', 'leftLanguages', 'leftCertifications']);
+    // Separate state for left column drag
+    const [isLeftDragActive, setIsLeftDragActive] = useState(false);
+    const [leftActiveId, setLeftActiveId] = useState<string | null>(null);
+    
+    // Left column section order state - use external if provided
+    const [internalLeftColumnOrder, setInternalLeftColumnOrder] = useState(['leftSkills', 'leftLanguages', 'leftCertifications']);
+    const leftColumnOrder = externalLeftColumnOrder || internalLeftColumnOrder;
+    const setLeftColumnOrder = externalLeftColumnOrder ? () => {} : setInternalLeftColumnOrder;
+
+    // Calculate available left column sections
+    const getAvailableLeftSections = () => {
+        const availableSections = [];
+        console.log('🔍 ATSFriendlyTemplate Debug - Data check:');
+        console.log('- Skills length:', skills.length);
+        console.log('- Languages length:', languages.length);
+        console.log('- Certifications length:', certifications.length);
+        
+        if (skills.length > 0) availableSections.push('leftSkills');
+        if (languages.length > 0) availableSections.push('leftLanguages');
+        if (certifications.length > 0) availableSections.push('leftCertifications');
+        
+        console.log('- Available left sections:', availableSections);
+        return availableSections;
+    };
+
+    const availableLeftSections = getAvailableLeftSections();
+    
+    // Filter leftColumnOrder to only include sections that actually exist
+    const filteredLeftColumnOrder = leftColumnOrder.filter(sectionId => availableLeftSections.includes(sectionId));
+    
+    // Update leftColumnOrder if it doesn't match available sections
+    useEffect(() => {
+        const currentFiltered = leftColumnOrder.filter(sectionId => availableLeftSections.includes(sectionId));
+        if (currentFiltered.length !== leftColumnOrder.length || !currentFiltered.every((section, index) => section === leftColumnOrder[index])) {
+            setLeftColumnOrder(currentFiltered);
+        }
+    }, [availableLeftSections, leftColumnOrder]);
 
     // Detect mobile device
     useEffect(() => {
@@ -1631,13 +1676,31 @@ const ATSFriendlyTemplate: React.FC<{
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: {
-                distance: 5, // Reduced distance for better responsiveness
+                distance: 8, // Minimum 8px movement to start drag
             },
         }),
         useSensor(TouchSensor, {
             activationConstraint: {
-                delay: 50, // Much shorter delay for better mobile experience
-                tolerance: 8, // Less tolerance for more precise touch
+                delay: 50, // Reduced delay for better mobile response
+                tolerance: 8, // Reduced tolerance for more precise touch
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    // Separate sensors for left column to avoid conflicts
+    const leftColumnSensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 5, // Very responsive for left column
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 25, // Super fast response for left column mobile
+                tolerance: 3, // Very precise for left column sections
             },
         }),
         useSensor(KeyboardSensor, {
@@ -1654,6 +1717,115 @@ const ATSFriendlyTemplate: React.FC<{
         // Add subtle body class for global styling if needed
         document.body.style.userSelect = 'none';
         document.body.style.cursor = 'grabbing';
+    };
+
+    // Separate drag handlers for left column
+    const handleLeftDragStart = (event: DragStartEvent) => {
+        setIsLeftDragActive(true);
+        setLeftActiveId(event.active.id as string);
+        console.log('=== LEFT COLUMN DRAG STARTED ===');
+        console.log('Device type:', 'ontouchstart' in window ? 'Touch Device' : 'Mouse Device');
+        console.log('Is Mobile:', isMobile);
+        console.log('Window width:', window.innerWidth);
+        console.log('Active left element:', event.active.id);
+        console.log('Current leftColumnOrder:', leftColumnOrder);
+        document.body.style.userSelect = 'none';
+        document.body.style.cursor = 'grabbing';
+    };
+
+    const handleLeftDragEnd = (event: DragEndEvent) => {
+        setIsLeftDragActive(false);
+        setLeftActiveId(null);
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+
+        const { active, over } = event;
+
+        console.log('=== LEFT COLUMN DRAG ENDED ===');
+        console.log('Active:', active.id);
+        console.log('Over:', over?.id);
+        console.log('Current leftColumnOrder:', leftColumnOrder);
+        console.log('External callback available:', !!onLeftSectionReorder);
+
+        if (over && active.id !== over.id) {
+            const oldIndex = filteredLeftColumnOrder.indexOf(active.id as string);
+            const newIndex = filteredLeftColumnOrder.indexOf(over.id as string);
+
+            console.log('Left column - Old index:', oldIndex, 'New index:', newIndex);
+            console.log('Left column array before move:', filteredLeftColumnOrder);
+
+            if (oldIndex !== -1 && newIndex !== -1) {
+                // If external callback is available, use it
+                if (onLeftSectionReorder) {
+                    console.log('🔄 Using external left section reorder callback for drag');
+                    const direction = newIndex < oldIndex ? 'up' : 'down';
+                    onLeftSectionReorder(active.id as string, direction);
+                } else {
+                    // Fallback to internal state
+                    const newOrder = arrayMove(filteredLeftColumnOrder, oldIndex, newIndex);
+                    console.log('✅ New left column order (internal):', newOrder);
+                    setLeftColumnOrder(newOrder);
+                }
+                
+                // Haptic feedback for mobile
+                if (navigator.vibrate) {
+                    navigator.vibrate(100); // Stronger vibration for success
+                }
+            } else {
+                console.log('❌ Invalid indices for left column reorder');
+                console.log('❌ filteredLeftColumnOrder:', filteredLeftColumnOrder);
+                console.log('❌ active.id:', active.id, 'over.id:', over.id);
+            }
+        }
+    };
+
+    // Function to move sections for mobile left column
+    const moveLeftSection = (activeSection: string, direction: 'up' | 'down') => {
+        // Use external callback if provided (from CVEditor)
+        if (onLeftSectionReorder) {
+            console.log('🔄 Using external left section reorder callback');
+            onLeftSectionReorder(activeSection, direction);
+            return;
+        }
+        
+        // Fallback to internal logic
+        // Recalculate available sections in real time
+        const currentAvailableLeftSections = [];
+        if (skills && skills.length > 0) currentAvailableLeftSections.push('leftSkills');
+        if (languages && languages.length > 0) currentAvailableLeftSections.push('leftLanguages');
+        if (certifications && certifications.length > 0) currentAvailableLeftSections.push('leftCertifications');
+        
+        if (!activeSection || !currentAvailableLeftSections.includes(activeSection)) {
+            console.log('❌ No valid left section to move:', activeSection);
+            console.log('❌ Available sections:', currentAvailableLeftSections);
+            return;
+        }
+        
+        console.log('📱 Moving left section:', { activeSection, direction, currentOrder: filteredLeftColumnOrder });
+        console.log('📱 Available sections for move:', currentAvailableLeftSections);
+        
+        const currentIndex = filteredLeftColumnOrder.indexOf(activeSection);
+        if (currentIndex === -1) {
+            console.log('❌ Left section not found in order:', activeSection);
+            return;
+        }
+        
+        const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+        
+        if (newIndex >= 0 && newIndex < filteredLeftColumnOrder.length) {
+            const newOrder = [...filteredLeftColumnOrder];
+            [newOrder[currentIndex], newOrder[newIndex]] = [newOrder[newIndex], newOrder[currentIndex]];
+            
+            console.log('✅ New left column order:', newOrder);
+            setLeftColumnOrder(newOrder);
+            
+            // Provide haptic feedback if available
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        } else {
+            console.log('❌ Cannot move left section - out of bounds:', { currentIndex, newIndex, orderLength: filteredLeftColumnOrder.length });
+        }
     };
 
     const handleDragEnd = (event: DragEndEvent) => {
@@ -1979,11 +2151,23 @@ const ATSFriendlyTemplate: React.FC<{
         <div
             className={`
                 w-full h-full bg-white text-gray-900 font-sans flex
-                ${isDragActive ? 'drag-mode' : ''}
+                ${isDragActive || isLeftDragActive ? 'drag-mode' : ''}
             `}
         >
             {/* Left Column - Contact & Skills */}
-            <div className="w-2/5 bg-gray-50 border-r border-gray-200" style={{ padding: '15mm 12mm' }}>
+            <div 
+                className="w-2/5 bg-gray-50 border-r border-gray-200" 
+                style={{ 
+                    padding: '15mm 12mm',
+                    touchAction: 'none', // Force DnD kit control
+                    userSelect: 'none'
+                }}
+                onTouchStart={(e) => {
+                    if (isMobile) {
+                        console.log('🟡 Left panel touch start detected');
+                    }
+                }}
+            >
                 {/* Profile Image */}
                 {personalInfo.profileImage && (
                     <div className="mb-6 cv-section avoid-break">
@@ -2046,62 +2230,55 @@ const ATSFriendlyTemplate: React.FC<{
 
                 {/* Left Column Draggable Sections */}
                 <DndContext
-                    sensors={sensors}
+                    sensors={leftColumnSensors}
                     collisionDetection={closestCenter}
-                    onDragStart={handleDragStart}
-                    onDragEnd={(event) => {
-                        setIsDragActive(false);
-                        setActiveId(null);
-                        document.body.style.userSelect = '';
-                        document.body.style.cursor = '';
-
-                        const { active, over } = event;
-
-                        console.log('=== LEFT COLUMN DRAG ENDED ===');
-                        console.log('Active:', active.id);
-                        console.log('Over:', over?.id);
-                        console.log('Current leftColumnOrder:', leftColumnOrder);
-
-                        if (over && active.id !== over.id) {
-                            const oldIndex = leftColumnOrder.indexOf(active.id as string);
-                            const newIndex = leftColumnOrder.indexOf(over.id as string);
-
-                            console.log('Old index:', oldIndex, 'New index:', newIndex);
-
-                            if (oldIndex !== -1 && newIndex !== -1) {
-                                const newOrder = arrayMove(leftColumnOrder, oldIndex, newIndex);
-                                console.log('✅ New left column order:', newOrder);
-                                setLeftColumnOrder(newOrder);
-                            } else {
-                                console.log('❌ Invalid indices for left column reorder');
-                            }
-                        }
-                    }}
+                    onDragStart={handleLeftDragStart}
+                    onDragEnd={handleLeftDragEnd}
                 >
                     <SortableContext
-                        items={leftColumnOrder}
+                        items={filteredLeftColumnOrder}
                         strategy={verticalListSortingStrategy}
                     >
+                        {/* Left Panel Header with Drag Instructions */}
+                        {filteredLeftColumnOrder.length > 1 && (
+                            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                <div className="text-xs text-blue-700 font-medium text-center">
+                                    📍 Sol Panel Bölmələri
+                                </div>
+                                <div className="text-xs text-blue-600 text-center mt-1">
+                                    Sırasını dəyişmək üçün sürükləyin
+                                </div>
+                            </div>
+                        )}
+                        
                         <div 
-                            className={`transition-all duration-300 ${isDragActive ? 'opacity-95 bg-gradient-to-br from-transparent via-blue-50/30 to-transparent' : ''}`}
+                            className={`transition-all duration-300 ${isLeftDragActive ? 'opacity-95 bg-gradient-to-br from-transparent via-blue-50/30 to-transparent' : ''}`}
                             style={{ 
                                 display: 'flex',
                                 flexDirection: 'column',
                                 gap: '16px'
                             }}
                         >
-                            {/* Render sections based on leftColumnOrder */}
-                            {leftColumnOrder.map((sectionId) => {
+                            {/* Render sections based on filteredLeftColumnOrder */}
+                            {filteredLeftColumnOrder.map((sectionId) => {
+                                console.log('🔄 Rendering left section:', sectionId);
                                 switch (sectionId) {
                                     case 'leftSkills':
+                                        console.log('🎯 Rendering leftSkills, skills.length:', skills.length);
                                         return skills.length > 0 && (
                                             <SortableItem 
                                                 key="leftSkills" 
                                                 id="leftSkills"
-                                                sectionOrder={leftColumnOrder}
-                                                onSectionReorder={() => {}} // Left column handles its own reordering
+                                                sectionOrder={filteredLeftColumnOrder}
+                                                onSectionReorder={() => {
+                                                    console.log('🔧 Left Skills SortableItem callback called (should be handled by DndContext)');
+                                                    // Empty - let DndContext handle this
+                                                }}
                                                 activeSection={activeSection}
                                                 onSetActiveSection={onSectionSelect}
+                                                showDragInstruction={true}
+                                                dragIconPosition="right"
+                                                alwaysShowDragHandle={true}
                                             >
                                                 <div className="mb-6">
                                                     {/* Hard Skills */}
@@ -2181,10 +2358,16 @@ const ATSFriendlyTemplate: React.FC<{
                                             <SortableItem 
                                                 key="leftLanguages" 
                                                 id="leftLanguages"
-                                                sectionOrder={leftColumnOrder}
-                                                onSectionReorder={() => {}} // Left column handles its own reordering
+                                                sectionOrder={filteredLeftColumnOrder}
+                                                onSectionReorder={() => {
+                                                    console.log('🔧 Left Languages SortableItem callback called (should be handled by DndContext)');
+                                                    // Empty - let DndContext handle this
+                                                }}
                                                 activeSection={activeSection}
                                                 onSetActiveSection={onSectionSelect}
+                                                showDragInstruction={true}
+                                                dragIconPosition="right"
+                                                alwaysShowDragHandle={true}
                                             >
                                                 <div className="mb-6">
                                                     <h2 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide border-b border-gray-300 pb-1">
@@ -2206,10 +2389,16 @@ const ATSFriendlyTemplate: React.FC<{
                                             <SortableItem 
                                                 key="leftCertifications" 
                                                 id="leftCertifications"
-                                                sectionOrder={leftColumnOrder}
-                                                onSectionReorder={() => {}} // Left column handles its own reordering
+                                                sectionOrder={filteredLeftColumnOrder}
+                                                onSectionReorder={() => {
+                                                    console.log('🔧 Left Certifications SortableItem callback called (should be handled by DndContext)');
+                                                    // Empty - let DndContext handle this
+                                                }}
                                                 activeSection={activeSection}
                                                 onSetActiveSection={onSectionSelect}
+                                                showDragInstruction={true}
+                                                dragIconPosition="right"
+                                                alwaysShowDragHandle={true}
                                             >
                                                 <div className="mb-6">
                                                     <h2 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide border-b border-gray-300 pb-1">
@@ -2323,6 +2512,8 @@ const ATSFriendlyTemplate: React.FC<{
                 {/* Bottom margin for professional standards */}
                 <div className="mt-8"></div>
             </div>
+
+            {/* Mobile Section Controls moved to CVEditor - this section removed */}
         </div>
     );
 };
@@ -2763,6 +2954,8 @@ export default function CVPreview({
     onUpdate,
     activeSection: externalActiveSection,
     onSectionSelect: externalOnSectionSelect,
+    onLeftSectionReorder,
+    leftColumnOrder: externalLeftColumnOrder,
     fontSettings = {
         fontFamily: 'Arial, sans-serif',
         nameSize: 24,
@@ -2978,6 +3171,8 @@ export default function CVPreview({
                 onSectionReorder={handleSectionReorder}
                 activeSection={activeSection}
                 onSectionSelect={handleSectionSelect}
+                onLeftSectionReorder={onLeftSectionReorder}
+                leftColumnOrder={externalLeftColumnOrder}
             />;
         }
 

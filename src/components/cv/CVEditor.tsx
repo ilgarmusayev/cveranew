@@ -294,6 +294,9 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
     // Mobile states for section reordering
     const [isMobile, setIsMobile] = useState(false);
     const [activeMobileSection, setActiveMobileSection] = useState<string | null>(null);
+    
+    // Left column order for ATS template
+    const [leftColumnOrder, setLeftColumnOrder] = useState(['leftSkills', 'leftLanguages', 'leftCertifications']);
 
     // Mobile section reorder hook
     const sectionOrder = cv.sectionOrder || [
@@ -579,6 +582,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 fontSettings={fontSettings}
                 activeSection={activeMobileSection}
                 onSectionSelect={setActiveMobileSection}
+                leftColumnOrder={leftColumnOrder}
                 onSectionReorder={(newOrder: string[]) => {
                     console.log('📋 Section reorder from CVPreview:', newOrder);
                     setCv(prevCv => ({
@@ -586,6 +590,40 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                         sectionOrder: newOrder
                     }));
                     setIsDirty(true);
+                }}
+                onLeftSectionReorder={(activeSection: string, direction: 'up' | 'down') => {
+                    console.log('🔄 Left section reorder from CVPreview:', { activeSection, direction });
+                    
+                    // Get available left sections
+                    const availableLeftSections: string[] = [];
+                    if (cv.skills && cv.skills.length > 0) availableLeftSections.push('leftSkills');
+                    if (cv.languages && cv.languages.length > 0) availableLeftSections.push('leftLanguages');
+                    if (cv.certifications && cv.certifications.length > 0) availableLeftSections.push('leftCertifications');
+                    
+                    // Filter current order to only include available sections
+                    const filteredOrder = leftColumnOrder.filter(section => availableLeftSections.includes(section));
+                    
+                    const currentIndex = filteredOrder.indexOf(activeSection);
+                    if (currentIndex === -1) {
+                        console.log('❌ Section not found in left order:', activeSection);
+                        return;
+                    }
+                    
+                    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+                    
+                    if (newIndex >= 0 && newIndex < filteredOrder.length) {
+                        const newOrder = [...filteredOrder];
+                        [newOrder[currentIndex], newOrder[newIndex]] = [newOrder[newIndex], newOrder[currentIndex]];
+                        
+                        console.log('✅ New left column order from CVEditor:', newOrder);
+                        setLeftColumnOrder(newOrder);
+                        setIsDirty(true);
+                        
+                        // Provide haptic feedback
+                        if (navigator.vibrate) navigator.vibrate(50);
+                    } else {
+                        console.log('❌ Cannot move - out of bounds:', { currentIndex, newIndex, totalSections: filteredOrder.length });
+                    }
                 }}
                 onUpdate={(updatedCv) => {
                     console.log('CV updated from preview:', updatedCv);
@@ -1148,6 +1186,229 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     <div className="text-xs text-blue-600 mt-1">
                         CV-də istənilən bölməyə toxunaraq seçə bilərsiniz
                     </div>
+                </div>
+            </div>
+        )}
+
+        {/* ATS Template Mobile Panel Controls - Separate Left/Right Panel Controls */}
+        {isMobile && cv.templateId && (cv.templateId.toLowerCase().includes('ats') || cv.templateId.toLowerCase().includes('clean')) && activeMobileSection && (
+            <div className="bg-white border-t border-gray-200 p-4 shadow-lg">
+                <div className="max-w-lg mx-auto">
+                    {/* Check if selected section is left panel (ATS template) */}
+                    {['leftSkills', 'leftLanguages', 'leftCertifications'].includes(activeMobileSection) ? (
+                        // Left Panel Controls
+                        <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                            <div className="text-center mb-4">
+                                <div className="text-sm text-blue-600 font-medium mb-1">Sol Panel Bölməsi</div>
+                                <div className="text-lg font-semibold text-blue-800">
+                                    {(() => {
+                                        // Get available left sections
+                                        const availableLeftSections = [];
+                                        if (cv.skills && cv.skills.length > 0) availableLeftSections.push('leftSkills');
+                                        if (cv.languages && cv.languages.length > 0) availableLeftSections.push('leftLanguages');
+                                        if (cv.certifications && cv.certifications.length > 0) availableLeftSections.push('leftCertifications');
+                                        
+                                        // Get section name
+                                        const sectionNames = {
+                                            leftSkills: cv.cvLanguage === 'english' ? 'Skills' : 'Bacarıqlar',
+                                            leftLanguages: cv.cvLanguage === 'english' ? 'Languages' : 'Dillər',
+                                            leftCertifications: cv.cvLanguage === 'english' ? 'Certifications' : 'Sertifikatlar'
+                                        };
+                                        
+                                        return sectionNames[activeMobileSection as keyof typeof sectionNames] || activeMobileSection;
+                                    })()}
+                                </div>
+                                <div className="text-xs text-blue-600 mt-1">
+                                    {(() => {
+                                        const availableLeftSections = [];
+                                        if (cv.skills && cv.skills.length > 0) availableLeftSections.push('leftSkills');
+                                        if (cv.languages && cv.languages.length > 0) availableLeftSections.push('leftLanguages');
+                                        if (cv.certifications && cv.certifications.length > 0) availableLeftSections.push('leftCertifications');
+                                        
+                                        const currentPos = availableLeftSections.indexOf(activeMobileSection) + 1;
+                                        const total = availableLeftSections.length;
+                                        
+                                        return `Sol Panel Sırası: ${currentPos} / ${total}`;
+                                    })()}
+                                </div>
+                            </div>
+
+                            {/* Left Panel Action Buttons */}
+                            <div className="flex items-center justify-center gap-3">
+                                <button
+                                    onClick={() => {
+                                        // Move left section up using available sections logic
+                                        const availableLeftSections: string[] = [];
+                                        if (cv.skills && cv.skills.length > 0) availableLeftSections.push('leftSkills');
+                                        if (cv.languages && cv.languages.length > 0) availableLeftSections.push('leftLanguages');
+                                        if (cv.certifications && cv.certifications.length > 0) availableLeftSections.push('leftCertifications');
+                                        
+                                        const filteredOrder = leftColumnOrder.filter(section => availableLeftSections.includes(section));
+                                        const currentIndex = filteredOrder.indexOf(activeMobileSection);
+                                        
+                                        if (currentIndex > 0 && activeMobileSection) {
+                                            console.log('🔼 CVEditor: Moving left section up:', activeMobileSection);
+                                            
+                                            const newOrder = [...filteredOrder];
+                                            [newOrder[currentIndex], newOrder[currentIndex - 1]] = [newOrder[currentIndex - 1], newOrder[currentIndex]];
+                                            
+                                            setLeftColumnOrder(newOrder);
+                                            setIsDirty(true);
+                                            
+                                            if (navigator.vibrate) navigator.vibrate(50);
+                                        }
+                                    }}
+                                    disabled={(() => {
+                                        const availableLeftSections: string[] = [];
+                                        if (cv.skills && cv.skills.length > 0) availableLeftSections.push('leftSkills');
+                                        if (cv.languages && cv.languages.length > 0) availableLeftSections.push('leftLanguages');
+                                        if (cv.certifications && cv.certifications.length > 0) availableLeftSections.push('leftCertifications');
+                                        const filteredOrder = leftColumnOrder.filter(section => availableLeftSections.includes(section));
+                                        return filteredOrder.indexOf(activeMobileSection) === 0;
+                                    })()}
+                                    className={`
+                                        flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 transform
+                                        ${(() => {
+                                            const availableLeftSections: string[] = [];
+                                            if (cv.skills && cv.skills.length > 0) availableLeftSections.push('leftSkills');
+                                            if (cv.languages && cv.languages.length > 0) availableLeftSections.push('leftLanguages');
+                                            if (cv.certifications && cv.certifications.length > 0) availableLeftSections.push('leftCertifications');
+                                            const filteredOrder = leftColumnOrder.filter(section => availableLeftSections.includes(section));
+                                            return filteredOrder.indexOf(activeMobileSection) === 0;
+                                        })()
+                                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                            : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl active:scale-95'
+                                        }
+                                    `}
+                                >
+                                    ↑ Yuxarı
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        // Move left section down using available sections logic
+                                        const availableLeftSections: string[] = [];
+                                        if (cv.skills && cv.skills.length > 0) availableLeftSections.push('leftSkills');
+                                        if (cv.languages && cv.languages.length > 0) availableLeftSections.push('leftLanguages');
+                                        if (cv.certifications && cv.certifications.length > 0) availableLeftSections.push('leftCertifications');
+                                        
+                                        const filteredOrder = leftColumnOrder.filter(section => availableLeftSections.includes(section));
+                                        const currentIndex = filteredOrder.indexOf(activeMobileSection);
+                                        
+                                        if (currentIndex < filteredOrder.length - 1 && activeMobileSection) {
+                                            console.log('🔽 CVEditor: Moving left section down:', activeMobileSection);
+                                            
+                                            const newOrder = [...filteredOrder];
+                                            [newOrder[currentIndex], newOrder[currentIndex + 1]] = [newOrder[currentIndex + 1], newOrder[currentIndex]];
+                                            
+                                            setLeftColumnOrder(newOrder);
+                                            setIsDirty(true);
+                                            
+                                            if (navigator.vibrate) navigator.vibrate(50);
+                                        }
+                                    }}
+                                    disabled={(() => {
+                                        const availableLeftSections: string[] = [];
+                                        if (cv.skills && cv.skills.length > 0) availableLeftSections.push('leftSkills');
+                                        if (cv.languages && cv.languages.length > 0) availableLeftSections.push('leftLanguages');
+                                        if (cv.certifications && cv.certifications.length > 0) availableLeftSections.push('leftCertifications');
+                                        const filteredOrder = leftColumnOrder.filter(section => availableLeftSections.includes(section));
+                                        return filteredOrder.indexOf(activeMobileSection) === filteredOrder.length - 1;
+                                    })()}
+                                    className={`
+                                        flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 transform
+                                        ${(() => {
+                                            const availableLeftSections: string[] = [];
+                                            if (cv.skills && cv.skills.length > 0) availableLeftSections.push('leftSkills');
+                                            if (cv.languages && cv.languages.length > 0) availableLeftSections.push('leftLanguages');
+                                            if (cv.certifications && cv.certifications.length > 0) availableLeftSections.push('leftCertifications');
+                                            const filteredOrder = leftColumnOrder.filter(section => availableLeftSections.includes(section));
+                                            return filteredOrder.indexOf(activeMobileSection) === filteredOrder.length - 1;
+                                        })()
+                                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                            : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl active:scale-95'
+                                        }
+                                    `}
+                                >
+                                    ↓ Aşağı
+                                </button>
+
+                                <button
+                                    onClick={() => setActiveMobileSection(null)}
+                                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium text-sm bg-gray-500 hover:bg-gray-600 text-white transition-all duration-200 transform hover:shadow-lg active:scale-95"
+                                >
+                                    Bağla
+                                </button>
+                            </div>
+
+                            <div className="text-center text-xs text-blue-600 mt-3">
+                                📱 Sol paneldəki bölmələrin sırasını dəyişmək üçün yuxarı/aşağı düymələrini istifadə edin
+                            </div>
+                        </div>
+                    ) : (
+                        // Right Panel Controls (existing logic)
+                        <div className="bg-green-50 rounded-xl p-4 border border-green-200">
+                            <div className="text-center mb-4">
+                                <div className="text-sm text-green-600 font-medium mb-1">Sağ Panel Bölməsi</div>
+                                <div className="text-lg font-semibold text-green-800">
+                                    {getSectionName(activeMobileSection, cv.cvLanguage, cv.sectionNames)}
+                                </div>
+                                <div className="text-xs text-green-600 mt-1">
+                                    Sağ Panel Sırası: {sectionOrder.indexOf(activeMobileSection) + 1} / {sectionOrder.length}
+                                </div>
+                            </div>
+
+                            {/* Right Panel Action Buttons */}
+                            <div className="flex items-center justify-center gap-3">
+                                <button
+                                    onClick={() => {
+                                        console.log('🔼 Move up clicked for:', activeMobileSection);
+                                        moveSection(activeMobileSection, 'up');
+                                        if (navigator.vibrate) navigator.vibrate(50);
+                                    }}
+                                    disabled={sectionOrder.indexOf(activeMobileSection) === 0}
+                                    className={`
+                                        flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 transform
+                                        ${sectionOrder.indexOf(activeMobileSection) === 0
+                                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                            : 'bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl active:scale-95'
+                                        }
+                                    `}
+                                >
+                                    ↑ Yuxarı
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        console.log('🔽 Move down clicked for:', activeMobileSection);
+                                        moveSection(activeMobileSection, 'down');
+                                        if (navigator.vibrate) navigator.vibrate(50);
+                                    }}
+                                    disabled={sectionOrder.indexOf(activeMobileSection) === sectionOrder.length - 1}
+                                    className={`
+                                        flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 transform
+                                        ${sectionOrder.indexOf(activeMobileSection) === sectionOrder.length - 1
+                                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                            : 'bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl active:scale-95'
+                                        }
+                                    `}
+                                >
+                                    ↓ Aşağı
+                                </button>
+
+                                <button
+                                    onClick={() => setActiveMobileSection(null)}
+                                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium text-sm bg-gray-500 hover:bg-gray-600 text-white transition-all duration-200 transform hover:shadow-lg active:scale-95"
+                                >
+                                    Bağla
+                                </button>
+                            </div>
+
+                            <div className="text-center text-xs text-green-600 mt-3">
+                                📱 Sağ paneldəki bölmələrin sırasını dəyişmək üçün yuxarı/aşağı düymələrini istifadə edin
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         )}
