@@ -216,7 +216,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
         'languages',
         'projects',
         'certifications',
-        'volunteer'
+        'volunteer',
+        'customSections'
     ];
     
     // Initialize CV state
@@ -304,11 +305,75 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                          cv.templateId?.toLowerCase().includes('clean') ||
                          cv.templateId?.toLowerCase().includes('minimal-professional');
 
-    // Mobile section reorder hook
+    // Mobile section reorder hook - Define sectionOrder first
     const sectionOrder = cv.sectionOrder || [
         'summary', 'experience', 'education', 'skills', 
         'languages', 'projects', 'certifications', 'volunteer', 'customSections'
     ];
+
+    // Function to get actual visible sections count
+    const getVisibleSectionsCount = useCallback(() => {
+        let count = 0;
+        
+        if (cv.personalInfo?.summary?.trim()) count++; // summary
+        if (cv.experience && cv.experience.length > 0) count++; // experience
+        if (cv.education && cv.education.length > 0) count++; // education
+        
+        // For ATS template, don't count skills/languages/certifications as they're in left panel
+        if (!isATSTemplate) {
+            if (cv.skills && cv.skills.length > 0) count++; // skills
+            if (cv.languages && cv.languages.length > 0) count++; // languages
+            if (cv.certifications && cv.certifications.length > 0) count++; // certifications
+        }
+        
+        if (cv.projects && cv.projects.length > 0) count++; // projects
+        if (cv.volunteerExperience && cv.volunteerExperience.length > 0) count++; // volunteer
+        if (cv.customSections && cv.customSections.length > 0) count++; // customSections
+        
+        return count;
+    }, [cv, isATSTemplate]);
+
+    // Function to get visible sections order
+    const getVisibleSections = useCallback(() => {
+        const visibleSections: string[] = [];
+        
+        sectionOrder.forEach(section => {
+            switch (section) {
+                case 'summary':
+                    if (cv.personalInfo?.summary?.trim()) visibleSections.push(section);
+                    break;
+                case 'experience':
+                    if (cv.experience && cv.experience.length > 0) visibleSections.push(section);
+                    break;
+                case 'education':
+                    if (cv.education && cv.education.length > 0) visibleSections.push(section);
+                    break;
+                case 'skills':
+                    // For ATS template, skills are in left panel, don't count in main order
+                    if (!isATSTemplate && cv.skills && cv.skills.length > 0) visibleSections.push(section);
+                    break;
+                case 'languages':
+                    // For ATS template, languages are in left panel, don't count in main order
+                    if (!isATSTemplate && cv.languages && cv.languages.length > 0) visibleSections.push(section);
+                    break;
+                case 'projects':
+                    if (cv.projects && cv.projects.length > 0) visibleSections.push(section);
+                    break;
+                case 'certifications':
+                    // For ATS template, certifications are in left panel, don't count in main order
+                    if (!isATSTemplate && cv.certifications && cv.certifications.length > 0) visibleSections.push(section);
+                    break;
+                case 'volunteer':
+                    if (cv.volunteerExperience && cv.volunteerExperience.length > 0) visibleSections.push(section);
+                    break;
+                case 'customSections':
+                    if (cv.customSections && cv.customSections.length > 0) visibleSections.push(section);
+                    break;
+            }
+        });
+        
+        return visibleSections;
+    }, [cv, sectionOrder, isATSTemplate]);
     
     // Define mobile section movement function that will use direct CV state updates
     const moveSection = useCallback((activeSection: string, direction: 'up' | 'down') => {
@@ -318,10 +383,15 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
         }
         
         console.log('📱 CVEditor Moving section:', { activeSection, direction, currentOrder: sectionOrder });
+        console.log('🔍 CustomSections check:', { 
+            hasCustomSections: cv.customSections?.length > 0,
+            customSectionsLength: cv.customSections?.length,
+            isActiveSectionCustom: activeSection === 'customSections'
+        });
         
         const currentIndex = sectionOrder.indexOf(activeSection);
         if (currentIndex === -1) {
-            console.log('❌ Section not found in order:', activeSection);
+            console.log('❌ Section not found in order:', activeSection, 'Available sections:', sectionOrder);
             return;
         }
         
@@ -332,6 +402,10 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             [newOrder[currentIndex], newOrder[newIndex]] = [newOrder[newIndex], newOrder[currentIndex]];
             
             console.log('✅ CVEditor updating CV with new section order:', newOrder);
+            console.log('🔄 Moving from position', currentIndex, 'to position', newIndex);
+            console.log('📋 Section order before:', sectionOrder);
+            console.log('📋 Section order after:', newOrder);
+            
             setCv(prevCv => ({
                 ...prevCv,
                 sectionOrder: newOrder
@@ -582,6 +656,12 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
 
     // Custom section select handler to prevent left panel sections from showing selection UI
     const handleMobileSectionSelect = useCallback((sectionId: string | null) => {
+        console.log('📱 CVEditor handleMobileSectionSelect:', { 
+            sectionId, 
+            isCustomSections: sectionId === 'customSections',
+            currentActiveMobileSection: activeMobileSection
+        });
+        
         // Check if this is a left panel section (ATS template)
         const leftPanelSections = ['leftSkills', 'leftLanguages', 'leftCertifications'];
         
@@ -598,7 +678,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
         
         // For regular sections, use normal selection behavior
         setActiveMobileSection(sectionId);
-    }, [showWarning]);
+        console.log('✅ CVEditor setActiveMobileSection to:', sectionId);
+    }, [showWarning, activeMobileSection]);
 
     // Render preview based on template
     const renderPreview = () => {
@@ -1101,10 +1182,10 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     <div className="text-center mb-4">
                         <div className="text-sm text-gray-600 mb-1">Seçilmiş Bölmə:</div>
                         <div className="text-lg font-semibold text-gray-800 bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
-                            {getSectionName(activeMobileSection, cv.cvLanguage, cv.sectionNames)}
+                            {getSectionName(activeMobileSection, cv.cvLanguage, cv.sectionNames, cv)}
                         </div>
                         <div className="text-xs text-gray-500 mt-1">
-                            Cari sıra: {sectionOrder.indexOf(activeMobileSection) + 1} / {sectionOrder.length}
+                            Cari sıra: {getVisibleSections().indexOf(activeMobileSection) + 1} / {getVisibleSectionsCount()}
                         </div>
                     </div>
 
@@ -1120,10 +1201,10 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                     navigator.vibrate(50);
                                 }
                             }}
-                            disabled={sectionOrder.indexOf(activeMobileSection) === 0}
+                            disabled={getVisibleSections().indexOf(activeMobileSection) === 0}
                             className={`
                                 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 transform
-                                ${sectionOrder.indexOf(activeMobileSection) === 0
+                                ${getVisibleSections().indexOf(activeMobileSection) === 0
                                     ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                     : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl active:scale-95 active:bg-blue-800'
                                 }
@@ -1149,10 +1230,10 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                     navigator.vibrate(50);
                                 }
                             }}
-                            disabled={sectionOrder.indexOf(activeMobileSection) === sectionOrder.length - 1}
+                            disabled={getVisibleSections().indexOf(activeMobileSection) === getVisibleSections().length - 1}
                             className={`
                                 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 transform
-                                ${sectionOrder.indexOf(activeMobileSection) === sectionOrder.length - 1
+                                ${getVisibleSections().indexOf(activeMobileSection) === getVisibleSections().length - 1
                                     ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                     : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl active:scale-95 active:bg-blue-800'
                                 }

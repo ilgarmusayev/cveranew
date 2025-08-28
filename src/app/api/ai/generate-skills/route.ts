@@ -56,8 +56,19 @@ export async function POST(request: NextRequest) {
     }
 
     const language = targetLanguage || cvData?.cvLanguage || 'azerbaijani';
-    console.log('🤖 Generating AI skills for user:', decoded.userId, 'in language:', language);
-    console.log('📋 CV Data:', cvData);
+    console.log('🤖 Generating AI skills for user:', decoded.userId);
+    console.log('🌐 Language Debug:', {
+      targetLanguage: targetLanguage,
+      cvDataLanguage: cvData?.cvLanguage,
+      finalLanguage: language,
+      isEnglish: language === 'english',
+      languageIncludes: language?.toLowerCase().includes('en')
+    });
+    console.log('📋 CV Data summary:', {
+      hasPersonalInfo: !!cvData.personalInfo,
+      experienceCount: cvData.experience?.length || 0,
+      educationCount: cvData.education?.length || 0
+    });
 
     // Prepare content for AI analysis
     const textContent = [
@@ -82,9 +93,18 @@ export async function POST(request: NextRequest) {
 
     // Create language-specific prompt
     const getLanguagePrompt = (lang: string, textContent: string) => {
-      if (lang === 'english') {
+      const isEnglish = lang === 'english' || lang?.toLowerCase().includes('en');
+      console.log('🔤 Prompt Language Selection:', {
+        originalLang: lang,
+        isEnglish: isEnglish,
+        willUseEnglishPrompt: isEnglish
+      });
+      
+      if (isEnglish) {
         return `
-          Based on the following CV information, suggest relevant skills:
+          IMPORTANT: The user's CV language is ENGLISH. ALL skills must be in ENGLISH only.
+
+          Based on the following CV information, suggest relevant skills in ENGLISH:
 
           CV Information: "${textContent.substring(0, 2000)}"
 
@@ -93,16 +113,17 @@ export async function POST(request: NextRequest) {
           2. Soft Skills (Personal skills): leadership, teamwork, communication, problem solving
           3. Suggest skills that match the CV information
           4. Maximum 8 skills per category
-          5. Return as JSON object format
+          5. ALL SKILLS MUST BE IN ENGLISH LANGUAGE
+          6. Return as JSON object format
           
-          Hard Skills Examples:
+          Hard Skills Examples (in English):
           - Programming: JavaScript, Python, Java, C#, TypeScript
           - Frameworks: React, Vue.js, Angular, Next.js, Laravel
           - Databases: MySQL, PostgreSQL, MongoDB, Redis
           - Tools: Git, Docker, AWS, Azure, Jenkins
           - Design: Photoshop, Figma, Adobe Illustrator
           
-          Soft Skills Examples:
+          Soft Skills Examples (in English):
           - Leadership, Teamwork, Communication, Problem Solving
           - Creativity, Adaptability, Time Management, Analytical Thinking
           - Customer Service, Presentation, Project Management
@@ -113,11 +134,50 @@ export async function POST(request: NextRequest) {
             "softSkills": ["Leadership", "Teamwork", "Problem Solving", "Communication"]
           }
 
-          ONLY provide JSON response, no additional text:
+          CRITICAL: Respond ONLY in English. NO Azerbaijani or other languages. ONLY provide JSON response in English:
+        `;
+      } else if (lang === 'turkish' || lang?.toLowerCase().includes('tr')) {
+        return `
+          ÖNEMLİ: Kullanıcının CV dili TÜRKÇE'dir. TÜM beceriler sadece TÜRKÇE olmalıdır.
+
+          Aşağıdaki CV bilgilerine dayanarak TÜRKÇE uygun beceriler önerseniz:
+
+          CV Bilgileri: "${textContent.substring(0, 2000)}"
+
+          Gereksinimler:
+          1. Hard Skills (Teknik beceriler): programlama dilleri, framework'ler, veritabanları, araçlar, teknolojiler
+          2. Soft Skills (Kişisel beceriler): liderlik, takım çalışması, iletişim, problem çözme
+          3. CV bilgilerine uygun becerileri önerin
+          4. Her kategoride maksimum 8 beceri
+          5. TÜM BECERİLER TÜRKÇE DİLİNDE OLMALIDIR
+          6. JSON object formatında döndürün
+          
+          Hard Skills Örnekleri (Türkçe):
+          - Programlama: JavaScript, Python, Java, C#, TypeScript
+          - Framework'ler: React, Vue.js, Angular, Next.js, Laravel
+          - Veritabanları: MySQL, PostgreSQL, MongoDB, Redis
+          - Araçlar: Git, Docker, AWS, Azure, Jenkins
+          - Tasarım: Photoshop, Figma, Adobe Illustrator
+          
+          Soft Skills Örnekleri (Türkçe):
+          - Liderlik, Takım Çalışması, İletişim, Problem Çözme
+          - Yaratıcılık, Uyum Sağlama, Zaman Yönetimi, Analitik Düşünme
+          - Müşteri Hizmetleri, Sunum, Proje Yönetimi
+
+          Yanıt formatı: 
+          {
+            "hardSkills": ["JavaScript", "React", "Node.js", "PostgreSQL", "Git"],
+            "softSkills": ["Liderlik", "Takım Çalışması", "Problem Çözme", "İletişim"]
+          }
+
+          KRİTİK: Sadece Türkçe yanıt verin. Azerbaycan Türkçesi veya başka diller YASAK. Sadece Türkçe JSON yanıt verin:
         `;
       } else {
+        // Default to Azerbaijani
         return `
-          Aşağıdaki CV məlumatlarına əsasən müvafiq bacarıqlar təklif edin:
+          ÖNEMLİ: İstifadəçinin CV dili AZƏRBAYCANCA-dır. BÜTÜN bacarıqlar yalnız AZƏRBAYCANCA olmalıdır.
+
+          Aşağıdaki CV məlumatlarına əsasən AZƏRBAYCANCA müvafiq bacarıqlar təklif edin:
 
           CV Məlumatları: "${textContent.substring(0, 2000)}"
 
@@ -126,16 +186,17 @@ export async function POST(request: NextRequest) {
           2. Soft Skills (Şəxsi bacarıqlar): liderlik, komanda işi, kommunikasiya, problem həll etmə
           3. CV məlumatlarına uyğun olan bacarıqları təklif edin
           4. Hər kateqoriyada maksimum 8 bacarıq
-          5. JSON object formatında qaytarın
+          5. BÜTÜN BACARIQLAR AZƏRBAYCANCA DİLİNDƏ OLMALIDIR
+          6. JSON object formatında qaytarın
           
-          Hard Skills Nümunələri:
+          Hard Skills Nümunələri (Azərbaycanca):
           - Proqramlaşdırma: JavaScript, Python, Java, C#, TypeScript
           - Framework-lər: React, Vue.js, Angular, Next.js, Laravel
           - Verilənlər bazası: MySQL, PostgreSQL, MongoDB, Redis
           - Alətlər: Git, Docker, AWS, Azure, Jenkins
           - Dizayn: Photoshop, Figma, Adobe Illustrator
           
-          Soft Skills Nümunələri:
+          Soft Skills Nümunələri (Azərbaycanca):
           - Liderlik, Komanda işi, Kommunikasiya, Problem həlli
           - Kreativlik, Adaptasiya, Vaxt idarəetməsi, Analitik düşüncə
           - Müştəri xidməti, Prezentasiya, Layihə idarəetməsi
@@ -146,7 +207,7 @@ export async function POST(request: NextRequest) {
             "softSkills": ["Liderlik", "Komanda işi", "Problem həlli", "Kommunikasiya"]
           }
 
-          YALNIZ JSON cavab verin, əlavə mətn yox:
+          KRİTİK: Yalnız Azərbaycanca cavab verin. İngilis və ya başqa dillər QADAĞANDIR. Yalnız Azərbaycanca JSON cavab verin:
         `;
       }
     };

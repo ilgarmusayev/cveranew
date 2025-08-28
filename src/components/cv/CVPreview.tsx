@@ -239,10 +239,25 @@ const getCurrentText = (cvLanguage?: string): string => {
 };
 
 // Dynamic section name mapping based on language
-const getSectionName = (sectionKey: string, cvLanguage?: string, customSectionNames?: Record<string, string>): string => {
+const getSectionName = (sectionKey: string, cvLanguage?: string, customSectionNames?: Record<string, string>, cvData?: any): string => {
     // If custom section names exist (from translation), use them
     if (customSectionNames && customSectionNames[sectionKey]) {
         return customSectionNames[sectionKey];
+    }
+
+    // Handle custom sections - get the first custom section's title if this is 'customSections'
+    if (sectionKey === 'customSections' && cvData?.customSections && cvData.customSections.length > 0) {
+        // Return the first custom section's title as representative name
+        const firstCustomSection = cvData.customSections[0];
+        if (firstCustomSection && firstCustomSection.title) {
+            let title = firstCustomSection.title;
+            // Replace capital İ with I for English language
+            const language = cvLanguage?.toLowerCase() || 'az';
+            if (language.includes('en')) {
+                title = title.replace(/İ/g, 'I');
+            }
+            return title;
+        }
     }
 
     // Default section names based on language
@@ -316,8 +331,8 @@ const getSectionName = (sectionKey: string, cvLanguage?: string, customSectionNa
 };
 
 // Helper function to properly uppercase section names for English
-const getUppercaseSectionName = (sectionKey: string, cvLanguage?: string, customSectionNames?: Record<string, string>): string => {
-    const sectionName = getSectionName(sectionKey, cvLanguage, customSectionNames);
+const getUppercaseSectionName = (sectionKey: string, cvLanguage?: string, customSectionNames?: Record<string, string>, cvData?: any): string => {
+    const sectionName = getSectionName(sectionKey, cvLanguage, customSectionNames, cvData);
     
     // For English, manually uppercase to handle İ -> I conversion
     if (cvLanguage?.toLowerCase().includes('en')) {
@@ -744,6 +759,13 @@ const SortableItem: React.FC<SortableItemProps> = ({
         if (isMobile && onSetActiveSection) {
             e.preventDefault();
             e.stopPropagation();
+            
+            console.log('📱 SortableItem mobile click:', { 
+                id, 
+                isActive, 
+                willActivate: !isActive,
+                isCustomSections: id === 'customSections'
+            });
             
             // Clear any existing auto-deactivate timer
             if (autoDeactivateTimerRef.current) {
@@ -1752,9 +1774,9 @@ const ModernTemplate: React.FC<{
                             </h2>
                             <div className="grid grid-cols-3 gap-3">
                                 {languages.map((lang) => (
-                                    <div key={lang.id} className="bg-red-50 rounded-lg p-3 text-center border border-red-200">
-                                        <div className="font-medium text-gray-900">{lang.language}</div>
-                                        <div className="text-red-600 text-sm">{lang.level}</div>
+                                    <div key={lang.id} className="bg-red-50 rounded-lg p-3 text-center border border-red-200 flex flex-col justify-between h-20">
+                                        <div className="font-medium text-gray-900 flex-1 flex items-center justify-center">{lang.language}</div>
+                                        <div className="text-red-600 text-sm flex-1 flex items-center justify-center">{lang.level}</div>
                                     </div>
                                 ))}
                             </div>
@@ -1955,19 +1977,14 @@ const ATSFriendlyTemplate: React.FC<{
     const leftColumnOrder = externalLeftColumnOrder || internalLeftColumnOrder;
     const setLeftColumnOrder = externalLeftColumnOrder ? () => {} : setInternalLeftColumnOrder;
 
-    // Calculate available left column sections
+    // Calculate available left column sections - always show all sections
     const getAvailableLeftSections = () => {
-        const availableSections = [];
+        const availableSections = ['leftSkills', 'leftLanguages', 'leftCertifications'];
         console.log('🔍 ATSFriendlyTemplate Debug - Data check:');
         console.log('- Skills length:', skills.length);
         console.log('- Languages length:', languages.length);
         console.log('- Certifications length:', certifications.length);
-        
-        if (skills.length > 0) availableSections.push('leftSkills');
-        if (languages.length > 0) availableSections.push('leftLanguages');
-        if (certifications.length > 0) availableSections.push('leftCertifications');
-        
-        console.log('- Available left sections:', availableSections);
+        console.log('- All left sections will be available:', availableSections);
         return availableSections;
     };
 
@@ -2508,11 +2525,12 @@ const ATSFriendlyTemplate: React.FC<{
         >
             {/* Left Column - Contact & Skills */}
             <div 
-                className="w-2/5 bg-blue-900 text-white border-r border-blue-800 min-h-full" 
+                className="w-2/5 bg-blue-900 text-white border-r border-blue-800" 
                 style={{ 
                     padding: '15mm 12mm',
                     touchAction: 'none', // Force DnD kit control
-                    userSelect: 'none'
+                    userSelect: 'none',
+                    minHeight: '297mm' // A4 uzunluğu - 297mm
                 }}
                 onTouchStart={(e) => {
                     if (isMobile) {
@@ -2612,8 +2630,6 @@ const ATSFriendlyTemplate: React.FC<{
                         items={filteredLeftColumnOrder}
                         strategy={verticalListSortingStrategy}
                     >
-                   
-                        
                         <div 
                             className={`transition-all duration-300 ${isLeftDragActive ? 'opacity-95 bg-gradient-to-br from-transparent via-blue-50/30 to-transparent' : ''}`}
                             style={{ 
@@ -2623,12 +2639,33 @@ const ATSFriendlyTemplate: React.FC<{
                             }}
                         >
                             {/* Render sections based on filteredLeftColumnOrder */}
+                            {(() => {
+                                console.log('🔍 ATS Left Panel Debug:', {
+                                    filteredLeftColumnOrder,
+                                    skillsCount: skills.length,
+                                    languagesCount: languages.length,
+                                    certificationsCount: certifications.length,
+                                    availableLeftSections
+                                });
+                                return null;
+                            })()}
+                            
+                            {filteredLeftColumnOrder.length === 0 ? (
+                                <div className="text-center py-8 px-4">
+                                    <div className="text-blue-200 text-sm">
+                                        {data.cvLanguage?.includes('en') ? 'Add skills, languages, or certifications to see them here' : 
+                                         data.cvLanguage?.includes('tr') ? 'Burada görmek için yetenekler, diller veya sertifikalar ekleyin' :
+                                         'Burada görmək üçün bacarıqlar, dillər və ya sertifikatlar əlavə edin'}
+                                    </div>
+                                </div>
+                            ) : null}
+                            
                             {filteredLeftColumnOrder.map((sectionId) => {
                                 console.log('🔄 Rendering left section:', sectionId);
                                 switch (sectionId) {
                                     case 'leftSkills':
                                         console.log('🎯 Rendering leftSkills, skills.length:', skills.length);
-                                        return skills.length > 0 && (
+                                        return (
                                             <LeftPanelSortableItem 
                                                 key="leftSkills" 
                                                 id="leftSkills"
@@ -2645,71 +2682,83 @@ const ATSFriendlyTemplate: React.FC<{
                                                 isDropTarget={leftDropTargetId === 'leftSkills'}
                                             >
                                                 <div className="mb-6">
-                                                    {/* Hard Skills */}
-                                                    {skills.filter(skill => skill.type === 'hard').length > 0 && (
-                                                        <div className="mb-4">
-                                                            <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
-                                                                {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('technicalSkills', data.cvLanguage, data.sectionNames) : getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
-                                                            </h2>
-                                                            <div className="space-y-2">
-                                                                {skills.filter(skill => skill.type === 'hard').map((skill) => (
-                                                                    <div key={skill.id}>
-                                                                        <div className="mb-1">
-                                                                            <span className="text-xs font-medium text-white">{skill.name}</span>
-                                                                        </div>
-                                                                        {skill.description && (
-                                                                            <div className="text-blue-100 text-xs leading-relaxed">
-                                                                                {renderHtmlContent(skill.description, true)}
+                                                    {skills.length > 0 ? (
+                                                        <>
+                                                            {/* Hard Skills */}
+                                                            {skills.filter(skill => skill.type === 'hard').length > 0 && (
+                                                                <div className="mb-4">
+                                                                    <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                                        {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('technicalSkills', data.cvLanguage, data.sectionNames) : getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
+                                                                    </h2>
+                                                                    <div className="space-y-2">
+                                                                        {skills.filter(skill => skill.type === 'hard').map((skill) => (
+                                                                            <div key={skill.id}>
+                                                                                <div className="mb-1">
+                                                                                    <span className="text-xs font-medium text-white">{skill.name}</span>
+                                                                                </div>
+                                                                                {skill.description && (
+                                                                                    <div className="text-blue-100 text-xs leading-relaxed">
+                                                                                        {renderHtmlContent(skill.description, true)}
+                                                                                    </div>
+                                                                                )}
                                                                             </div>
-                                                                        )}
+                                                                        ))}
                                                                     </div>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    )}
+                                                                </div>
+                                                            )}
 
-                                                    {/* Soft Skills */}
-                                                    {skills.filter(skill => skill.type === 'soft').length > 0 && (
-                                                        <div className="mb-4">
-                                                            <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
-                                                                {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('softSkills', data.cvLanguage, data.sectionNames) : getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
-                                                            </h2>
-                                                            <div className="space-y-2">
-                                                                {skills.filter(skill => skill.type === 'soft').map((skill) => (
-                                                                    <div key={skill.id}>
-                                                                        <div className="mb-1">
-                                                                            <span className="text-xs font-medium text-white">{skill.name}</span>
-                                                                        </div>
-                                                                        {skill.description && (
-                                                                            <div className="text-blue-100 text-xs leading-relaxed">
-                                                                                {renderHtmlContent(skill.description, true)}
+                                                            {/* Soft Skills */}
+                                                            {skills.filter(skill => skill.type === 'soft').length > 0 && (
+                                                                <div className="mb-4">
+                                                                    <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                                        {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('softSkills', data.cvLanguage, data.sectionNames) : getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
+                                                                    </h2>
+                                                                    <div className="space-y-2">
+                                                                        {skills.filter(skill => skill.type === 'soft').map((skill) => (
+                                                                            <div key={skill.id}>
+                                                                                <div className="mb-1">
+                                                                                    <span className="text-xs font-medium text-white">{skill.name}</span>
+                                                                                </div>
+                                                                                {skill.description && (
+                                                                                    <div className="text-blue-100 text-xs leading-relaxed">
+                                                                                        {renderHtmlContent(skill.description, true)}
+                                                                                    </div>
+                                                                                )}
                                                                             </div>
-                                                                        )}
+                                                                        ))}
                                                                     </div>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    )}
+                                                                </div>
+                                                            )}
 
-                                                    {/* General Skills */}
-                                                    {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).length > 0 && (
-                                                        <div className="mb-4">
-                                                            <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
-                                                                {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('skills', data.cvLanguage, data.sectionNames) : getSectionName('skills', data.cvLanguage, data.sectionNames)}
-                                                            </h2>
-                                                            <div className="space-y-2">
-                                                                {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map((skill) => (
-                                                                    <div key={skill.id}>
-                                                                        <div className="mb-1">
-                                                                            <span className="text-xs font-medium text-white">{skill.name}</span>
-                                                                        </div>
-                                                                        {skill.description && (
-                                                                            <div className="text-blue-100 text-xs leading-relaxed">
-                                                                                {renderHtmlContent(skill.description, true)}
+                                                            {/* General Skills */}
+                                                            {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).length > 0 && (
+                                                                <div className="mb-4">
+                                                                    <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                                        {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('skills', data.cvLanguage, data.sectionNames) : getSectionName('skills', data.cvLanguage, data.sectionNames)}
+                                                                    </h2>
+                                                                    <div className="space-y-2">
+                                                                        {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map((skill) => (
+                                                                            <div key={skill.id}>
+                                                                                <div className="mb-1">
+                                                                                    <span className="text-xs font-medium text-white">{skill.name}</span>
+                                                                                </div>
+                                                                                {skill.description && (
+                                                                                    <div className="text-blue-100 text-xs leading-relaxed">
+                                                                                        {renderHtmlContent(skill.description, true)}
+                                                                                    </div>
+                                                                                )}
                                                                             </div>
-                                                                        )}
+                                                                        ))}
                                                                     </div>
-                                                                ))}
+                                                                </div>
+                                                            )}
+                                                        </>
+                                                    ) : (
+                                                        <div className="text-center py-4">
+                                                            <div className="text-blue-200 text-xs">
+                                                                {data.cvLanguage?.includes('en') ? 'No skills added yet' : 
+                                                                 data.cvLanguage?.includes('tr') ? 'Henüz yetenek eklenmemiş' :
+                                                                 'Hələ bacarıq əlavə edilməyib'}
                                                             </div>
                                                         </div>
                                                     )}
@@ -2718,7 +2767,7 @@ const ATSFriendlyTemplate: React.FC<{
                                         );
 
                                     case 'leftLanguages':
-                                        return languages.length > 0 && (
+                                        return (
                                             <LeftPanelSortableItem 
                                                 key="leftLanguages" 
                                                 id="leftLanguages"
@@ -2738,19 +2787,29 @@ const ATSFriendlyTemplate: React.FC<{
                                                     <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                         {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('languages', data.cvLanguage, data.sectionNames) : getSectionName('languages', data.cvLanguage, data.sectionNames)}
                                                     </h2>
-                                                    <div className="space-y-1">
-                                                        {languages.map((lang) => (
-                                                            <div key={lang.id} className="text-xs text-white break-words">
-                                                                {lang.language} ({getLanguageLevel(lang.level, data.cvLanguage)})
+                                                    {languages.length > 0 ? (
+                                                        <div className="space-y-1">
+                                                            {languages.map((lang) => (
+                                                                <div key={lang.id} className="text-xs text-white break-words">
+                                                                    {lang.language} ({getLanguageLevel(lang.level, data.cvLanguage)})
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-center py-4">
+                                                            <div className="text-blue-200 text-xs">
+                                                                {data.cvLanguage?.includes('en') ? 'No languages added yet' : 
+                                                                 data.cvLanguage?.includes('tr') ? 'Henüz dil eklenmemiş' :
+                                                                 'Hələ dil əlavə edilməyib'}
                                                             </div>
-                                                        ))}
-                                                    </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </LeftPanelSortableItem>
                                         );
 
                                     case 'leftCertifications':
-                                        return certifications.length > 0 && (
+                                        return (
                                             <LeftPanelSortableItem 
                                                 key="leftCertifications" 
                                                 id="leftCertifications"
@@ -2770,37 +2829,47 @@ const ATSFriendlyTemplate: React.FC<{
                                                     <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                         {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('certifications', data.cvLanguage, data.sectionNames) : getSectionName('certifications', data.cvLanguage, data.sectionNames)}
                                                     </h2>
-                                                    <div className="space-y-2">
-                                                        {certifications.map((cert) => (
-                                                            <div key={cert.id}>
-                                                                <div className="flex justify-between items-start">
-                                                                    <div>
-                                                                        {cert.url ? (
-                                                                            <a
-                                                                                href={cert.url}
-                                                                                target="_blank"
-                                                                                rel="noopener noreferrer"
-                                                                                className="text-xs font-medium text-white underline hover:text-blue-200 transition-colors cursor-pointer"
-                                                                            >
-                                                                                {cert.name}
-                                                                            </a>
-                                                                        ) : (
-                                                                            <h3 className="text-xs font-medium text-white">{cert.name}</h3>
-                                                                        )}
-                                                                        <p className="text-xs text-blue-200">{cert.issuer}</p>
-                                                                        {cert.description && (
-                                                                            <div className="text-blue-100 text-xs mt-1">{renderHtmlContent(cert.description, true)}</div>
+                                                    {certifications.length > 0 ? (
+                                                        <div className="space-y-2">
+                                                            {certifications.map((cert) => (
+                                                                <div key={cert.id}>
+                                                                    <div className="flex justify-between items-start">
+                                                                        <div>
+                                                                            {cert.url ? (
+                                                                                <a
+                                                                                    href={cert.url}
+                                                                                    target="_blank"
+                                                                                    rel="noopener noreferrer"
+                                                                                    className="text-xs font-medium text-white underline hover:text-blue-200 transition-colors cursor-pointer"
+                                                                                >
+                                                                                    {cert.name}
+                                                                                </a>
+                                                                            ) : (
+                                                                                <h3 className="text-xs font-medium text-white">{cert.name}</h3>
+                                                                            )}
+                                                                            <p className="text-xs text-blue-200">{cert.issuer}</p>
+                                                                            {cert.description && (
+                                                                                <div className="text-blue-100 text-xs mt-1">{renderHtmlContent(cert.description, true)}</div>
+                                                                            )}
+                                                                        </div>
+                                                                        {cert.date && (
+                                                                            <span className="text-xs text-blue-200 font-medium whitespace-nowrap ml-2">
+                                                                                {formatDate(cert.date, data.cvLanguage)}
+                                                                            </span>
                                                                         )}
                                                                     </div>
-                                                                    {cert.date && (
-                                                                        <span className="text-xs text-blue-200 font-medium whitespace-nowrap ml-2">
-                                                                            {formatDate(cert.date, data.cvLanguage)}
-                                                                        </span>
-                                                                    )}
                                                                 </div>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-center py-4">
+                                                            <div className="text-blue-200 text-xs">
+                                                                {data.cvLanguage?.includes('en') ? 'No certifications added yet' : 
+                                                                 data.cvLanguage?.includes('tr') ? 'Henüz sertifika eklenmemiş' :
+                                                                 'Hələ sertifikat əlavə edilməyib'}
                                                             </div>
-                                                        ))}
-                                                    </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </LeftPanelSortableItem>
                                         );

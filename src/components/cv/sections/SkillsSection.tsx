@@ -120,8 +120,11 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
       }
 
       const response = await apiClient.post('/api/ai/generate-skills', { 
-        cvData,
-        targetLanguage: cvData?.cvLanguage || 'azerbaijani' // Pass CV language for appropriate suggestions
+        cvData: {
+          ...cvData,
+          cvLanguage: cvLanguage // Use the component prop directly
+        },
+        targetLanguage: cvLanguage || cvData?.cvLanguage || 'azerbaijani'
       });
 
       console.log('📡 AI Skills API Response:', {
