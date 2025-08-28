@@ -1568,7 +1568,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     {/* Professional Action Buttons */}
                     <div className="flex-shrink-0 bg-gradient-to-r from-gray-50 to-gray-100 
                                    border-t border-gray-200 px-5 py-4
-                                   flex flex-col sm:flex-row justify-end 
+                                   flex flex-col sm:flex-row justify-center 
                                    space-y-3 sm:space-y-0 sm:space-x-3">
                         <button
                             onClick={() => {
@@ -1594,16 +1594,6 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                      transition-all duration-200 shadow-sm"
                         >
                             {cv.cvLanguage === 'english' ? 'Reset' : 'Sıfırla'}
-                        </button>
-                        <button
-                            onClick={() => setShowFontPanel(false)}
-                            className="w-full sm:w-auto px-6 py-3 text-sm font-semibold text-white 
-                                     bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg 
-                                     hover:from-blue-700 hover:to-blue-800 
-                                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                                     transition-all duration-200 shadow-lg"
-                        >
-                            {cv.cvLanguage === 'english' ? 'Apply' : 'Tətbiq Et'}
                         </button>
                     </div>
                 </div>

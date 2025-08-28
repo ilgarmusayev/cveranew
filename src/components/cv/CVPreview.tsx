@@ -2502,13 +2502,13 @@ const ATSFriendlyTemplate: React.FC<{
     return (
         <div
             className={`
-                w-full h-full bg-white text-gray-900 font-sans flex
+                w-full h-full bg-white text-gray-900 font-sans flex min-h-screen
                 ${isDragActive || isLeftDragActive ? 'drag-mode' : ''}
             `}
         >
             {/* Left Column - Contact & Skills */}
             <div 
-                className="w-2/5 bg-blue-900 text-white border-r border-blue-800" 
+                className="w-2/5 bg-blue-900 text-white border-r border-blue-800 min-h-full" 
                 style={{ 
                     padding: '15mm 12mm',
                     touchAction: 'none', // Force DnD kit control
@@ -2738,7 +2738,7 @@ const ATSFriendlyTemplate: React.FC<{
                                                     <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                         {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('languages', data.cvLanguage, data.sectionNames) : getSectionName('languages', data.cvLanguage, data.sectionNames)}
                                                     </h2>
-                                                    <div className={languages.length <= 2 ? "space-y-1" : "grid grid-cols-4 gap-x-2 gap-y-1"}>
+                                                    <div className="space-y-1">
                                                         {languages.map((lang) => (
                                                             <div key={lang.id} className="text-xs text-white break-words">
                                                                 {lang.language} ({getLanguageLevel(lang.level, data.cvLanguage)})
