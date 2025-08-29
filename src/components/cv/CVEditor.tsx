@@ -299,11 +299,12 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
     // ATS Template Left Column Order State
     const [leftColumnOrder, setLeftColumnOrder] = useState<string[]>(['skills', 'languages', 'certifications']);
     
-    // Check if current template is ATS
+    // Check if current template is ATS or Aurora
     const isATSTemplate = cv.templateId?.toLowerCase().includes('ats') || 
                          cv.templateId?.toLowerCase().includes('resume-ats') || 
                          cv.templateId?.toLowerCase().includes('clean') ||
-                         cv.templateId?.toLowerCase().includes('minimal-professional');
+                         cv.templateId?.toLowerCase().includes('minimal-professional') ||
+                         cv.templateId?.toLowerCase().includes('aurora');
 
     // Mobile section reorder hook - Define sectionOrder first
     const sectionOrder = cv.sectionOrder || [
