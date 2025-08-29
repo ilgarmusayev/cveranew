@@ -291,7 +291,7 @@ const getSectionName = (sectionKey: string, cvLanguage?: string, customSectionNa
             coreCompetencies: 'Core Competencies',
             languages: 'Languages',
             projects: 'Projects',
-            keyProjects: 'Key Projects',
+            keyProjects: 'Projects',
             certifications: 'Certifications',
             volunteerExperience: 'Volunteer Experience',
             volunteerWork: 'Volunteer Work'
@@ -3405,6 +3405,410 @@ const ProfessionalTemplate: React.FC<{
     );
 };
 
+// Exclusive Template Component - Professional and Modern
+const ExclusiveTemplate: React.FC<{ 
+    data: CVData; 
+    sectionOrder: string[]; 
+    onSectionReorder: (newOrder: string[]) => void;
+    activeSection?: string | null;
+    onSectionSelect?: (sectionId: string | null) => void;
+}> = ({ data, sectionOrder, onSectionReorder, activeSection, onSectionSelect }) => {
+    const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
+
+    const [activeId, setActiveId] = useState<string | null>(null);
+    const isMobile = window.innerWidth <= 768;
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 150,
+                tolerance: 15,
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    // Handle section selection for mobile
+    const handleSectionClick = (sectionId: string) => {
+        if (isMobile && onSectionSelect) {
+            const newValue = sectionId === activeSection ? null : sectionId;
+            onSectionSelect(newValue);
+        }
+    };
+
+    // Drag and drop handlers
+    const handleDragStart = (event: DragStartEvent) => {
+        setActiveId(event.active.id as string);
+    };
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        setActiveId(null);
+        
+        if (active.id !== over?.id) {
+            const oldIndex = sectionOrder.indexOf(active.id as string);
+            const newIndex = sectionOrder.indexOf(over?.id as string);
+            
+            const newOrder = arrayMove(sectionOrder, oldIndex, newIndex);
+            onSectionReorder(newOrder);
+        }
+    };
+
+    // Helper component for section header
+    const SectionHeader: React.FC<{ title: string; icon?: string; sectionId: string }> = ({ title, icon, sectionId }) => (
+        <div 
+            className={`mb-6 ${isMobile && activeSection === sectionId ? 'ring-2 ring-blue-500 rounded-lg' : ''}`}
+            onClick={() => handleSectionClick(sectionId)}
+        >
+            <div className="flex items-center gap-3 mb-4">
+                {icon && <span className="text-xl text-blue-600">{icon}</span>}
+                <h2 className="text-xl font-bold text-gray-800 tracking-wide">
+                    {title}
+                </h2>
+                <div className="flex-1 h-px bg-gradient-to-r from-blue-600 to-transparent"></div>
+            </div>
+        </div>
+    );
+
+    // Generate section components based on order
+    const generateSection = (sectionId: string) => {
+        switch (sectionId) {
+            case 'personalInfo':
+                return (
+                    <div key="personalInfo" className="mb-8">
+                        {/* Header Section with Professional Layout */}
+                        <div className="bg-gradient-to-r from-blue-900 to-blue-800 text-white p-8 rounded-lg shadow-lg">
+                            <div className="flex flex-col lg:flex-row gap-6 items-start">
+                                <div className="flex-1">
+                                    <h1 className="text-4xl font-bold mb-2 tracking-wide">
+                                        {personalInfo?.firstName} {personalInfo?.lastName}
+                                    </h1>
+                                    {personalInfo?.summary && (
+                                        <p className="text-blue-50 leading-relaxed text-base mt-4">
+                                            {personalInfo.summary}
+                                        </p>
+                                    )}
+                                </div>
+                                
+                                {/* Contact Information Card */}
+                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 min-w-[280px]">
+                                    <h3 className="text-lg font-semibold mb-4 text-blue-100">Contact Information</h3>
+                                    <div className="space-y-3">
+                                        {personalInfo?.email && (
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-blue-200">✉</span>
+                                                <span className="text-sm text-blue-50">{personalInfo.email}</span>
+                                            </div>
+                                        )}
+                                        {personalInfo?.phone && (
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-blue-200">📞</span>
+                                                <span className="text-sm text-blue-50">{personalInfo.phone}</span>
+                                            </div>
+                                        )}
+                                        {personalInfo?.location && (
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-blue-200">📍</span>
+                                                <span className="text-sm text-blue-50">{personalInfo.location}</span>
+                                            </div>
+                                        )}
+                                        {personalInfo?.website && (
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-blue-200">🌐</span>
+                                                <span className="text-sm text-blue-50">{personalInfo.website}</span>
+                                            </div>
+                                        )}
+                                        {personalInfo?.linkedin && (
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-blue-200">💼</span>
+                                                <span className="text-sm text-blue-50">{personalInfo.linkedin}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+
+            case 'experience':
+                if (!experience.length) return null;
+                return (
+                    <div key="experience" className="mb-8">
+                        <SectionHeader title="Professional Experience" icon="💼" sectionId="experience" />
+                        <div className="space-y-6">
+                            {experience.map((exp, index) => (
+                                <div key={index} className="bg-gray-50 rounded-lg p-6 border-l-4 border-blue-600 hover:shadow-md transition-all duration-200">
+                                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-2 mb-3">
+                                        <div className="flex-1">
+                                            <h3 className="font-bold text-lg text-gray-800">{exp.position}</h3>
+                                            <h4 className="font-semibold text-blue-600 text-base">{exp.company}</h4>
+                                        </div>
+                                        <div className="text-sm text-gray-600 bg-white px-3 py-1 rounded-full border">
+                                            {exp.startDate} - {exp.endDate || 'Present'}
+                                        </div>
+                                    </div>
+                                    {exp.description && (
+                                        <div className="text-gray-700 leading-relaxed">
+                                            {exp.description.split('\n').map((line, i) => (
+                                                <p key={i} className="mb-2">{line}</p>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+
+            case 'education':
+                if (!education.length) return null;
+                return (
+                    <div key="education" className="mb-8">
+                        <SectionHeader title="Education" icon="🎓" sectionId="education" />
+                        <div className="space-y-4">
+                            {education.map((edu, index) => (
+                                <div key={index} className="bg-gradient-to-r from-blue-50 to-transparent rounded-lg p-6 border border-blue-100">
+                                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-2 mb-2">
+                                        <div className="flex-1">
+                                            <h3 className="font-bold text-lg text-gray-800">{edu.degree}</h3>
+                                            <h4 className="font-semibold text-blue-600">{edu.institution}</h4>
+                                        </div>
+                                        <div className="text-sm text-gray-600 bg-white px-3 py-1 rounded-full border">
+                                            {edu.startDate} - {edu.endDate}
+                                        </div>
+                                    </div>
+                                    {edu.gpa && (
+                                        <p className="text-sm text-gray-700">
+                                            <span className="font-medium">GPA:</span> {edu.gpa}
+                                        </p>
+                                    )}
+                                    {edu.description && (
+                                        <p className="text-gray-700 mt-2 leading-relaxed">{edu.description}</p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+
+            case 'skills':
+                if (!skills.length) return null;
+                return (
+                    <div key="skills" className="mb-8">
+                        <SectionHeader title="Skills & Expertise" icon="⚡" sectionId="skills" />
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {skills.map((skill, index) => (
+                                <div key={index} className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                    <div className="flex flex-wrap gap-2">
+                                        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium border border-blue-200 hover:bg-blue-200 transition-colors">
+                                            {skill.name}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+
+            case 'projects':
+                if (!projects.length) return null;
+                return (
+                    <div key="projects" className="mb-8">
+                        <SectionHeader title="Notable Projects" icon="🚀" sectionId="projects" />
+                        <div className="space-y-6">
+                            {projects.map((project, index) => (
+                                <div key={index} className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-2 mb-3">
+                                        <h3 className="font-bold text-lg text-gray-800">{project.name}</h3>
+                                        {project.startDate && (
+                                            <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
+                                                {project.startDate}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {project.description && (
+                                        <p className="text-gray-700 mb-4 leading-relaxed">{project.description}</p>
+                                    )}
+                                    {project.technologies && project.technologies.length > 0 && (
+                                        <div className="mb-3">
+                                            <h5 className="font-semibold text-gray-800 mb-2">Technologies:</h5>
+                                            <div className="flex flex-wrap gap-2">
+                                                {project.technologies.map((tech, i) => (
+                                                    <span key={i} className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm font-medium">
+                                                        {tech}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                    {project.url && (
+                                        <a href={project.url} className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1">
+                                            <span>🔗</span> View Project
+                                        </a>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+
+            case 'languages':
+                if (!languages.length) return null;
+                return (
+                    <div key="languages" className="mb-8">
+                        <SectionHeader title="Languages" icon="🌍" sectionId="languages" />
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            {languages.map((lang, index) => (
+                                <div key={index} className="bg-gradient-to-r from-green-50 to-transparent rounded-lg p-4 border border-green-100">
+                                    <div className="flex justify-between items-center">
+                                        <span className="font-semibold text-gray-800">{lang.language}</span>
+                                        <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                                            {lang.level}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+
+            case 'certifications':
+                if (!certifications.length) return null;
+                return (
+                    <div key="certifications" className="mb-8">
+                        <SectionHeader title="Certifications" icon="🏆" sectionId="certifications" />
+                        <div className="space-y-4">
+                            {certifications.map((cert, index) => (
+                                <div key={index} className="bg-yellow-50 rounded-lg p-6 border border-yellow-200">
+                                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-2 mb-2">
+                                        <div className="flex-1">
+                                            <h3 className="font-bold text-gray-800">{cert.name}</h3>
+                                            <p className="text-yellow-700 font-medium">{cert.issuer}</p>
+                                        </div>
+                                        {cert.date && (
+                                            <span className="text-sm text-gray-600 bg-white px-3 py-1 rounded-full border">
+                                                {cert.date}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {cert.description && (
+                                        <p className="text-gray-700 leading-relaxed">{cert.description}</p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+
+            case 'volunteerExperience':
+                if (!volunteerExperience.length) return null;
+                return (
+                    <div key="volunteerExperience" className="mb-8">
+                        <SectionHeader title="Volunteer Experience" icon="🤝" sectionId="volunteerExperience" />
+                        <div className="space-y-4">
+                            {volunteerExperience.map((vol, index) => (
+                                <div key={index} className="bg-purple-50 rounded-lg p-6 border border-purple-200">
+                                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-2 mb-3">
+                                        <div className="flex-1">
+                                            <h3 className="font-bold text-gray-800">{vol.role}</h3>
+                                            <h4 className="font-semibold text-purple-600">{vol.organization}</h4>
+                                        </div>
+                                        <div className="text-sm text-gray-600 bg-white px-3 py-1 rounded-full border">
+                                            {vol.startDate} - {vol.endDate || 'Present'}
+                                        </div>
+                                    </div>
+                                    {vol.description && (
+                                        <p className="text-gray-700 leading-relaxed">{vol.description}</p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+
+            default:
+                // Handle custom sections
+                const customSection = customSections.find(section => section.id === sectionId);
+                if (!customSection || !customSection.items.length) return null;
+
+                return (
+                    <div key={sectionId} className="mb-8">
+                        <SectionHeader title={customSection.title} icon="📋" sectionId={sectionId} />
+                        <div className="space-y-4">
+                            {customSection.items.map((item, index) => (
+                                <div key={index} className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                    <h3 className="font-bold text-gray-800 mb-2">{item.title}</h3>
+                                    {item.subtitle && (
+                                        <h4 className="font-semibold text-blue-600 mb-2">{item.subtitle}</h4>
+                                    )}
+                                    {item.date && (
+                                        <p className="text-sm text-gray-600 mb-3">
+                                            <span className="bg-white px-2 py-1 rounded border">{item.date}</span>
+                                        </p>
+                                    )}
+                                    {item.description && (
+                                        <p className="text-gray-700 leading-relaxed">{item.description}</p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+        }
+    };
+
+    return (
+        <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+        >
+            <div className="cv-template exclusive-template bg-white min-h-[297mm] p-8" style={{ fontFamily: 'var(--cv-font-family, "Inter", sans-serif)' }}>
+                <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
+                    <div 
+                        className={`transition-all duration-300 ${activeId ? 'opacity-95 bg-gradient-to-br from-transparent via-blue-50/30 to-transparent' : ''}`}
+                        style={{ 
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 'var(--cv-section-spacing, 16px)'
+                        }}
+                    >
+                        {sectionOrder.map((sectionId) => {
+                            const section = generateSection(sectionId);
+                            if (!section) return null;
+
+                            return (
+                                <SortableItem 
+                                    key={sectionId} 
+                                    id={sectionId}
+                                    showDragInstruction={!isMobile}
+                                    dragIconPosition="left"
+                                    sectionOrder={sectionOrder}
+                                    onSectionReorder={onSectionReorder}
+                                    activeSection={activeSection}
+                                    onSetActiveSection={onSectionSelect}
+                                    isDropTarget={false}
+                                >
+                                    {section}
+                                </SortableItem>
+                            );
+                        })}
+                    </div>
+                </SortableContext>
+            </div>
+        </DndContext>
+    );
+};
+
 // Main CVPreview Component
 export default function CVPreview({
     cv,
@@ -3649,6 +4053,18 @@ export default function CVPreview({
             />;
         }
 
+        // Exclusive templates
+        if (normalizedTemplate.includes('exclusive') ||
+            normalizedTemplate === 'exclusive') {
+            return <ExclusiveTemplate 
+                data={cv.data} 
+                sectionOrder={sectionOrder} 
+                onSectionReorder={handleSectionReorder}
+                activeSection={activeSection}
+                onSectionSelect={handleSectionSelect}
+            />;
+        }
+
         // Professional/Executive templates
         if (normalizedTemplate.includes('professional') ||
             normalizedTemplate.includes('elegant') ||
@@ -3742,7 +4158,7 @@ export default function CVPreview({
 }
 
 // Export individual templates for direct use if needed
-export { BasicTemplate, ModernTemplate, ProfessionalTemplate, ATSFriendlyTemplate };
+export { BasicTemplate, ModernTemplate, ProfessionalTemplate, ATSFriendlyTemplate, ExclusiveTemplate };
 
 // Export mobile helper functions for external use
 export const useMobileSectionReorder = (sectionOrder: string[], onSectionReorder: (newOrder: string[]) => void) => {
