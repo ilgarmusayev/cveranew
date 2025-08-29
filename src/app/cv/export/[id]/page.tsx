@@ -87,7 +87,7 @@ export default function CVExportPage() {
             await new Promise(resolve => setTimeout(resolve, 100));
             
             // CVPreview elementini tap və HTML-ini al
-            const cvPreviewElement = document.querySelector('.cv-preview');
+            const cvPreviewElement = document.getElementById('cv-preview-element');
             if (!cvPreviewElement) {
                 console.warn('CV preview elementi tapılmadı, fallback method istifadə ediləcək');
                 
