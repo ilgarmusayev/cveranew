@@ -263,7 +263,29 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                     <style>
                         ${cssContent}
                         
-                        /* ROUTE.TS ƏLAVƏ CSS - YALNIZ DINAMIK FONT SISTEMI */
+                        /* ROUTE.TS ƏLAVƏ CSS - LAYOUT VE FONT SISTEMI */
+                        
+                        /* CONSISTENT LAYOUT SYSTEM - PREVIEW İLƏ EYNI */
+                        
+                        /* A4 Layout - Template öz padding-i verir */
+                        .cv-layout-container,
+                        .cv-preview {
+                            width: 210mm !important;
+                            min-height: 297mm !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            box-sizing: border-box !important;
+                        }
+                        
+                        .cv-template {
+                            width: 210mm !important;
+                            min-height: 297mm !important;
+                            height: auto !important;
+                            margin: 0 !important;
+                            padding: 20mm !important;
+                            box-sizing: border-box !important;
+                            background: white !important;
+                        }
                         
                         /* CSS Variables - Font Manager Integration */
                         :root, body {
@@ -721,43 +743,188 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             word-break: break-all !important;
                         }
                         
-                        /* SADƏ VƏ EFFEKTİV PAGE BREAK SİSTEMİ */
+                        /* PROFESSIONAL PAGE BREAK SİSTEMİ - AUTOMATIC MULTI-PAGE SUPPORT */
                         
-                        /* A4 page setup - bütün səhifələr üçün eyni margin */
+                        /* A4 page setup - PDF margin-ları 0 çünki template öz padding-i var */
                         @page {
                             size: A4;
-                            margin: 20mm; /* 2.0cm bütün tərəflərdə */
+                            margin: 0mm; /* Margin yoxdur - template özü 20mm padding verir */
                         }
                         
-                        /* Section-lar yarımçıq qalmasın - bütün template-lər üçün */
+                        /* CV Container - otomatik səhifə keçidi */
+                        .cv-template {
+                            width: 210mm !important; /* Tam A4 eni */
+                            min-height: 297mm !important; /* Tam A4 hündürlüyü */
+                            height: auto !important;
+                            page-break-inside: auto !important; /* İçerik çox olsa növbəti səhifəyə keçsin */
+                            break-inside: auto !important;
+                            margin: 0 !important;
+                            padding: 20mm !important; /* Template öz 20mm padding-ini verir */
+                            box-sizing: border-box !important;
+                        }
+                        
+                        /* CV Preview container */
+                        .cv-preview {
+                            width: 210mm !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
+                        }
+                        
+                        /* SMART SECTION BREAKS - Məzmun əsaslı qırılmalar */
+                        
+                        /* Kiçik section-lar - birgə qalsın */
+                        .aurora-template .mb-4, .vertex-template .mb-4, .horizon-template .mb-4,
+                        .lumen-template .mb-4, .modern-template .mb-4, .exclusive-template .mb-4,
+                        .ats-template .mb-4, .basic-template .mb-4, .traditional-template .mb-4,
+                        .classic-template .mb-4 {
+                            page-break-inside: avoid !important;
+                            break-inside: avoid !important;
+                            margin-bottom: 4mm !important; /* Consistent 4mm spacing */
+                        }
+                        
+                        /* Böyük section-lar - lazımsa keçid icazə ver */
                         .aurora-template .mb-6, .vertex-template .mb-6, .horizon-template .mb-6,
                         .lumen-template .mb-6, .modern-template .mb-6, .exclusive-template .mb-6,
                         .ats-template .mb-6, .basic-template .mb-6, .traditional-template .mb-6,
                         .classic-template .mb-6 {
-                            page-break-inside: avoid !important;
-                            break-inside: avoid !important;
+                            page-break-inside: auto !important;
+                            break-inside: auto !important;
+                            orphans: 2 !important; /* Minimum 2 sətir qırılmadan əvvəl */
+                            widows: 2 !important; /* Minimum 2 sətir qırılmadan sonra */
+                            margin-bottom: 6mm !important; /* Consistent 6mm spacing for larger sections */
                         }
                         
-                        /* Section başlıqları tək qalmasın */
+                        /* HEADER PROTECTION - Başlıqlar tək qalmasın */
+                        .aurora-template h1, .vertex-template h1, .horizon-template h1,
+                        .lumen-template h1, .modern-template h1, .exclusive-template h1,
+                        .ats-template h1, .basic-template h1, .traditional-template h1,
+                        .classic-template h1,
                         .aurora-template h2, .vertex-template h2, .horizon-template h2,
                         .lumen-template h2, .modern-template h2, .exclusive-template h2,
                         .ats-template h2, .basic-template h2, .traditional-template h2,
                         .classic-template h2,
+                        .aurora-template h3, .vertex-template h3, .horizon-template h3,
+                        .lumen-template h3, .modern-template h3, .exclusive-template h3,
+                        .ats-template h3, .basic-template h3, .traditional-template h3,
+                        .classic-template h3,
                         .aurora-template .text-2xl, .vertex-template .text-2xl, .horizon-template .text-2xl,
                         .lumen-template .text-2xl, .modern-template .text-2xl, .exclusive-template .text-2xl,
                         .ats-template .text-2xl, .basic-template .text-2xl, .traditional-template .text-2xl,
                         .classic-template .text-2xl {
                             page-break-after: avoid !important;
                             break-after: avoid !important;
+                            orphans: 3 !important;
+                            widows: 3 !important;
+                            margin-bottom: 2mm !important; /* Consistent 2mm after headers */
                         }
                         
-                        /* Experience və Education item-ları bütün olaraq qalsın */
+                        /* ITEM LEVEL PROTECTION - Individual items */
+                        .aurora-template .space-y-2 > div, .vertex-template .space-y-2 > div, .horizon-template .space-y-2 > div,
+                        .lumen-template .space-y-2 > div, .modern-template .space-y-2 > div, .exclusive-template .space-y-2 > div,
+                        .ats-template .space-y-2 > div, .basic-template .space-y-2 > div, .traditional-template .space-y-2 > div,
+                        .classic-template .space-y-2 > div,
+                        .aurora-template .space-y-3 > div, .vertex-template .space-y-3 > div, .horizon-template .space-y-3 > div,
+                        .lumen-template .space-y-3 > div, .modern-template .space-y-3 > div, .exclusive-template .space-y-3 > div,
+                        .ats-template .space-y-3 > div, .basic-template .space-y-3 > div, .traditional-template .space-y-3 > div,
+                        .classic-template .space-y-3 > div {
+                            page-break-inside: avoid !important;
+                            break-inside: avoid !important;
+                        }
+                        
+                        /* Larger sections that can break - işiniz çoxsa səhifə dəyişsin */
                         .aurora-template .space-y-4 > div, .vertex-template .space-y-4 > div, .horizon-template .space-y-4 > div,
                         .lumen-template .space-y-4 > div, .modern-template .space-y-4 > div, .exclusive-template .space-y-4 > div,
                         .ats-template .space-y-4 > div, .basic-template .space-y-4 > div, .traditional-template .space-y-4 > div,
                         .classic-template .space-y-4 > div {
+                            page-break-inside: auto !important;
+                            break-inside: auto !important;
+                        }
+                        
+                        /* PERSONAL INFO PROTECTION - Şəxsi məlumat hissəsi */
+                        .aurora-template .mb-6:first-child, .vertex-template .mb-6:first-child, .horizon-template .mb-6:first-child,
+                        .lumen-template .mb-6:first-child, .modern-template .mb-6:first-child, .exclusive-template .mb-6:first-child,
+                        .ats-template .mb-6:first-child, .basic-template .mb-6:first-child, .traditional-template .mb-6:first-child,
+                        .classic-template .mb-6:first-child,
+                        .personal-info-section, .header-section {
                             page-break-inside: avoid !important;
                             break-inside: avoid !important;
+                            page-break-after: avoid !important;
+                            break-after: avoid !important;
+                        }
+                        
+                        /* MANUAL CONTROL CLASSES */
+                        .force-page-break {
+                            page-break-before: always !important;
+                            break-before: page !important;
+                            margin-top: 8mm !important; /* Növbəti səhifədə yuxarıdan boşluq */
+                            padding-top: 0 !important;
+                        }
+                        
+                        .avoid-page-break {
+                            page-break-inside: avoid !important;
+                            break-inside: avoid !important;
+                        }
+                        
+                        .allow-page-break {
+                            page-break-inside: auto !important;
+                            break-inside: auto !important;
+                        }
+                        
+                        /* PAGE SPACING SYSTEM - PREVIEW İLƏ EYNI GÖRÜNÜM */
+                        
+                        /* Content that naturally flows to next page gets spacing */
+                        .cv-template > div:first-child {
+                            margin-top: 0 !important; /* İlk səhifə yuxarıdan boşluq yoxdur */
+                        }
+                        
+                        /* Natural page breaks - automatic content flow */
+                        .page-break-content {
+                            margin-top: 0 !important; /* PDF-də otomatik keçid */
+                            margin-bottom: 0 !important;
+                        }
+                        
+                        /* Forced page breaks get proper spacing */
+                        .force-new-page {
+                            page-break-before: always !important;
+                            break-before: page !important;
+                            margin-top: 0 !important;
+                            padding-top: 0 !important; /* Template-in öz padding-i var */
+                        }
+                        
+                        /* Section spacing that works with page breaks */
+                        .cv-section {
+                            margin-bottom: 4mm !important; /* Consistent section spacing */
+                        }
+                        
+                        .cv-section:last-child {
+                            margin-bottom: 0 !important;
+                        }
+                        
+                        /* Header spacing */
+                        .cv-template .mb-6:first-child {
+                            margin-bottom: 6mm !important; /* Header section spacing */
+                        }
+                        @media print {
+                            /* Ensure clean page breaks with spacing */
+                            .cv-template {
+                                orphans: 2;
+                                widows: 2;
+                            }
+                            
+                            /* Add breathing room for content at page boundaries */
+                            .mb-4:last-of-type {
+                                margin-bottom: 8mm !important;
+                            }
+                            
+                            .mb-6:last-of-type {
+                                margin-bottom: 10mm !important;
+                            }
+                            
+                            /* Prevent awkward breaks in contact sections */
+                            .grid-cols-3 > div {
+                                page-break-inside: avoid !important;
+                                break-inside: avoid !important;
+                            }
                         }
                     </style>
                 </head>

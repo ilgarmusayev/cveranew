@@ -379,7 +379,7 @@ export default function CVExportPage() {
                         padding: 0 !important;
                     }
                     
-                    /* Additional print optimizations for professional look */
+                    /* Enhanced print optimizations for professional look */
                     .cv-preview .p-6,
                     .cv-preview .p-8,
                     .cv-preview .px-6,
@@ -396,43 +396,184 @@ export default function CVExportPage() {
                         margin-right: 4px !important;
                     }
                     
+                    /* MULTI-PAGE SUPPORT STYLES */
+                    
+                    /* Hide page break indicators on print */
+                    .page-break-indicator,
+                    .page-number-indicator {
+                        display: none !important;
+                    }
+                    
+                    /* AUTOMATIC PAGE BREAK SYSTEM - PREVIEW VE PDF EXPORT */
+                    
                     /* A4 page setup with 20mm margins (2.0cm all sides) */
                     @page {
                         size: A4 portrait;
                         margin: 20mm; /* 2.0cm bütün tərəflərdə */
                     }
                     
-                    /* Page break controls */
-                    .cv-section {
-                        page-break-inside: avoid;
-                        margin-bottom: 20px;
-                    }
-                    
-                    .cv-section h2, .cv-section h3 {
-                        page-break-after: avoid;
-                    }
-                    
-                    .avoid-break {
-                        page-break-inside: avoid;
-                    }
-                    
-                    .page-break {
-                        page-break-before: always;
-                    }
-                    
-                    /* Ensure CV container fits within 20mm margins */
+                    /* CV Container - Auto page break when content exceeds A4 */
                     .cv-preview {
                         width: 100% !important;
-                        max-width: 170mm !important; /* A4 width (210mm) - 20mm margins (40mm total) */
+                        max-width: 210mm !important; /* Tam A4 eni - padding template içindədir */
+                        min-height: 297mm !important; /* Tam A4 hündürlüyü - padding template içindədir */
                         height: auto !important;
                         margin: 0 auto !important;
-                        padding: 0 !important;
+                        padding: 0 !important; /* Padding yoxdur - template özü 20mm padding verir */
                         transform: none !important;
                         scale: 1 !important;
                         border: none !important;
                         box-shadow: none !important;
                         border-radius: 0 !important;
-                        page-break-inside: auto; /* Allow content to break across pages */
+                        page-break-inside: auto !important; /* Allow content to break across pages */
+                        
+                        /* CSS Grid for automatic page breaks */
+                        display: block !important;
+                        overflow: visible !important;
+                    }
+                    
+                    /* Template container - handles its own 20mm padding */
+                    .cv-template {
+                        width: 210mm !important; /* Tam A4 eni */
+                        min-height: 297mm !important; /* Tam A4 hündürlüyü */
+                        height: auto !important;
+                        break-inside: auto !important;
+                        page-break-inside: auto !important;
+                        margin: 0 !important;
+                        padding: 20mm !important; /* Template öz padding-ini verir */
+                        box-sizing: border-box !important;
+                    }
+                    
+                    /* SMART PAGE BREAK CONTROLS */
+                    
+                    /* Section-level breaks - keep sections together when possible */
+                    .cv-section, 
+                    .aurora-template .mb-4, .vertex-template .mb-4, .horizon-template .mb-4,
+                    .lumen-template .mb-4, .modern-template .mb-4, .exclusive-template .mb-4,
+                    .ats-template .mb-4, .basic-template .mb-4, .traditional-template .mb-4 {
+                        page-break-inside: avoid !important;
+                        break-inside: avoid !important;
+                        margin-bottom: 4mm !important; /* 4mm spacing for sections */
+                    }
+                    
+                    /* Larger sections - allow breaks if necessary */
+                    .cv-section.large-section,
+                    .aurora-template .mb-6, .vertex-template .mb-6, .horizon-template .mb-6,
+                    .lumen-template .mb-6, .modern-template .mb-6, .exclusive-template .mb-6,
+                    .ats-template .mb-6, .basic-template .mb-6, .traditional-template .mb-6 {
+                        page-break-inside: auto !important;
+                        break-inside: auto !important;
+                        margin-bottom: 6mm !important; /* 6mm spacing for larger sections */
+                    }
+                    
+                    /* Headers - never break after headers */
+                    .cv-section h1, .cv-section h2, .cv-section h3,
+                    .aurora-template h1, .vertex-template h1, .horizon-template h1,
+                    .lumen-template h1, .modern-template h1, .exclusive-template h1,
+                    .ats-template h1, .basic-template h1, .traditional-template h1,
+                    .aurora-template h2, .vertex-template h2, .horizon-template h2,
+                    .lumen-template h2, .modern-template h2, .exclusive-template h2,
+                    .ats-template h2, .basic-template h2, .traditional-template h2 {
+                        page-break-after: avoid !important;
+                        break-after: avoid !important;
+                        orphans: 3 !important; /* Minimum 3 lines before page break */
+                        widows: 3 !important; /* Minimum 3 lines after page break */
+                        margin-bottom: 2mm !important; /* Small spacing after headers */
+                    }
+                    
+                    /* Individual items - try to keep together */
+                    .experience-item, .education-item, .project-item,
+                    .aurora-template .space-y-2 > div, .vertex-template .space-y-2 > div,
+                    .lumen-template .space-y-2 > div, .modern-template .space-y-2 > div,
+                    .exclusive-template .space-y-2 > div, .ats-template .space-y-2 > div,
+                    .basic-template .space-y-2 > div, .traditional-template .space-y-2 > div {
+                        page-break-inside: avoid !important;
+                        break-inside: avoid !important;
+                    }
+                    
+                    /* Force page breaks when explicitly needed */
+                    .page-break {
+                        page-break-before: always !important;
+                        break-before: page !important;
+                        margin-top: 20mm !important; /* Növbəti səhifədə yuxarıdan boşluq */
+                    }
+                    
+                    .avoid-break {
+                        page-break-inside: avoid !important;
+                        break-inside: avoid !important;
+                    }
+                    
+                    /* PAGE SPACING - Səhifələr arası boşluq */
+                    
+                    /* Automatic page spacing for overflow content */
+                    @media screen {
+                        .cv-preview {
+                            /* Preview-də səhifələr arası görünən boşluq */
+                            background: linear-gradient(
+                                to bottom,
+                                white 0%,
+                                white calc(257mm - 10px),
+                                #e5e7eb calc(257mm - 10px),
+                                #e5e7eb calc(257mm + 10px),
+                                white calc(257mm + 10px)
+                            );
+                            background-size: 100% 277mm; /* 257mm content + 20mm spacing */
+                            background-repeat: repeat-y;
+                        }
+                        
+                        /* Visual page break lines in preview */
+                        .cv-template::after {
+                            content: '';
+                            position: absolute;
+                            top: 257mm;
+                            left: 0;
+                            right: 0;
+                            height: 2px;
+                            background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+                            z-index: 10;
+                            opacity: 0.3;
+                        }
+                    }
+                    
+                    /* Print-specific spacing */
+                    @media print {
+                        /* Ensure proper spacing between printed pages */
+                        .cv-template {
+                            page-break-inside: auto !important;
+                        }
+                        
+                        /* Add margin to content that flows to next page */
+                        .cv-template > *:not(:first-child) {
+                            margin-top: 0 !important;
+                        }
+                        
+                        /* Specific spacing for sections that break across pages */
+                        .mb-4, .mb-6 {
+                            margin-bottom: 4mm !important; /* Consistent 4mm spacing */
+                        }
+                        
+                        /* Header spacing in print */
+                        h1, h2, h3 {
+                            margin-bottom: 2mm !important; /* Consistent 2mm after headers */
+                        }
+                        
+                        /* Extra spacing before content that starts on new page */
+                        .page-content-start {
+                            margin-top: 8mm !important;
+                            padding-top: 0 !important;
+                        }
+                    }
+                    
+                    /* Personal info section - always keep together */
+                    .personal-info-section,
+                    .aurora-template .mb-6:first-child, .vertex-template .mb-6:first-child,
+                    .lumen-template .mb-6:first-child, .modern-template .mb-6:first-child,
+                    .exclusive-template .mb-6:first-child, .ats-template .mb-6:first-child,
+                    .basic-template .mb-6:first-child, .traditional-template .mb-6:first-child {
+                        page-break-inside: avoid !important;
+                        break-inside: avoid !important;
+                        page-break-after: avoid !important;
+                        break-after: avoid !important;
                     }
                     
                     /* Ensure fonts are preserved */

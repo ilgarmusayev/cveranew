@@ -26,6 +26,8 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { CVData, PersonalInfo, Experience, Education, Skill, Language, Project, Certification, VolunteerExperience, CustomSection, CustomSectionItem } from '@/types/cv';
 import '@/styles/cv-fonts.css';
+import '@/styles/page-breaks.css';
+import PageBreakIndicator, { usePageBreaks } from './PageBreakIndicator';
 
 interface CVPreviewProps {
     cv: {
@@ -6773,40 +6775,49 @@ export default function CVPreview({
         <div 
             className="relative"
             style={{
-                width: isMobile ? '100%' : '210mm',
+                width: isMobile ? '100%' : '210mm', /* Preview container tam A4 eni */
                 height: isMobile ? '100%' : 'auto', // Desktop: auto height for long CVs
-                maxWidth: '210mm', // CV eni ilə limitli
-                minHeight: '297mm', // Minimum A4 hündürlüyü
+                maxWidth: '210mm', /* Tam A4 eni */
+                minHeight: '297mm', /* Tam A4 hündürlüyü */
                 overflow: isMobile ? 'hidden' : 'visible', // Desktop: allow content to overflow container
                 background: 'transparent',
             }}
         >
-
-            {/* CV Preview Container */}
-            <div
-                id="cv-preview-element"
-                className="cv-preview"
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                onClick={(e) => {
-                    // Stop propagation to prevent closing external buttons
-                    e.stopPropagation();
-                }}
-                style={{
-                    width: '210mm',
-                    height: isMobile ? 'fit-content' : 'auto', // Desktop: auto height for long content
-                    minHeight: '297mm', // Minimum A4 hündürlüyü
-                    maxWidth: '210mm', // CV enindən artıq olmaz
-                    maxHeight: isMobile ? 'none' : 'none', // Desktop: no height limit for long CVs
-                    margin: '0',
-                    overflow: isMobile ? 'auto' : 'visible', // Desktop: allow content to be visible
-                    position: 'relative',
-                    background: 'white',
-                    transformOrigin: 'top left',
-                    transform: `scale(${scale}) translateX(${isMobile ? currentTranslateX : 0}px)`,
-                    boxSizing: 'border-box',
-                    // Set CSS Variables for font management
+            {/* CV Preview Container with Page Break Indicators */}
+            <PageBreakIndicator
+                showIndicators={!isMobile} // Only show on desktop
+                pageHeight={297} // A4 height in mm
+                pageWidth={210} // A4 width in mm
+                marginTop={20}
+                marginBottom={20}
+                marginLeft={20}
+                marginRight={20}
+                className="cv-preview-with-breaks"
+            >
+                <div
+                    id="cv-preview-element"
+                    className="cv-preview"
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                    onClick={(e) => {
+                        // Stop propagation to prevent closing external buttons
+                        e.stopPropagation();
+                    }}
+                    style={{
+                        width: '210mm', /* Tam A4 eni - template padding-i özü verir */
+                        height: isMobile ? 'fit-content' : 'auto', // Desktop: auto height for long content
+                        minHeight: '297mm', /* Tam A4 hündürlüyü - template padding-i özü verir */
+                        maxWidth: '210mm', /* Tam A4 eni */
+                        maxHeight: isMobile ? 'none' : 'none', // Desktop: no height limit for long CVs
+                        margin: '0',
+                        overflow: isMobile ? 'auto' : 'visible', // Desktop: allow content to be visible
+                        position: 'relative',
+                        background: 'white',
+                        transformOrigin: 'top left',
+                        transform: `scale(${scale}) translateX(${isMobile ? currentTranslateX : 0}px)`,
+                        boxSizing: 'border-box',
+                        // Set CSS Variables for font management
                     ['--cv-font-family' as any]: fontSettings.fontFamily,
                     ['--cv-name-size' as any]: `${fontSettings.nameSize}px`,
                     ['--cv-title-size' as any]: `${fontSettings.titleSize}px`,
@@ -6827,9 +6838,10 @@ export default function CVPreview({
                     scrollBehavior: 'smooth',
                     transition: isDragging ? 'none' : 'transform 0.2s ease-out',
                 } as React.CSSProperties}
-            >
-                {renderTemplate()}
-            </div>
+                >
+                    {renderTemplate()}
+                </div>
+            </PageBreakIndicator>
         </div>
     );
 }
