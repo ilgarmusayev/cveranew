@@ -99,7 +99,7 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
           </p>
           <button
             onClick={addVolunteerExperience}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             {cvLanguage === 'english' 
               ? 'Add your first volunteer experience' 

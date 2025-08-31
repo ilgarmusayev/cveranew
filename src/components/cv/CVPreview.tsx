@@ -1328,7 +1328,7 @@ const BasicTemplate: React.FC<{
                 ${isDragActive ? 'drag-mode' : ''}
             `}
             style={{
-                padding: '15mm 12mm'
+                padding: '20mm'
             }}
         >
 
@@ -2043,7 +2043,7 @@ const ModernTemplate: React.FC<{
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
         >
-            <div className="w-full h-full bg-white text-gray-900" style={{ padding: '20mm 15mm' }}>
+            <div className="w-full h-full bg-white text-gray-900" style={{ padding: '20mm' }}>
                 <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
                     {sectionOrder.map((sectionType) => renderModernSection(sectionType)).filter(Boolean)}
                 </SortableContext>
@@ -2641,7 +2641,7 @@ const ATSFriendlyTemplate: React.FC<{
             <div 
                 className="w-2/5 bg-blue-900 text-white border-r border-blue-800" 
                 style={{ 
-                    padding: '15mm 12mm',
+                    padding: '20mm 10mm 20mm 20mm', /* üst: 20mm, sağ: 10mm, alt: 20mm, sol: 20mm */
                     touchAction: 'none', // Force DnD kit control
                     userSelect: 'none',
                     minHeight: '297mm' // A4 uzunluğu - 297mm
@@ -2998,7 +2998,7 @@ const ATSFriendlyTemplate: React.FC<{
             </div>
 
             {/* Right Column - Main Content with Draggable Sections */}
-            <div className="flex-1" style={{ padding: '15mm 12mm' }}>
+            <div className="flex-1" style={{ padding: '20mm 20mm 20mm 10mm' /* üst: 20mm, sağ: 20mm, alt: 20mm, sol: 10mm */ }}>
                 {/* Header - Name */}
                 <div className="mb-6 cv-section avoid-break">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2 leading-tight">
@@ -3657,7 +3657,7 @@ const LumenTemplate: React.FC<{
             <div 
                 className="w-2/5 bg-white text-gray-800 border-r-2 border-gray-300" 
                 style={{ 
-                    padding: '15mm 12mm',
+                    padding: '20mm 10mm 20mm 20mm', /* üst: 20mm, sağ: 10mm, alt: 20mm, sol: 20mm */
                     touchAction: 'none', // Force DnD kit control
                     userSelect: 'none',
                     minHeight: '297mm' // A4 uzunluğu - 297mm
@@ -3970,7 +3970,7 @@ const LumenTemplate: React.FC<{
             </div>
 
             {/* Right Column - Main Content with Draggable Sections */}
-            <div className="flex-1" style={{ padding: '15mm 12mm' }}>
+            <div className="flex-1" style={{ padding: '20mm 20mm 20mm 10mm' /* üst: 20mm, sağ: 20mm, alt: 20mm, sol: 10mm */ }}>
                 {/* Header - Name */}
                 <div className="mb-6 cv-section avoid-break">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2 leading-tight">
@@ -4563,7 +4563,7 @@ const VertexTemplate: React.FC<{
         >
             <div className="cv-template vertex-template bg-white min-h-[297mm]" style={{ 
                 fontFamily: 'var(--cv-font-family, "Courier New", monospace)',
-                padding: '20mm 15mm',
+                padding: '20mm',
                 lineHeight: '1.5',
                 letterSpacing: '0.01em'
             }}>
@@ -5131,7 +5131,7 @@ const HorizonTemplate: React.FC<{
         >
             <div className="cv-template horizon-template bg-white min-h-[297mm]" style={{ 
                 fontFamily: 'var(--cv-font-family, "Arial", sans-serif)',
-                padding: '25mm 20mm',
+                padding: '20mm',
                 lineHeight: '1.6',
                 letterSpacing: '0.02em'
             }}>
@@ -5758,7 +5758,7 @@ const AuroraTemplate: React.FC<{
         >
             <div className="cv-template aurora-template bg-white min-h-[297mm]" style={{ 
                 fontFamily: 'var(--cv-font-family, "Arial", sans-serif)',
-                padding: '20mm 15mm'
+                padding: '20mm'
             }}>
                 {/* Header Section - Clean and Professional */}
                 <div className="mb-8 pb-6 border-b-2 border-gray-900">
@@ -5898,8 +5898,8 @@ const ExclusiveTemplate: React.FC<{
 
     // Helper component for section header - mobile interactions disabled
     const SectionHeader: React.FC<{ title: string; icon?: string; sectionId: string }> = ({ title, icon, sectionId }) => (
-        <div className="mb-4">
-            <h2 className="text-lg font-bold text-gray-800 border-b-2 border-blue-600 pb-2">
+        <div className="mb-2">
+            <h2 className="text-sm font-bold text-gray-800 border-b-2 border-blue-600 pb-1">
                 {title}
             </h2>
         </div>
@@ -5911,9 +5911,9 @@ const ExclusiveTemplate: React.FC<{
             case 'summary':
                 if (!personalInfo.summary) return null;
                 return (
-                    <div key="summary" className="mb-6">
+                    <div key="summary" className="mb-4">
                         <SectionHeader title={getSectionName('summary', data.cvLanguage, data.sectionNames)} icon="📝" sectionId="summary" />
-                        <div className="text-gray-700 leading-relaxed text-sm p-4 border border-gray-200">
+                        <div className="text-gray-700 leading-relaxed text-sm px-1 py-2">
                             {renderHtmlContent(personalInfo.summary, false, data.cvLanguage)}
                         </div>
                     </div>
@@ -5922,15 +5922,15 @@ const ExclusiveTemplate: React.FC<{
             case 'experience':
                 if (!experience.length) return null;
                 return (
-                    <div key="experience" className="mb-6">
+                    <div key="experience" className="mb-4">
                         <SectionHeader title={getSectionName('experience', data.cvLanguage, data.sectionNames)} icon="💼" sectionId="experience" />
-                        <div className="space-y-4">
+                        <div className="space-y-2">
                             {experience.map((exp, index) => (
-                                <div key={exp.id || index} className="border border-gray-200 p-4">
-                                    <div className="flex flex-row items-start justify-between gap-2 mb-2">
+                                <div key={exp.id || index} className="px-1 py-2">
+                                    <div className="flex flex-row items-start justify-between gap-2 mb-1">
                                         <div className="flex-1">
-                                            <h3 className="font-bold text-base text-gray-800">{exp.position}</h3>
-                                            <h4 className="font-medium text-blue-600 text-sm">{exp.company}</h4>
+                                            <h3 className="font-bold text-sm text-gray-800">{exp.position}</h3>
+                                            <h4 className="font-medium text-blue-600 text-xs">{exp.company}</h4>
                                         </div>
                                         {(exp.startDate || exp.endDate) && (
                                             <div className="text-xs text-gray-600 font-medium text-right">
@@ -5945,7 +5945,7 @@ const ExclusiveTemplate: React.FC<{
                                         )}
                                     </div>
                                     {exp.description && (
-                                        <div className="text-gray-700 leading-relaxed text-sm">
+                                        <div className="text-gray-700 leading-relaxed text-xs mt-1">
                                             {renderHtmlContent(exp.description, false, data.cvLanguage)}
                                         </div>
                                     )}
@@ -5958,15 +5958,15 @@ const ExclusiveTemplate: React.FC<{
             case 'education':
                 if (!education.length) return null;
                 return (
-                    <div key="education" className="mb-6">
+                    <div key="education" className="mb-4">
                         <SectionHeader title={getSectionName('education', data.cvLanguage, data.sectionNames)} icon="🎓" sectionId="education" />
-                        <div className="space-y-3">
+                        <div className="space-y-2">
                             {education.map((edu, index) => (
-                                <div key={edu.id || index} className="border border-gray-200 p-4">
-                                    <div className="flex flex-row items-start justify-between gap-2 mb-2">
+                                <div key={edu.id || index} className="px-1 py-2">
+                                    <div className="flex flex-row items-start justify-between gap-2 mb-1">
                                         <div className="flex-1">
-                                            <h3 className="font-bold text-base text-gray-800">{edu.degree}</h3>
-                                            <h4 className="font-medium text-blue-600 text-sm">{edu.institution}</h4>
+                                            <h3 className="font-bold text-sm text-gray-800">{edu.degree}</h3>
+                                            <h4 className="font-medium text-blue-600 text-xs">{edu.institution}</h4>
                                             {(edu.field || edu.gpa) && (
                                                 <div className="text-xs text-gray-700 mt-1">
                                                     {edu.field && <span className="italic">{edu.field}</span>}
@@ -5988,7 +5988,7 @@ const ExclusiveTemplate: React.FC<{
                                         )}
                                     </div>
                                     {edu.description && (
-                                        <div className="text-gray-700 mt-2 leading-relaxed">
+                                        <div className="text-gray-700 mt-1 leading-relaxed text-xs">
                                             {renderHtmlContent(edu.description, false, data.cvLanguage)}
                                         </div>
                                     )}
@@ -6000,45 +6000,46 @@ const ExclusiveTemplate: React.FC<{
 
             case 'skills':
                 if (!skills.length) return null;
+                
+                const hardSkills = skills.filter(skill => skill.type === 'hard');
+                const softSkills = [
+                    ...skills.filter(skill => skill.type === 'soft'),
+                    ...skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft'))
+                ];
+                
                 return (
-                    <div key="skills" className="mb-6">
-                        <SectionHeader title={getSectionName('skills', data.cvLanguage, data.sectionNames)} icon="⚡" sectionId="skills" />
+                    <div key="skills">
+                        {/* Technical Skills as main section */}
+                        {hardSkills.length > 0 && (
+                            <div className="mb-3">
+                                <SectionHeader 
+                                    title={data.cvLanguage?.includes('en') ? 'Technical Skills' : 
+                                           data.cvLanguage?.includes('tr') ? 'Teknik Beceriler' : 'Texniki Bacarıqlar'} 
+                                    icon="⚙️" 
+                                    sectionId="technical-skills" 
+                                />
+                                <div className="flex flex-wrap gap-1">
+                                    {hardSkills.map((skill, index) => (
+                                        <span key={skill.id || index} className="bg-gray-100 text-gray-800 px-2 py-1 text-xs rounded">
+                                            {skill.name}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                         
-                        {/* Hard Skills */}
-                        {skills.filter(skill => skill.type === 'hard').length > 0 && (
-                            <div className="mb-4">
-                                <h3 className="text-sm font-medium text-gray-800 mb-2">{getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}</h3>
-                                <div className="flex flex-wrap gap-2">
-                                    {skills.filter(skill => skill.type === 'hard').map((skill, index) => (
-                                        <span key={skill.id || index} className="bg-white text-gray-800 px-2 py-1 text-xs border border-gray-300">
-                                            {skill.name}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Soft Skills */}
-                        {skills.filter(skill => skill.type === 'soft').length > 0 && (
-                            <div className="mb-4">
-                                <h3 className="text-sm font-medium text-gray-800 mb-2">{getSectionName('softSkills', data.cvLanguage, data.sectionNames)}</h3>
-                                <div className="flex flex-wrap gap-2">
-                                    {skills.filter(skill => skill.type === 'soft').map((skill, index) => (
-                                        <span key={skill.id || index} className="bg-white text-gray-800 px-2 py-1 text-xs border border-gray-300">
-                                            {skill.name}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Default/Other Skills */}
-                        {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).length > 0 && (
-                            <div className="mb-4">
-                                <h3 className="text-sm font-medium text-gray-800 mb-2">{getSectionName('coreCompetencies', data.cvLanguage, data.sectionNames)}</h3>
-                                <div className="flex flex-wrap gap-2">
-                                    {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map((skill, index) => (
-                                        <span key={skill.id || index} className="bg-white text-gray-800 px-2 py-1 text-xs border border-gray-300">
+                        {/* Soft Skills as main section */}
+                        {softSkills.length > 0 && (
+                            <div className="mb-3">
+                                <SectionHeader 
+                                    title={data.cvLanguage?.includes('en') ? 'Soft Skills' : 
+                                           data.cvLanguage?.includes('tr') ? 'Kişisel Beceriler' : 'Şəxsi Bacarıqlar'} 
+                                    icon="🤝" 
+                                    sectionId="soft-skills" 
+                                />
+                                <div className="flex flex-wrap gap-1">
+                                    {softSkills.map((skill, index) => (
+                                        <span key={skill.id || index} className="bg-gray-100 text-gray-800 px-2 py-1 text-xs rounded">
                                             {skill.name}
                                         </span>
                                     ))}
@@ -6051,28 +6052,28 @@ const ExclusiveTemplate: React.FC<{
             case 'projects':
                 if (!projects.length) return null;
                 return (
-                    <div key="projects" className="mb-6">
+                    <div key="projects" className="mb-4">
                         <SectionHeader title={getSectionName('projects', data.cvLanguage, data.sectionNames)} icon="🚀" sectionId="projects" />
-                        <div className="space-y-6">
+                        <div className="space-y-2">
                             {projects.map((project, index) => (
-                                <div key={project.id || index} className="bg-white p-4 border border-gray-200">
-                                    <div className="flex flex-row items-start justify-between gap-2 mb-3">
+                                <div key={project.id || index} className="px-1 py-2">
+                                    <div className="flex flex-row items-start justify-between gap-2 mb-1">
                                         <div className="flex-1">
                                             {project.url ? (
                                                 <a
                                                     href={project.url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="font-bold text-lg text-blue-600 hover:text-blue-800 underline transition-colors"
+                                                    className="font-bold text-sm text-blue-600 hover:text-blue-800 underline transition-colors"
                                                 >
                                                     {project.name}
                                                 </a>
                                             ) : (
-                                                <h3 className="font-bold text-lg text-gray-800">{project.name}</h3>
+                                                <h3 className="font-bold text-sm text-gray-800">{project.name}</h3>
                                             )}
                                         </div>
                                         {(project.startDate || project.endDate || project.current) && (
-                                            <span className="text-sm text-gray-600 font-medium text-right">
+                                            <span className="text-xs text-gray-600 font-medium text-right">
                                                 {project.current ? (
                                                     project.startDate ? `${formatDate(project.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : getCurrentText(data.cvLanguage)
                                                 ) : project.startDate && project.endDate ? (
@@ -6084,19 +6085,19 @@ const ExclusiveTemplate: React.FC<{
                                         )}
                                     </div>
                                     {project.description && (
-                                        <div className="text-gray-700 mb-4 leading-relaxed">
+                                        <div className="text-gray-700 mb-2 leading-relaxed text-xs">
                                             {renderHtmlContent(project.description, false, data.cvLanguage)}
                                         </div>
                                     )}
                                     {project.technologies && project.technologies.length > 0 && (
-                                        <div className="mb-3">
-                                            <h5 className="font-semibold text-gray-800 mb-2">
+                                        <div className="mb-1">
+                                            <h5 className="font-semibold text-gray-800 mb-1 text-xs">
                                                 {data.cvLanguage?.includes('en') ? 'Technologies:' : 
                                                  data.cvLanguage?.includes('tr') ? 'Teknolojiler:' : 'Texnologiyalar:'}
                                             </h5>
-                                            <div className="flex flex-wrap gap-2">
+                                            <div className="flex flex-wrap gap-1">
                                                 {project.technologies.map((tech, i) => (
-                                                    <span key={i} className="bg-white text-gray-800 px-2 py-1 text-xs border border-gray-300">
+                                                    <span key={i} className="bg-gray-100 text-gray-800 px-2 py-1 text-xs rounded">
                                                         {tech}
                                                     </span>
                                                 ))}
@@ -6112,14 +6113,14 @@ const ExclusiveTemplate: React.FC<{
             case 'languages':
                 if (!languages.length) return null;
                 return (
-                    <div key="languages" className="mb-6">
+                    <div key="languages" className="mb-4">
                         <SectionHeader title={getSectionName('languages', data.cvLanguage, data.sectionNames)} icon="🌍" sectionId="languages" />
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-2">
                             {languages.map((lang, index) => (
-                                <div key={lang.id || index} className="bg-white p-4 border border-gray-200">
+                                <div key={lang.id || index} className="bg-gray-50 p-2 rounded">
                                     <div className="flex justify-between items-center">
-                                        <span className="font-semibold text-gray-800">{lang.language}</span>
-                                        <span className="bg-white text-gray-800 px-3 py-1 text-sm font-medium border border-gray-300">
+                                        <span className="font-semibold text-gray-800 text-xs">{lang.language}</span>
+                                        <span className="bg-gray-200 text-gray-800 px-2 py-0.5 text-xs font-medium rounded">
                                             {getLanguageLevel(lang.level, data.cvLanguage)}
                                         </span>
                                     </div>
@@ -6132,35 +6133,35 @@ const ExclusiveTemplate: React.FC<{
             case 'certifications':
                 if (!certifications.length) return null;
                 return (
-                    <div key="certifications" className="mb-6">
+                    <div key="certifications" className="mb-4">
                         <SectionHeader title={getSectionName('certifications', data.cvLanguage, data.sectionNames)} icon="🏆" sectionId="certifications" />
-                        <div className="space-y-4">
+                        <div className="space-y-2">
                             {certifications.map((cert, index) => (
-                                <div key={cert.id || index} className="bg-white p-4 border border-gray-200">
-                                    <div className="flex flex-row items-start justify-between gap-2 mb-2">
+                                <div key={cert.id || index} className="px-1 py-2">
+                                    <div className="flex flex-row items-start justify-between gap-2 mb-1">
                                         <div className="flex-1">
                                             {cert.url ? (
                                                 <a
                                                     href={cert.url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="font-bold text-gray-800 hover:text-blue-600 underline transition-colors"
+                                                    className="font-bold text-sm text-gray-800 hover:text-blue-600 underline transition-colors"
                                                 >
                                                     {cert.name}
                                                 </a>
                                             ) : (
-                                                <h3 className="font-bold text-gray-800">{cert.name}</h3>
+                                                <h3 className="font-bold text-sm text-gray-800">{cert.name}</h3>
                                             )}
-                                            <p className="text-gray-700 font-medium">{cert.issuer}</p>
+                                            <p className="text-blue-600 font-medium text-xs">{cert.issuer}</p>
                                         </div>
                                         {cert.date && (
-                                            <span className="text-sm text-gray-600 font-medium text-right">
+                                            <span className="text-xs text-gray-600 font-medium text-right">
                                                 {formatDate(cert.date, data.cvLanguage)}
                                             </span>
                                         )}
                                     </div>
                                     {cert.description && (
-                                        <div className="text-gray-700 leading-relaxed">
+                                        <div className="text-gray-700 leading-relaxed text-xs mt-1">
                                             {renderHtmlContent(cert.description, false, data.cvLanguage)}
                                         </div>
                                     )}
@@ -6173,18 +6174,18 @@ const ExclusiveTemplate: React.FC<{
             case 'volunteer':
                 if (!volunteerExperience.length) return null;
                 return (
-                    <div key="volunteer" className="mb-6">
+                    <div key="volunteer" className="mb-4">
                         <SectionHeader title={getSectionName('volunteerExperience', data.cvLanguage, data.sectionNames)} icon="🤝" sectionId="volunteer" />
-                        <div className="space-y-4">
+                        <div className="space-y-2">
                             {volunteerExperience.map((vol, index) => (
-                                <div key={vol.id || index} className="bg-white p-4 border border-gray-200">
-                                    <div className="flex flex-row items-start justify-between gap-2 mb-3">
+                                <div key={vol.id || index} className="px-1 py-2">
+                                    <div className="flex flex-row items-start justify-between gap-2 mb-1">
                                         <div className="flex-1">
-                                            <h3 className="font-bold text-gray-800">{vol.role}</h3>
-                                            <h4 className="font-semibold text-gray-700">{vol.organization}</h4>
+                                            <h3 className="font-bold text-sm text-gray-800">{vol.role}</h3>
+                                            <h4 className="font-medium text-blue-600 text-xs">{vol.organization}</h4>
                                         </div>
                                         {(vol.startDate || vol.endDate) && (
-                                            <div className="text-sm text-gray-600 font-medium text-right">
+                                            <div className="text-xs text-gray-600 font-medium text-right">
                                                 {vol.startDate ? (
                                                     vol.current ? `${formatDate(vol.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
                                                     vol.endDate ? `${formatDate(vol.startDate, data.cvLanguage)} - ${formatDate(vol.endDate, data.cvLanguage)}` :
@@ -6196,7 +6197,7 @@ const ExclusiveTemplate: React.FC<{
                                         )}
                                     </div>
                                     {vol.description && (
-                                        <div className="text-gray-700 leading-relaxed">
+                                        <div className="text-gray-700 leading-relaxed text-xs mt-1">
                                             {renderHtmlContent(vol.description, false, data.cvLanguage)}
                                         </div>
                                     )}
@@ -6209,13 +6210,13 @@ const ExclusiveTemplate: React.FC<{
             case 'customSections':
                 if (!customSections.length) return null;
                 return (
-                    <div key="customSections" className="mb-8">
+                    <div key="customSections" className="mb-4">
                         {customSections.map((customSection, sectionIndex) => (
-                            <div key={customSection.id || sectionIndex} className="mb-8">
+                            <div key={customSection.id || sectionIndex} className="mb-4">
                                 <SectionHeader title={customSection.title} icon="📋" sectionId={`custom-${customSection.id}`} />
-                                <div className="space-y-4">
+                                <div className="space-y-3">
                                     {customSection.items.map((item, index) => (
-                                        <div key={item.id || index} className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                        <div key={item.id || index} className="bg-white p-4">
                                             {item.title && (
                                                 <h3 className="font-bold text-gray-800 mb-2">{item.title}</h3>
                                             )}
@@ -6224,7 +6225,7 @@ const ExclusiveTemplate: React.FC<{
                                             )}
                                             {item.date && (
                                                 <p className="text-sm text-gray-600 mb-3">
-                                                    <span className="bg-white px-2 py-1 rounded border">{formatDate(item.date, data.cvLanguage)}</span>
+                                                    <span className="bg-white px-2 py-1">{formatDate(item.date, data.cvLanguage)}</span>
                                                 </p>
                                             )}
                                             {item.description && (
@@ -6248,11 +6249,11 @@ const ExclusiveTemplate: React.FC<{
                     if (!customSection || !customSection.items.length) return null;
 
                     return (
-                        <div key={sectionId} className="mb-8">
+                        <div key={sectionId} className="mb-4">
                             <SectionHeader title={customSection.title} icon="📋" sectionId={sectionId} />
-                            <div className="space-y-4">
+                            <div className="space-y-3">
                                 {customSection.items.map((item, index) => (
-                                    <div key={item.id || index} className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                    <div key={item.id || index} className="bg-white p-4">
                                         {item.title && (
                                             <h3 className="font-bold text-gray-800 mb-2">{item.title}</h3>
                                         )}
@@ -6261,7 +6262,7 @@ const ExclusiveTemplate: React.FC<{
                                         )}
                                         {item.date && (
                                             <p className="text-sm text-gray-600 mb-3">
-                                                <span className="bg-white px-2 py-1 rounded border">{formatDate(item.date, data.cvLanguage)}</span>
+                                                <span className="bg-white px-2 py-1">{formatDate(item.date, data.cvLanguage)}</span>
                                             </p>
                                         )}
                                         {item.description && (
@@ -6286,69 +6287,78 @@ const ExclusiveTemplate: React.FC<{
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
         >
-            <div className="cv-template exclusive-template bg-white min-h-[297mm]" style={{ fontFamily: 'var(--cv-font-family, "Inter", sans-serif)', padding: '10mm 15mm' }}>
-                {/* Header Section - Not draggable */}
-                <div className="mb-8">
-                    <div className="bg-white border-b-2 border-blue-600">
+            <div className="cv-template exclusive-template bg-white min-h-[297mm]" style={{ fontFamily: 'var(--cv-font-family, "Inter", sans-serif)', padding: '20mm' }}>
+                {/* Header Section - Enhanced Professional Design */}
+                <div className="mb-6">
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg shadow-sm">
                         <div className="p-6">
-                            <div className="flex flex-row gap-6 items-start">
+                            <div className="flex flex-row gap-6 items-center">
                                 {/* Profile Image */}
                                 {personalInfo.profileImage && (
                                     <div className="flex justify-start flex-shrink-0">
-                                        <div>
+                                        <div className="relative">
                                             <img
                                                 src={personalInfo.profileImage}
                                                 alt="Profile"
-                                                className="w-32 h-32 rounded-full object-cover border-2 border-blue-600"
+                                                className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-lg"
                                             />
+                                            <div className="absolute inset-0 rounded-full border-2 border-blue-600 opacity-20"></div>
                                         </div>
                                     </div>
                                 )}
                                 
                                 <div className="flex-1 text-left">
-                                    {/* Name */}
-                                    <h1 className="text-5xl font-bold mb-4 tracking-wide text-gray-800">
+                                    {/* Name with enhanced styling */}
+                                    <h1 className="text-2xl font-bold mb-3 tracking-wide text-gray-900">
                                         {getFullName(personalInfo, data.cvLanguage)}
                                     </h1>
                                 </div>
                             </div>
                             
-                            {/* Contact Information Grid */}
-                            <div className="mt-6 pt-4 border-t border-gray-200">
+                            {/* Contact Information Grid - Enhanced */}
+                            <div className="mt-4 pt-4 border-t border-blue-200">
                                 <div className="grid grid-cols-3 gap-4">
                                     {personalInfo.email && (
-                                        <div className="text-gray-700">
-                                            <p className="text-xs text-gray-500 uppercase font-medium">
-                                                {data.cvLanguage?.includes('en') ? 'Email' : 
-                                                 data.cvLanguage?.includes('tr') ? 'E-posta' : 'Email'}
-                                            </p>
+                                        <div className="bg-white p-3 rounded-md shadow-sm">
+                                            <div className="text-blue-600 uppercase font-bold mb-1">
+                                                <p>
+                                                    {data.cvLanguage?.includes('en') ? 'Email' : 
+                                                     data.cvLanguage?.includes('tr') ? 'E-posta' : 'E-poçt'}
+                                                </p>
+                                            </div>
                                             <p className="text-gray-800 font-medium text-sm">{personalInfo.email}</p>
                                         </div>
                                     )}
                                     
                                     {personalInfo.phone && (
-                                        <div className="text-gray-700">
-                                            <p className="text-xs text-gray-500 uppercase font-medium">
-                                                {data.cvLanguage?.includes('en') ? 'Phone' : 
-                                                 data.cvLanguage?.includes('tr') ? 'Telefon' : 'Telefon'}
-                                            </p>
+                                        <div className="bg-white p-3 rounded-md shadow-sm">
+                                            <div className="text-blue-600 uppercase font-bold mb-1">
+                                                <p>
+                                                    {data.cvLanguage?.includes('en') ? 'Phone' : 
+                                                     data.cvLanguage?.includes('tr') ? 'Telefon' : 'Telefon'}
+                                                </p>
+                                            </div>
                                             <p className="text-gray-800 font-medium text-sm">{personalInfo.phone}</p>
                                         </div>
                                     )}
                                     
                                     {personalInfo.location && (
-                                        <div className="text-gray-700">
-                                            <p className="text-xs text-gray-500 uppercase font-medium">
-                                                {data.cvLanguage?.includes('en') ? 'Location' : 
-                                                 data.cvLanguage?.includes('tr') ? 'Lokasyon' : 'Ünvan'}
-                                            </p>
+                                        <div className="bg-white p-3 rounded-md shadow-sm">
+                                            <div className="text-blue-600 uppercase font-bold mb-1">
+                                                <p>
+                                                    {data.cvLanguage?.includes('en') ? 'Location' : 
+                                                     data.cvLanguage?.includes('tr') ? 'Lokasyon' : 'Ünvan'}
+                                                </p>
+                                            </div>
                                             <p className="text-gray-800 font-medium text-sm">{personalInfo.location}</p>
                                         </div>
                                     )}
                                     
                                     {personalInfo.linkedin && (
-                                        <div className="text-gray-700">
-                                            <p className="text-xs text-gray-500 uppercase font-medium">LinkedIn</p>
+                                        <div className="bg-white p-3 rounded-md shadow-sm">
+                                            <div className="text-blue-600 uppercase font-bold mb-1">
+                                                <p>LinkedIn</p>
+                                            </div>
                                             <a
                                                 href={getLinkedInDisplay(personalInfo.linkedin).url}
                                                 target="_blank"
@@ -6361,19 +6371,23 @@ const ExclusiveTemplate: React.FC<{
                                     )}
                                     
                                     {personalInfo.website && (
-                                        <div className="text-gray-700">
-                                            <p className="text-xs text-gray-500 uppercase font-medium">
-                                                {data.cvLanguage?.includes('en') ? 'Website' : 
-                                                 data.cvLanguage?.includes('tr') ? 'Web Sitesi' : 'Veb sayt'}
-                                            </p>
+                                        <div className="bg-white p-3 rounded-md shadow-sm">
+                                            <div className="text-blue-600 uppercase font-bold mb-1">
+                                                <p>
+                                                    {data.cvLanguage?.includes('en') ? 'Website' : 
+                                                     data.cvLanguage?.includes('tr') ? 'Web Sitesi' : 'Veb-sayt'}
+                                                </p>
+                                            </div>
                                             <p className="text-gray-800 font-medium text-sm break-all">{personalInfo.website}</p>
                                         </div>
                                     )}
                                     
                                     {personalInfo.additionalLinks && personalInfo.additionalLinks.length > 0 && (
-                                        personalInfo.additionalLinks.map((link) => (
-                                            <div key={link.id} className="text-gray-700">
-                                                <p className="text-xs text-gray-500 uppercase font-medium">{link.label}</p>
+                                        personalInfo.additionalLinks.slice(0, 1).map((link) => (
+                                            <div key={link.id} className="bg-white p-3 rounded-md shadow-sm">
+                                                <div className="text-blue-600 uppercase font-bold mb-1">
+                                                    <p>{link.label}</p>
+                                                </div>
                                                 <p className="text-gray-800 font-medium text-sm break-all">{link.value}</p>
                                             </div>
                                         ))

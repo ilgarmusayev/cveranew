@@ -87,7 +87,7 @@ export default function CVExportPage() {
             await new Promise(resolve => setTimeout(resolve, 100));
             
             // CVPreview elementini tap və HTML-ini al
-            const cvPreviewElement = document.getElementById('cv-preview-element');
+            const cvPreviewElement = document.querySelector('.cv-preview');
             if (!cvPreviewElement) {
                 console.warn('CV preview elementi tapılmadı, fallback method istifadə ediləcək');
                 
@@ -396,10 +396,10 @@ export default function CVExportPage() {
                         margin-right: 4px !important;
                     }
                     
-                    /* A4 page setup with minimal margins for maximum content */
+                    /* A4 page setup with 20mm margins (2.0cm all sides) */
                     @page {
                         size: A4 portrait;
-                        margin: 5mm 3mm; /* Minimal professional CV margins: üst/alt 5mm, sol/sağ 3mm */
+                        margin: 20mm; /* 2.0cm bütün tərəflərdə */
                     }
                     
                     /* Page break controls */
@@ -420,10 +420,10 @@ export default function CVExportPage() {
                         page-break-before: always;
                     }
                     
-                    /* Ensure CV container fits within minimal A4 margins */
+                    /* Ensure CV container fits within 20mm margins */
                     .cv-preview {
                         width: 100% !important;
-                        max-width: 204mm !important; /* A4 width (210mm) - minimal margins (6mm total) */
+                        max-width: 170mm !important; /* A4 width (210mm) - 20mm margins (40mm total) */
                         height: auto !important;
                         margin: 0 auto !important;
                         padding: 0 !important;

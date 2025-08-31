@@ -32,10 +32,10 @@ export const exportToPDF = async (
       (el as HTMLElement).style.display = 'none';
     });
 
-    // Apply exact styling to match preview - preserve template padding
+    // Apply exact styling to match preview
     const style = document.createElement('style');
     style.textContent = 
-      '#' + elementId + ' { background: white !important; margin: 0 !important; box-shadow: none !important; border: none !important; transform: none !important; width: 794px !important; min-height: 1123px !important; font-family: -apple-system, BlinkMacSystemFont, sans-serif !important; }' +
+      '#' + elementId + ' { background: white !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; border: none !important; transform: none !important; width: 794px !important; min-height: 1123px !important; font-family: -apple-system, BlinkMacSystemFont, sans-serif !important; }' +
       '#' + elementId + ' * { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box !important; }' +
       '#' + elementId + ' .hover\\:bg-gray-50:hover, #' + elementId + ' .hover\\:bg-blue-50:hover, #' + elementId + ' .hover\\:bg-gray-100:hover, #' + elementId + ' .hover\\:bg-blue-100:hover, #' + elementId + ' .hover\\:shadow-md:hover, #' + elementId + ' .hover\\:shadow-lg:hover { background-color: transparent !important; box-shadow: none !important; transform: none !important; }' +
       '#' + elementId + ' .drag-handle, #' + elementId + ' .section-drag-indicator, #' + elementId + ' .cursor-move, #' + elementId + ' .cursor-pointer, #' + elementId + ' .group, #' + elementId + ' .relative.group { cursor: default !important; transform: none !important; background-color: transparent !important; box-shadow: none !important; }' +

@@ -166,7 +166,11 @@ async function initializeBrowser() {
                 '--enable-font-antialiasing',
                 '--force-device-scale-factor=1',
                 '--default-encoding=utf-8',
-                '--lang=az'
+                '--locale=az-AZ',
+                '--lang=az',
+                '--accept-lang=az-AZ,az,tr-TR,tr,en-US,en',
+                '--disable-web-security',
+                '--allow-running-insecure-content'
             ],
             executablePath: executablePath
         });
@@ -246,473 +250,316 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
         let html;
         
         if (htmlContent && cssContent) {
-            // Front-end-dən gələn HTML content istifadə et
+            // Front-end-dən gələn HTML content istifadə et, amma CSS-i təkmilləşdir
             html = `
                 <!DOCTYPE html>
                 <html lang="az">
                 <head>
                     <meta charset="UTF-8">
                     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+                    <meta http-equiv="Content-Language" content="az-AZ">
                     <meta name="viewport" content="width=device-width, initial-scale=1">
                     <title>CV Export</title>
                     <style>
-                        @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
-                        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+                        ${cssContent}
                         
-                        * {
-                            -webkit-print-color-adjust: exact !important;
-                            color-adjust: exact !important;
-                            print-color-adjust: exact !important;
-                            font-family: 'Roboto', 'Noto Sans', 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif !important;
-                            unicode-bidi: normal !important;
-                            direction: ltr !important;
-                        }
+                        /* ROUTE.TS ƏLAVƏ CSS - YALNIZ DINAMIK FONT SISTEMI */
                         
-                        /* Azərbaycan dili üçün genişləndirilmiş font support */
-                        body, html {
-                            font-family: 'Roboto', 'Noto Sans', 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif !important;
-                            -webkit-font-feature-settings: "liga", "kern", "clig" !important;
-                            font-feature-settings: "liga", "kern", "clig" !important;
-                            text-rendering: optimizeLegibility;
-                            unicode-bidi: normal;
-                        }
-                        
-                        /* Specific support for Azerbaijani characters */
-                        h1, h2, h3, h4, h5, h6, p, span, div, li {
-                            font-family: 'Roboto', 'DejaVu Sans', Arial, sans-serif !important;
-                            unicode-bidi: normal;
-                            text-rendering: optimizeLegibility;
-                        }
-                        
-                        /* Font weights və digər text stilləri */
-                        .font-bold, .font-semibold {
-                            font-weight: bold !important;
-                        }
-                        
-                        .font-medium {
-                            font-weight: 500 !important;
-                        }
-                        
-                        .font-normal {
-                            font-weight: normal !important;
-                        }
-                        
-                        .font-light {
-                            font-weight: 300 !important;
-                        }
-                        
-                        .font-thin {
-                            font-weight: 100 !important;
-                        }
-                        
-                        .font-extralight {
-                            font-weight: 200 !important;
-                        }
-                        
-                        .font-extrabold {
-                            font-weight: 800 !important;
-                        }
-                        
-                        .font-black {
-                            font-weight: 900 !important;
-                        }
-                        
-                        /* Numeric font weights */
-                        .font-100 { font-weight: 100 !important; }
-                        .font-200 { font-weight: 200 !important; }
-                        .font-300 { font-weight: 300 !important; }
-                        .font-400 { font-weight: 400 !important; }
-                        .font-500 { font-weight: 500 !important; }
-                        .font-600 { font-weight: 600 !important; }
-                        .font-700 { font-weight: 700 !important; }
-                        .font-800 { font-weight: 800 !important; }
-                        .font-900 { font-weight: 900 !important; }
-                        
-                        /* Font styles */
-                        .italic {
-                            font-style: italic !important;
-                        }
-                        
-                        .not-italic {
-                            font-style: normal !important;
-                        }
-                        
-                        /* Text decorations */
-                        .underline {
-                            text-decoration: underline !important;
-                        }
-                        
-                        .no-underline {
-                            text-decoration: none !important;
-                        }
-                        
-                        .line-through {
-                            text-decoration: line-through !important;
-                        }
-                        
-                        /* Text transform */
-                        .uppercase {
-                            text-transform: uppercase !important;
-                        }
-                        
-                        .lowercase {
-                            text-transform: lowercase !important;
-                        }
-                        
-                        .capitalize {
-                            text-transform: capitalize !important;
-                        }
-                        
-                        .normal-case {
-                            text-transform: none !important;
-                        }
-                        
-                        /* Text sizes və font weights */
-                        .text-lg {
-                            font-size: 18px !important;
-                        }
-                        
-                        .text-base {
-                            font-size: 16px !important;
-                        }
-                        
-                        .text-sm {
-                            font-size: 14px !important;
-                        }
-                        
-                        .text-xs {
-                            font-size: 12px !important;
-                        }
-                        
-                        .text-xl {
-                            font-size: 20px !important;
-                        }
-                        
-                        .text-2xl {
-                            font-size: 24px !important;
-                        }
-                        
-                        .text-3xl {
-                            font-size: 30px !important;
-                        }
-                        
-                        /* Heading styles with proper weights */
-                        h1 {
-                            font-weight: bold !important;
-                            font-size: 24px !important;
-                        }
-                        
-                        h2 {
-                            font-weight: bold !important;
-                            font-size: 20px !important;
-                        }
-                        
-                        h3 {
-                            font-weight: 600 !important;
-                            font-size: 18px !important;
-                        }
-                        
-                        h4 {
-                            font-weight: 600 !important;
-                            font-size: 16px !important;
-                        }
-                        
-                        /* Strong və bold taglar */
-                        strong, b {
-                            font-weight: bold !important;
-                        }
-                        
-                        body {
-                            margin: 0;
-                            padding: 0;
-                            background: white;
-                            font-family: ${fontSettings?.fontFamily || 'Arial, sans-serif'};
-                            
-                            /* CSS Variables */
-                            --cv-font-family: ${fontSettings?.fontFamily || 'Arial, sans-serif'};
-                            --cv-heading-size: ${fontSettings?.headingSize || 18}px;
+                        /* CSS Variables - Font Manager Integration */
+                        :root, body {
+                            --cv-font-family: ${fontSettings?.fontFamily || 'Inter, sans-serif'};
+                            --cv-heading-size: ${fontSettings?.headingSize || 24}px;
                             --cv-subheading-size: ${fontSettings?.subheadingSize || 16}px;
                             --cv-body-size: ${fontSettings?.bodySize || 14}px;
                             --cv-small-size: ${fontSettings?.smallSize || 12}px;
                         }
                         
-                        /* A4 page ayarları - kenar boşluqsuz, yalnız səhifə arası boşluq */
-                        @page {
-                            size: A4;
-                            margin: 0;  /* Heç bir kenar boşluq - preview kimi tam kenardan */
+                        /* Global font family override - dinamik olaraq */
+                        * {
+                            font-family: var(--cv-font-family) !important;
                         }
                         
-                        /* Səhifə arası ayırma ayarları - yalnız səhifə sonunda boşluq */
-                        .page-break {
-                            page-break-before: always;
-                            padding-top: 10mm; /* Yeni səhifənin yuxarısında boşluq */
+                        /* UNIVERSAL DYNAMIC FONT SYSTEM - BÜTÜN TEMPLATE-LƏR ÜÇÜN */
+                        
+                        /* Font Family - Bütün template-lər */
+                        .aurora-template *, .vertex-template *, .horizon-template *, 
+                        .lumen-template *, .modern-template *, .exclusive-template *, 
+                        .ats-template *, .basic-template *, .traditional-template *, 
+                        .classic-template * {
+                            font-family: var(--cv-font-family) !important;
                         }
                         
-                        .avoid-break {
-                            page-break-inside: avoid;
+                        /* Heading Sizes - Dinamik H1, H2, H3 */
+                        .aurora-template h1, .vertex-template h1, .horizon-template h1,
+                        .lumen-template h1, .modern-template h1, .exclusive-template h1,
+                        .ats-template h1, .basic-template h1, .traditional-template h1,
+                        .classic-template h1 {
+                            font-size: calc(var(--cv-heading-size) * 1.33) !important; /* ~32px */
+                            line-height: 1.2 !important;
                         }
                         
-                        /* CV section-lar üçün səhifə arası ayırma */
-                        .cv-section {
-                            page-break-inside: avoid;
-                            margin-bottom: 15px; /* Section-lar arası normal boşluq */
+                        .aurora-template h2, .vertex-template h2, .horizon-template h2,
+                        .lumen-template h2, .modern-template h2, .exclusive-template h2,
+                        .ats-template h2, .basic-template h2, .traditional-template h2,
+                        .classic-template h2 {
+                            font-size: var(--cv-heading-size) !important; /* 24px default */
+                            line-height: 1.3 !important;
                         }
                         
-                        .cv-section h2, .cv-section h3 {
-                            page-break-after: avoid;
+                        .aurora-template h3, .vertex-template h3, .horizon-template h3,
+                        .lumen-template h3, .modern-template h3, .exclusive-template h3,
+                        .ats-template h3, .basic-template h3, .traditional-template h3,
+                        .classic-template h3 {
+                            font-size: calc(var(--cv-subheading-size) * 1.125) !important; /* ~18px */
+                            line-height: 1.4 !important;
                         }
                         
-                        /* Səhifə sonunda əlavə boşluq */
-                        .cv-section:last-child {
-                            padding-bottom: 10mm;
+                        .aurora-template h4, .vertex-template h4, .horizon-template h4,
+                        .lumen-template h4, .modern-template h4, .exclusive-template h4,
+                        .ats-template h4, .basic-template h4, .traditional-template h4,
+                        .classic-template h4 {
+                            font-size: var(--cv-subheading-size) !important; /* 16px default */
+                            line-height: 1.5 !important;
                         }
                         
-                        /* CV container - tam kenardan, heç bir margin və padding yoxdur */
-                        .cv-preview {
-                            width: 210mm !important;  /* Tam A4 eni */
-                            height: auto !important;
-                            margin: 0 !important;
-                            padding: 0 !important;
-                            /* Template öz padding-ini saxlayacaq, amma container-in padding-i yoxdur */
-                            transform: none !important;
-                            scale: 1 !important;
-                            border: none !important;
-                            box-shadow: none !important;
-                            border-radius: 0 !important;
-                            page-break-inside: auto; /* Səhifə arası keçişə icazə ver */
+                        /* Text Size Classes - Dinamik Tailwind */
+                        .aurora-template .text-5xl, .vertex-template .text-5xl, .horizon-template .text-5xl,
+                        .lumen-template .text-5xl, .modern-template .text-5xl, .exclusive-template .text-5xl,
+                        .ats-template .text-5xl, .basic-template .text-5xl, .traditional-template .text-5xl,
+                        .classic-template .text-5xl {
+                            font-size: calc(var(--cv-heading-size) * 2) !important; /* ~48px */
+                            line-height: 1.2 !important;
                         }
                         
-                        /* Template container - tam kenardan görünüm */
-                        .cv-template {
-                            width: 100% !important;
-                            margin: 0 !important;
-                            /* Template öz padding-ini saxlayacaq */
-                            transform: none !important;
-                            scale: 1 !important;
+                        .aurora-template .text-4xl, .vertex-template .text-4xl, .horizon-template .text-4xl,
+                        .lumen-template .text-4xl, .modern-template .text-4xl, .exclusive-template .text-4xl,
+                        .ats-template .text-4xl, .basic-template .text-4xl, .traditional-template .text-4xl,
+                        .classic-template .text-4xl {
+                            font-size: calc(var(--cv-heading-size) * 1.5) !important; /* ~36px */
+                            line-height: 1.2 !important;
                         }
                         
-                        /* Remove all interactive elements and hover effects for PDF */
-                        .hover\\:bg-gray-50:hover,
-                        .hover\\:bg-blue-50:hover,
-                        .hover\\:bg-gray-100:hover,
-                        .hover\\:bg-blue-100:hover,
-                        .hover\\:shadow-md:hover,
-                        .hover\\:shadow-lg:hover,
-                        .hover\\:border:hover {
-                            background-color: transparent !important;
-                            box-shadow: none !important;
-                            border: none !important;
-                            transform: none !important;
+                        .aurora-template .text-3xl, .vertex-template .text-3xl, .horizon-template .text-3xl,
+                        .lumen-template .text-3xl, .modern-template .text-3xl, .exclusive-template .text-3xl,
+                        .ats-template .text-3xl, .basic-template .text-3xl, .traditional-template .text-3xl,
+                        .classic-template .text-3xl {
+                            font-size: calc(var(--cv-heading-size) * 1.25) !important; /* ~30px */
+                            line-height: 1.3 !important;
                         }
                         
-                        .drag-handle,
-                        .section-drag-indicator,
-                        .cursor-move,
-                        .cursor-pointer,
-                        .group,
-                        .relative.group {
-                            cursor: default !important;
-                            transform: none !important;
-                            background-color: transparent !important;
-                            box-shadow: none !important;
+                        .aurora-template .text-2xl, .vertex-template .text-2xl, .horizon-template .text-2xl,
+                        .lumen-template .text-2xl, .modern-template .text-2xl, .exclusive-template .text-2xl,
+                        .ats-template .text-2xl, .basic-template .text-2xl, .traditional-template .text-2xl,
+                        .classic-template .text-2xl {
+                            font-size: var(--cv-heading-size) !important; /* 24px default */
+                            line-height: 1.3 !important;
                         }
                         
-                        /* Hide any buttons or interactive elements */
-                        button,
-                        .edit-button,
-                        .delete-button,
-                        .add-button {
-                            display: none !important;
+                        .aurora-template .text-xl, .vertex-template .text-xl, .horizon-template .text-xl,
+                        .lumen-template .text-xl, .modern-template .text-xl, .exclusive-template .text-xl,
+                        .ats-template .text-xl, .basic-template .text-xl, .traditional-template .text-xl,
+                        .classic-template .text-xl {
+                            font-size: calc(var(--cv-heading-size) * 0.83) !important; /* ~20px */
+                            line-height: 1.4 !important;
                         }
                         
-                        /* Text colors */
-                        .text-gray-700 {
-                            color: #374151 !important;
+                        .aurora-template .text-lg, .vertex-template .text-lg, .horizon-template .text-lg,
+                        .lumen-template .text-lg, .modern-template .text-lg, .exclusive-template .text-lg,
+                        .ats-template .text-lg, .basic-template .text-lg, .traditional-template .text-lg,
+                        .classic-template .text-lg {
+                            font-size: calc(var(--cv-subheading-size) * 1.125) !important; /* ~18px */
+                            line-height: 1.4 !important;
                         }
                         
-                        .text-gray-800 {
-                            color: #1f2937 !important;
+                        .aurora-template .text-base, .vertex-template .text-base, .horizon-template .text-base,
+                        .lumen-template .text-base, .modern-template .text-base, .exclusive-template .text-base,
+                        .ats-template .text-base, .basic-template .text-base, .traditional-template .text-base,
+                        .classic-template .text-base {
+                            font-size: var(--cv-subheading-size) !important; /* 16px default */
+                            line-height: 1.5 !important;
                         }
                         
-                        .text-gray-900 {
-                            color: #111827 !important;
+                        .aurora-template .text-sm, .vertex-template .text-sm, .horizon-template .text-sm,
+                        .lumen-template .text-sm, .modern-template .text-sm, .exclusive-template .text-sm,
+                        .ats-template .text-sm, .basic-template .text-sm, .traditional-template .text-sm,
+                        .classic-template .text-sm {
+                            font-size: var(--cv-body-size) !important; /* 14px default */
+                            line-height: 1.4 !important;
                         }
                         
-                        .text-blue-600 {
-                            color: #2563eb !important;
+                        .aurora-template .text-xs, .vertex-template .text-xs, .horizon-template .text-xs,
+                        .lumen-template .text-xs, .modern-template .text-xs, .exclusive-template .text-xs,
+                        .ats-template .text-xs, .basic-template .text-xs, .traditional-template .text-xs,
+                        .classic-template .text-xs {
+                            font-size: var(--cv-small-size) !important; /* 12px default */
+                            line-height: 1.3 !important;
                         }
                         
-                        .text-blue-700 {
-                            color: #1d4ed8 !important;
-                        }
-                        
-                        .text-black {
-                            color: #000000 !important;
-                        }
-                        
-                        .text-white {
-                            color: #ffffff !important;
-                        }
-                        
-                        /* Template spesifik font weights */
-                        .aurora-heading {
-                            font-weight: bold !important;
-                        }
-                        
-                        .vertex-heading {
+                        /* Font Weights - Dinamik */
+                        .aurora-template .font-bold, .vertex-template .font-bold, .horizon-template .font-bold,
+                        .lumen-template .font-bold, .modern-template .font-bold, .exclusive-template .font-bold,
+                        .ats-template .font-bold, .basic-template .font-bold, .traditional-template .font-bold,
+                        .classic-template .font-bold {
                             font-weight: 700 !important;
                         }
                         
-                        .horizon-heading {
+                        .aurora-template .font-semibold, .vertex-template .font-semibold, .horizon-template .font-semibold,
+                        .lumen-template .font-semibold, .modern-template .font-semibold, .exclusive-template .font-semibold,
+                        .ats-template .font-semibold, .basic-template .font-semibold, .traditional-template .font-semibold,
+                        .classic-template .font-semibold {
                             font-weight: 600 !important;
                         }
                         
-                        .lumen-heading {
-                            font-weight: 600 !important;
+                        .aurora-template .font-medium, .vertex-template .font-medium, .horizon-template .font-medium,
+                        .lumen-template .font-medium, .modern-template .font-medium, .exclusive-template .font-medium,
+                        .ats-template .font-medium, .basic-template .font-medium, .traditional-template .font-medium,
+                        .classic-template .font-medium {
+                            font-weight: 500 !important;
                         }
                         
-                        .modern-heading {
-                            font-weight: bold !important;
+                        .aurora-template .font-normal, .vertex-template .font-normal, .horizon-template .font-normal,
+                        .lumen-template .font-normal, .modern-template .font-normal, .exclusive-template .font-normal,
+                        .ats-template .font-normal, .basic-template .font-normal, .traditional-template .font-normal,
+                        .classic-template .font-normal {
+                            font-weight: 400 !important;
                         }
                         
-                        .ats-heading {
-                            font-weight: bold !important;
+                        /* Template Specific Dynamic Overrides */
+                        
+                        /* Aurora Template */
+                        .aurora-template {
+                            font-family: var(--cv-font-family) !important;
                         }
                         
-                        .exclusive-heading {
+                        /* Vertex Template */
+                        .vertex-template {
+                            font-family: var(--cv-font-family) !important;
+                        }
+                        
+                        /* Horizon Template */
+                        .horizon-template {
+                            font-family: var(--cv-font-family) !important;
+                        }
+                        
+                        /* Lumen Template */
+                        .lumen-template {
+                            font-family: var(--cv-font-family) !important;
+                        }
+                        
+                        /* Modern Template */
+                        .modern-template {
+                            font-family: var(--cv-font-family) !important;
+                        }
+                        
+                        /* ATS Template */
+                        .ats-template {
+                            font-family: var(--cv-font-family) !important;
+                        }
+                        
+                        /* Basic Template */
+                        .basic-template {
+                            font-family: var(--cv-font-family) !important;
+                        }
+                        
+                        /* Traditional Template */
+                        .traditional-template {
+                            font-family: var(--cv-font-family) !important;
+                        }
+                        
+                        /* Classic Template */
+                        .classic-template {
+                            font-family: var(--cv-font-family) !important;
+                        }
+                        
+                        /* EXCLUSIVE TEMPLATE SPESIFIK EXPORT FIXES */
+                        
+                        /* Font weights - dinamik export üçün */
+                        .exclusive-template .font-bold,
+                        .exclusive-template h1,
+                        .exclusive-template h2,
+                        .exclusive-template .text-5xl {
                             font-weight: 700 !important;
                         }
                         
-                        /* Section title weights */
-                        .section-title {
-                            font-weight: bold !important;
-                        }
-                        
-                        .job-title {
+                        .exclusive-template .font-semibold,
+                        .exclusive-template h3 {
                             font-weight: 600 !important;
                         }
                         
-                        .company-name {
+                        .exclusive-template .font-medium {
                             font-weight: 500 !important;
                         }
                         
-                        /* Name və contact font weights */
-                        .cv-name {
-                            font-weight: bold !important;
-                            font-size: 24px !important;
+                        /* Personal info background - mavi gradient */
+                        .exclusive-template .bg-gradient-to-r.from-blue-50.to-indigo-50 {
+                            background: linear-gradient(to right, #eff6ff, #eef2ff) !important;
                         }
                         
-                        .cv-title {
-                            font-weight: 500 !important;
-                            font-size: 16px !important;
+                        .exclusive-template .bg-gradient-to-r {
+                            background: linear-gradient(to right, #eff6ff, #eef2ff) !important;
                         }
                         
-                        .cv-contact {
-                            font-weight: normal !important;
-                        }
-                        
-                        /* Skill və education weights */
-                        .skill-name {
-                            font-weight: 500 !important;
-                        }
-                        
-                        .education-degree {
-                            font-weight: 600 !important;
-                        }
-                        
-                        .education-school {
-                            font-weight: 500 !important;
-                        }
-                        
-                        /* Exclusive Template Sadələşdirilmiş CSS */
-                        .exclusive-template {
-                            padding: 10mm 15mm !important; /* Yuxarı padding azaldıldı */
-                            background: white !important;
-                            min-height: 297mm !important;
-                            font-family: var(--cv-font-family, "Inter", sans-serif) !important;
-                        }
-                        
-                        /* İlk səhifənin yuxarı boşluğunu azalt */
-                        .exclusive-template > div:first-child {
-                            margin-top: 0 !important;
-                            padding-top: 0 !important;
-                        }
-                        
-                        .exclusive-template .border-b-2 {
-                            border-bottom-width: 2px !important;
-                        }
-                        
-                        .exclusive-template .border-2 {
-                            border-width: 2px !important;
-                        }
-                        
-                        .exclusive-template .border {
-                            border-width: 1px !important;
-                        }
-                        
-                        .exclusive-template .border-blue-600 {
-                            border-color: #2563eb !important;
-                        }
-                        
-                        .exclusive-template .border-gray-200 {
-                            border-color: #e5e7eb !important;
-                        }
-                        
+                        /* Personal info border */
                         .exclusive-template .border-blue-200 {
                             border-color: #dbeafe !important;
                         }
                         
-                        .exclusive-template .border-green-200 {
-                            border-color: #bbf7d0 !important;
+                        /* Dynamic font sizes - CSS Variables based */
+                        .exclusive-template .text-5xl {
+                            font-size: calc(var(--cv-heading-size) * 2) !important;
+                            line-height: 1.2 !important;
                         }
                         
-                        .exclusive-template .border-gray-300 {
-                            border-color: #d1d5db !important;
+                        .exclusive-template .text-2xl {
+                            font-size: var(--cv-heading-size) !important;
+                            line-height: 1.3 !important;
                         }
                         
-                        .exclusive-template .bg-blue-100 {
-                            background-color: #ffffff !important; /* Ağ background */
+                        .exclusive-template .text-lg {
+                            font-size: calc(var(--cv-subheading-size) * 1.125) !important;
+                            line-height: 1.4 !important;
                         }
                         
-                        .exclusive-template .bg-green-100 {
-                            background-color: #ffffff !important; /* Ağ background */
+                        .exclusive-template .text-base {
+                            font-size: var(--cv-subheading-size) !important;
+                            line-height: 1.5 !important;
                         }
                         
-                        .exclusive-template .bg-gray-100 {
-                            background-color: #ffffff !important; /* Ağ background */
+                        .exclusive-template .text-sm {
+                            font-size: var(--cv-body-size) !important;
+                            line-height: 1.4 !important;
                         }
                         
-                        .exclusive-template .text-blue-800 {
-                            color: #1f2937 !important; /* Qara text */
+                        .exclusive-template .text-xs {
+                            font-size: var(--cv-small-size) !important;
+                            line-height: 1.3 !important;
                         }
                         
-                        .exclusive-template .text-green-800 {
-                            color: #1f2937 !important; /* Qara text */
-                        }
+                        /* PERSONAL INFO SECTION - COMPLETE PREVIEW MATCH */
                         
-                        .exclusive-template .px-2 {
-                            padding-left: 0.5rem !important;
-                            padding-right: 0.5rem !important;
-                        }
-                        
-                        .exclusive-template .py-1 {
-                            padding-top: 0.25rem !important;
-                            padding-bottom: 0.25rem !important;
-                        }
-                        
-                        .exclusive-template .p-4 {
-                            padding: 1rem !important;
-                        }
-                        
+                        /* Main header container */
                         .exclusive-template .p-6 {
                             padding: 1.5rem !important;
                         }
                         
-                        .exclusive-template .pb-2 {
-                            padding-bottom: 0.5rem !important;
+                        .exclusive-template .mb-6 {
+                            margin-bottom: 1.5rem !important;
                         }
                         
-                        /* Tam sadə layout CSS */
+                        .exclusive-template .rounded-lg {
+                            border-radius: 0.5rem !important;
+                        }
+                        
+                        .exclusive-template .shadow-sm {
+                            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
+                        }
+                        
+                        .exclusive-template .border {
+                            border-width: 1px !important;
+                            border-style: solid !important;
+                        }
+                        
+                        /* Profile image and content layout */
                         .exclusive-template .flex {
                             display: flex !important;
                         }
@@ -721,28 +568,112 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             flex-direction: row !important;
                         }
                         
-                        .exclusive-template .flex-1 {
-                            flex: 1 1 0% !important;
+                        .exclusive-template .items-center {
+                            align-items: center !important;
                         }
                         
+                        .exclusive-template .gap-6 {
+                            gap: 1.5rem !important;
+                        }
+                        
+                        /* Profile image */
                         .exclusive-template .flex-shrink-0 {
                             flex-shrink: 0 !important;
                         }
                         
-                        .exclusive-template .items-start {
-                            align-items: flex-start !important;
+                        .exclusive-template .relative {
+                            position: relative !important;
                         }
                         
-                        .exclusive-template .justify-between {
-                            justify-content: space-between !important;
+                        .exclusive-template .w-28 {
+                            width: 7rem !important;
+                        }
+                        
+                        .exclusive-template .h-28 {
+                            height: 7rem !important;
+                        }
+                        
+                        .exclusive-template .rounded-full {
+                            border-radius: 9999px !important;
+                        }
+                        
+                        .exclusive-template .object-cover {
+                            object-fit: cover !important;
+                        }
+                        
+                        .exclusive-template .shadow-lg {
+                            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1) !important;
+                        }
+                        
+                        .exclusive-template .border-4 {
+                            border-width: 4px !important;
+                        }
+                        
+                        .exclusive-template .border-white {
+                            border-color: white !important;
+                        }
+                        
+                        /* Decorative border */
+                        .exclusive-template .absolute {
+                            position: absolute !important;
+                        }
+                        
+                        .exclusive-template .inset-0 {
+                            top: 0px !important;
+                            right: 0px !important;
+                            bottom: 0px !important;
+                            left: 0px !important;
+                        }
+                        
+                        .exclusive-template .border-2 {
+                            border-width: 2px !important;
+                        }
+                        
+                        .exclusive-template .border-blue-600 {
+                            border-color: #2563eb !important;
+                        }
+                        
+                        .exclusive-template .opacity-20 {
+                            opacity: 0.2 !important;
+                        }
+                        
+                        /* Name and title section */
+                        .exclusive-template .flex-1 {
+                            flex: 1 1 0% !important;
                         }
                         
                         .exclusive-template .text-left {
                             text-align: left !important;
                         }
                         
-                        .exclusive-template .text-right {
-                            text-align: right !important;
+                        .exclusive-template .mb-3 {
+                            margin-bottom: 0.75rem !important;
+                        }
+                        
+                        .exclusive-template .tracking-wide {
+                            letter-spacing: 0.025em !important;
+                        }
+                        
+                        .exclusive-template .text-gray-900 {
+                            color: #111827 !important;
+                        }
+                        
+                        .exclusive-template .text-gray-600 {
+                            color: #4b5563 !important;
+                        }
+                        
+                        /* Contact info section */
+                        .exclusive-template .border-t {
+                            border-top-width: 1px !important;
+                            border-top-style: solid !important;
+                        }
+                        
+                        .exclusive-template .pt-4 {
+                            padding-top: 1rem !important;
+                        }
+                        
+                        .exclusive-template .mt-4 {
+                            margin-top: 1rem !important;
                         }
                         
                         .exclusive-template .grid {
@@ -750,126 +681,84 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         }
                         
                         .exclusive-template .grid-cols-3 {
-                            grid-template-columns: repeat(3, 1fr) !important;
-                        }
-                        
-                        .exclusive-template .grid-cols-2 {
-                            grid-template-columns: repeat(2, 1fr) !important;
-                        }
-                        
-                        .exclusive-template .gap-2 {
-                            gap: 0.5rem !important;
+                            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
                         }
                         
                         .exclusive-template .gap-4 {
                             gap: 1rem !important;
                         }
                         
-                        .exclusive-template .gap-6 {
-                            gap: 1.5rem !important;
+                        /* Contact info items */
+                        .exclusive-template .p-3 {
+                            padding: 0.75rem !important;
                         }
                         
-                        .exclusive-template .space-y-3 > * + * {
-                            margin-top: 0.5rem !important; /* Azaldıldı */
+                        .exclusive-template .rounded-md {
+                            border-radius: 0.375rem !important;
                         }
                         
-                        .exclusive-template .space-y-4 > * + * {
-                            margin-top: 0.75rem !important; /* Azaldıldı */
+                        .exclusive-template .text-center {
+                            text-align: center !important;
                         }
                         
-                        .exclusive-template .space-y-6 > * + * {
-                            margin-top: 1rem !important; /* Azaldıldı */
+                        .exclusive-template .mb-1 {
+                            margin-bottom: 0.25rem !important;
                         }
                         
-                        .exclusive-template .flex-wrap {
-                            flex-wrap: wrap !important;
-                        }
-                        
-                        /* Margins */
-                        .exclusive-template .mb-2 {
-                            margin-bottom: 0.5rem !important;
-                        }
-                        
-                        .exclusive-template .mb-4 {
-                            margin-bottom: 0.75rem !important; /* Azaldıldı */
-                        }
-                        
-                        .exclusive-template .mb-6 {
-                            margin-bottom: 1rem !important; /* Azaldıldı */
-                        }
-                        
-                        .exclusive-template .mt-1 {
-                            margin-top: 0.25rem !important;
-                        }
-                        
-                        .exclusive-template .mt-6 {
-                            margin-top: 1.5rem !important;
-                        }
-                        
-                        .exclusive-template .mb-8 {
-                            margin-bottom: 1rem !important; /* Azaldıldı */
-                        }
-                        
-                        .exclusive-template .pt-4 {
-                            padding-top: 1rem !important;
-                        }
-                        
-                        .exclusive-template .border-t {
-                            border-top-width: 1px !important;
-                        }
-                        
-                        /* Image styling */
-                        .exclusive-template img {
-                            max-width: 100% !important;
-                            height: auto !important;
-                        }
-                        
-                        .exclusive-template .w-32 {
-                            width: 8rem !important;
-                        }
-                        
-                        .exclusive-template .h-32 {
-                            height: 8rem !important;
-                        }
-                        
-                        .exclusive-template .rounded-full {
-                            border-radius: 50% !important;
-                        }
-                        
-                        .exclusive-template .object-cover {
-                            object-fit: cover !important;
-                        }
-                        
-                        /* Text utilities */
                         .exclusive-template .uppercase {
                             text-transform: uppercase !important;
+                        }
+                        
+                        .exclusive-template .text-gray-500 {
+                            color: #6b7280 !important;
+                        }
+                        
+                        .exclusive-template .text-gray-800 {
+                            color: #1f2937 !important;
                         }
                         
                         .exclusive-template .break-all {
                             word-break: break-all !important;
                         }
                         
-                        .exclusive-template .italic {
-                            font-style: italic !important;
+                        /* SADƏ VƏ EFFEKTİV PAGE BREAK SİSTEMİ */
+                        
+                        /* A4 page setup - bütün səhifələr üçün eyni margin */
+                        @page {
+                            size: A4;
+                            margin: 20mm; /* 2.0cm bütün tərəflərdə */
                         }
                         
-                        .exclusive-template .underline {
-                            text-decoration: underline !important;
+                        /* Section-lar yarımçıq qalmasın - bütün template-lər üçün */
+                        .aurora-template .mb-6, .vertex-template .mb-6, .horizon-template .mb-6,
+                        .lumen-template .mb-6, .modern-template .mb-6, .exclusive-template .mb-6,
+                        .ats-template .mb-6, .basic-template .mb-6, .traditional-template .mb-6,
+                        .classic-template .mb-6 {
+                            page-break-inside: avoid !important;
+                            break-inside: avoid !important;
                         }
                         
-                        .exclusive-template .leading-relaxed {
-                            line-height: 1.625 !important;
+                        /* Section başlıqları tək qalmasın */
+                        .aurora-template h2, .vertex-template h2, .horizon-template h2,
+                        .lumen-template h2, .modern-template h2, .exclusive-template h2,
+                        .ats-template h2, .basic-template h2, .traditional-template h2,
+                        .classic-template h2,
+                        .aurora-template .text-2xl, .vertex-template .text-2xl, .horizon-template .text-2xl,
+                        .lumen-template .text-2xl, .modern-template .text-2xl, .exclusive-template .text-2xl,
+                        .ats-template .text-2xl, .basic-template .text-2xl, .traditional-template .text-2xl,
+                        .classic-template .text-2xl {
+                            page-break-after: avoid !important;
+                            break-after: avoid !important;
                         }
                         
-                        /* Links */
-                        .exclusive-template a {
-                            color: inherit !important;
+                        /* Experience və Education item-ları bütün olaraq qalsın */
+                        .aurora-template .space-y-4 > div, .vertex-template .space-y-4 > div, .horizon-template .space-y-4 > div,
+                        .lumen-template .space-y-4 > div, .modern-template .space-y-4 > div, .exclusive-template .space-y-4 > div,
+                        .ats-template .space-y-4 > div, .basic-template .space-y-4 > div, .traditional-template .space-y-4 > div,
+                        .classic-template .space-y-4 > div {
+                            page-break-inside: avoid !important;
+                            break-inside: avoid !important;
                         }
-                        
-                        .exclusive-template a:hover {
-                            color: #2563eb !important;
-                        }
-                        ${cssContent}
                     </style>
                 </head>
                 <body>
@@ -878,7 +767,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                 </html>
             `;
         } else {
-            // Fallback: köhnə method
+            // Fallback - sadə HTML
             html = generateCVHTML(cvData, templateId, fontSettings);
         }
         
@@ -921,6 +810,12 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             waitUntil: 'networkidle0',
             timeout: 30000
         });
+        
+        // Azərbaycan dili və encoding dəstəyi üçün əlavə ayarlar
+        await page.setExtraHTTPHeaders({
+            'Accept-Charset': 'utf-8',
+            'Accept-Language': 'az-AZ,az,tr-TR,tr,en-US,en'
+        });
 
         // PDF yarat - Ultra minimal margin-lar, maksimal content sahəsi
         console.log('PDF yaradılır...');
@@ -952,29 +847,60 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
         
         // Unicode və font rendering üçün əlavə ayarlar
         await page.evaluateOnNewDocument(() => {
-            // Force UTF-8 encoding
+            // Force UTF-8 encoding və Azərbaycan dili dəstəyi
             if (document.characterSet !== 'UTF-8') {
                 const meta = document.querySelector('meta[charset]') || document.createElement('meta');
                 meta.setAttribute('charset', 'UTF-8');
+                meta.setAttribute('http-equiv', 'Content-Type');
+                meta.setAttribute('content', 'text/html; charset=UTF-8');
                 if (!document.head.contains(meta)) {
                     document.head.appendChild(meta);
                 }
             }
+            
+            // Language və locale dəstəyi
+            document.documentElement.setAttribute('lang', 'az-AZ');
+            
+            // Font rendering optimizasyonu
+            const style = document.createElement('style');
+            style.textContent = `
+                * {
+                    font-synthesis: weight style !important;
+                    font-variant-ligatures: common-ligatures !important;
+                    unicode-bidi: normal !important;
+                    direction: ltr !important;
+                    text-rendering: optimizeLegibility !important;
+                    -webkit-font-feature-settings: "liga", "kern", "calt" !important;
+                    font-feature-settings: "liga", "kern", "calt" !important;
+                    -moz-font-feature-settings: "liga", "kern", "calt" !important;
+                }
+                
+                /* Azərbaycan hərfləri üçün xüsusi optimizasiya */
+                body, h1, h2, h3, h4, h5, h6, p, span, div, li, a, td, th, input, textarea, select, button {
+                    font-family: 'Roboto', 'Open Sans', 'Noto Sans', 'DejaVu Sans', 'Liberation Sans', -apple-system, BlinkMacSystemFont, Arial, sans-serif !important;
+                    unicode-bidi: normal !important;
+                    direction: ltr !important;
+                    text-rendering: optimizeLegibility !important;
+                }
+            `;
+            document.head?.appendChild(style);
         });
         
         const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true,
-            preferCSSPageSize: false,
+            preferCSSPageSize: true,  // CSS @page margin-larını istifadə et
             displayHeaderFooter: false,
             // Unicode və font support üçün əlavə ayarlar
             tagged: true,  // PDF/A accessibility və unicode dəstəyi
             outline: false,
+            omitBackground: false,  // Background-ları qoruyub saxla
+            // Margin-ları CSS-də təyin etdik, burada sıfır qoy
             margin: {
-                top: '8mm',       // 8mm üst boşluq - çox minimal
-                right: '6mm',     // 6mm sağ boşluq - çox minimal  
-                bottom: '8mm',    // 8mm alt boşluq - çox minimal
-                left: '6mm'       // 6mm sol boşluq - çox minimal
+                top: '0mm',
+                right: '0mm',
+                bottom: '0mm',
+                left: '0mm'
             },
             scale: 1,
             // Page break ayarları
@@ -1068,7 +994,7 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
         <style>
             @page {
                 size: A4;
-                margin: 15mm 12mm; /* Minimal CV margins: üst/alt 15mm, sol/sağ 12mm */
+                margin: 15mm 20mm 15mm 20mm; /* Optimized CV margins: üst/alt 15mm (1.5cm), sol 20mm (2cm), sağ 20mm (2cm) */
             }
             
             body {
@@ -1107,6 +1033,42 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
             
             .page-break {
                 page-break-before: always;
+            }
+            
+            /* Exclusive Template üçün əlavə page-break qaydaları */
+            .exclusive-template .cv-section,
+            .exclusive-template [key] {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            
+            /* Section headers heç vaxt tək qalmasın */
+            .exclusive-template h2[class*="text-sm"],
+            .exclusive-template h2[class*="font-bold"] {
+                page-break-after: avoid !important;
+                keep-with-next: always !important;
+            }
+            
+            /* Experience, education item-ları */
+            .exclusive-template div[class*="p-3"],
+            .exclusive-template div[class*="p-4"] {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            
+            /* Section container-ları */
+            .exclusive-template div[class*="mb-4"] {
+                page-break-inside: avoid !important;
+                orphans: 2 !important;
+                widows: 2 !important;
+            }
+            
+            /* Skills section - birlikdə qalsın */
+            .exclusive-template div[key="skills"],
+            .exclusive-template div[key="technical-skills"],
+            .exclusive-template div[key="soft-skills"] {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
             }
             
             .cv-preview {

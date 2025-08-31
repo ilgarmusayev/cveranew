@@ -184,7 +184,7 @@ export default function CertificationsSection({ data, onChange, cvLanguage = 'az
 
       {data.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-          <div className="text-gray-400 mb-4 flex justify-center">
+          <div className="text-gray-400 mb-4">
             <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
             </svg>
@@ -194,7 +194,7 @@ export default function CertificationsSection({ data, onChange, cvLanguage = 'az
           </p>
           <button
             onClick={addCertification}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             {getTranslation(cvLanguage, 'addFirstButton')}
           </button>
