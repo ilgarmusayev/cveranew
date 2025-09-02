@@ -1,6 +1,6 @@
 /* Page Break Styles for CV Preview and Export */
 
-/* A4 Page dimensions with accurate spacing */
+/* A4 Page dimensions */
 .cv-page {
   width: 210mm;
   min-height: 297mm;
@@ -10,40 +10,39 @@
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   page-break-after: always;
   position: relative;
-  box-sizing: border-box;
 }
 
 .cv-page:last-child {
   page-break-after: auto;
 }
 
-/* Page break indicators for preview - matching PDF spacing */
-.page-end-indicator {
-  border-top: 3px solid #ef4444;
-  margin: 0;
+/* Page break indicators for preview */
+.page-break-preview {
+  border-top: 2px dashed #3b82f6;
+  margin: 20px 0;
   position: relative;
-  height: 4px;
-}
-
-.page-spacing-gap {
-  height: 8mm; /* Exact spacing between pages in PDF */
-  background: repeating-linear-gradient(
-    45deg,
-    #f9fafb 0px,
-    #f9fafb 8px,
-    #f3f4f6 8px,
-    #f3f4f6 16px
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(59, 130, 246, 0.1) 50%,
+    transparent 100%
   );
-  border-left: 2px dashed #d1d5db;
-  border-right: 2px dashed #d1d5db;
-  position: relative;
+  height: 2px;
 }
 
-.page-start-indicator {
-  border-top: 3px solid #10b981;
-  margin: 0;
-  position: relative;
-  height: 4px;
+.page-break-preview::before {
+  content: 'Səhifə sonu';
+  position: absolute;
+  right: 10px;
+  top: -12px;
+  background: #3b82f6;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Page number indicator */
@@ -59,29 +58,6 @@
   font-weight: 600;
   z-index: 1000;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* PDF Export Page Break Control */
-@media print {
-  /* Ensure proper page breaks in PDF */
-  .cv-template {
-    page-break-inside: auto !important;
-    break-inside: auto !important;
-  }
-  
-  /* Automatic page break when content exceeds page */
-  .auto-page-break {
-    page-break-before: auto !important;
-    break-before: auto !important;
-  }
-  
-  /* Force new page when needed */
-  .force-new-page {
-    page-break-before: always !important;
-    break-before: page !important;
-    margin-top: 0 !important;
-    padding-top: 20mm !important; /* PDF margin at top of new page */
-  }
 }
 
 /* Content that should avoid page breaks */
@@ -135,11 +111,9 @@
   break-after: avoid !important;
 }
 
-/* Print styles - hide indicators in PDF */
+/* Print styles */
 @media print {
-  .page-end-indicator,
-  .page-spacing-gap,
-  .page-start-indicator,
+  .page-break-preview,
   .page-number {
     display: none !important;
   }
@@ -151,7 +125,7 @@
   
   @page {
     size: A4;
-    margin: 0; /* PDF margins handled by template padding */
+    margin: 20mm;
   }
 }
 

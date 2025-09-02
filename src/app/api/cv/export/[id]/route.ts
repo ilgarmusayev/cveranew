@@ -263,29 +263,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                     <style>
                         ${cssContent}
                         
-                        /* ROUTE.TS ƏLAVƏ CSS - LAYOUT VE FONT SISTEMI */
-                        
-                        /* CONSISTENT LAYOUT SYSTEM - PREVIEW İLƏ EYNI */
-                        
-                        /* A4 Layout - Template öz padding-i verir */
-                        .cv-layout-container,
-                        .cv-preview {
-                            width: 210mm !important;
-                            min-height: 297mm !important;
-                            margin: 0 !important;
-                            padding: 0 !important;
-                            box-sizing: border-box !important;
-                        }
-                        
-                        .cv-template {
-                            width: 210mm !important;
-                            min-height: 297mm !important;
-                            height: auto !important;
-                            margin: 0 !important;
-                            padding: 20mm !important;
-                            box-sizing: border-box !important;
-                            background: white !important;
-                        }
+                        /* ROUTE.TS ƏLAVƏ CSS - YALNIZ DINAMIK FONT SISTEMI */
                         
                         /* CSS Variables - Font Manager Integration */
                         :root, body {
@@ -745,29 +723,18 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         
                         /* PROFESSIONAL PAGE BREAK SİSTEMİ - AUTOMATIC MULTI-PAGE SUPPORT */
                         
-                        /* A4 page setup - PDF margin-ları 0 çünki template öz padding-i var */
+                        /* A4 page setup - bütün səhifələr üçün eyni margin */
                         @page {
                             size: A4;
-                            margin: 0mm; /* Margin yoxdur - template özü 20mm padding verir */
+                            margin: 20mm; /* 2.0cm bütün tərəflərdə */
                         }
                         
                         /* CV Container - otomatik səhifə keçidi */
                         .cv-template {
-                            width: 210mm !important; /* Tam A4 eni */
-                            min-height: 297mm !important; /* Tam A4 hündürlüyü */
+                            min-height: 257mm; /* A4 content area (297mm - 40mm margins) */
                             height: auto !important;
                             page-break-inside: auto !important; /* İçerik çox olsa növbəti səhifəyə keçsin */
                             break-inside: auto !important;
-                            margin: 0 !important;
-                            padding: 20mm !important; /* Template öz 20mm padding-ini verir */
-                            box-sizing: border-box !important;
-                        }
-                        
-                        /* CV Preview container */
-                        .cv-preview {
-                            width: 210mm !important;
-                            margin: 0 !important;
-                            padding: 0 !important;
                         }
                         
                         /* SMART SECTION BREAKS - Məzmun əsaslı qırılmalar */
@@ -779,7 +746,6 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         .classic-template .mb-4 {
                             page-break-inside: avoid !important;
                             break-inside: avoid !important;
-                            margin-bottom: 4mm !important; /* Consistent 4mm spacing */
                         }
                         
                         /* Böyük section-lar - lazımsa keçid icazə ver */
@@ -791,7 +757,6 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             break-inside: auto !important;
                             orphans: 2 !important; /* Minimum 2 sətir qırılmadan əvvəl */
                             widows: 2 !important; /* Minimum 2 sətir qırılmadan sonra */
-                            margin-bottom: 6mm !important; /* Consistent 6mm spacing for larger sections */
                         }
                         
                         /* HEADER PROTECTION - Başlıqlar tək qalmasın */
@@ -815,7 +780,6 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             break-after: avoid !important;
                             orphans: 3 !important;
                             widows: 3 !important;
-                            margin-bottom: 2mm !important; /* Consistent 2mm after headers */
                         }
                         
                         /* ITEM LEVEL PROTECTION - Individual items */
@@ -856,8 +820,6 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         .force-page-break {
                             page-break-before: always !important;
                             break-before: page !important;
-                            margin-top: 8mm !important; /* Növbəti səhifədə yuxarıdan boşluq */
-                            padding-top: 0 !important;
                         }
                         
                         .avoid-page-break {
@@ -868,63 +830,6 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         .allow-page-break {
                             page-break-inside: auto !important;
                             break-inside: auto !important;
-                        }
-                        
-                        /* PAGE SPACING SYSTEM - PREVIEW İLƏ EYNI GÖRÜNÜM */
-                        
-                        /* Content that naturally flows to next page gets spacing */
-                        .cv-template > div:first-child {
-                            margin-top: 0 !important; /* İlk səhifə yuxarıdan boşluq yoxdur */
-                        }
-                        
-                        /* Natural page breaks - automatic content flow */
-                        .page-break-content {
-                            margin-top: 0 !important; /* PDF-də otomatik keçid */
-                            margin-bottom: 0 !important;
-                        }
-                        
-                        /* Forced page breaks get proper spacing */
-                        .force-new-page {
-                            page-break-before: always !important;
-                            break-before: page !important;
-                            margin-top: 0 !important;
-                            padding-top: 0 !important; /* Template-in öz padding-i var */
-                        }
-                        
-                        /* Section spacing that works with page breaks */
-                        .cv-section {
-                            margin-bottom: 4mm !important; /* Consistent section spacing */
-                        }
-                        
-                        .cv-section:last-child {
-                            margin-bottom: 0 !important;
-                        }
-                        
-                        /* Header spacing */
-                        .cv-template .mb-6:first-child {
-                            margin-bottom: 6mm !important; /* Header section spacing */
-                        }
-                        @media print {
-                            /* Ensure clean page breaks with spacing */
-                            .cv-template {
-                                orphans: 2;
-                                widows: 2;
-                            }
-                            
-                            /* Add breathing room for content at page boundaries */
-                            .mb-4:last-of-type {
-                                margin-bottom: 8mm !important;
-                            }
-                            
-                            .mb-6:last-of-type {
-                                margin-bottom: 10mm !important;
-                            }
-                            
-                            /* Prevent awkward breaks in contact sections */
-                            .grid-cols-3 > div {
-                                page-break-inside: avoid !important;
-                                break-inside: avoid !important;
-                            }
                         }
                     </style>
                 </head>

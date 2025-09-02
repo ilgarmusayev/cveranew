@@ -6775,10 +6775,10 @@ export default function CVPreview({
         <div 
             className="relative"
             style={{
-                width: isMobile ? '100%' : '210mm', /* Preview container tam A4 eni */
+                width: isMobile ? '100%' : '210mm',
                 height: isMobile ? '100%' : 'auto', // Desktop: auto height for long CVs
-                maxWidth: '210mm', /* Tam A4 eni */
-                minHeight: '297mm', /* Tam A4 hündürlüyü */
+                maxWidth: '210mm', // CV eni ilə limitli
+                minHeight: '297mm', // Minimum A4 hündürlüyü
                 overflow: isMobile ? 'hidden' : 'visible', // Desktop: allow content to overflow container
                 background: 'transparent',
             }}
@@ -6805,10 +6805,10 @@ export default function CVPreview({
                         e.stopPropagation();
                     }}
                     style={{
-                        width: '210mm', /* Tam A4 eni - template padding-i özü verir */
+                        width: '210mm',
                         height: isMobile ? 'fit-content' : 'auto', // Desktop: auto height for long content
-                        minHeight: '297mm', /* Tam A4 hündürlüyü - template padding-i özü verir */
-                        maxWidth: '210mm', /* Tam A4 eni */
+                        minHeight: '297mm', // Minimum A4 hündürlüyü
+                        maxWidth: '210mm', // CV enindən artıq olmaz
                         maxHeight: isMobile ? 'none' : 'none', // Desktop: no height limit for long CVs
                         margin: '0',
                         overflow: isMobile ? 'auto' : 'visible', // Desktop: allow content to be visible
