@@ -591,13 +591,14 @@ const LeftPanelSortableItem: React.FC<LeftPanelSortableItemProps> = ({
                 cursor-grab active:cursor-grabbing
                 ${isDragging
                     ? 'border-2 border-blue-500 bg-blue-50/20'
-                    : 'hover:shadow-sm hover:border hover:border-blue-300'
+                    : 'hover:border-2 hover:border-blue-300 hover:shadow-sm'
                 }
                 ${isActive && isMobile ? 'bg-blue-50/30 border-blue-400' : ''}
                 ${isPressed && isMobile ? 'bg-blue-800/20' : ''}
                 ${isDropTarget ? 'bg-blue-700/30 border-2 border-white border-dashed' : ''}
                 transition-all duration-200 ease-out
-                rounded-lg border-2 border-transparent
+                border-2 border-transparent
+                rounded-lg
                 ${isMobile ? 'touch-manipulation' : 'touch-manipulation'}
                 select-none
                 ${isMobile ? 'min-h-[60px]' : ''}
@@ -642,13 +643,14 @@ const LeftPanelSortableItem: React.FC<LeftPanelSortableItemProps> = ({
                 </div>
             )}
 
-            {/* Content with responsive padding */}
+            {/* Content - centered layout for symmetric positioning */}
             <div
-                className={`
-                    transition-transform duration-200
-                    ${dragIconPosition === 'right' ? 'pr-6' : 'pr-2'}
-                `}
-                style={{ userSelect: isDragging ? 'none' : 'auto' }}
+                className="transition-transform duration-200"
+                style={{ 
+                    userSelect: isDragging ? 'none' : 'auto',
+                    paddingLeft: '0px',  // Removed left padding for contact section symmetry
+                    paddingRight: '0px'  // Removed right padding for contact section symmetry
+                }}
             >
                 {children}
             </div>
@@ -2085,13 +2087,16 @@ const ATSFriendlyTemplate: React.FC<{
     const [leftDropTargetId, setLeftDropTargetId] = useState<string | null>(null);
     
     // Left column section order state - use external if provided
-    const [internalLeftColumnOrder, setInternalLeftColumnOrder] = useState(['leftSkills', 'leftLanguages', 'leftCertifications']);
+    const [internalLeftColumnOrder, setInternalLeftColumnOrder] = useState(['leftContact', 'leftSkills', 'leftLanguages', 'leftCertifications']);
     const leftColumnOrder = externalLeftColumnOrder || internalLeftColumnOrder;
     const setLeftColumnOrder = externalLeftColumnOrder ? () => {} : setInternalLeftColumnOrder;
 
     // Calculate available left column sections - only show sections with valid content
     const getAvailableLeftSections = () => {
         const availableSections = [];
+        
+        // Always add contact section (it always has some content - at least the header)
+        availableSections.push('leftContact');
         
         // Only add skills if there are valid skills (with names)
         const validSkills = skills.filter(skill => skill.name && skill.name.trim() !== '');
@@ -2112,6 +2117,7 @@ const ATSFriendlyTemplate: React.FC<{
         }
         
         console.log('🔍 ATSFriendlyTemplate Debug - Data check:');
+        console.log('- Contact section: always available');
         console.log('- Valid Skills:', validSkills.length);
         console.log('- Valid Languages:', validLanguages.length);
         console.log('- Valid Certifications:', validCertifications.length);
@@ -2670,7 +2676,7 @@ const ATSFriendlyTemplate: React.FC<{
             <div 
                 className="w-2/5 bg-blue-900 text-white border-r border-blue-800" 
                 style={{ 
-                    padding: '20mm 10mm 20mm 20mm', /* üst: 20mm, sağ: 10mm, alt: 20mm, sol: 20mm */
+                    padding: '20mm 15mm 20mm 15mm', /* üst: 20mm, sağ: 15mm, alt: 20mm, sol: 15mm - symmetric padding */
                     touchAction: 'none', // Force DnD kit control
                     userSelect: 'none',
                     minHeight: '297mm' // A4 uzunluğu - 297mm
@@ -2774,11 +2780,11 @@ const ATSFriendlyTemplate: React.FC<{
                         strategy={verticalListSortingStrategy}
                     >
                         <div 
-                            className={`transition-all duration-300 ${isLeftDragActive ? 'opacity-95 bg-gradient-to-br from-transparent via-blue-50/30 to-transparent' : ''}`}
+                            className="transition-all duration-300"
                             style={{ 
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: '16px'
+                                gap: '24px' // Changed from 16px to 24px to match mb-6 spacing
                             }}
                         >
                             {/* Render sections based on filteredLeftColumnOrder */}
@@ -2824,7 +2830,7 @@ const ATSFriendlyTemplate: React.FC<{
                                                 alwaysShowDragHandle={true}
                                                 isDropTarget={leftDropTargetId === 'leftSkills'}
                                             >
-                                                <div className="mb-6">
+                                                <div>
                                                     <>
                                                         {/* Hard Skills */}
                                                         {skills.filter(skill => skill.type === 'hard' && skill.name && skill.name.trim() !== '').length > 0 && (
@@ -2916,7 +2922,7 @@ const ATSFriendlyTemplate: React.FC<{
                                                 alwaysShowDragHandle={true}
                                                 isDropTarget={leftDropTargetId === 'leftLanguages'}
                                             >
-                                                <div className="mb-6">
+                                                <div>
                                                     <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                         {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('languages', data.cvLanguage, data.sectionNames) : getSectionName('languages', data.cvLanguage, data.sectionNames)}
                                                     </h2>
@@ -2950,7 +2956,7 @@ const ATSFriendlyTemplate: React.FC<{
                                                 alwaysShowDragHandle={true}
                                                 isDropTarget={leftDropTargetId === 'leftCertifications'}
                                             >
-                                                <div className="mb-6">
+                                                <div>
                                                     <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                         {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('certifications', data.cvLanguage, data.sectionNames) : getSectionName('certifications', data.cvLanguage, data.sectionNames)}
                                                     </h2>
