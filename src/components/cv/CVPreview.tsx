@@ -1071,16 +1071,18 @@ const BasicTemplate: React.FC<{
                 ) : null;
 
             case 'skills':
-                return skills && skills.length > 0 ? (
+                // Filter out empty skills (no skill name)
+                const validSkills = skills?.filter(skill => skill.name && skill.name.trim() !== '') || [];
+                return validSkills.length > 0 ? (
                     <div className="mb-4">
                         {/* Hard Skills */}
-                        {skills.filter(skill => skill.type === 'hard').length > 0 && (
+                        {validSkills.filter(skill => skill.type === 'hard').length > 0 && (
                             <div className="mb-4">
                                 <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                                     {getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
                                 </h2>
                                 <div className="space-y-2">
-                                    {skills.filter(skill => skill.type === 'hard').map((skill) => (
+                                    {validSkills.filter(skill => skill.type === 'hard').map((skill) => (
                                         <div key={skill.id} className="border-l-2 border-blue-200 pl-2">
                                             <div className="mb-1">
                                                 <span className="text-gray-700 text-xs font-medium">{skill.name}</span>
@@ -1097,13 +1099,13 @@ const BasicTemplate: React.FC<{
                         )}
 
                         {/* Soft Skills */}
-                        {skills.filter(skill => skill.type === 'soft').length > 0 && (
+                        {validSkills.filter(skill => skill.type === 'soft').length > 0 && (
                             <div className="mb-4">
                                 <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                                     {getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
                                 </h2>
                                 <div className="space-y-2">
-                                    {skills.filter(skill => skill.type === 'soft').map((skill) => (
+                                    {validSkills.filter(skill => skill.type === 'soft').map((skill) => (
                                         <div key={skill.id} className="border-l-2 border-blue-200 pl-2">
                                             <div className="mb-1">
                                                 <span className="text-gray-700 text-xs font-medium">{skill.name}</span>
@@ -1120,13 +1122,13 @@ const BasicTemplate: React.FC<{
                         )}
 
                         {/* General Skills */}
-                        {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).length > 0 && (
+                        {validSkills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).length > 0 && (
                             <div className="mb-4">
                                 <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                                     {getSectionName('skills', data.cvLanguage, data.sectionNames)}
                                 </h2>
                                 <div className="space-y-2">
-                                    {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map((skill) => (
+                                    {validSkills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map((skill) => (
                                         <div key={skill.id} className="border-l-2 border-blue-200 pl-2">
                                             <div className="mb-1">
                                                 <span className="text-gray-700 text-xs font-medium">{skill.name}</span>
@@ -1145,13 +1147,15 @@ const BasicTemplate: React.FC<{
                 ) : null;
 
             case 'languages':
-                return languages && languages.length > 0 ? (
+                // Filter out empty languages (no language name)
+                const validLanguages = languages?.filter(lang => lang.language && lang.language.trim() !== '') || [];
+                return validLanguages.length > 0 ? (
                     <div className="mb-4">
                         <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                             {getSectionName('languages', data.cvLanguage, data.sectionNames)}
                         </h2>
-                        <div className={languages.length <= 2 ? "space-y-1" : "grid grid-cols-4 gap-x-2 gap-y-1"}>
-                            {languages.map((lang) => (
+                        <div className={validLanguages.length <= 2 ? "space-y-1" : "grid grid-cols-4 gap-x-2 gap-y-1"}>
+                            {validLanguages.map((lang) => (
                                 <div key={lang.id} className="text-xs text-gray-700 break-words">
                                     {lang.language} ({getLanguageLevel(lang.level, data.cvLanguage)})
                                 </div>
@@ -1728,7 +1732,9 @@ const ModernTemplate: React.FC<{
                 ) : null;
 
             case 'skills':
-                return skills.length > 0 ? (
+                // Filter out empty skills (no skill name)
+                const validSkillsCreative = skills?.filter(skill => skill.name && skill.name.trim() !== '') || [];
+                return validSkillsCreative.length > 0 ? (
                     <SortableItem 
                         key="skills" 
                         id="skills"
@@ -1743,7 +1749,7 @@ const ModernTemplate: React.FC<{
                                 {getSectionName('skills', data.cvLanguage, data.sectionNames)}
                             </h2>
                             <div className="grid grid-cols-2 gap-4">
-                                {skills.map((skill) => (
+                                {validSkillsCreative.map((skill) => (
                                     <div key={skill.id} className="bg-purple-50 rounded-lg p-3 border border-purple-200">
                                         <div className="flex justify-between items-center mb-1">
                                             <span className="font-medium text-gray-900">{skill.name}</span>
@@ -1818,7 +1824,9 @@ const ModernTemplate: React.FC<{
                 ) : null;
 
             case 'languages':
-                return languages.length > 0 ? (
+                // Filter out empty languages (no language name)
+                const validLanguagesCreative = languages?.filter(lang => lang.language && lang.language.trim() !== '') || [];
+                return validLanguagesCreative.length > 0 ? (
                     <SortableItem 
                         key="languages" 
                         id="languages"
@@ -1833,7 +1841,7 @@ const ModernTemplate: React.FC<{
                                 {getSectionName('languages', data.cvLanguage, data.sectionNames)}
                             </h2>
                             <div className="grid grid-cols-3 gap-3">
-                                {languages.map((lang) => (
+                                {validLanguagesCreative.map((lang) => (
                                     <div key={lang.id} className="bg-red-50 rounded-lg p-3 text-center border border-red-200 flex flex-col justify-between h-20">
                                         <div className="font-medium text-gray-900 flex-1 flex items-center justify-center">{lang.language}</div>
                                         <div className="text-red-600 text-sm flex-1 flex items-center justify-center">{lang.level}</div>
@@ -2081,14 +2089,33 @@ const ATSFriendlyTemplate: React.FC<{
     const leftColumnOrder = externalLeftColumnOrder || internalLeftColumnOrder;
     const setLeftColumnOrder = externalLeftColumnOrder ? () => {} : setInternalLeftColumnOrder;
 
-    // Calculate available left column sections - always show all sections
+    // Calculate available left column sections - only show sections with valid content
     const getAvailableLeftSections = () => {
-        const availableSections = ['leftSkills', 'leftLanguages', 'leftCertifications'];
+        const availableSections = [];
+        
+        // Only add skills if there are valid skills (with names)
+        const validSkills = skills.filter(skill => skill.name && skill.name.trim() !== '');
+        if (validSkills.length > 0) {
+            availableSections.push('leftSkills');
+        }
+        
+        // Only add languages if there are valid languages (with language names)
+        const validLanguages = languages.filter(lang => lang.language && lang.language.trim() !== '');
+        if (validLanguages.length > 0) {
+            availableSections.push('leftLanguages');
+        }
+        
+        // Only add certifications if there are valid certifications (with names)
+        const validCertifications = certifications.filter(cert => cert.name && cert.name.trim() !== '');
+        if (validCertifications.length > 0) {
+            availableSections.push('leftCertifications');
+        }
+        
         console.log('🔍 ATSFriendlyTemplate Debug - Data check:');
-        console.log('- Skills length:', skills.length);
-        console.log('- Languages length:', languages.length);
-        console.log('- Certifications length:', certifications.length);
-        console.log('- All left sections will be available:', availableSections);
+        console.log('- Valid Skills:', validSkills.length);
+        console.log('- Valid Languages:', validLanguages.length);
+        console.log('- Valid Certifications:', validCertifications.length);
+        console.log('- Available left sections:', availableSections);
         return availableSections;
     };
 
@@ -2798,86 +2825,76 @@ const ATSFriendlyTemplate: React.FC<{
                                                 isDropTarget={leftDropTargetId === 'leftSkills'}
                                             >
                                                 <div className="mb-6">
-                                                    {skills.length > 0 ? (
-                                                        <>
-                                                            {/* Hard Skills */}
-                                                            {skills.filter(skill => skill.type === 'hard').length > 0 && (
-                                                                <div className="mb-4">
-                                                                    <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
-                                                                        {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('technicalSkills', data.cvLanguage, data.sectionNames) : getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
-                                                                    </h2>
-                                                                    <div className="space-y-2">
-                                                                        {skills.filter(skill => skill.type === 'hard').map((skill) => (
-                                                                            <div key={skill.id}>
-                                                                                <div className="mb-1">
-                                                                                    <span className="text-xs font-medium text-white">{skill.name}</span>
-                                                                                </div>
-                                                                                {skill.description && (
-                                                                                    <div className="text-blue-100 text-xs leading-relaxed">
-                                                                                        {renderHtmlContent(skill.description, true)}
-                                                                                    </div>
-                                                                                )}
+                                                    <>
+                                                        {/* Hard Skills */}
+                                                        {skills.filter(skill => skill.type === 'hard' && skill.name && skill.name.trim() !== '').length > 0 && (
+                                                            <div className="mb-4">
+                                                                <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                                    {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('technicalSkills', data.cvLanguage, data.sectionNames) : getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
+                                                                </h2>
+                                                                <div className="space-y-2">
+                                                                    {skills.filter(skill => skill.type === 'hard' && skill.name && skill.name.trim() !== '').map((skill) => (
+                                                                        <div key={skill.id}>
+                                                                            <div className="mb-1">
+                                                                                <span className="text-xs font-medium text-white">{skill.name}</span>
                                                                             </div>
-                                                                        ))}
-                                                                    </div>
-                                                                </div>
-                                                            )}
-
-                                                            {/* Soft Skills */}
-                                                            {skills.filter(skill => skill.type === 'soft').length > 0 && (
-                                                                <div className="mb-4">
-                                                                    <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
-                                                                        {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('softSkills', data.cvLanguage, data.sectionNames) : getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
-                                                                    </h2>
-                                                                    <div className="space-y-2">
-                                                                        {skills.filter(skill => skill.type === 'soft').map((skill) => (
-                                                                            <div key={skill.id}>
-                                                                                <div className="mb-1">
-                                                                                    <span className="text-xs font-medium text-white">{skill.name}</span>
+                                                                            {skill.description && (
+                                                                                <div className="text-blue-100 text-xs leading-relaxed">
+                                                                                    {renderHtmlContent(skill.description, true)}
                                                                                 </div>
-                                                                                {skill.description && (
-                                                                                    <div className="text-blue-100 text-xs leading-relaxed">
-                                                                                        {renderHtmlContent(skill.description, true)}
-                                                                                    </div>
-                                                                                )}
-                                                                            </div>
-                                                                        ))}
-                                                                    </div>
+                                                                            )}
+                                                                        </div>
+                                                                    ))}
                                                                 </div>
-                                                            )}
-
-                                                            {/* General Skills */}
-                                                            {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).length > 0 && (
-                                                                <div className="mb-4">
-                                                                    <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
-                                                                        {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('skills', data.cvLanguage, data.sectionNames) : getSectionName('skills', data.cvLanguage, data.sectionNames)}
-                                                                    </h2>
-                                                                    <div className="space-y-2">
-                                                                        {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map((skill) => (
-                                                                            <div key={skill.id}>
-                                                                                <div className="mb-1">
-                                                                                    <span className="text-xs font-medium text-white">{skill.name}</span>
-                                                                                </div>
-                                                                                {skill.description && (
-                                                                                    <div className="text-blue-100 text-xs leading-relaxed">
-                                                                                        {renderHtmlContent(skill.description, true)}
-                                                                                    </div>
-                                                                                )}
-                                                                            </div>
-                                                                        ))}
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                        </>
-                                                    ) : (
-                                                        <div className="text-center py-4">
-                                                            <div className="text-blue-200 text-xs">
-                                                                {data.cvLanguage?.includes('en') ? 'No skills added yet' : 
-                                                                 data.cvLanguage?.includes('tr') ? 'Henüz yetenek eklenmemiş' :
-                                                                 'Hələ bacarıq əlavə edilməyib'}
                                                             </div>
-                                                        </div>
-                                                    )}
+                                                        )}
+
+                                                        {/* Soft Skills */}
+                                                        {skills.filter(skill => skill.type === 'soft' && skill.name && skill.name.trim() !== '').length > 0 && (
+                                                            <div className="mb-4">
+                                                                <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                                    {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('softSkills', data.cvLanguage, data.sectionNames) : getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
+                                                                </h2>
+                                                                <div className="space-y-2">
+                                                                    {skills.filter(skill => skill.type === 'soft' && skill.name && skill.name.trim() !== '').map((skill) => (
+                                                                        <div key={skill.id}>
+                                                                            <div className="mb-1">
+                                                                                <span className="text-xs font-medium text-white">{skill.name}</span>
+                                                                            </div>
+                                                                            {skill.description && (
+                                                                                <div className="text-blue-100 text-xs leading-relaxed">
+                                                                                    {renderHtmlContent(skill.description, true)}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* General Skills */}
+                                                        {skills.filter(skill => (!skill.type || (skill.type !== 'hard' && skill.type !== 'soft')) && skill.name && skill.name.trim() !== '').length > 0 && (
+                                                            <div className="mb-4">
+                                                                <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                                    {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('skills', data.cvLanguage, data.sectionNames) : getSectionName('skills', data.cvLanguage, data.sectionNames)}
+                                                                </h2>
+                                                                <div className="space-y-2">
+                                                                    {skills.filter(skill => (!skill.type || (skill.type !== 'hard' && skill.type !== 'soft')) && skill.name && skill.name.trim() !== '').map((skill) => (
+                                                                        <div key={skill.id}>
+                                                                            <div className="mb-1">
+                                                                                <span className="text-xs font-medium text-white">{skill.name}</span>
+                                                                            </div>
+                                                                            {skill.description && (
+                                                                                <div className="text-blue-100 text-xs leading-relaxed">
+                                                                                    {renderHtmlContent(skill.description, true)}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </>
                                                 </div>
                                             </LeftPanelSortableItem>
                                         );
@@ -2903,21 +2920,13 @@ const ATSFriendlyTemplate: React.FC<{
                                                     <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                         {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('languages', data.cvLanguage, data.sectionNames) : getSectionName('languages', data.cvLanguage, data.sectionNames)}
                                                     </h2>
-                                                    {languages.length > 0 ? (
+                                                    {languages.filter(lang => lang.language && lang.language.trim() !== '').length > 0 && (
                                                         <div className="space-y-1">
-                                                            {languages.map((lang) => (
+                                                            {languages.filter(lang => lang.language && lang.language.trim() !== '').map((lang) => (
                                                                 <div key={lang.id} className="text-xs text-white break-words">
                                                                     {lang.language} ({getLanguageLevel(lang.level, data.cvLanguage)})
                                                                 </div>
                                                             ))}
-                                                        </div>
-                                                    ) : (
-                                                        <div className="text-center py-4">
-                                                            <div className="text-blue-200 text-xs">
-                                                                {data.cvLanguage?.includes('en') ? 'No languages added yet' : 
-                                                                 data.cvLanguage?.includes('tr') ? 'Henüz dil eklenmemiş' :
-                                                                 'Hələ dil əlavə edilməyib'}
-                                                            </div>
                                                         </div>
                                                     )}
                                                 </div>
@@ -2945,9 +2954,9 @@ const ATSFriendlyTemplate: React.FC<{
                                                     <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                         {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('certifications', data.cvLanguage, data.sectionNames) : getSectionName('certifications', data.cvLanguage, data.sectionNames)}
                                                     </h2>
-                                                    {certifications.length > 0 ? (
+                                                    {certifications.filter(cert => cert.name && cert.name.trim() !== '').length > 0 && (
                                                         <div className="space-y-2">
-                                                            {certifications.map((cert) => (
+                                                            {certifications.filter(cert => cert.name && cert.name.trim() !== '').map((cert) => (
                                                                 <div key={cert.id}>
                                                                     <div className="flex justify-between items-start">
                                                                         <div>
@@ -2976,14 +2985,6 @@ const ATSFriendlyTemplate: React.FC<{
                                                                     </div>
                                                                 </div>
                                                             ))}
-                                                        </div>
-                                                    ) : (
-                                                        <div className="text-center py-4">
-                                                            <div className="text-blue-200 text-xs">
-                                                                {data.cvLanguage?.includes('en') ? 'No certifications added yet' : 
-                                                                 data.cvLanguage?.includes('tr') ? 'Henüz sertifika eklenmemiş' :
-                                                                 'Hələ sertifikat əlavə edilməyib'}
-                                                            </div>
                                                         </div>
                                                     )}
                                                 </div>
