@@ -1142,26 +1142,39 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
 
                     {/* A4 Preview Container */}
 <div className="bg-slate-50 rounded-xl border border-dashed border-slate-300 transition-all duration-300 overflow-hidden">
-    {/* Desktop: Vertical scrolling enabled for long CVs */}
-    <div className="hidden lg:block h-[calc(100vh-12rem)] p-4 sm:p-8 flex justify-center items-start border border-white overflow-y-auto">
+    {/* Desktop: A4 uzunluğunda arxa plan */}
+    <div className="hidden lg:block p-4 sm:p-8 flex justify-center items-start border border-white overflow-y-auto"
+         style={{
+             minHeight: '297mm', // A4 uzunluğu
+             height: 'auto', // Kontentə görə avtomatik
+             maxHeight: 'calc(100vh - 8rem)' // Ekrandan böyük olduqda scroll
+         }}>
         <div 
             className="bg-white rounded-xl border border-white shadow-2xl shadow-slate-300/60 transition-transform duration-300 mb-8"
+            style={{
+                width: '210mm', // A4 eni
+                minHeight: '297mm' // A4 minimum uzunluğu
+            }}
         >
             {renderPreview()}
         </div>
     </div>
     
-    {/* Mobile: Yenidən düzəldilmiş scroll və ölçü sistemi */}
+    {/* Mobile: A4 uzunluğunda mobil preview */}
     <div className="block lg:hidden">
-        <div className="h-[calc(100vh-12rem)] overflow-auto bg-gray-100 p-4">
+        <div className="overflow-auto bg-gray-100 p-4"
+             style={{
+                 minHeight: '297mm', // A4 uzunluğu
+                 height: 'auto', // Kontentə görə avtomatik
+                 maxHeight: 'calc(100vh - 8rem)' // Ekrandan böyük olduqda scroll
+             }}>
             <div className="min-h-full flex items-start justify-start">
                 <div
                     style={{
-                        width: '210mm',
-                        height: '297mm',
-                        maxHeight: 'calc(100vh - 12rem)',
+                        width: '210mm', // A4 eni
+                        minHeight: '297mm', // A4 minimum uzunluğu
                         maxWidth: 'calc(100vw - 2rem)',
-                        transform: 'scale(1.5)',
+                        transform: 'scale(0.8)', // Mobil üçün daha kiçik
                         transformOrigin: 'top left',
                         marginTop: '1rem',
                         marginBottom: '1rem',
