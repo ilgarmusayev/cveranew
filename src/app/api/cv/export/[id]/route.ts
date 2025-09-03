@@ -250,7 +250,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
         let html;
         
         if (htmlContent && cssContent) {
-            // Front-end-dən gələn HTML content istifadə et, amma A4 container wrapper əlavə et
+            // Front-end-dən gələn HTML content istifadə et, amma CSS-i təkmilləşdir
             html = `
                 <!DOCTYPE html>
                 <html lang="az">
@@ -263,265 +263,165 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                     <style>
                         ${cssContent}
                         
-                        /* PDF EXPORT SPECIFIC CSS - COMPLETE A4 VIEWPORT MATCH */
+                        /* ROUTE.TS ƏLAVƏ CSS - YALNIZ DINAMIK FONT SISTEMI */
                         
-                        /* SIFIR MARGIN + CSS Variables - Font Manager Integration */
-                        @page {
-                            size: A4;
-                            margin: 0mm !important;
-                        }
-                        
-                        html, body {
-                            margin: 0 !important;
-                            padding: 0 !important;
-                            width: 210mm !important;
-                            background: white !important;
-                            font-synthesis: weight style !important;
-                            text-rendering: optimizeLegibility !important;
-                        }
-                        
-                        /* PDF Container - Exact A4 dimensions */
-                        .pdf-container {
-                            width: 210mm !important;
-                            min-height: 297mm !important;
-                            margin: 0 !important;
-                            padding: 0 !important;
-                            background: white !important;
-                            box-sizing: border-box !important;
-                            overflow: visible !important;
-                        }
-                        
+                        /* CSS Variables - Font Manager Integration */
                         :root, body {
                             --cv-font-family: ${fontSettings?.fontFamily || 'Inter, sans-serif'};
-                            --cv-name-size: ${fontSettings?.nameSize || 28}px;
-                            --cv-title-size: ${fontSettings?.titleSize || 20}px;
-                            --cv-heading-size: ${fontSettings?.headingSize || 18}px;
+                            --cv-heading-size: ${fontSettings?.headingSize || 24}px;
                             --cv-subheading-size: ${fontSettings?.subheadingSize || 16}px;
                             --cv-body-size: ${fontSettings?.bodySize || 14}px;
                             --cv-small-size: ${fontSettings?.smallSize || 12}px;
-                            --cv-heading-weight: ${fontSettings?.headingWeight || 700};
-                            --cv-subheading-weight: ${fontSettings?.subheadingWeight || 600};
-                            --cv-body-weight: ${fontSettings?.bodyWeight || 400};
-                            --cv-small-weight: ${fontSettings?.smallWeight || 400};
-                            --cv-section-spacing: ${fontSettings?.sectionSpacing || 24}px;
                         }
                         
-                        /* Global font family override - HƏYATI ÖNƏM */
+                        /* Global font family override - dinamik olaraq */
                         * {
                             font-family: var(--cv-font-family) !important;
                         }
                         
-                        /* UNIVERSAL DYNAMIC FONT SYSTEM - HƏYATI BÜTÜN TEMPLATE-LƏR */
+                        /* UNIVERSAL DYNAMIC FONT SYSTEM - BÜTÜN TEMPLATE-LƏR ÜÇÜN */
                         
-                        /* FONT SIZES - TAM DINAMIK */
+                        /* Font Family - Bütün template-lər */
+                        .aurora-template *, .vertex-template *, .horizon-template *, 
+                        .lumen-template *, .modern-template *, .exclusive-template *, 
+                        .ats-template *, .basic-template *, .traditional-template *, 
+                        .classic-template * {
+                            font-family: var(--cv-font-family) !important;
+                        }
                         
-                        /* H1 / Name / Very Large Text */
-                        h1, .text-5xl, .text-4xl, .name-style,
+                        /* Heading Sizes - Dinamik H1, H2, H3 */
                         .aurora-template h1, .vertex-template h1, .horizon-template h1,
                         .lumen-template h1, .modern-template h1, .exclusive-template h1,
                         .ats-template h1, .basic-template h1, .traditional-template h1,
-                        .classic-template h1,
+                        .classic-template h1 {
+                            font-size: calc(var(--cv-heading-size) * 1.33) !important; /* ~32px */
+                            line-height: 1.2 !important;
+                        }
+                        
+                        .aurora-template h2, .vertex-template h2, .horizon-template h2,
+                        .lumen-template h2, .modern-template h2, .exclusive-template h2,
+                        .ats-template h2, .basic-template h2, .traditional-template h2,
+                        .classic-template h2 {
+                            font-size: var(--cv-heading-size) !important; /* 24px default */
+                            line-height: 1.3 !important;
+                        }
+                        
+                        .aurora-template h3, .vertex-template h3, .horizon-template h3,
+                        .lumen-template h3, .modern-template h3, .exclusive-template h3,
+                        .ats-template h3, .basic-template h3, .traditional-template h3,
+                        .classic-template h3 {
+                            font-size: calc(var(--cv-subheading-size) * 1.125) !important; /* ~18px */
+                            line-height: 1.4 !important;
+                        }
+                        
+                        .aurora-template h4, .vertex-template h4, .horizon-template h4,
+                        .lumen-template h4, .modern-template h4, .exclusive-template h4,
+                        .ats-template h4, .basic-template h4, .traditional-template h4,
+                        .classic-template h4 {
+                            font-size: var(--cv-subheading-size) !important; /* 16px default */
+                            line-height: 1.5 !important;
+                        }
+                        
+                        /* Text Size Classes - Dinamik Tailwind */
                         .aurora-template .text-5xl, .vertex-template .text-5xl, .horizon-template .text-5xl,
                         .lumen-template .text-5xl, .modern-template .text-5xl, .exclusive-template .text-5xl,
                         .ats-template .text-5xl, .basic-template .text-5xl, .traditional-template .text-5xl,
-                        .classic-template .text-5xl,
+                        .classic-template .text-5xl {
+                            font-size: calc(var(--cv-heading-size) * 2) !important; /* ~48px */
+                            line-height: 1.2 !important;
+                        }
+                        
                         .aurora-template .text-4xl, .vertex-template .text-4xl, .horizon-template .text-4xl,
                         .lumen-template .text-4xl, .modern-template .text-4xl, .exclusive-template .text-4xl,
                         .ats-template .text-4xl, .basic-template .text-4xl, .traditional-template .text-4xl,
                         .classic-template .text-4xl {
-                            font-size: var(--cv-name-size) !important;
-                            font-weight: var(--cv-heading-weight) !important;
-                            font-family: var(--cv-font-family) !important;
+                            font-size: calc(var(--cv-heading-size) * 1.5) !important; /* ~36px */
                             line-height: 1.2 !important;
                         }
                         
-                        /* H2 / Section Headings */
-                        h2, .text-3xl, .text-2xl, .heading-style,
-                        .aurora-template h2, .vertex-template h2, .horizon-template h2,
-                        .lumen-template h2, .modern-template h2, .exclusive-template h2,
-                        .ats-template h2, .basic-template h2, .traditional-template h2,
-                        .classic-template h2,
                         .aurora-template .text-3xl, .vertex-template .text-3xl, .horizon-template .text-3xl,
                         .lumen-template .text-3xl, .modern-template .text-3xl, .exclusive-template .text-3xl,
                         .ats-template .text-3xl, .basic-template .text-3xl, .traditional-template .text-3xl,
-                        .classic-template .text-3xl,
+                        .classic-template .text-3xl {
+                            font-size: calc(var(--cv-heading-size) * 1.25) !important; /* ~30px */
+                            line-height: 1.3 !important;
+                        }
+                        
                         .aurora-template .text-2xl, .vertex-template .text-2xl, .horizon-template .text-2xl,
                         .lumen-template .text-2xl, .modern-template .text-2xl, .exclusive-template .text-2xl,
                         .ats-template .text-2xl, .basic-template .text-2xl, .traditional-template .text-2xl,
                         .classic-template .text-2xl {
-                            font-size: var(--cv-heading-size) !important;
-                            font-weight: var(--cv-heading-weight) !important;
-                            font-family: var(--cv-font-family) !important;
+                            font-size: var(--cv-heading-size) !important; /* 24px default */
                             line-height: 1.3 !important;
                         }
                         
-                        /* H3 / Sub Headings */
-                        h3, .text-xl, .text-lg, .subheading-style,
-                        .aurora-template h3, .vertex-template h3, .horizon-template h3,
-                        .lumen-template h3, .modern-template h3, .exclusive-template h3,
-                        .ats-template h3, .basic-template h3, .traditional-template h3,
-                        .classic-template h3,
                         .aurora-template .text-xl, .vertex-template .text-xl, .horizon-template .text-xl,
                         .lumen-template .text-xl, .modern-template .text-xl, .exclusive-template .text-xl,
                         .ats-template .text-xl, .basic-template .text-xl, .traditional-template .text-xl,
-                        .classic-template .text-xl,
+                        .classic-template .text-xl {
+                            font-size: calc(var(--cv-heading-size) * 0.83) !important; /* ~20px */
+                            line-height: 1.4 !important;
+                        }
+                        
                         .aurora-template .text-lg, .vertex-template .text-lg, .horizon-template .text-lg,
                         .lumen-template .text-lg, .modern-template .text-lg, .exclusive-template .text-lg,
                         .ats-template .text-lg, .basic-template .text-lg, .traditional-template .text-lg,
                         .classic-template .text-lg {
-                            font-size: var(--cv-subheading-size) !important;
-                            font-weight: var(--cv-subheading-weight) !important;
-                            font-family: var(--cv-font-family) !important;
+                            font-size: calc(var(--cv-subheading-size) * 1.125) !important; /* ~18px */
                             line-height: 1.4 !important;
                         }
                         
-                        /* Body Text / Normal Text */
-                        p, span, div, li, .text-base, .text-sm,
-                        .aurora-template p, .vertex-template p, .horizon-template p,
-                        .lumen-template p, .modern-template p, .exclusive-template p,
-                        .ats-template p, .basic-template p, .traditional-template p,
-                        .classic-template p,
-                        .aurora-template span, .vertex-template span, .horizon-template span,
-                        .lumen-template span, .modern-template span, .exclusive-template span,
-                        .ats-template span, .basic-template span, .traditional-template span,
-                        .classic-template span,
-                        .aurora-template div, .vertex-template div, .horizon-template div,
-                        .lumen-template div, .modern-template div, .exclusive-template div,
-                        .ats-template div, .basic-template div, .traditional-template div,
-                        .classic-template div,
-                        .aurora-template li, .vertex-template li, .horizon-template li,
-                        .lumen-template li, .modern-template li, .exclusive-template li,
-                        .ats-template li, .basic-template li, .traditional-template li,
-                        .classic-template li,
                         .aurora-template .text-base, .vertex-template .text-base, .horizon-template .text-base,
                         .lumen-template .text-base, .modern-template .text-base, .exclusive-template .text-base,
                         .ats-template .text-base, .basic-template .text-base, .traditional-template .text-base,
-                        .classic-template .text-base,
+                        .classic-template .text-base {
+                            font-size: var(--cv-subheading-size) !important; /* 16px default */
+                            line-height: 1.5 !important;
+                        }
+                        
                         .aurora-template .text-sm, .vertex-template .text-sm, .horizon-template .text-sm,
                         .lumen-template .text-sm, .modern-template .text-sm, .exclusive-template .text-sm,
                         .ats-template .text-sm, .basic-template .text-sm, .traditional-template .text-sm,
                         .classic-template .text-sm {
-                            font-size: var(--cv-body-size) !important;
-                            font-weight: var(--cv-body-weight) !important;
-                            font-family: var(--cv-font-family) !important;
-                            line-height: 1.5 !important;
+                            font-size: var(--cv-body-size) !important; /* 14px default */
+                            line-height: 1.4 !important;
                         }
                         
-                        /* Small Text */
-                        .text-xs, .small-text,
                         .aurora-template .text-xs, .vertex-template .text-xs, .horizon-template .text-xs,
                         .lumen-template .text-xs, .modern-template .text-xs, .exclusive-template .text-xs,
                         .ats-template .text-xs, .basic-template .text-xs, .traditional-template .text-xs,
                         .classic-template .text-xs {
-                            font-size: var(--cv-small-size) !important;
-                            font-weight: var(--cv-small-weight) !important;
-                            font-family: var(--cv-font-family) !important;
+                            font-size: var(--cv-small-size) !important; /* 12px default */
                             line-height: 1.3 !important;
                         }
                         
-                        /* Font Weights - Dinamik Weight Classes */
-                        .font-bold,
+                        /* Font Weights - Dinamik */
                         .aurora-template .font-bold, .vertex-template .font-bold, .horizon-template .font-bold,
                         .lumen-template .font-bold, .modern-template .font-bold, .exclusive-template .font-bold,
                         .ats-template .font-bold, .basic-template .font-bold, .traditional-template .font-bold,
                         .classic-template .font-bold {
-                            font-weight: var(--cv-heading-weight) !important;
+                            font-weight: 700 !important;
                         }
                         
-                        .font-semibold,
                         .aurora-template .font-semibold, .vertex-template .font-semibold, .horizon-template .font-semibold,
                         .lumen-template .font-semibold, .modern-template .font-semibold, .exclusive-template .font-semibold,
                         .ats-template .font-semibold, .basic-template .font-semibold, .traditional-template .font-semibold,
                         .classic-template .font-semibold {
-                            font-weight: var(--cv-subheading-weight) !important;
+                            font-weight: 600 !important;
                         }
                         
-                        .font-medium,
                         .aurora-template .font-medium, .vertex-template .font-medium, .horizon-template .font-medium,
                         .lumen-template .font-medium, .modern-template .font-medium, .exclusive-template .font-medium,
                         .ats-template .font-medium, .basic-template .font-medium, .traditional-template .font-medium,
                         .classic-template .font-medium {
-                            font-weight: var(--cv-body-weight) !important;
+                            font-weight: 500 !important;
                         }
                         
-                        .font-normal,
                         .aurora-template .font-normal, .vertex-template .font-normal, .horizon-template .font-normal,
                         .lumen-template .font-normal, .modern-template .font-normal, .exclusive-template .font-normal,
                         .ats-template .font-normal, .basic-template .font-normal, .traditional-template .font-normal,
                         .classic-template .font-normal {
-                            font-weight: var(--cv-body-weight) !important;
-                        }
-                        
-                        /* Section Spacing - Dinamik */
-                        .mb-6, .section-spacing,
-                        .aurora-template .mb-6, .vertex-template .mb-6, .horizon-template .mb-6,
-                        .lumen-template .mb-6, .modern-template .mb-6, .exclusive-template .mb-6,
-                        .ats-template .mb-6, .basic-template .mb-6, .traditional-template .mb-6,
-                        .classic-template .mb-6,
-                        .aurora-template .section-spacing, .vertex-template .section-spacing, .horizon-template .section-spacing,
-                        .lumen-template .section-spacing, .modern-template .section-spacing, .exclusive-template .section-spacing,
-                        .ats-template .section-spacing, .basic-template .section-spacing, .traditional-template .section-spacing,
-                        .classic-template .section-spacing {
-                            margin-bottom: var(--cv-section-spacing) !important;
-                        }
-                        
-                        /* Universal Paragraf və Text Elements - TAM OVERRIDE */
-                        p, span, div:not(.cv-template):not(.pdf-container), li, a, td, th, input, textarea, label,
-                        .aurora-template p, .vertex-template p, .horizon-template p,
-                        .lumen-template p, .modern-template p, .exclusive-template p,
-                        .ats-template p, .basic-template p, .traditional-template p,
-                        .classic-template p,
-                        .aurora-template span:not(.text-xl):not(.text-lg):not(.text-2xl):not(.text-3xl):not(.text-5xl), 
-                        .vertex-template span:not(.text-xl):not(.text-lg):not(.text-2xl):not(.text-3xl):not(.text-5xl), 
-                        .horizon-template span:not(.text-xl):not(.text-lg):not(.text-2xl):not(.text-3xl):not(.text-5xl),
-                        .lumen-template span:not(.text-xl):not(.text-lg):not(.text-2xl):not(.text-3xl):not(.text-5xl), 
-                        .modern-template span:not(.text-xl):not(.text-lg):not(.text-2xl):not(.text-3xl):not(.text-5xl), 
-                        .exclusive-template span:not(.text-xl):not(.text-lg):not(.text-2xl):not(.text-3xl):not(.text-5xl),
-                        .ats-template span:not(.text-xl):not(.text-lg):not(.text-2xl):not(.text-3xl):not(.text-5xl), 
-                        .basic-template span:not(.text-xl):not(.text-lg):not(.text-2xl):not(.text-3xl):not(.text-5xl), 
-                        .traditional-template span:not(.text-xl):not(.text-lg):not(.text-2xl):not(.text-3xl):not(.text-5xl),
-                        .classic-template span:not(.text-xl):not(.text-lg):not(.text-2xl):not(.text-3xl):not(.text-5xl),
-                        .aurora-template div:not(.cv-template):not(.pdf-container), .vertex-template div:not(.cv-template):not(.pdf-container), .horizon-template div:not(.cv-template):not(.pdf-container),
-                        .lumen-template div:not(.cv-template):not(.pdf-container), .modern-template div:not(.cv-template):not(.pdf-container), .exclusive-template div:not(.cv-template):not(.pdf-container),
-                        .ats-template div:not(.cv-template):not(.pdf-container), .basic-template div:not(.cv-template):not(.pdf-container), .traditional-template div:not(.cv-template):not(.pdf-container),
-                        .classic-template div:not(.cv-template):not(.pdf-container),
-                        .aurora-template li, .vertex-template li, .horizon-template li,
-                        .lumen-template li, .modern-template li, .exclusive-template li,
-                        .ats-template li, .basic-template li, .traditional-template li,
-                        .classic-template li {
-                            font-family: var(--cv-font-family) !important;
-                            font-size: var(--cv-body-size) !important;
-                            font-weight: var(--cv-body-weight) !important;
-                            line-height: 1.5 !important;
-                        }
-                        
-                        /* CV Preview Container Styles */
-                        .cv-preview-container, .cv-preview, .cv-template {
-                            width: 210mm !important;
-                            max-width: 210mm !important;
-                            margin: 0 !important;
-                            padding: 0 !important;
-                            box-sizing: border-box !important;
-                        }
-                        
-                        /* Print optimizations */
-                        @media print {
-                            html, body {
-                                margin: 0 !important;
-                                padding: 0 !important;
-                                width: 210mm !important;
-                                background: white !important;
-                            }
-                            
-                            .pdf-container, .cv-preview-container, .cv-preview, .cv-template {
-                                width: 210mm !important;
-                                max-width: 210mm !important;
-                                margin: 0 !important;
-                                padding: 0 !important;
-                                box-sizing: border-box !important;
-                                box-shadow: none !important;
-                                border: none !important;
-                            }
+                            font-weight: 400 !important;
                         }
                         
                         /* Template Specific Dynamic Overrides */
@@ -931,30 +831,10 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             page-break-inside: auto !important;
                             break-inside: auto !important;
                         }
-                        
-                        /* FINAL DYNAMIC FONT OVERRIDE - Hətta inline style olsa da */
-                        .pdf-container [style*="font-family"] {
-                            font-family: var(--cv-font-family) !important;
-                        }
-                        
-                        .pdf-container [style*="font-size"] {
-                            font-size: unset !important;
-                        }
-                        
-                        .pdf-container [style*="font-weight"] {
-                            font-weight: unset !important;
-                        }
-                        
-                        /* ULTIMATE OVERRIDE */
-                        .pdf-container * {
-                            font-family: var(--cv-font-family) !important;
-                        }
                     </style>
                 </head>
                 <body>
-                    <div class="pdf-container">
-                        ${htmlContent}
-                    </div>
+                    ${htmlContent}
                 </body>
                 </html>
             `;

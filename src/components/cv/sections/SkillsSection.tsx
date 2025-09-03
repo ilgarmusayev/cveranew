@@ -40,11 +40,6 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
   const [suggestions, setSuggestions] = useState<SkillSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  
-  // Əvvəlki AI təkliflərini yaddaşda saxla - təkrarlanmasın
-  const [previousAISuggestions, setPreviousAISuggestions] = useState<string[]>([]);
-  const [aiRequestCount, setAiRequestCount] = useState(0);
-  
   const { showSuccess, showError, showWarning, showInfo } = useNotification();
 
   // AI is available for all users to see, but only works for premium users
@@ -91,13 +86,6 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
       return;
     }
 
-    // Əvvəlki suggestions-ları təmizlə
-    setSuggestions([]);
-    setShowSuggestions(false);
-    
-    // AI tələb sayını artır
-    setAiRequestCount(prev => prev + 1);
-
     if (!cvId) {
       showWarning(cvLanguage === 'english' ? 'CV ID is required for AI suggestions' : 'AI tövsiyələri almaq üçün CV ID lazımdır');
       return;
@@ -132,33 +120,8 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
       }
 
       const response = await apiClient.post('/api/ai/generate-skills', { 
-        cvData: {
-          ...cvData,
-          skills: data || [] // Mövcud skills-ləri də əlavə et ki, AI onları nəzərə alsın
-        },
-        existingSkills: data?.map(skill => skill.name) || [], // Mövcud skill adlarını ayrıca göndər
-        previousSuggestions: previousAISuggestions, // Əvvəlki AI təkliflərini göndər
-        targetLanguage: cvData?.cvLanguage || 'azerbaijani', // Pass CV language for appropriate suggestions
-        
-        // Diversifikasiya parametrləri - tam fərqli nəticələr üçün
-        requestTime: Date.now(), // Hər dəfə fərqli timestamp
-        requestCount: aiRequestCount, // Neçənci tələb olduğunu bildir
-        sessionId: Math.random().toString(36).substring(7), // Random session ID
-        diversityFactor: Math.random(), // Random faktor daha çeşidli nəticələr üçün
-        variationSeed: Math.floor(Math.random() * 1000000), // Variation seed
-        creativityLevel: 'high', // Yüksək yaradıcılıq səviyyəsi
-        
-        // Tələb parametrləri
-        skipExisting: true, // Backend-ə bildir ki, mövcud skills-ləri skip etsin
-        generateNew: true, // Yeni və fərqli skills tələb et
-        maxSuggestions: 10, // Daha çox seçenek al
-        forceUnique: true, // Tam unikal skills tələb et
-        avoidSimilar: true, // Oxşar skills-lərdən qaçın
-        
-        // Kateqoriya diversifikasiyası
-        includeEmergingSkills: true, // Yeni trend skills daxil et
-        includeNicheSkills: true, // Xüsusi sahə skills-ləri
-        includeIndustrySpecific: true // Sənaye spesifik skills
+        cvData,
+        targetLanguage: cvData?.cvLanguage || 'azerbaijani' // Pass CV language for appropriate suggestions
       });
 
       console.log('📡 AI Skills API Response:', {
@@ -189,34 +152,10 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
         console.log('✅ AI Skills Generated:', allSkills.length, 'skills');
         
         if (allSkills && allSkills.length > 0) {
-          // Daha çox seçenek ver - 4+4 məhdudiyyətini aradan qaldır
-          const hardSkillsFromAI = allSkills.filter((skill: any) => skill.type === 'hard');
-          const softSkillsFromAI = allSkills.filter((skill: any) => skill.type === 'soft');
-          
-          console.log('📊 AI Skills breakdown:', { 
-            hardCount: hardSkillsFromAI.length, 
-            softCount: softSkillsFromAI.length,
-            total: allSkills.length
-          });
-          
-          const finalSkills = [...hardSkillsFromAI, ...softSkillsFromAI];
-          
           // Store suggested skills for user to manually choose from (avoid duplicates)
-          const existingSkillNames = data.map(skill => skill.name.toLowerCase().trim());
-          console.log('🔍 Existing skills:', existingSkillNames);
-          console.log('🤖 AI suggested skills:', finalSkills.map(s => s.name));
-          
-          const newSuggestions = finalSkills
-            .filter((skill: any) => {
-              const skillName = skill.name.toLowerCase().trim();
-              const isDuplicate = existingSkillNames.includes(skillName);
-              if (isDuplicate) {
-                console.log(`⚠️ Duplicate skill filtered: "${skill.name}"`);
-              } else {
-                console.log(`✅ New skill accepted: "${skill.name}"`);
-              }
-              return !isDuplicate;
-            })
+          const existingSkillNames = data.map(skill => skill.name.toLowerCase());
+          const newSuggestions = allSkills
+            .filter((skill: any) => !existingSkillNames.includes(skill.name.toLowerCase()))
             .map((skill: any) => ({
               name: skill.name,
               reason: skill.description || (cvLanguage === 'english' 
@@ -234,24 +173,14 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
             }));
           
           if (newSuggestions.length > 0) {
-            // Yeni təklifləri əvvəlki təkliflər siyahısına əlavə et
-            const newSuggestionNames = newSuggestions.map(s => s.name);
-            setPreviousAISuggestions(prev => [...prev, ...newSuggestionNames]);
-            
             setSuggestions(newSuggestions);
             setShowSuggestions(true);
             showSuccess(message || (cvLanguage === 'english' 
               ? `${newSuggestions.length} AI skill suggestions generated! Select and add them.`
               : `${newSuggestions.length} AI bacarıq təklifi hazırlandı! Seçib əlavə edin.`
             ));
-            
-            console.log('📝 Added new suggestions to history:', newSuggestionNames);
-            console.log('📚 Total previous suggestions:', previousAISuggestions.length + newSuggestionNames.length);
           } else {
-            showInfo(cvLanguage === 'english' 
-              ? 'All suggested skills are already in your profile. Your skills are comprehensive!'
-              : 'Bütün təklif edilən bacarıqlar artıq profilinizdə mövcuddur. Bacarıqlarınız ətraflıdır!'
-            );
+            showInfo('Bütün təklif edilən bacarıqlar artıq mövcuddur.');
           }
         } else {
           showInfo('AI hazırda əlavə bacarıq təklif etmir.');

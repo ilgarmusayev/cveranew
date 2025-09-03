@@ -1313,8 +1313,17 @@ const BasicTemplate: React.FC<{
                                                     {data.cvLanguage === 'azerbaijani' ? 'Texnologiyalar' : 'Technologies'}: {item.technologies.join(', ')}
                                                 </p>
                                             )}
-                                            {item.url && (
-                                                <p className="text-gray-600 text-xs mt-1">URL: {item.url}</p>
+                                            {(item.url || item.link) && (
+                                                <div className="text-xs mt-1">
+                                                    <a
+                                                        href={(item.link || item.url)?.startsWith('http') ? (item.link || item.url) : `https://${(item.link || item.url)}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-blue-600 hover:text-blue-800 underline hover:no-underline transition-colors cursor-pointer break-all"
+                                                    >
+                                                        {item.link || item.url}
+                                                    </a>
+                                                </div>
                                             )}
                                         </div>
                                     ))}
@@ -2023,9 +2032,9 @@ const ModernTemplate: React.FC<{
                                                             </div>
                                                         )}
                                                     </div>
-                                                    {item.url && (
+                                                    {(item.url || item.link) && (
                                                         <a
-                                                            href={item.url}
+                                                            href={(item.link || item.url)?.startsWith('http') ? (item.link || item.url) : `https://${(item.link || item.url)}`}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm hover:bg-indigo-50 ml-4"
@@ -2800,8 +2809,12 @@ const ATSFriendlyTemplate: React.FC<{
                             })()}
                             
                             {filteredLeftColumnOrder.length === 0 ? (
-                                // Empty left column - hide instruction text, show nothing  
-                                <div className="hidden">
+                                <div className="text-center py-8 px-4">
+                                    <div className="text-blue-200 text-sm">
+                                        {data.cvLanguage?.includes('en') ? 'Add skills, languages, or certifications to see them here' : 
+                                         data.cvLanguage?.includes('tr') ? 'Burada görmek için yetenekler, diller veya sertifikalar ekleyin' :
+                                         'Burada görmək üçün bacarıqlar, dillər və ya sertifikatlar əlavə edin'}
+                                    </div>
                                 </div>
                             ) : null}
                             
@@ -3100,33 +3113,14 @@ const LumenTemplate: React.FC<{
     const leftColumnOrder = externalLeftColumnOrder || internalLeftColumnOrder;
     const setLeftColumnOrder = externalLeftColumnOrder ? () => {} : setInternalLeftColumnOrder;
 
-    // Calculate available left column sections - only show sections with content
+    // Calculate available left column sections - always show all sections
     const getAvailableLeftSections = () => {
-        const availableSections = [];
-        
-        // Only add skills if there are valid skills (with names)
-        const validSkills = skills.filter(skill => skill.name && skill.name.trim() !== '');
-        if (validSkills.length > 0) {
-            availableSections.push('leftSkills');
-        }
-        
-        // Only add languages if there are valid languages (with language names)
-        const validLanguages = languages.filter(lang => lang.language && lang.language.trim() !== '');
-        if (validLanguages.length > 0) {
-            availableSections.push('leftLanguages');
-        }
-        
-        // Only add certifications if there are valid certifications (with names)
-        const validCertifications = certifications.filter(cert => cert.name && cert.name.trim() !== '');
-        if (validCertifications.length > 0) {
-            availableSections.push('leftCertifications');
-        }
-        
+        const availableSections = ['leftSkills', 'leftLanguages', 'leftCertifications'];
         console.log('🔍 LumenTemplate Debug - Data check:');
-        console.log('- Valid Skills:', validSkills.length);
-        console.log('- Valid Languages:', validLanguages.length);
-        console.log('- Valid Certifications:', validCertifications.length);
-        console.log('- Available left sections:', availableSections);
+        console.log('- Skills length:', skills.length);
+        console.log('- Languages length:', languages.length);
+        console.log('- Certifications length:', certifications.length);
+        console.log('- All left sections will be available:', availableSections);
         return availableSections;
     };
 
@@ -3665,136 +3659,6 @@ const LumenTemplate: React.FC<{
                     </SortableItem>
                 ) : null;
 
-            case 'skills':
-                return skills && skills.length > 0 ? (
-                    <SortableItem 
-                        key="skills" 
-                        id="skills"
-                        sectionOrder={sectionOrder}
-                        onSectionReorder={onSectionReorder}
-                        activeSection={activeSection}
-                        onSetActiveSection={onSectionSelect}
-                        isDropTarget={dropTargetId === 'skills'}
-                    >
-                        <div className="mb-6 cv-section">
-                            <h2 className="text-sm font-bold text-gray-900 mb-4 tracking-wide border-b border-gray-200 pb-1" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
-                                {getUppercaseSectionName('skills', data.cvLanguage, data.sectionNames)}
-                            </h2>
-                            
-                            {/* Technical Skills */}
-                            {skills.filter(skill => skill.type === 'hard').length > 0 && (
-                                <div className="mb-4">
-                                    <h3 className="text-xs font-bold text-gray-800 mb-3 uppercase tracking-wider">
-                                        {getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
-                                    </h3>
-                                    <div className="flex flex-wrap gap-2">
-                                        {skills.filter(skill => skill.type === 'hard').map((skill, index) => (
-                                            <span key={skill.id || index} className="bg-gray-100 text-gray-800 text-xs px-3 py-1 rounded border font-medium">
-                                                {skill.name}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Soft Skills */}
-                            {skills.filter(skill => skill.type === 'soft').length > 0 && (
-                                <div className="mb-4">
-                                    <h3 className="text-xs font-bold text-gray-800 mb-3 uppercase tracking-wider">
-                                        {getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
-                                    </h3>
-                                    <div className="text-xs text-gray-700 leading-relaxed bg-gray-50 p-3 border rounded">
-                                        {skills.filter(skill => skill.type === 'soft').map(skill => skill.name).join(' • ')}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Core Competencies */}
-                            {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).length > 0 && (
-                                <div className="mb-2">
-                                    <h3 className="text-xs font-bold text-gray-800 mb-3 uppercase tracking-wider">
-                                        {getSectionName('coreCompetencies', data.cvLanguage, data.sectionNames)}
-                                    </h3>
-                                    <div className="text-xs text-gray-700 leading-relaxed bg-gray-50 p-3 border rounded">
-                                        {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map(skill => skill.name).join(' • ')}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </SortableItem>
-                ) : null;
-
-            case 'languages':
-                return languages && languages.length > 0 ? (
-                    <SortableItem 
-                        key="languages" 
-                        id="languages"
-                        sectionOrder={sectionOrder}
-                        onSectionReorder={onSectionReorder}
-                        activeSection={activeSection}
-                        onSetActiveSection={onSectionSelect}
-                        isDropTarget={dropTargetId === 'languages'}
-                    >
-                        <div className="mb-6 cv-section">
-                            <h2 className="text-sm font-bold text-gray-900 mb-4 tracking-wide border-b border-gray-200 pb-1" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
-                                {getUppercaseSectionName('languages', data.cvLanguage, data.sectionNames)}
-                            </h2>
-                            <div className="grid grid-cols-2 gap-3">
-                                {languages.map((lang, index) => (
-                                    <div key={lang.id || index} className="flex justify-between items-center">
-                                        <span className="text-xs font-bold text-gray-800">{lang.language}</span>
-                                        <span className="text-xs text-gray-600 font-medium">
-                                            {getLanguageLevel(lang.level, data.cvLanguage)}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </SortableItem>
-                ) : null;
-
-            case 'certifications':
-                return certifications && certifications.length > 0 ? (
-                    <SortableItem 
-                        key="certifications" 
-                        id="certifications"
-                        sectionOrder={sectionOrder}
-                        onSectionReorder={onSectionReorder}
-                        activeSection={activeSection}
-                        onSetActiveSection={onSectionSelect}
-                        isDropTarget={dropTargetId === 'certifications'}
-                    >
-                        <div className="mb-6 cv-section">
-                            <h2 className="text-sm font-bold text-gray-900 mb-4 tracking-wide border-b border-gray-200 pb-1" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
-                                {getUppercaseSectionName('certifications', data.cvLanguage, data.sectionNames)}
-                            </h2>
-                            <div className="space-y-3">
-                                {certifications.map((cert, index) => (
-                                    <div key={cert.id || index} className="avoid-break">
-                                        <div className="flex justify-between items-start mb-1">
-                                            <div>
-                                                <h3 className="text-xs font-bold text-gray-900">{cert.name}</h3>
-                                                {cert.issuer && (
-                                                    <p className="text-xs text-gray-700 font-medium">{cert.issuer}</p>
-                                                )}
-                                            </div>
-                                            {cert.date && (
-                                                <span className="text-xs text-gray-600 font-medium whitespace-nowrap ml-2">
-                                                    {formatDate(cert.date, data.cvLanguage)}
-                                                </span>
-                                            )}
-                                        </div>
-                                        {cert.description && (
-                                            <div className="text-gray-700 text-xs leading-relaxed mt-1">
-                                                {renderHtmlContent(cert.description)}
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </SortableItem>
-                ) : null;
             default:
                 return null;
         }
@@ -3935,8 +3799,12 @@ const LumenTemplate: React.FC<{
                             })()}
                             
                             {filteredLeftColumnOrder.length === 0 ? (
-                                // Empty left column - hide instruction text, show nothing  
-                                <div className="hidden">
+                                <div className="text-center py-8 px-4">
+                                    <div className="text-gray-500 text-sm">
+                                        {data.cvLanguage?.includes('en') ? 'Add skills, languages, or certifications to see them here' : 
+                                         data.cvLanguage?.includes('tr') ? 'Burada görmek için yetenekler, diller veya sertifikalar ekleyin' :
+                                         'Burada görmək üçün bacarıqlar, dillər və ya sertifikatlar əlavə edin'}
+                                    </div>
                                 </div>
                             ) : null}
                             
@@ -4013,8 +3881,11 @@ const LumenTemplate: React.FC<{
                                                             )}
                                                         </>
                                                     ) : (
-                                                        // Empty state for skills - hide text, show nothing
-                                                        <div className="hidden">
+                                                        <div className="text-center py-4">
+                                                            <div className="text-gray-500 text-xs">
+                                                                {data.cvLanguage?.includes('en') ? 'No skills added yet' : 
+                                                                 data.cvLanguage?.includes('tr') ? 'Henüz yetenek eklenmedi' : 'Hələ bacarıq əlavə edilməyib'}
+                                                            </div>
                                                         </div>
                                                     )}
                                                 </div>
@@ -4051,8 +3922,11 @@ const LumenTemplate: React.FC<{
                                                             ))}
                                                         </div>
                                                     ) : (
-                                                        // Empty state for languages - hide text, show nothing
-                                                        <div className="hidden">
+                                                        <div className="text-center py-4">
+                                                            <div className="text-gray-500 text-xs">
+                                                                {data.cvLanguage?.includes('en') ? 'No languages added yet' : 
+                                                                 data.cvLanguage?.includes('tr') ? 'Henüz dil eklenmedi' : 'Hələ dil əlavə edilməyib'}
+                                                            </div>
                                                         </div>
                                                     )}
                                                 </div>
@@ -4093,8 +3967,11 @@ const LumenTemplate: React.FC<{
                                                             ))}
                                                         </div>
                                                     ) : (
-                                                        // Empty state for certifications - hide text, show nothing
-                                                        <div className="hidden">
+                                                        <div className="text-center py-4">
+                                                            <div className="text-gray-500 text-xs">
+                                                                {data.cvLanguage?.includes('en') ? 'No certifications added yet' : 
+                                                                 data.cvLanguage?.includes('tr') ? 'Henüz sertifika eklenmedi' : 'Hələ sertifikat əlavə edilməyib'}
+                                                            </div>
                                                         </div>
                                                     )}
                                                 </div>
@@ -6704,7 +6581,8 @@ export default function CVPreview({
             setActiveSection(newValue);
         }
     }, [isMobile, activeSection, setActiveSection]);
-  // Get responsive scale based on screen size
+
+    // Get responsive scale based on screen size
     const getResponsiveScale = () => {
         if (typeof window !== 'undefined') {
             const width = window.innerWidth;
@@ -6914,10 +6792,10 @@ export default function CVPreview({
             className="relative"
             style={{
                 width: isMobile ? '100%' : '210mm',
-                height: isMobile ? 'fit-content' : 'auto', // Mobile: content-ə uyğun, Desktop: auto
+                height: isMobile ? '100%' : 'auto', // Desktop: auto height for long CVs
                 maxWidth: '210mm', // CV eni ilə limitli
-                minHeight: isMobile ? 'fit-content' : '297mm', // Mobile: content uzunluğu, Desktop: A4
-                overflow: isMobile ? 'auto' : 'visible', // Mobile: scroll edilə bilsin, Desktop: visible
+                minHeight: '297mm', // Minimum A4 hündürlüyü
+                overflow: isMobile ? 'hidden' : 'visible', // Desktop: allow content to overflow container
                 background: 'transparent',
             }}
         >
@@ -6945,11 +6823,11 @@ export default function CVPreview({
                     style={{
                         width: '210mm',
                         height: isMobile ? 'fit-content' : 'auto', // Desktop: auto height for long content
-                        minHeight: isMobile ? 'fit-content' : '297mm', // Mobile: content uzunluğu, Desktop: A4
+                        minHeight: '297mm', // Minimum A4 hündürlüyü
                         maxWidth: '210mm', // CV enindən artıq olmaz
-                        maxHeight: isMobile ? 'none' : 'none', // Height limiti yox
+                        maxHeight: isMobile ? 'none' : 'none', // Desktop: no height limit for long CVs
                         margin: '0',
-                        overflow: 'visible', // Her iki halda visible - scroll üst container-da
+                        overflow: isMobile ? 'auto' : 'visible', // Desktop: allow content to be visible
                         position: 'relative',
                         background: 'white',
                         transformOrigin: 'top left',
