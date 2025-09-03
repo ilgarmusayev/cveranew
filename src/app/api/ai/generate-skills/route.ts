@@ -46,8 +46,16 @@ export async function POST(request: NextRequest) {
       }, { status: 403 });
     }
 
-    // Get CV data from request
-    const { cvData, targetLanguage } = await request.json();
+    // Get CV data from request - with randomness parameters
+    const { 
+      cvData, 
+      targetLanguage,
+      existingSkills = [],
+      previousSuggestions = [],
+      requestCount = 0,
+      forceUnique = false,
+      diversityFactor = Math.random()
+    } = await request.json();
     if (!cvData) {
       return NextResponse.json(
         { success: false, error: 'CV məlumatları tələb olunur' },
@@ -77,11 +85,32 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Generate AI skills using Gemini
-    const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    // Generate AI skills using Gemini with maximum randomness
+    const model = geminiAI.getGenerativeModel({ 
+      model: 'gemini-1.5-flash',
+      generationConfig: {
+        temperature: 1.0, // Maksimal yaradıcılıq (0.0-1.0)
+        topP: 0.95, // Yüksək diversity (0.0-1.0)
+        topK: 40, // Daha çox token seçenəyi
+        maxOutputTokens: 2048
+      }
+    });
 
-    // Create language-specific prompt
+    // Create language-specific prompt with anti-duplicate logic
     const getLanguagePrompt = (lang: string, textContent: string) => {
+      const randomId = Math.random().toString(36).substring(7);
+      const timestamp = new Date().toISOString();
+      
+      // Create constraint text for existing skills
+      const avoidSkillsText = [...existingSkills, ...previousSuggestions].length > 0
+        ? `\n\nNEVER suggest these existing skills: ${[...existingSkills, ...previousSuggestions].join(', ')}`
+        : '';
+      
+      const uniqueInstruction = forceUnique 
+        ? '\n\nCRITICAL: Generate COMPLETELY UNIQUE skills. NO duplicates allowed!'
+        : '';
+      
+      const diversityNote = `\n\n[REQUEST #${requestCount} - DIVERSITY FACTOR: ${diversityFactor.toFixed(3)} - ID: ${randomId}]`;
       if (lang === 'english') {
         return `
           Based on the following CV information, suggest relevant skills:
@@ -119,6 +148,9 @@ export async function POST(request: NextRequest) {
           - Return EXACTLY 4 hard skills and 4 soft skills
           - All skills must be in ENGLISH language
           - ONLY provide JSON response, no additional text
+          ${avoidSkillsText}
+          ${uniqueInstruction}
+          ${diversityNote}
         `;
       } else if (lang === 'turkish' || lang === 'tr') {
         return `
@@ -157,6 +189,9 @@ export async function POST(request: NextRequest) {
           - TAM OLARAK 4 hard skill ve 4 soft skill döndürün
           - Tüm yetenekler TÜRKÇE dilinde olmalıdır
           - SADECE JSON yanıtı verin, ek metin eklemeyin
+          ${avoidSkillsText}
+          ${uniqueInstruction}
+          ${diversityNote}
         `;
       } else {
         return `
@@ -195,6 +230,9 @@ export async function POST(request: NextRequest) {
           - DƏQIQ 4 hard skills və 4 soft skills qaytarın
           - Bütün bacarıqlar AZƏRBAYCAN dilində olmalıdır
           - YALNIZ JSON cavabı verin, əlavə mətn əlavə etməyin
+          ${avoidSkillsText}
+          ${uniqueInstruction}
+          ${diversityNote}
 
           VACIB: DƏQIQ 4 ədəd hard skills və 4 ədəd soft skills qaytarın.
           YALNIZ JSON cavab verin, əlavə mətn yox:
@@ -203,6 +241,10 @@ export async function POST(request: NextRequest) {
     };
 
     const prompt = getLanguagePrompt(language, textContent);
+    
+    console.log('🔄 Generated Prompt:', prompt.substring(0, 500) + '...');
+    console.log('🎯 Prompt contains diversity note:', prompt.includes('DIVERSITY FACTOR'));
+    console.log('🚫 Prompt contains avoid text:', prompt.includes('avoiding these'));
 
     const result = await model.generateContent(prompt);
     const aiResponse = result.response.text().trim();

@@ -1,0 +1,130 @@
+            case 'skills':
+                return skills && skills.length > 0 ? (
+                    <SortableItem 
+                        key="skills" 
+                        id="skills"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'skills'}
+                    >
+                        <div className="mb-6 cv-section">
+                            <h2 className="text-sm font-bold text-gray-900 mb-4 tracking-wide border-b border-gray-200 pb-1" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
+                                {getUppercaseSectionName('skills', data.cvLanguage, data.sectionNames)}
+                            </h2>
+                            
+                            {/* Technical Skills */}
+                            {skills.filter(skill => skill.type === 'hard').length > 0 && (
+                                <div className="mb-4">
+                                    <h3 className="text-xs font-bold text-gray-800 mb-3 uppercase tracking-wider">
+                                        {getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
+                                    </h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {skills.filter(skill => skill.type === 'hard').map((skill, index) => (
+                                            <span key={skill.id || index} className="bg-gray-100 text-gray-800 text-xs px-3 py-1 rounded border font-medium">
+                                                {skill.name}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Soft Skills */}
+                            {skills.filter(skill => skill.type === 'soft').length > 0 && (
+                                <div className="mb-4">
+                                    <h3 className="text-xs font-bold text-gray-800 mb-3 uppercase tracking-wider">
+                                        {getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
+                                    </h3>
+                                    <div className="text-xs text-gray-700 leading-relaxed bg-gray-50 p-3 border rounded">
+                                        {skills.filter(skill => skill.type === 'soft').map(skill => skill.name).join(' • ')}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Core Competencies */}
+                            {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).length > 0 && (
+                                <div className="mb-2">
+                                    <h3 className="text-xs font-bold text-gray-800 mb-3 uppercase tracking-wider">
+                                        {getSectionName('coreCompetencies', data.cvLanguage, data.sectionNames)}
+                                    </h3>
+                                    <div className="text-xs text-gray-700 leading-relaxed bg-gray-50 p-3 border rounded">
+                                        {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map(skill => skill.name).join(' • ')}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'languages':
+                return languages && languages.length > 0 ? (
+                    <SortableItem 
+                        key="languages" 
+                        id="languages"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'languages'}
+                    >
+                        <div className="mb-6 cv-section">
+                            <h2 className="text-sm font-bold text-gray-900 mb-4 tracking-wide border-b border-gray-200 pb-1" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
+                                {getUppercaseSectionName('languages', data.cvLanguage, data.sectionNames)}
+                            </h2>
+                            <div className="grid grid-cols-2 gap-3">
+                                {languages.map((lang, index) => (
+                                    <div key={lang.id || index} className="flex justify-between items-center">
+                                        <span className="text-xs font-bold text-gray-800">{lang.language}</span>
+                                        <span className="text-xs text-gray-600 font-medium">
+                                            {getLanguageLevel(lang.level, data.cvLanguage)}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'certifications':
+                return certifications && certifications.length > 0 ? (
+                    <SortableItem 
+                        key="certifications" 
+                        id="certifications"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'certifications'}
+                    >
+                        <div className="mb-6 cv-section">
+                            <h2 className="text-sm font-bold text-gray-900 mb-4 tracking-wide border-b border-gray-200 pb-1" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
+                                {getUppercaseSectionName('certifications', data.cvLanguage, data.sectionNames)}
+                            </h2>
+                            <div className="space-y-3">
+                                {certifications.map((cert, index) => (
+                                    <div key={cert.id || index} className="avoid-break">
+                                        <div className="flex justify-between items-start mb-1">
+                                            <div>
+                                                <h3 className="text-xs font-bold text-gray-900">{cert.name}</h3>
+                                                {cert.issuer && (
+                                                    <p className="text-xs text-gray-700 font-medium">{cert.issuer}</p>
+                                                )}
+                                            </div>
+                                            {cert.date && (
+                                                <span className="text-xs text-gray-600 font-medium whitespace-nowrap ml-2">
+                                                    {formatDate(cert.date, data.cvLanguage)}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {cert.description && (
+                                            <div className="text-gray-700 text-xs leading-relaxed mt-1">
+                                                {renderHtmlContent(cert.description)}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
