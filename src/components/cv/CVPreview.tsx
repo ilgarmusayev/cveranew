@@ -809,14 +809,14 @@ const SortableItem: React.FC<SortableItemProps> = ({
                 relative group
                 ${isMobile ? 'cursor-pointer' : 'cursor-grab active:cursor-grabbing'}
                 ${isDragging && !isMobile
-                    ? 'border-2 border-blue-500 bg-blue-50/20'
-                    : 'hover:shadow-sm hover:border hover:border-blue-300 hover:bg-blue-50/10'
+                    ? 'border-2 border-blue-500 bg-blue-50/20 m-0'
+                    : 'hover:shadow-sm hover:border hover:border-blue-300 hover:bg-blue-50/10 hover:m-0'
                 }
-                ${isActive && isMobile ? 'bg-blue-50/70 shadow-xl border-blue-400' : ''}
-                ${isPressed && isMobile ? 'bg-blue-100/50' : ''}
-                ${isDropTarget ? 'bg-blue-200/50 border-2 border-blue-400 border-dashed' : ''}
+                ${isActive && isMobile ? 'bg-blue-50/70 shadow-xl border-blue-400 m-0' : ''}
+                ${isPressed && isMobile ? 'bg-blue-100/50 m-0' : ''}
+                ${isDropTarget ? 'bg-blue-200/50 border-2 border-blue-400 border-dashed m-0' : ''}
                 transition-all duration-200 ease-out
-                rounded-lg border-2 border-transparent
+                rounded-lg border-2 border-transparent m-1
                 ${isMobile ? 'touch-manipulation' : 'touch-manipulation'}
                 select-none
                 ${isMobile ? 'min-h-[80px]' : ''}
@@ -869,7 +869,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
                 </div>
             )}
 
-            {/* Content with responsive padding */}
+            {/* Content wrapper */}
             <div
                 className={`
                     transition-transform duration-200
@@ -1313,15 +1313,15 @@ const BasicTemplate: React.FC<{
                                                     {data.cvLanguage === 'azerbaijani' ? 'Texnologiyalar' : 'Technologies'}: {item.technologies.join(', ')}
                                                 </p>
                                             )}
-                                            {(item.url || item.link) && (
+                                            {item.url && (
                                                 <div className="text-xs mt-1">
                                                     <a
-                                                        href={(item.link || item.url)?.startsWith('http') ? (item.link || item.url) : `https://${(item.link || item.url)}`}
+                                                        href={item.url?.startsWith('http') ? item.url : `https://${item.url}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="text-blue-600 hover:text-blue-800 underline hover:no-underline transition-colors cursor-pointer break-all"
+                                                        className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer break-all"
                                                     >
-                                                        {item.link || item.url}
+                                                        {item.url}
                                                     </a>
                                                 </div>
                                             )}
@@ -1434,7 +1434,7 @@ const BasicTemplate: React.FC<{
                         style={{ 
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: 'var(--cv-section-spacing, 16px)'
+                            gap: '2px'
                         }}
                     >
                         {sectionOrder.map((sectionType) => {
@@ -2032,9 +2032,9 @@ const ModernTemplate: React.FC<{
                                                             </div>
                                                         )}
                                                     </div>
-                                                    {(item.url || item.link) && (
+                                                    {item.url && (
                                                         <a
-                                                            href={(item.link || item.url)?.startsWith('http') ? (item.link || item.url) : `https://${(item.link || item.url)}`}
+                                                            href={(item.url)?.startsWith('http') ? (item.url) : `https://${(item.url)}`}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm hover:bg-indigo-50 ml-4"
@@ -2372,7 +2372,7 @@ const ATSFriendlyTemplate: React.FC<{
                         onSetActiveSection={onSectionSelect}
                         isDropTarget={dropTargetId === 'summary'}
                     >
-                        <div className="mb-6 cv-section">
+                        <div className="mb-8 cv-section">
                             <h2 className="text-sm font-bold text-gray-900 mb-2 tracking-wide" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
                                 {getUppercaseSectionName('summary', data.cvLanguage, data.sectionNames)}
                             </h2>
@@ -2394,8 +2394,8 @@ const ATSFriendlyTemplate: React.FC<{
                         onSetActiveSection={onSectionSelect}
                         isDropTarget={dropTargetId === 'experience'}
                     >
-                        <div className="mb-6 cv-section">
-                            <h2 className="text-sm font-bold text-gray-900 mb-4 tracking-wide border-b border-gray-200 pb-1" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
+                        <div className="mb-8 cv-section">
+                            <h2 className="text-sm font-bold text-gray-900 mb-3 tracking-wide border-b border-gray-200 pb-1" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
                                 {getUppercaseSectionName('experience', data.cvLanguage, data.sectionNames)}
                             </h2>
                             <div className="space-y-4">
@@ -2443,8 +2443,8 @@ const ATSFriendlyTemplate: React.FC<{
                         onSetActiveSection={onSectionSelect}
                         isDropTarget={dropTargetId === 'education'}
                     >
-                        <div className="mb-6 cv-section">
-                            <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-200 pb-1">
+                        <div className="mb-8 cv-section">
+                            <h2 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide border-b border-gray-200 pb-1">
                                 {getSectionName('education', data.cvLanguage, data.sectionNames)}
                             </h2>
                             <div className="space-y-3">
@@ -2652,12 +2652,16 @@ const ATSFriendlyTemplate: React.FC<{
                                                         </div>
                                                     )}
                                                     {item.url && (
-                                                        <p className="text-xs text-gray-600 mt-1">
-                                                            <span className="font-medium">
-                                                                {data.cvLanguage?.includes('en') ? 'URL:' : 
-                                                                 data.cvLanguage?.includes('tr') ? 'Bağlantı:' : 'Link:'}
-                                                            </span> {item.url}
-                                                        </p>
+                                                        <div className="text-xs mt-1">
+                                                            <a
+                                                                href={(item.url)?.startsWith('http') ? (item.url) : `https://${(item.url)}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer break-all"
+                                                            >
+                                                                {item.url}
+                                                            </a>
+                                                        </div>
                                                     )}
                                                 </div>
                                             ))}
@@ -2793,7 +2797,7 @@ const ATSFriendlyTemplate: React.FC<{
                             style={{ 
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: '24px' // Changed from 16px to 24px to match mb-6 spacing
+                                gap: '12px' // Changed from 24px to 12px for tighter spacing
                             }}
                         >
                             {/* Render sections based on filteredLeftColumnOrder */}
@@ -2966,41 +2970,43 @@ const ATSFriendlyTemplate: React.FC<{
                                                 isDropTarget={leftDropTargetId === 'leftCertifications'}
                                             >
                                                 <div>
-                                                    <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
-                                                        {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('certifications', data.cvLanguage, data.sectionNames) : getSectionName('certifications', data.cvLanguage, data.sectionNames)}
-                                                    </h2>
                                                     {certifications.filter(cert => cert.name && cert.name.trim() !== '').length > 0 && (
-                                                        <div className="space-y-2">
-                                                            {certifications.filter(cert => cert.name && cert.name.trim() !== '').map((cert) => (
-                                                                <div key={cert.id}>
-                                                                    <div className="flex justify-between items-start">
-                                                                        <div>
-                                                                            {cert.url ? (
-                                                                                <a
-                                                                                    href={cert.url}
-                                                                                    target="_blank"
-                                                                                    rel="noopener noreferrer"
-                                                                                    className="text-xs font-medium text-white underline hover:text-blue-200 transition-colors cursor-pointer"
-                                                                                >
-                                                                                    {cert.name}
-                                                                                </a>
-                                                                            ) : (
-                                                                                <h3 className="text-xs font-medium text-white">{cert.name}</h3>
-                                                                            )}
-                                                                            <p className="text-xs text-blue-200">{cert.issuer}</p>
-                                                                            {cert.description && (
-                                                                                <div className="text-blue-100 text-xs mt-1">{renderHtmlContent(cert.description, true)}</div>
+                                                        <>
+                                                            <h2 className="text-sm font-bold text-gray-800 mb-3 tracking-wide border-b border-gray-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                                {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('certifications', data.cvLanguage, data.sectionNames) : getSectionName('certifications', data.cvLanguage, data.sectionNames)}
+                                                            </h2>
+                                                            <div className="space-y-2">
+                                                                {certifications.filter(cert => cert.name && cert.name.trim() !== '').map((cert) => (
+                                                                    <div key={cert.id}>
+                                                                        <div className="flex justify-between items-start">
+                                                                            <div>
+                                                                                {cert.url ? (
+                                                                                    <a
+                                                                                        href={cert.url}
+                                                                                        target="_blank"
+                                                                                        rel="noopener noreferrer"
+                                                                                        className="text-xs font-medium text-gray-800 underline hover:text-gray-600 transition-colors cursor-pointer"
+                                                                                    >
+                                                                                        {cert.name}
+                                                                                    </a>
+                                                                                ) : (
+                                                                                    <h3 className="text-xs font-medium text-gray-800">{cert.name}</h3>
+                                                                                )}
+                                                                                <p className="text-xs text-gray-600">{cert.issuer}</p>
+                                                                                {cert.description && (
+                                                                                    <div className="text-gray-600 text-xs mt-1">{renderHtmlContent(cert.description, true)}</div>
+                                                                                )}
+                                                                            </div>
+                                                                            {cert.date && (
+                                                                                <span className="text-xs text-gray-600 font-medium whitespace-nowrap ml-2">
+                                                                                    {formatDate(cert.date, data.cvLanguage)}
+                                                                                </span>
                                                                             )}
                                                                         </div>
-                                                                        {cert.date && (
-                                                                            <span className="text-xs text-blue-200 font-medium whitespace-nowrap ml-2">
-                                                                                {formatDate(cert.date, data.cvLanguage)}
-                                                                            </span>
-                                                                        )}
                                                                     </div>
-                                                                </div>
-                                                            ))}
-                                                        </div>
+                                                                ))}
+                                                            </div>
+                                                        </>
                                                     )}
                                                 </div>
                                             </LeftPanelSortableItem>
@@ -3066,7 +3072,7 @@ const ATSFriendlyTemplate: React.FC<{
                             style={{ 
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: 'var(--cv-section-spacing, 16px)'
+                                gap: 'var(--cv-section-spacing, 8px)'
                             }}
                         >
                             {sectionOrder.map((sectionType) => {
@@ -3113,14 +3119,33 @@ const LumenTemplate: React.FC<{
     const leftColumnOrder = externalLeftColumnOrder || internalLeftColumnOrder;
     const setLeftColumnOrder = externalLeftColumnOrder ? () => {} : setInternalLeftColumnOrder;
 
-    // Calculate available left column sections - always show all sections
+    // Calculate available left column sections - only show sections with valid content
     const getAvailableLeftSections = () => {
-        const availableSections = ['leftSkills', 'leftLanguages', 'leftCertifications'];
+        const availableSections = [];
+        
+        // Only add skills if there are valid skills (with names)
+        const validSkills = skills.filter(skill => skill.name && skill.name.trim() !== '');
+        if (validSkills.length > 0) {
+            availableSections.push('leftSkills');
+        }
+        
+        // Only add languages if there are valid languages (with language names)
+        const validLanguages = languages.filter(lang => lang.language && lang.language.trim() !== '');
+        if (validLanguages.length > 0) {
+            availableSections.push('leftLanguages');
+        }
+        
+        // Only add certifications if there are valid certifications (with names)
+        const validCertifications = certifications.filter(cert => cert.name && cert.name.trim() !== '');
+        if (validCertifications.length > 0) {
+            availableSections.push('leftCertifications');
+        }
+        
         console.log('🔍 LumenTemplate Debug - Data check:');
-        console.log('- Skills length:', skills.length);
-        console.log('- Languages length:', languages.length);
-        console.log('- Certifications length:', certifications.length);
-        console.log('- All left sections will be available:', availableSections);
+        console.log('- Valid Skills:', validSkills.length);
+        console.log('- Valid Languages:', validLanguages.length);
+        console.log('- Valid Certifications:', validCertifications.length);
+        console.log('- Available left sections:', availableSections);
         return availableSections;
     };
 
@@ -3642,12 +3667,16 @@ const LumenTemplate: React.FC<{
                                                         </div>
                                                     )}
                                                     {item.url && (
-                                                        <p className="text-xs text-gray-600 mt-1">
-                                                            <span className="font-medium">
-                                                                {data.cvLanguage?.includes('en') ? 'URL:' : 
-                                                                 data.cvLanguage?.includes('tr') ? 'Bağlantı:' : 'Link:'}
-                                                            </span> {item.url}
-                                                        </p>
+                                                        <div className="text-xs mt-1">
+                                                            <a
+                                                                href={(item.url)?.startsWith('http') ? (item.url) : `https://${(item.url)}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer break-all"
+                                                            >
+                                                                {item.url}
+                                                            </a>
+                                                        </div>
                                                     )}
                                                 </div>
                                             ))}
@@ -3783,7 +3812,7 @@ const LumenTemplate: React.FC<{
                             style={{ 
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: '16px'
+                                gap: '8px'
                             }}
                         >
                             {/* Render sections based on filteredLeftColumnOrder */}
@@ -3830,61 +3859,50 @@ const LumenTemplate: React.FC<{
                                                 isDropTarget={leftDropTargetId === 'leftSkills'}
                                             >
                                                 <div className="mb-6">
-                                                    {skills.length > 0 ? (
-                                                        <>
-                                                            {/* Hard Skills */}
-                                                            {skills.filter(skill => skill.type === 'hard').length > 0 && (
-                                                                <div className="mb-4">
-                                                                    <h2 className="text-sm font-bold text-gray-800 mb-3 tracking-wide border-b border-gray-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
-                                                                        {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('skills', data.cvLanguage, data.sectionNames) : getSectionName('skills', data.cvLanguage, data.sectionNames)}
-                                                                    </h2>
-                                                                    <div className="space-y-2">
-                                                                        {skills.filter(skill => skill.type === 'hard').map((skill) => (
-                                                                            <div key={skill.id} className="text-xs text-gray-700 break-words">
-                                                                                • {skill.name}
-                                                                            </div>
-                                                                        ))}
+                                                    {/* Hard Skills */}
+                                                    {skills.filter(skill => skill.type === 'hard' && skill.name && skill.name.trim() !== '').length > 0 && (
+                                                        <div className="mb-4">
+                                                            <h2 className="text-sm font-bold text-gray-800 mb-3 tracking-wide border-b border-gray-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                                {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('skills', data.cvLanguage, data.sectionNames) : getSectionName('skills', data.cvLanguage, data.sectionNames)}
+                                                            </h2>
+                                                            <div className="space-y-2">
+                                                                {skills.filter(skill => skill.type === 'hard' && skill.name && skill.name.trim() !== '').map((skill) => (
+                                                                    <div key={skill.id} className="text-xs text-gray-700 break-words">
+                                                                        • {skill.name}
                                                                     </div>
-                                                                </div>
-                                                            )}
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
 
-                                                            {/* Soft Skills */}
-                                                            {skills.filter(skill => skill.type === 'soft').length > 0 && (
-                                                                <div className="mb-4">
-                                                                    <h2 className="text-sm font-bold text-gray-800 mb-3 tracking-wide border-b border-gray-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
-                                                                        {getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
-                                                                    </h2>
-                                                                    <div className="space-y-2">
-                                                                        {skills.filter(skill => skill.type === 'soft').map((skill) => (
-                                                                            <div key={skill.id} className="text-xs text-gray-700 break-words">
-                                                                                • {skill.name}
-                                                                            </div>
-                                                                        ))}
+                                                    {/* Soft Skills */}
+                                                    {skills.filter(skill => skill.type === 'soft' && skill.name && skill.name.trim() !== '').length > 0 && (
+                                                        <div className="mb-4">
+                                                            <h2 className="text-sm font-bold text-gray-800 mb-3 tracking-wide border-b border-gray-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                                {getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
+                                                            </h2>
+                                                            <div className="space-y-2">
+                                                                {skills.filter(skill => skill.type === 'soft' && skill.name && skill.name.trim() !== '').map((skill) => (
+                                                                    <div key={skill.id} className="text-xs text-gray-700 break-words">
+                                                                        • {skill.name}
                                                                     </div>
-                                                                </div>
-                                                            )}
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
 
-                                                            {/* General Skills */}
-                                                            {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).length > 0 && (
-                                                                <div className="mb-4">
-                                                                    <h2 className="text-sm font-bold text-gray-800 mb-3 tracking-wide border-b border-gray-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
-                                                                        {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('skills', data.cvLanguage, data.sectionNames) : getSectionName('skills', data.cvLanguage, data.sectionNames)}
-                                                                    </h2>
-                                                                    <div className="space-y-2">
-                                                                        {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map((skill) => (
-                                                                            <div key={skill.id} className="text-xs text-gray-700 break-words">
-                                                                                • {skill.name}
-                                                                            </div>
-                                                                        ))}
+                                                    {/* General Skills */}
+                                                    {skills.filter(skill => (!skill.type || (skill.type !== 'hard' && skill.type !== 'soft')) && skill.name && skill.name.trim() !== '').length > 0 && (
+                                                        <div className="mb-4">
+                                                            <h2 className="text-sm font-bold text-gray-800 mb-3 tracking-wide border-b border-gray-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                                {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('skills', data.cvLanguage, data.sectionNames) : getSectionName('skills', data.cvLanguage, data.sectionNames)}
+                                                            </h2>
+                                                            <div className="space-y-2">
+                                                                {skills.filter(skill => (!skill.type || (skill.type !== 'hard' && skill.type !== 'soft')) && skill.name && skill.name.trim() !== '').map((skill) => (
+                                                                    <div key={skill.id} className="text-xs text-gray-700 break-words">
+                                                                        • {skill.name}
                                                                     </div>
-                                                                </div>
-                                                            )}
-                                                        </>
-                                                    ) : (
-                                                        <div className="text-center py-4">
-                                                            <div className="text-gray-500 text-xs">
-                                                                {data.cvLanguage?.includes('en') ? 'No skills added yet' : 
-                                                                 data.cvLanguage?.includes('tr') ? 'Henüz yetenek eklenmedi' : 'Hələ bacarıq əlavə edilməyib'}
+                                                                ))}
                                                             </div>
                                                         </div>
                                                     )}
@@ -3910,25 +3928,20 @@ const LumenTemplate: React.FC<{
                                                 isDropTarget={leftDropTargetId === 'leftLanguages'}
                                             >
                                                 <div className="mb-6">
-                                                    <h2 className="text-sm font-bold text-gray-800 mb-3 tracking-wide border-b border-gray-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
-                                                        {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('languages', data.cvLanguage, data.sectionNames) : getSectionName('languages', data.cvLanguage, data.sectionNames)}
-                                                    </h2>
-                                                    {languages.length > 0 ? (
-                                                        <div className="space-y-1">
-                                                            {languages.map((lang) => (
-                                                                <div key={lang.id} className="text-xs text-gray-700 break-words">
-                                                                    {lang.language} ({getLanguageLevel(lang.level, data.cvLanguage)})
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    ) : (
-                                                        <div className="text-center py-4">
-                                                            <div className="text-gray-500 text-xs">
-                                                                {data.cvLanguage?.includes('en') ? 'No languages added yet' : 
-                                                                 data.cvLanguage?.includes('tr') ? 'Henüz dil eklenmedi' : 'Hələ dil əlavə edilməyib'}
+                                                    {languages.filter(lang => lang.language && lang.language.trim() !== '').length > 0 ? (
+                                                        <>
+                                                            <h2 className="text-sm font-bold text-gray-800 mb-3 tracking-wide border-b border-gray-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                                {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('languages', data.cvLanguage, data.sectionNames) : getSectionName('languages', data.cvLanguage, data.sectionNames)}
+                                                            </h2>
+                                                            <div className="space-y-1">
+                                                                {languages.filter(lang => lang.language && lang.language.trim() !== '').map((lang) => (
+                                                                    <div key={lang.id} className="text-xs text-gray-700 break-words">
+                                                                        {lang.language} ({getLanguageLevel(lang.level, data.cvLanguage)})
+                                                                    </div>
+                                                                ))}
                                                             </div>
-                                                        </div>
-                                                    )}
+                                                        </>
+                                                    ) : null}
                                                 </div>
                                             </LeftPanelSortableItem>
                                         );
@@ -4038,7 +4051,7 @@ const LumenTemplate: React.FC<{
                             style={{ 
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: 'var(--cv-section-spacing, 16px)'
+                                gap: 'var(--cv-section-spacing, 8px)'
                             }}
                         >
                             {sectionOrder.map((sectionType) => {
@@ -4514,6 +4527,18 @@ const VertexTemplate: React.FC<{
                                                             {renderHtmlContent(item.description, false, data.cvLanguage)}
                                                         </div>
                                                     )}
+                                                    {item.url && (
+                                                        <div className="mt-3">
+                                                            <a
+                                                                href={(item.url)?.startsWith('http') ? (item.url) : `https://${(item.url)}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer text-sm font-medium break-all"
+                                                            >
+                                                                {item.url}
+                                                            </a>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -4558,6 +4583,18 @@ const VertexTemplate: React.FC<{
                                                 {item.description && (
                                                     <div className="text-gray-600 text-sm leading-relaxed">
                                                         {renderHtmlContent(item.description, false, data.cvLanguage)}
+                                                    </div>
+                                                )}
+                                                {item.url && (
+                                                    <div className="mt-3">
+                                                        <a
+                                                            href={(item.url)?.startsWith('http') ? (item.url) : `https://${(item.url)}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer text-sm font-medium break-all"
+                                                        >
+                                                            {item.url}
+                                                        </a>
                                                     </div>
                                                 )}
                                             </div>
@@ -4662,7 +4699,7 @@ const VertexTemplate: React.FC<{
                         style={{ 
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '2.5rem' // 40px consistent spacing between all sections
+                            gap: '1rem' // 16px reduced from 40px for tighter spacing
                         }}
                     >
                         {sectionOrder.map((sectionId) => {
@@ -5063,7 +5100,7 @@ const HorizonTemplate: React.FC<{
                     </div>
                 );
 
-            case 'customSections':
+                            case 'customSections':
                 if (!customSections.length) return null;
                 return (
                     <div key="customSections">
@@ -5089,6 +5126,18 @@ const HorizonTemplate: React.FC<{
                                             {item.description && (
                                                 <div className="text-gray-600 text-sm leading-relaxed">
                                                     {renderHtmlContent(item.description, false, data.cvLanguage)}
+                                                </div>
+                                            )}
+                                            {item.url && (
+                                                <div className="mt-2">
+                                                    <a
+                                                        href={(item.url)?.startsWith('http') ? (item.url) : `https://${(item.url)}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer text-sm break-all"
+                                                    >
+                                                        {item.url}
+                                                    </a>
                                                 </div>
                                             )}
                                         </div>
@@ -5128,6 +5177,18 @@ const HorizonTemplate: React.FC<{
                                         {item.description && (
                                             <div className="text-gray-600 text-sm leading-relaxed">
                                                 {renderHtmlContent(item.description, false, data.cvLanguage)}
+                                            </div>
+                                        )}
+                                        {item.url && (
+                                            <div className="mt-2">
+                                                <a
+                                                    href={(item.url)?.startsWith('http') ? (item.url) : `https://${(item.url)}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer text-sm break-all"
+                                                >
+                                                    {item.url}
+                                                </a>
                                             </div>
                                         )}
                                     </div>
@@ -5720,6 +5781,18 @@ const AuroraTemplate: React.FC<{
                                                     {renderHtmlContent(item.description, false, data.cvLanguage)}
                                                 </div>
                                             )}
+                                            {item.url && (
+                                                <div className="mt-2">
+                                                    <a
+                                                        href={(item.url)?.startsWith('http') ? (item.url) : `https://${(item.url)}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer text-sm break-all"
+                                                    >
+                                                        {item.url}
+                                                    </a>
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
@@ -5755,6 +5828,18 @@ const AuroraTemplate: React.FC<{
                                         {item.description && (
                                             <div className="text-gray-600 text-sm leading-relaxed">
                                                 {renderHtmlContent(item.description, false, data.cvLanguage)}
+                                            </div>
+                                        )}
+                                        {item.url && (
+                                            <div className="mt-2">
+                                                <a
+                                                    href={(item.url)?.startsWith('http') ? (item.url) : `https://${(item.url)}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer text-sm break-all"
+                                                >
+                                                    {item.url}
+                                                </a>
                                             </div>
                                         )}
                                     </div>
@@ -5826,7 +5911,7 @@ const AuroraTemplate: React.FC<{
                         style={{ 
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: 'var(--cv-section-spacing, 16px)'
+                            gap: 'var(--cv-section-spacing, 8px)'
                         }}
                     >
                         {sectionOrder.map((sectionId) => {
@@ -6082,7 +6167,7 @@ const ExclusiveTemplate: React.FC<{
                                                     href={project.url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="font-bold text-sm text-blue-600 hover:text-blue-800 underline transition-colors"
+                                                    className="font-bold text-sm text-gray-900 hover:text-gray-700 underline transition-colors"
                                                 >
                                                     {project.name}
                                                 </a>
@@ -6232,23 +6317,35 @@ const ExclusiveTemplate: React.FC<{
                         {customSections.map((customSection, sectionIndex) => (
                             <div key={customSection.id || sectionIndex} className="mb-4">
                                 <SectionHeader title={customSection.title} icon="📋" sectionId={`custom-${customSection.id}`} />
-                                <div className="space-y-3">
+                                <div className="space-y-2">
                                     {customSection.items.map((item, index) => (
-                                        <div key={item.id || index} className="bg-white p-4">
+                                        <div key={item.id || index} className="px-1 py-2">
                                             {item.title && (
-                                                <h3 className="font-bold text-gray-800 mb-2">{item.title}</h3>
+                                                <h3 className="font-bold text-sm text-gray-800 mb-1">{item.title}</h3>
                                             )}
                                             {item.subtitle && (
-                                                <h4 className="font-semibold text-blue-600 mb-2">{item.subtitle}</h4>
+                                                <h4 className="font-medium text-blue-600 text-xs mb-1">{item.subtitle}</h4>
                                             )}
                                             {item.date && (
-                                                <p className="text-sm text-gray-600 mb-3">
-                                                    <span className="bg-white px-2 py-1">{formatDate(item.date, data.cvLanguage)}</span>
+                                                <p className="text-xs text-gray-600 mb-2">
+                                                    {formatDate(item.date, data.cvLanguage)}
                                                 </p>
                                             )}
                                             {item.description && (
-                                                <div className="text-gray-700 leading-relaxed">
+                                                <div className="text-gray-700 leading-relaxed text-xs">
                                                     {renderHtmlContent(item.description, false, data.cvLanguage)}
+                                                </div>
+                                            )}
+                                            {item.url && (
+                                                <div className="mt-1">
+                                                    <a
+                                                        href={(item.url)?.startsWith('http') ? (item.url) : `https://${(item.url)}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer text-xs break-all"
+                                                    >
+                                                        {item.url}
+                                                    </a>
                                                 </div>
                                             )}
                                         </div>
@@ -6269,23 +6366,35 @@ const ExclusiveTemplate: React.FC<{
                     return (
                         <div key={sectionId} className="mb-4">
                             <SectionHeader title={customSection.title} icon="📋" sectionId={sectionId} />
-                            <div className="space-y-3">
+                            <div className="space-y-2">
                                 {customSection.items.map((item, index) => (
-                                    <div key={item.id || index} className="bg-white p-4">
+                                    <div key={item.id || index} className="px-1 py-2">
                                         {item.title && (
-                                            <h3 className="font-bold text-gray-800 mb-2">{item.title}</h3>
+                                            <h3 className="font-bold text-sm text-gray-800 mb-1">{item.title}</h3>
                                         )}
                                         {item.subtitle && (
-                                            <h4 className="font-semibold text-blue-600 mb-2">{item.subtitle}</h4>
+                                            <h4 className="font-medium text-blue-600 text-xs mb-1">{item.subtitle}</h4>
                                         )}
                                         {item.date && (
-                                            <p className="text-sm text-gray-600 mb-3">
-                                                <span className="bg-white px-2 py-1">{formatDate(item.date, data.cvLanguage)}</span>
+                                            <p className="text-xs text-gray-600 mb-2">
+                                                {formatDate(item.date, data.cvLanguage)}
                                             </p>
                                         )}
                                         {item.description && (
-                                            <div className="text-gray-700 leading-relaxed">
+                                            <div className="text-gray-700 leading-relaxed text-xs">
                                                 {renderHtmlContent(item.description, false, data.cvLanguage)}
+                                            </div>
+                                        )}
+                                        {item.url && (
+                                            <div className="mt-1">
+                                                <a
+                                                    href={(item.url)?.startsWith('http') ? (item.url) : `https://${(item.url)}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer text-xs break-all"
+                                                >
+                                                    {item.url}
+                                                </a>
                                             </div>
                                         )}
                                     </div>
@@ -6421,7 +6530,7 @@ const ExclusiveTemplate: React.FC<{
                         style={{ 
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '12px'
+                            gap: '6px'
                         }}
                     >
                         {sectionOrder.map((sectionId) => {
