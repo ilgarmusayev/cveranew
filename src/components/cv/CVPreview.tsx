@@ -809,12 +809,12 @@ const SortableItem: React.FC<SortableItemProps> = ({
                 relative group
                 ${isMobile ? 'cursor-pointer' : 'cursor-grab active:cursor-grabbing'}
                 ${isDragging && !isMobile
-                    ? 'border-2 border-blue-500 bg-blue-50/20 m-0'
-                    : 'hover:shadow-sm hover:border hover:border-blue-300 hover:bg-blue-50/10 hover:m-0'
+                    ? 'border-2 border-blue-500 bg-blue-50/20 m-0 p-0'
+                    : 'hover:shadow-sm hover:border hover:border-blue-300 hover:bg-blue-50/10 hover:m-0 hover:p-0'
                 }
-                ${isActive && isMobile ? 'bg-blue-50/70 shadow-xl border-blue-400 m-0' : ''}
-                ${isPressed && isMobile ? 'bg-blue-100/50 m-0' : ''}
-                ${isDropTarget ? 'bg-blue-200/50 border-2 border-blue-400 border-dashed m-0' : ''}
+                ${isActive && isMobile ? 'bg-blue-50/70 shadow-xl border-blue-400 m-0 p-0' : ''}
+                ${isPressed && isMobile ? 'bg-blue-100/50 m-0 p-0' : ''}
+                ${isDropTarget ? 'bg-blue-200/50 border-2 border-blue-400 border-dashed m-0 p-0' : ''}
                 transition-all duration-200 ease-out
                 rounded-lg border-2 border-transparent m-1
                 ${isMobile ? 'touch-manipulation' : 'touch-manipulation'}
@@ -1434,7 +1434,7 @@ const BasicTemplate: React.FC<{
                         style={{ 
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '2px'
+                            gap: '24px'
                         }}
                     >
                         {sectionOrder.map((sectionType) => {
@@ -2066,7 +2066,9 @@ const ModernTemplate: React.FC<{
         >
             <div className="w-full h-full bg-white text-gray-900" style={{ padding: '20mm' }}>
                 <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
-                    {sectionOrder.map((sectionType) => renderModernSection(sectionType)).filter(Boolean)}
+                    <div className="space-y-8">
+                        {sectionOrder.map((sectionType) => renderModernSection(sectionType)).filter(Boolean)}
+                    </div>
                 </SortableContext>
             </div>
         </DndContext>
@@ -3072,7 +3074,7 @@ const ATSFriendlyTemplate: React.FC<{
                             style={{ 
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: 'var(--cv-section-spacing, 8px)'
+                                gap: '24px'
                             }}
                         >
                             {sectionOrder.map((sectionType) => {
@@ -4051,7 +4053,7 @@ const LumenTemplate: React.FC<{
                             style={{ 
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: 'var(--cv-section-spacing, 8px)'
+                                gap: '24px'
                             }}
                         >
                             {sectionOrder.map((sectionType) => {
@@ -4699,7 +4701,7 @@ const VertexTemplate: React.FC<{
                         style={{ 
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '1rem' // 16px reduced from 40px for tighter spacing
+                            gap: '24px'
                         }}
                     >
                         {sectionOrder.map((sectionId) => {
@@ -5290,7 +5292,7 @@ const HorizonTemplate: React.FC<{
                             // For mobile: show all sections in single column
                             if (isMobile) {
                                 return (
-                                    <div className="space-y-8">
+                                    <div className="space-y-6">
                                         {availableSections.map((sectionId) => {
                                             const section = generateSection(sectionId);
                                             if (!section) return null;
@@ -5334,7 +5336,7 @@ const HorizonTemplate: React.FC<{
                             return (
                                 <>
                                     {/* Left Column */}
-                                    <div className="space-y-8">
+                                    <div className="space-y-6">
                                         {leftSections.map((sectionId) => {
                                             const section = generateSection(sectionId);
                                             if (!section) return null;
@@ -5358,7 +5360,7 @@ const HorizonTemplate: React.FC<{
                                     </div>
 
                                     {/* Right Column */}
-                                    <div className="space-y-8">
+                                    <div className="space-y-6">
                                         {rightSections.map((sectionId) => {
                                             const section = generateSection(sectionId);
                                             if (!section) return null;
@@ -5911,7 +5913,7 @@ const AuroraTemplate: React.FC<{
                         style={{ 
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: 'var(--cv-section-spacing, 8px)'
+                            gap: '24px'
                         }}
                     >
                         {sectionOrder.map((sectionId) => {
@@ -6530,7 +6532,7 @@ const ExclusiveTemplate: React.FC<{
                         style={{ 
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '6px'
+                            gap: '24px'
                         }}
                     >
                         {sectionOrder.map((sectionId) => {
