@@ -269,7 +269,7 @@ export default function CVExportPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen">
             {/* Header */}
             <div className="bg-white shadow-sm border-b border-gray-200 print:hidden">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -311,19 +311,17 @@ export default function CVExportPage() {
                 </div>
             </div>
 
-            {/* CV Preview */}
-            <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-                <div className="bg-white rounded-lg shadow-lg p-8">
-                    <CVPreview 
-                        cv={{
-                            id: cv.id,
-                            templateId: cv.templateId,
-                            data: cv.data as any
-                        }}
-                        template={cv.templateId}
-                        fontSettings={fontSettings}
-                    />
-                </div>
+            {/* CV Preview - Centered without background */}
+            <div className="flex justify-center py-8">
+                <CVPreview 
+                    cv={{
+                        id: cv.id,
+                        templateId: cv.templateId,
+                        data: cv.data as any
+                    }}
+                    template={cv.templateId}
+                    fontSettings={fontSettings}
+                />
             </div>
 
 
@@ -342,6 +340,12 @@ export default function CVExportPage() {
                         background: white !important;
                         font-size: 12pt !important;
                         line-height: 1.4 !important;
+                    }
+                    
+                    /* Add 15mm margins to CV preview */
+                    .cv-preview {
+                        margin: 15mm !important;
+                        box-sizing: border-box !important;
                     }
                     
                     .print\\:hidden {

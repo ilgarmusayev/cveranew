@@ -92,8 +92,10 @@ export async function POST(request: NextRequest) {
           1. Hard Skills (Technical skills): programming languages, frameworks, databases, tools, technologies
           2. Soft Skills (Personal skills): leadership, teamwork, communication, problem solving
           3. Suggest skills that match the CV information
-          4. Maximum 8 skills per category
+          4. EXACTLY 4 hard skills and 4 soft skills - no more, no less
           5. Return as JSON object format
+          6. Skills must be relevant to the industry and position
+          7. All skills must be in ENGLISH language
           
           Hard Skills Examples:
           - Programming: JavaScript, Python, Java, C#, TypeScript
@@ -109,11 +111,52 @@ export async function POST(request: NextRequest) {
 
           Response format: 
           {
-            "hardSkills": ["JavaScript", "React", "Node.js", "PostgreSQL", "Git"],
+            "hardSkills": ["JavaScript", "React", "Node.js", "PostgreSQL"],
             "softSkills": ["Leadership", "Teamwork", "Problem Solving", "Communication"]
           }
 
-          ONLY provide JSON response, no additional text:
+          IMPORTANT: 
+          - Return EXACTLY 4 hard skills and 4 soft skills
+          - All skills must be in ENGLISH language
+          - ONLY provide JSON response, no additional text
+        `;
+      } else if (lang === 'turkish' || lang === 'tr') {
+        return `
+          Aşağıdaki CV bilgilerine dayanarak ilgili yetenekler önerin:
+
+          CV Bilgileri: "${textContent.substring(0, 2000)}"
+
+          Gereksinimler:
+          1. Hard Skills (Teknik yetenekler): programlama dilleri, framework'ler, veritabanları, araçlar, teknolojiler
+          2. Soft Skills (Kişisel yetenekler): liderlik, takım çalışması, iletişim, problem çözme
+          3. CV bilgilerine uygun yetenekleri önerin
+          4. TAM OLARAK 4 adet hard skill ve 4 adet soft skill - ne eksik ne fazla
+          5. JSON object formatında döndürün
+          6. Yetenekler sektör ve pozisyona uygun olmalıdır
+          7. Tüm yetenekler TÜRKÇE dilinde olmalıdır
+          
+          Hard Skills Örnekleri:
+          - Programlama: JavaScript, Python, Java, C#, TypeScript
+          - Framework'ler: React, Vue.js, Angular, Next.js, Laravel
+          - Veritabanları: MySQL, PostgreSQL, MongoDB, Redis
+          - Araçlar: Git, Docker, AWS, Azure, Jenkins
+          - Tasarım: Photoshop, Figma, Adobe Illustrator
+          
+          Soft Skills Örnekleri:
+          - Liderlik, Takım Çalışması, İletişim, Problem Çözme
+          - Yaratıcılık, Uyum Sağlama, Zaman Yönetimi, Analitik Düşünce
+          - Müşteri Hizmetleri, Sunum, Proje Yönetimi
+
+          Yanıt formatı: 
+          {
+            "hardSkills": ["JavaScript", "React", "Node.js", "PostgreSQL"],
+            "softSkills": ["Liderlik", "Takım Çalışması", "Problem Çözme", "İletişim"]
+          }
+
+          ÖNEMLİ: 
+          - TAM OLARAK 4 hard skill ve 4 soft skill döndürün
+          - Tüm yetenekler TÜRKÇE dilinde olmalıdır
+          - SADECE JSON yanıtı verin, ek metin eklemeyin
         `;
       } else {
         return `
@@ -125,8 +168,10 @@ export async function POST(request: NextRequest) {
           1. Hard Skills (Texniki bacarıqlar): proqramlaşdırma dilləri, framework-lər, verilənlər bazası, alətlər, texnologiyalar
           2. Soft Skills (Şəxsi bacarıqlar): liderlik, komanda işi, kommunikasiya, problem həll etmə
           3. CV məlumatlarına uyğun olan bacarıqları təklif edin
-          4. Hər kateqoriyada maksimum 8 bacarıq
+          4. DƏQIQ 4 ədəd hard skills və 4 ədəd soft skills - az ya da çox olmasın
           5. JSON object formatında qaytarın
+          6. Bacarıqlar sənaye və vəzifəyə uyğun olmalıdır
+          7. Bütün bacarıqlar AZƏRBAYCAN dilində olmalıdır
           
           Hard Skills Nümunələri:
           - Proqramlaşdırma: JavaScript, Python, Java, C#, TypeScript
@@ -142,10 +187,16 @@ export async function POST(request: NextRequest) {
 
           Cavab formatı: 
           {
-            "hardSkills": ["JavaScript", "React", "Node.js", "PostgreSQL", "Git"],
+            "hardSkills": ["JavaScript", "React", "Node.js", "PostgreSQL"],
             "softSkills": ["Liderlik", "Komanda işi", "Problem həlli", "Kommunikasiya"]
           }
 
+          ÖNEMLİ: 
+          - DƏQIQ 4 hard skills və 4 soft skills qaytarın
+          - Bütün bacarıqlar AZƏRBAYCAN dilində olmalıdır
+          - YALNIZ JSON cavabı verin, əlavə mətn əlavə etməyin
+
+          VACIB: DƏQIQ 4 ədəd hard skills və 4 ədəd soft skills qaytarın.
           YALNIZ JSON cavab verin, əlavə mətn yox:
         `;
       }
@@ -170,15 +221,50 @@ export async function POST(request: NextRequest) {
 
       // Check if response is in the new format with hardSkills and softSkills
       if (extractedData.hardSkills && extractedData.softSkills) {
-        const hardSkills = Array.isArray(extractedData.hardSkills) 
-          ? extractedData.hardSkills.filter((skill: any) => typeof skill === 'string' && skill.trim()).map((skill: any) => skill.trim()).slice(0, 8)
+        let hardSkills = Array.isArray(extractedData.hardSkills) 
+          ? extractedData.hardSkills.filter((skill: any) => typeof skill === 'string' && skill.trim()).map((skill: any) => skill.trim())
           : [];
 
-        const softSkills = Array.isArray(extractedData.softSkills) 
-          ? extractedData.softSkills.filter((skill: any) => typeof skill === 'string' && skill.trim()).map((skill: any) => skill.trim()).slice(0, 8)
+        let softSkills = Array.isArray(extractedData.softSkills) 
+          ? extractedData.softSkills.filter((skill: any) => typeof skill === 'string' && skill.trim()).map((skill: any) => skill.trim())
           : [];
 
-        console.log(`✅ Generated ${hardSkills.length} hard skills and ${softSkills.length} soft skills`);
+        // Ensure exactly 4 hard skills and 4 soft skills
+        if (hardSkills.length !== 4) {
+          hardSkills = hardSkills.slice(0, 4);
+          // If less than 4, add generic skills based on language
+          const fallbackHardSkills = targetLanguage?.includes('en') 
+            ? ['Microsoft Office', 'Data Analysis', 'Project Management', 'Technical Writing']
+            : targetLanguage?.includes('tr')
+            ? ['Microsoft Office', 'Veri Analizi', 'Proje Yönetimi', 'Teknik Yazım']
+            : ['Microsoft Office', 'Məlumat analizi', 'Layihə idarəetməsi', 'Texniki yazı'];
+            
+          while (hardSkills.length < 4) {
+            const fallback = fallbackHardSkills[hardSkills.length];
+            if (!hardSkills.includes(fallback)) {
+              hardSkills.push(fallback);
+            }
+          }
+        }
+
+        if (softSkills.length !== 4) {
+          softSkills = softSkills.slice(0, 4);
+          // If less than 4, add generic skills based on language
+          const fallbackSoftSkills = targetLanguage?.includes('en')
+            ? ['Communication', 'Teamwork', 'Problem Solving', 'Adaptability']
+            : targetLanguage?.includes('tr')
+            ? ['İletişim', 'Takım Çalışması', 'Problem Çözme', 'Uyum']
+            : ['Kommunikasiya', 'Komanda işi', 'Problem həlli', 'Adaptasiya'];
+            
+          while (softSkills.length < 4) {
+            const fallback = fallbackSoftSkills[softSkills.length];
+            if (!softSkills.includes(fallback)) {
+              softSkills.push(fallback);
+            }
+          }
+        }
+
+        console.log(`✅ Generated exactly ${hardSkills.length} hard skills and ${softSkills.length} soft skills`);
 
         // Log the AI skills generation for analytics
         await prisma.importSession.create({
@@ -201,7 +287,11 @@ export async function POST(request: NextRequest) {
           success: true,
           hardSkills: hardSkills,
           softSkills: softSkills,
-          message: `${hardSkills.length + softSkills.length} yeni skill AI tərəfindən yaradıldı (${hardSkills.length} hard, ${softSkills.length} soft)`
+          message: targetLanguage?.includes('en') 
+            ? `4 technical skills and 4 soft skills generated by AI`
+            : targetLanguage?.includes('tr')
+            ? `AI tarafından 4 teknik beceri ve 4 kişisel beceri üretildi`
+            : `AI tərəfindən 4 texniki bacarıq və 4 şəxsi bacarıq yaradıldı`
         });
       } 
       // Fallback for old array format

@@ -6795,10 +6795,10 @@ export default function CVPreview({
                 showIndicators={!isMobile} // Only show on desktop
                 pageHeight={297} // A4 height in mm
                 pageWidth={210} // A4 width in mm
-                marginTop={20}
-                marginBottom={20}
-                marginLeft={20}
-                marginRight={20}
+                marginTop={15}
+                marginBottom={15}
+                marginLeft={15}
+                marginRight={15}
                 className="cv-preview-with-breaks"
             >
                 <div

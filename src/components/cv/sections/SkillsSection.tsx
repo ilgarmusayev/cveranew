@@ -152,9 +152,28 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
         console.log('✅ AI Skills Generated:', allSkills.length, 'skills');
         
         if (allSkills && allSkills.length > 0) {
+          // Ensure we have exactly 4 hard and 4 soft skills
+          const hardSkillsFromAI = allSkills.filter((skill: any) => skill.type === 'hard').slice(0, 4);
+          const softSkillsFromAI = allSkills.filter((skill: any) => skill.type === 'soft').slice(0, 4);
+          
+          // Validate that we have exactly 4 of each type
+          if (hardSkillsFromAI.length !== 4 || softSkillsFromAI.length !== 4) {
+            console.warn('⚠️ AI did not return exactly 4+4 skills:', { 
+              hardCount: hardSkillsFromAI.length, 
+              softCount: softSkillsFromAI.length 
+            });
+            
+            showError(cvLanguage === 'english' 
+              ? 'AI did not generate the expected number of skills. Please try again.' 
+              : 'AI gözlənilən sayda bacarıq yaratmadı. Yenidən cəhd edin.');
+            return;
+          }
+          
+          const finalSkills = [...hardSkillsFromAI, ...softSkillsFromAI];
+          
           // Store suggested skills for user to manually choose from (avoid duplicates)
           const existingSkillNames = data.map(skill => skill.name.toLowerCase());
-          const newSuggestions = allSkills
+          const newSuggestions = finalSkills
             .filter((skill: any) => !existingSkillNames.includes(skill.name.toLowerCase()))
             .map((skill: any) => ({
               name: skill.name,
@@ -391,8 +410,8 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
 
       {data.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-          <div className="text-gray-400 mb-4">
-            <svg className=" h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="text-gray-400 mb-4 flex justify-center">
+            <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
             </svg>
           </div>
