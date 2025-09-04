@@ -4331,8 +4331,8 @@ const VertexTemplate: React.FC<{
                                                 <h4 className="font-semibold text-gray-700 text-base mb-3">{edu.institution}</h4>
                                                 {(edu.field || edu.gpa) && (
                                                     <div className="text-sm text-gray-600 mb-3 font-mono bg-gray-50 p-3 rounded border">
-                                                        {edu.field && <div className="mb-1">Field: {edu.field}</div>}
-                                                        {edu.gpa && <div>GPA: {edu.gpa}</div>}
+                                                        {edu.field && <div className="mb-1">{data.cvLanguage === 'english' ? 'Field' : 'Sahə'}: {edu.field}</div>}
+                                                        {edu.gpa && <div>{data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: {edu.gpa}</div>}
                                                     </div>
                                                 )}
                                                 {edu.description && (
@@ -4970,7 +4970,7 @@ const HorizonTemplate: React.FC<{
                                         <div className="text-sm text-gray-500 mb-2">
                                             {edu.field && <span>{edu.field}</span>}
                                             {edu.field && edu.gpa && <span className="mx-2">|</span>}
-                                            {edu.gpa && <span>GPA: {edu.gpa}</span>}
+                                            {edu.gpa && <span>{data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: {edu.gpa}</span>}
                                         </div>
                                     )}
                                     {edu.description && (
@@ -5620,7 +5620,7 @@ const AuroraTemplate: React.FC<{
                                                 <div className="text-xs text-gray-600 mt-1">
                                                     {edu.field && <span>{edu.field}</span>}
                                                     {edu.field && edu.gpa && <span className="mx-1">•</span>}
-                                                    {edu.gpa && <span>GPA: {edu.gpa}</span>}
+                                                    {edu.gpa && <span>{data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: {edu.gpa}</span>}
                                                 </div>
                                             )}
                                         </div>
@@ -5957,35 +5957,49 @@ const AuroraTemplate: React.FC<{
                             {getFullName(personalInfo, data.cvLanguage)}
                         </h1>
                         
-                        {/* Contact Information - Single Line */}
-                        <div className="flex flex-wrap justify-center items-center gap-4 text-sm text-gray-700">
-                            {personalInfo.email && (
-                                <span>{personalInfo.email}</span>
-                            )}
-                            {personalInfo.phone && (
-                                <span>•</span>
-                            )}
-                            {personalInfo.phone && (
-                                <span>{personalInfo.phone}</span>
-                            )}
-                            {personalInfo.location && (
-                                <span>•</span>
-                            )}
-                            {personalInfo.location && (
-                                <span>{personalInfo.location}</span>
-                            )}
-                            {personalInfo.linkedin && (
-                                <span>•</span>
-                            )}
-                            {personalInfo.linkedin && (
-                                <span>{getLinkedInDisplay(personalInfo.linkedin).displayText}</span>
-                            )}
-                            {personalInfo.website && (
-                                <span>•</span>
-                            )}
-                            {personalInfo.website && (
-                                <span>{personalInfo.website}</span>
-                            )}
+                        {/* Contact Information - Split into two lines */}
+                        <div className="text-center space-y-1 text-sm text-gray-700">
+                            {(() => {
+                                // First line: email, phone, location
+                                const firstLineItems = [];
+                                if (personalInfo.email) firstLineItems.push(personalInfo.email);
+                                if (personalInfo.phone) firstLineItems.push(personalInfo.phone);
+                                if (personalInfo.location) firstLineItems.push(personalInfo.location);
+                                
+                                // Second line: linkedin, website
+                                const secondLineItems = [];
+                                if (personalInfo.linkedin) secondLineItems.push(getLinkedInDisplay(personalInfo.linkedin).displayText);
+                                if (personalInfo.website) secondLineItems.push(personalInfo.website);
+                                
+                                return (
+                                    <>
+                                        {firstLineItems.length > 0 && (
+                                            <div className="flex flex-wrap justify-center items-center gap-2">
+                                                {firstLineItems.map((item, index) => (
+                                                    <React.Fragment key={`first-${index}`}>
+                                                        <span>{item}</span>
+                                                        {index < firstLineItems.length - 1 && (
+                                                            <span className="text-gray-500">•</span>
+                                                        )}
+                                                    </React.Fragment>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {secondLineItems.length > 0 && (
+                                            <div className="flex flex-wrap justify-center items-center gap-2">
+                                                {secondLineItems.map((item, index) => (
+                                                    <React.Fragment key={`second-${index}`}>
+                                                        <span>{item}</span>
+                                                        {index < secondLineItems.length - 1 && (
+                                                            <span className="text-gray-500">•</span>
+                                                        )}
+                                                    </React.Fragment>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </>
+                                );
+                            })()}
                         </div>
                     </div>
                 </div>
@@ -6160,7 +6174,7 @@ const ExclusiveTemplate: React.FC<{
                                                 <div className="text-xs text-gray-700 mt-1">
                                                     {edu.field && <span className="italic">{edu.field}</span>}
                                                     {edu.field && edu.gpa && <span className="mx-2">•</span>}
-                                                    {edu.gpa && <span><strong>GPA:</strong> {edu.gpa}</span>}
+                                                    {edu.gpa && <span><strong>{data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}:</strong> {edu.gpa}</span>}
                                                 </div>
                                             )}
                                         </div>
