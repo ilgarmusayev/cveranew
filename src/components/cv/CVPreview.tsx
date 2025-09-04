@@ -1208,7 +1208,17 @@ const BasicTemplate: React.FC<{
                                         <p className="text-blue-600 text-xs mt-1">{data.cvLanguage === 'azerbaijani' ? 'Texnologiyalar' : 'Technologies'}: {project.technologies.join(', ')}</p>
                                     )}
                                     {project.github && (
-                                        <p className="text-gray-600 text-xs mt-1">GitHub: {project.github}</p>
+                                        <div className="text-xs text-gray-600 mt-1">
+                                            GitHub:{' '}
+                                            <a
+                                                href={project.github.startsWith('http') ? project.github : `https://github.com/${project.github}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer break-all"
+                                            >
+                                                {project.github}
+                                            </a>
+                                        </div>
                                     )}
                                 </div>
                             ))}
@@ -2566,9 +2576,17 @@ const ATSFriendlyTemplate: React.FC<{
                                                     </p>
                                                 )}
                                                 {project.github && (
-                                                    <p className="text-xs text-gray-600 mt-1">
-                                                        <span className="font-medium">GitHub:</span> {project.github}
-                                                    </p>
+                                                    <div className="text-xs text-gray-600 mt-1">
+                                                        <span className="font-medium">GitHub:</span>{' '}
+                                                        <a
+                                                            href={project.github.startsWith('http') ? project.github : `https://github.com/${project.github}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-gray-900 hover:text-blue-600 underline hover:no-underline transition-colors cursor-pointer break-all"
+                                                        >
+                                                            {project.github}
+                                                        </a>
+                                                    </div>
                                                 )}
                                             </div>
                                             {(project.startDate || project.endDate || project.current) && (
@@ -2727,7 +2745,7 @@ const ATSFriendlyTemplate: React.FC<{
             <div 
                 className="w-2/5 bg-blue-900 text-white border-r border-blue-800" 
                 style={{ 
-                    padding: '20mm 15mm 20mm 15mm', /* üst: 20mm, sağ: 15mm, alt: 20mm, sol: 15mm - symmetric padding */
+                    padding: '12mm 12mm 15mm 12mm', /* üst: 12mm, sağ: 12mm, alt: 15mm, sol: 12mm - reduced top padding */
                     touchAction: 'none', // Force DnD kit control
                     userSelect: 'none',
                     minHeight: '297mm' // A4 uzunluğu - 297mm
@@ -3052,9 +3070,9 @@ const ATSFriendlyTemplate: React.FC<{
             </div>
 
             {/* Right Column - Main Content with Draggable Sections */}
-            <div className="flex-1" style={{ padding: '20mm 20mm 20mm 10mm' /* üst: 20mm, sağ: 20mm, alt: 20mm, sol: 10mm */ }}>
+            <div className="flex-1" style={{ padding: '12mm 10mm 15mm 8mm' /* üst: 12mm, sağ: 10mm, alt: 15mm, sol: 8mm - reduced right padding */ }}>
                 {/* Header - Name */}
-                <div className="cv-section avoid-break">
+                <div className="cv-section avoid-break" style={{ marginBottom: '8px' }}>
                     <h1 className="text-3xl font-bold text-gray-900 leading-tight">
                         {getFullName(personalInfo, data.cvLanguage)}
                     </h1>
@@ -3608,9 +3626,17 @@ const LumenTemplate: React.FC<{
                                                     </p>
                                                 )}
                                                 {project.github && (
-                                                    <p className="text-xs text-gray-600 mt-1">
-                                                        <span className="font-medium">GitHub:</span> {project.github}
-                                                    </p>
+                                                    <div className="text-xs text-gray-600 mt-1">
+                                                        <span className="font-medium">GitHub:</span>{' '}
+                                                        <a
+                                                            href={project.github.startsWith('http') ? project.github : `https://github.com/${project.github}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-gray-900 hover:text-blue-600 underline hover:no-underline transition-colors cursor-pointer break-all"
+                                                        >
+                                                            {project.github}
+                                                        </a>
+                                                    </div>
                                                 )}
                                             </div>
                                             {(project.startDate || project.endDate || project.current) && (
@@ -5517,10 +5543,10 @@ const AuroraTemplate: React.FC<{
     // Helper component for section header
     const SectionHeader: React.FC<{ title: string; sectionId: string }> = ({ title, sectionId }) => (
         <div 
-            className={`mb-4 ${isMobile && activeSection === sectionId ? 'ring-2 ring-gray-400 rounded' : ''}`}
+            className={`mb-3 ${isMobile && activeSection === sectionId ? 'ring-2 ring-gray-400 rounded' : ''}`}
             onClick={() => handleSectionClick(sectionId)}
         >
-            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider border-b border-gray-300 pb-1 mb-3">
+            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider border-b border-gray-300 pb-1 mb-2">
                 {title}
             </h2>
         </div>
@@ -5532,7 +5558,7 @@ const AuroraTemplate: React.FC<{
             case 'summary':
                 if (!personalInfo.summary) return null;
                 return (
-                    <div key="summary" className="mb-6">
+                    <div key="summary">
                         <SectionHeader title={getSectionName('summary', data.cvLanguage, data.sectionNames)} sectionId="summary" />
                         <div className="text-gray-700 leading-relaxed text-sm">
                             {renderHtmlContent(personalInfo.summary, false, data.cvLanguage)}
@@ -5543,18 +5569,18 @@ const AuroraTemplate: React.FC<{
             case 'experience':
                 if (!experience.length) return null;
                 return (
-                    <div key="experience" className="mb-6">
+                    <div key="experience">
                         <SectionHeader title={getSectionName('experience', data.cvLanguage, data.sectionNames)} sectionId="experience" />
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             {experience.map((exp, index) => (
-                                <div key={exp.id || index} className="pb-4 border-b border-gray-100 last:border-b-0">
-                                    <div className="flex justify-between items-start mb-2">
+                                <div key={exp.id || index} className="border-b border-gray-100 last:border-b-0 pb-2">
+                                    <div className="flex justify-between items-start mb-1">
                                         <div className="flex-1">
-                                            <h3 className="font-bold text-gray-900 text-base">{exp.position}</h3>
-                                            <p className="font-medium text-gray-700 text-sm">{exp.company}</p>
+                                            <h3 className="font-semibold text-gray-900 text-sm">{exp.position}</h3>
+                                            <p className="font-medium text-gray-700 text-xs mt-0.5">{exp.company}</p>
                                         </div>
                                         {(exp.startDate || exp.endDate) && (
-                                            <div className="text-xs text-gray-600 font-medium text-right ml-4">
+                                            <div className="text-xs text-gray-600 font-medium text-right ml-4 flex-shrink-0">
                                                 {exp.startDate ? (
                                                     exp.current ? `${formatDate(exp.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
                                                     exp.endDate ? `${formatDate(exp.startDate, data.cvLanguage)} - ${formatDate(exp.endDate, data.cvLanguage)}` :
@@ -5568,7 +5594,7 @@ const AuroraTemplate: React.FC<{
                                         )}
                                     </div>
                                     {exp.description && (
-                                        <div className="text-gray-600 text-sm leading-relaxed">
+                                        <div className="text-gray-600 text-xs leading-relaxed text-left mt-2">
                                             {renderHtmlContent(exp.description, false, data.cvLanguage)}
                                         </div>
                                     )}
@@ -5581,15 +5607,15 @@ const AuroraTemplate: React.FC<{
             case 'education':
                 if (!education.length) return null;
                 return (
-                    <div key="education" className="mb-6">
+                    <div key="education">
                         <SectionHeader title={getSectionName('education', data.cvLanguage, data.sectionNames)} sectionId="education" />
                         <div className="space-y-3">
                             {education.map((edu, index) => (
-                                <div key={edu.id || index} className="pb-3 border-b border-gray-100 last:border-b-0">
-                                    <div className="flex justify-between items-start mb-2">
+                                <div key={edu.id || index} className="border-b border-gray-100 last:border-b-0 pb-2">
+                                    <div className="flex justify-between items-start mb-1">
                                         <div className="flex-1">
-                                            <h3 className="font-bold text-gray-900 text-base">{edu.degree}</h3>
-                                            <p className="font-medium text-gray-700 text-sm">{edu.institution}</p>
+                                            <h3 className="font-semibold text-gray-900 text-sm">{edu.degree}</h3>
+                                            <p className="font-medium text-gray-700 text-xs mt-0.5">{edu.institution}</p>
                                             {(edu.field || edu.gpa) && (
                                                 <div className="text-xs text-gray-600 mt-1">
                                                     {edu.field && <span>{edu.field}</span>}
@@ -5599,7 +5625,7 @@ const AuroraTemplate: React.FC<{
                                             )}
                                         </div>
                                         {(edu.startDate || edu.endDate) && (
-                                            <div className="text-xs text-gray-600 font-medium text-right ml-4">
+                                            <div className="text-xs text-gray-600 font-medium text-right ml-4 flex-shrink-0">
                                                 {edu.startDate ? (
                                                     edu.current ? `${formatDate(edu.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
                                                     edu.endDate ? `${formatDate(edu.startDate, data.cvLanguage)} - ${formatDate(edu.endDate, data.cvLanguage)}` :
@@ -5613,7 +5639,7 @@ const AuroraTemplate: React.FC<{
                                         )}
                                     </div>
                                     {edu.description && (
-                                        <div className="text-gray-600 text-sm leading-relaxed">
+                                        <div className="text-gray-600 text-xs leading-relaxed text-left mt-2">
                                             {renderHtmlContent(edu.description, false, data.cvLanguage)}
                                         </div>
                                     )}
@@ -5626,12 +5652,12 @@ const AuroraTemplate: React.FC<{
             case 'skills':
                 if (!skills.length) return null;
                 return (
-                    <div key="skills" className="mb-6">
+                    <div key="skills">
                         <SectionHeader title={getSectionName('skills', data.cvLanguage, data.sectionNames)} sectionId="skills" />
                         
                         {/* Hard Skills */}
                         {skills.filter(skill => skill.type === 'hard').length > 0 && (
-                            <div >
+                            <div className="mb-3">
                                 <h3 className="text-sm font-semibold text-gray-800 mb-2">{getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}</h3>
                                 <div className="text-sm text-gray-700">
                                     {skills.filter(skill => skill.type === 'hard').map(skill => skill.name).join(' • ')}
@@ -5641,7 +5667,7 @@ const AuroraTemplate: React.FC<{
 
                         {/* Soft Skills */}
                         {skills.filter(skill => skill.type === 'soft').length > 0 && (
-                            <div >
+                            <div className="mb-3">
                                 <h3 className="text-sm font-semibold text-gray-800 mb-2">{getSectionName('softSkills', data.cvLanguage, data.sectionNames)}</h3>
                                 <div className="text-sm text-gray-700">
                                     {skills.filter(skill => skill.type === 'soft').map(skill => skill.name).join(' • ')}
@@ -5651,7 +5677,7 @@ const AuroraTemplate: React.FC<{
 
                         {/* Default/Other Skills */}
                         {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).length > 0 && (
-                            <div >
+                            <div className="mb-3">
                                 <h3 className="text-sm font-semibold text-gray-800 mb-2">{getSectionName('coreCompetencies', data.cvLanguage, data.sectionNames)}</h3>
                                 <div className="text-sm text-gray-700">
                                     {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map(skill => skill.name).join(' • ')}
@@ -5664,28 +5690,28 @@ const AuroraTemplate: React.FC<{
             case 'projects':
                 if (!projects.length) return null;
                 return (
-                    <div key="projects" className="mb-6">
+                    <div key="projects">
                         <SectionHeader title={getSectionName('projects', data.cvLanguage, data.sectionNames)} sectionId="projects" />
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             {projects.map((project, index) => (
-                                <div key={project.id || index} className="pb-4 border-b border-gray-100 last:border-b-0">
-                                    <div className="flex justify-between items-start mb-2">
+                                <div key={project.id || index} className="border-b border-gray-100 last:border-b-0 pb-2">
+                                    <div className="flex justify-between items-start mb-1">
                                         <div className="flex-1">
                                             {project.url ? (
                                                 <a
                                                     href={project.url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="font-bold text-gray-900 text-base underline hover:no-underline"
+                                                    className="font-semibold text-gray-900 text-sm underline hover:no-underline"
                                                 >
                                                     {project.name}
                                                 </a>
                                             ) : (
-                                                <h3 className="font-bold text-gray-900 text-base">{project.name}</h3>
+                                                <h3 className="font-semibold text-gray-900 text-sm">{project.name}</h3>
                                             )}
                                         </div>
                                         {(project.startDate || project.endDate || project.current) && (
-                                            <div className="text-xs text-gray-600 font-medium text-right ml-4">
+                                            <div className="text-xs text-gray-600 font-medium text-right ml-4 flex-shrink-0">
                                                 {project.current ? (
                                                     project.startDate ? `${formatDate(project.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : getCurrentText(data.cvLanguage)
                                                 ) : project.startDate && project.endDate ? (
@@ -5697,12 +5723,12 @@ const AuroraTemplate: React.FC<{
                                         )}
                                     </div>
                                     {project.description && (
-                                        <div className="text-gray-600 text-sm leading-relaxed mb-2">
+                                        <div className="text-gray-600 text-xs leading-relaxed text-left mt-2">
                                             {renderHtmlContent(project.description, false, data.cvLanguage)}
                                         </div>
                                     )}
                                     {project.technologies && project.technologies.length > 0 && (
-                                        <div className="text-xs text-gray-600">
+                                        <div className="text-xs text-gray-600 mt-1">
                                             <span className="font-medium">
                                                 {data.cvLanguage?.includes('en') ? 'Technologies: ' : 
                                                  data.cvLanguage?.includes('tr') ? 'Teknolojiler: ' : 'Texnologiyalar: '}
@@ -5719,7 +5745,7 @@ const AuroraTemplate: React.FC<{
             case 'languages':
                 if (!languages.length) return null;
                 return (
-                    <div key="languages" className="mb-6">
+                    <div key="languages">
                         <SectionHeader title={getSectionName('languages', data.cvLanguage, data.sectionNames)} sectionId="languages" />
                         <div className="grid grid-cols-2 gap-3">
                             {languages.map((lang, index) => (
@@ -5735,11 +5761,11 @@ const AuroraTemplate: React.FC<{
             case 'certifications':
                 if (!certifications.length) return null;
                 return (
-                    <div key="certifications" className="mb-6">
+                    <div key="certifications">
                         <SectionHeader title={getSectionName('certifications', data.cvLanguage, data.sectionNames)} sectionId="certifications" />
                         <div className="space-y-3">
                             {certifications.map((cert, index) => (
-                                <div key={cert.id || index} className="pb-3 border-b border-gray-100 last:border-b-0">
+                                <div key={cert.id || index} className="border-b border-gray-100 last:border-b-0 pb-2">
                                     <div className="flex justify-between items-start mb-1">
                                         <div className="flex-1">
                                             {cert.url ? (
@@ -5747,23 +5773,23 @@ const AuroraTemplate: React.FC<{
                                                     href={cert.url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="font-bold text-gray-900 text-sm underline hover:no-underline"
+                                                    className="font-semibold text-gray-900 text-sm underline hover:no-underline"
                                                 >
                                                     {cert.name}
                                                 </a>
                                             ) : (
-                                                <h3 className="font-bold text-gray-900 text-sm">{cert.name}</h3>
+                                                <h3 className="font-semibold text-gray-900 text-sm">{cert.name}</h3>
                                             )}
-                                            <p className="text-sm text-gray-700">{cert.issuer}</p>
+                                            <p className="text-xs text-gray-700 mt-0.5">{cert.issuer}</p>
                                         </div>
                                         {cert.date && (
-                                            <div className="text-xs text-gray-600 font-medium text-right ml-4">
+                                            <div className="text-xs text-gray-600 font-medium text-right ml-4 flex-shrink-0">
                                                 {formatDate(cert.date, data.cvLanguage)}
                                             </div>
                                         )}
                                     </div>
                                     {cert.description && (
-                                        <div className="text-gray-600 text-sm leading-relaxed">
+                                        <div className="text-gray-600 text-xs leading-relaxed text-left mt-2">
                                             {renderHtmlContent(cert.description, false, data.cvLanguage)}
                                         </div>
                                     )}
@@ -5776,18 +5802,18 @@ const AuroraTemplate: React.FC<{
             case 'volunteer':
                 if (!volunteerExperience.length) return null;
                 return (
-                    <div key="volunteer" className="mb-6">
+                    <div key="volunteer">
                         <SectionHeader title={getSectionName('volunteerExperience', data.cvLanguage, data.sectionNames)} sectionId="volunteer" />
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             {volunteerExperience.map((vol, index) => (
-                                <div key={vol.id || index} className="pb-4 border-b border-gray-100 last:border-b-0">
-                                    <div className="flex justify-between items-start mb-2">
+                                <div key={vol.id || index} className="border-b border-gray-100 last:border-b-0 pb-2">
+                                    <div className="flex justify-between items-start mb-1">
                                         <div className="flex-1">
-                                            <h3 className="font-bold text-gray-900 text-base">{vol.role}</h3>
-                                            <p className="font-medium text-gray-700 text-sm">{vol.organization}</p>
+                                            <h3 className="font-semibold text-gray-900 text-sm">{vol.role}</h3>
+                                            <p className="font-medium text-gray-700 text-xs mt-0.5">{vol.organization}</p>
                                         </div>
                                         {(vol.startDate || vol.endDate) && (
-                                            <div className="text-xs text-gray-600 font-medium text-right ml-4">
+                                            <div className="text-xs text-gray-600 font-medium text-right ml-4 flex-shrink-0">
                                                 {vol.startDate ? (
                                                     vol.current ? `${formatDate(vol.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
                                                     vol.endDate ? `${formatDate(vol.startDate, data.cvLanguage)} - ${formatDate(vol.endDate, data.cvLanguage)}` :
@@ -5801,7 +5827,7 @@ const AuroraTemplate: React.FC<{
                                         )}
                                     </div>
                                     {vol.description && (
-                                        <div className="text-gray-600 text-sm leading-relaxed">
+                                        <div className="text-gray-600 text-xs leading-relaxed text-left mt-2">
                                             {renderHtmlContent(vol.description, false, data.cvLanguage)}
                                         </div>
                                     )}
@@ -5814,26 +5840,30 @@ const AuroraTemplate: React.FC<{
             case 'customSections':
                 if (!customSections.length) return null;
                 return (
-                    <div key="customSections" className="mb-6">
+                    <div key="customSections">
                         {customSections.map((customSection, sectionIndex) => (
-                            <div key={customSection.id || sectionIndex} className="mb-6">
+                            <div key={customSection.id || sectionIndex} className="mb-4">
                                 <SectionHeader title={customSection.title} sectionId={`custom-${customSection.id}`} />
                                 <div className="space-y-3">
                                     {customSection.items.map((item, index) => (
-                                        <div key={item.id || index} className="pb-3 border-b border-gray-100 last:border-b-0">
-                                            {item.title && (
-                                                <h3 className="font-bold text-gray-900 text-base mb-1">{item.title}</h3>
-                                            )}
-                                            {item.subtitle && (
-                                                <p className="font-medium text-gray-700 text-sm mb-1">{item.subtitle}</p>
-                                            )}
-                                            {item.date && (
-                                                <p className="text-xs text-gray-600 font-medium mb-2">
-                                                    {formatDate(item.date, data.cvLanguage)}
-                                                </p>
-                                            )}
+                                        <div key={item.id || index} className="border-b border-gray-100 last:border-b-0 pb-2">
+                                            <div className="flex justify-between items-start mb-1">
+                                                <div className="flex-1">
+                                                    {item.title && (
+                                                        <h3 className="font-semibold text-gray-900 text-sm">{item.title}</h3>
+                                                    )}
+                                                    {item.subtitle && (
+                                                        <p className="font-medium text-gray-700 text-xs mt-0.5">{item.subtitle}</p>
+                                                    )}
+                                                </div>
+                                                {item.date && (
+                                                    <span className="text-xs text-gray-600 font-medium text-right flex-shrink-0">
+                                                        {formatDate(item.date, data.cvLanguage)}
+                                                    </span>
+                                                )}
+                                            </div>
                                             {item.description && (
-                                                <div className="text-gray-600 text-sm leading-relaxed">
+                                                <div className="text-gray-600 text-xs leading-relaxed text-left mt-2">
                                                     {renderHtmlContent(item.description, false, data.cvLanguage)}
                                                 </div>
                                             )}
@@ -5843,7 +5873,7 @@ const AuroraTemplate: React.FC<{
                                                         href={(item.url)?.startsWith('http') ? (item.url) : `https://${(item.url)}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer text-sm break-all"
+                                                        className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer text-xs break-all"
                                                     >
                                                         {item.url}
                                                     </a>
@@ -5865,11 +5895,11 @@ const AuroraTemplate: React.FC<{
                     if (!customSection || !customSection.items.length) return null;
 
                     return (
-                        <div key={sectionId} className="mb-6">
+                        <div key={sectionId}>
                             <SectionHeader title={customSection.title} sectionId={sectionId} />
                             <div className="space-y-3">
                                 {customSection.items.map((item, index) => (
-                                    <div key={item.id || index} className="pb-3 border-b border-gray-100 last:border-b-0">
+                                    <div key={item.id || index} className="border-b border-gray-100 last:border-b-0 pb-3">
                                         {item.title && (
                                             <h3 className="font-bold text-gray-900 text-base mb-1">{item.title}</h3>
                                         )}
@@ -5920,7 +5950,7 @@ const AuroraTemplate: React.FC<{
                 padding: '20mm'
             }}>
                 {/* Header Section - Clean and Professional */}
-                <div className="mb-8 pb-6 border-b-2 border-gray-900">
+                <div className="mb-6 pb-4 border-b-2 border-gray-900">
                     <div className="text-center">
                         {/* Name */}
                         <h1 className="text-3xl font-bold text-gray-900 mb-3 tracking-wide">
@@ -5967,7 +5997,7 @@ const AuroraTemplate: React.FC<{
                         style={{ 
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '24px'
+                            gap: '16px'
                         }}
                     >
                         {sectionOrder.map((sectionId) => {
@@ -6072,7 +6102,7 @@ const ExclusiveTemplate: React.FC<{
                 return (
                     <div key="summary" >
                         <SectionHeader title={getSectionName('summary', data.cvLanguage, data.sectionNames)} icon="📝" sectionId="summary" />
-                        <div className="text-gray-700 leading-relaxed text-sm px-1 py-2">
+                        <div className="text-gray-700 leading-relaxed text-sm text-left" style={{ marginLeft: 0, paddingLeft: 0 }}>
                             {renderHtmlContent(personalInfo.summary, false, data.cvLanguage)}
                         </div>
                     </div>
@@ -6085,14 +6115,14 @@ const ExclusiveTemplate: React.FC<{
                         <SectionHeader title={getSectionName('experience', data.cvLanguage, data.sectionNames)} icon="💼" sectionId="experience" />
                         <div className="space-y-2">
                             {experience.map((exp, index) => (
-                                <div key={exp.id || index} className="px-1 py-2">
-                                    <div className="flex flex-row items-start justify-between gap-2 mb-1">
+                                <div key={exp.id || index} className="pb-1">
+                                    <div className="flex flex-row items-start justify-between gap-3 mb-1">
                                         <div className="flex-1">
-                                            <h3 className="font-bold text-sm text-gray-800">{exp.position}</h3>
-                                            <h4 className="font-medium text-blue-600 text-xs">{exp.company}</h4>
+                                            <h3 className="font-semibold text-sm text-gray-800">{exp.position}</h3>
+                                            <h4 className="font-medium text-blue-600 text-xs mt-0.5">{exp.company}</h4>
                                         </div>
                                         {(exp.startDate || exp.endDate) && (
-                                            <div className="text-xs text-gray-600 font-medium text-right">
+                                            <div className="text-xs text-gray-600 font-medium text-right flex-shrink-0">
                                                 {exp.startDate ? (
                                                     exp.current ? `${formatDate(exp.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
                                                     exp.endDate ? `${formatDate(exp.startDate, data.cvLanguage)} - ${formatDate(exp.endDate, data.cvLanguage)}` :
@@ -6104,7 +6134,7 @@ const ExclusiveTemplate: React.FC<{
                                         )}
                                     </div>
                                     {exp.description && (
-                                        <div className="text-gray-700 leading-relaxed text-xs mt-1">
+                                        <div className="text-gray-700 leading-relaxed text-xs text-left mt-1" style={{ marginLeft: 0, paddingLeft: 0 }}>
                                             {renderHtmlContent(exp.description, false, data.cvLanguage)}
                                         </div>
                                     )}
@@ -6119,13 +6149,13 @@ const ExclusiveTemplate: React.FC<{
                 return (
                     <div key="education" >
                         <SectionHeader title={getSectionName('education', data.cvLanguage, data.sectionNames)} icon="🎓" sectionId="education" />
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                             {education.map((edu, index) => (
-                                <div key={edu.id || index} className="px-1 py-2">
-                                    <div className="flex flex-row items-start justify-between gap-2 mb-1">
+                                <div key={edu.id || index} className="pb-2">
+                                    <div className="flex flex-row items-start justify-between gap-3 mb-2">
                                         <div className="flex-1">
-                                            <h3 className="font-bold text-sm text-gray-800">{edu.degree}</h3>
-                                            <h4 className="font-medium text-blue-600 text-xs">{edu.institution}</h4>
+                                            <h3 className="font-semibold text-sm text-gray-800">{edu.degree}</h3>
+                                            <h4 className="font-medium text-blue-600 text-xs mt-1">{edu.institution}</h4>
                                             {(edu.field || edu.gpa) && (
                                                 <div className="text-xs text-gray-700 mt-1">
                                                     {edu.field && <span className="italic">{edu.field}</span>}
@@ -6135,7 +6165,7 @@ const ExclusiveTemplate: React.FC<{
                                             )}
                                         </div>
                                         {(edu.startDate || edu.endDate) && (
-                                            <div className="text-xs text-gray-600 font-medium text-right">
+                                            <div className="text-xs text-gray-600 font-medium text-right flex-shrink-0">
                                                 {edu.startDate ? (
                                                     edu.current ? `${formatDate(edu.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
                                                     edu.endDate ? `${formatDate(edu.startDate, data.cvLanguage)} - ${formatDate(edu.endDate, data.cvLanguage)}` :
@@ -6147,7 +6177,7 @@ const ExclusiveTemplate: React.FC<{
                                         )}
                                     </div>
                                     {edu.description && (
-                                        <div className="text-gray-700 mt-1 leading-relaxed text-xs">
+                                        <div className="text-gray-700 leading-relaxed text-xs text-left" style={{ marginLeft: 0, paddingLeft: 0 }}>
                                             {renderHtmlContent(edu.description, false, data.cvLanguage)}
                                         </div>
                                     )}
@@ -6213,26 +6243,26 @@ const ExclusiveTemplate: React.FC<{
                 return (
                     <div key="projects" >
                         <SectionHeader title={getSectionName('projects', data.cvLanguage, data.sectionNames)} icon="🚀" sectionId="projects" />
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                             {projects.map((project, index) => (
-                                <div key={project.id || index} className="px-1 py-2">
-                                    <div className="flex flex-row items-start justify-between gap-2 mb-1">
+                                <div key={project.id || index} className="pb-2">
+                                    <div className="flex flex-row items-start justify-between gap-3 mb-2">
                                         <div className="flex-1">
                                             {project.url ? (
                                                 <a
                                                     href={project.url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="font-bold text-sm text-gray-900 hover:text-gray-700 underline transition-colors"
+                                                    className="font-semibold text-sm text-gray-900 hover:text-gray-700 underline transition-colors"
                                                 >
                                                     {project.name}
                                                 </a>
                                             ) : (
-                                                <h3 className="font-bold text-sm text-gray-800">{project.name}</h3>
+                                                <h3 className="font-semibold text-sm text-gray-800">{project.name}</h3>
                                             )}
                                         </div>
                                         {(project.startDate || project.endDate || project.current) && (
-                                            <span className="text-xs text-gray-600 font-medium text-right">
+                                            <span className="text-xs text-gray-600 font-medium text-right flex-shrink-0">
                                                 {project.current ? (
                                                     project.startDate ? `${formatDate(project.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : getCurrentText(data.cvLanguage)
                                                 ) : project.startDate && project.endDate ? (
@@ -6244,23 +6274,30 @@ const ExclusiveTemplate: React.FC<{
                                         )}
                                     </div>
                                     {project.description && (
-                                        <div className="text-gray-700 mb-2 leading-relaxed text-xs">
+                                        <div className="text-gray-700 mb-2 leading-relaxed text-xs text-left" style={{ marginLeft: 0, paddingLeft: 0 }}>
                                             {renderHtmlContent(project.description, false, data.cvLanguage)}
                                         </div>
                                     )}
                                     {project.technologies && project.technologies.length > 0 && (
-                                        <div className="mb-1">
-                                            <h5 className="font-semibold text-gray-800 mb-1 text-xs">
+                                        <p className="text-xs text-gray-600 mb-1">
+                                            <span className="font-medium text-gray-800">
                                                 {data.cvLanguage?.includes('en') ? 'Technologies:' : 
                                                  data.cvLanguage?.includes('tr') ? 'Teknolojiler:' : 'Texnologiyalar:'}
-                                            </h5>
-                                            <div className="flex flex-wrap gap-1">
-                                                {project.technologies.map((tech, i) => (
-                                                    <span key={i} className="bg-gray-100 text-gray-800 px-2 py-1 text-xs rounded">
-                                                        {tech}
-                                                    </span>
-                                                ))}
-                                            </div>
+                                            </span>{' '}
+                                            {project.technologies.join(', ')}
+                                        </p>
+                                    )}
+                                    {project.github && (
+                                        <div className="text-xs text-gray-600">
+                                            <span className="font-medium">GitHub:</span>{' '}
+                                            <a
+                                                href={project.github.startsWith('http') ? project.github : `https://github.com/${project.github}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer break-all"
+                                            >
+                                                {project.github}
+                                            </a>
                                         </div>
                                     )}
                                 </div>
@@ -6294,33 +6331,33 @@ const ExclusiveTemplate: React.FC<{
                 return (
                     <div key="certifications" >
                         <SectionHeader title={getSectionName('certifications', data.cvLanguage, data.sectionNames)} icon="🏆" sectionId="certifications" />
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                             {certifications.map((cert, index) => (
-                                <div key={cert.id || index} className="px-1 py-2">
-                                    <div className="flex flex-row items-start justify-between gap-2 mb-1">
+                                <div key={cert.id || index} className="pb-2">
+                                    <div className="flex flex-row items-start justify-between gap-3 mb-1">
                                         <div className="flex-1">
                                             {cert.url ? (
                                                 <a
                                                     href={cert.url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="font-bold text-sm text-gray-800 hover:text-blue-600 underline transition-colors"
+                                                    className="font-semibold text-sm text-gray-800 hover:text-blue-600 underline transition-colors"
                                                 >
                                                     {cert.name}
                                                 </a>
                                             ) : (
-                                                <h3 className="font-bold text-sm text-gray-800">{cert.name}</h3>
+                                                <h3 className="font-semibold text-sm text-gray-800">{cert.name}</h3>
                                             )}
-                                            <p className="text-blue-600 font-medium text-xs">{cert.issuer}</p>
+                                            <p className="text-blue-600 font-medium text-xs mt-1">{cert.issuer}</p>
                                         </div>
                                         {cert.date && (
-                                            <span className="text-xs text-gray-600 font-medium text-right">
+                                            <span className="text-xs text-gray-600 font-medium text-right flex-shrink-0">
                                                 {formatDate(cert.date, data.cvLanguage)}
                                             </span>
                                         )}
                                     </div>
                                     {cert.description && (
-                                        <div className="text-gray-700 leading-relaxed text-xs mt-1">
+                                        <div className="text-gray-700 leading-relaxed text-xs text-left" style={{ marginLeft: 0, paddingLeft: 0 }}>
                                             {renderHtmlContent(cert.description, false, data.cvLanguage)}
                                         </div>
                                     )}
@@ -6335,16 +6372,16 @@ const ExclusiveTemplate: React.FC<{
                 return (
                     <div key="volunteer" >
                         <SectionHeader title={getSectionName('volunteerExperience', data.cvLanguage, data.sectionNames)} icon="🤝" sectionId="volunteer" />
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                             {volunteerExperience.map((vol, index) => (
-                                <div key={vol.id || index} className="px-1 py-2">
-                                    <div className="flex flex-row items-start justify-between gap-2 mb-1">
+                                <div key={vol.id || index}>
+                                    <div className="flex flex-row items-start justify-between gap-3 mb-2">
                                         <div className="flex-1">
-                                            <h3 className="font-bold text-sm text-gray-800">{vol.role}</h3>
-                                            <h4 className="font-medium text-blue-600 text-xs">{vol.organization}</h4>
+                                            <h3 className="font-semibold text-sm text-gray-800">{vol.role}</h3>
+                                            <h4 className="font-medium text-blue-600 text-xs mt-1">{vol.organization}</h4>
                                         </div>
                                         {(vol.startDate || vol.endDate) && (
-                                            <div className="text-xs text-gray-600 font-medium text-right">
+                                            <div className="text-xs text-gray-600 font-medium text-right flex-shrink-0">
                                                 {vol.startDate ? (
                                                     vol.current ? `${formatDate(vol.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
                                                     vol.endDate ? `${formatDate(vol.startDate, data.cvLanguage)} - ${formatDate(vol.endDate, data.cvLanguage)}` :
@@ -6356,7 +6393,7 @@ const ExclusiveTemplate: React.FC<{
                                         )}
                                     </div>
                                     {vol.description && (
-                                        <div className="text-gray-700 leading-relaxed text-xs mt-1">
+                                        <div className="text-gray-700 leading-relaxed text-xs text-left" style={{ marginLeft: 0, paddingLeft: 0 }}>
                                             {renderHtmlContent(vol.description, false, data.cvLanguage)}
                                         </div>
                                     )}
@@ -6373,27 +6410,31 @@ const ExclusiveTemplate: React.FC<{
                         {customSections.map((customSection, sectionIndex) => (
                             <div key={customSection.id || sectionIndex} >
                                 <SectionHeader title={customSection.title} icon="📋" sectionId={`custom-${customSection.id}`} />
-                                <div className="space-y-2">
+                                <div className="space-y-3">
                                     {customSection.items.map((item, index) => (
-                                        <div key={item.id || index} className="px-1 py-2">
-                                            {item.title && (
-                                                <h3 className="font-bold text-sm text-gray-800 mb-1">{item.title}</h3>
-                                            )}
-                                            {item.subtitle && (
-                                                <h4 className="font-medium text-blue-600 text-xs mb-1">{item.subtitle}</h4>
-                                            )}
-                                            {item.date && (
-                                                <p className="text-xs text-gray-600 mb-2">
-                                                    {formatDate(item.date, data.cvLanguage)}
-                                                </p>
-                                            )}
+                                        <div key={item.id || index} className="pb-2">
+                                            <div className="flex flex-row items-start justify-between gap-3 mb-2">
+                                                <div className="flex-1">
+                                                    {item.title && (
+                                                        <h3 className="font-semibold text-sm text-gray-800">{item.title}</h3>
+                                                    )}
+                                                    {item.subtitle && (
+                                                        <h4 className="font-medium text-blue-600 text-xs mt-1">{item.subtitle}</h4>
+                                                    )}
+                                                </div>
+                                                {item.date && (
+                                                    <span className="text-xs text-gray-600 font-medium text-right flex-shrink-0">
+                                                        {formatDate(item.date, data.cvLanguage)}
+                                                    </span>
+                                                )}
+                                            </div>
                                             {item.description && (
-                                                <div className="text-gray-700 leading-relaxed text-xs">
+                                                <div className="text-gray-700 leading-relaxed text-xs text-left" style={{ marginLeft: 0, paddingLeft: 0 }}>
                                                     {renderHtmlContent(item.description, false, data.cvLanguage)}
                                                 </div>
                                             )}
                                             {item.url && (
-                                                <div className="mt-1">
+                                                <div className="mt-2">
                                                     <a
                                                         href={(item.url)?.startsWith('http') ? (item.url) : `https://${(item.url)}`}
                                                         target="_blank"
@@ -6422,27 +6463,31 @@ const ExclusiveTemplate: React.FC<{
                     return (
                         <div key={sectionId} >
                             <SectionHeader title={customSection.title} icon="📋" sectionId={sectionId} />
-                            <div className="space-y-2">
+                            <div className="space-y-3">
                                 {customSection.items.map((item, index) => (
-                                    <div key={item.id || index} className="px-1 py-2">
-                                        {item.title && (
-                                            <h3 className="font-bold text-sm text-gray-800 mb-1">{item.title}</h3>
-                                        )}
-                                        {item.subtitle && (
-                                            <h4 className="font-medium text-blue-600 text-xs mb-1">{item.subtitle}</h4>
-                                        )}
-                                        {item.date && (
-                                            <p className="text-xs text-gray-600 mb-2">
-                                                {formatDate(item.date, data.cvLanguage)}
-                                            </p>
-                                        )}
+                                    <div key={item.id || index} className="pb-2">
+                                        <div className="flex flex-row items-start justify-between gap-3 mb-2">
+                                            <div className="flex-1">
+                                                {item.title && (
+                                                    <h3 className="font-semibold text-sm text-gray-800">{item.title}</h3>
+                                                )}
+                                                {item.subtitle && (
+                                                    <h4 className="font-medium text-blue-600 text-xs mt-1">{item.subtitle}</h4>
+                                                )}
+                                            </div>
+                                            {item.date && (
+                                                <span className="text-xs text-gray-600 font-medium text-right flex-shrink-0">
+                                                    {formatDate(item.date, data.cvLanguage)}
+                                                </span>
+                                            )}
+                                        </div>
                                         {item.description && (
-                                            <div className="text-gray-700 leading-relaxed text-xs">
+                                            <div className="text-gray-700 leading-relaxed text-xs text-left" style={{ marginLeft: 0, paddingLeft: 0 }}>
                                                 {renderHtmlContent(item.description, false, data.cvLanguage)}
                                             </div>
                                         )}
                                         {item.url && (
-                                            <div className="mt-1">
+                                            <div className="mt-2">
                                                 <a
                                                     href={(item.url)?.startsWith('http') ? (item.url) : `https://${(item.url)}`}
                                                     target="_blank"
@@ -6586,7 +6631,7 @@ const ExclusiveTemplate: React.FC<{
                         style={{ 
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '24px'
+                            gap: '12px'
                         }}
                     >
                         {sectionOrder.map((sectionId) => {
