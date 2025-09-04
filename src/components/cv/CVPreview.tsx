@@ -1445,7 +1445,7 @@ const BasicTemplate: React.FC<{
                         style={{ 
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '8px'
+                            gap: 'var(--cv-section-spacing, 8px)'
                         }}
                     >
                         {sectionOrder.map((sectionType) => {
@@ -2077,7 +2077,7 @@ const ModernTemplate: React.FC<{
         >
             <div className="w-full h-full bg-white text-gray-900" style={{ padding: '20mm' }}>
                 <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
-                    <div className="space-y-8">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 32px)' }}>
                         {sectionOrder.map((sectionType) => renderModernSection(sectionType)).filter(Boolean)}
                     </div>
                 </SortableContext>
@@ -2771,16 +2771,14 @@ const ATSFriendlyTemplate: React.FC<{
 
                 {/* Contact Information */}
                 <div className="cv-section avoid-break">
-                    <h2 className="text-sm font-bold text-white tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
-                        {data.cvLanguage?.includes('en') ? 'CONTACT' : 
-                         data.cvLanguage?.includes('tr') ? 'ILETISIM' : 'ƏLAQƏ'}
+                    <h2 className="text-sm font-bold text-white tracking-wide border-b border-blue-300 pb-1 uppercase">
+                        {data.cvLanguage === 'english' ? 'CONTACT' : 'ƏLAQƏ'}
                     </h2>
                     <div className="space-y-2 text-xs">
                         {personalInfo.email && (
                             <div className="flex items-start gap-2">
                                 <span className="font-medium text-blue-200 min-w-[40px]">
-                                    {data.cvLanguage?.includes('en') ? 'Email:' : 
-                                     data.cvLanguage?.includes('tr') ? 'E-posta:' : 'Email:'}
+                                    {data.cvLanguage === 'english' ? 'Email:' : 'E-poçt:'}
                                 </span>
                                 <span className="text-white">{personalInfo.email}</span>
                             </div>
@@ -2788,8 +2786,7 @@ const ATSFriendlyTemplate: React.FC<{
                         {personalInfo.phone && (
                             <div className="flex items-start gap-2">
                                 <span className="font-medium text-blue-200 min-w-[40px]">
-                                    {data.cvLanguage?.includes('en') ? 'Phone:' : 
-                                     data.cvLanguage?.includes('tr') ? 'Telefon:' : 'Telefon:'}
+                                    {data.cvLanguage === 'english' ? 'Phone:' : 'Telefon:'}
                                 </span>
                                 <span className="text-white">{personalInfo.phone}</span>
                             </div>
@@ -2819,8 +2816,7 @@ const ATSFriendlyTemplate: React.FC<{
                         {personalInfo.website && (
                             <div className="flex items-start gap-2">
                                 <span className="font-medium text-blue-200 min-w-[40px]">
-                                    {data.cvLanguage?.includes('en') ? 'Website:' : 
-                                     data.cvLanguage?.includes('tr') ? 'Web Sitesi:' : 'Veb sayt:'}
+                                    {data.cvLanguage === 'english' ? 'Website:' : 'Sayt:'}
                                 </span>
                                 <span className="text-white break-all">{personalInfo.website}</span>
                             </div>
@@ -3120,7 +3116,7 @@ const ATSFriendlyTemplate: React.FC<{
                             style={{ 
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: '18px'
+                                gap: 'var(--cv-section-spacing, 18px)'
                             }}
                         >
                             {sectionOrder.map((sectionType) => {
@@ -3830,7 +3826,7 @@ const LumenTemplate: React.FC<{
                             <div className="flex items-start gap-2">
                                 <span className="font-medium text-gray-600 min-w-[40px]">
                                     {data.cvLanguage?.includes('en') ? 'Email:' : 
-                                     data.cvLanguage?.includes('tr') ? 'E-posta:' : 'Email:'}
+                                     data.cvLanguage?.includes('tr') ? 'E-posta:' : 'E-poçt:'}
                                 </span>
                                 <span className="text-gray-800">{personalInfo.email}</span>
                             </div>
@@ -3838,8 +3834,7 @@ const LumenTemplate: React.FC<{
                         {personalInfo.phone && (
                             <div className="flex items-start gap-2">
                                 <span className="font-medium text-gray-600 min-w-[40px]">
-                                    {data.cvLanguage?.includes('en') ? 'Phone:' : 
-                                     data.cvLanguage?.includes('tr') ? 'Telefon:' : 'Telefon:'}
+                                    {data.cvLanguage === 'english' ? 'Phone:' : 'Telefon:'}
                                 </span>
                                 <span className="text-gray-800">{personalInfo.phone}</span>
                             </div>
@@ -3869,8 +3864,7 @@ const LumenTemplate: React.FC<{
                         {personalInfo.website && (
                             <div className="flex items-start gap-2">
                                 <span className="font-medium text-gray-600 min-w-[40px]">
-                                    {data.cvLanguage?.includes('en') ? 'Website:' : 
-                                     data.cvLanguage?.includes('tr') ? 'Web Sitesi:' : 'Veb sayt:'}
+                                    {data.cvLanguage === 'english' ? 'Website:' : 'Sayt:'}
                                 </span>
                                 <span className="text-gray-800 break-all">{personalInfo.website}</span>
                             </div>
@@ -4133,7 +4127,7 @@ const LumenTemplate: React.FC<{
                             style={{ 
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: '24px'
+                                gap: 'var(--cv-section-spacing, 24px)'
                             }}
                         >
                             {sectionOrder.map((sectionType) => {
@@ -4331,7 +4325,7 @@ const VertexTemplate: React.FC<{
                                                 <h4 className="font-semibold text-gray-700 text-base mb-3">{edu.institution}</h4>
                                                 {(edu.field || edu.gpa) && (
                                                     <div className="text-sm text-gray-600 mb-3 font-mono bg-gray-50 p-3 rounded border">
-                                                        {edu.field && <div className="mb-1">{data.cvLanguage === 'english' ? 'Field' : 'Sahə'}: {edu.field}</div>}
+                                                        {edu.field && <div className="mb-1">{edu.field}</div>}
                                                         {edu.gpa && <div>{data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: {edu.gpa}</div>}
                                                     </div>
                                                 )}
@@ -4722,19 +4716,25 @@ const VertexTemplate: React.FC<{
                             <div className="space-y-5">
                                 {personalInfo.email && (
                                     <div className="flex items-center justify-between border-b border-gray-300 pb-4">
-                                        <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-24 font-semibold">Email</span>
+                                        <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-24 font-semibold">
+                                            {data.cvLanguage === 'english' ? 'Email' : 'E-poçt'}
+                                        </span>
                                         <span className="text-sm text-gray-900 font-mono flex-1 text-right">{personalInfo.email}</span>
                                     </div>
                                 )}
                                 {personalInfo.phone && (
                                     <div className="flex items-center justify-between border-b border-gray-300 pb-4">
-                                        <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-24 font-semibold">Phone</span>
+                                        <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-24 font-semibold">
+                                            {data.cvLanguage === 'english' ? 'Phone' : 'Telefon'}
+                                        </span>
                                         <span className="text-sm text-gray-900 font-mono flex-1 text-right">{personalInfo.phone}</span>
                                     </div>
                                 )}
                                 {personalInfo.website && (
                                     <div className="flex items-center justify-between border-b border-gray-300 pb-4">
-                                        <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-24 font-semibold">Website</span>
+                                        <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-24 font-semibold">
+                                            {data.cvLanguage === 'english' ? 'Website' : 'Sayt'}
+                                        </span>
                                         <span className="text-sm text-gray-900 font-mono flex-1 text-right truncate">{personalInfo.website}</span>
                                     </div>
                                 )}
@@ -4744,7 +4744,9 @@ const VertexTemplate: React.FC<{
                             <div className="space-y-5">
                                 {personalInfo.location && (
                                     <div className="flex items-center justify-between border-b border-gray-300 pb-4">
-                                        <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-24 font-semibold">Location</span>
+                                        <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-24 font-semibold">
+                                            {data.cvLanguage === 'english' ? 'Location' : 'Ünvan'}
+                                        </span>
                                         <span className="text-sm text-gray-900 font-mono flex-1 text-right">{personalInfo.location}</span>
                                     </div>
                                 )}
@@ -4781,7 +4783,7 @@ const VertexTemplate: React.FC<{
                         style={{ 
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '24px'
+                            gap: 'var(--cv-section-spacing, 24px)'
                         }}
                     >
                         {sectionOrder.map((sectionId) => {
@@ -5372,7 +5374,7 @@ const HorizonTemplate: React.FC<{
                             // For mobile: show all sections in single column
                             if (isMobile) {
                                 return (
-                                    <div className="space-y-6">
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                                         {availableSections.map((sectionId) => {
                                             const section = generateSection(sectionId);
                                             if (!section) return null;
@@ -5416,7 +5418,7 @@ const HorizonTemplate: React.FC<{
                             return (
                                 <>
                                     {/* Left Column */}
-                                    <div className="space-y-6">
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                                         {leftSections.map((sectionId) => {
                                             const section = generateSection(sectionId);
                                             if (!section) return null;
@@ -5440,7 +5442,7 @@ const HorizonTemplate: React.FC<{
                                     </div>
 
                                     {/* Right Column */}
-                                    <div className="space-y-6">
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                                         {rightSections.map((sectionId) => {
                                             const section = generateSection(sectionId);
                                             if (!section) return null;
@@ -6645,7 +6647,7 @@ const ExclusiveTemplate: React.FC<{
                         style={{ 
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '12px'
+                            gap: 'var(--cv-section-spacing, 12px)'
                         }}
                     >
                         {sectionOrder.map((sectionId) => {
@@ -7096,6 +7098,8 @@ export default function CVPreview({
                     ['--cv-body-weight' as any]: fontSettings.bodyWeight,
                     ['--cv-small-weight' as any]: fontSettings.smallWeight,
                     ['--cv-section-spacing' as any]: `${fontSettings.sectionSpacing}px`,
+                    ['--cv-section-margin-top' as any]: `${fontSettings.sectionSpacing}px`,
+                    ['--cv-section-margin-bottom' as any]: `${fontSettings.sectionSpacing}px`,
                     lineHeight: '1.5',
                     // Enhanced mobile touch optimization for smooth scroll
                     touchAction: isMobile ? 'pan-x pan-y pinch-zoom' : 'pan-y',
