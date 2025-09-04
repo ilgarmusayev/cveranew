@@ -121,7 +121,16 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
 
       const response = await apiClient.post('/api/ai/generate-skills', { 
         cvData,
-        targetLanguage: cvData?.cvLanguage || 'azerbaijani' // Pass CV language for appropriate suggestions
+        // Pass SAME language as CV for same-language suggestions
+        targetLanguage: cvData?.cvLanguage || 'english',
+        // Add timestamp to ensure new suggestions each time
+        requestId: Date.now().toString()
+      });
+
+      console.log('🔄 Skills API Request:', {
+        cvLanguage: cvData?.cvLanguage,
+        targetLanguage: cvData?.cvLanguage || 'english',
+        requestId: Date.now().toString()
       });
 
       console.log('📡 AI Skills API Response:', {
@@ -191,8 +200,17 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
         showError(errorMessage);
       }
     } catch (error) {
-      console.error('� AI Skills Generation Error:', error);
-      showError(cvLanguage === 'english' ? 'Error occurred during AI skill suggestion.' : 'AI bacarıq təklifi zamanı xəta baş verdi.');
+      console.error('🚨 AI Skills Generation Error:', error);
+      console.error('🚨 Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      showError(cvLanguage === 'english' 
+        ? `Error occurred during AI skill suggestion: ${errorMessage}` 
+        : `AI bacarıq təklifi zamanı xəta baş verdi: ${errorMessage}`
+      );
     } finally {
       setAiSuggesting(false);
     }

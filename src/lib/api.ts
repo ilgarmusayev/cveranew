@@ -68,7 +68,12 @@ export class ApiClient {
         return { data: null, status: response.status };
       }
 
-      const data = await response.json();
+      const data = await response.json().catch(async (jsonError) => {
+        console.error('JSON parse error:', jsonError);
+        const text = await response.text();
+        console.log('Response as text:', text);
+        throw new Error(`JSON parse xətası: ${jsonError.message}. Response: ${text.substring(0, 200)}`);
+      });
 
       if (!response.ok) {
         // Handle authentication errors
