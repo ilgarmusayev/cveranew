@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
     DndContext,
     closestCenter,
@@ -816,7 +816,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
                 ${isPressed && isMobile ? 'bg-blue-100/50 m-0 p-0' : ''}
                 ${isDropTarget ? 'bg-blue-200/50 border-2 border-blue-400 border-dashed m-0 p-0' : ''}
                 transition-all duration-200 ease-out
-                rounded-lg border-2 border-transparent m-1
+                rounded-lg border-2 border-transparent m-0
                 ${isMobile ? 'touch-manipulation' : 'touch-manipulation'}
                 select-none
                 ${isMobile ? 'min-h-[80px]' : ''}
@@ -874,6 +874,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
                 className={`
                     transition-transform duration-200
                     ${dragIconPosition === 'right' ? 'pr-8' : 'pr-2'}
+                    ${id === 'summary' ? 'py-0' : ''}
                 `}
                 style={{ userSelect: isDragging && !isMobile ? 'none' : 'auto' }}
             >
@@ -986,11 +987,11 @@ const BasicTemplate: React.FC<{
         switch (sectionType) {
             case 'summary':
                 return personalInfo.summary ? (
-                    <div className="mb-4 cv-section">
-                        <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
+                    <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingBottom: 0 }}>
+                        <h2 className="text-base font-semibold text-blue-600 my-0 border-b border-gray-300 pb-1">
                             {getSectionName('summary', data.cvLanguage, data.sectionNames)}
                         </h2>
-                        <div className="text-gray-700 leading-relaxed text-xs">
+                        <div className="text-gray-700 leading-relaxed text-xs mt-1 mb-0" style={{ marginBottom: 0, paddingBottom: 0 }}>
                             {renderHtmlContent(personalInfo.summary, false, data.cvLanguage)}
                         </div>
                     </div>
@@ -999,7 +1000,7 @@ const BasicTemplate: React.FC<{
             case 'experience':
                 console.log('Experience data in renderSection:', experience);
                 return experience && experience.length > 0 ? (
-                    <div className="mb-4">
+                    <div>
                         <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                             {getSectionName('experience', data.cvLanguage, data.sectionNames)}
                         </h2>
@@ -1034,7 +1035,7 @@ const BasicTemplate: React.FC<{
 
             case 'education':
                 return education && education.length > 0 ? (
-                    <div className="mb-4">
+                    <div>
                         <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                             {getSectionName('education', data.cvLanguage, data.sectionNames)}
                         </h2>
@@ -1076,10 +1077,10 @@ const BasicTemplate: React.FC<{
                 // Filter out empty skills (no skill name)
                 const validSkills = skills?.filter(skill => skill.name && skill.name.trim() !== '') || [];
                 return validSkills.length > 0 ? (
-                    <div className="mb-4">
+                    <div>
                         {/* Hard Skills */}
                         {validSkills.filter(skill => skill.type === 'hard').length > 0 && (
-                            <div className="mb-4">
+                            <div >
                                 <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                                     {getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
                                 </h2>
@@ -1102,7 +1103,7 @@ const BasicTemplate: React.FC<{
 
                         {/* Soft Skills */}
                         {validSkills.filter(skill => skill.type === 'soft').length > 0 && (
-                            <div className="mb-4">
+                            <div >
                                 <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                                     {getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
                                 </h2>
@@ -1125,7 +1126,7 @@ const BasicTemplate: React.FC<{
 
                         {/* General Skills */}
                         {validSkills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).length > 0 && (
-                            <div className="mb-4">
+                            <div >
                                 <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                                     {getSectionName('skills', data.cvLanguage, data.sectionNames)}
                                 </h2>
@@ -1152,7 +1153,7 @@ const BasicTemplate: React.FC<{
                 // Filter out empty languages (no language name)
                 const validLanguages = languages?.filter(lang => lang.language && lang.language.trim() !== '') || [];
                 return validLanguages.length > 0 ? (
-                    <div className="mb-4">
+                    <div>
                         <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                             {getSectionName('languages', data.cvLanguage, data.sectionNames)}
                         </h2>
@@ -1168,7 +1169,7 @@ const BasicTemplate: React.FC<{
 
             case 'projects':
                 return projects && projects.length > 0 ? (
-                    <div className="mb-4">
+                    <div >
                         <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                             {getSectionName('projects', data.cvLanguage, data.sectionNames)}
                         </h2>
@@ -1217,7 +1218,7 @@ const BasicTemplate: React.FC<{
 
             case 'certifications':
                 return certifications && certifications.length > 0 ? (
-                    <div className="mb-4">
+                    <div >
                         <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                             {getSectionName('certifications', data.cvLanguage, data.sectionNames)}
                         </h2>
@@ -1257,7 +1258,7 @@ const BasicTemplate: React.FC<{
 
             case 'volunteer':
                 return volunteerExperience && volunteerExperience.length > 0 ? (
-                    <div className="mb-4">
+                    <div >
                         <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                             {getSectionName('volunteerExperience', data.cvLanguage, data.sectionNames)}
                         </h2>
@@ -1292,9 +1293,9 @@ const BasicTemplate: React.FC<{
 
             case 'customSections':
                 return customSections && customSections.length > 0 ? (
-                    <div className="mb-4">
+                    <div >
                         {customSections.map((section) => (
-                            <div key={section.id} className="mb-4">
+                            <div key={section.id} >
                                 <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                                     {section.title}
                                 </h2>
@@ -1434,7 +1435,7 @@ const BasicTemplate: React.FC<{
                         style={{ 
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '24px'
+                            gap: '8px'
                         }}
                     >
                         {sectionOrder.map((sectionType) => {
@@ -1589,7 +1590,7 @@ const ModernTemplate: React.FC<{
                         {/* Personal Info */}
                         <div className="text-center pb-6 border-b-2 border-blue-500 mb-6">
                             {personalInfo.profileImage && (
-                                <div className="mb-4">
+                                <div >
                                     <img
                                         src={personalInfo.profileImage}
                                         alt="Profile"
@@ -2097,6 +2098,10 @@ const ATSFriendlyTemplate: React.FC<{
     const [leftActiveId, setLeftActiveId] = useState<string | null>(null);
     const [leftDropTargetId, setLeftDropTargetId] = useState<string | null>(null);
     
+
+    // Force update state for real-time left panel updates
+    const [, forceAtlasUpdate] = useState(0);
+    const triggerAtlasUpdate = () => forceAtlasUpdate(prev => prev + 1);
     // Left column section order state - use external if provided
     const [internalLeftColumnOrder, setInternalLeftColumnOrder] = useState(['leftContact', 'leftSkills', 'leftLanguages', 'leftCertifications']);
     const leftColumnOrder = externalLeftColumnOrder || internalLeftColumnOrder;
@@ -2108,6 +2113,12 @@ const ATSFriendlyTemplate: React.FC<{
         
         // Always add contact section (it always has some content - at least the header)
         availableSections.push('leftContact');
+        
+        // Only add education if there are valid education entries
+        const validEducation = education.filter(edu => edu.degree && edu.degree.trim() !== '');
+        if (validEducation.length > 0) {
+            availableSections.push('leftEducation');
+        }
         
         // Only add skills if there are valid skills (with names)
         const validSkills = skills.filter(skill => skill.name && skill.name.trim() !== '');
@@ -2129,17 +2140,33 @@ const ATSFriendlyTemplate: React.FC<{
         
         console.log('🔍 ATSFriendlyTemplate Debug - Data check:');
         console.log('- Contact section: always available');
-        console.log('- Valid Skills:', validSkills.length);
-        console.log('- Valid Languages:', validLanguages.length);
-        console.log('- Valid Certifications:', validCertifications.length);
+        console.log('- Valid Education:', validEducation.length, 'Raw Education:', education.length);
+        console.log('- Education Data:', education);
+        console.log('- Valid Skills:', validSkills.length, 'Raw Skills:', skills.length);
+        console.log('- Skills Data:', skills);
+        console.log('- Valid Languages:', validLanguages.length, 'Raw Languages:', languages.length);
+        console.log('- Languages raw data:', languages);
+        console.log('- Valid Certifications:', validCertifications.length, 'Raw Certifications:', certifications.length);
+        console.log('- Certifications Data:', certifications);
         console.log('- Available left sections:', availableSections);
         return availableSections;
     };
 
-    const availableLeftSections = getAvailableLeftSections();
+    const availableLeftSections = useMemo(() => {
+        console.log('🔄 ATSFriendlyTemplate useMemo recalculating with:', { 
+            education: education.length, 
+            skills: skills.length, 
+            languages: languages.length, 
+            certifications: certifications.length,
+            timestamp: Date.now()
+        });
+        const sections = getAvailableLeftSections();
+        console.log('✅ Calculated sections:', sections);
+        return sections;
+    }, [education, skills, languages, certifications, getAvailableLeftSections]);
     
     // Filter leftColumnOrder to only include sections that actually exist
-    const filteredLeftColumnOrder = leftColumnOrder.filter(sectionId => availableLeftSections.includes(sectionId));
+    const filteredLeftColumnOrder = useMemo(() => leftColumnOrder.filter(sectionId => availableLeftSections.includes(sectionId)), [leftColumnOrder, availableLeftSections]);
     
     // Update leftColumnOrder if it doesn't match available sections
     useEffect(() => {
@@ -2147,7 +2174,7 @@ const ATSFriendlyTemplate: React.FC<{
         if (currentFiltered.length !== leftColumnOrder.length || !currentFiltered.every((section, index) => section === leftColumnOrder[index])) {
             setLeftColumnOrder(currentFiltered);
         }
-    }, [availableLeftSections, leftColumnOrder]);
+    }, [availableLeftSections, leftColumnOrder, education, skills, languages, certifications]);
 
     // Detect mobile device
     useEffect(() => {
@@ -2159,6 +2186,15 @@ const ATSFriendlyTemplate: React.FC<{
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
+
+    // Real-time left panel updates for Atlas template
+    useEffect(() => {
+        console.log('🔄 Atlas template left panel real-time update triggered');
+        // Force re-render when data changes
+        const leftSectionsUpdated = getAvailableLeftSections();
+        console.log('📋 Available left sections updated:', leftSectionsUpdated);
+        triggerAtlasUpdate(); // Force component update
+    }, [data.education, data.skills, data.languages, data.certifications]);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -2374,11 +2410,11 @@ const ATSFriendlyTemplate: React.FC<{
                         onSetActiveSection={onSectionSelect}
                         isDropTarget={dropTargetId === 'summary'}
                     >
-                        <div className="mb-8 cv-section">
-                            <h2 className="text-sm font-bold text-gray-900 mb-2 tracking-wide" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
+                        <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
+                            <h2 className="text-sm font-bold text-gray-900 tracking-wide my-0" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
                                 {getUppercaseSectionName('summary', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="text-gray-700 leading-relaxed text-xs">
+                            <div className="text-gray-700 leading-none text-xs mt-1 mb-0" style={{ margin: 0, padding: 0 }}>
                                 {renderHtmlContent(personalInfo.summary)}
                             </div>
                         </div>
@@ -2396,14 +2432,14 @@ const ATSFriendlyTemplate: React.FC<{
                         onSetActiveSection={onSectionSelect}
                         isDropTarget={dropTargetId === 'experience'}
                     >
-                        <div className="mb-8 cv-section">
-                            <h2 className="text-sm font-bold text-gray-900 mb-3 tracking-wide border-b border-gray-200 pb-1" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
+                        <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
+                            <h2 className="text-sm font-bold text-gray-900 tracking-wide border-b border-gray-200 pb-1 my-0" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
                                 {getUppercaseSectionName('experience', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="space-y-4">
+                            <div className="space-y-2 mt-1 mb-0" style={{ margin: 0, padding: 0 }}>
                                 {experience.map((exp) => (
                                     <div key={exp.id} className="avoid-break">
-                                        <div className="flex justify-between items-start mb-2">
+                                        <div className="flex justify-between items-start mb-1">
                                             <div>
                                                 <h3 className="text-sm font-bold text-gray-900">{exp.position}</h3>
                                                 <p className="text-xs font-medium text-gray-700">{exp.company}</p>
@@ -2423,7 +2459,7 @@ const ATSFriendlyTemplate: React.FC<{
                                             )}
                                         </div>
                                         {exp.description && (
-                                            <div className="text-gray-700 text-xs leading-relaxed">
+                                            <div className="text-gray-700 text-xs leading-none mb-0" style={{ margin: 0, padding: 0 }}>
                                                 {renderHtmlContent(exp.description)}
                                             </div>
                                         )}
@@ -2445,11 +2481,11 @@ const ATSFriendlyTemplate: React.FC<{
                         onSetActiveSection={onSectionSelect}
                         isDropTarget={dropTargetId === 'education'}
                     >
-                        <div className="mb-8 cv-section">
-                            <h2 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide border-b border-gray-200 pb-1">
+                        <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0,paddingBottom: 0 }}>
+                            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide border-b border-gray-200 pb-1 my-0">
                                 {getSectionName('education', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="space-y-3">
+                            <div className="mt-1 mb-0" style={{ margin: 0, padding: 0 }}>
                                 {education.map((edu) => (
                                     <div key={edu.id} className="avoid-break">
                                         <div className="flex justify-between items-start mb-1">
@@ -2477,7 +2513,7 @@ const ATSFriendlyTemplate: React.FC<{
                                             )}
                                         </div>
                                         {edu.description && (
-                                            <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(edu.description)}</div>
+                                            <div className="text-gray-700 text-xs mt-1 mb-0" style={{ margin: 0, padding: 0 }}>{renderHtmlContent(edu.description)}</div>
                                         )}
                                     </div>
                                 ))}
@@ -2497,11 +2533,11 @@ const ATSFriendlyTemplate: React.FC<{
                         onSetActiveSection={onSectionSelect}
                         isDropTarget={dropTargetId === 'projects'}
                     >
-                        <div className="mb-6">
-                            <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-200 pb-1">
+                        <div>
+                            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide border-b border-gray-200 pb-1">
                                 {getSectionName('projects', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="space-y-3">
+                            <div className="">
                                 {projects.map((project) => (
                                     <div key={project.id}>
                                         <div className="flex justify-between items-start">
@@ -2565,11 +2601,11 @@ const ATSFriendlyTemplate: React.FC<{
                         onSetActiveSection={onSectionSelect}
                         isDropTarget={dropTargetId === 'volunteer'}
                     >
-                        <div className="mb-6">
-                            <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-200 pb-1">
+                        <div>
+                            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide border-b border-gray-200 pb-1">
                                 {getSectionName('volunteerExperience', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="space-y-3">
+                            <div className="">
                                 {volunteerExperience.map((vol) => (
                                     <div key={vol.id}>
                                         <div className="flex justify-between items-start mb-1">
@@ -2612,15 +2648,15 @@ const ATSFriendlyTemplate: React.FC<{
                         onSetActiveSection={onSectionSelect}
                         isDropTarget={dropTargetId === 'customSections'}
                     >
-                        <div className="mb-6">
+                        <div>
                             {customSections
                                 .sort((a, b) => (a.order || 999) - (b.order || 999))
                                 .map((section) => (
-                                    <div key={section.id} className="mb-6">
-                                        <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide border-b border-gray-200 pb-1">
+                                    <div key={section.id} >
+                                        <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide border-b border-gray-200 pb-1">
                                             {section.title}
                                         </h2>
-                                        <div className="space-y-3">
+                                        <div className="">
                                             {section.items.map((item) => (
                                                 <div key={item.id}>
                                                     <div className="flex justify-between items-start mb-1">
@@ -2637,7 +2673,7 @@ const ATSFriendlyTemplate: React.FC<{
                                                         )}
                                                     </div>
                                                     {item.description && (
-                                                        <div className="text-gray-700 text-xs mt-1 leading-relaxed">
+                                                        <div className="text-gray-700 text-xs leading-none">
                                                             {renderHtmlContent(item.description)}
                                                         </div>
                                                     )}
@@ -2704,7 +2740,7 @@ const ATSFriendlyTemplate: React.FC<{
             >
                 {/* Profile Image */}
                 {personalInfo.profileImage && (
-                    <div className="mb-6 cv-section avoid-break">
+                    <div className="cv-section avoid-break">
                         <div className="flex justify-center">
                             <img
                                 src={personalInfo.profileImage}
@@ -2716,8 +2752,8 @@ const ATSFriendlyTemplate: React.FC<{
                 )}
 
                 {/* Contact Information */}
-                <div className="mb-6 cv-section avoid-break">
-                    <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
+                <div className="cv-section avoid-break">
+                    <h2 className="text-sm font-bold text-white tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
                         {data.cvLanguage?.includes('en') ? 'CONTACT' : 
                          data.cvLanguage?.includes('tr') ? 'ILETISIM' : 'ƏLAQƏ'}
                     </h2>
@@ -2814,15 +2850,7 @@ const ATSFriendlyTemplate: React.FC<{
                                 return null;
                             })()}
                             
-                            {filteredLeftColumnOrder.length === 0 ? (
-                                <div className="text-center py-8 px-4">
-                                    <div className="text-blue-200 text-sm">
-                                        {data.cvLanguage?.includes('en') ? 'Add skills, languages, or certifications to see them here' : 
-                                         data.cvLanguage?.includes('tr') ? 'Burada görmek için yetenekler, diller veya sertifikalar ekleyin' :
-                                         'Burada görmək üçün bacarıqlar, dillər və ya sertifikatlar əlavə edin'}
-                                    </div>
-                                </div>
-                            ) : null}
+                         
                             
                             {filteredLeftColumnOrder.map((sectionId) => {
                                 console.log('🔄 Rendering left section:', sectionId);
@@ -2831,7 +2859,7 @@ const ATSFriendlyTemplate: React.FC<{
                                         console.log('🎯 Rendering leftSkills, skills.length:', skills.length);
                                         return (
                                             <LeftPanelSortableItem 
-                                                key="leftSkills" 
+                                                key={`leftSkills-${skills.length}`} 
                                                 id="leftSkills"
                                                 sectionOrder={filteredLeftColumnOrder}
                                                 onSectionReorder={() => {
@@ -2849,8 +2877,8 @@ const ATSFriendlyTemplate: React.FC<{
                                                     <>
                                                         {/* Hard Skills */}
                                                         {skills.filter(skill => skill.type === 'hard' && skill.name && skill.name.trim() !== '').length > 0 && (
-                                                            <div className="mb-4">
-                                                                <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                            <div>
+                                                                <h2 className="text-sm font-bold text-white tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                                     {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('technicalSkills', data.cvLanguage, data.sectionNames) : getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
                                                                 </h2>
                                                                 <div className="space-y-2">
@@ -2860,7 +2888,7 @@ const ATSFriendlyTemplate: React.FC<{
                                                                                 <span className="text-xs font-medium text-white">{skill.name}</span>
                                                                             </div>
                                                                             {skill.description && (
-                                                                                <div className="text-blue-100 text-xs leading-relaxed">
+                                                                                <div className="text-blue-100 text-xs leading-none">
                                                                                     {renderHtmlContent(skill.description, true)}
                                                                                 </div>
                                                                             )}
@@ -2872,8 +2900,8 @@ const ATSFriendlyTemplate: React.FC<{
 
                                                         {/* Soft Skills */}
                                                         {skills.filter(skill => skill.type === 'soft' && skill.name && skill.name.trim() !== '').length > 0 && (
-                                                            <div className="mb-4">
-                                                                <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                            <div>
+                                                                <h2 className="text-sm font-bold text-white tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                                     {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('softSkills', data.cvLanguage, data.sectionNames) : getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
                                                                 </h2>
                                                                 <div className="space-y-2">
@@ -2883,7 +2911,7 @@ const ATSFriendlyTemplate: React.FC<{
                                                                                 <span className="text-xs font-medium text-white">{skill.name}</span>
                                                                             </div>
                                                                             {skill.description && (
-                                                                                <div className="text-blue-100 text-xs leading-relaxed">
+                                                                                <div className="text-blue-100 text-xs leading-none">
                                                                                     {renderHtmlContent(skill.description, true)}
                                                                                 </div>
                                                                             )}
@@ -2895,8 +2923,8 @@ const ATSFriendlyTemplate: React.FC<{
 
                                                         {/* General Skills */}
                                                         {skills.filter(skill => (!skill.type || (skill.type !== 'hard' && skill.type !== 'soft')) && skill.name && skill.name.trim() !== '').length > 0 && (
-                                                            <div className="mb-4">
-                                                                <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                            <div>
+                                                                <h2 className="text-sm font-bold text-white tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                                     {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('skills', data.cvLanguage, data.sectionNames) : getSectionName('skills', data.cvLanguage, data.sectionNames)}
                                                                 </h2>
                                                                 <div className="space-y-2">
@@ -2906,7 +2934,7 @@ const ATSFriendlyTemplate: React.FC<{
                                                                                 <span className="text-xs font-medium text-white">{skill.name}</span>
                                                                             </div>
                                                                             {skill.description && (
-                                                                                <div className="text-blue-100 text-xs leading-relaxed">
+                                                                                <div className="text-blue-100 text-xs leading-none">
                                                                                     {renderHtmlContent(skill.description, true)}
                                                                                 </div>
                                                                             )}
@@ -2923,7 +2951,7 @@ const ATSFriendlyTemplate: React.FC<{
                                     case 'leftLanguages':
                                         return (
                                             <LeftPanelSortableItem 
-                                                key="leftLanguages" 
+                                                key={`leftLanguages-${languages.length}`} 
                                                 id="leftLanguages"
                                                 sectionOrder={filteredLeftColumnOrder}
                                                 onSectionReorder={() => {
@@ -2938,11 +2966,11 @@ const ATSFriendlyTemplate: React.FC<{
                                                 isDropTarget={leftDropTargetId === 'leftLanguages'}
                                             >
                                                 <div>
-                                                    <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                    <h2 className="text-sm font-bold text-white tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                         {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('languages', data.cvLanguage, data.sectionNames) : getSectionName('languages', data.cvLanguage, data.sectionNames)}
                                                     </h2>
                                                     {languages.filter(lang => lang.language && lang.language.trim() !== '').length > 0 && (
-                                                        <div className="space-y-1">
+                                                        <div className="">
                                                             {languages.filter(lang => lang.language && lang.language.trim() !== '').map((lang) => (
                                                                 <div key={lang.id} className="text-xs text-white break-words">
                                                                     {lang.language} ({getLanguageLevel(lang.level, data.cvLanguage)})
@@ -2957,7 +2985,7 @@ const ATSFriendlyTemplate: React.FC<{
                                     case 'leftCertifications':
                                         return (
                                             <LeftPanelSortableItem 
-                                                key="leftCertifications" 
+                                                key={`leftCertifications-${certifications.length}`} 
                                                 id="leftCertifications"
                                                 sectionOrder={filteredLeftColumnOrder}
                                                 onSectionReorder={() => {
@@ -2974,7 +3002,7 @@ const ATSFriendlyTemplate: React.FC<{
                                                 <div>
                                                     {certifications.filter(cert => cert.name && cert.name.trim() !== '').length > 0 && (
                                                         <>
-                                                            <h2 className="text-sm font-bold text-gray-800 mb-3 tracking-wide border-b border-gray-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                            <h2 className="text-sm font-bold text-gray-800 tracking-wide border-b border-gray-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                                 {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('certifications', data.cvLanguage, data.sectionNames) : getSectionName('certifications', data.cvLanguage, data.sectionNames)}
                                                             </h2>
                                                             <div className="space-y-2">
@@ -3026,8 +3054,8 @@ const ATSFriendlyTemplate: React.FC<{
             {/* Right Column - Main Content with Draggable Sections */}
             <div className="flex-1" style={{ padding: '20mm 20mm 20mm 10mm' /* üst: 20mm, sağ: 20mm, alt: 20mm, sol: 10mm */ }}>
                 {/* Header - Name */}
-                <div className="mb-6 cv-section avoid-break">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2 leading-tight">
+                <div className="cv-section avoid-break">
+                    <h1 className="text-3xl font-bold text-gray-900 leading-tight">
                         {getFullName(personalInfo, data.cvLanguage)}
                     </h1>
                 </div>
@@ -3074,7 +3102,7 @@ const ATSFriendlyTemplate: React.FC<{
                             style={{ 
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: '24px'
+                                gap: '18px'
                             }}
                         >
                             {sectionOrder.map((sectionType) => {
@@ -3107,6 +3135,10 @@ const LumenTemplate: React.FC<{
 }> = ({ data, sectionOrder, onSectionReorder, activeSection, onSectionSelect, onLeftSectionReorder, leftColumnOrder: externalLeftColumnOrder }) => {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
     const [isDragActive, setIsDragActive] = useState(false);
+
+    // Force update state for real-time left panel updates
+    const [, forceLumenUpdate] = useState(0);
+    const triggerLumenUpdate = () => forceLumenUpdate(prev => prev + 1);
     const [activeId, setActiveId] = useState<string | null>(null);
     const [dropTargetId, setDropTargetId] = useState<string | null>(null);
     const [isMobile, setIsMobile] = useState(false);
@@ -3124,6 +3156,12 @@ const LumenTemplate: React.FC<{
     // Calculate available left column sections - only show sections with valid content
     const getAvailableLeftSections = () => {
         const availableSections = [];
+        
+        // Only add education if there are valid education entries
+        const validEducation = education.filter(edu => edu.degree && edu.degree.trim() !== '');
+        if (validEducation.length > 0) {
+            availableSections.push('leftEducation');
+        }
         
         // Only add skills if there are valid skills (with names)
         const validSkills = skills.filter(skill => skill.name && skill.name.trim() !== '');
@@ -3144,17 +3182,33 @@ const LumenTemplate: React.FC<{
         }
         
         console.log('🔍 LumenTemplate Debug - Data check:');
-        console.log('- Valid Skills:', validSkills.length);
-        console.log('- Valid Languages:', validLanguages.length);
-        console.log('- Valid Certifications:', validCertifications.length);
+        console.log('- Valid Education:', validEducation.length, 'Raw Education:', education.length);
+        console.log('- Education Data:', education);
+        console.log('- Valid Skills:', validSkills.length, 'Raw Skills:', skills.length);
+        console.log('- Skills Data:', skills);
+        console.log('- Valid Languages:', validLanguages.length, 'Raw Languages:', languages.length);
+        console.log('- Languages Data:', languages);
+        console.log('- Valid Certifications:', validCertifications.length, 'Raw Certifications:', certifications.length);
+        console.log('- Certifications Data:', certifications);
         console.log('- Available left sections:', availableSections);
         return availableSections;
     };
 
-    const availableLeftSections = getAvailableLeftSections();
+    const availableLeftSections = useMemo(() => {
+        console.log('🔄 LumenTemplate useMemo recalculating with:', { 
+            education: education.length, 
+            skills: skills.length, 
+            languages: languages.length, 
+            certifications: certifications.length,
+            timestamp: Date.now()
+        });
+        const sections = getAvailableLeftSections();
+        console.log('✅ Calculated sections:', sections);
+        return sections;
+    }, [education, skills, languages, certifications, getAvailableLeftSections]);
     
     // Filter leftColumnOrder to only include sections that actually exist
-    const filteredLeftColumnOrder = leftColumnOrder.filter(sectionId => availableLeftSections.includes(sectionId));
+    const filteredLeftColumnOrder = useMemo(() => leftColumnOrder.filter(sectionId => availableLeftSections.includes(sectionId)), [leftColumnOrder, availableLeftSections]);
     
     // Update leftColumnOrder if it doesn't match available sections
     useEffect(() => {
@@ -3162,7 +3216,7 @@ const LumenTemplate: React.FC<{
         if (currentFiltered.length !== leftColumnOrder.length || !currentFiltered.every((section, index) => section === leftColumnOrder[index])) {
             setLeftColumnOrder(currentFiltered);
         }
-    }, [availableLeftSections, leftColumnOrder]);
+    }, [availableLeftSections, leftColumnOrder, skills, languages, certifications]);
 
     // Detect mobile device
     useEffect(() => {
@@ -3174,6 +3228,15 @@ const LumenTemplate: React.FC<{
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
+
+    // Real-time left panel updates for Lumen template
+    useEffect(() => {
+        console.log('🔄 Lumen template left panel real-time update triggered');
+        // Force re-render when data changes
+        const leftSectionsUpdated = getAvailableLeftSections();
+        console.log('📋 Available left sections updated:', leftSectionsUpdated);
+        triggerLumenUpdate(); // Force component update
+    }, [data.education, data.skills, data.languages, data.certifications]);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -3389,7 +3452,7 @@ const LumenTemplate: React.FC<{
                         onSetActiveSection={onSectionSelect}
                         isDropTarget={dropTargetId === 'summary'}
                     >
-                        <div className="mb-6 cv-section">
+                        <div className="cv-section">
                             <h2 className="text-sm font-bold text-gray-900 mb-2 tracking-wide" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
                                 {getUppercaseSectionName('summary', data.cvLanguage, data.sectionNames)}
                             </h2>
@@ -3829,16 +3892,7 @@ const LumenTemplate: React.FC<{
                                 return null;
                             })()}
                             
-                            {filteredLeftColumnOrder.length === 0 ? (
-                                <div className="text-center py-8 px-4">
-                                    <div className="text-gray-500 text-sm">
-                                        {data.cvLanguage?.includes('en') ? 'Add skills, languages, or certifications to see them here' : 
-                                         data.cvLanguage?.includes('tr') ? 'Burada görmek için yetenekler, diller veya sertifikalar ekleyin' :
-                                         'Burada görmək üçün bacarıqlar, dillər və ya sertifikatlar əlavə edin'}
-                                    </div>
-                                </div>
-                            ) : null}
-                            
+                  
                             {filteredLeftColumnOrder.map((sectionId) => {
                                 console.log('🔄 Rendering left section:', sectionId);
                                 switch (sectionId) {
@@ -3846,7 +3900,7 @@ const LumenTemplate: React.FC<{
                                         console.log('🎯 Rendering leftSkills, skills.length:', skills.length);
                                         return (
                                             <LeftPanelSortableItem 
-                                                key="leftSkills" 
+                                                key={`leftSkills-${skills.length}`} 
                                                 id="leftSkills"
                                                 sectionOrder={filteredLeftColumnOrder}
                                                 onSectionReorder={() => {
@@ -3863,7 +3917,7 @@ const LumenTemplate: React.FC<{
                                                 <div className="mb-6">
                                                     {/* Hard Skills */}
                                                     {skills.filter(skill => skill.type === 'hard' && skill.name && skill.name.trim() !== '').length > 0 && (
-                                                        <div className="mb-4">
+                                                        <div >
                                                             <h2 className="text-sm font-bold text-gray-800 mb-3 tracking-wide border-b border-gray-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                                 {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('skills', data.cvLanguage, data.sectionNames) : getSectionName('skills', data.cvLanguage, data.sectionNames)}
                                                             </h2>
@@ -3879,7 +3933,7 @@ const LumenTemplate: React.FC<{
 
                                                     {/* Soft Skills */}
                                                     {skills.filter(skill => skill.type === 'soft' && skill.name && skill.name.trim() !== '').length > 0 && (
-                                                        <div className="mb-4">
+                                                        <div >
                                                             <h2 className="text-sm font-bold text-gray-800 mb-3 tracking-wide border-b border-gray-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                                 {getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
                                                             </h2>
@@ -3895,7 +3949,7 @@ const LumenTemplate: React.FC<{
 
                                                     {/* General Skills */}
                                                     {skills.filter(skill => (!skill.type || (skill.type !== 'hard' && skill.type !== 'soft')) && skill.name && skill.name.trim() !== '').length > 0 && (
-                                                        <div className="mb-4">
+                                                        <div >
                                                             <h2 className="text-sm font-bold text-gray-800 mb-3 tracking-wide border-b border-gray-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                                 {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('skills', data.cvLanguage, data.sectionNames) : getSectionName('skills', data.cvLanguage, data.sectionNames)}
                                                             </h2>
@@ -3915,7 +3969,7 @@ const LumenTemplate: React.FC<{
                                     case 'leftLanguages':
                                         return (
                                             <LeftPanelSortableItem 
-                                                key="leftLanguages" 
+                                                key={`leftLanguages-${languages.length}`} 
                                                 id="leftLanguages"
                                                 sectionOrder={filteredLeftColumnOrder}
                                                 onSectionReorder={() => {
@@ -3951,7 +4005,7 @@ const LumenTemplate: React.FC<{
                                     case 'leftCertifications':
                                         return (
                                             <LeftPanelSortableItem 
-                                                key="leftCertifications" 
+                                                key={`leftCertifications-${certifications.length}`} 
                                                 id="leftCertifications"
                                                 sectionOrder={filteredLeftColumnOrder}
                                                 onSectionReorder={() => {
@@ -4832,7 +4886,7 @@ const HorizonTemplate: React.FC<{
                         <SectionHeader title={getSectionName('experience', data.cvLanguage, data.sectionNames)} sectionId="experience" />
                         <div className="space-y-6">
                             {experience.map((exp, index) => (
-                                <div key={exp.id || index} className="mb-4">
+                                <div key={exp.id || index} >
                                     <div className="flex justify-between items-start mb-2">
                                         <div className="flex-1">
                                             <h3 className="font-bold text-gray-800 text-lg">{exp.position}</h3>
@@ -4868,7 +4922,7 @@ const HorizonTemplate: React.FC<{
                         <SectionHeader title={getSectionName('education', data.cvLanguage, data.sectionNames)} sectionId="education" />
                         <div className="space-y-4">
                             {education.map((edu, index) => (
-                                <div key={edu.id || index} className="mb-4">
+                                <div key={edu.id || index} >
                                     <div className="flex justify-between items-start mb-2">
                                         <div className="flex-1">
                                             <h3 className="font-bold text-gray-800 text-base">{edu.degree}</h3>
@@ -4961,7 +5015,7 @@ const HorizonTemplate: React.FC<{
                         <SectionHeader title={getSectionName('projects', data.cvLanguage, data.sectionNames)} sectionId="projects" />
                         <div className="space-y-6">
                             {projects.map((project, index) => (
-                                <div key={project.id || index} className="mb-4">
+                                <div key={project.id || index} >
                                     <div className="flex justify-between items-start mb-2">
                                         <div className="flex-1">
                                             {project.url ? (
@@ -5034,7 +5088,7 @@ const HorizonTemplate: React.FC<{
                         <SectionHeader title={getSectionName('certifications', data.cvLanguage, data.sectionNames)} sectionId="certifications" />
                         <div className="space-y-4">
                             {certifications.map((cert, index) => (
-                                <div key={cert.id || index} className="mb-4">
+                                <div key={cert.id || index} >
                                     <div className="flex justify-between items-start mb-1">
                                         <div className="flex-1">
                                             {cert.url ? (
@@ -5073,7 +5127,7 @@ const HorizonTemplate: React.FC<{
                         <SectionHeader title={getSectionName('volunteerExperience', data.cvLanguage, data.sectionNames)} sectionId="volunteer" />
                         <div className="space-y-6">
                             {volunteerExperience.map((vol, index) => (
-                                <div key={vol.id || index} className="mb-4">
+                                <div key={vol.id || index} >
                                     <div className="flex justify-between items-start mb-2">
                                         <div className="flex-1">
                                             <h3 className="font-bold text-gray-800 text-base">{vol.role}</h3>
@@ -5111,7 +5165,7 @@ const HorizonTemplate: React.FC<{
                                 <SectionHeader title={customSection.title} sectionId={`custom-${customSection.id}`} />
                                 <div className="space-y-4">
                                     {customSection.items.map((item, index) => (
-                                        <div key={item.id || index} className="mb-4">
+                                        <div key={item.id || index} >
                                             <div className="flex justify-between items-start mb-1">
                                                 <div className="flex-1">
                                                     {item.title && (
@@ -5162,7 +5216,7 @@ const HorizonTemplate: React.FC<{
                             <SectionHeader title={customSection.title} sectionId={sectionId} />
                             <div className="space-y-4">
                                 {customSection.items.map((item, index) => (
-                                    <div key={item.id || index} className="mb-4">
+                                    <div key={item.id || index} >
                                         <div className="flex justify-between items-start mb-1">
                                             <div className="flex-1">
                                                 {item.title && (
@@ -5577,7 +5631,7 @@ const AuroraTemplate: React.FC<{
                         
                         {/* Hard Skills */}
                         {skills.filter(skill => skill.type === 'hard').length > 0 && (
-                            <div className="mb-4">
+                            <div >
                                 <h3 className="text-sm font-semibold text-gray-800 mb-2">{getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}</h3>
                                 <div className="text-sm text-gray-700">
                                     {skills.filter(skill => skill.type === 'hard').map(skill => skill.name).join(' • ')}
@@ -5587,7 +5641,7 @@ const AuroraTemplate: React.FC<{
 
                         {/* Soft Skills */}
                         {skills.filter(skill => skill.type === 'soft').length > 0 && (
-                            <div className="mb-4">
+                            <div >
                                 <h3 className="text-sm font-semibold text-gray-800 mb-2">{getSectionName('softSkills', data.cvLanguage, data.sectionNames)}</h3>
                                 <div className="text-sm text-gray-700">
                                     {skills.filter(skill => skill.type === 'soft').map(skill => skill.name).join(' • ')}
@@ -5597,7 +5651,7 @@ const AuroraTemplate: React.FC<{
 
                         {/* Default/Other Skills */}
                         {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).length > 0 && (
-                            <div className="mb-4">
+                            <div >
                                 <h3 className="text-sm font-semibold text-gray-800 mb-2">{getSectionName('coreCompetencies', data.cvLanguage, data.sectionNames)}</h3>
                                 <div className="text-sm text-gray-700">
                                     {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map(skill => skill.name).join(' • ')}
@@ -6016,7 +6070,7 @@ const ExclusiveTemplate: React.FC<{
             case 'summary':
                 if (!personalInfo.summary) return null;
                 return (
-                    <div key="summary" className="mb-4">
+                    <div key="summary" >
                         <SectionHeader title={getSectionName('summary', data.cvLanguage, data.sectionNames)} icon="📝" sectionId="summary" />
                         <div className="text-gray-700 leading-relaxed text-sm px-1 py-2">
                             {renderHtmlContent(personalInfo.summary, false, data.cvLanguage)}
@@ -6027,7 +6081,7 @@ const ExclusiveTemplate: React.FC<{
             case 'experience':
                 if (!experience.length) return null;
                 return (
-                    <div key="experience" className="mb-4">
+                    <div key="experience" >
                         <SectionHeader title={getSectionName('experience', data.cvLanguage, data.sectionNames)} icon="💼" sectionId="experience" />
                         <div className="space-y-2">
                             {experience.map((exp, index) => (
@@ -6063,7 +6117,7 @@ const ExclusiveTemplate: React.FC<{
             case 'education':
                 if (!education.length) return null;
                 return (
-                    <div key="education" className="mb-4">
+                    <div key="education" >
                         <SectionHeader title={getSectionName('education', data.cvLanguage, data.sectionNames)} icon="🎓" sectionId="education" />
                         <div className="space-y-2">
                             {education.map((edu, index) => (
@@ -6157,7 +6211,7 @@ const ExclusiveTemplate: React.FC<{
             case 'projects':
                 if (!projects.length) return null;
                 return (
-                    <div key="projects" className="mb-4">
+                    <div key="projects" >
                         <SectionHeader title={getSectionName('projects', data.cvLanguage, data.sectionNames)} icon="🚀" sectionId="projects" />
                         <div className="space-y-2">
                             {projects.map((project, index) => (
@@ -6218,7 +6272,7 @@ const ExclusiveTemplate: React.FC<{
             case 'languages':
                 if (!languages.length) return null;
                 return (
-                    <div key="languages" className="mb-4">
+                    <div key="languages" >
                         <SectionHeader title={getSectionName('languages', data.cvLanguage, data.sectionNames)} icon="🌍" sectionId="languages" />
                         <div className="grid grid-cols-2 gap-2">
                             {languages.map((lang, index) => (
@@ -6238,7 +6292,7 @@ const ExclusiveTemplate: React.FC<{
             case 'certifications':
                 if (!certifications.length) return null;
                 return (
-                    <div key="certifications" className="mb-4">
+                    <div key="certifications" >
                         <SectionHeader title={getSectionName('certifications', data.cvLanguage, data.sectionNames)} icon="🏆" sectionId="certifications" />
                         <div className="space-y-2">
                             {certifications.map((cert, index) => (
@@ -6279,7 +6333,7 @@ const ExclusiveTemplate: React.FC<{
             case 'volunteer':
                 if (!volunteerExperience.length) return null;
                 return (
-                    <div key="volunteer" className="mb-4">
+                    <div key="volunteer" >
                         <SectionHeader title={getSectionName('volunteerExperience', data.cvLanguage, data.sectionNames)} icon="🤝" sectionId="volunteer" />
                         <div className="space-y-2">
                             {volunteerExperience.map((vol, index) => (
@@ -6315,9 +6369,9 @@ const ExclusiveTemplate: React.FC<{
             case 'customSections':
                 if (!customSections.length) return null;
                 return (
-                    <div key="customSections" className="mb-4">
+                    <div key="customSections" >
                         {customSections.map((customSection, sectionIndex) => (
-                            <div key={customSection.id || sectionIndex} className="mb-4">
+                            <div key={customSection.id || sectionIndex} >
                                 <SectionHeader title={customSection.title} icon="📋" sectionId={`custom-${customSection.id}`} />
                                 <div className="space-y-2">
                                     {customSection.items.map((item, index) => (
@@ -6366,7 +6420,7 @@ const ExclusiveTemplate: React.FC<{
                     if (!customSection || !customSection.items.length) return null;
 
                     return (
-                        <div key={sectionId} className="mb-4">
+                        <div key={sectionId} >
                             <SectionHeader title={customSection.title} icon="📋" sectionId={sectionId} />
                             <div className="space-y-2">
                                 {customSection.items.map((item, index) => (
@@ -6606,6 +6660,30 @@ export default function CVPreview({
     console.log('=== CV PREVIEW DEBUG ===');
     console.log('CV Data:', cv.data);
     console.log('Custom Sections:', cv.data.customSections);
+
+    // Force re-render when cv.data changes (real-time updates)
+    const [, forceUpdate] = React.useReducer(x => x + 1, 0);
+    const [prevDataHash, setPrevDataHash] = React.useState('');
+    
+    React.useEffect(() => {
+        // Create hash of critical data for deep comparison
+        const currentHash = JSON.stringify({
+            skills: cv.data.skills?.map(s => ({ name: s.name, type: s.type })) || [],
+            languages: cv.data.languages?.map(l => ({ language: l.language, level: l.level })) || [],
+            certifications: cv.data.certifications?.map(c => ({ name: c.name, organization: c.issuer })) || [],
+            education: cv.data.education?.map(e => ({ degree: e.degree, institution: e.institution })) || []
+        });
+        
+        if (currentHash !== prevDataHash) {
+            console.log('🔄 CV Data hash changed - forcing full re-render');
+            console.log('📊 Skills:', cv.data.skills?.length || 0);
+            console.log('🌐 Languages:', cv.data.languages?.length || 0);
+            console.log('📜 Certifications:', cv.data.certifications?.length || 0);
+            console.log('🎓 Education:', cv.data.education?.length || 0);
+            setPrevDataHash(currentHash);
+            forceUpdate();
+        }
+    }, [cv.data.skills, cv.data.languages, cv.data.certifications, cv.data.education, prevDataHash]);
     console.log('Custom Sections Length:', cv.data.customSections?.length);
     console.log('Template ID:', templateId);
 
@@ -6782,6 +6860,7 @@ export default function CVPreview({
             normalizedTemplate.includes('clean') ||
             normalizedTemplate.includes('minimal-professional')) {
             return <ATSFriendlyTemplate 
+                key={`atlas-${cv.data.skills?.length || 0}-${cv.data.languages?.length || 0}-${cv.data.certifications?.length || 0}-${cv.data.education?.length || 0}`}
                 data={cv.data} 
                 sectionOrder={sectionOrder} 
                 onSectionReorder={handleSectionReorder}
@@ -6832,6 +6911,7 @@ export default function CVPreview({
         if (normalizedTemplate.includes('lumen') ||
             normalizedTemplate === 'lumen') {
             return <LumenTemplate 
+                key={`lumen-${cv.data.skills?.length || 0}-${cv.data.languages?.length || 0}-${cv.data.certifications?.length || 0}-${cv.data.education?.length || 0}`}
                 data={cv.data} 
                 sectionOrder={sectionOrder} 
                 onSectionReorder={handleSectionReorder}

@@ -299,11 +299,13 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
     // ATS Template Left Column Order State
     const [leftColumnOrder, setLeftColumnOrder] = useState<string[]>(['skills', 'languages', 'certifications']);
     
-    // Check if current template is ATS
+    // Check if current template is ATS or Aurora or Vertex
     const isATSTemplate = cv.templateId?.toLowerCase().includes('ats') || 
                          cv.templateId?.toLowerCase().includes('resume-ats') || 
                          cv.templateId?.toLowerCase().includes('clean') ||
-                         cv.templateId?.toLowerCase().includes('minimal-professional');
+                         cv.templateId?.toLowerCase().includes('minimal-professional') ||
+                         cv.templateId?.toLowerCase().includes('aurora') ||
+                         cv.templateId?.toLowerCase().includes('vertex');
 
     // Mobile section reorder hook - Define sectionOrder first
     const sectionOrder = cv.sectionOrder || [
@@ -1142,39 +1144,26 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
 
                     {/* A4 Preview Container */}
 <div className="bg-slate-50 rounded-xl border border-dashed border-slate-300 transition-all duration-300 overflow-hidden">
-    {/* Desktop: A4 uzunluğunda arxa plan */}
-    <div className="hidden lg:block p-4 sm:p-8 flex justify-center items-start border border-white overflow-y-auto"
-         style={{
-             minHeight: '297mm', // A4 uzunluğu
-             height: 'auto', // Kontentə görə avtomatik
-             maxHeight: 'calc(100vh - 8rem)' // Ekrandan böyük olduqda scroll
-         }}>
+    {/* Desktop: Vertical scrolling enabled for long CVs */}
+    <div className="hidden lg:block h-[calc(100vh-12rem)] p-4 sm:p-8 flex justify-center items-start border border-white overflow-y-auto">
         <div 
             className="bg-white rounded-xl border border-white shadow-2xl shadow-slate-300/60 transition-transform duration-300 mb-8"
-            style={{
-                width: '210mm', // A4 eni
-                minHeight: '297mm' // A4 minimum uzunluğu
-            }}
         >
             {renderPreview()}
         </div>
     </div>
     
-    {/* Mobile: A4 uzunluğunda mobil preview */}
+    {/* Mobile: Yenidən düzəldilmiş scroll və ölçü sistemi */}
     <div className="block lg:hidden">
-        <div className="overflow-auto bg-gray-100 p-4"
-             style={{
-                 minHeight: '297mm', // A4 uzunluğu
-                 height: 'auto', // Kontentə görə avtomatik
-                 maxHeight: 'calc(100vh - 8rem)' // Ekrandan böyük olduqda scroll
-             }}>
+        <div className="h-[calc(100vh-12rem)] overflow-auto bg-gray-100 p-4">
             <div className="min-h-full flex items-start justify-start">
                 <div
                     style={{
-                        width: '210mm', // A4 eni
-                        minHeight: '297mm', // A4 minimum uzunluğu
+                        width: '210mm',
+                        height: '297mm',
+                        maxHeight: 'calc(100vh - 12rem)',
                         maxWidth: 'calc(100vw - 2rem)',
-                        transform: 'scale(0.8)', // Mobil üçün daha kiçik
+                        transform: 'scale(1.5)',
                         transformOrigin: 'top left',
                         marginTop: '1rem',
                         marginBottom: '1rem',
