@@ -15,6 +15,7 @@ interface DateRangeInputProps {
   currentLabel?: string;
   required?: boolean;
   cvLanguage?: CVLanguage;
+  singleDate?: boolean; // For certifications - only show start date
 }
 
 export default function DateRangeInput({
@@ -26,8 +27,10 @@ export default function DateRangeInput({
   onCurrentChange,
   startLabel = 'Başlama tarixi',
   endLabel = 'Bitirmə tarixi',
+  currentLabel,
   required = false,
-  cvLanguage = 'azerbaijani'
+  cvLanguage = 'azerbaijani',
+  singleDate = false
 }: DateRangeInputProps) {
 
   const [showStartPicker, setShowStartPicker] = useState(false);
@@ -220,7 +223,7 @@ export default function DateRangeInput({
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className={`grid gap-4 ${singleDate ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
         {/* Start Date */}
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -243,41 +246,57 @@ export default function DateRangeInput({
           />
         </div>
 
-        {/* End Date */}
-        <div className="relative">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {endLabel}
-          </label>
-          <button
-            type="button"
-            onClick={() => !current && setShowEndPicker(!showEndPicker)}
-            disabled={current}
-            className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-left transition-colors ${
-              current ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-white hover:bg-gray-50'
-            }`}
-          >
-            {current 
-              ? texts.currentlyWorking
-              : formatDateForDisplay(endDate || '') || texts.selectMonth
-            }
-          </button>
-          
-          {!current && (
-            <DatePicker
-              isOpen={showEndPicker}
-              onClose={() => setShowEndPicker(false)}
-              onSelect={(year, monthIndex) => handleDateSelect(year, monthIndex, false)}
-              currentValue={endDate || ''}
-              isStartDate={false}
-            />
-          )}
-        </div>
+        {/* End Date - only show if not singleDate */}
+        {!singleDate && (
+          <div className="relative">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {endLabel}
+            </label>
+            <button
+              type="button"
+              onClick={() => !current && setShowEndPicker(!showEndPicker)}
+              disabled={current}
+              className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-left transition-colors ${
+                current ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-white hover:bg-gray-50'
+              }`}
+            >
+              {current 
+                ? texts.currentlyWorking
+                : formatDateForDisplay(endDate || '') || texts.selectMonth
+              }
+            </button>
+            
+            {!current && (
+              <DatePicker
+                isOpen={showEndPicker}
+                onClose={() => setShowEndPicker(false)}
+                onSelect={(year, monthIndex) => handleDateSelect(year, monthIndex, false)}
+                currentValue={endDate || ''}
+                isStartDate={false}
+              />
+            )}
+          </div>
+        )}
       </div>
 
-   
+      {/* Current checkbox - only show if not singleDate */}
+      {!singleDate && currentLabel && (
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            id="current-work"
+            checked={current}
+            onChange={(e) => onCurrentChange(e.target.checked)}
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+          />
+          <label htmlFor="current-work" className="ml-2 text-sm text-gray-700">
+            {currentLabel}
+          </label>
+        </div>
+      )}
 
-      {/* Validation Message */}
-      {startDate && endDate && !current && new Date(startDate) > new Date(endDate) && (
+      {/* Validation Message - only show if not singleDate */}
+      {!singleDate && startDate && endDate && !current && new Date(startDate) > new Date(endDate) && (
         <div className="text-red-500 text-sm">
           {language === 'english' 
             ? 'End date must be after start date'

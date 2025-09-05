@@ -77,14 +77,14 @@ export function LinkedInImportComponent({ onImportSuccess, className = '' }: Lin
           <input
             id="linkedin-url"
             type="text"
-            placeholder="https://www.linkedin.com/in/mikayilzeynalabdinov/"
+            placeholder="linkedin.com/in/username və ya www.linkedin.com/in/username"
             value={linkedinUrl}
             onChange={handleInputChange}
             disabled={isLoading}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm hover:border-gray-400"
           />
           <p className="text-xs text-gray-500 mt-1">
-            LinkedIn profil URL-inizi daxil edin
+            LinkedIn profil URL-ini və ya sadəcə username-i daxil edin
           </p>
         </div>
 

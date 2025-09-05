@@ -348,31 +348,45 @@ const getUppercaseSectionName = (sectionKey: string, cvLanguage?: string, custom
 const getLinkedInDisplay = (linkedinInput: string): { displayText: string; url: string } => {
     if (!linkedinInput) return { displayText: '', url: '' };
     
-    // If it's already a full URL, extract username
-    if (linkedinInput.includes('linkedin.com/in/')) {
-        const match = linkedinInput.match(/linkedin\.com\/in\/([^\/\?]+)/);
+    // Clean up the input - remove leading/trailing whitespace
+    const cleanInput = linkedinInput.trim();
+    
+    // If it contains linkedin.com/in/, extract username (handles all formats)
+    if (cleanInput.includes('linkedin.com/in/')) {
+        // More flexible regex to handle various LinkedIn URL formats:
+        // - https://www.linkedin.com/in/username
+        // - https://linkedin.com/in/username  
+        // - www.linkedin.com/in/username
+        // - linkedin.com/in/username
+        const match = cleanInput.match(/(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/([^\/\?\s]+)/);
         if (match) {
             const username = match[1];
+            // Ensure the URL has proper protocol
+            const fullUrl = cleanInput.startsWith('http') ? cleanInput : `https://www.linkedin.com/in/${username}`;
             return {
                 displayText: `${username}`,
-                url: linkedinInput
+                url: fullUrl
             };
         }
     }
     
     // If it's just a username (with or without @)
-    const cleanUsername = linkedinInput.replace('@', '');
-    if (!linkedinInput.includes('http')) {
+    const cleanUsername = cleanInput.replace('@', '');
+    if (!cleanInput.includes('http') && !cleanInput.includes('linkedin.com')) {
         return {
             displayText: `${cleanUsername}`,
             url: `https://www.linkedin.com/in/${cleanUsername}/`
         };
     }
     
-    // Fallback: display as is
+    // Fallback: display as is but ensure proper URL
+    const displayText = cleanInput.includes('linkedin.com/in/') ? 
+        cleanInput.match(/linkedin\.com\/in\/([^\/\?\s]+)/)?.[1] || cleanInput : 
+        cleanInput;
+    
     return {
-        displayText: linkedinInput,
-        url: linkedinInput.includes('http') ? linkedinInput : `https://www.linkedin.com/in/${linkedinInput}/`
+        displayText: displayText,
+        url: cleanInput.includes('http') ? cleanInput : `https://www.linkedin.com/in/${cleanInput}/`
     };
 };
 
@@ -1033,7 +1047,7 @@ const BasicTemplate: React.FC<{
                 console.log('Experience data in renderSection:', experience);
                 return experience && experience.length > 0 ? (
                     <div>
-                        <h2 className="text-base font-semibold text-blue-600 mb-3 border-b border-blue-600 pb-2">
+                        <h2 className="text-base font-semibold text-blue-600 mb-3 border-b border-gray-300 pb-2">
                             {getSectionName('experience', data.cvLanguage, data.sectionNames)}
                         </h2>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
@@ -1068,7 +1082,7 @@ const BasicTemplate: React.FC<{
             case 'education':
                 return education && education.length > 0 ? (
                     <div>
-                        <h2 className="text-base font-semibold text-blue-600 mb-3 border-b border-blue-600 pb-2">
+                        <h2 className="text-base font-semibold text-blue-600 mb-3 border-b border-gray-300 pb-2">
                             {getSectionName('education', data.cvLanguage, data.sectionNames)}
                         </h2>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
@@ -1272,7 +1286,7 @@ const BasicTemplate: React.FC<{
             case 'certifications':
                 return certifications && certifications.length > 0 ? (
                     <div >
-                        <h2 className="text-base font-semibold text-blue-600 mb-3 border-b border-blue-600 pb-2">
+                        <h2 className="text-base font-semibold text-blue-600 mb-3 border-b border-gray-300 pb-2">
                             {getSectionName('certifications', data.cvLanguage, data.sectionNames)}
                         </h2>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>

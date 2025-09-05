@@ -123,13 +123,17 @@ export class ScrapingDogLinkedInService {
 
     // If it's already just a username (no URL), return it
     if (!cleanInput.includes('/') && !cleanInput.includes('linkedin.com')) {
-      return cleanInput;
+      return cleanInput.replace('@', ''); // Remove @ if present
     }
 
-    // Extract from LinkedIn URL patterns
+    // Extract from LinkedIn URL patterns - supports various formats:
+    // - https://www.linkedin.com/in/username
+    // - https://linkedin.com/in/username  
+    // - www.linkedin.com/in/username
+    // - linkedin.com/in/username
     const patterns = [
-      /linkedin\.com\/in\/([a-zA-Z0-9\-_.]+)/i,
-      /linkedin\.com\/pub\/([a-zA-Z0-9\-_.]+)/i,
+      /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/([a-zA-Z0-9\-_.]+)/i,
+      /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/pub\/([a-zA-Z0-9\-_.]+)/i,
     ];
 
     for (const pattern of patterns) {

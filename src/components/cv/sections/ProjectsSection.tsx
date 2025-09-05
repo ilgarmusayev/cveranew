@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { getLabel } from '@/lib/cvLanguage';
 import RichTextEditor from '@/components/ui/RichTextEditor';
+import DateRangeInput from '@/components/cv/DateRangeInput';
 
 // Utility function to safely render HTML content
 const stripHtmlTags = (html: string): string => {
@@ -297,50 +298,41 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
                     </div>
                   </div>
 
-                  {/* Date Fields */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {cvLanguage === 'english' ? 'Start Date' : 'Başlama tarixi'}
-                      </label>
+                  {/* Date Range Input */}
+                  <DateRangeInput
+                    startDate={project.startDate || ''}
+                    endDate={project.endDate}
+                    current={project.current || false}
+                    onStartDateChange={(date) => updateProject(project.id, 'startDate', date)}
+                    onEndDateChange={(date) => updateProject(project.id, 'endDate', date)}
+                    onCurrentChange={(current) => updateProjectMultiple(project.id, { 
+                      current, 
+                      endDate: current ? '' : project.endDate 
+                    })}
+                    startLabel={cvLanguage === 'english' ? 'Start Date' : 'Başlama tarixi'}
+                    endLabel={cvLanguage === 'english' ? 'End Date' : 'Bitirmə tarixi'}
+                    currentLabel={cvLanguage === 'english' ? 'Currently ongoing' : 'Davam edir'}
+                    cvLanguage={cvLanguage}
+                  />
+
+                  <div className="flex items-end">
+                    <label className="flex items-center">
                       <input
-                        type="month"
-                        value={project.startDate || ''}
-                        onChange={(e) => updateProject(project.id, 'startDate', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        type="checkbox"
+                        checked={Boolean(project.current)}
+                        onChange={(e) => {
+                          const isChecked = e.target.checked;
+                          updateProjectMultiple(project.id, {
+                            current: isChecked,
+                            endDate: isChecked ? '' : project.endDate,
+                          });
+                        }}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {cvLanguage === 'english' ? 'End Date' : 'Bitirmə tarixi'}
-                      </label>
-                      <input
-                        type="month"
-                        value={project.current ? '' : (project.endDate || '')}
-                        onChange={(e) => updateProject(project.id, 'endDate', e.target.value)}
-                        disabled={project.current}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:bg-gray-100 disabled:text-gray-500"
-                      />
-                    </div>
-                    <div className="flex items-end">
-                      <label className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={Boolean(project.current)}
-                          onChange={(e) => {
-                            const isChecked = e.target.checked;
-                            updateProjectMultiple(project.id, {
-                              current: isChecked,
-                              endDate: isChecked ? '' : project.endDate,
-                            });
-                          }}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                        <span className="ml-2 text-sm text-gray-700">
-                          {cvLanguage === 'english' ? 'Currently ongoing' : 'Davam edir'}
-                        </span>
-                      </label>
-                    </div>
+                      <span className="ml-2 text-sm text-gray-700">
+                        {cvLanguage === 'english' ? 'Currently ongoing' : 'Davam edir'}
+                      </span>
+                    </label>
                   </div>
 
                   <div>

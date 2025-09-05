@@ -217,6 +217,7 @@ export default function ExperienceSection({ data, onChange, cvLanguage = 'azerba
                     })}
                     startLabel={cvLanguage === 'english' ? 'Start Date' : 'Başlama tarixi'}
                     endLabel={cvLanguage === 'english' ? 'End Date' : 'Bitirmə tarixi'}
+                    currentLabel={cvLanguage === 'english' ? 'Currently working' : 'Davam edir'}
                     cvLanguage={cvLanguage}
                   />
     <div className="flex items-end">

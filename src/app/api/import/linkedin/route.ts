@@ -7,6 +7,45 @@ import axios from 'axios';
 
 const prisma = new PrismaClient();
 
+// Helper function to extract and normalize LinkedIn username from various URL formats
+function extractLinkedInUsername(input: string): { username: string; normalizedUrl: string } | null {
+  if (!input?.trim()) return null;
+  
+  const cleanInput = input.trim();
+  
+  // Handle various LinkedIn URL formats:
+  // - https://www.linkedin.com/in/username
+  // - https://linkedin.com/in/username  
+  // - www.linkedin.com/in/username
+  // - linkedin.com/in/username
+  // - just username
+  
+  // If it contains linkedin.com/in/, extract username
+  if (cleanInput.includes('linkedin.com/in/')) {
+    const match = cleanInput.match(/(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/([^\/\?\s]+)/);
+    if (match) {
+      const username = match[1];
+      return {
+        username: username,
+        normalizedUrl: `https://www.linkedin.com/in/${username}`
+      };
+    }
+  }
+  
+  // If it's just a username (no linkedin.com), treat as username
+  if (!cleanInput.includes('linkedin.com') && !cleanInput.includes('http')) {
+    const cleanUsername = cleanInput.replace('@', '').replace(/[^\w.-]/g, '');
+    if (cleanUsername) {
+      return {
+        username: cleanUsername,
+        normalizedUrl: `https://www.linkedin.com/in/${cleanUsername}`
+      };
+    }
+  }
+  
+  return null;
+}
+
 // ScrapingDog LinkedIn Service instance
 const scrapingDogService = new ScrapingDogLinkedInService();
 
@@ -143,11 +182,11 @@ async function getRapidAPISkills(linkedinUrl: string) {
   }
 }
 
-// Transform ScrapingDog data to CV format with complete data mapping
-function transformScrapingDogToCVFormat(scrapingDogData: any) {
-  console.log('🔄 ScrapingDog məlumatları tam CV formatına çevrilir...');
-  
-  // Personal Information - daha ətraflı məlumat dolduruluşu
+// Transform ScrapingDog data to our format
+function transformScrapingDogData(scrapingDogData: any, normalizedUrl: string) {
+  console.log('🔄 ScrapingDog data transform edilir...');
+
+  // Personal Information - şəxsi məlumatlar
   const personalInfo = {
     fullName: scrapingDogData.name || `${scrapingDogData.firstName || ''} ${scrapingDogData.lastName || ''}`.trim(),
     firstName: scrapingDogData.firstName || scrapingDogData.name?.split(' ')[0] || '',
@@ -157,12 +196,10 @@ function transformScrapingDogToCVFormat(scrapingDogData: any) {
     phone: scrapingDogData.phone || '',
     location: scrapingDogData.location || '',
     website: scrapingDogData.website || '',
-    linkedin: scrapingDogData.linkedinUrl || scrapingDogData.profileUrl || '',
+    linkedin: normalizedUrl, // Use the normalized URL instead of scraped data
     summary: scrapingDogData.summary || scrapingDogData.about || '',
     profilePicture: scrapingDogData.profilePicture || ''
-  };
-
-  // Work Experience - tam təcrübə məlumatları
+  };  // Work Experience - tam təcrübə məlumatları
   const experience = (scrapingDogData.experience || []).map((exp: any, index: number) => {
     // Tarix formatlarını düzəlt
     let startDate = exp.startDate || exp.starts_at || '';
@@ -384,15 +421,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('📝 LinkedIn URL:', linkedinUrl);
+    // Extract and normalize LinkedIn URL
+    const linkedinData = extractLinkedInUsername(linkedinUrl);
+    if (!linkedinData) {
+      return NextResponse.json(
+        { error: 'Düzgün LinkedIn URL və ya username daxil edin (məs: musayevcreate və ya https://linkedin.com/in/musayevcreate)' },
+        { status: 400 }
+      );
+    }
+
+    const { username, normalizedUrl } = linkedinData;
+    console.log('📝 Original input:', linkedinUrl);
+    console.log('👤 Extracted username:', username);
+    console.log('🔗 Normalized URL:', normalizedUrl);
     console.log('👤 User ID:', decoded.userId);
 
     // Parallel execution of ScrapingDog and RapidAPI
     console.log('📡 ScrapingDog və RapidAPI paralel başlayır...');
 
     const [scrapingDogResponse, rapidApiResponse] = await Promise.allSettled([
-      scrapingDogService.scrapeLinkedInProfile(linkedinUrl),
-      getRapidAPISkills(linkedinUrl)
+      scrapingDogService.scrapeLinkedInProfile(normalizedUrl),
+      getRapidAPISkills(normalizedUrl)
     ]);
 
     // Check ScrapingDog result
@@ -419,7 +468,7 @@ export async function POST(request: NextRequest) {
 
     // Transform ScrapingDog data to CV format
     console.log('📍 ScrapingDog məlumatları formatlanır...');
-    const transformedData = transformScrapingDogToCVFormat(scrapingDogResult);
+    const transformedData = transformScrapingDogData(scrapingDogResult, normalizedUrl);
 
     // Add RapidAPI skills if available
     if (rapidApiResult) {
@@ -500,7 +549,7 @@ export async function POST(request: NextRequest) {
         type: 'linkedin_success',
         data: JSON.stringify({
           cvId: newCV.id,
-          profileUrl: linkedinUrl,
+          profileUrl: normalizedUrl, // Use normalized URL instead of original input
           cvLanguage: 'en',
           importStats: {
             experienceCount: transformedData.experience.length,

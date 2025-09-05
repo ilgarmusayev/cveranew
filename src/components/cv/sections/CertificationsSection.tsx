@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import DateRangeInput from '@/components/cv/DateRangeInput';
 
 interface Certification {
   id: string;
@@ -311,17 +312,18 @@ export default function CertificationsSection({ data, onChange, cvLanguage = 'az
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {getTranslation(cvLanguage, 'issueDate')}
-                      </label>
-                      <input
-                        type="month"
-                        value={certification.date || ''}
-                        onChange={(e) => updateCertification(certification.id, 'date', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                      />
-                    </div>
+                    {/* Issue Date using DateRangeInput in single date mode */}
+                    <DateRangeInput
+                      startDate={certification.date || ''}
+                      endDate=""
+                      current={false}
+                      onStartDateChange={(date) => updateCertification(certification.id, 'date', date)}
+                      onEndDateChange={() => {}}
+                      onCurrentChange={() => {}}
+                      startLabel={getTranslation(cvLanguage, 'issueDate')}
+                      cvLanguage={cvLanguage}
+                      singleDate={true}
+                    />
                   </div>
 
                   <div>

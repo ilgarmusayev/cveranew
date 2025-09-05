@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import RichTextEditor from '@/components/ui/RichTextEditor';
+import DateRangeInput from '@/components/cv/DateRangeInput';
 
 interface Education {
   id: string;
@@ -279,50 +280,41 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                     </div>
                   </div>
 
-                  {/* Date Fields */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {cvLanguage === 'english' ? 'Start Date' : 'Başlama tarixi'}
-                      </label>
+                  {/* Date Range Input */}
+                  <DateRangeInput
+                    startDate={education.startDate || ''}
+                    endDate={education.endDate}
+                    current={education.current || false}
+                    onStartDateChange={(date) => updateEducation(education.id, { startDate: date })}
+                    onEndDateChange={(date) => updateEducation(education.id, { endDate: date })}
+                    onCurrentChange={(current) => updateEducation(education.id, { 
+                      current, 
+                      endDate: current ? '' : education.endDate 
+                    })}
+                    startLabel={cvLanguage === 'english' ? 'Start Date' : 'Başlama tarixi'}
+                    endLabel={cvLanguage === 'english' ? 'End Date' : 'Bitirmə tarixi'}
+                    currentLabel={cvLanguage === 'english' ? 'Currently studying' : 'Davam edir'}
+                    cvLanguage={cvLanguage}
+                  />
+
+                  <div className="flex items-end">
+                    <label className="flex items-center">
                       <input
-                        type="month"
-                        value={education.startDate || ''}
-                        onChange={(e) => updateEducation(education.id, { startDate: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        type="checkbox"
+                        checked={Boolean(education.current)}
+                        onChange={(e) => {
+                          const isChecked = e.target.checked;
+                          updateEducation(education.id, {
+                            current: isChecked,
+                            endDate: isChecked ? '' : education.endDate,
+                          });
+                        }}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {cvLanguage === 'english' ? 'End Date' : 'Bitirmə tarixi'}
-                      </label>
-                      <input
-                        type="month"
-                        value={education.current ? '' : (education.endDate || '')}
-                        onChange={(e) => updateEducation(education.id, { endDate: e.target.value })}
-                        disabled={education.current}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:bg-gray-100 disabled:text-gray-500"
-                      />
-                    </div>
-                    <div className="flex items-end">
-                      <label className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={Boolean(education.current)}
-                          onChange={(e) => {
-                            const isChecked = e.target.checked;
-                            updateEducation(education.id, {
-                              current: isChecked,
-                              endDate: isChecked ? '' : education.endDate,
-                            });
-                          }}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                        <span className="ml-2 text-sm text-gray-700">
-                          {cvLanguage === 'english' ? 'Currently studying' : 'Davam edir'}
-                        </span>
-                      </label>
-                    </div>
+                      <span className="ml-2 text-sm text-gray-700">
+                        {cvLanguage === 'english' ? 'Currently studying' : 'Davam edir'}
+                      </span>
+                    </label>
                   </div>
 
                <div>
