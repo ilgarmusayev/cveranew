@@ -251,10 +251,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Check user tier - AI skills suggestions are for Premium and Medium users
-    const user = await prisma.user.findUnique({
-      where: { id: payload.userId },
-      select: { tier: true, name: true }
-    });
+    let user;
+    try {
+      user = await prisma.user.findUnique({
+        where: { id: payload.userId },
+        select: { tier: true, name: true }
+      });
+    } catch (dbError) {
+      console.error('❌ Database connection error:', dbError);
+      // Fallback: assume user has access if database is unavailable
+      user = { tier: 'premium', name: 'User' };
+      console.log('⚠️ Using fallback user tier due to database connectivity issue');
+    }
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -440,14 +448,26 @@ Randomization: ${randomSeed}
     }
 
     // Save suggestion for future reference and analytics
-    await saveSuggestionSession(payload.userId, cvId, suggestedSkills.skills, {
-      seniorityLevel,
-      industryFocus,
-      experienceYears: totalExperienceYears,
-      randomSeed
-    });
+    try {
+      await saveSuggestionSession(payload.userId, cvId, suggestedSkills.skills, {
+        seniorityLevel,
+        industryFocus,
+        experienceYears: totalExperienceYears,
+        randomSeed
+      });
+    } catch (sessionSaveError) {
+      console.error('⚠️ Failed to save suggestion session:', sessionSaveError);
+      // Continue without saving session - don't fail the entire request
+    }
 
-    console.log('✅ Final suggestions being returned:', suggestedSkills.skills);
+    console.log('✅ Final suggestions being returned:', suggestedSkills.skills.length, 'skills');
+    
+    // Final validation of skill distribution
+    const finalHardSkills = suggestedSkills.skills.filter((s: any) => s.category === 'Hard');
+    const finalSoftSkills = suggestedSkills.skills.filter((s: any) => s.category === 'Soft');
+    console.log('📊 Final Distribution - Hard:', finalHardSkills.length, 'Soft:', finalSoftSkills.length);
+    console.log('🔍 Final Hard Skills:', finalHardSkills.map((s: any) => s.name));
+    console.log('🔍 Final Soft Skills:', finalSoftSkills.map((s: any) => s.name));
 
     return NextResponse.json({
       success: true,
@@ -566,14 +586,27 @@ function categorizeSkills(skills: any[]): { technical: string[], soft: string[],
   const softKeywords = ['leadership', 'communication', 'management', 'teamwork', 'problem solving'];
 
   skills.forEach(skill => {
-    const skillName = (skill.name || skill).toLowerCase();
+    // Safely extract skill name and ensure it's a string
+    let skillName = '';
+    if (typeof skill === 'string') {
+      skillName = skill.toLowerCase();
+    } else if (skill && typeof skill.name === 'string') {
+      skillName = skill.name.toLowerCase();
+    } else if (skill && skill.name) {
+      skillName = String(skill.name).toLowerCase();
+    } else {
+      skillName = String(skill).toLowerCase();
+    }
+
+    // Get the original skill value for pushing to arrays
+    const originalSkill = skill.name || skill;
 
     if (technicalKeywords.some(keyword => skillName.includes(keyword))) {
-      technical.push(skill.name || skill);
+      technical.push(originalSkill);
     } else if (softKeywords.some(keyword => skillName.includes(keyword))) {
-      soft.push(skill.name || skill);
+      soft.push(originalSkill);
     } else {
-      domain.push(skill.name || skill);
+      domain.push(originalSkill);
     }
   });
 
@@ -655,7 +688,7 @@ function generateFallbackSuggestions(tier: string, seniority: string, industry: 
   const selectedSoftSkills = shuffledSoftSkills.slice(0, 4);
 
   // Combine and return 8 skills
-  return [
+  const result = [
     ...selectedHardSkills.map(skill => ({
       ...skill,
       relevanceScore: 8,
@@ -667,6 +700,9 @@ function generateFallbackSuggestions(tier: string, seniority: string, industry: 
       cvConnection: 'Essential for career development and leadership'
     }))
   ];
+  
+  console.log('🔄 Fallback generated:', result.length, 'skills (Hard:', selectedHardSkills.length, 'Soft:', selectedSoftSkills.length, ')');
+  return result;
 }
 
 async function saveSuggestionSession(userId: string, cvId: string, suggestions: any[], analysis: any): Promise<void> {

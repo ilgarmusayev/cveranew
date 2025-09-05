@@ -143,9 +143,19 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
       if (response.success && response.data) {
         const { suggestions } = response.data;
         
+        console.log('📋 Raw AI Response suggestions:', suggestions);
+        console.log('📋 First suggestion example:', suggestions?.[0]);
+        
         console.log('✅ AI Skills Generated:', suggestions?.length || 0, 'skills');
         
         if (suggestions && suggestions.length > 0) {
+          // Log skill distribution
+          const hardSkills = suggestions.filter((s: any) => s.category === 'Hard');
+          const softSkills = suggestions.filter((s: any) => s.category === 'Soft');
+          console.log('📊 Skill Distribution - Hard:', hardSkills.length, 'Soft:', softSkills.length);
+          console.log('🔍 Hard Skills:', hardSkills.map((s: any) => s.name));
+          console.log('🔍 Soft Skills:', softSkills.map((s: any) => s.name));
+          
           // Store suggested skills for user to manually choose from (avoid duplicates)
           const existingSkillNames = data.map(skill => skill.name.toLowerCase());
           const newSuggestions = suggestions
@@ -156,7 +166,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                 ? 'Recommended based on your CV profile'
                 : 'CV profilinizə əsasən tövsiyə edilən'
               ),
-              category: cvLanguage === 'english' ? 'Technical Skills' : 'Texniki Bacarıqlar',
+              category: skill.category || 'Hard', // Use AI's actual category instead of hardcoding
               relevanceScore: skill.relevanceScore || 8,
               marketDemand: 'High',
               implementation: 'Add to your skillset',
@@ -211,10 +221,57 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
       return;
     }
 
-    // Determine skill type based on category
-    const skillType = (cvLanguage === 'english' && suggestion.category === 'Soft Skills') || 
-                      (cvLanguage === 'azerbaijani' && suggestion.category === 'Şəxsi Bacarıqlar') 
-                      ? 'soft' : 'hard';
+    // Determine skill type based on category - improved logic
+    let skillType: 'hard' | 'soft' = 'hard'; // default to hard
+    
+    console.log('🔍 Categorizing skill:', suggestion.name, 'with category:', suggestion.category);
+    
+    if (suggestion.category) {
+      const category = suggestion.category.toLowerCase();
+      console.log('📝 Processing category:', category);
+      
+      // Direct AI category matching ("Hard" and "Soft" from AI)
+      if (category === 'soft') {
+        skillType = 'soft';
+        console.log('✅ Matched as Soft skill (direct)');
+      } else if (category === 'hard') {
+        skillType = 'hard';
+        console.log('✅ Matched as Hard skill (direct)');
+      }
+      // Fallback for language-specific categories
+      else if (category.includes('soft') || 
+               category.includes('şəxsi') || 
+               category.includes('personal') ||
+               category === 'soft skills' ||
+               category === 'şəxsi bacarıqlar') {
+        skillType = 'soft';
+        console.log('✅ Matched as Soft skill (fallback)');
+      }
+    }
+    
+    // Additional check based on skill name for common soft skills
+    const skillName = suggestion.name.toLowerCase();
+    const commonSoftSkills = [
+      'communication', 'kommunikasiya', 'iletişim',
+      'leadership', 'liderlik', 'rəhbərlik', 
+      'teamwork', 'team work', 'komanda işi', 'takım çalışması',
+      'problem solving', 'problem həlli', 'problem çözme',
+      'adaptability', 'adaptasiya', 'uyum',
+      'creativity', 'yaradıcılıq', 'kreativite',
+      'time management', 'vaxt idarəetməsi', 'zaman yönetimi',
+      'analytical thinking', 'analitik düşüncə', 'analitik düşünce',
+      'critical thinking', 'tənqidi düşüncə', 'eleştirel düşünce',
+      'negotiation', 'danışıq', 'müzakere',
+      'presentation', 'təqdimat', 'sunum',
+      'strategic thinking', 'strateji düşüncə'
+    ];
+    
+    if (commonSoftSkills.some(softSkill => skillName.includes(softSkill))) {
+      skillType = 'soft';
+      console.log('✅ Matched as Soft skill (by name)');
+    }
+
+    console.log('🎯 Final skill type:', skillType, 'for skill:', suggestion.name);
 
     // Add the suggested skill with proper type
     const newSkill: Skill = {
