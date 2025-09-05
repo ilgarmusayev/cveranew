@@ -1437,24 +1437,24 @@ const BasicTemplate: React.FC<{
                         <h1 className="text-2xl font-bold text-blue-600 mb-2">
                             {getFullName(personalInfo, data.cvLanguage)}
                         </h1>
-                        <div className="grid grid-cols-2 text-xs text-gray-600" style={{ gap: 0 }}>
+                        <div className="grid grid-cols-2 text-xs text-gray-600 gap-3">
                             {personalInfo.email && (
-                                <span className="flex items-center" style={{ gap: 0 }}>
+                                <span className="flex items-center gap-2">
                                     📧 {personalInfo.email}
                                 </span>
                             )}
                             {personalInfo.phone && (
-                                <span className="flex items-center" style={{ gap: 0 }}>
+                                <span className="flex items-center gap-2">
                                     📱 {personalInfo.phone}
                                 </span>
                             )}
                             {personalInfo.location && (
-                                <span className="flex items-center" style={{ gap: 0 }}>
+                                <span className="flex items-center gap-2">
                                     📍 {personalInfo.location}
                                 </span>
                             )}
                             {personalInfo.linkedin && (
-                                <span className="flex items-center" style={{ gap: 0 }}>
+                                <span className="flex items-center gap-2">
                                     🔗 <a
                                         href={getLinkedInDisplay(personalInfo.linkedin).url}
                                         target="_blank"
@@ -1466,13 +1466,13 @@ const BasicTemplate: React.FC<{
                                 </span>
                             )}
                             {personalInfo.website && (
-                                <span className="flex items-center" style={{ gap: 0 }}>
+                                <span className="flex items-center gap-2">
                                     🌐 {personalInfo.website}
                                 </span>
                             )}
                             {personalInfo.additionalLinks && personalInfo.additionalLinks.length > 0 && (
                                 personalInfo.additionalLinks.map((link) => (
-                                    <span key={link.id} className="flex items-center" style={{ gap: 0 }}>
+                                    <span key={link.id} className="flex items-center gap-2">
                                         📎 {link.label}: {link.value}
                                     </span>
                                 ))
@@ -1672,28 +1672,28 @@ const ModernTemplate: React.FC<{
                                 <p className="text-lg text-blue-600 font-medium" style={{ marginBottom: 0 }}>{(personalInfo as any).title}</p>
                             )}
 
-                            <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-600">
+                            <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600 mt-4">
                                 {personalInfo.email && (
-                                    <span className="flex items-center">
-                                        <span className="w-4 h-4 mr-1">📧</span>
+                                    <span className="flex items-center gap-2">
+                                        <span className="w-4 h-4">📧</span>
                                         {personalInfo.email}
                                     </span>
                                 )}
                                 {personalInfo.phone && (
-                                    <span className="flex items-center">
-                                        <span className="w-4 h-4 mr-1">📱</span>
+                                    <span className="flex items-center gap-2">
+                                        <span className="w-4 h-4">📱</span>
                                         {personalInfo.phone}
                                     </span>
                                 )}
                                 {personalInfo.location && (
-                                    <span className="flex items-center">
-                                        <span className="w-4 h-4 mr-1">📍</span>
+                                    <span className="flex items-center gap-2">
+                                        <span className="w-4 h-4">📍</span>
                                         {personalInfo.location}
                                     </span>
                                 )}
                                 {personalInfo.linkedin && (
-                                    <span className="flex items-center">
-                                        <span className="w-4 h-4 mr-1">🔗</span>
+                                    <span className="flex items-center gap-2">
+                                        <span className="w-4 h-4">🔗</span>
                                         <a
                                             href={getLinkedInDisplay(personalInfo.linkedin).url}
                                             target="_blank"
@@ -1705,8 +1705,8 @@ const ModernTemplate: React.FC<{
                                     </span>
                                 )}
                                 {personalInfo.website && (
-                                    <span className="flex items-center">
-                                        <span className="w-4 h-4 mr-1">🌐</span>
+                                    <span className="flex items-center gap-2">
+                                        <span className="w-4 h-4">🌐</span>
                                         {personalInfo.website}
                                     </span>
                                 )}
@@ -2842,30 +2842,30 @@ const ATSFriendlyTemplate: React.FC<{
                 )}
 
                 {/* Contact Information */}
-                <div className="cv-section avoid-break" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                    <h2 className="text-sm font-bold text-white tracking-wide border-b border-blue-300 pb-1 uppercase">
+                <div className="cv-section avoid-break mb-6">
+                    <h2 className="text-sm font-bold text-white tracking-wide border-b border-blue-300 pb-1 uppercase mb-3">
                         {data.cvLanguage === 'english' ? 'CONTACT' : 'ƏLAQƏ'}
                     </h2>
-                    <div className="text-xs" style={{ gap: 0 }}>
+                    <div className="text-xs space-y-3">
                         {personalInfo.email && (
-                            <div className="flex items-start" style={{ gap: 0, marginBottom: 0 }}>
-                                <span className="font-medium text-blue-200 min-w-[40px]">
+                            <div className="flex items-start gap-3">
+                                <span className="font-medium text-blue-200 min-w-[50px]">
                                     {data.cvLanguage === 'english' ? 'Email: ' : 'E-poçt: '}
                                 </span>
                                 <span className="text-white">{personalInfo.email}</span>
                             </div>
                         )}
                         {personalInfo.phone && (
-                            <div className="flex items-start" style={{ gap: 0, marginBottom: 0 }}>
-                                <span className="font-medium text-blue-200 min-w-[40px]">
+                            <div className="flex items-start gap-3">
+                                <span className="font-medium text-blue-200 min-w-[50px]">
                                     {data.cvLanguage === 'english' ? 'Phone: ' : 'Telefon: '}
                                 </span>
                                 <span className="text-white">{personalInfo.phone}</span>
                             </div>
                         )}
                         {personalInfo.location && (
-                            <div className="flex items-start" style={{ gap: 0, marginBottom: 0 }}>
-                                <span className="font-medium text-blue-200 min-w-[40px]">
+                            <div className="flex items-start gap-3">
+                                <span className="font-medium text-blue-200 min-w-[50px]">
                                     {data.cvLanguage?.includes('en') ? 'Address: ' : 
                                      data.cvLanguage?.includes('tr') ? 'Adres: ' : 'Ünvan: '}
                                 </span>
@@ -2873,8 +2873,8 @@ const ATSFriendlyTemplate: React.FC<{
                             </div>
                         )}
                         {personalInfo.linkedin && (
-                            <div className="flex items-start" style={{ gap: 0, marginBottom: 0 }}>
-                                <span className="font-medium text-blue-200 min-w-[40px]">LinkedIn: </span>
+                            <div className="flex items-start gap-3">
+                                <span className="font-medium text-blue-200 min-w-[50px]">LinkedIn: </span>
                                 <a
                                     href={getLinkedInDisplay(personalInfo.linkedin).url}
                                     target="_blank"
@@ -2886,8 +2886,8 @@ const ATSFriendlyTemplate: React.FC<{
                             </div>
                         )}
                         {personalInfo.website && (
-                            <div className="flex items-start gap-2">
-                                <span className="font-medium text-blue-200 min-w-[40px]">
+                            <div className="flex items-start gap-3">
+                                <span className="font-medium text-blue-200 min-w-[50px]">
                                     {data.cvLanguage === 'english' ? 'Website:' : 'Sayt:'}
                                 </span>
                                 <span className="text-white break-all">{personalInfo.website}</span>
@@ -2895,8 +2895,8 @@ const ATSFriendlyTemplate: React.FC<{
                         )}
                         {personalInfo.additionalLinks && personalInfo.additionalLinks.length > 0 && (
                             personalInfo.additionalLinks.map((link) => (
-                                <div key={link.id} className="flex items-start gap-2">
-                                    <span className="font-medium text-blue-200 min-w-[40px]">{link.label}:</span>
+                                <div key={link.id} className="flex items-start gap-3">
+                                    <span className="font-medium text-blue-200 min-w-[50px]">{link.label}:</span>
                                     <span className="text-white break-all">{link.value}</span>
                                 </div>
                             ))
@@ -3872,15 +3872,15 @@ const LumenTemplate: React.FC<{
                 )}
 
                 {/* Contact Information */}
-                <div className="cv-section avoid-break" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                    <h2 className="text-sm font-bold text-gray-800 tracking-wide border-b border-gray-300 pb-1" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase', marginBottom: 0 }}>
+                <div className="cv-section avoid-break mb-6">
+                    <h2 className="text-sm font-bold text-gray-800 tracking-wide border-b border-gray-300 pb-1 mb-3" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
                         {data.cvLanguage?.includes('en') ? 'CONTACT' : 
                          data.cvLanguage?.includes('tr') ? 'ILETISIM' : 'ƏLAQƏ'}
                     </h2>
-                    <div className="text-xs" style={{ gap: 0 }}>
+                    <div className="text-xs space-y-3">
                         {personalInfo.email && (
-                            <div className="flex items-start" style={{ gap: 0, marginBottom: 0 }}>
-                                <span className="font-medium text-gray-600 min-w-[60px]">
+                            <div className="flex items-start gap-3">
+                                <span className="font-medium text-gray-600 min-w-[70px]">
                                     {data.cvLanguage?.includes('en') ? 'Email: ' : 
                                      data.cvLanguage?.includes('tr') ? 'E-posta: ' : 'E-poçt: '}
                                 </span>
@@ -3888,16 +3888,16 @@ const LumenTemplate: React.FC<{
                             </div>
                         )}
                         {personalInfo.phone && (
-                            <div className="flex items-start" style={{ gap: 0, marginBottom: 0 }}>
-                                <span className="font-medium text-gray-600 min-w-[60px]">
+                            <div className="flex items-start gap-3">
+                                <span className="font-medium text-gray-600 min-w-[70px]">
                                     {data.cvLanguage === 'english' ? 'Phone: ' : 'Telefon: '}
                                 </span>
                                 <span className="text-gray-800">{personalInfo.phone}</span>
                             </div>
                         )}
                         {personalInfo.location && (
-                            <div className="flex items-start" style={{ gap: 0, marginBottom: 0 }}>
-                                <span className="font-medium text-gray-600 min-w-[60px]">
+                            <div className="flex items-start gap-3">
+                                <span className="font-medium text-gray-600 min-w-[70px]">
                                     {data.cvLanguage?.includes('en') ? 'Address: ' : 
                                      data.cvLanguage?.includes('tr') ? 'Adres: ' : 'Ünvan: '}
                                 </span>
@@ -3905,8 +3905,8 @@ const LumenTemplate: React.FC<{
                             </div>
                         )}
                         {personalInfo.linkedin && (
-                            <div className="flex items-start" style={{ gap: 0, marginBottom: 0 }}>
-                                <span className="font-medium text-gray-600 min-w-[60px]">LinkedIn: </span>
+                            <div className="flex items-start gap-3">
+                                <span className="font-medium text-gray-600 min-w-[70px]">LinkedIn: </span>
                                 <a
                                     href={getLinkedInDisplay(personalInfo.linkedin).url}
                                     target="_blank"
@@ -3918,8 +3918,8 @@ const LumenTemplate: React.FC<{
                             </div>
                         )}
                         {personalInfo.github && (
-                            <div className="flex items-start" style={{ gap: 0, marginBottom: 0 }}>
-                                <span className="font-medium text-gray-600 min-w-[60px]">GitHub: </span>
+                            <div className="flex items-start gap-3">
+                                <span className="font-medium text-gray-600 min-w-[70px]">GitHub: </span>
                                 <a
                                     href={getGitHubDisplay(personalInfo.github).url}
                                     target="_blank"
@@ -3931,8 +3931,8 @@ const LumenTemplate: React.FC<{
                             </div>
                         )}
                         {personalInfo.website && (
-                            <div className="flex items-start" style={{ gap: 0, marginBottom: 0 }}>
-                                <span className="font-medium text-gray-600 min-w-[60px]">
+                            <div className="flex items-start gap-3">
+                                <span className="font-medium text-gray-600 min-w-[70px]">
                                     {data.cvLanguage === 'english' ? 'Website: ' : 'Sayt: '}
                                 </span>
                                 <span className="text-gray-800 break-all">{personalInfo.website}</span>
@@ -4787,29 +4787,29 @@ const VertexTemplate: React.FC<{
                     </div>
                     
                     {/* Contact Information - Perfect Symmetric Grid */}
-                    <div className="max-w-5xl mx-auto">
-                        <div className="grid grid-cols-2 gap-16">
+                    <div className="max-w-5xl mx-auto mb-16">
+                        <div className="grid grid-cols-2 gap-12">
                             {/* Left Column */}
-                            <div style={{ gap: 0 }}>
+                            <div className="space-y-2">
                                 {personalInfo.email && (
-                                    <div className="flex items-center justify-between border-b border-gray-300" style={{ paddingBottom: 0, marginBottom: 0 }}>
-                                        <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-24 font-semibold">
+                                    <div className="flex items-center justify-between border-b border-gray-300 pb-2">
+                                        <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-28 font-semibold">
                                             {data.cvLanguage === 'english' ? 'Email' : 'E-poçt'}
                                         </span>
                                         <span className="text-sm text-gray-900 font-mono flex-1 text-right">{personalInfo.email}</span>
                                     </div>
                                 )}
                                 {personalInfo.phone && (
-                                    <div className="flex items-center justify-between border-b border-gray-300" style={{ paddingBottom: 0, marginBottom: 0 }}>
-                                        <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-24 font-semibold">
+                                    <div className="flex items-center justify-between border-b border-gray-300 pb-2">
+                                        <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-28 font-semibold">
                                             {data.cvLanguage === 'english' ? 'Phone' : 'Telefon'}
                                         </span>
                                         <span className="text-sm text-gray-900 font-mono flex-1 text-right">{personalInfo.phone}</span>
                                     </div>
                                 )}
                                 {personalInfo.website && (
-                                    <div className="flex items-center justify-between border-b border-gray-300" style={{ paddingBottom: 0, marginBottom: 0 }}>
-                                        <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-24 font-semibold">
+                                    <div className="flex items-center justify-between border-b border-gray-300 pb-2">
+                                        <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-28 font-semibold">
                                             {data.cvLanguage === 'english' ? 'Website' : 'Sayt'}
                                         </span>
                                         <span className="text-sm text-gray-900 font-mono flex-1 text-right truncate">{personalInfo.website}</span>
@@ -4818,18 +4818,18 @@ const VertexTemplate: React.FC<{
                             </div>
                             
                             {/* Right Column */}
-                            <div style={{ gap: 0 }}>
+                            <div className="space-y-2">
                                 {personalInfo.location && (
-                                    <div className="flex items-center justify-between border-b border-gray-300" style={{ paddingBottom: 0, marginBottom: 0 }}>
-                                        <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-24 font-semibold">
+                                    <div className="flex items-center justify-between border-b border-gray-300 pb-2">
+                                        <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-28 font-semibold">
                                             {data.cvLanguage === 'english' ? 'Location' : 'Ünvan'}
                                         </span>
                                         <span className="text-sm text-gray-900 font-mono flex-1 text-right">{personalInfo.location}</span>
                                     </div>
                                 )}
                                 {personalInfo.linkedin && (
-                                    <div className="flex items-center justify-between border-b border-gray-300" style={{ paddingBottom: 0, marginBottom: 0 }}>
-                                        <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-24 font-semibold">LinkedIn</span>
+                                    <div className="flex items-center justify-between border-b border-gray-300 pb-2">
+                                        <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-28 font-semibold">LinkedIn</span>
                                         <a
                                             href={getLinkedInDisplay(personalInfo.linkedin).url}
                                             target="_blank"
@@ -4841,8 +4841,8 @@ const VertexTemplate: React.FC<{
                                     </div>
                                 )}
                                 {personalInfo.github && (
-                                    <div className="flex items-center justify-between border-b border-gray-300" style={{ paddingBottom: 0, marginBottom: 0 }}>
-                                        <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-24 font-semibold">GitHub</span>
+                                    <div className="flex items-center justify-between border-b border-gray-300 pb-2">
+                                        <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-28 font-semibold">GitHub</span>
                                         <a
                                             href={getGitHubDisplay(personalInfo.github).url}
                                             target="_blank"
@@ -4855,7 +4855,7 @@ const VertexTemplate: React.FC<{
                                 )}
                                 {personalInfo.additionalLinks && personalInfo.additionalLinks.length > 0 && (
                                     personalInfo.additionalLinks.slice(0, 1).map((link) => (
-                                        <div key={link.id} className="flex items-center justify-between border-b border-gray-300 pb-4">
+                                        <div key={link.id} className="flex items-center justify-between border-b border-gray-300 pb-2">
                                             <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-24 font-semibold">{link.label}</span>
                                             <span className="text-sm text-gray-900 font-mono flex-1 text-right truncate">{link.value}</span>
                                         </div>
@@ -5395,33 +5395,33 @@ const HorizonTemplate: React.FC<{
                     </h1>
                     
                     {/* Contact Information - Single Row Layout */}
-                    <div className="flex flex-wrap justify-center items-center text-sm text-gray-600" style={{ gap: 0, marginBottom: 0 }}>
+                    <div className="flex flex-wrap justify-center items-center text-sm text-gray-600 gap-8 mt-6">
                         {personalInfo.phone && (
-                            <div className="flex items-center" style={{ gap: 0 }}>
+                            <div className="flex items-center gap-3">
                                 <span>📞</span>
                                 <span>{personalInfo.phone}</span>
                             </div>
                         )}
                         {personalInfo.email && (
-                            <div className="flex items-center" style={{ gap: 0 }}>
+                            <div className="flex items-center gap-3">
                                 <span>✉</span>
                                 <span>{personalInfo.email}</span>
                             </div>
                         )}
                         {personalInfo.location && (
-                            <div className="flex items-center" style={{ gap: 0 }}>
+                            <div className="flex items-center gap-3">
                                 <span>📍</span>
                                 <span>{personalInfo.location}</span>
                             </div>
                         )}
                         {personalInfo.website && (
-                            <div className="flex items-center" style={{ gap: 0 }}>
+                            <div className="flex items-center gap-3">
                                 <span>🌐</span>
                                 <span>{personalInfo.website}</span>
                             </div>
                         )}
                         {personalInfo.linkedin && (
-                            <div className="flex items-center" style={{ gap: 0 }}>
+                            <div className="flex items-center gap-3">
                                 <span>💼</span>
                                 <a
                                     href={getLinkedInDisplay(personalInfo.linkedin).url}
@@ -5434,7 +5434,7 @@ const HorizonTemplate: React.FC<{
                             </div>
                         )}
                         {personalInfo.github && (
-                            <div className="flex items-center" style={{ gap: 0 }}>
+                            <div className="flex items-center gap-3">
                                 <span>🔗</span>
                                 <a
                                     href={getGitHubDisplay(personalInfo.github).url}
@@ -6066,7 +6066,7 @@ const AuroraTemplate: React.FC<{
                         </h1>
                         
                         {/* Contact Information - Split into two lines */}
-                        <div className="text-center text-sm text-gray-700" style={{ gap: 0, marginBottom: 0 }}>
+                        <div className="text-center text-sm text-gray-700 space-y-3 mt-6">
                             {(() => {
                                 // First line: email, phone, location
                                 const firstLineItems = [];
@@ -6083,7 +6083,7 @@ const AuroraTemplate: React.FC<{
                                 return (
                                     <>
                                         {firstLineItems.length > 0 && (
-                                            <div className="flex flex-wrap justify-center items-center" style={{ gap: 0 }}>
+                                            <div className="flex flex-wrap justify-center items-center gap-6">
                                                 {firstLineItems.map((item, index) => (
                                                     <React.Fragment key={`first-${index}`}>
                                                         <span>{item}</span>
@@ -6095,7 +6095,7 @@ const AuroraTemplate: React.FC<{
                                             </div>
                                         )}
                                         {secondLineItems.length > 0 && (
-                                            <div className="flex flex-wrap justify-center items-center" style={{ gap: 0 }}>
+                                            <div className="flex flex-wrap justify-center items-center gap-6">
                                                 {secondLineItems.map((item, index) => (
                                                     <React.Fragment key={`second-${index}`}>
                                                         <span>{item}</span>
@@ -6671,11 +6671,11 @@ const ExclusiveTemplate: React.FC<{
                             </div>
                             
                             {/* Contact Information Grid - Enhanced */}
-                            <div className="mt-4 pt-4 border-t border-blue-200">
-                                <div className="grid grid-cols-3" style={{ gap: 0 }}>
+                            <div className="mt-6 pt-4 border-t border-blue-200">
+                                <div className="grid grid-cols-3 gap-4">
                                     {personalInfo.email && (
                                         <div className="bg-white p-3 rounded-md shadow-sm">
-                                            <div className="text-blue-600 uppercase font-bold" style={{ marginBottom: 0 }}>
+                                            <div className="text-blue-600 uppercase font-bold text-xs mb-2">
                                                 <p>
                                                     {data.cvLanguage?.includes('en') ? 'Email' : 
                                                      data.cvLanguage?.includes('tr') ? 'E-posta' : 'E-poçt'}
@@ -6687,7 +6687,7 @@ const ExclusiveTemplate: React.FC<{
                                     
                                     {personalInfo.phone && (
                                         <div className="bg-white p-3 rounded-md shadow-sm">
-                                            <div className="text-blue-600 uppercase font-bold" style={{ marginBottom: 0 }}>
+                                            <div className="text-blue-600 uppercase font-bold text-xs mb-2">
                                                 <p>
                                                     {data.cvLanguage?.includes('en') ? 'Phone' : 
                                                      data.cvLanguage?.includes('tr') ? 'Telefon' : 'Telefon'}
@@ -6699,7 +6699,7 @@ const ExclusiveTemplate: React.FC<{
                                     
                                     {personalInfo.location && (
                                         <div className="bg-white p-3 rounded-md shadow-sm">
-                                            <div className="text-blue-600 uppercase font-bold" style={{ marginBottom: 0 }}>
+                                            <div className="text-blue-600 uppercase font-bold text-xs mb-2">
                                                 <p>
                                                     {data.cvLanguage?.includes('en') ? 'Location' : 
                                                      data.cvLanguage?.includes('tr') ? 'Lokasyon' : 'Ünvan'}
@@ -6711,7 +6711,7 @@ const ExclusiveTemplate: React.FC<{
                                     
                                     {personalInfo.linkedin && (
                                         <div className="bg-white p-3 rounded-md shadow-sm">
-                                            <div className="text-blue-600 uppercase font-bold" style={{ marginBottom: 0 }}>
+                                            <div className="text-blue-600 uppercase font-bold text-xs mb-2">
                                                 <p>LinkedIn</p>
                                             </div>
                                             <a
@@ -6727,7 +6727,7 @@ const ExclusiveTemplate: React.FC<{
                                     
                                     {personalInfo.github && (
                                         <div className="bg-white p-3 rounded-md shadow-sm">
-                                            <div className="text-blue-600 uppercase font-bold mb-1">
+                                            <div className="text-blue-600 uppercase font-bold text-xs mb-2">
                                                 <p>GitHub</p>
                                             </div>
                                             <a
@@ -6743,7 +6743,7 @@ const ExclusiveTemplate: React.FC<{
                                     
                                     {personalInfo.website && (
                                         <div className="bg-white p-3 rounded-md shadow-sm">
-                                            <div className="text-blue-600 uppercase font-bold mb-1">
+                                            <div className="text-blue-600 uppercase font-bold text-xs mb-2">
                                                 <p>
                                                     {data.cvLanguage?.includes('en') ? 'Website' : 
                                                      data.cvLanguage?.includes('tr') ? 'Web Sitesi' : 'Veb-sayt'}
@@ -6756,7 +6756,7 @@ const ExclusiveTemplate: React.FC<{
                                     {personalInfo.additionalLinks && personalInfo.additionalLinks.length > 0 && (
                                         personalInfo.additionalLinks.slice(0, 1).map((link) => (
                                             <div key={link.id} className="bg-white p-3 rounded-md shadow-sm">
-                                                <div className="text-blue-600 uppercase font-bold mb-1">
+                                                <div className="text-blue-600 uppercase font-bold text-xs mb-2">
                                                     <p>{link.label}</p>
                                                 </div>
                                                 <p className="text-gray-800 font-medium text-sm break-all">{link.value}</p>
