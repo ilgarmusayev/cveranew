@@ -26,7 +26,6 @@ export default function DateRangeInput({
   onCurrentChange,
   startLabel = 'Başlama tarixi',
   endLabel = 'Bitirmə tarixi',
-  currentLabel = 'Hal-hazırda davam edir',
   required = false,
   cvLanguage = 'azerbaijani'
 }: DateRangeInputProps) {
@@ -275,28 +274,7 @@ export default function DateRangeInput({
         </div>
       </div>
 
-      {/* Current Position Toggle */}
-      <div className="flex items-center space-x-2">
-        <button
-          type="button"
-          onClick={handleCurrentToggle}
-          className={`flex items-center justify-center w-6 h-6 rounded-full border-2 transition-all duration-200 ${
-            current
-              ? 'bg-green-500 border-green-500 text-white shadow-md' 
-              : 'bg-white border-gray-300 text-gray-400 hover:border-green-400 hover:text-green-500'
-          }`}
-        >
-          <span className={`text-sm font-bold transition-transform duration-200 ${current ? 'rotate-45' : ''}`}>
-            +
-          </span>
-        </button>
-        <label
-          onClick={handleCurrentToggle}
-          className="text-sm text-gray-700 cursor-pointer select-none hover:text-green-600 transition-colors"
-        >
-          {currentLabel}
-        </label>
-      </div>
+   
 
       {/* Validation Message */}
       {startDate && endDate && !current && new Date(startDate) > new Date(endDate) && (

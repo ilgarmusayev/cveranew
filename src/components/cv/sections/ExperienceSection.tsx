@@ -204,32 +204,22 @@ export default function ExperienceSection({ data, onChange, cvLanguage = 'azerba
                     </div>
                   </div>
 
-                  {/* Date Fields */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {cvLanguage === 'english' ? 'Start Date' : 'Başlama tarixi'}
-                      </label>
-                      <input
-                        type="month"
-                        value={experience.startDate || ''}
-                        onChange={(e) => updateExperience(experience.id, { startDate: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {cvLanguage === 'english' ? 'End Date' : 'Bitirmə tarixi'}
-                      </label>
-                      <input
-                        type="month"
-                        value={experience.current ? '' : (experience.endDate || '')}
-                        onChange={(e) => updateExperience(experience.id, { endDate: e.target.value })}
-                        disabled={experience.current}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:bg-gray-100 disabled:text-gray-500"
-                      />
-                    </div>
-                    <div className="flex items-end">
+                  {/* Date Range Input */}
+                  <DateRangeInput
+                    startDate={experience.startDate || ''}
+                    endDate={experience.endDate}
+                    current={experience.current || false}
+                    onStartDateChange={(date) => updateExperience(experience.id, { startDate: date })}
+                    onEndDateChange={(date) => updateExperience(experience.id, { endDate: date })}
+                    onCurrentChange={(current) => updateExperience(experience.id, { 
+                      current, 
+                      endDate: current ? '' : experience.endDate 
+                    })}
+                    startLabel={cvLanguage === 'english' ? 'Start Date' : 'Başlama tarixi'}
+                    endLabel={cvLanguage === 'english' ? 'End Date' : 'Bitirmə tarixi'}
+                    cvLanguage={cvLanguage}
+                  />
+    <div className="flex items-end">
                       <label className="flex items-center">
                         <input
                           type="checkbox"
@@ -248,8 +238,6 @@ export default function ExperienceSection({ data, onChange, cvLanguage = 'azerba
                         </span>
                       </label>
                     </div>
-                  </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       {cvLanguage === 'english' ? 'Description (optional)' : 'Təsvir (ixtiyari)'}
