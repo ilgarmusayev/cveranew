@@ -376,6 +376,38 @@ const getLinkedInDisplay = (linkedinInput: string): { displayText: string; url: 
     };
 };
 
+// Helper function to format GitHub URL and display text
+const getGitHubDisplay = (githubInput: string): { displayText: string; url: string } => {
+    if (!githubInput) return { displayText: '', url: '' };
+    
+    // If it's already a full URL, extract username
+    if (githubInput.includes('github.com/')) {
+        const match = githubInput.match(/github\.com\/([^\/\?]+)/);
+        if (match) {
+            const username = match[1];
+            return {
+                displayText: `${username}`,
+                url: githubInput
+            };
+        }
+    }
+    
+    // If it's just a username (with or without @)
+    const cleanUsername = githubInput.replace('@', '');
+    if (!githubInput.includes('http')) {
+        return {
+            displayText: `${cleanUsername}`,
+            url: `https://github.com/${cleanUsername}`
+        };
+    }
+    
+    // Fallback: display as is
+    return {
+        displayText: githubInput,
+        url: githubInput.includes('http') ? githubInput : `https://github.com/${githubInput}`
+    };
+};
+
 // Utility function to split content into A4 pages
 const splitContentToPages = (sections: React.ReactNode[], pageHeightPx: number = 1122) => {
     const pages: React.ReactNode[][] = [];
@@ -1001,15 +1033,15 @@ const BasicTemplate: React.FC<{
                 console.log('Experience data in renderSection:', experience);
                 return experience && experience.length > 0 ? (
                     <div>
-                        <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
+                        <h2 className="text-base font-semibold text-blue-600 mb-3 border-b border-blue-600 pb-2">
                             {getSectionName('experience', data.cvLanguage, data.sectionNames)}
                         </h2>
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             {experience.map((exp) => (
                                 <div key={exp.id} className="border-l-2 border-blue-200 pl-3">
-                                    <div className="flex justify-between items-start mb-1">
-                                        <h3 className="font-semibold text-gray-900 text-sm">{exp.position}</h3>
-                                        <span className="text-xs text-blue-600 font-medium whitespace-nowrap ml-2">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <h3 className="font-semibold text-gray-900 text-sm mb-1">{exp.position}</h3>
+                                        <span className="text-xs text-blue-600 font-medium whitespace-nowrap ml-4">
                                             {exp.startDate ? (
                                                 exp.current ? `${formatDate(exp.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
                                                 exp.endDate ? `${formatDate(exp.startDate, data.cvLanguage)} - ${formatDate(exp.endDate, data.cvLanguage)}` :
@@ -1021,9 +1053,9 @@ const BasicTemplate: React.FC<{
                                             ) : ''}
                                         </span>
                                     </div>
-                                    <p className="text-blue-600 font-medium text-xs">{exp.company}</p>
+                                    <p className="text-blue-600 font-medium text-xs mb-2">{exp.company}</p>
                                     {exp.description && (
-                                        <div className="text-gray-700 text-xs mt-1 leading-relaxed">
+                                        <div className="text-gray-700 text-xs leading-relaxed">
                                             {renderHtmlContent(exp.description, false, data.cvLanguage)}
                                         </div>
                                     )}
@@ -1036,23 +1068,29 @@ const BasicTemplate: React.FC<{
             case 'education':
                 return education && education.length > 0 ? (
                     <div>
-                        <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
+                        <h2 className="text-base font-semibold text-blue-600 mb-3 border-b border-blue-600 pb-2">
                             {getSectionName('education', data.cvLanguage, data.sectionNames)}
                         </h2>
-                        <div className="space-y-2">
+                        <div className="space-y-4">
                             {education.map((edu) => (
                                 <div key={edu.id} className="border-l-2 border-blue-200 pl-3">
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            {edu.degree && <h3 className="font-semibold text-gray-900 text-sm">{edu.degree}</h3>}
-                                            <p className="text-blue-600 font-medium text-xs">{edu.institution}</p>
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div className="flex-1">
+                                            {edu.degree ? (
+                                                <h3 className="font-semibold text-gray-900 text-sm mb-1">{edu.degree}</h3>
+                                            ) : (
+                                                <h3 className="font-semibold text-gray-900 text-sm mb-1">{edu.institution}</h3>
+                                            )}
+                                            {edu.degree && (
+                                                <p className="text-blue-600 font-medium text-xs mb-1">{edu.institution}</p>
+                                            )}
                                             {(edu.field || edu.gpa) && (
                                                 <p className="text-gray-600 text-xs">
                                                     {[edu.field, edu.gpa && `${data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: ${edu.gpa}`].filter(Boolean).join(' - ')}
                                                 </p>
                                             )}
                                         </div>
-                                        <span className="text-xs text-blue-600 font-medium whitespace-nowrap ml-2">
+                                        <span className="text-xs text-blue-600 font-medium whitespace-nowrap ml-4">
                                             {edu.startDate ? (
                                                 edu.current ? `${formatDate(edu.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
                                                 edu.endDate ? `${formatDate(edu.startDate, data.cvLanguage)} - ${formatDate(edu.endDate, data.cvLanguage)}` :
@@ -1065,7 +1103,7 @@ const BasicTemplate: React.FC<{
                                         </span>
                                     </div>
                                     {edu.description && (
-                                        <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(edu.description)}</div>
+                                        <div className="text-gray-700 text-xs leading-relaxed mt-2">{renderHtmlContent(edu.description)}</div>
                                     )}
                                 </div>
                             ))}
@@ -1154,10 +1192,10 @@ const BasicTemplate: React.FC<{
                 const validLanguages = languages?.filter(lang => lang.language && lang.language.trim() !== '') || [];
                 return validLanguages.length > 0 ? (
                     <div>
-                        <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
+                        <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-2">
                             {getSectionName('languages', data.cvLanguage, data.sectionNames)}
                         </h2>
-                        <div className={validLanguages.length <= 2 ? "space-y-1" : "grid grid-cols-4 gap-x-2 gap-y-1"}>
+                        <div className={validLanguages.length <= 2 ? "space-y-1 border-l-2 border-blue-200 pl-3" : "grid grid-cols-4 gap-x-2 gap-y-1 border-l-2 border-blue-200 pl-3"}>
                             {validLanguages.map((lang) => (
                                 <div key={lang.id} className="text-xs text-gray-700 break-words">
                                     {lang.language} ({getLanguageLevel(lang.level, data.cvLanguage)})
@@ -1211,12 +1249,12 @@ const BasicTemplate: React.FC<{
                                         <div className="text-xs text-gray-600 mt-1">
                                             GitHub:{' '}
                                             <a
-                                                href={project.github.startsWith('http') ? project.github : `https://github.com/${project.github}`}
+                                                href={getGitHubDisplay(project.github).url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer break-all"
                                             >
-                                                {project.github}
+                                                {getGitHubDisplay(project.github).displayText}
                                             </a>
                                         </div>
                                     )}
@@ -1229,36 +1267,36 @@ const BasicTemplate: React.FC<{
             case 'certifications':
                 return certifications && certifications.length > 0 ? (
                     <div >
-                        <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
+                        <h2 className="text-base font-semibold text-blue-600 mb-3 border-b border-blue-600 pb-2">
                             {getSectionName('certifications', data.cvLanguage, data.sectionNames)}
                         </h2>
-                        <div className="space-y-2">
+                        <div className="space-y-4">
                             {certifications.map((cert) => (
                                 <div key={cert.id} className="border-l-2 border-blue-200 pl-3">
-                                    <div className="flex justify-between items-start">
-                                        <div>
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div className="flex-1">
                                             {cert.url ? (
                                                 <a
                                                     href={cert.url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="font-semibold text-gray-900 text-sm underline hover:text-blue-600 transition-colors cursor-pointer"
+                                                    className="font-semibold text-gray-900 text-sm underline hover:text-blue-600 transition-colors cursor-pointer mb-1 block"
                                                 >
                                                     {cert.name}
                                                 </a>
                                             ) : (
-                                                <h3 className="font-semibold text-gray-900 text-sm">{cert.name}</h3>
+                                                <h3 className="font-semibold text-gray-900 text-sm mb-1">{cert.name}</h3>
                                             )}
                                             <p className="text-blue-600 font-medium text-xs">{cert.issuer}</p>
                                         </div>
                                         {cert.date && (
-                                            <span className="text-xs text-blue-600 font-medium whitespace-nowrap ml-2">
+                                            <span className="text-xs text-blue-600 font-medium whitespace-nowrap ml-4">
                                                 {formatDate(cert.date, data.cvLanguage)}
                                             </span>
                                         )}
                                     </div>
                                     {cert.description && (
-                                        <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(cert.description)}</div>
+                                        <div className="text-gray-700 text-xs leading-relaxed mt-2">{renderHtmlContent(cert.description)}</div>
                                     )}
                                 </div>
                             ))}
@@ -1445,7 +1483,7 @@ const BasicTemplate: React.FC<{
                         style={{ 
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: 'var(--cv-section-spacing, 8px)'
+                            gap: 'var(--cv-section-spacing, 24px)' // Professional section spacing
                         }}
                     >
                         {sectionOrder.map((sectionType) => {
@@ -1634,6 +1672,19 @@ const ModernTemplate: React.FC<{
                                         {personalInfo.location}
                                     </span>
                                 )}
+                                {personalInfo.linkedin && (
+                                    <span className="flex items-center">
+                                        <span className="w-4 h-4 mr-1">🔗</span>
+                                        <a
+                                            href={getLinkedInDisplay(personalInfo.linkedin).url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer underline"
+                                        >
+                                            {getLinkedInDisplay(personalInfo.linkedin).displayText}
+                                        </a>
+                                    </span>
+                                )}
                                 {personalInfo.website && (
                                     <span className="flex items-center">
                                         <span className="w-4 h-4 mr-1">🌐</span>
@@ -1721,8 +1772,14 @@ const ModernTemplate: React.FC<{
                                     <div key={edu.id} className="border-l-4 border-green-400 pl-4 bg-green-50 p-4 rounded-r-lg">
                                         <div className="flex justify-between items-start mb-1">
                                             <div className="flex-1">
-                                                {edu.degree && <h3 className="font-bold text-gray-900">{edu.degree}</h3>}
-                                                <p className="text-green-600 font-medium">{edu.institution}</p>
+                                                {edu.degree ? (
+                                                    <h3 className="font-bold text-gray-900">{edu.degree}</h3>
+                                                ) : (
+                                                    <h3 className="font-bold text-gray-900">{edu.institution}</h3>
+                                                )}
+                                                {edu.degree && (
+                                                    <p className="text-green-600 font-medium">{edu.institution}</p>
+                                                )}
                                                 {(edu.field || edu.gpa) && (
                                                     <p className="text-gray-600 text-sm">
                                                         {[edu.field, edu.gpa && `${data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: ${edu.gpa}`].filter(Boolean).join(' - ')}
@@ -1826,6 +1883,19 @@ const ModernTemplate: React.FC<{
                                                         </div>
                                                     </div>
                                                 )}
+                                                {project.github && (
+                                                    <div className="mt-2">
+                                                        <span className="text-sm text-gray-600">GitHub: </span>
+                                                        <a
+                                                            href={getGitHubDisplay(project.github).url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-orange-700 hover:text-orange-900 underline text-sm"
+                                                        >
+                                                            {getGitHubDisplay(project.github).displayText}
+                                                        </a>
+                                                    </div>
+                                                )}
                                             </div>
                                             {project.url && (
                                                 <a
@@ -1899,7 +1969,7 @@ const ModernTemplate: React.FC<{
                                                     <p className="text-yellow-600 text-sm">{cert.issuer}</p>
                                                 )}
                                                 {cert.description && (
-                                                    <p className="text-gray-600 text-sm mt-1">{cert.description}</p>
+                                                    <div className="text-gray-600 text-sm mt-1">{renderHtmlContent(cert.description)}</div>
                                                 )}
                                             </div>
                                             {cert.date && (
@@ -2443,19 +2513,19 @@ const ATSFriendlyTemplate: React.FC<{
                         isDropTarget={dropTargetId === 'experience'}
                     >
                         <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                            <h2 className="text-sm font-bold text-gray-900 tracking-wide border-b border-gray-200 pb-1 my-0" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
+                            <h2 className="text-sm font-bold text-gray-900 tracking-wide border-b border-gray-200 pb-2 mb-3" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
                                 {getUppercaseSectionName('experience', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="space-y-2 mt-1 mb-0" style={{ margin: 0, padding: 0 }}>
+                            <div className="space-y-4 mt-3" style={{ margin: 0, padding: 0 }}>
                                 {experience.map((exp) => (
                                     <div key={exp.id} className="avoid-break">
-                                        <div className="flex justify-between items-start mb-1">
-                                            <div>
-                                                <h3 className="text-sm font-bold text-gray-900">{exp.position}</h3>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div className="flex-1">
+                                                <h3 className="text-sm font-bold text-gray-900 mb-1">{exp.position}</h3>
                                                 <p className="text-xs font-medium text-gray-700">{exp.company}</p>
                                             </div>
                                             {(exp.startDate || exp.endDate) && (
-                                                <span className="text-xs text-gray-600 font-medium whitespace-nowrap ml-2">
+                                                <span className="text-xs text-gray-600 font-medium whitespace-nowrap ml-4">
                                                     {exp.startDate ? (
                                                         exp.current ? `${formatDate(exp.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
                                                         exp.endDate ? `${formatDate(exp.startDate, data.cvLanguage)} - ${formatDate(exp.endDate, data.cvLanguage)}` :
@@ -2469,7 +2539,7 @@ const ATSFriendlyTemplate: React.FC<{
                                             )}
                                         </div>
                                         {exp.description && (
-                                            <div className="text-gray-700 text-xs leading-none mb-0" style={{ margin: 0, padding: 0 }}>
+                                            <div className="text-gray-700 text-xs leading-relaxed mt-2" style={{ margin: 0, padding: 0 }}>
                                                 {renderHtmlContent(exp.description)}
                                             </div>
                                         )}
@@ -2492,16 +2562,22 @@ const ATSFriendlyTemplate: React.FC<{
                         isDropTarget={dropTargetId === 'education'}
                     >
                         <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0,paddingBottom: 0 }}>
-                            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide border-b border-gray-200 pb-1 my-0">
+                            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide border-b border-gray-200 pb-2 mb-3">
                                 {getSectionName('education', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="mt-1 mb-0" style={{ margin: 0, padding: 0 }}>
+                            <div className="space-y-4 mt-3" style={{ margin: 0, padding: 0 }}>
                                 {education.map((edu) => (
                                     <div key={edu.id} className="avoid-break">
-                                        <div className="flex justify-between items-start mb-1">
-                                            <div>
-                                                <h3 className="text-sm font-bold text-gray-900">{edu.degree}</h3>
-                                                <p className="text-xs font-medium text-gray-700">{edu.institution}</p>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div className="flex-1">
+                                                {edu.degree ? (
+                                                    <h3 className="text-sm font-bold text-gray-900 mb-1">{edu.degree}</h3>
+                                                ) : (
+                                                    <h3 className="text-sm font-bold text-gray-900 mb-1">{edu.institution}</h3>
+                                                )}
+                                                {edu.degree && (
+                                                    <p className="text-xs font-medium text-gray-700 mb-1">{edu.institution}</p>
+                                                )}
                                                 {(edu.field || edu.gpa) && (
                                                     <p className="text-xs text-gray-600">
                                                         {[edu.field, edu.gpa && `${data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: ${edu.gpa}`].filter(Boolean).join(' - ')}
@@ -2509,7 +2585,7 @@ const ATSFriendlyTemplate: React.FC<{
                                                 )}
                                             </div>
                                             {(edu.startDate || edu.endDate) && (
-                                                <span className="text-xs text-gray-600 font-medium whitespace-nowrap ml-2">
+                                                <span className="text-xs text-gray-600 font-medium whitespace-nowrap ml-4">
                                                     {edu.startDate ? (
                                                         edu.current ? `${formatDate(edu.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
                                                         edu.endDate ? `${formatDate(edu.startDate, data.cvLanguage)} - ${formatDate(edu.endDate, data.cvLanguage)}` :
@@ -2523,7 +2599,7 @@ const ATSFriendlyTemplate: React.FC<{
                                             )}
                                         </div>
                                         {edu.description && (
-                                            <div className="text-gray-700 text-xs mt-1 mb-0" style={{ margin: 0, padding: 0 }}>{renderHtmlContent(edu.description)}</div>
+                                            <div className="text-gray-700 text-xs leading-relaxed mt-2" style={{ margin: 0, padding: 0 }}>{renderHtmlContent(edu.description)}</div>
                                         )}
                                     </div>
                                 ))}
@@ -2579,12 +2655,12 @@ const ATSFriendlyTemplate: React.FC<{
                                                     <div className="text-xs text-gray-600 mt-1">
                                                         <span className="font-medium">GitHub:</span>{' '}
                                                         <a
-                                                            href={project.github.startsWith('http') ? project.github : `https://github.com/${project.github}`}
+                                                            href={getGitHubDisplay(project.github).url}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             className="text-gray-900 hover:text-blue-600 underline hover:no-underline transition-colors cursor-pointer break-all"
                                                         >
-                                                            {project.github}
+                                                            {getGitHubDisplay(project.github).displayText}
                                                         </a>
                                                     </div>
                                                 )}
@@ -2725,6 +2801,58 @@ const ATSFriendlyTemplate: React.FC<{
                                     </div>
                                 ))
                             }
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'certifications':
+                return certifications && certifications.length > 0 ? (
+                    <SortableItem 
+                        key="certifications" 
+                        id="certifications"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'certifications'}
+                    >
+                        <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
+                            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide border-b border-gray-200 pb-2 mb-3">
+                                {getSectionName('certifications', data.cvLanguage, data.sectionNames)}
+                            </h2>
+                            <div className="space-y-4 mt-3" style={{ margin: 0, padding: 0 }}>
+                                {certifications.map((cert) => (
+                                    <div key={cert.id} className="avoid-break">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div className="flex-1">
+                                                {cert.url ? (
+                                                    <a
+                                                        href={cert.url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-sm font-bold text-gray-900 underline hover:text-blue-600 transition-colors cursor-pointer mb-1 block"
+                                                    >
+                                                        {cert.name}
+                                                    </a>
+                                                ) : (
+                                                    <h3 className="text-sm font-bold text-gray-900 mb-1">{cert.name}</h3>
+                                                )}
+                                                <p className="text-xs font-medium text-gray-700">{cert.issuer}</p>
+                                            </div>
+                                            {cert.date && (
+                                                <span className="text-xs text-gray-600 font-medium whitespace-nowrap ml-4">
+                                                    {formatDate(cert.date, data.cvLanguage)}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {cert.description && (
+                                            <div className="text-gray-700 text-xs leading-relaxed mt-2" style={{ margin: 0, padding: 0 }}>
+                                                {renderHtmlContent(cert.description)}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </SortableItem>
                 ) : null;
@@ -3116,7 +3244,7 @@ const ATSFriendlyTemplate: React.FC<{
                             style={{ 
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: 'var(--cv-section-spacing, 18px)'
+                                gap: 'var(--cv-section-spacing, 24px)' // Professional default spacing
                             }}
                         >
                             {sectionOrder.map((sectionType) => {
@@ -3546,8 +3674,14 @@ const LumenTemplate: React.FC<{
                                     <div key={edu.id} className="avoid-break">
                                         <div className="flex justify-between items-start mb-1">
                                             <div>
-                                                <h3 className="text-sm font-bold text-gray-900">{edu.degree}</h3>
-                                                <p className="text-xs font-medium text-gray-700">{edu.institution}</p>
+                                                {edu.degree ? (
+                                                    <h3 className="text-sm font-bold text-gray-900">{edu.degree}</h3>
+                                                ) : (
+                                                    <h3 className="text-sm font-bold text-gray-900">{edu.institution}</h3>
+                                                )}
+                                                {edu.degree && (
+                                                    <p className="text-xs font-medium text-gray-700">{edu.institution}</p>
+                                                )}
                                                 {(edu.field || edu.gpa) && (
                                                     <p className="text-xs text-gray-600">
                                                         {[edu.field, edu.gpa && `${data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: ${edu.gpa}`].filter(Boolean).join(' - ')}
@@ -3625,12 +3759,12 @@ const LumenTemplate: React.FC<{
                                                     <div className="text-xs text-gray-600 mt-1">
                                                         <span className="font-medium">GitHub:</span>{' '}
                                                         <a
-                                                            href={project.github.startsWith('http') ? project.github : `https://github.com/${project.github}`}
+                                                            href={getGitHubDisplay(project.github).url}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             className="text-gray-900 hover:text-blue-600 underline hover:no-underline transition-colors cursor-pointer break-all"
                                                         >
-                                                            {project.github}
+                                                            {getGitHubDisplay(project.github).displayText}
                                                         </a>
                                                     </div>
                                                 )}
@@ -3861,6 +3995,19 @@ const LumenTemplate: React.FC<{
                                 </a>
                             </div>
                         )}
+                        {personalInfo.github && (
+                            <div className="flex items-start gap-3">
+                                <span className="font-medium text-gray-600 min-w-[40px]">GitHub:</span>
+                                <a
+                                    href={getGitHubDisplay(personalInfo.github).url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-gray-800 break-all hover:text-blue-600 transition-colors cursor-pointer underline"
+                                >
+                                    {getGitHubDisplay(personalInfo.github).displayText}
+                                </a>
+                            </div>
+                        )}
                         {personalInfo.website && (
                             <div className="flex items-start gap-2">
                                 <span className="font-medium text-gray-600 min-w-[40px]">
@@ -4051,6 +4198,9 @@ const LumenTemplate: React.FC<{
                                                                     <div className="text-xs text-gray-600">{cert.issuer}</div>
                                                                     {cert.date && (
                                                                         <div className="text-xs text-gray-500">{formatDate(cert.date, data.cvLanguage)}</div>
+                                                                    )}
+                                                                    {cert.description && (
+                                                                        <div className="text-xs text-gray-600 mt-1">{renderHtmlContent(cert.description)}</div>
                                                                     )}
                                                                 </div>
                                                             ))}
@@ -4321,8 +4471,14 @@ const VertexTemplate: React.FC<{
                                         {/* Content Column */}
                                         <div className="col-span-9">
                                             <div className="border-l-4 border-gray-300 pl-6">
-                                                <h3 className="font-bold text-gray-900 text-lg mb-2">{edu.degree}</h3>
-                                                <h4 className="font-semibold text-gray-700 text-base mb-3">{edu.institution}</h4>
+                                                {edu.degree ? (
+                                                    <h3 className="font-bold text-gray-900 text-lg mb-2">{edu.degree}</h3>
+                                                ) : (
+                                                    <h3 className="font-bold text-gray-900 text-lg mb-2">{edu.institution}</h3>
+                                                )}
+                                                {edu.degree && (
+                                                    <h4 className="font-semibold text-gray-700 text-base mb-3">{edu.institution}</h4>
+                                                )}
                                                 {(edu.field || edu.gpa) && (
                                                     <div className="text-sm text-gray-600 mb-3 font-mono bg-gray-50 p-3 rounded border">
                                                         {edu.field && <div className="mb-1">{edu.field}</div>}
@@ -4372,7 +4528,7 @@ const VertexTemplate: React.FC<{
                                     {getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
                                 </h3>
                                 <div className="text-base text-gray-700 leading-relaxed bg-gray-50 p-4 border rounded">
-                                    {skills.filter(skill => skill.type === 'soft').map(skill => skill.name).join(' • ')}
+                                    {skills.filter(skill => skill.type === 'soft').map(skill => skill.name).join(' - ')}
                                 </div>
                             </div>
                         )}
@@ -4384,7 +4540,7 @@ const VertexTemplate: React.FC<{
                                     {getSectionName('coreCompetencies', data.cvLanguage, data.sectionNames)}
                                 </h3>
                                 <div className="text-base text-gray-700 leading-relaxed bg-gray-50 p-4 border rounded">
-                                    {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map(skill => skill.name).join(' • ')}
+                                    {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map(skill => skill.name).join(' - ')}
                                 </div>
                             </div>
                         )}
@@ -4763,6 +4919,19 @@ const VertexTemplate: React.FC<{
                                         </a>
                                     </div>
                                 )}
+                                {personalInfo.github && (
+                                    <div className="flex items-center justify-between border-b border-gray-300 pb-4">
+                                        <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-24 font-semibold">GitHub</span>
+                                        <a
+                                            href={getGitHubDisplay(personalInfo.github).url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-sm text-gray-900 font-mono hover:underline flex-1 text-right truncate"
+                                        >
+                                            {getGitHubDisplay(personalInfo.github).displayText}
+                                        </a>
+                                    </div>
+                                )}
                                 {personalInfo.additionalLinks && personalInfo.additionalLinks.length > 0 && (
                                     personalInfo.additionalLinks.slice(0, 1).map((link) => (
                                         <div key={link.id} className="flex items-center justify-between border-b border-gray-300 pb-4">
@@ -4971,7 +5140,7 @@ const HorizonTemplate: React.FC<{
                                     {(edu.field || edu.gpa) && (
                                         <div className="text-sm text-gray-500 mb-2">
                                             {edu.field && <span>{edu.field}</span>}
-                                            {edu.field && edu.gpa && <span className="mx-2">|</span>}
+                                            {edu.field && edu.gpa && <span> - </span>}
                                             {edu.gpa && <span>{data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: {edu.gpa}</span>}
                                         </div>
                                     )}
@@ -5344,6 +5513,19 @@ const HorizonTemplate: React.FC<{
                                 </a>
                             </div>
                         )}
+                        {personalInfo.github && (
+                            <div className="flex items-center gap-2">
+                                <span>🔗</span>
+                                <a
+                                    href={getGitHubDisplay(personalInfo.github).url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:underline"
+                                >
+                                    {getGitHubDisplay(personalInfo.github).displayText}
+                                </a>
+                            </div>
+                        )}
                     </div>
                     
                     {/* Divider Line */}
@@ -5616,12 +5798,18 @@ const AuroraTemplate: React.FC<{
                                 <div key={edu.id || index} className="border-b border-gray-100 last:border-b-0 pb-2">
                                     <div className="flex justify-between items-start mb-1">
                                         <div className="flex-1">
-                                            <h3 className="font-semibold text-gray-900 text-sm">{edu.degree}</h3>
-                                            <p className="font-medium text-gray-700 text-xs mt-0.5">{edu.institution}</p>
+                                            {edu.degree ? (
+                                                <h3 className="font-semibold text-gray-900 text-sm">{edu.degree}</h3>
+                                            ) : (
+                                                <h3 className="font-semibold text-gray-900 text-sm">{edu.institution}</h3>
+                                            )}
+                                            {edu.degree && (
+                                                <p className="font-medium text-gray-700 text-xs mt-0.5">{edu.institution}</p>
+                                            )}
                                             {(edu.field || edu.gpa) && (
                                                 <div className="text-xs text-gray-600 mt-1">
                                                     {edu.field && <span>{edu.field}</span>}
-                                                    {edu.field && edu.gpa && <span className="mx-1">•</span>}
+                                                    {edu.field && edu.gpa && <span> - </span>}
                                                     {edu.gpa && <span>{data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: {edu.gpa}</span>}
                                                 </div>
                                             )}
@@ -5662,7 +5850,7 @@ const AuroraTemplate: React.FC<{
                             <div className="mb-3">
                                 <h3 className="text-sm font-semibold text-gray-800 mb-2">{getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}</h3>
                                 <div className="text-sm text-gray-700">
-                                    {skills.filter(skill => skill.type === 'hard').map(skill => skill.name).join(' • ')}
+                                    {skills.filter(skill => skill.type === 'hard').map(skill => skill.name).join(' - ')}
                                 </div>
                             </div>
                         )}
@@ -5672,7 +5860,7 @@ const AuroraTemplate: React.FC<{
                             <div className="mb-3">
                                 <h3 className="text-sm font-semibold text-gray-800 mb-2">{getSectionName('softSkills', data.cvLanguage, data.sectionNames)}</h3>
                                 <div className="text-sm text-gray-700">
-                                    {skills.filter(skill => skill.type === 'soft').map(skill => skill.name).join(' • ')}
+                                    {skills.filter(skill => skill.type === 'soft').map(skill => skill.name).join(' - ')}
                                 </div>
                             </div>
                         )}
@@ -5735,7 +5923,7 @@ const AuroraTemplate: React.FC<{
                                                 {data.cvLanguage?.includes('en') ? 'Technologies: ' : 
                                                  data.cvLanguage?.includes('tr') ? 'Teknolojiler: ' : 'Texnologiyalar: '}
                                             </span>
-                                            {project.technologies.join(' • ')}
+                                            {project.technologies.join(' - ')}
                                         </div>
                                     )}
                                 </div>
@@ -5968,9 +6156,10 @@ const AuroraTemplate: React.FC<{
                                 if (personalInfo.phone) firstLineItems.push(personalInfo.phone);
                                 if (personalInfo.location) firstLineItems.push(personalInfo.location);
                                 
-                                // Second line: linkedin, website
+                                // Second line: linkedin, github, website
                                 const secondLineItems = [];
                                 if (personalInfo.linkedin) secondLineItems.push(getLinkedInDisplay(personalInfo.linkedin).displayText);
+                                if (personalInfo.github) secondLineItems.push(getGitHubDisplay(personalInfo.github).displayText);
                                 if (personalInfo.website) secondLineItems.push(personalInfo.website);
                                 
                                 return (
@@ -6013,7 +6202,7 @@ const AuroraTemplate: React.FC<{
                         style={{ 
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '16px'
+                            gap: 'var(--cv-section-spacing, 24px)' // Professional section spacing
                         }}
                     >
                         {sectionOrder.map((sectionId) => {
@@ -6170,12 +6359,18 @@ const ExclusiveTemplate: React.FC<{
                                 <div key={edu.id || index} className="pb-2">
                                     <div className="flex flex-row items-start justify-between gap-3 mb-2">
                                         <div className="flex-1">
-                                            <h3 className="font-semibold text-sm text-gray-800">{edu.degree}</h3>
-                                            <h4 className="font-medium text-blue-600 text-xs mt-1">{edu.institution}</h4>
+                                            {edu.degree ? (
+                                                <h3 className="font-semibold text-sm text-gray-800">{edu.degree}</h3>
+                                            ) : (
+                                                <h3 className="font-semibold text-sm text-gray-800">{edu.institution}</h3>
+                                            )}
+                                            {edu.degree && (
+                                                <h4 className="font-medium text-blue-600 text-xs mt-1">{edu.institution}</h4>
+                                            )}
                                             {(edu.field || edu.gpa) && (
                                                 <div className="text-xs text-gray-700 mt-1">
                                                     {edu.field && <span className="italic">{edu.field}</span>}
-                                                    {edu.field && edu.gpa && <span className="mx-2">•</span>}
+                                                    {edu.field && edu.gpa && <span> - </span>}
                                                     {edu.gpa && <span><strong>{data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}:</strong> {edu.gpa}</span>}
                                                 </div>
                                             )}
@@ -6307,12 +6502,12 @@ const ExclusiveTemplate: React.FC<{
                                         <div className="text-xs text-gray-600">
                                             <span className="font-medium">GitHub:</span>{' '}
                                             <a
-                                                href={project.github.startsWith('http') ? project.github : `https://github.com/${project.github}`}
+                                                href={getGitHubDisplay(project.github).url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer break-all"
                                             >
-                                                {project.github}
+                                                {getGitHubDisplay(project.github).displayText}
                                             </a>
                                         </div>
                                     )}
@@ -6614,6 +6809,22 @@ const ExclusiveTemplate: React.FC<{
                                         </div>
                                     )}
                                     
+                                    {personalInfo.github && (
+                                        <div className="bg-white p-3 rounded-md shadow-sm">
+                                            <div className="text-blue-600 uppercase font-bold mb-1">
+                                                <p>GitHub</p>
+                                            </div>
+                                            <a
+                                                href={getGitHubDisplay(personalInfo.github).url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-gray-800 font-medium text-sm hover:text-blue-600 underline"
+                                            >
+                                                {getGitHubDisplay(personalInfo.github).displayText}
+                                            </a>
+                                        </div>
+                                    )}
+                                    
                                     {personalInfo.website && (
                                         <div className="bg-white p-3 rounded-md shadow-sm">
                                             <div className="text-blue-600 uppercase font-bold mb-1">
@@ -6647,7 +6858,7 @@ const ExclusiveTemplate: React.FC<{
                         style={{ 
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: 'var(--cv-section-spacing, 12px)'
+                            gap: 'var(--cv-section-spacing, 24px)' // Professional section spacing
                         }}
                     >
                         {sectionOrder.map((sectionId) => {

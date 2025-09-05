@@ -50,24 +50,27 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
     // Replace &nbsp; with regular spaces
     cleaned = cleaned.replace(/&nbsp;/g, ' ');
 
-    // Replace div tags with p tags
+    // Convert div tags to p tags more carefully
     cleaned = cleaned.replace(/<div>/g, '<p>');
     cleaned = cleaned.replace(/<\/div>/g, '</p>');
 
-    // Remove empty paragraphs and clean up spacing
+    // Remove empty paragraphs but preserve structure
     cleaned = cleaned.replace(/<p><\/p>/g, '');
     cleaned = cleaned.replace(/<p>\s*<\/p>/g, '');
-    cleaned = cleaned.replace(/<p><br><\/p>/g, '<p></p>');
+    
+    // Handle line breaks more carefully
+    cleaned = cleaned.replace(/<p><br><\/p>/g, '<p>&nbsp;</p>'); // Preserve line breaks
+    cleaned = cleaned.replace(/<br><br>/g, '<br>'); // Prevent double breaks
 
-    // Clean up multiple consecutive spaces
-    cleaned = cleaned.replace(/\s+/g, ' ');
+    // Clean up multiple consecutive spaces but preserve single spaces
+    cleaned = cleaned.replace(/\s{2,}/g, ' ');
 
-    // Ensure proper paragraph wrapping for plain text
+    // Ensure proper paragraph wrapping for plain text only if no HTML structure exists
     if (cleaned && !cleaned.includes('<') && cleaned.trim()) {
       cleaned = `<p>${cleaned.trim()}</p>`;
     }
 
-    // Fix malformed HTML
+    // Fix malformed HTML more carefully
     cleaned = cleaned.replace(/<p>\s*<p>/g, '<p>');
     cleaned = cleaned.replace(/<\/p>\s*<\/p>/g, '</p>');
 
@@ -610,8 +613,18 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
         {/* Rich Text Editor Content */}
         <div
           ref={(el) => {
-            if (el && data.summary && el.innerHTML !== data.summary) {
-              el.innerHTML = cleanHtmlContent(data.summary);
+            if (el && data.summary !== undefined) {
+              // Only update if content is significantly different to prevent cursor jumps
+              const currentContent = el.innerHTML;
+              const newContent = cleanHtmlContent(data.summary || '');
+              
+              if (currentContent !== newContent && !el.matches(':focus')) {
+                // Only update when element is not focused to prevent cursor disruption
+                el.innerHTML = newContent;
+              } else if (!currentContent && newContent) {
+                // Initial load case
+                el.innerHTML = newContent;
+              }
             }
           }}
           contentEditable
@@ -626,8 +639,42 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
             const target = e.target as HTMLDivElement;
             const content = target.innerHTML;
 
-            // Immediately clean and save content
+            // Save cursor position
+            const selection = window.getSelection();
+            let cursorPosition = 0;
+            if (selection && selection.rangeCount > 0) {
+              const range = selection.getRangeAt(0);
+              cursorPosition = range.startOffset;
+            }
+
+            // Clean content
             const cleanedContent = cleanHtmlContent(content);
+            
+            // Only update if content actually changed to prevent cursor jumps
+            if (cleanedContent !== content) {
+              target.innerHTML = cleanedContent;
+              
+              // Restore cursor position
+              try {
+                if (selection && target.firstChild) {
+                  const range = document.createRange();
+                  const textNode = target.firstChild.nodeType === Node.TEXT_NODE 
+                    ? target.firstChild 
+                    : target.firstChild.firstChild || target.firstChild;
+                  
+                  if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+                    const maxOffset = Math.min(cursorPosition, textNode.textContent?.length || 0);
+                    range.setStart(textNode, maxOffset);
+                    range.setEnd(textNode, maxOffset);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                  }
+                }
+              } catch (error) {
+                // Ignore cursor restoration errors
+              }
+            }
+
             handleChange('summary', cleanedContent);
           }}
           onBlur={(e) => {
@@ -644,10 +691,28 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
             document.execCommand('insertText', false, text);
           }}
           onKeyDown={(e) => {
-            // Handle Enter key properly - single line break
+            // Handle Enter key properly - prevent default behavior that causes cursor jump
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
-              document.execCommand('insertHTML', false, '<br>');
+              
+              // Get current selection and position
+              const selection = window.getSelection();
+              if (!selection || selection.rangeCount === 0) return;
+              
+              const range = selection.getRangeAt(0);
+              
+              // Create a new paragraph element instead of br
+              const p = document.createElement('p');
+              p.innerHTML = '<br>'; // Add a br inside p to maintain proper height
+              
+              // Insert the paragraph at cursor position
+              range.insertNode(p);
+              
+              // Move cursor to inside the new paragraph
+              range.setStart(p, 0);
+              range.setEnd(p, 0);
+              selection.removeAllRanges();
+              selection.addRange(range);
             }
           }}
           data-placeholder={canUseAI
@@ -670,6 +735,8 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
           }
           [contenteditable] {
             background: white;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
           }
           [contenteditable]:focus {
             background: white;
@@ -677,12 +744,16 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
           [contenteditable] p {
             margin: 0.5rem 0;
             line-height: 1.5;
+            min-height: 1.2em;
           }
           [contenteditable] p:first-child {
             margin-top: 0;
           }
           [contenteditable] p:last-child {
             margin-bottom: 0;
+          }
+          [contenteditable] p:empty {
+            min-height: 1.2em;
           }
           [contenteditable] ul, [contenteditable] ol {
             margin: 0.5rem 0;
@@ -706,6 +777,10 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
           }
           [contenteditable] br {
             line-height: 1.5;
+          }
+          /* Prevent cursor jumping issues */
+          [contenteditable] * {
+            outline: none;
           }
         `}</style>
       </div>
