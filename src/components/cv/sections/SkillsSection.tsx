@@ -119,7 +119,8 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
         return;
       }
 
-      const response = await apiClient.post('/api/ai/generate-skills', { 
+      const response = await apiClient.post('/api/ai/suggest-skills', { 
+        cvId: cvId, // Add CV ID to request
         cvData,
         // Pass SAME language as CV for same-language suggestions
         targetLanguage: cvData?.cvLanguage || 'english',
@@ -140,54 +141,37 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
       });
 
       if (response.success && response.data) {
-        const { skills, hardSkills, softSkills, message } = response.data;
+        const { suggestions } = response.data;
         
-        // Handle new format with hardSkills and softSkills
-        let allSkills: any[] = [];
-        if (hardSkills && softSkills) {
-          // New format
-          allSkills = [
-            ...hardSkills.map((skill: string) => ({ name: skill, type: 'hard' })),
-            ...softSkills.map((skill: string) => ({ name: skill, type: 'soft' }))
-          ];
-        } else if (skills) {
-          // Legacy format
-          allSkills = skills.map((skill: any) => ({
-            name: typeof skill === 'string' ? skill : skill.name,
-            type: skill.type || 'hard'
-          }));
-        }
+        console.log('✅ AI Skills Generated:', suggestions?.length || 0, 'skills');
         
-        console.log('✅ AI Skills Generated:', allSkills.length, 'skills');
-        
-        if (allSkills && allSkills.length > 0) {
+        if (suggestions && suggestions.length > 0) {
           // Store suggested skills for user to manually choose from (avoid duplicates)
           const existingSkillNames = data.map(skill => skill.name.toLowerCase());
-          const newSuggestions = allSkills
+          const newSuggestions = suggestions
             .filter((skill: any) => !existingSkillNames.includes(skill.name.toLowerCase()))
             .map((skill: any) => ({
               name: skill.name,
-              reason: skill.description || (cvLanguage === 'english' 
-                ? `Recommended ${skill.type === 'soft' ? 'soft skill' : 'technical skill'} based on your profile`
-                : `Profilinizə əsasən tövsiyə edilən ${skill.type === 'soft' ? 'şəxsi bacarıq' : 'texniki bacarıq'}`
+              reason: skill.reason || skill.cvConnection || (cvLanguage === 'english' 
+                ? 'Recommended based on your CV profile'
+                : 'CV profilinizə əsasən tövsiyə edilən'
               ),
-              category: skill.type === 'soft' 
-                ? (cvLanguage === 'english' ? 'Soft Skills' : 'Şəxsi Bacarıqlar') 
-                : (cvLanguage === 'english' ? 'Technical Skills' : 'Texniki Bacarıqlar'),
-              relevanceScore: 8,
+              category: cvLanguage === 'english' ? 'Technical Skills' : 'Texniki Bacarıqlar',
+              relevanceScore: skill.relevanceScore || 8,
               marketDemand: 'High',
               implementation: 'Add to your skillset',
-              timeToMaster: skill.type === 'soft' ? '3-6 months' : '6-12 months',
-              industryTrend: 'Growing'
+              timeToMaster: '6-12 months',
+              industryTrend: 'Growing',
+              cvConnection: skill.cvConnection
             }));
           
           if (newSuggestions.length > 0) {
             setSuggestions(newSuggestions);
             setShowSuggestions(true);
-            showSuccess(message || (cvLanguage === 'english' 
+            showSuccess(cvLanguage === 'english' 
               ? `${newSuggestions.length} AI skill suggestions generated! Select and add them.`
               : `${newSuggestions.length} AI bacarıq təklifi hazırlandı! Seçib əlavə edin.`
-            ));
+            );
           } else {
             showInfo('Bütün təklif edilən bacarıqlar artıq mövcuddur.');
           }
