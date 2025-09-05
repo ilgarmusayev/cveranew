@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import RichTextEditor from '@/components/ui/RichTextEditor';
+import DateRangeInput from '@/components/cv/DateRangeInput';
 
 interface Experience {
   id: string;

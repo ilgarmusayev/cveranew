@@ -1036,7 +1036,7 @@ const BasicTemplate: React.FC<{
                         <h2 className="text-base font-semibold text-blue-600 mb-3 border-b border-blue-600 pb-2">
                             {getSectionName('experience', data.cvLanguage, data.sectionNames)}
                         </h2>
-                        <div className="space-y-4">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                             {experience.map((exp) => (
                                 <div key={exp.id} className="border-l-2 border-blue-200 pl-3">
                                     <div className="flex justify-between items-start mb-2">
@@ -1071,7 +1071,7 @@ const BasicTemplate: React.FC<{
                         <h2 className="text-base font-semibold text-blue-600 mb-3 border-b border-blue-600 pb-2">
                             {getSectionName('education', data.cvLanguage, data.sectionNames)}
                         </h2>
-                        <div className="space-y-4">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                             {education.map((edu) => (
                                 <div key={edu.id} className="border-l-2 border-blue-200 pl-3">
                                     <div className="flex justify-between items-start mb-2">
@@ -1115,14 +1115,14 @@ const BasicTemplate: React.FC<{
                 // Filter out empty skills (no skill name)
                 const validSkills = skills?.filter(skill => skill.name && skill.name.trim() !== '') || [];
                 return validSkills.length > 0 ? (
-                    <div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                         {/* Hard Skills */}
                         {validSkills.filter(skill => skill.type === 'hard').length > 0 && (
                             <div >
                                 <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                                     {getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
                                 </h2>
-                                <div className="space-y-2">
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                                     {validSkills.filter(skill => skill.type === 'hard').map((skill) => (
                                         <div key={skill.id} className="border-l-2 border-blue-200 pl-2">
                                             <div className="mb-1">
@@ -1145,7 +1145,7 @@ const BasicTemplate: React.FC<{
                                 <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                                     {getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
                                 </h2>
-                                <div className="space-y-2">
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                                     {validSkills.filter(skill => skill.type === 'soft').map((skill) => (
                                         <div key={skill.id} className="border-l-2 border-blue-200 pl-2">
                                             <div className="mb-1">
@@ -1168,7 +1168,7 @@ const BasicTemplate: React.FC<{
                                 <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                                     {getSectionName('skills', data.cvLanguage, data.sectionNames)}
                                 </h2>
-                                <div className="space-y-2">
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                                     {validSkills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map((skill) => (
                                         <div key={skill.id} className="border-l-2 border-blue-200 pl-2">
                                             <div className="mb-1">
@@ -1195,7 +1195,12 @@ const BasicTemplate: React.FC<{
                         <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-2">
                             {getSectionName('languages', data.cvLanguage, data.sectionNames)}
                         </h2>
-                        <div className={validLanguages.length <= 2 ? "space-y-1 border-l-2 border-blue-200 pl-3" : "grid grid-cols-4 gap-x-2 gap-y-1 border-l-2 border-blue-200 pl-3"}>
+                        <div className="border-l-2 border-blue-200 pl-3" style={{ 
+                            display: validLanguages.length <= 2 ? 'flex' : 'grid', 
+                            flexDirection: validLanguages.length <= 2 ? 'column' : undefined,
+                            gridTemplateColumns: validLanguages.length > 2 ? 'repeat(4, 1fr)' : undefined,
+                            gap: 'var(--cv-section-spacing, 24px)' 
+                        }}>
                             {validLanguages.map((lang) => (
                                 <div key={lang.id} className="text-xs text-gray-700 break-words">
                                     {lang.language} ({getLanguageLevel(lang.level, data.cvLanguage)})
@@ -1211,7 +1216,7 @@ const BasicTemplate: React.FC<{
                         <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                             {getSectionName('projects', data.cvLanguage, data.sectionNames)}
                         </h2>
-                        <div className="space-y-2">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                             {projects.map((project) => (
                                 <div key={project.id} className="border-l-2 border-blue-200 pl-3">
                                     <div className="flex justify-between items-start mb-1">
@@ -1247,14 +1252,14 @@ const BasicTemplate: React.FC<{
                                     )}
                                     {project.github && (
                                         <div className="text-xs text-gray-600 mt-1">
-                                            GitHub:{' '}
                                             <a
                                                 href={getGitHubDisplay(project.github).url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer break-all"
+                                                className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer"
                                             >
-                                                {getGitHubDisplay(project.github).displayText}
+                                                {data.cvLanguage === 'azerbaijani' ? 'GitHub Linki' : 
+                                                 data.cvLanguage?.includes('tr') ? 'GitHub Linki' : 'GitHub Link'}
                                             </a>
                                         </div>
                                     )}
@@ -1270,7 +1275,7 @@ const BasicTemplate: React.FC<{
                         <h2 className="text-base font-semibold text-blue-600 mb-3 border-b border-blue-600 pb-2">
                             {getSectionName('certifications', data.cvLanguage, data.sectionNames)}
                         </h2>
-                        <div className="space-y-4">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                             {certifications.map((cert) => (
                                 <div key={cert.id} className="border-l-2 border-blue-200 pl-3">
                                     <div className="flex justify-between items-start mb-2">
@@ -1310,7 +1315,7 @@ const BasicTemplate: React.FC<{
                         <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
                             {getSectionName('volunteerExperience', data.cvLanguage, data.sectionNames)}
                         </h2>
-                        <div className="space-y-3">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                             {volunteerExperience.map((vol) => (
                                 <div key={vol.id} className="border-l-2 border-blue-200 pl-3">
                                     <div className="flex justify-between items-start mb-1">
@@ -1717,7 +1722,7 @@ const ModernTemplate: React.FC<{
                                 <span className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">💼</span>
                                 {getSectionName('experience', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="space-y-4">
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                                 {experience.map((exp) => (
                                     <div key={exp.id} className="border-l-4 border-blue-400 pl-4 bg-gray-50 p-4 rounded-r-lg">
                                         <div className="flex justify-between items-start mb-2">
@@ -1767,7 +1772,7 @@ const ModernTemplate: React.FC<{
                                 <span className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">🎓</span>
                                 {getSectionName('education', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="space-y-4">
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                                 {education.map((edu) => (
                                     <div key={edu.id} className="border-l-4 border-green-400 pl-4 bg-green-50 p-4 rounded-r-lg">
                                         <div className="flex justify-between items-start mb-1">
@@ -1823,11 +1828,11 @@ const ModernTemplate: React.FC<{
                         onSetActiveSection={onSectionSelect}
                     >
                         <div style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                            <h2 className="text-xl font-bold text-gray-900 flex items-center" style={{ marginBottom: 0 }}>
+                            <h2 className="text-xl font-bold text-gray-900 flex items-center mb-4">
                                 <span className="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">🚀</span>
                                 {getSectionName('skills', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--cv-section-spacing, 24px)' }}>
                                 {validSkillsCreative.map((skill) => (
                                     <div key={skill.id} className="bg-purple-50 rounded-lg p-3 border border-purple-200">
                                         <div className="flex justify-between items-center mb-1">
@@ -1863,7 +1868,7 @@ const ModernTemplate: React.FC<{
                                 <span className="bg-orange-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">🚀</span>
                                 {getSectionName('projects', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="space-y-4">
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                                 {projects.map((project) => (
                                     <div key={project.id} className="border-l-4 border-orange-400 pl-4 bg-orange-50 p-4 rounded-r-lg">
                                         <div className="flex justify-between items-start">
@@ -1885,14 +1890,14 @@ const ModernTemplate: React.FC<{
                                                 )}
                                                 {project.github && (
                                                     <div className="mt-2">
-                                                        <span className="text-sm text-gray-600">GitHub: </span>
                                                         <a
                                                             href={getGitHubDisplay(project.github).url}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             className="text-orange-700 hover:text-orange-900 underline text-sm"
                                                         >
-                                                            {getGitHubDisplay(project.github).displayText}
+                                                            {data.cvLanguage === 'azerbaijani' ? 'GitHub Linki' : 
+                                                             data.cvLanguage?.includes('tr') ? 'GitHub Linki' : 'GitHub Link'}
                                                         </a>
                                                     </div>
                                                 )}
@@ -1959,7 +1964,7 @@ const ModernTemplate: React.FC<{
                                 <span className="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">🏆</span>
                                 {getSectionName('certifications', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="space-y-3">
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'calc(var(--cv-section-spacing, 24px) * 0.5)' }}>
                                 {certifications.map((cert) => (
                                     <div key={cert.id} className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
                                         <div className="flex justify-between items-start">
@@ -2000,7 +2005,7 @@ const ModernTemplate: React.FC<{
                                 <span className="bg-pink-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">❤️</span>
                                 {getSectionName('volunteerExperience', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="space-y-4">
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                                 {volunteerExperience.map((vol) => (
                                     <div key={vol.id} className="border-l-4 border-pink-400 pl-4 bg-pink-50 p-4 rounded-r-lg">
                                         <div className="flex justify-between items-start mb-1">
@@ -2044,7 +2049,7 @@ const ModernTemplate: React.FC<{
                                 <span className="bg-pink-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">❤️</span>
                                 {getSectionName('volunteer', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="space-y-4">
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                                 {volunteerExperience.map((vol) => (
                                     <div key={vol.id} className="border-l-4 border-pink-400 pl-4 bg-pink-50 p-4 rounded-r-lg">
                                         <div className="flex justify-between items-start mb-1">
@@ -2493,7 +2498,7 @@ const ATSFriendlyTemplate: React.FC<{
                             <h2 className="text-sm font-bold text-gray-900 tracking-wide border-b border-gray-200 pb-2 mb-3" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
                                 {getUppercaseSectionName('experience', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="space-y-4 mt-3" style={{ margin: 0, padding: 0 }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)', margin: 0, padding: 0 }}>
                                 {experience.map((exp) => (
                                     <div key={exp.id} className="avoid-break">
                                         <div className="flex justify-between items-start mb-2">
@@ -2542,7 +2547,7 @@ const ATSFriendlyTemplate: React.FC<{
                             <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide border-b border-gray-200 pb-2 mb-3">
                                 {getSectionName('education', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="space-y-4 mt-3" style={{ margin: 0, padding: 0 }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)', margin: 0, padding: 0 }}>
                                 {education.map((edu) => (
                                     <div key={edu.id} className="avoid-break">
                                         <div className="flex justify-between items-start mb-2">
@@ -2629,15 +2634,15 @@ const ATSFriendlyTemplate: React.FC<{
                                                     </p>
                                                 )}
                                                 {project.github && (
-                                                    <div className="text-xs text-gray-600 mt-1">
-                                                        <span className="font-medium">GitHub:</span>{' '}
+                                                    <div className="text-xs mt-1">
                                                         <a
                                                             href={getGitHubDisplay(project.github).url}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="text-gray-900 hover:text-blue-600 underline hover:no-underline transition-colors cursor-pointer break-all"
+                                                            className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer"
                                                         >
-                                                            {getGitHubDisplay(project.github).displayText}
+                                                            {data.cvLanguage === 'azerbaijani' ? 'GitHub Linki' : 
+                                                             data.cvLanguage?.includes('tr') ? 'GitHub Linki' : 'GitHub Link'}
                                                         </a>
                                                     </div>
                                                 )}
@@ -2831,7 +2836,7 @@ const ATSFriendlyTemplate: React.FC<{
                         {personalInfo.email && (
                             <div className="flex items-start" style={{ gap: 0, marginBottom: 0 }}>
                                 <span className="font-medium text-blue-200 min-w-[40px]">
-                                    {data.cvLanguage === 'english' ? 'Email:' : 'E-poçt:'}
+                                    {data.cvLanguage === 'english' ? 'Email: ' : 'E-poçt: '}
                                 </span>
                                 <span className="text-white">{personalInfo.email}</span>
                             </div>
@@ -2839,7 +2844,7 @@ const ATSFriendlyTemplate: React.FC<{
                         {personalInfo.phone && (
                             <div className="flex items-start" style={{ gap: 0, marginBottom: 0 }}>
                                 <span className="font-medium text-blue-200 min-w-[40px]">
-                                    {data.cvLanguage === 'english' ? 'Phone:' : 'Telefon:'}
+                                    {data.cvLanguage === 'english' ? 'Phone: ' : 'Telefon: '}
                                 </span>
                                 <span className="text-white">{personalInfo.phone}</span>
                             </div>
@@ -2847,15 +2852,15 @@ const ATSFriendlyTemplate: React.FC<{
                         {personalInfo.location && (
                             <div className="flex items-start" style={{ gap: 0, marginBottom: 0 }}>
                                 <span className="font-medium text-blue-200 min-w-[40px]">
-                                    {data.cvLanguage?.includes('en') ? 'Address:' : 
-                                     data.cvLanguage?.includes('tr') ? 'Adres:' : 'Ünvan:'}
+                                    {data.cvLanguage?.includes('en') ? 'Address: ' : 
+                                     data.cvLanguage?.includes('tr') ? 'Adres: ' : 'Ünvan: '}
                                 </span>
                                 <span className="text-white">{personalInfo.location}</span>
                             </div>
                         )}
                         {personalInfo.linkedin && (
                             <div className="flex items-start" style={{ gap: 0, marginBottom: 0 }}>
-                                <span className="font-medium text-blue-200 min-w-[40px]">LinkedIn:</span>
+                                <span className="font-medium text-blue-200 min-w-[40px]">LinkedIn: </span>
                                 <a
                                     href={getLinkedInDisplay(personalInfo.linkedin).url}
                                     target="_blank"
@@ -2940,15 +2945,15 @@ const ATSFriendlyTemplate: React.FC<{
                                                 alwaysShowDragHandle={true}
                                                 isDropTarget={leftDropTargetId === 'leftSkills'}
                                             >
-                                                <div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                                                     <>
                                                         {/* Hard Skills */}
                                                         {skills.filter(skill => skill.type === 'hard' && skill.name && skill.name.trim() !== '').length > 0 && (
                                                             <div>
-                                                                <h2 className="text-sm font-bold text-white tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                                <h2 className="text-sm font-bold text-white tracking-wide border-b border-blue-300 pb-1 mb-3" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                                     {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('technicalSkills', data.cvLanguage, data.sectionNames) : getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
                                                                 </h2>
-                                                                <div className="space-y-2">
+                                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                                                                     {skills.filter(skill => skill.type === 'hard' && skill.name && skill.name.trim() !== '').map((skill) => (
                                                                         <div key={skill.id}>
                                                                             <div className="mb-1">
@@ -2968,10 +2973,10 @@ const ATSFriendlyTemplate: React.FC<{
                                                         {/* Soft Skills */}
                                                         {skills.filter(skill => skill.type === 'soft' && skill.name && skill.name.trim() !== '').length > 0 && (
                                                             <div>
-                                                                <h2 className="text-sm font-bold text-white tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                                <h2 className="text-sm font-bold text-white tracking-wide border-b border-blue-300 pb-1 mb-3" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                                     {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('softSkills', data.cvLanguage, data.sectionNames) : getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
                                                                 </h2>
-                                                                <div className="space-y-2">
+                                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                                                                     {skills.filter(skill => skill.type === 'soft' && skill.name && skill.name.trim() !== '').map((skill) => (
                                                                         <div key={skill.id}>
                                                                             <div className="mb-1">
@@ -3659,15 +3664,15 @@ const LumenTemplate: React.FC<{
                                                     </p>
                                                 )}
                                                 {project.github && (
-                                                    <div className="text-xs text-gray-600 mt-1">
-                                                        <span className="font-medium">GitHub:</span>{' '}
+                                                    <div className="text-xs mt-1">
                                                         <a
                                                             href={getGitHubDisplay(project.github).url}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="text-gray-900 hover:text-blue-600 underline hover:no-underline transition-colors cursor-pointer break-all"
+                                                            className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer"
                                                         >
-                                                            {getGitHubDisplay(project.github).displayText}
+                                                            {data.cvLanguage === 'azerbaijani' ? 'GitHub Linki' : 
+                                                             data.cvLanguage?.includes('tr') ? 'GitHub Linki' : 'GitHub Link'}
                                                         </a>
                                                     </div>
                                                 )}
@@ -3861,33 +3866,33 @@ const LumenTemplate: React.FC<{
                     <div className="text-xs" style={{ gap: 0 }}>
                         {personalInfo.email && (
                             <div className="flex items-start" style={{ gap: 0, marginBottom: 0 }}>
-                                <span className="font-medium text-gray-600 min-w-[40px]">
-                                    {data.cvLanguage?.includes('en') ? 'Email:' : 
-                                     data.cvLanguage?.includes('tr') ? 'E-posta:' : 'E-poçt:'}
+                                <span className="font-medium text-gray-600 min-w-[60px]">
+                                    {data.cvLanguage?.includes('en') ? 'Email: ' : 
+                                     data.cvLanguage?.includes('tr') ? 'E-posta: ' : 'E-poçt: '}
                                 </span>
                                 <span className="text-gray-800">{personalInfo.email}</span>
                             </div>
                         )}
                         {personalInfo.phone && (
                             <div className="flex items-start" style={{ gap: 0, marginBottom: 0 }}>
-                                <span className="font-medium text-gray-600 min-w-[40px]">
-                                    {data.cvLanguage === 'english' ? 'Phone:' : 'Telefon:'}
+                                <span className="font-medium text-gray-600 min-w-[60px]">
+                                    {data.cvLanguage === 'english' ? 'Phone: ' : 'Telefon: '}
                                 </span>
                                 <span className="text-gray-800">{personalInfo.phone}</span>
                             </div>
                         )}
                         {personalInfo.location && (
                             <div className="flex items-start" style={{ gap: 0, marginBottom: 0 }}>
-                                <span className="font-medium text-gray-600 min-w-[40px]">
-                                    {data.cvLanguage?.includes('en') ? 'Address:' : 
-                                     data.cvLanguage?.includes('tr') ? 'Adres:' : 'Ünvan:'}
+                                <span className="font-medium text-gray-600 min-w-[60px]">
+                                    {data.cvLanguage?.includes('en') ? 'Address: ' : 
+                                     data.cvLanguage?.includes('tr') ? 'Adres: ' : 'Ünvan: '}
                                 </span>
                                 <span className="text-gray-800">{personalInfo.location}</span>
                             </div>
                         )}
                         {personalInfo.linkedin && (
                             <div className="flex items-start" style={{ gap: 0, marginBottom: 0 }}>
-                                <span className="font-medium text-gray-600 min-w-[40px]">LinkedIn:</span>
+                                <span className="font-medium text-gray-600 min-w-[60px]">LinkedIn: </span>
                                 <a
                                     href={getLinkedInDisplay(personalInfo.linkedin).url}
                                     target="_blank"
@@ -3899,8 +3904,8 @@ const LumenTemplate: React.FC<{
                             </div>
                         )}
                         {personalInfo.github && (
-                            <div className="flex items-start gap-3">
-                                <span className="font-medium text-gray-600 min-w-[40px]">GitHub:</span>
+                            <div className="flex items-start" style={{ gap: 0, marginBottom: 0 }}>
+                                <span className="font-medium text-gray-600 min-w-[60px]">GitHub: </span>
                                 <a
                                     href={getGitHubDisplay(personalInfo.github).url}
                                     target="_blank"
@@ -3912,17 +3917,17 @@ const LumenTemplate: React.FC<{
                             </div>
                         )}
                         {personalInfo.website && (
-                            <div className="flex items-start gap-2">
-                                <span className="font-medium text-gray-600 min-w-[40px]">
-                                    {data.cvLanguage === 'english' ? 'Website:' : 'Sayt:'}
+                            <div className="flex items-start" style={{ gap: 0, marginBottom: 0 }}>
+                                <span className="font-medium text-gray-600 min-w-[60px]">
+                                    {data.cvLanguage === 'english' ? 'Website: ' : 'Sayt: '}
                                 </span>
                                 <span className="text-gray-800 break-all">{personalInfo.website}</span>
                             </div>
                         )}
                         {personalInfo.additionalLinks && personalInfo.additionalLinks.length > 0 && (
                             personalInfo.additionalLinks.map((link) => (
-                                <div key={link.id} className="flex items-start gap-2">
-                                    <span className="font-medium text-gray-600 min-w-[40px]">{link.label}:</span>
+                                <div key={link.id} className="flex items-start" style={{ gap: 0, marginBottom: 0 }}>
+                                    <span className="font-medium text-gray-600 min-w-[60px]">{link.label}: </span>
                                     <span className="text-gray-800 break-all">{link.value}</span>
                                 </div>
                             ))
@@ -3984,14 +3989,14 @@ const LumenTemplate: React.FC<{
                                                 alwaysShowDragHandle={true}
                                                 isDropTarget={leftDropTargetId === 'leftSkills'}
                                             >
-                                                <div style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
+                                                <div style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0, display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                                                     {/* Hard Skills */}
                                                     {skills.filter(skill => skill.type === 'hard' && skill.name && skill.name.trim() !== '').length > 0 && (
                                                         <div >
                                                             <h2 className="text-sm font-bold text-gray-800 mb-3 tracking-wide border-b border-gray-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                                 {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('skills', data.cvLanguage, data.sectionNames) : getSectionName('skills', data.cvLanguage, data.sectionNames)}
                                                             </h2>
-                                                            <div className="space-y-2">
+                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                                                                 {skills.filter(skill => skill.type === 'hard' && skill.name && skill.name.trim() !== '').map((skill) => (
                                                                     <div key={skill.id} className="text-xs text-gray-700 break-words">
                                                                         • {skill.name}
@@ -4007,7 +4012,7 @@ const LumenTemplate: React.FC<{
                                                             <h2 className="text-sm font-bold text-gray-800 mb-3 tracking-wide border-b border-gray-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                                 {getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
                                                             </h2>
-                                                            <div className="space-y-2">
+                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                                                                 {skills.filter(skill => skill.type === 'soft' && skill.name && skill.name.trim() !== '').map((skill) => (
                                                                     <div key={skill.id} className="text-xs text-gray-700 break-words">
                                                                         • {skill.name}
@@ -4406,16 +4411,16 @@ const VertexTemplate: React.FC<{
             case 'skills':
                 if (!skills.length) return null;
                 return (
-                    <div key="skills">
+                    <div key="skills" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                         <SectionHeader title={getSectionName('skills', data.cvLanguage, data.sectionNames)} sectionId="skills" />
                         
                         {/* Technical Skills */}
                         {skills.filter(skill => skill.type === 'hard').length > 0 && (
                             <div style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                                <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wider" style={{ marginBottom: 0 }}>
+                                <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wider mb-3">
                                     {getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
                                 </h3>
-                                <div className="grid grid-cols-4 gap-3">
+                                <div className="grid grid-cols-4" style={{ gap: 'var(--cv-section-spacing, 24px)' }}>
                                     {skills.filter(skill => skill.type === 'hard').map((skill, index) => (
                                         <div key={skill.id || index} className="bg-gray-100 border border-gray-300 px-4 py-3 text-center rounded">
                                             <span className="text-sm font-medium text-gray-800">{skill.name}</span>
@@ -4428,7 +4433,7 @@ const VertexTemplate: React.FC<{
                         {/* Soft Skills */}
                         {skills.filter(skill => skill.type === 'soft').length > 0 && (
                             <div style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                                <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wider" style={{ marginBottom: 0 }}>
+                                <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wider mb-3">
                                     {getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
                                 </h3>
                                 <div className="text-base text-gray-700 leading-relaxed bg-gray-50 p-4 border rounded">
@@ -4439,8 +4444,8 @@ const VertexTemplate: React.FC<{
 
                         {/* Core Competencies */}
                         {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).length > 0 && (
-                            <div className="mb-2">
-                                <h3 className="text-sm font-semibold text-gray-800 mb-4 uppercase tracking-wider">
+                            <div style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
+                                <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wider mb-3">
                                     {getSectionName('coreCompetencies', data.cvLanguage, data.sectionNames)}
                                 </h3>
                                 <div className="text-base text-gray-700 leading-relaxed bg-gray-50 p-4 border rounded">
@@ -5061,13 +5066,13 @@ const HorizonTemplate: React.FC<{
             case 'skills':
                 if (!skills.length) return null;
                 return (
-                    <div key="skills">
+                    <div key="skills" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                         <SectionHeader title={getSectionName('skills', data.cvLanguage, data.sectionNames)} sectionId="skills" />
                         
                         {/* Technical Skills */}
                         {skills.filter(skill => skill.type === 'hard').length > 0 && (
                             <div style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                                <div className="flex flex-wrap gap-2">
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--cv-section-spacing, 24px)' }}>
                                     {skills.filter(skill => skill.type === 'hard').map((skill, index) => (
                                         <span key={skill.id || index} className="text-sm text-gray-700 bg-gray-100 px-3 py-1 rounded">
                                             {skill.name}
@@ -5080,10 +5085,10 @@ const HorizonTemplate: React.FC<{
                         {/* Soft Skills */}
                         {skills.filter(skill => skill.type === 'soft').length > 0 && (
                             <div style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                                <h4 className="text-sm font-medium text-gray-600 uppercase tracking-wide" style={{ marginBottom: 0 }}>
+                                <h4 className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-3">
                                     {getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
                                 </h4>
-                                <div className="flex flex-wrap gap-2">
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--cv-section-spacing, 24px)' }}>
                                     {skills.filter(skill => skill.type === 'soft').map((skill, index) => (
                                         <span key={skill.id || index} className="text-sm text-gray-700 bg-gray-50 px-3 py-1 rounded border">
                                             {skill.name}
@@ -5095,8 +5100,8 @@ const HorizonTemplate: React.FC<{
 
                         {/* Core Competencies */}
                         {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).length > 0 && (
-                            <div className="mb-2">
-                                <div className="flex flex-wrap gap-2">
+                            <div style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--cv-section-spacing, 24px)' }}>
                                     {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map((skill, index) => (
                                         <span key={skill.id || index} className="text-sm text-gray-700 bg-gray-100 px-3 py-1 rounded">
                                             {skill.name}
@@ -5743,12 +5748,12 @@ const AuroraTemplate: React.FC<{
             case 'skills':
                 if (!skills.length) return null;
                 return (
-                    <div key="skills">
+                    <div key="skills" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                         <SectionHeader title={getSectionName('skills', data.cvLanguage, data.sectionNames)} sectionId="skills" />
                         
                         {/* Hard Skills */}
                         {skills.filter(skill => skill.type === 'hard').length > 0 && (
-                            <div className="mb-3">
+                            <div style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
                                 <h3 className="text-sm font-semibold text-gray-800 mb-2">{getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}</h3>
                                 <div className="text-sm text-gray-700">
                                     {skills.filter(skill => skill.type === 'hard').map(skill => skill.name).join(' - ')}
@@ -5758,7 +5763,7 @@ const AuroraTemplate: React.FC<{
 
                         {/* Soft Skills */}
                         {skills.filter(skill => skill.type === 'soft').length > 0 && (
-                            <div className="mb-3">
+                            <div style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
                                 <h3 className="text-sm font-semibold text-gray-800 mb-2">{getSectionName('softSkills', data.cvLanguage, data.sectionNames)}</h3>
                                 <div className="text-sm text-gray-700">
                                     {skills.filter(skill => skill.type === 'soft').map(skill => skill.name).join(' - ')}
@@ -5768,7 +5773,7 @@ const AuroraTemplate: React.FC<{
 
                         {/* Default/Other Skills */}
                         {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).length > 0 && (
-                            <div className="mb-3">
+                            <div style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
                                 <h3 className="text-sm font-semibold text-gray-800 mb-2">{getSectionName('coreCompetencies', data.cvLanguage, data.sectionNames)}</h3>
                                 <div className="text-sm text-gray-700">
                                     {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map(skill => skill.name).join(' • ')}
@@ -6307,17 +6312,17 @@ const ExclusiveTemplate: React.FC<{
                 ];
                 
                 return (
-                    <div key="skills">
+                    <div key="skills" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                         {/* Technical Skills as main section */}
                         {hardSkills.length > 0 && (
-                            <div className="mb-3">
+                            <div style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
                                 <SectionHeader 
                                     title={data.cvLanguage?.includes('en') ? 'Technical Skills' : 
                                            data.cvLanguage?.includes('tr') ? 'Teknik Beceriler' : 'Texniki Bacarıqlar'} 
                                     icon="⚙️" 
                                     sectionId="technical-skills" 
                                 />
-                                <div className="flex flex-wrap gap-1">
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--cv-section-spacing, 24px)' }}>
                                     {hardSkills.map((skill, index) => (
                                         <span key={skill.id || index} className="bg-gray-100 text-gray-800 px-2 py-1 text-xs rounded">
                                             {skill.name}
@@ -6329,14 +6334,14 @@ const ExclusiveTemplate: React.FC<{
                         
                         {/* Soft Skills as main section */}
                         {softSkills.length > 0 && (
-                            <div className="mb-3">
+                            <div style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
                                 <SectionHeader 
                                     title={data.cvLanguage?.includes('en') ? 'Soft Skills' : 
                                            data.cvLanguage?.includes('tr') ? 'Kişisel Beceriler' : 'Şəxsi Bacarıqlar'} 
                                     icon="🤝" 
                                     sectionId="soft-skills" 
                                 />
-                                <div className="flex flex-wrap gap-1">
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--cv-section-spacing, 24px)' }}>
                                     {softSkills.map((skill, index) => (
                                         <span key={skill.id || index} className="bg-gray-100 text-gray-800 px-2 py-1 text-xs rounded">
                                             {skill.name}
@@ -6399,14 +6404,14 @@ const ExclusiveTemplate: React.FC<{
                                     )}
                                     {project.github && (
                                         <div className="text-xs text-gray-600">
-                                            <span className="font-medium">GitHub:</span>{' '}
                                             <a
                                                 href={getGitHubDisplay(project.github).url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer break-all"
+                                                className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer"
                                             >
-                                                {getGitHubDisplay(project.github).displayText}
+                                                {data.cvLanguage === 'azerbaijani' ? 'GitHub Linki' : 
+                                                 data.cvLanguage?.includes('tr') ? 'GitHub Linki' : 'GitHub Link'}
                                             </a>
                                         </div>
                                     )}
