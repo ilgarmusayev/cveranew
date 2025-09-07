@@ -270,19 +270,41 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
     const [success, setSuccess] = useState('');
     const [showTranslationPanel, setShowTranslationPanel] = useState(false);
     const [showFontPanel, setShowFontPanel] = useState(false);
-    const [fontSettings, setFontSettings] = useState({
-        fontFamily: 'Arial, sans-serif',
-        nameSize: 24,         // İsim üçün
-        titleSize: 16,        // Başlıq üçün
-        headingSize: 18,      // Başlıqlar üçün
-        subheadingSize: 16,   // Alt başlıqlar üçün  
-        bodySize: 14,         // Əsas mətn üçün
-        smallSize: 12,        // Kiçik mətn üçün
-        headingWeight: 700,   // Başlıq qalınlığı
-        subheadingWeight: 600, // Alt başlıq qalınlığı
-        bodyWeight: 400,      // Əsas mətn qalınlığı
-        smallWeight: 400,     // Kiçik mətn qalınlığı
-        sectionSpacing: 8    // Bölmələr arası məsafə (px)
+    const [fontSettings, setFontSettings] = useState(() => {
+        // Load font settings from initialData if available
+        if (initialData?.data?.fontSettings) {
+            console.log('🎨 Font CVEditor: Loading font settings from database:', initialData.data.fontSettings);
+            return {
+                fontFamily: initialData.data.fontSettings.fontFamily || 'Arial, sans-serif',
+                nameSize: initialData.data.fontSettings.nameSize || 24,
+                titleSize: initialData.data.fontSettings.titleSize || 16,
+                headingSize: initialData.data.fontSettings.headingSize || 18,
+                subheadingSize: initialData.data.fontSettings.subheadingSize || 16,
+                bodySize: initialData.data.fontSettings.bodySize || 14,
+                smallSize: initialData.data.fontSettings.smallSize || 12,
+                headingWeight: initialData.data.fontSettings.headingWeight || 700,
+                subheadingWeight: initialData.data.fontSettings.subheadingWeight || 600,
+                bodyWeight: initialData.data.fontSettings.bodyWeight || 400,
+                smallWeight: initialData.data.fontSettings.smallWeight || 400,
+                sectionSpacing: initialData.data.fontSettings.sectionSpacing || 8
+            };
+        }
+        
+        console.log('🎨 Font CVEditor: Using default font settings');
+        return {
+            fontFamily: 'Arial, sans-serif',
+            nameSize: 24,         // İsim üçün
+            titleSize: 16,        // Başlıq üçün
+            headingSize: 18,      // Başlıqlar üçün
+            subheadingSize: 16,   // Alt başlıqlar üçün  
+            bodySize: 14,         // Əsas mətn üçün
+            smallSize: 12,        // Kiçik mətn üçün
+            headingWeight: 700,   // Başlıq qalınlığı
+            subheadingWeight: 600, // Alt başlıq qalınlığı
+            bodyWeight: 400,      // Əsas mətn qalınlığı
+            smallWeight: 400,     // Kiçik mətn qalınlığı
+            sectionSpacing: 8    // Bölmələr arası məsafə (px)
+        };
     });
     
     // Auto-save states - hybrid system (debounced + periodic)
@@ -616,8 +638,14 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             const payload = {
                 title: cvData.title,
                 templateId: cvData.templateId,
-                cv_data: cvData.data
+                cv_data: cvData.data,
+                fontSettings: fontSettings // CRITICAL: Save font settings to database
             };
+            
+            console.log('🎨 CVEditor Save Payload:', {
+                fontSettings: payload.fontSettings,
+                templateId: payload.templateId
+            });
 
             if (cv.id) {
                 await apiClient.put(`/api/cv/${cv.id}`, payload);
@@ -710,6 +738,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 sectionNames: cv.sectionNames // Section names də əlavə edildi
             } as any
         };
+
+        console.log('🎨 CVEditor renderPreview fontSettings:', fontSettings);
 
         return (
             <CVPreview 
@@ -929,7 +959,11 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Action Buttons */}
                             {cv.id && (
                                 <button
-                                    onClick={() => window.open(`/cv/export/${cv.id}`, '_blank')}
+                                    onClick={() => {
+                                        // Font settings-ləri localStorage-da saxla ki export page-də istifadə edilsin
+                                        localStorage.setItem('exportFontSettings', JSON.stringify(fontSettings));
+                                        window.open(`/cv/export/${cv.id}`, '_blank');
+                                    }}
                                     className="flex items-center justify-center h-10 w-10 sm:h-auto sm:w-auto sm:px-3 sm:py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-transparent rounded-lg hover:bg-gray-200 transition-colors"
                                     aria-label={cv.cvLanguage === 'english' ? 'Export CV' : 'CV-ni yüklə'}
                                 >

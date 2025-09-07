@@ -939,12 +939,50 @@ const BasicTemplate: React.FC<{
     onUpdate?: (updatedCv: any) => void;
     activeSection?: string | null;
     onSectionSelect?: (sectionId: string | null) => void;
-}> = ({ data, sectionOrder, onSectionReorder, cv, onUpdate, activeSection, onSectionSelect }) => {
+    fontSettings?: {
+        fontFamily: string;
+        nameSize: number;
+        titleSize: number;
+        headingSize: number;
+        subheadingSize: number;
+        bodySize: number;
+        smallSize: number;
+        headingWeight: number;
+        subheadingWeight: number;
+        bodyWeight: number;
+        smallWeight: number;
+        sectionSpacing: number;
+    };
+}> = ({ 
+    data, 
+    sectionOrder, 
+    onSectionReorder, 
+    cv, 
+    onUpdate, 
+    activeSection, 
+    onSectionSelect, 
+    fontSettings = {
+        fontFamily: 'Arial, sans-serif',
+        nameSize: 24,
+        titleSize: 16,
+        headingSize: 18,
+        subheadingSize: 16,
+        bodySize: 14,
+        smallSize: 12,
+        headingWeight: 700,
+        subheadingWeight: 600,
+        bodyWeight: 400,
+        smallWeight: 400,
+        sectionSpacing: 16
+    }
+}) => {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
     const [isDragActive, setIsDragActive] = useState(false);
     const [activeId, setActiveId] = useState<string | null>(null);
     const [dropTargetId, setDropTargetId] = useState<string | null>(null);
     const [isMobile, setIsMobile] = useState(false);
+
+    console.log('🎨 BasicTemplate fontSettings:', fontSettings);
 
     // Detect mobile device
     useEffect(() => {
@@ -1034,10 +1072,25 @@ const BasicTemplate: React.FC<{
             case 'summary':
                 return personalInfo.summary ? (
                     <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                        <h2 className="text-base font-semibold text-blue-600 my-0 border-b border-gray-300 pb-1">
+                        <h2 style={{ 
+                            fontSize: 'var(--cv-subheading-size, 16px)', 
+                            fontWeight: 'var(--cv-subheading-weight, 600)',
+                            color: '#2563eb',
+                            margin: '0',
+                            borderBottom: '1px solid #d1d5db',
+                            paddingBottom: '4px'
+                        }}>
                             {getSectionName('summary', data.cvLanguage, data.sectionNames)}
                         </h2>
-                        <div className="text-gray-700 leading-relaxed text-xs mt-1 mb-0" style={{ marginBottom: 0, paddingBottom: 0 }}>
+                        <div style={{ 
+                            fontSize: 'var(--cv-small-size, 12px)',
+                            fontWeight: 'var(--cv-small-weight, 400)',
+                            color: '#374151',
+                            lineHeight: '1.6',
+                            marginTop: '4px',
+                            marginBottom: '0',
+                            paddingBottom: '0'
+                        }}>
                             {renderHtmlContent(personalInfo.summary, false, data.cvLanguage)}
                         </div>
                     </div>
@@ -1047,15 +1100,33 @@ const BasicTemplate: React.FC<{
                 console.log('Experience data in renderSection:', experience);
                 return experience && experience.length > 0 ? (
                     <div>
-                        <h2 className="text-base font-semibold text-blue-600 mb-3 border-b border-gray-300 pb-2">
+                        <h2 style={{ 
+                            fontSize: 'var(--cv-subheading-size, 16px)', 
+                            fontWeight: 'var(--cv-subheading-weight, 600)',
+                            color: '#2563eb',
+                            marginBottom: '12px',
+                            borderBottom: '1px solid #d1d5db',
+                            paddingBottom: '8px'
+                        }}>
                             {getSectionName('experience', data.cvLanguage, data.sectionNames)}
                         </h2>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
                             {experience.map((exp) => (
                                 <div key={exp.id} className="border-l-2 border-blue-200 pl-3">
                                     <div className="flex justify-between items-start mb-2">
-                                        <h3 className="font-semibold text-gray-900 text-sm mb-1">{exp.position}</h3>
-                                        <span className="text-xs text-blue-600 font-medium whitespace-nowrap ml-4">
+                                        <h3 style={{ 
+                                            fontSize: 'var(--cv-body-size, 14px)', 
+                                            fontWeight: 'var(--cv-subheading-weight, 600)',
+                                            color: '#111827',
+                                            marginBottom: '4px'
+                                        }}>{exp.position}</h3>
+                                        <span style={{ 
+                                            fontSize: 'var(--cv-small-size, 12px)',
+                                            fontWeight: 'var(--cv-body-weight, 500)',
+                                            color: '#2563eb',
+                                            whiteSpace: 'nowrap',
+                                            marginLeft: '16px'
+                                        }}>
                                             {exp.startDate ? (
                                                 exp.current ? `${formatDate(exp.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
                                                 exp.endDate ? `${formatDate(exp.startDate, data.cvLanguage)} - ${formatDate(exp.endDate, data.cvLanguage)}` :
@@ -1067,9 +1138,19 @@ const BasicTemplate: React.FC<{
                                             ) : ''}
                                         </span>
                                     </div>
-                                    <p className="text-blue-600 font-medium text-xs mb-2">{exp.company}</p>
+                                    <p style={{ 
+                                        fontSize: 'var(--cv-small-size, 12px)',
+                                        fontWeight: 'var(--cv-body-weight, 500)',
+                                        color: '#2563eb',
+                                        marginBottom: '8px'
+                                    }}>{exp.company}</p>
                                     {exp.description && (
-                                        <div className="text-gray-700 text-xs leading-relaxed">
+                                        <div style={{ 
+                                            fontSize: 'var(--cv-small-size, 12px)',
+                                            fontWeight: 'var(--cv-small-weight, 400)',
+                                            color: '#374151',
+                                            lineHeight: '1.6'
+                                        }}>
                                             {renderHtmlContent(exp.description, false, data.cvLanguage)}
                                         </div>
                                     )}
@@ -1082,7 +1163,14 @@ const BasicTemplate: React.FC<{
             case 'education':
                 return education && education.length > 0 ? (
                     <div>
-                        <h2 className="text-base font-semibold text-blue-600 mb-3 border-b border-gray-300 pb-2">
+                        <h2 style={{ 
+                            fontSize: 'var(--cv-subheading-size, 16px)', 
+                            fontWeight: 'var(--cv-subheading-weight, 600)',
+                            color: '#2563eb',
+                            marginBottom: '12px',
+                            borderBottom: '1px solid #d1d5db',
+                            paddingBottom: '8px'
+                        }}>
                             {getSectionName('education', data.cvLanguage, data.sectionNames)}
                         </h2>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
@@ -1091,20 +1179,45 @@ const BasicTemplate: React.FC<{
                                     <div className="flex justify-between items-start mb-2">
                                         <div className="flex-1">
                                             {edu.degree ? (
-                                                <h3 className="font-semibold text-gray-900 text-sm mb-1">{edu.degree}</h3>
+                                                <h3 style={{ 
+                                                    fontSize: 'var(--cv-body-size, 14px)', 
+                                                    fontWeight: 'var(--cv-subheading-weight, 600)',
+                                                    color: '#111827',
+                                                    marginBottom: '4px'
+                                                }}>{edu.degree}</h3>
                                             ) : (
-                                                <h3 className="font-semibold text-gray-900 text-sm mb-1">{edu.institution}</h3>
+                                                <h3 style={{ 
+                                                    fontSize: 'var(--cv-body-size, 14px)', 
+                                                    fontWeight: 'var(--cv-subheading-weight, 600)',
+                                                    color: '#111827',
+                                                    marginBottom: '4px'
+                                                }}>{edu.institution}</h3>
                                             )}
                                             {edu.degree && (
-                                                <p className="text-blue-600 font-medium text-xs mb-1">{edu.institution}</p>
+                                                <p style={{ 
+                                                    fontSize: 'var(--cv-small-size, 12px)',
+                                                    fontWeight: 'var(--cv-body-weight, 500)',
+                                                    color: '#2563eb',
+                                                    marginBottom: '4px'
+                                                }}>{edu.institution}</p>
                                             )}
                                             {(edu.field || edu.gpa) && (
-                                                <p className="text-gray-600 text-xs">
+                                                <p style={{ 
+                                                    fontSize: 'var(--cv-small-size, 12px)',
+                                                    fontWeight: 'var(--cv-small-weight, 400)',
+                                                    color: '#6b7280'
+                                                }}>
                                                     {[edu.field, edu.gpa && `${data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: ${edu.gpa}`].filter(Boolean).join(' - ')}
                                                 </p>
                                             )}
                                         </div>
-                                        <span className="text-xs text-blue-600 font-medium whitespace-nowrap ml-4">
+                                        <span style={{ 
+                                            fontSize: 'var(--cv-small-size, 12px)',
+                                            fontWeight: 'var(--cv-body-weight, 500)',
+                                            color: '#2563eb',
+                                            whiteSpace: 'nowrap',
+                                            marginLeft: '16px'
+                                        }}>
                                             {edu.startDate ? (
                                                 edu.current ? `${formatDate(edu.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
                                                 edu.endDate ? `${formatDate(edu.startDate, data.cvLanguage)} - ${formatDate(edu.endDate, data.cvLanguage)}` :
@@ -1117,7 +1230,13 @@ const BasicTemplate: React.FC<{
                                         </span>
                                     </div>
                                     {edu.description && (
-                                        <div className="text-gray-700 text-xs leading-relaxed mt-2">{renderHtmlContent(edu.description)}</div>
+                                        <div style={{ 
+                                            fontSize: 'var(--cv-small-size, 12px)',
+                                            fontWeight: 'var(--cv-small-weight, 400)',
+                                            color: '#374151',
+                                            lineHeight: '1.6',
+                                            marginTop: '8px'
+                                        }}>{renderHtmlContent(edu.description)}</div>
                                     )}
                                 </div>
                             ))}
@@ -1133,7 +1252,14 @@ const BasicTemplate: React.FC<{
                         {/* Hard Skills */}
                         {validSkills.filter(skill => skill.type === 'hard').length > 0 && (
                             <div >
-                                <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
+                                <h2 style={{ 
+                                    fontSize: 'var(--cv-subheading-size, 16px)', 
+                                    fontWeight: 'var(--cv-subheading-weight, 600)',
+                                    color: '#2563eb',
+                                    marginBottom: '8px',
+                                    borderBottom: '1px solid #d1d5db',
+                                    paddingBottom: '4px'
+                                }}>
                                     {getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
                                 </h2>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing, 24px)' }}>
@@ -1206,7 +1332,14 @@ const BasicTemplate: React.FC<{
                 const validLanguages = languages?.filter(lang => lang.language && lang.language.trim() !== '') || [];
                 return validLanguages.length > 0 ? (
                     <div>
-                        <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-2">
+                        <h2 style={{ 
+                            fontSize: 'var(--cv-subheading-size, 16px)', 
+                            fontWeight: 'var(--cv-subheading-weight, 600)',
+                            color: '#2563eb',
+                            marginBottom: '8px',
+                            borderBottom: '1px solid #d1d5db',
+                            paddingBottom: '8px'
+                        }}>
                             {getSectionName('languages', data.cvLanguage, data.sectionNames)}
                         </h2>
                         <div className="border-l-2 border-blue-200 pl-3" style={{ 
@@ -1413,8 +1546,20 @@ const BasicTemplate: React.FC<{
                 ${isDragActive ? 'drag-mode' : ''}
             `}
             style={{
-                padding: '20mm'
-            }}
+                padding: '20mm',
+                '--cv-font-family': fontSettings.fontFamily,
+                '--cv-name-size': `${fontSettings.nameSize}px`,
+                '--cv-title-size': `${fontSettings.titleSize}px`,
+                '--cv-heading-size': `${fontSettings.headingSize}px`,
+                '--cv-subheading-size': `${fontSettings.subheadingSize}px`,
+                '--cv-body-size': `${fontSettings.bodySize}px`,
+                '--cv-small-size': `${fontSettings.smallSize}px`,
+                '--cv-heading-weight': fontSettings.headingWeight,
+                '--cv-subheading-weight': fontSettings.subheadingWeight,
+                '--cv-body-weight': fontSettings.bodyWeight,
+                '--cv-small-weight': fontSettings.smallWeight,
+                '--cv-section-spacing': `${fontSettings.sectionSpacing}px`
+            } as React.CSSProperties}
         >
 
 
@@ -1434,10 +1579,24 @@ const BasicTemplate: React.FC<{
 
                     {/* Name and Contact Info */}
                     <div className="flex-1">
-                        <h1 className="text-2xl font-bold text-blue-600 mb-2">
+                        <h1 
+                            className="font-bold text-blue-600 mb-2"
+                            style={{
+                                fontSize: 'var(--cv-name-size, 24px)',
+                                fontWeight: 'var(--cv-heading-weight, 700)',
+                                fontFamily: 'var(--cv-font-family, Arial, sans-serif)'
+                            }}
+                        >
                             {getFullName(personalInfo, data.cvLanguage)}
                         </h1>
-                        <div className="grid grid-cols-2 text-xs text-gray-600 gap-3">
+                        <div 
+                            className="grid grid-cols-2 text-gray-600 gap-3"
+                            style={{
+                                fontSize: 'var(--cv-small-size, 12px)',
+                                fontWeight: 'var(--cv-small-weight, 400)',
+                                fontFamily: 'var(--cv-font-family, Arial, sans-serif)'
+                            }}
+                        >
                             {personalInfo.email && (
                                 <span className="flex items-center gap-2">
                                     📧 {personalInfo.email}
@@ -7151,6 +7310,7 @@ export default function CVPreview({
                 onUpdate={onUpdate}
                 activeSection={activeSection}
                 onSectionSelect={handleSectionSelect}
+                fontSettings={fontSettings}
             />;
         }
 
@@ -7163,6 +7323,7 @@ export default function CVPreview({
             onUpdate={onUpdate}
             activeSection={activeSection}
             onSectionSelect={handleSectionSelect}
+            fontSettings={fontSettings}
         />;
     };
 

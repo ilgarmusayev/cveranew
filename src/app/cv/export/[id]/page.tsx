@@ -37,20 +37,37 @@ export default function CVExportPage() {
     const [exporting, setExporting] = useState(false);
     const [showFontPanel, setShowFontPanel] = useState(false);
     
-    // Font settings state (default values matching CVEditor)
-    const [fontSettings, setFontSettings] = useState({
-        fontFamily: 'Arial, sans-serif',
-        nameSize: 24,
-        titleSize: 20,
-        headingSize: 18,
-        subheadingSize: 16,
-        bodySize: 14,
-        smallSize: 12,
-        headingWeight: 700,
-        subheadingWeight: 600,
-        bodyWeight: 400,
-        smallWeight: 400,
-        sectionSpacing: 8
+    // Font settings state - CVEditor-dən localStorage vasitəsilə al
+    const [fontSettings, setFontSettings] = useState(() => {
+        // Client-side olduğunu yoxla
+        if (typeof window !== 'undefined') {
+            try {
+                const storedFontSettings = localStorage.getItem('exportFontSettings');
+                if (storedFontSettings) {
+                    console.log('📤 CVEditor-dən alınan font settings:', storedFontSettings);
+                    localStorage.removeItem('exportFontSettings'); // Təmizlə ki bir dəfə istifadə olsun
+                    return JSON.parse(storedFontSettings);
+                }
+            } catch (error) {
+                console.error('Font settings localStorage-dan oxunarkən xəta:', error);
+            }
+        }
+        
+        // Default font settings
+        return {
+            fontFamily: 'Arial, sans-serif',
+            nameSize: 24,
+            titleSize: 20,
+            headingSize: 18,
+            subheadingSize: 16,
+            bodySize: 14,
+            smallSize: 12,
+            headingWeight: 700,
+            subheadingWeight: 600,
+            bodyWeight: 400,
+            smallWeight: 400,
+            sectionSpacing: 8
+        };
     });
 
     useEffect(() => {
@@ -61,6 +78,7 @@ export default function CVExportPage() {
                 
                 if (response.status === 200 && response.data) {
                     setCV(response.data);
+                    console.log('🎨 Export page: CV data loaded, using default font settings');
                 } else {
                     setError('CV məlumatları tapılmadı');
                 }
@@ -312,7 +330,23 @@ export default function CVExportPage() {
             </div>
 
             {/* CV Preview - Centered without background */}
-            <div className="flex justify-center py-8">
+            <div 
+                className="flex justify-center py-8"
+                style={{
+                    '--cv-font-family': fontSettings.fontFamily,
+                    '--cv-name-size': `${fontSettings.nameSize}px`,
+                    '--cv-title-size': `${fontSettings.titleSize}px`,
+                    '--cv-heading-size': `${fontSettings.headingSize}px`,
+                    '--cv-subheading-size': `${fontSettings.subheadingSize}px`,
+                    '--cv-body-size': `${fontSettings.bodySize}px`,
+                    '--cv-small-size': `${fontSettings.smallSize}px`,
+                    '--cv-heading-weight': fontSettings.headingWeight,
+                    '--cv-subheading-weight': fontSettings.subheadingWeight,
+                    '--cv-body-weight': fontSettings.bodyWeight,
+                    '--cv-small-weight': fontSettings.smallWeight,
+                    '--cv-section-spacing': `${fontSettings.sectionSpacing}px`
+                } as React.CSSProperties}
+            >
                 <CVPreview 
                     cv={{
                         id: cv.id,

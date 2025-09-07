@@ -61,6 +61,19 @@ export async function POST(
             htmlContent: htmlContent ? 'mövcud' : 'yox',
             cssContent: cssContent ? 'mövcud' : 'yox'
         });
+        
+        // FONT SETTINGS DEBUG - TAM STRUCTURE
+        console.log('=== FONT SETTINGS FULL DEBUG ===');
+        console.log('fontSettings raw:', JSON.stringify(fontSettings, null, 2));
+        if (fontSettings) {
+            console.log('fontSettings properties:');
+            Object.keys(fontSettings).forEach(key => {
+                console.log(`  ${key}:`, fontSettings[key]);
+            });
+        } else {
+            console.log('⚠️  fontSettings is NULL/UNDEFINED - using defaults');
+        }
+        console.log('=== END FONT SETTINGS DEBUG ===');
 
         if (!format || format !== 'pdf') {
             return NextResponse.json(
@@ -251,6 +264,31 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
         
         if (htmlContent && cssContent) {
             // Front-end-dən gələn HTML content istifadə et, amma CSS-i təkmilləşdir
+            console.log('=== Front-end HTML/CSS istifadə edilir ===');
+            console.log('HTML length:', htmlContent.length);
+            console.log('CSS length:', cssContent.length);
+            console.log('Font Settings DEBUG:', JSON.stringify(fontSettings, null, 2));
+            console.log('Template ID:', templateId);
+            
+            // Check if basic template
+            if (templateId === 'basic') {
+                console.log('=== BASIC TEMPLATE DETECTED - EXTRA DEBUGGING ===');
+                console.log('Font Settings Object Keys:', Object.keys(fontSettings || {}));
+                console.log('Available font settings:');
+                console.log('- headingSize:', fontSettings?.headingSize);
+                console.log('- titleSize:', fontSettings?.titleSize);
+                console.log('- subheadingSize:', fontSettings?.subheadingSize);
+                console.log('- subtitleSize:', fontSettings?.subtitleSize);
+                console.log('- bodySize:', fontSettings?.bodySize);
+                console.log('- fontSize:', fontSettings?.fontSize);
+                console.log('- smallSize:', fontSettings?.smallSize);
+                console.log('- xsSize:', fontSettings?.xsSize);
+                console.log('Final computed sizes:');
+                console.log('- Heading:', fontSettings?.headingSize || fontSettings?.titleSize || 10, 'px');
+                console.log('- Subheading:', fontSettings?.subheadingSize || fontSettings?.subtitleSize || 9, 'px');
+                console.log('- Body:', fontSettings?.bodySize || fontSettings?.fontSize || 8, 'px');
+                console.log('- Small:', fontSettings?.smallSize || fontSettings?.xsSize || 7, 'px');
+            }
             html = `
                 <!DOCTYPE html>
                 <html lang="az">
@@ -264,291 +302,644 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         ${cssContent}
                         
                         /* ROUTE.TS ƏLAVƏ CSS - YALNIZ DINAMIK FONT SISTEMI */
+                          
+                        /* MƏCBURI SIFIR MARGIN - PDF ÜÇÜN */
+                        @page {
+                            size: A4;
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            border: none !important;
+                        }
                         
-                        /* CSS Variables - Font Manager Integration */
-                        :root, body {
-                            --cv-font-family: ${fontSettings?.fontFamily || 'Inter, sans-serif'};
-                            --cv-heading-size: ${fontSettings?.headingSize || 24}px;
-                            --cv-subheading-size: ${fontSettings?.subheadingSize || 16}px;
+                        html, body {
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            width: 100% !important;
+                            height: 100% !important;
+                            box-sizing: border-box !important;
+                            border: none !important;
+                            outline: none !important;
+                        }
+                        
+                        /* Bütün elementlər üçün margin sıfır */
+                        *, *::before, *::after {
+                            box-sizing: border-box !important;
+                            margin: 0 !important;
+                        }
+                        
+                        /* Container siniflarını override et */
+                        .cv-preview, .cv-container, .container, .max-w-4xl, .max-w-3xl, .max-w-2xl, 
+                        .max-w-xl, .max-w-lg, .mx-auto, .w-full, .h-full {
+                            width: 100% !important;
+                            max-width: none !important;
+                            margin: 0 !important;
+                            border: none !important;
+                        }
+                            
+                        /* TAMAMILƏ DİNAMİK SİSTEM - HEÇ BİR HARDCODED DƏYƏR YOX */
+                        
+                        /* CSS Variables - FONT MANAGER İLƏ SINXRON */
+                        :root, html, body {
+                            --cv-font-family: ${fontSettings?.fontFamily || 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'};
+                            /* FONT MANAGER ilə eyni default-lar */
+                            --cv-heading-size: ${fontSettings?.headingSize || 18}px;
+                            --cv-subheading-size: ${fontSettings?.subheadingSize || 16}px;  
                             --cv-body-size: ${fontSettings?.bodySize || 14}px;
                             --cv-small-size: ${fontSettings?.smallSize || 12}px;
+                            
+                            /* Dinamik Rənglər */
+                            --cv-primary-color: ${fontSettings?.primaryColor || '#1f2937'};
+                            --cv-secondary-color: ${fontSettings?.secondaryColor || '#6b7280'};
+                            --cv-accent-color: ${fontSettings?.accentColor || '#3b82f6'};
+                            --cv-text-color: ${fontSettings?.textColor || '#374151'};
+                            --cv-light-color: ${fontSettings?.lightColor || '#f9fafb'};
+                            --cv-border-color: ${fontSettings?.borderColor || '#e5e7eb'};
+                            
+                            /* Dinamik Məsafələr */
+                            --cv-spacing-xs: ${fontSettings?.spacingXs || '0.25rem'};
+                            --cv-spacing-sm: ${fontSettings?.spacingSm || '0.5rem'};
+                            --cv-spacing-md: ${fontSettings?.spacingMd || '1rem'};
+                            --cv-spacing-lg: ${fontSettings?.spacingLg || '1.5rem'};
+                            --cv-spacing-xl: ${fontSettings?.spacingXl || '2rem'};
+                            
+                            /* Dinamik Border və Shadow */
+                            --cv-border-width: ${fontSettings?.borderWidth || '1px'};
+                            --cv-border-radius: ${fontSettings?.borderRadius || '0.375rem'};
+                            --cv-shadow: ${fontSettings?.shadow || '0 1px 3px 0 rgb(0 0 0 / 0.1)'};
                         }
                         
-                        /* Global font family override - dinamik olaraq */
-                        * {
+                        /* Global Dynamic Override - HEÇ BİR HARDCODE YOX */
+                        *, *::before, *::after, html, body, div, span, h1, h2, h3, h4, h5, h6, p, a, strong, em, ul, ol, li {
+                            font-family: var(--cv-font-family) !important;
+                            color: var(--cv-text-color) !important;
+                        }
+                        
+                        /* UNIVERSAL CSS OVERRIDE - FRONT-END CSS-İ OVERRIDE ET */
+                        .basic-template *, .basic-template *::before, .basic-template *::after,
+                        .basic-template h1, .basic-template h2, .basic-template h3, .basic-template h4, .basic-template h5, .basic-template h6,
+                        .basic-template p, .basic-template span, .basic-template div, .basic-template li, .basic-template a, .basic-template strong {
+                            font-family: var(--cv-font-family) !important;
+                            color: var(--cv-text-color) !important;
+                        }
+                        
+                        /* UNIVERSAL DYNAMIC SYSTEM - CLEAN AND SIMPLE */
+                        
+                        /* ALL TEXT SIZES - DYNAMIC */
+                        .text-xs { font-size: calc(var(--cv-small-size) * 0.75) !important; }
+                        .text-sm { font-size: var(--cv-small-size) !important; }
+                        .text-base { font-size: var(--cv-body-size) !important; }
+                        .text-lg { font-size: calc(var(--cv-subheading-size) * 1.125) !important; }
+                        .text-xl { font-size: calc(var(--cv-heading-size) * 0.83) !important; }
+                        .text-2xl { font-size: var(--cv-heading-size) !important; }
+                        .text-3xl { font-size: calc(var(--cv-heading-size) * 1.25) !important; }
+                        .text-4xl { font-size: calc(var(--cv-heading-size) * 1.5) !important; }
+                        .text-5xl { font-size: calc(var(--cv-heading-size) * 2) !important; }
+                        
+                        /* BASIC TEMPLATE FONT SIZE OVERRIDES - GÜCLÜ */
+                        .basic-template .text-xs { font-size: calc(var(--cv-small-size) * 0.75) !important; }
+                        .basic-template .text-sm { font-size: var(--cv-small-size) !important; }
+                        .basic-template .text-base { font-size: var(--cv-body-size) !important; }
+                        .basic-template .text-lg { font-size: calc(var(--cv-subheading-size) * 1.125) !important; }
+                        .basic-template .text-xl { font-size: calc(var(--cv-heading-size) * 0.83) !important; }
+                        .basic-template .text-2xl { font-size: var(--cv-heading-size) !important; }
+                        .basic-template .text-3xl { font-size: calc(var(--cv-heading-size) * 1.25) !important; }
+                        .basic-template .text-4xl { font-size: calc(var(--cv-heading-size) * 1.5) !important; }
+                        .basic-template .text-5xl { font-size: calc(var(--cv-heading-size) * 2) !important; }
+                        
+                        /* BASIC TEMPLATE ULTRA STRONG OVERRIDES */
+                        /* NUCLEAR OPTION - ABSOLUTE FONT SIZE OVERRIDE */
+                        .basic-template * {
                             font-family: var(--cv-font-family) !important;
                         }
                         
-                        /* UNIVERSAL DYNAMIC FONT SYSTEM - BÜTÜN TEMPLATE-LƏR ÜÇÜN */
-                        
-                        /* Font Family - Bütün template-lər */
-                        .aurora-template *, .vertex-template *, .horizon-template *, 
-                        .lumen-template *, .modern-template *, .exclusive-template *, 
-                        .ats-template *, .basic-template *, .traditional-template *, 
-                        .classic-template * {
-                            font-family: var(--cv-font-family) !important;
+                        .basic-template *[class*="text-xs"] {
+                            font-size: calc(var(--cv-small-size) * 0.75) !important;
                         }
                         
-                        /* Heading Sizes - Dinamik H1, H2, H3 */
-                        .aurora-template h1, .vertex-template h1, .horizon-template h1,
-                        .lumen-template h1, .modern-template h1, .exclusive-template h1,
-                        .ats-template h1, .basic-template h1, .traditional-template h1,
-                        .classic-template h1 {
-                            font-size: calc(var(--cv-heading-size) * 1.33) !important; /* ~32px */
-                            line-height: 1.2 !important;
+                        .basic-template *[class*="text-sm"] {
+                            font-size: var(--cv-small-size) !important;
                         }
                         
-                        .aurora-template h2, .vertex-template h2, .horizon-template h2,
-                        .lumen-template h2, .modern-template h2, .exclusive-template h2,
-                        .ats-template h2, .basic-template h2, .traditional-template h2,
-                        .classic-template h2 {
-                            font-size: var(--cv-heading-size) !important; /* 24px default */
-                            line-height: 1.3 !important;
+                        .basic-template *[class*="text-base"] {
+                            font-size: var(--cv-body-size) !important;
                         }
                         
-                        .aurora-template h3, .vertex-template h3, .horizon-template h3,
-                        .lumen-template h3, .modern-template h3, .exclusive-template h3,
-                        .ats-template h3, .basic-template h3, .traditional-template h3,
-                        .classic-template h3 {
-                            font-size: calc(var(--cv-subheading-size) * 1.125) !important; /* ~18px */
-                            line-height: 1.4 !important;
+                        .basic-template *[class*="text-lg"] {
+                            font-size: calc(var(--cv-subheading-size) * 1.125) !important;
                         }
                         
-                        .aurora-template h4, .vertex-template h4, .horizon-template h4,
-                        .lumen-template h4, .modern-template h4, .exclusive-template h4,
-                        .ats-template h4, .basic-template h4, .traditional-template h4,
-                        .classic-template h4 {
-                            font-size: var(--cv-subheading-size) !important; /* 16px default */
-                            line-height: 1.5 !important;
+                        .basic-template *[class*="text-xl"]:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-5xl"]) {
+                            font-size: calc(var(--cv-heading-size) * 0.83) !important;
                         }
                         
-                        /* Text Size Classes - Dinamik Tailwind */
-                        .aurora-template .text-5xl, .vertex-template .text-5xl, .horizon-template .text-5xl,
-                        .lumen-template .text-5xl, .modern-template .text-5xl, .exclusive-template .text-5xl,
-                        .ats-template .text-5xl, .basic-template .text-5xl, .traditional-template .text-5xl,
-                        .classic-template .text-5xl {
-                            font-size: calc(var(--cv-heading-size) * 2) !important; /* ~48px */
-                            line-height: 1.2 !important;
-                        }
-                        
-                        .aurora-template .text-4xl, .vertex-template .text-4xl, .horizon-template .text-4xl,
-                        .lumen-template .text-4xl, .modern-template .text-4xl, .exclusive-template .text-4xl,
-                        .ats-template .text-4xl, .basic-template .text-4xl, .traditional-template .text-4xl,
-                        .classic-template .text-4xl {
-                            font-size: calc(var(--cv-heading-size) * 1.5) !important; /* ~36px */
-                            line-height: 1.2 !important;
-                        }
-                        
-                        .aurora-template .text-3xl, .vertex-template .text-3xl, .horizon-template .text-3xl,
-                        .lumen-template .text-3xl, .modern-template .text-3xl, .exclusive-template .text-3xl,
-                        .ats-template .text-3xl, .basic-template .text-3xl, .traditional-template .text-3xl,
-                        .classic-template .text-3xl {
-                            font-size: calc(var(--cv-heading-size) * 1.25) !important; /* ~30px */
-                            line-height: 1.3 !important;
-                        }
-                        
-                        .aurora-template .text-2xl, .vertex-template .text-2xl, .horizon-template .text-2xl,
-                        .lumen-template .text-2xl, .modern-template .text-2xl, .exclusive-template .text-2xl,
-                        .ats-template .text-2xl, .basic-template .text-2xl, .traditional-template .text-2xl,
-                        .classic-template .text-2xl {
-                            font-size: var(--cv-heading-size) !important; /* 24px default */
-                            line-height: 1.3 !important;
-                        }
-                        
-                        .aurora-template .text-xl, .vertex-template .text-xl, .horizon-template .text-xl,
-                        .lumen-template .text-xl, .modern-template .text-xl, .exclusive-template .text-xl,
-                        .ats-template .text-xl, .basic-template .text-xl, .traditional-template .text-xl,
-                        .classic-template .text-xl {
-                            font-size: calc(var(--cv-heading-size) * 0.83) !important; /* ~20px */
-                            line-height: 1.4 !important;
-                        }
-                        
-                        .aurora-template .text-lg, .vertex-template .text-lg, .horizon-template .text-lg,
-                        .lumen-template .text-lg, .modern-template .text-lg, .exclusive-template .text-lg,
-                        .ats-template .text-lg, .basic-template .text-lg, .traditional-template .text-lg,
-                        .classic-template .text-lg {
-                            font-size: calc(var(--cv-subheading-size) * 1.125) !important; /* ~18px */
-                            line-height: 1.4 !important;
-                        }
-                        
-                        .aurora-template .text-base, .vertex-template .text-base, .horizon-template .text-base,
-                        .lumen-template .text-base, .modern-template .text-base, .exclusive-template .text-base,
-                        .ats-template .text-base, .basic-template .text-base, .traditional-template .text-base,
-                        .classic-template .text-base {
-                            font-size: var(--cv-subheading-size) !important; /* 16px default */
-                            line-height: 1.5 !important;
-                        }
-                        
-                        .aurora-template .text-sm, .vertex-template .text-sm, .horizon-template .text-sm,
-                        .lumen-template .text-sm, .modern-template .text-sm, .exclusive-template .text-sm,
-                        .ats-template .text-sm, .basic-template .text-sm, .traditional-template .text-sm,
-                        .classic-template .text-sm {
-                            font-size: var(--cv-body-size) !important; /* 14px default */
-                            line-height: 1.4 !important;
-                        }
-                        
-                        .aurora-template .text-xs, .vertex-template .text-xs, .horizon-template .text-xs,
-                        .lumen-template .text-xs, .modern-template .text-xs, .exclusive-template .text-xs,
-                        .ats-template .text-xs, .basic-template .text-xs, .traditional-template .text-xs,
-                        .classic-template .text-xs {
-                            font-size: var(--cv-small-size) !important; /* 12px default */
-                            line-height: 1.3 !important;
-                        }
-                        
-                        /* Font Weights - Dinamik */
-                        .aurora-template .font-bold, .vertex-template .font-bold, .horizon-template .font-bold,
-                        .lumen-template .font-bold, .modern-template .font-bold, .exclusive-template .font-bold,
-                        .ats-template .font-bold, .basic-template .font-bold, .traditional-template .font-bold,
-                        .classic-template .font-bold {
-                            font-weight: 700 !important;
-                        }
-                        
-                        .aurora-template .font-semibold, .vertex-template .font-semibold, .horizon-template .font-semibold,
-                        .lumen-template .font-semibold, .modern-template .font-semibold, .exclusive-template .font-semibold,
-                        .ats-template .font-semibold, .basic-template .font-semibold, .traditional-template .font-semibold,
-                        .classic-template .font-semibold {
-                            font-weight: 600 !important;
-                        }
-                        
-                        .aurora-template .font-medium, .vertex-template .font-medium, .horizon-template .font-medium,
-                        .lumen-template .font-medium, .modern-template .font-medium, .exclusive-template .font-medium,
-                        .ats-template .font-medium, .basic-template .font-medium, .traditional-template .font-medium,
-                        .classic-template .font-medium {
-                            font-weight: 500 !important;
-                        }
-                        
-                        .aurora-template .font-normal, .vertex-template .font-normal, .horizon-template .font-normal,
-                        .lumen-template .font-normal, .modern-template .font-normal, .exclusive-template .font-normal,
-                        .ats-template .font-normal, .basic-template .font-normal, .traditional-template .font-normal,
-                        .classic-template .font-normal {
-                            font-weight: 400 !important;
-                        }
-                        
-                        /* Template Specific Dynamic Overrides */
-                        
-                        /* Aurora Template */
-                        .aurora-template {
-                            font-family: var(--cv-font-family) !important;
-                        }
-                        
-                        /* Vertex Template */
-                        .vertex-template {
-                            font-family: var(--cv-font-family) !important;
-                        }
-                        
-                        /* Horizon Template */
-                        .horizon-template {
-                            font-family: var(--cv-font-family) !important;
-                        }
-                        
-                        /* Lumen Template */
-                        .lumen-template {
-                            font-family: var(--cv-font-family) !important;
-                        }
-                        
-                        /* Modern Template */
-                        .modern-template {
-                            font-family: var(--cv-font-family) !important;
-                        }
-                        
-                        /* ATS Template */
-                        .ats-template {
-                            font-family: var(--cv-font-family) !important;
-                        }
-                        
-                        /* Basic Template */
-                        .basic-template {
-                            font-family: var(--cv-font-family) !important;
-                        }
-                        
-                        /* Traditional Template */
-                        .traditional-template {
-                            font-family: var(--cv-font-family) !important;
-                        }
-                        
-                        /* Classic Template */
-                        .classic-template {
-                            font-family: var(--cv-font-family) !important;
-                        }
-                        
-                        /* EXCLUSIVE TEMPLATE SPESIFIK EXPORT FIXES */
-                        
-                        /* Font weights - dinamik export üçün */
-                        .exclusive-template .font-bold,
-                        .exclusive-template h1,
-                        .exclusive-template h2,
-                        .exclusive-template .text-5xl {
-                            font-weight: 700 !important;
-                        }
-                        
-                        .exclusive-template .font-semibold,
-                        .exclusive-template h3 {
-                            font-weight: 600 !important;
-                        }
-                        
-                        .exclusive-template .font-medium {
-                            font-weight: 500 !important;
-                        }
-                        
-                        /* Personal info background - mavi gradient */
-                        .exclusive-template .bg-gradient-to-r.from-blue-50.to-indigo-50 {
-                            background: linear-gradient(to right, #eff6ff, #eef2ff) !important;
-                        }
-                        
-                        .exclusive-template .bg-gradient-to-r {
-                            background: linear-gradient(to right, #eff6ff, #eef2ff) !important;
-                        }
-                        
-                        /* Personal info border */
-                        .exclusive-template .border-blue-200 {
-                            border-color: #dbeafe !important;
-                        }
-                        
-                        /* Dynamic font sizes - CSS Variables based */
-                        .exclusive-template .text-5xl {
-                            font-size: calc(var(--cv-heading-size) * 2) !important;
-                            line-height: 1.2 !important;
-                        }
-                        
-                        .exclusive-template .text-2xl {
+                        .basic-template *[class*="text-2xl"] {
                             font-size: var(--cv-heading-size) !important;
+                        }
+                        
+                        .basic-template *[class*="text-3xl"] {
+                            font-size: calc(var(--cv-heading-size) * 1.25) !important;
+                        }
+                        
+                        .basic-template *[class*="text-4xl"] {
+                            font-size: calc(var(--cv-heading-size) * 1.5) !important;
+                        }
+                        
+                        .basic-template *[class*="text-5xl"] {
+                            font-size: calc(var(--cv-heading-size) * 2) !important;
+                        }
+                        
+                        /* HTML TAGS - DYNAMIC */
+                        h1 { 
+                            font-size: calc(var(--cv-heading-size) * 1.33) !important;
+                            color: var(--cv-primary-color) !important;
+                            margin: var(--cv-spacing-md) 0 !important;
+                        }
+                        h2 { 
+                            font-size: var(--cv-heading-size) !important;
+                            color: var(--cv-primary-color) !important;
+                            margin: var(--cv-spacing-md) 0 !important;
+                        }
+                        h3 { 
+                            font-size: calc(var(--cv-subheading-size) * 1.125) !important;
+                            color: var(--cv-primary-color) !important;
+                            margin: var(--cv-spacing-sm) 0 !important;
+                        }
+                        h4, h5, h6 { 
+                            font-size: var(--cv-subheading-size) !important;
+                            color: var(--cv-primary-color) !important;
+                        }
+                        p, span, div, li, td, th, a { 
+                            font-size: var(--cv-body-size) !important;
+                            color: var(--cv-text-color) !important;
+                        }
+                        
+                        /* BASIC TEMPLATE EXTREME OVERRIDES - MAX SPECIFICITY */
+                        body .basic-template h1, 
+                        html body .basic-template h1,
+                        .basic-template h1[class*="text-"],
+                        .basic-template .text-4xl,
+                        .basic-template .text-5xl { 
+                            font-size: calc(var(--cv-heading-size) * 1.33) !important;
+                            color: var(--cv-primary-color) !important;
+                            font-family: var(--cv-font-family) !important;
+                        }
+                        
+                        body .basic-template h2, 
+                        html body .basic-template h2,
+                        .basic-template h2[class*="text-"],
+                        .basic-template .text-3xl,
+                        .basic-template .text-2xl { 
+                            font-size: var(--cv-heading-size) !important;
+                            color: var(--cv-primary-color) !important;
+                            font-family: var(--cv-font-family) !important;
+                        }
+                        
+                        body .basic-template h3, 
+                        html body .basic-template h3,
+                        .basic-template h3[class*="text-"],
+                        .basic-template .text-xl,
+                        .basic-template .text-lg { 
+                            font-size: calc(var(--cv-subheading-size) * 1.125) !important;
+                            color: var(--cv-primary-color) !important;
+                            font-family: var(--cv-font-family) !important;
+                        }
+                        
+                        body .basic-template h4, body .basic-template h5, body .basic-template h6,
+                        html body .basic-template h4, html body .basic-template h5, html body .basic-template h6,
+                        .basic-template h4[class*="text-"], .basic-template h5[class*="text-"], .basic-template h6[class*="text-"],
+                        .basic-template .text-base { 
+                            font-size: var(--cv-subheading-size) !important;
+                            color: var(--cv-primary-color) !important;
+                            font-family: var(--cv-font-family) !important;
+                        }
+                        
+                        body .basic-template p, body .basic-template span, body .basic-template div, body .basic-template li, body .basic-template td, body .basic-template th, body .basic-template a,
+                        html body .basic-template p, html body .basic-template span, html body .basic-template div, html body .basic-template li, html body .basic-template td, html body .basic-template th, html body .basic-template a,
+                        .basic-template p[class*="text-"], .basic-template span[class*="text-"], .basic-template div[class*="text-"], .basic-template li[class*="text-"],
+                        .basic-template .text-sm { 
+                            font-size: var(--cv-body-size) !important;
+                            color: var(--cv-text-color) !important;
+                            font-family: var(--cv-font-family) !important;
+                        }
+                        
+                        /* BASIC TEMPLATE ABSOLUTE NUCLEAR OVERRIDE - HƏR HALDA DİNAMİK OLSUN */
+                        .basic-template * { font-family: var(--cv-font-family) !important; }
+                        .basic-template *[class*="text-"] { 
+                            font-family: var(--cv-font-family) !important;
+                        }
+                        .basic-template [class*="text-xs"] { font-size: calc(var(--cv-small-size) * 0.75) !important; }
+                        .basic-template [class*="text-sm"] { font-size: var(--cv-small-size) !important; }
+                        .basic-template [class*="text-base"] { font-size: var(--cv-body-size) !important; }
+                        .basic-template [class*="text-lg"] { font-size: calc(var(--cv-subheading-size) * 1.125) !important; }
+                        .basic-template [class*="text-xl"]:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-5xl"]) { font-size: calc(var(--cv-heading-size) * 0.83) !important; }
+                        .basic-template [class*="text-2xl"] { font-size: var(--cv-heading-size) !important; }
+                        .basic-template [class*="text-3xl"] { font-size: calc(var(--cv-heading-size) * 1.25) !important; }
+                        .basic-template [class*="text-4xl"] { font-size: calc(var(--cv-heading-size) * 1.5) !important; }
+                        .basic-template [class*="text-5xl"] { font-size: calc(var(--cv-heading-size) * 2) !important; }
+                        
+                        /* BASIC TEMPLATE MEGA NUCLEAR OVERRIDE - BÜTÜNLÜYLƏ DYNAMIC */
+                        html .basic-template *,
+                        body .basic-template *,
+                        .basic-template *,
+                        .basic-template h1, .basic-template h2, .basic-template h3, .basic-template h4, .basic-template h5, .basic-template h6,
+                        .basic-template p, .basic-template span, .basic-template div, .basic-template li, .basic-template a, .basic-template strong, .basic-template em,
+                        .basic-template .text-xs, .basic-template .text-sm, .basic-template .text-base, .basic-template .text-lg, 
+                        .basic-template .text-xl, .basic-template .text-2xl, .basic-template .text-3xl, .basic-template .text-4xl, .basic-template .text-5xl {
+                            font-family: var(--cv-font-family) !important;
+                        }
+                        
+                        /* BASIC TEMPLATE FONT SIZE NUCLEAR MATRIX - MAX SPECIFICITY */
+                        html body .basic-template .text-xs,
+                        html body .basic-template [class*="text-xs"],
+                        .basic-template .text-xs[class],
+                        .basic-template *[class*="text-xs"] {
+                            font-size: calc(var(--cv-small-size) * 0.75) !important;
                             line-height: 1.3 !important;
                         }
                         
-                        .exclusive-template .text-lg {
+                        html body .basic-template .text-sm,
+                        html body .basic-template [class*="text-sm"],
+                        .basic-template .text-sm[class],
+                        .basic-template *[class*="text-sm"] {
+                            font-size: var(--cv-small-size) !important;
+                            line-height: 1.4 !important;
+                        }
+                        
+                        html body .basic-template .text-base,
+                        html body .basic-template [class*="text-base"],
+                        .basic-template .text-base[class],
+                        .basic-template *[class*="text-base"] {
+                            font-size: var(--cv-body-size) !important;
+                            line-height: 1.5 !important;
+                        }
+                        
+                        html body .basic-template .text-lg,
+                        html body .basic-template [class*="text-lg"],
+                        .basic-template .text-lg[class],
+                        .basic-template *[class*="text-lg"] {
                             font-size: calc(var(--cv-subheading-size) * 1.125) !important;
                             line-height: 1.4 !important;
                         }
                         
-                        .exclusive-template .text-base {
-                            font-size: var(--cv-subheading-size) !important;
-                            line-height: 1.5 !important;
-                        }
-                        
-                        .exclusive-template .text-sm {
-                            font-size: var(--cv-body-size) !important;
+                        html body .basic-template .text-xl:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-5xl"]),
+                        html body .basic-template [class*="text-xl"]:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-5xl"]),
+                        .basic-template .text-xl[class]:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-5xl"]),
+                        .basic-template *[class*="text-xl"]:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-5xl"]) {
+                            font-size: calc(var(--cv-heading-size) * 0.83) !important;
                             line-height: 1.4 !important;
                         }
                         
-                        .exclusive-template .text-xs {
-                            font-size: var(--cv-small-size) !important;
+                        html body .basic-template .text-2xl,
+                        html body .basic-template [class*="text-2xl"],
+                        .basic-template .text-2xl[class],
+                        .basic-template *[class*="text-2xl"] {
+                            font-size: var(--cv-heading-size) !important;
                             line-height: 1.3 !important;
                         }
                         
-                        /* PERSONAL INFO SECTION - COMPLETE PREVIEW MATCH */
-                        
-                        /* Main header container */
-                        .exclusive-template .p-6 {
-                            padding: 1.5rem !important;
+                        html body .basic-template .text-3xl,
+                        html body .basic-template [class*="text-3xl"],
+                        .basic-template .text-3xl[class],
+                        .basic-template *[class*="text-3xl"] {
+                            font-size: calc(var(--cv-heading-size) * 1.25) !important;
+                            line-height: 1.3 !important;
                         }
                         
-                        .exclusive-template .mb-6 {
-                            margin-bottom: 1.5rem !important;
+                        html body .basic-template .text-4xl,
+                        html body .basic-template [class*="text-4xl"],
+                        .basic-template .text-4xl[class],
+                        .basic-template *[class*="text-4xl"] {
+                            font-size: calc(var(--cv-heading-size) * 1.5) !important;
+                            line-height: 1.2 !important;
                         }
                         
-                        .exclusive-template .rounded-lg {
-                            border-radius: 0.5rem !important;
+                        html body .basic-template .text-5xl,
+                        html body .basic-template [class*="text-5xl"],
+                        .basic-template .text-5xl[class],
+                        .basic-template *[class*="text-5xl"] {
+                            font-size: calc(var(--cv-heading-size) * 2) !important;
+                            line-height: 1.2 !important;
                         }
+                        
+                        /* BASIC TEMPLATE FONT WEIGHT NUCLEAR OVERRIDE */
+                        html body .basic-template .font-light,
+                        html body .basic-template [class*="font-light"],
+                        .basic-template .font-light[class],
+                        .basic-template *[class*="font-light"] {
+                            font-weight: 300 !important;
+                        }
+                        
+                        html body .basic-template .font-normal,
+                        html body .basic-template [class*="font-normal"],
+                        .basic-template .font-normal[class],
+                        .basic-template *[class*="font-normal"] {
+                            font-weight: 400 !important;
+                        }
+                        
+                        html body .basic-template .font-medium,
+                        html body .basic-template [class*="font-medium"],
+                        .basic-template .font-medium[class],
+                        .basic-template *[class*="font-medium"] {
+                            font-weight: 500 !important;
+                        }
+                        
+                        html body .basic-template .font-semibold,
+                        html body .basic-template [class*="font-semibold"],
+                        .basic-template .font-semibold[class],
+                        .basic-template *[class*="font-semibold"] {
+                            font-weight: 600 !important;
+                        }
+                        
+                        html body .basic-template .font-bold,
+                        html body .basic-template [class*="font-bold"],
+                        .basic-template .font-bold[class],
+                        .basic-template *[class*="font-bold"] {
+                            font-weight: 700 !important;
+                        }
+                        
+                        html body .basic-template .font-extrabold,
+                        html body .basic-template [class*="font-extrabold"],
+                        .basic-template .font-extrabold[class],
+                        .basic-template *[class*="font-extrabold"] {
+                            font-weight: 800 !important;
+                        }
+                        
+                        html body .basic-template .font-black,
+                        html body .basic-template [class*="font-black"],
+                        .basic-template .font-black[class],
+                        .basic-template *[class*="font-black"] {
+                            font-weight: 900 !important;
+                        }
+                        
+                        /* UNIVERSAL SPACING CLASSES - DİNAMİK */
+                        .space-y-0 > * + * { margin-top: 0 !important; }
+                        .space-y-1 > * + * { margin-top: var(--cv-spacing-xs) !important; }
+                        .space-y-2 > * + * { margin-top: var(--cv-spacing-sm) !important; }
+                        .space-y-3 > * + * { margin-top: calc(var(--cv-spacing-sm) * 1.5) !important; }
+                        .space-y-4 > * + * { margin-top: var(--cv-spacing-md) !important; }
+                        .space-y-6 > * + * { margin-top: var(--cv-spacing-lg) !important; }
+                        .space-y-8 > * + * { margin-top: var(--cv-spacing-xl) !important; }
+                        
+                        .space-x-0 > * + * { margin-left: 0 !important; }
+                        .space-x-1 > * + * { margin-left: var(--cv-spacing-xs) !important; }
+                        .space-x-2 > * + * { margin-left: var(--cv-spacing-sm) !important; }
+                        .space-x-4 > * + * { margin-left: var(--cv-spacing-md) !important; }
+                        
+                        /* UNIVERSAL GAP CLASSES - DİNAMİK */
+                        .gap-0 { gap: 0 !important; }
+                        .gap-1 { gap: var(--cv-spacing-xs) !important; }
+                        .gap-2 { gap: var(--cv-spacing-sm) !important; }
+                        .gap-3 { gap: calc(var(--cv-spacing-sm) * 1.5) !important; }
+                        .gap-4 { gap: var(--cv-spacing-md) !important; }
+                        .gap-6 { gap: var(--cv-spacing-lg) !important; }
+                        .gap-8 { gap: var(--cv-spacing-xl) !important; }
+                        
+                        /* UNIVERSAL FONT WEIGHTS - DİNAMİK */
+                        .font-thin { font-weight: 100 !important; }
+                        .font-light { font-weight: 300 !important; }
+                        .font-normal { font-weight: 400 !important; }
+                        .font-medium { font-weight: 500 !important; }
+                        .font-semibold { font-weight: 600 !important; }
+                        .font-bold { font-weight: 700 !important; }
+                        .font-extrabold { font-weight: 800 !important; }
+                        .font-black { font-weight: 900 !important; }
+                        
+                        /* UNIVERSAL LAYOUT CLASSES - DİNAMİK */
+                        .flex { display: flex !important; }
+                        .flex-col { flex-direction: column !important; }
+                        .flex-row { flex-direction: row !important; }
+                        .flex-wrap { flex-wrap: wrap !important; }
+                        .items-start { align-items: flex-start !important; }
+                        .items-center { align-items: center !important; }
+                        .items-end { align-items: flex-end !important; }
+                        .justify-start { justify-content: flex-start !important; }
+                        .justify-center { justify-content: center !important; }
+                        .justify-between { justify-content: space-between !important; }
+                        .justify-end { justify-content: flex-end !important; }
+                        
+                        .grid { display: grid !important; }
+                        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
+                        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+                        .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+                        .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+                        
+                        /* UNIVERSAL WIDTH/HEIGHT CLASSES - DİNAMİK */
+                        .w-full { width: 100% !important; }
+                        .w-1\/2 { width: 50% !important; }
+                        .w-1\/3 { width: 33.333333% !important; }
+                        .w-2\/3 { width: 66.666667% !important; }
+                        .w-1\/4 { width: 25% !important; }
+                        .w-3\/4 { width: 75% !important; }
+                        
+                        .h-full { height: 100% !important; }
+                        .h-auto { height: auto !important; }
+                        
+                        /* UNIVERSAL POSITION CLASSES - DİNAMİK */
+                        .relative { position: relative !important; }
+                        .absolute { position: absolute !important; }
+                        .fixed { position: fixed !important; }
+                        .sticky { position: sticky !important; }
+                        
+                        .top-0 { top: 0 !important; }
+                        .bottom-0 { bottom: 0 !important; }
+                        .left-0 { left: 0 !important; }
+                        .right-0 { right: 0 !important; }
+                        
+                        /* UNIVERSAL DISPLAY CLASSES - DİNAMİK */
+                        .block { display: block !important; }
+                        .inline { display: inline !important; }
+                        .inline-block { display: inline-block !important; }
+                        .hidden { display: none !important; }
+                        
+                        /* UNIVERSAL TEXT ALIGNMENT - DİNAMİK */
+                        .text-left { text-align: left !important; }
+                        .text-center { text-align: center !important; }
+                        .text-right { text-align: right !important; }
+                        .text-justify { text-align: justify !important; }
+                        
+                        /* UNIVERSAL LINE HEIGHT - DİNAMİK */
+                        .leading-tight { line-height: 1.25 !important; }
+                        .leading-snug { line-height: 1.375 !important; }
+                        .leading-normal { line-height: 1.5 !important; }
+                        .leading-relaxed { line-height: 1.625 !important; }
+                        .leading-loose { line-height: 2 !important; }
+                        
+                        /* UNIVERSAL BREAK RULES - DİNAMİK */
+                        .break-words { word-break: break-word !important; }
+                        .break-all { word-break: break-all !important; }
+                        .whitespace-nowrap { white-space: nowrap !important; }
+                        .whitespace-normal { white-space: normal !important; }
+                        
+                        /* UNIVERSAL OVERFLOW - DİNAMİK */
+                        .overflow-hidden { overflow: hidden !important; }
+                        .overflow-visible { overflow: visible !important; }
+                        .overflow-auto { overflow: auto !important; }
+                        
+                        /* UNIVERSAL CURSOR - DİNAMİK */
+                        .cursor-pointer { cursor: pointer !important; }
+                        .cursor-default { cursor: default !important; }
+                        
+                        /* UNIVERSAL OPACITY - DİNAMİK */
+                        .opacity-0 { opacity: 0 !important; }
+                        .opacity-50 { opacity: 0.5 !important; }
+                        .opacity-75 { opacity: 0.75 !important; }
+                        .opacity-100 { opacity: 1 !important; }
+                        
+                        
+                        /* UNIVERSAL TEXT SIZE CLASSES - TAMAMI DİNAMİK */
+                        .text-xs { font-size: calc(var(--cv-small-size) * 0.75) !important; line-height: 1.3 !important; }
+                        .text-sm { font-size: var(--cv-body-size) !important; line-height: 1.4 !important; }
+                        .text-base { font-size: var(--cv-subheading-size) !important; line-height: 1.5 !important; }
+                        .text-lg { font-size: calc(var(--cv-subheading-size) * 1.125) !important; line-height: 1.4 !important; }
+                        .text-xl { font-size: calc(var(--cv-heading-size) * 0.83) !important; line-height: 1.4 !important; }
+                        .text-2xl { font-size: var(--cv-heading-size) !important; line-height: 1.3 !important; }
+                        .text-3xl { font-size: calc(var(--cv-heading-size) * 1.25) !important; line-height: 1.3 !important; }
+                        .text-4xl { font-size: calc(var(--cv-heading-size) * 1.5) !important; line-height: 1.2 !important; }
+                        .text-5xl { font-size: calc(var(--cv-heading-size) * 2) !important; line-height: 1.2 !important; }
+                        
+                        /* UNIVERSAL HTML TAG STYLING - DİNAMİK */
+                        h1 { font-size: calc(var(--cv-heading-size) * 1.33) !important; line-height: 1.2 !important; }
+                        h2 { font-size: var(--cv-heading-size) !important; line-height: 1.3 !important; }
+                        h3 { font-size: calc(var(--cv-subheading-size) * 1.125) !important; line-height: 1.4 !important; }
+                        h4 { font-size: var(--cv-subheading-size) !important; line-height: 1.5 !important; }
+                        
+                        /* ALL TEMPLATES USE DYNAMIC FONT FAMILY */
+                        .aurora-template, .vertex-template, .horizon-template, .lumen-template,
+                        .modern-template, .ats-template, .basic-template, .traditional-template,
+                        .classic-template, .exclusive-template {
+                            font-family: var(--cv-font-family) !important;
+                        }
+                        
+                        .text-sm {
+                            font-size: var(--cv-small-size) !important; /* 12px default */
+                        }
+                        
+                        .text-base {
+                            font-size: var(--cv-body-size) !important; /* 14px default */
+                        }
+                        
+                        .text-lg {
+                            font-size: calc(var(--cv-subheading-size) * 1.125) !important; /* ~18px */
+                        }
+                        
+                        .text-xl {
+                            font-size: calc(var(--cv-heading-size) * 0.83) !important; /* ~20px */
+                        }
+                        
+                        .text-2xl {
+                            font-size: var(--cv-heading-size) !important; /* 24px default */
+                        }
+                        
+                        .text-3xl {
+                            font-size: calc(var(--cv-heading-size) * 1.25) !important; /* ~30px */
+                        }
+                        
+                        .text-4xl {
+                            font-size: calc(var(--cv-heading-size) * 1.5) !important; /* ~36px */
+                        }
+                        
+                        .text-5xl {
+                            font-size: calc(var(--cv-heading-size) * 2) !important; /* ~48px */
+                        }
+                        
+                        /* HTML Tag Overrides - Universal */
+                        h1 {
+                            font-size: calc(var(--cv-heading-size) * 1.33) !important; /* ~32px */
+                            font-family: var(--cv-font-family) !important;
+                        }
+                        
+                        h2 {
+                            font-size: var(--cv-heading-size) !important; /* 24px default */
+                            font-family: var(--cv-font-family) !important;
+                        }
+                        
+                        h3 {
+                            font-size: calc(var(--cv-subheading-size) * 1.125) !important; /* ~18px */
+                            font-family: var(--cv-font-family) !important;
+                        }
+                        
+                        
+                        /* UNIVERSAL BACKGROUND GRADIENTS - DİNAMİK */
+                        .bg-gradient-to-r.from-blue-50.to-indigo-50,
+                        .bg-gradient-to-r {
+                            background: linear-gradient(to right, #eff6ff, #eef2ff) !important;
+                        }
+                        
+                        /* UNIVERSAL BORDER COLORS - DİNAMİK */
+                        .border-blue-200 { border-color: #dbeafe !important; }
+                        
+                        /* UNIVERSAL PADDING CLASSES - DİNAMİK */
+                        .p-1 { padding: var(--cv-spacing-xs) !important; }
+                        .p-2 { padding: var(--cv-spacing-sm) !important; }
+                        .p-3 { padding: calc(var(--cv-spacing-sm) * 1.5) !important; }
+                        .p-4 { padding: var(--cv-spacing-md) !important; }
+                        .p-6 { padding: var(--cv-spacing-lg) !important; }
+                        .p-8 { padding: var(--cv-spacing-xl) !important; }
+                        
+                        .px-1 { padding-left: var(--cv-spacing-xs) !important; padding-right: var(--cv-spacing-xs) !important; }
+                        .px-2 { padding-left: var(--cv-spacing-sm) !important; padding-right: var(--cv-spacing-sm) !important; }
+                        .px-3 { padding-left: calc(var(--cv-spacing-sm) * 1.5) !important; padding-right: calc(var(--cv-spacing-sm) * 1.5) !important; }
+                        .px-4 { padding-left: var(--cv-spacing-md) !important; padding-right: var(--cv-spacing-md) !important; }
+                        .px-6 { padding-left: var(--cv-spacing-lg) !important; padding-right: var(--cv-spacing-lg) !important; }
+                        .px-8 { padding-left: var(--cv-spacing-xl) !important; padding-right: var(--cv-spacing-xl) !important; }
+                        
+                        .py-1 { padding-top: var(--cv-spacing-xs) !important; padding-bottom: var(--cv-spacing-xs) !important; }
+                        .py-2 { padding-top: var(--cv-spacing-sm) !important; padding-bottom: var(--cv-spacing-sm) !important; }
+                        .py-3 { padding-top: calc(var(--cv-spacing-sm) * 1.5) !important; padding-bottom: calc(var(--cv-spacing-sm) * 1.5) !important; }
+                        .py-4 { padding-top: var(--cv-spacing-md) !important; padding-bottom: var(--cv-spacing-md) !important; }
+                        .py-6 { padding-top: var(--cv-spacing-lg) !important; padding-bottom: var(--cv-spacing-lg) !important; }
+                        .py-8 { padding-top: var(--cv-spacing-xl) !important; padding-bottom: var(--cv-spacing-xl) !important; }
+                        
+                        /* UNIVERSAL MARGIN CLASSES - DİNAMİK */
+                        .m-0 { margin: 0 !important; }
+                        .m-1 { margin: var(--cv-spacing-xs) !important; }
+                        .m-2 { margin: var(--cv-spacing-sm) !important; }
+                        .m-3 { margin: calc(var(--cv-spacing-sm) * 1.5) !important; }
+                        .m-4 { margin: var(--cv-spacing-md) !important; }
+                        .m-6 { margin: var(--cv-spacing-lg) !important; }
+                        .m-8 { margin: var(--cv-spacing-xl) !important; }
+                        
+                        .mx-auto { margin-left: auto !important; margin-right: auto !important; }
+                        
+                        .mb-0 { margin-bottom: 0 !important; }
+                        .mb-1 { margin-bottom: var(--cv-spacing-xs) !important; }
+                        .mb-2 { margin-bottom: var(--cv-spacing-sm) !important; }
+                        .mb-3 { margin-bottom: calc(var(--cv-spacing-sm) * 1.5) !important; }
+                        .mb-4 { margin-bottom: var(--cv-spacing-md) !important; }
+                        .mb-6 { margin-bottom: var(--cv-spacing-lg) !important; }
+                        .mb-8 { margin-bottom: var(--cv-spacing-xl) !important; }
+                        
+                        .mt-0 { margin-top: 0 !important; }
+                        .mt-1 { margin-top: var(--cv-spacing-xs) !important; }
+                        .mt-2 { margin-top: var(--cv-spacing-sm) !important; }
+                        .mt-3 { margin-top: calc(var(--cv-spacing-sm) * 1.5) !important; }
+                        .mt-4 { margin-top: var(--cv-spacing-md) !important; }
+                        .mt-6 { margin-top: var(--cv-spacing-lg) !important; }
+                        .mt-8 { margin-top: var(--cv-spacing-xl) !important; }
+                        
+                        .ml-0 { margin-left: 0 !important; }
+                        .ml-1 { margin-left: var(--cv-spacing-xs) !important; }
+                        .ml-2 { margin-left: var(--cv-spacing-sm) !important; }
+                        .ml-3 { margin-left: calc(var(--cv-spacing-sm) * 1.5) !important; }
+                        .ml-4 { margin-left: var(--cv-spacing-md) !important; }
+                        .ml-6 { margin-left: var(--cv-spacing-lg) !important; }
+                        .ml-8 { margin-left: var(--cv-spacing-xl) !important; }
+                        
+                        .mr-0 { margin-right: 0 !important; }
+                        .mr-1 { margin-right: var(--cv-spacing-xs) !important; }
+                        .mr-2 { margin-right: var(--cv-spacing-sm) !important; }
+                        .mr-3 { margin-right: calc(var(--cv-spacing-sm) * 1.5) !important; }
+                        .mr-4 { margin-right: var(--cv-spacing-md) !important; }
+                        .mr-6 { margin-right: var(--cv-spacing-lg) !important; }
+                        .mr-8 { margin-right: var(--cv-spacing-xl) !important; }
+                        
+                        /* UNIVERSAL BORDER RADIUS - DİNAMİK */
+                        .rounded { border-radius: 0.25rem !important; }
+                        .rounded-md { border-radius: 0.375rem !important; }
+                        .rounded-lg { border-radius: 0.5rem !important; }
+                        .rounded-xl { border-radius: 0.75rem !important; }
+                        .rounded-2xl { border-radius: 1rem !important; }
+                        .rounded-full { border-radius: 9999px !important; }
                         
                         .exclusive-template .shadow-sm {
                             box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
@@ -576,100 +967,106 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             gap: 1.5rem !important;
                         }
                         
-                        /* Profile image */
-                        .exclusive-template .flex-shrink-0 {
-                            flex-shrink: 0 !important;
-                        }
                         
-                        .exclusive-template .relative {
-                            position: relative !important;
-                        }
+                        /* UNIVERSAL FLEX SHRINK - DİNAMİK */
+                        .flex-shrink-0 { flex-shrink: 0 !important; }
+                        .flex-shrink { flex-shrink: 1 !important; }
                         
-                        .exclusive-template .w-28 {
-                            width: 7rem !important;
-                        }
+                        /* UNIVERSAL WIDTH/HEIGHT SPECIFIC VALUES - DİNAMİK */
+                        .w-28 { width: 7rem !important; }
+                        .h-28 { height: 7rem !important; }
                         
-                        .exclusive-template .h-28 {
-                            height: 7rem !important;
-                        }
+                        /* UNIVERSAL OBJECT FIT - DİNAMİK */
+                        .object-cover { object-fit: cover !important; }
+                        .object-contain { object-fit: contain !important; }
+                        .object-fill { object-fit: fill !important; }
                         
-                        .exclusive-template .rounded-full {
-                            border-radius: 9999px !important;
-                        }
+                        /* UNIVERSAL SHADOWS - DİNAMİK */
+                        .shadow-sm { box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important; }
+                        .shadow { box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1) !important; }
+                        .shadow-md { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important; }
+                        .shadow-lg { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1) !important; }
+                        .shadow-xl { box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1) !important; }
                         
-                        .exclusive-template .object-cover {
-                            object-fit: cover !important;
-                        }
+                        /* UNIVERSAL BORDER WIDTHS - DİNAMİK */
+                        .border { border-width: 1px !important; }
+                        .border-0 { border-width: 0px !important; }
+                        .border-2 { border-width: 2px !important; }
+                        .border-4 { border-width: 4px !important; }
+                        .border-8 { border-width: 8px !important; }
                         
-                        .exclusive-template .shadow-lg {
-                            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1) !important;
-                        }
+                        /* UNIVERSAL BORDER COLORS - DİNAMİK */
+                        .border-white { border-color: white !important; }
+                        .border-blue-600 { border-color: #2563eb !important; }
+                        .border-gray-200 { border-color: #e5e7eb !important; }
+                        .border-gray-300 { border-color: #d1d5db !important; }
                         
-                        .exclusive-template .border-4 {
-                            border-width: 4px !important;
-                        }
+                        /* UNIVERSAL INSET POSITIONS - DİNAMİK */
+                        .inset-0 { top: 0 !important; right: 0 !important; bottom: 0 !important; left: 0 !important; }
+                        .inset-1 { top: var(--cv-spacing-xs) !important; right: var(--cv-spacing-xs) !important; bottom: var(--cv-spacing-xs) !important; left: var(--cv-spacing-xs) !important; }
                         
-                        .exclusive-template .border-white {
-                            border-color: white !important;
-                        }
+                        /* UNIVERSAL FLEX PROPERTIES - DİNAMİK */
+                        .flex-1 { flex: 1 1 0% !important; }
+                        .flex-auto { flex: 1 1 auto !important; }
+                        .flex-initial { flex: 0 1 auto !important; }
+                        .flex-none { flex: none !important; }
                         
-                        /* Decorative border */
-                        .exclusive-template .absolute {
-                            position: absolute !important;
-                        }
+                        /* UNIVERSAL LETTER SPACING - DİNAMİK */
+                        .tracking-tighter { letter-spacing: -0.05em !important; }
+                        .tracking-tight { letter-spacing: -0.025em !important; }
+                        .tracking-normal { letter-spacing: 0em !important; }
+                        .tracking-wide { letter-spacing: 0.025em !important; }
+                        .tracking-wider { letter-spacing: 0.05em !important; }
+                        .tracking-widest { letter-spacing: 0.1em !important; }
                         
-                        .exclusive-template .inset-0 {
-                            top: 0px !important;
-                            right: 0px !important;
-                            bottom: 0px !important;
-                            left: 0px !important;
-                        }
+                        /* UNIVERSAL TEXT COLORS - DİNAMİK */
+                        .text-gray-900 { color: #111827 !important; }
+                        .text-gray-600 { color: #4b5563 !important; }
+                        .text-gray-500 { color: #6b7280 !important; }
+                        .text-gray-400 { color: #9ca3af !important; }
+                        .text-gray-300 { color: #d1d5db !important; }
+                        .text-blue-600 { color: #2563eb !important; }
+                        .text-blue-500 { color: #3b82f6 !important; }
+                        .text-blue-700 { color: #1d4ed8 !important; }
                         
-                        .exclusive-template .border-2 {
-                            border-width: 2px !important;
-                        }
+                        /* UNIVERSAL BORDER DIRECTIONS - DİNAMİK */
+                        .border-t { border-top-width: 1px !important; border-top-style: solid !important; }
+                        .border-b { border-bottom-width: 1px !important; border-bottom-style: solid !important; }
+                        .border-l { border-left-width: 1px !important; border-left-style: solid !important; }
+                        .border-r { border-right-width: 1px !important; border-right-style: solid !important; }
                         
-                        .exclusive-template .border-blue-600 {
-                            border-color: #2563eb !important;
-                        }
+                        /* UNIVERSAL PADDING DIRECTIONS - DİNAMİK */
+                        .pt-0 { padding-top: 0 !important; }
+                        .pt-1 { padding-top: var(--cv-spacing-xs) !important; }
+                        .pt-2 { padding-top: var(--cv-spacing-sm) !important; }
+                        .pt-3 { padding-top: calc(var(--cv-spacing-sm) * 1.5) !important; }
+                        .pt-4 { padding-top: var(--cv-spacing-md) !important; }
+                        .pt-6 { padding-top: var(--cv-spacing-lg) !important; }
+                        .pt-8 { padding-top: var(--cv-spacing-xl) !important; }
                         
-                        .exclusive-template .opacity-20 {
-                            opacity: 0.2 !important;
-                        }
+                        .pb-0 { padding-bottom: 0 !important; }
+                        .pb-1 { padding-bottom: var(--cv-spacing-xs) !important; }
+                        .pb-2 { padding-bottom: var(--cv-spacing-sm) !important; }
+                        .pb-3 { padding-bottom: calc(var(--cv-spacing-sm) * 1.5) !important; }
+                        .pb-4 { padding-bottom: var(--cv-spacing-md) !important; }
+                        .pb-6 { padding-bottom: var(--cv-spacing-lg) !important; }
+                        .pb-8 { padding-bottom: var(--cv-spacing-xl) !important; }
                         
-                        /* Name and title section */
-                        .exclusive-template .flex-1 {
-                            flex: 1 1 0% !important;
-                        }
+                        .pl-0 { padding-left: 0 !important; }
+                        .pl-1 { padding-left: var(--cv-spacing-xs) !important; }
+                        .pl-2 { padding-left: var(--cv-spacing-sm) !important; }
+                        .pl-3 { padding-left: calc(var(--cv-spacing-sm) * 1.5) !important; }
+                        .pl-4 { padding-left: var(--cv-spacing-md) !important; }
+                        .pl-6 { padding-left: var(--cv-spacing-lg) !important; }
+                        .pl-8 { padding-left: var(--cv-spacing-xl) !important; }
                         
-                        .exclusive-template .text-left {
-                            text-align: left !important;
-                        }
-                        
-                        .exclusive-template .mb-3 {
-                            margin-bottom: 0.75rem !important;
-                        }
-                        
-                        .exclusive-template .tracking-wide {
-                            letter-spacing: 0.025em !important;
-                        }
-                        
-                        .exclusive-template .text-gray-900 {
-                            color: #111827 !important;
-                        }
-                        
-                        .exclusive-template .text-gray-600 {
-                            color: #4b5563 !important;
-                        }
-                        
-                        /* Contact info section */
-                        .exclusive-template .border-t {
-                            border-top-width: 1px !important;
-                            border-top-style: solid !important;
-                        }
-                        
-                        .exclusive-template .pt-4 {
-                            padding-top: 1rem !important;
+                        .pr-0 { padding-right: 0 !important; }
+                        .pr-1 { padding-right: var(--cv-spacing-xs) !important; }
+                        .pr-2 { padding-right: var(--cv-spacing-sm) !important; }
+                        .pr-3 { padding-right: calc(var(--cv-spacing-sm) * 1.5) !important; }
+                        .pr-4 { padding-right: var(--cv-spacing-md) !important; }
+                        .pr-6 { padding-right: var(--cv-spacing-lg) !important; }
+                        .pr-8 { padding-right: var(--cv-spacing-xl) !important; }
                         }
                         
                         .exclusive-template .mt-4 {
@@ -726,7 +1123,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         /* A4 page setup - bütün səhifələr üçün eyni margin */
                         @page {
                             size: A4;
-                            margin: 20mm; /* 2.0cm bütün tərəflərdə */
+                            margin: 0 !important; /* TAMAMİLƏ SIFIR */
                         }
                         
                         /* CV Container - otomatik səhifə keçidi */
@@ -737,86 +1134,50 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             break-inside: auto !important;
                         }
                         
-                        /* SMART SECTION BREAKS - Məzmun əsaslı qırılmalar */
+                        /* UNIVERSAL SECTION BREAKS - Məzmun əsaslı qırılmalar */
                         
                         /* Kiçik section-lar - birgə qalsın */
-                        .aurora-template .mb-4, .vertex-template .mb-4, .horizon-template .mb-4,
-                        .lumen-template .mb-4, .modern-template .mb-4, .exclusive-template .mb-4,
-                        .ats-template .mb-4, .basic-template .mb-4, .traditional-template .mb-4,
-                        .classic-template .mb-4 {
+                        .mb-4 {
                             page-break-inside: avoid !important;
                             break-inside: avoid !important;
                         }
                         
                         /* Böyük section-lar - lazımsa keçid icazə ver */
-                        .aurora-template .mb-6, .vertex-template .mb-6, .horizon-template .mb-6,
-                        .lumen-template .mb-6, .modern-template .mb-6, .exclusive-template .mb-6,
-                        .ats-template .mb-6, .basic-template .mb-6, .traditional-template .mb-6,
-                        .classic-template .mb-6 {
+                        .mb-6 {
                             page-break-inside: auto !important;
                             break-inside: auto !important;
                             orphans: 2 !important; /* Minimum 2 sətir qırılmadan əvvəl */
                             widows: 2 !important; /* Minimum 2 sətir qırılmadan sonra */
                         }
                         
-                        /* HEADER PROTECTION - Başlıqlar tək qalmasın */
-                        .aurora-template h1, .vertex-template h1, .horizon-template h1,
-                        .lumen-template h1, .modern-template h1, .exclusive-template h1,
-                        .ats-template h1, .basic-template h1, .traditional-template h1,
-                        .classic-template h1,
-                        .aurora-template h2, .vertex-template h2, .horizon-template h2,
-                        .lumen-template h2, .modern-template h2, .exclusive-template h2,
-                        .ats-template h2, .basic-template h2, .traditional-template h2,
-                        .classic-template h2,
-                        .aurora-template h3, .vertex-template h3, .horizon-template h3,
-                        .lumen-template h3, .modern-template h3, .exclusive-template h3,
-                        .ats-template h3, .basic-template h3, .traditional-template h3,
-                        .classic-template h3,
-                        .aurora-template .text-2xl, .vertex-template .text-2xl, .horizon-template .text-2xl,
-                        .lumen-template .text-2xl, .modern-template .text-2xl, .exclusive-template .text-2xl,
-                        .ats-template .text-2xl, .basic-template .text-2xl, .traditional-template .text-2xl,
-                        .classic-template .text-2xl {
+                        /* UNIVERSAL HEADER PROTECTION - Başlıqlar tək qalmasın */
+                        h1, h2, h3, .text-2xl {
                             page-break-after: avoid !important;
                             break-after: avoid !important;
                             orphans: 3 !important;
                             widows: 3 !important;
                         }
                         
-                        /* ITEM LEVEL PROTECTION - Individual items */
-                        .aurora-template .space-y-2 > div, .vertex-template .space-y-2 > div, .horizon-template .space-y-2 > div,
-                        .lumen-template .space-y-2 > div, .modern-template .space-y-2 > div, .exclusive-template .space-y-2 > div,
-                        .ats-template .space-y-2 > div, .basic-template .space-y-2 > div, .traditional-template .space-y-2 > div,
-                        .classic-template .space-y-2 > div,
-                        .aurora-template .space-y-3 > div, .vertex-template .space-y-3 > div, .horizon-template .space-y-3 > div,
-                        .lumen-template .space-y-3 > div, .modern-template .space-y-3 > div, .exclusive-template .space-y-3 > div,
-                        .ats-template .space-y-3 > div, .basic-template .space-y-3 > div, .traditional-template .space-y-3 > div,
-                        .classic-template .space-y-3 > div {
+                        /* UNIVERSAL ITEM LEVEL PROTECTION - Individual items */
+                        .space-y-2 > div, .space-y-3 > div {
                             page-break-inside: avoid !important;
                             break-inside: avoid !important;
                         }
                         
                         /* Larger sections that can break - işiniz çoxsa səhifə dəyişsin */
-                        .aurora-template .space-y-4 > div, .vertex-template .space-y-4 > div, .horizon-template .space-y-4 > div,
-                        .lumen-template .space-y-4 > div, .modern-template .space-y-4 > div, .exclusive-template .space-y-4 > div,
-                        .ats-template .space-y-4 > div, .basic-template .space-y-4 > div, .traditional-template .space-y-4 > div,
-                        .classic-template .space-y-4 > div {
+                        .space-y-4 > div {
                             page-break-inside: auto !important;
                             break-inside: auto !important;
                         }
                         
-                        /* PERSONAL INFO PROTECTION - Şəxsi məlumat hissəsi */
-                        .aurora-template .mb-6:first-child, .vertex-template .mb-6:first-child, .horizon-template .mb-6:first-child,
-                        .lumen-template .mb-6:first-child, .modern-template .mb-6:first-child, .exclusive-template .mb-6:first-child,
-                        .ats-template .mb-6:first-child, .basic-template .mb-6:first-child, .traditional-template .mb-6:first-child,
-                        .classic-template .mb-6:first-child,
-                        .personal-info-section, .header-section {
+                        /* UNIVERSAL PERSONAL INFO PROTECTION - Şəxsi məlumat hissəsi */
+                        .mb-6:first-child, .personal-info-section, .header-section {
                             page-break-inside: avoid !important;
                             break-inside: avoid !important;
                             page-break-after: avoid !important;
                             break-after: avoid !important;
-                        }
                         
-                        /* MANUAL CONTROL CLASSES */
+                        /* UNIVERSAL MANUAL CONTROL CLASSES */
                         .force-page-break {
                             page-break-before: always !important;
                             break-before: page !important;
@@ -840,6 +1201,9 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             `;
         } else {
             // Fallback - sadə HTML
+            console.log('=== Fallback generateCVHTML istifadə edilir ===');
+            console.log('Template ID:', templateId);
+            console.log('Font Settings ötürülür:', fontSettings);
             html = generateCVHTML(cvData, templateId, fontSettings);
         }
         
@@ -882,6 +1246,110 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             waitUntil: 'networkidle0',
             timeout: 30000
         });
+        
+        // Basic template üçün runtime CSS injection
+        if (templateId === 'basic') {
+            console.log('=== BASIC TEMPLATE - RUNTIME CSS INJECTION ===');
+            
+            console.log('🎨 Font Settings from font manager:', JSON.stringify(fontSettings, null, 2));
+            
+            // Use only fontSettings from request body (font manager)
+            const finalFontSettings = {
+                fontFamily: fontSettings?.fontFamily || 'Arial, sans-serif',
+                headingSize: fontSettings?.headingSize || 18,
+                subheadingSize: fontSettings?.subheadingSize || 16,
+                bodySize: fontSettings?.bodySize || 14,
+                smallSize: fontSettings?.smallSize || 12,
+                headingWeight: fontSettings?.headingWeight || 700,
+                subheadingWeight: fontSettings?.subheadingWeight || 600,
+                bodyWeight: fontSettings?.bodyWeight || 400,
+                smallWeight: fontSettings?.smallWeight || 400,
+                sectionSpacing: fontSettings?.sectionSpacing || 8
+            };
+            
+            console.log('✅ Final font settings (font manager only):', JSON.stringify(finalFontSettings, null, 2));
+            
+            // İndi finalFontSettings istifadə edək
+            const headingSize = finalFontSettings.headingSize;
+            const subheadingSize = finalFontSettings.subheadingSize;  
+            const bodySize = finalFontSettings.bodySize;
+            const smallSize = finalFontSettings.smallSize;
+            const fontFamily = finalFontSettings.fontFamily;
+            const headingWeight = finalFontSettings.headingWeight;
+            const subheadingWeight = finalFontSettings.subheadingWeight;
+            const bodyWeight = finalFontSettings.bodyWeight;
+            
+            console.log('✅ COMPUTED FONT SIZES FROM MERGED SETTINGS:', { headingSize, subheadingSize, bodySize, smallSize });
+            
+            // Direct CSS injection with important
+            await page.addStyleTag({
+                content: `
+                    /* BASIC TEMPLATE FONT OVERRIDE - SIMPLE AND EFFECTIVE */
+                    
+                    /* All text size classes - maximum specificity */
+                    .basic-template .text-xs { font-size: ${Math.round(smallSize * 0.8)}px !important; font-family: ${fontFamily} !important; }
+                    .basic-template .text-sm { font-size: ${smallSize}px !important; font-family: ${fontFamily} !important; }
+                    .basic-template .text-base { font-size: ${bodySize}px !important; font-family: ${fontFamily} !important; }
+                    .basic-template .text-lg { font-size: ${Math.round(subheadingSize * 1.1)}px !important; font-family: ${fontFamily} !important; }
+                    .basic-template .text-xl { font-size: ${subheadingSize}px !important; font-family: ${fontFamily} !important; }
+                    .basic-template .text-2xl { font-size: ${headingSize}px !important; font-family: ${fontFamily} !important; }
+                    
+                    /* HTML tags override */
+                    .basic-template h1 { font-size: ${Math.round(headingSize * 1.3)}px !important; font-weight: ${headingWeight} !important; font-family: ${fontFamily} !important; }
+                    .basic-template h2 { font-size: ${headingSize}px !important; font-weight: ${headingWeight} !important; font-family: ${fontFamily} !important; }
+                    .basic-template h3 { font-size: ${subheadingSize}px !important; font-weight: ${subheadingWeight} !important; font-family: ${fontFamily} !important; }
+                    .basic-template h4, .basic-template h5, .basic-template h6 { font-size: ${bodySize}px !important; font-weight: ${subheadingWeight} !important; font-family: ${fontFamily} !important; }
+                    .basic-template p { font-size: ${bodySize}px !important; font-weight: ${bodyWeight} !important; font-family: ${fontFamily} !important; }
+                    .basic-template span { font-size: ${bodySize}px !important; font-weight: ${bodyWeight} !important; font-family: ${fontFamily} !important; }
+                    .basic-template div { font-size: ${bodySize}px !important; font-family: ${fontFamily} !important; }
+                    .basic-template li { font-size: ${bodySize}px !important; font-family: ${fontFamily} !important; }
+                    
+                    /* Font weight classes */
+                    .basic-template .font-medium { font-weight: ${bodyWeight + 100} !important; }
+                    .basic-template .font-semibold { font-weight: ${subheadingWeight} !important; }
+                    .basic-template .font-bold { font-weight: ${headingWeight} !important; }
+                    
+                    /* Important: Force all elements */
+                    .basic-template * { font-family: ${fontFamily} !important; }
+                    
+                    /* PDF MULTI-PAGE SYSTEM */
+                    @page {
+                        size: A4;
+                        margin: 5mm 10mm;
+                    }
+                    
+                    /* Page break settings */
+                    .cv-section {
+                        break-inside: avoid;
+                        page-break-inside: avoid;
+                    }
+                    
+                    .cv-section-title {
+                        break-after: avoid;
+                        page-break-after: avoid;
+                    }
+                    
+                    .cv-item {
+                        break-inside: avoid;
+                        page-break-inside: avoid;
+                    }
+                    
+                    /* Force page content to flow properly */
+                    body {
+                        margin: 0;
+                        padding: 5mm;
+                        line-height: 1.4;
+                    }
+                    
+                    /* Adjust spacing for better page breaks */
+                    .section-spacing {
+                        margin-bottom: 8px;
+                    }
+                `
+            });
+            
+            console.log('✅ BASIC TEMPLATE CSS INJECTION COMPLETED - SIMPLE VERSION');
+        }
         
         // Azərbaycan dili və encoding dəstəyi üçün əlavə ayarlar
         await page.setExtraHTTPHeaders({
@@ -958,27 +1426,285 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             document.head?.appendChild(style);
         });
         
+        // Multi-page PDF support üçün CSS əlavə et
+        await page.addStyleTag({
+            content: `
+                @page {
+                    size: A4;
+                    margin: 8mm 8mm 23mm 8mm;  /* Top, Right, Bottom (with 15mm extra), Left */
+                    padding: 0;
+                }
+                
+                /* PDF Multi-page fundamental rules for A4 */
+                html {
+                    height: auto !important;
+                    overflow: visible !important;
+                    font-size: 12pt !important;
+                }
+                
+                body {
+                    height: auto !important;
+                    min-height: auto !important;
+                    overflow: visible !important;
+                    margin: 0 !important;
+                    padding: 8mm !important;
+                    -webkit-print-color-adjust: exact !important;
+                    color-adjust: exact !important;
+                    line-height: 1.4 !important;
+                }
+                
+                /* Force multi-page behavior with A4 constraints */
+                .basic-template {
+                    width: 100% !important;
+                    max-width: 194mm !important; /* A4 width minus margins */
+                    height: auto !important;
+                    min-height: auto !important;
+                    max-height: none !important;
+                    overflow: visible !important;
+                    page-break-after: auto !important;
+                    break-after: auto !important;
+                }
+                
+                /* A4 OPTIMIZED SECTION BREAK CONTROL */
+                .cv-section,
+                [class*="experience"],
+                [class*="education"],
+                [class*="project"],
+                .space-y-6 > div,
+                .space-y-4 > div {
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                    margin-bottom: 12px !important;
+                }
+                
+                /* Allow very long sections to break intelligently */
+                .cv-section-long,
+                .experience-item,
+                .education-item {
+                    page-break-inside: auto;
+                    break-inside: auto;
+                }
+                
+                /* Prevent headers from being orphaned */
+                h1, h2, h3, h4, h5, h6 {
+                    page-break-after: avoid;
+                    break-after: avoid;
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                    orphans: 3;
+                    widows: 3;
+                }
+                
+                /* Optimize spacing for better page breaks */
+                .mb-6, .mb-8 {
+                    page-break-after: auto;
+                    break-after: auto;
+                }
+                
+                /* Keep related content together */
+                .flex, .grid {
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                }
+                
+                /* BASIC TEMPLATE ULTIMATE HARDCODE KILLER */
+                .basic-template .text-xs { font-size: var(--cv-small-size, 12px) !important; }
+                .basic-template .text-sm { font-size: var(--cv-body-size, 14px) !important; }
+                .basic-template .text-base { font-size: var(--cv-subheading-size, 16px) !important; }
+                .basic-template .text-lg { font-size: calc(var(--cv-subheading-size, 16px) * 1.125) !important; }
+                .basic-template .text-xl { font-size: calc(var(--cv-heading-size, 18px) * 0.9) !important; }
+                .basic-template .text-2xl { font-size: var(--cv-heading-size, 18px) !important; }
+                
+                .basic-template .font-medium { font-weight: var(--cv-body-weight, 500) !important; }
+                .basic-template .font-semibold { font-weight: var(--cv-subheading-weight, 600) !important; }
+                .basic-template .font-bold { font-weight: var(--cv-heading-weight, 700) !important; }
+                
+                .basic-template .mb-1 { margin-bottom: calc(var(--cv-section-spacing, 16px) * 0.25) !important; }
+                .basic-template .mb-2 { margin-bottom: calc(var(--cv-section-spacing, 16px) * 0.5) !important; }
+                .basic-template .mb-3 { margin-bottom: var(--cv-section-spacing, 16px) !important; }
+                .basic-template .mt-1 { margin-top: calc(var(--cv-section-spacing, 16px) * 0.25) !important; }
+                .basic-template .mt-2 { margin-top: calc(var(--cv-section-spacing, 16px) * 0.5) !important; }
+                .basic-template .pl-2 { padding-left: calc(var(--cv-section-spacing, 16px) * 0.5) !important; }
+                .basic-template .pl-3 { padding-left: var(--cv-section-spacing, 16px) !important; }
+                .basic-template .pb-1 { padding-bottom: calc(var(--cv-section-spacing, 16px) * 0.25) !important; }
+                .basic-template .pb-2 { padding-bottom: calc(var(--cv-section-spacing, 16px) * 0.5) !important; }
+                
+                /* Bütün rənglər dinamik olmalıdır */
+                .basic-template .text-blue-600 { color: #2563eb !important; }
+                .basic-template .text-gray-700 { color: #374151 !important; }
+                .basic-template .text-gray-600 { color: #6b7280 !important; }
+                .basic-template .text-gray-900 { color: #111827 !important; }
+                .basic-template .border-blue-200 { border-color: #bfdbfe !important; }
+                .basic-template .border-gray-300 { border-color: #d1d5db !important; }
+            `
+        });
+        
+        // CRITICAL: Wait for content to fully load and calculate height
+        await page.waitForFunction(() => {
+            return document.readyState === 'complete';
+        }, { timeout: 15000 });
+        
+        // Check if template exists, if not continue anyway
+        const templateExists = await page.evaluate(() => {
+            const basicTemplate = document.querySelector('.basic-template');
+            const anyTemplate = document.querySelector('[class*="template"]');
+            const hasContent = document.body.children.length > 0;
+            
+            console.log('=== TEMPLATE DETECTION DEBUG ===');
+            console.log('Basic template found:', !!basicTemplate);
+            console.log('Any template found:', !!anyTemplate);
+            console.log('Body has children:', hasContent, 'count:', document.body.children.length);
+            
+            return basicTemplate !== null || anyTemplate !== null || hasContent;
+        });
+        
+        console.log('Template exists:', templateExists);
+        
+        // Force recalculation of layout
+        if (templateExists) {
+            await page.evaluate(() => {
+                console.log('=== A4 PAGE BREAK ALGORITHM STARTING ===');
+                
+                // Force browser to recalculate layout 
+                document.body.offsetHeight;
+                
+                // Add explicit page breaks if content is too long
+                const template = document.querySelector('.basic-template') as HTMLElement ||
+                                document.querySelector('[class*="template"]') as HTMLElement ||
+                                document.body as HTMLElement;
+                
+                if (template) {
+                    // A4 calculations with 8mm margins and 15mm bottom reserve
+                    // A4 = 210mm x 297mm
+                    // With 8mm margins: content area = 194mm x 281mm  
+                    // With 15mm bottom reserve: usable height = 266mm
+                    // At 96 DPI: 266mm ≈ 1008px, but conservatively use 950px
+                    
+                    const templateHeight = template.scrollHeight;
+                    const a4UsableHeight = 950; // Conservative A4 height minus bottom reserve
+                    const pageBreakThreshold = a4UsableHeight; // When to break to next page
+                    
+                    console.log('=== A4 PAGE CALCULATIONS ===');
+                    console.log('Template total height:', templateHeight + 'px');
+                    console.log('A4 usable height (with 15mm bottom reserve):', a4UsableHeight + 'px');
+                    console.log('Needs multi-page:', templateHeight > a4UsableHeight);
+                    
+                    if (templateHeight > a4UsableHeight) {
+                        console.log('Content exceeds A4 usable area - applying page breaks');
+                        
+                        // Ensure template can flow across pages
+                        template.style.height = 'auto';
+                        template.style.minHeight = 'auto';
+                        template.style.maxHeight = 'none';
+                        template.style.overflow = 'visible';
+                        template.style.pageBreakInside = 'auto';
+                        template.style.breakInside = 'auto';
+                        
+                        // Find all potential break points - prioritize logical content boundaries
+                        const allElements = template.querySelectorAll(`
+                            div, section, p, h1, h2, h3, h4, h5, h6,
+                            .space-y-6 > *,
+                            .space-y-4 > *,
+                            .mb-6, .mb-8, .mt-6, .mt-8,
+                            [class*="experience"],
+                            [class*="education"], 
+                            [class*="project"],
+                            [class*="skill"]
+                        `);
+                        
+                        console.log('Found', allElements.length, 'potential break elements');
+                        
+                        let currentPageHeight = 0;
+                        let pageNumber = 1;
+                        let pageBreaksAdded = 0;
+                        
+                        allElements.forEach((element, index) => {
+                            const htmlElement = element as HTMLElement;
+                            const elementTop = htmlElement.offsetTop;
+                            const elementHeight = htmlElement.offsetHeight;
+                            
+                            // Enhanced debug info
+                            if (index < 10 || elementTop > (pageNumber * pageBreakThreshold - 100)) {
+                                console.log(`Element ${index}: ${htmlElement.tagName}.${htmlElement.className} at ${elementTop}px, height: ${elementHeight}px`);
+                            }
+                            
+                            // Check if this element would exceed current page
+                            if (elementTop > 0 && elementTop > (pageNumber * pageBreakThreshold)) {
+                                // Add page break before this element
+                                htmlElement.style.pageBreakBefore = 'always';
+                                htmlElement.style.breakBefore = 'page';
+                                pageBreaksAdded++;
+                                pageNumber++;
+                                
+                                console.log(`🔥 PAGE BREAK ${pageBreaksAdded}: Added before element at ${elementTop}px (moving to Page ${pageNumber})`);
+                                console.log(`   Element: ${htmlElement.tagName}.${htmlElement.className}`);
+                                console.log(`   Break threshold was: ${(pageNumber-1) * pageBreakThreshold}px`);
+                                console.log(`   Next break will be at: ${pageNumber * pageBreakThreshold}px`);
+                            }
+                        });
+                        
+                        console.log('Total page breaks added:', pageBreaksAdded);
+                        console.log('Estimated pages:', pageNumber);
+                        
+                        // Additional safety: force breaks at fixed intervals if still too long
+                        if (templateHeight > pageBreakThreshold * 3) {
+                            console.log('Applying safety breaks every', pageBreakThreshold, 'px');
+                            
+                            const allDivs = template.querySelectorAll('div, section');
+                            allDivs.forEach((div) => {
+                                const htmlDiv = div as HTMLElement;
+                                const divTop = htmlDiv.offsetTop;
+                                
+                                // Add breaks near multiples of pageBreakThreshold
+                                if (divTop > 0) {
+                                    const pagePosition = divTop % pageBreakThreshold;
+                                    const nextPageStart = Math.floor(divTop / pageBreakThreshold + 1) * pageBreakThreshold;
+                                    
+                                    // If we're close to the end of a page, break to next page
+                                    if (pagePosition > (pageBreakThreshold - 100)) {
+                                        htmlDiv.style.pageBreakBefore = 'always';
+                                        htmlDiv.style.breakBefore = 'page';
+                                    }
+                                }
+                            });
+                        }
+                        
+                        console.log('=== A4 PAGE BREAK ALGORITHM COMPLETED ===');
+                    } else {
+                        console.log('Content fits in single A4 page, no breaks needed');
+                    }
+                } else {
+                    console.log('No template element found for page break processing');
+                }
+            });
+        } else {
+            console.log('Template does not exist, skipping page break logic');
+        }
+
         const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true,
-            preferCSSPageSize: true,  // CSS @page margin-larını istifadə et
+            preferCSSPageSize: true,  // CSS @page ayarlarını istifadə et - ÇOX VACIB!
             displayHeaderFooter: false,
             // Unicode və font support üçün əlavə ayarlar
             tagged: true,  // PDF/A accessibility və unicode dəstəyi
             outline: false,
             omitBackground: false,  // Background-ları qoruyub saxla
-            // Margin-ları CSS-də təyin etdik, burada sıfır qoy
+            // A4 optimized margins with 15mm bottom reserve
             margin: {
-                top: '0mm',
-                right: '0mm',
-                bottom: '0mm',
-                left: '0mm'
+                top: '8mm',
+                right: '8mm', 
+                bottom: '23mm',  // 8mm + 15mm reserve = 23mm total
+                left: '8mm'
             },
             scale: 1,
-            // Page break ayarları
-            pageRanges: '',
+            // Multi-page support - CRITICAL FOR A4 PAGINATION
+            pageRanges: '',  // Boş string = bütün səhifələr
+            // Optimize for A4 page flow
             width: '210mm',   // A4 genişlik
             height: '297mm'   // A4 hündürlük
+            // AUTO sizing - let Puppeteer determine dimensions
+            // Remove fixed width/height to allow auto-pagination
         });
 
         console.log('PDF yaradıldı, browser bağlanır...');
@@ -1019,16 +1745,33 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
 function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): string {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [] } = cvData;
 
-    // Default font settings
+    console.log('=== generateCVHTML çağırıldı ===');
+    console.log('Template ID:', templateId);
+    console.log('Font Settings (gələn):', fontSettings);
+
+    // Default font settings - FULL DYNAMIC
     const defaultFontSettings = {
         fontFamily: 'Arial, sans-serif',
         headingSize: 18,
         subheadingSize: 16,
         bodySize: 14,
-        smallSize: 12
+        smallSize: 12,
+        // Dynamic Colors
+        primaryColor: '#1f2937',
+        secondaryColor: '#6b7280', 
+        textColor: '#374151',
+        lightColor: '#f9fafb',
+        borderColor: '#e5e7eb',
+        // Dynamic Spacing
+        spacingXs: '0.25rem',
+        spacingSm: '0.5rem', 
+        spacingMd: '1rem',
+        spacingLg: '1.5rem',
+        spacingXl: '2rem'
     };
     
     const fonts = { ...defaultFontSettings, ...fontSettings };
+    console.log('Final font settings (merged):', fonts);
 
     // Utility functions for HTML generation
     const stripHtmlTags = (html: string): string => {
@@ -1064,15 +1807,40 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
     // Professional PDF üçün CSS style-lar - minimal margins
     const pdfStyles = `
         <style>
+            :root {
+                --cv-font-family: ${fonts.fontFamily};
+                --cv-heading-size: ${fonts.headingSize}px;
+                --cv-subheading-size: ${fonts.subheadingSize}px;
+                --cv-body-size: ${fonts.bodySize}px;
+                --cv-small-size: ${fonts.smallSize}px;
+                --cv-primary-color: ${fonts.primaryColor};
+                --cv-secondary-color: ${fonts.secondaryColor};
+                --cv-text-color: ${fonts.textColor};
+                --cv-light-color: ${fonts.lightColor};
+                --cv-border-color: ${fonts.borderColor};
+                --cv-spacing-xs: ${fonts.spacingXs};
+                --cv-spacing-sm: ${fonts.spacingSm};
+                --cv-spacing-md: ${fonts.spacingMd};
+                --cv-spacing-lg: ${fonts.spacingLg};
+                --cv-spacing-xl: ${fonts.spacingXl};
+            }
+            
             @page {
                 size: A4;
-                margin: 15mm 20mm 15mm 20mm; /* Optimized CV margins: üst/alt 15mm (1.5cm), sol 20mm (2cm), sağ 20mm (2cm) */
+                margin: 0 !important; /* SIFIR MARGIN - TAMAMI PDF ÜÇÜN */
+                padding: 0 !important;
+                border: none !important;
             }
             
             body {
-                margin: 0;
-                padding: 0;
-                font-family: 'Roboto', 'Noto Sans', 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                box-sizing: border-box !important;
+                font-family: var(--cv-font-family) !important;
+                font-size: var(--cv-body-size) !important;
+                color: var(--cv-text-color) !important;
                 -webkit-font-feature-settings: "liga", "kern", "clig" !important;
                 font-feature-settings: "liga", "kern", "clig" !important;
                 text-rendering: optimizeLegibility;
@@ -1083,16 +1851,79 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
             }
             
             h1, h2, h3, h4, h5, h6, p, span, div, li, td, th {
-                font-family: 'Roboto', 'Noto Sans', 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif !important;
+                font-family: var(--cv-font-family) !important;
+                color: var(--cv-text-color) !important;
                 unicode-bidi: normal !important;
                 text-rendering: optimizeLegibility !important;
                 direction: ltr !important;
                 font-variant-ligatures: common-ligatures !important;
+                margin: 0 !important;
+            }
+            
+            /* DYNAMIC FONT SIZES - UNIVERSAL */
+            h1 { font-size: calc(var(--cv-heading-size) * 1.33) !important; color: var(--cv-primary-color) !important; }
+            h2 { font-size: var(--cv-heading-size) !important; color: var(--cv-primary-color) !important; }
+            h3 { font-size: calc(var(--cv-subheading-size) * 1.125) !important; color: var(--cv-primary-color) !important; }
+            h4, h5, h6 { font-size: var(--cv-subheading-size) !important; color: var(--cv-primary-color) !important; }
+            p, span, div, li, td, th { font-size: var(--cv-body-size) !important; }
+            
+            /* UNIVERSAL TEXT SIZE CLASSES */
+            .text-xs { font-size: calc(var(--cv-small-size) * 0.75) !important; }
+            .text-sm { font-size: var(--cv-small-size) !important; }
+            .text-base { font-size: var(--cv-body-size) !important; }
+            .text-lg { font-size: calc(var(--cv-subheading-size) * 1.125) !important; }
+            .text-xl { font-size: calc(var(--cv-heading-size) * 0.83) !important; }
+            .text-2xl { font-size: var(--cv-heading-size) !important; }
+            .text-3xl { font-size: calc(var(--cv-heading-size) * 1.25) !important; }
+            
+            /* UNIVERSAL MARGIN CLASSES - DİNAMİK */
+            .m-0 { margin: 0 !important; }
+            .mb-1 { margin-bottom: var(--cv-spacing-xs) !important; }
+            .mb-2 { margin-bottom: var(--cv-spacing-sm) !important; }
+            .mb-4 { margin-bottom: var(--cv-spacing-md) !important; }
+            .mb-6 { margin-bottom: var(--cv-spacing-lg) !important; }
+            .mb-8 { margin-bottom: var(--cv-spacing-xl) !important; }
+            
+            /* UNIVERSAL PADDING CLASSES - DİNAMİK */
+            .p-0 { padding: 0 !important; }
+            .pb-1 { padding-bottom: var(--cv-spacing-xs) !important; }
+            .pb-4 { padding-bottom: var(--cv-spacing-md) !important; }
+            .px-4 { padding-left: var(--cv-spacing-md) !important; padding-right: var(--cv-spacing-md) !important; }
+            .py-8 { padding-top: var(--cv-spacing-xl) !important; padding-bottom: var(--cv-spacing-xl) !important; }
+            
+            /* UNIVERSAL FONT WEIGHTS - DİNAMİK */
+            .font-bold { font-weight: 700 !important; }
+            .font-medium { font-weight: 500 !important; }
+            .font-normal { font-weight: 400 !important; }
+            .italic { font-style: italic !important; }
+            
+            /* UNIVERSAL LAYOUT CLASSES - DİNAMİK */
+            .flex { display: flex !important; }
+            .justify-between { justify-content: space-between !important; }
+            .items-start { align-items: flex-start !important; }
+            .leading-relaxed { line-height: 1.625 !important; }
+            .leading-snug { line-height: 1.375 !important; }
+            
+            /* UNIVERSAL BORDER CLASSES - DİNAMİK */
+            .border-b { border-bottom: 1px solid var(--cv-border-color) !important; }
+            .border-b-2 { border-bottom: 2px solid var(--cv-border-color) !important; }
+            
+            /* UNIVERSAL TEXT ALIGNMENT - DİNAMİK */
+            .text-center { text-align: center !important; }
+            .text-left { text-align: left !important; }
+            .text-right { text-align: right !important; }
+            
+            /* CONTAINER UNIVERSAL OVERRIDES */
+            .cv-container, .container, .max-w-4xl, .w-full {
+                width: 100% !important;
+                max-width: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
             
             .cv-section {
                 page-break-inside: avoid;
-                margin-bottom: 20px;
+                margin-bottom: var(--cv-spacing-lg) !important;
             }
             
             .cv-section h2, .cv-section h3 {
@@ -1144,10 +1975,11 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
             }
             
             .cv-preview {
-                width: 100%;
-                max-width: 186mm; /* A4 genişlik - minimal margin-lar */
-                margin: 0 auto;
-                padding: 0;
+                width: 100% !important;
+                max-width: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
             }
         </style>
     `;
@@ -1161,19 +1993,17 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
             ${pdfStyles}
         </head>
         <body>
-        <div class="cv-preview" style="
-            font-family: ${fonts.fontFamily}; 
-            font-size: ${fonts.bodySize}px; 
-            line-height: 1.4; 
-            color: #333; 
-            max-width: 186mm; 
-            margin: 0 auto; 
-            padding: 0;
+        <div class="cv-preview max-w-full mx-auto p-0 leading-snug" style="
+            font-family: var(--cv-font-family); 
+            font-size: var(--cv-body-size); 
+            color: var(--cv-text-color); 
+            width: 100%;
+            max-width: none;
         ">
             <!-- Header -->
-            <div class="cv-section avoid-break" style="text-align: center; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 15px;">
-                <h1 style="font-size: ${fonts.headingSize}px; font-weight: bold; margin: 0 0 10px 0; color: #333;">${personalInfo.fullName || personalInfo.name || `${personalInfo.firstName || ''} ${personalInfo.lastName || ''}`.trim()}</h1>
-                <div style="font-size: ${fonts.smallSize}px; color: #666;">
+            <div class="cv-section avoid-break text-center mb-8 border-b-2 pb-4" style="border-color: var(--cv-primary-color);">
+                <h1 style="color: var(--cv-primary-color); font-size: var(--cv-heading-size); font-weight: bold; margin: 0; margin-bottom: var(--cv-spacing-sm);">${personalInfo.fullName || personalInfo.name || `${personalInfo.firstName || ''} ${personalInfo.lastName || ''}`.trim()}</h1>
+                <div style="color: var(--cv-secondary-color); font-size: var(--cv-small-size);">
                     ${personalInfo.email ? `${personalInfo.email}` : ''}
                     ${personalInfo.phone ? ` | ${personalInfo.phone}` : ''}
                     ${personalInfo.location ? ` | ${personalInfo.location}` : ''}
@@ -1182,11 +2012,11 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
 
             <!-- Summary -->
             ${personalInfo.summary ? `
-            <div class="cv-section" style="margin-bottom: 20px;">
-                <h2 style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 8px; border-bottom: 1px solid #ddd; padding-bottom: 3px;">
+            <div class="cv-section mb-6">
+                <h2 style="color: var(--cv-primary-color); font-size: var(--cv-subheading-size); font-weight: bold; margin-bottom: var(--cv-spacing-sm); border-bottom: 1px solid var(--cv-border-color); padding-bottom: var(--cv-spacing-xs);">
                     ÖZƏT
                 </h2>
-                <p style="color: #555; line-height: 1.5; margin: 0;">
+                <p style="color: var(--cv-text-color); font-size: var(--cv-body-size); line-height: 1.5; margin: 0;">
                     ${stripHtmlTags(personalInfo.summary)}
                 </p>
             </div>
@@ -1194,20 +2024,20 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
 
             <!-- Experience -->
             ${experience.length > 0 ? `
-            <div class="cv-section" style="margin-bottom: 20px;">
-                <h2 style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 3px;">
+            <div class="cv-section mb-6">
+                <h2 style="color: var(--cv-primary-color); font-size: var(--cv-subheading-size); font-weight: bold; margin-bottom: var(--cv-spacing-sm); border-bottom: 1px solid var(--cv-border-color); padding-bottom: var(--cv-spacing-xs);">
                     İŞ TƏCRÜBƏSİ
                 </h2>
                 ${experience.map((exp: any) => `
-                <div class="avoid-break" style="margin-bottom: 15px;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 3px;">
-                        <h3 style="font-size: 12px; font-weight: bold; color: #333; margin: 0;">${exp.position}</h3>
-                        <span style="font-size: 10px; color: #666;">
+                <div class="avoid-break mb-4">
+                    <div class="flex justify-between items-start mb-1">
+                        <h3 style="color: var(--cv-primary-color); font-size: var(--cv-subheading-size); font-weight: bold; margin: 0;">${exp.position}</h3>
+                        <span style="color: var(--cv-secondary-color); font-size: var(--cv-small-size);">
                             ${formatDate(exp.startDate)} - ${exp.current ? 'Hazırda' : formatDate(exp.endDate || '')}
                         </span>
                     </div>
-                    <p style="font-size: 11px; color: #555; font-style: italic; margin: 0 0 5px 0;">${exp.company}</p>
-                    ${exp.description ? `<p style="font-size: 10px; color: #555; line-height: 1.4; margin: 0;">${stripHtmlTags(exp.description)}</p>` : ''}
+                    <p style="color: var(--cv-text-color); font-size: var(--cv-small-size); font-style: italic; margin: 0; margin-bottom: var(--cv-spacing-xs);">${exp.company}</p>
+                    ${exp.description ? `<p style="color: var(--cv-text-color); font-size: var(--cv-small-size); line-height: 1.4; margin: 0;">${stripHtmlTags(exp.description)}</p>` : ''}
                 </div>
                 `).join('')}
             </div>
@@ -1215,21 +2045,21 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
 
             <!-- Education -->
             ${education.length > 0 ? `
-            <div class="cv-section" style="margin-bottom: 20px;">
-                <h2 style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 8px; border-bottom: 1px solid #ddd; padding-bottom: 3px;">
+            <div class="cv-section mb-6">
+                <h2 style="color: var(--cv-primary-color); font-size: var(--cv-subheading-size); font-weight: bold; margin-bottom: var(--cv-spacing-sm); border-bottom: 1px solid var(--cv-border-color); padding-bottom: var(--cv-spacing-xs);">
                     TƏHSİL
                 </h2>
                 ${education.map((edu: any) => `
-                <div class="avoid-break" style="margin-bottom: 10px;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 3px;">
-                        <h3 style="font-size: 12px; font-weight: bold; color: #333; margin: 0;">${edu.degree}</h3>
-                        <span style="font-size: 10px; color: #666;">
+                <div class="avoid-break mb-2">
+                    <div class="flex justify-between items-start mb-1">
+                        <h3 style="color: var(--cv-primary-color); font-size: var(--cv-subheading-size); font-weight: bold; margin: 0;">${edu.degree}</h3>
+                        <span style="color: var(--cv-secondary-color); font-size: var(--cv-small-size);">
                             ${formatDate(edu.startDate)} - ${edu.current ? 'Hazırda' : formatDate(edu.endDate || '')}
                         </span>
                     </div>
-                    <p style="font-size: 11px; color: #555; margin: 0;">${edu.institution}</p>
-                    ${edu.field ? `<p style="font-size: 10px; color: #666; margin: 0;">${edu.field}</p>` : ''}
-                    ${edu.gpa ? `<p style="font-size: 10px; color: #666; margin: 0;">GPA: ${edu.gpa}</p>` : ''}
+                    <p style="color: var(--cv-text-color); font-size: var(--cv-small-size); margin: 0;">${edu.institution}</p>
+                    ${edu.field ? `<p style="color: var(--cv-secondary-color); font-size: var(--cv-small-size); margin: 0;">${edu.field}</p>` : ''}
+                    ${edu.gpa ? `<p style="color: var(--cv-secondary-color); font-size: var(--cv-small-size); margin: 0;">GPA: ${edu.gpa}</p>` : ''}
                 </div>
                 `).join('')}
             </div>
@@ -1237,11 +2067,11 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
 
             <!-- Skills -->
             ${skills.length > 0 ? `
-            <div class="cv-section avoid-break" style="margin-bottom: 20px;">
-                <h2 style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 8px; border-bottom: 1px solid #ddd; padding-bottom: 3px;">
+            <div class="cv-section avoid-break mb-6">
+                <h2 style="color: var(--cv-primary-color); font-size: var(--cv-subheading-size); font-weight: bold; margin-bottom: var(--cv-spacing-sm); border-bottom: 1px solid var(--cv-border-color); padding-bottom: var(--cv-spacing-xs);">
                     BACARIQLAR
                 </h2>
-                <p style="font-size: 10px; color: #555; line-height: 1.4; margin: 0;">
+                <p style="color: var(--cv-text-color); font-size: var(--cv-body-size); line-height: 1.4; margin: 0;">
                     ${skills.map((skill: any) => skill.name).join(', ')}
                 </p>
             </div>
@@ -1249,11 +2079,11 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
 
             <!-- Languages -->
             ${languages.length > 0 ? `
-            <div class="cv-section avoid-break" style="margin-bottom: 20px;">
-                <h2 style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 8px; border-bottom: 1px solid #ddd; padding-bottom: 3px;">
+            <div class="cv-section avoid-break mb-6">
+                <h2 style="color: var(--cv-primary-color); font-size: var(--cv-subheading-size); font-weight: bold; margin-bottom: var(--cv-spacing-sm); border-bottom: 1px solid var(--cv-border-color); padding-bottom: var(--cv-spacing-xs);">
                     DİLLƏR
                 </h2>
-                <p style="font-size: 10px; color: #555; line-height: 1.4; margin: 0;">
+                <p style="color: var(--cv-text-color); font-size: var(--cv-body-size); line-height: 1.4; margin: 0;">
                     ${languages.map((lang: any) => `${lang.language} (${lang.level})`).join(', ')}
                 </p>
             </div>
