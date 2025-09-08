@@ -960,8 +960,11 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {cv.id && (
                                 <button
                                     onClick={() => {
-                                        // Font settings-ləri localStorage-da saxla ki export page-də istifadə edilsin
-                                        localStorage.setItem('exportFontSettings', JSON.stringify(fontSettings));
+                                        // Font settings-ləri həm export həm də persistent storage-ə saxla
+                                        const fontSettingsJSON = JSON.stringify(fontSettings);
+                                        localStorage.setItem('exportFontSettings', fontSettingsJSON);
+                                        localStorage.setItem('currentFontSettings', fontSettingsJSON);
+                                        console.log('🚀 CVEditor: Font settings export page üçün hazırlandı:', fontSettings);
                                         window.open(`/cv/export/${cv.id}`, '_blank');
                                     }}
                                     className="flex items-center justify-center h-10 w-10 sm:h-auto sm:w-auto sm:px-3 sm:py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-transparent rounded-lg hover:bg-gray-200 transition-colors"

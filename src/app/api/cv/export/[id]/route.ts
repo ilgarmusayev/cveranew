@@ -284,10 +284,10 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                 console.log('- smallSize:', fontSettings?.smallSize);
                 console.log('- xsSize:', fontSettings?.xsSize);
                 console.log('Final computed sizes:');
-                console.log('- Heading:', fontSettings?.headingSize || fontSettings?.titleSize || 10, 'px');
-                console.log('- Subheading:', fontSettings?.subheadingSize || fontSettings?.subtitleSize || 9, 'px');
-                console.log('- Body:', fontSettings?.bodySize || fontSettings?.fontSize || 8, 'px');
-                console.log('- Small:', fontSettings?.smallSize || fontSettings?.xsSize || 7, 'px');
+                console.log('- Heading:', fontSettings?.headingSize || fontSettings?.titleSize, 'px');
+                console.log('- Subheading:', fontSettings?.subheadingSize || fontSettings?.subtitleSize, 'px');
+                console.log('- Body:', fontSettings?.bodySize || fontSettings?.fontSize, 'px');
+                console.log('- Small:', fontSettings?.smallSize || fontSettings?.xsSize, 'px');
             }
             html = `
                 <!DOCTYPE html>
@@ -341,11 +341,25 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         /* CSS Variables - FONT MANAGER İLƏ SINXRON */
                         :root, html, body {
                             --cv-font-family: ${fontSettings?.fontFamily || 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'};
-                            /* FONT MANAGER ilə eyni default-lar */
+                            /* FONT MANAGER İLƏ TAM 1:1 UYĞUN ÖLÇÜLƏR */
+                            --cv-name-size: ${fontSettings?.nameSize || 24}px;
                             --cv-heading-size: ${fontSettings?.headingSize || 18}px;
                             --cv-subheading-size: ${fontSettings?.subheadingSize || 16}px;  
                             --cv-body-size: ${fontSettings?.bodySize || 14}px;
                             --cv-small-size: ${fontSettings?.smallSize || 12}px;
+                            
+                            /* Font Weight Dəyişənləri */
+                            --cv-heading-weight: ${fontSettings?.headingWeight};
+                            --cv-subheading-weight: ${fontSettings?.subheadingWeight};
+                            --cv-body-weight: ${fontSettings?.bodyWeight};
+                            --cv-small-weight: ${fontSettings?.smallWeight};
+                            
+                            /* Section Spacing - CVPreview ilə tam uyğun, px istifadə */
+                            --cv-section-spacing: ${fontSettings?.sectionSpacing || 8}px;
+                            
+                            /* Additional Spacing Variables */
+                            --cv-small-spacing: 4px;
+                            --cv-item-spacing: 8px;
                             
                             /* Dinamik Rənglər */
                             --cv-primary-color: ${fontSettings?.primaryColor || '#1f2937'};
@@ -384,27 +398,27 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         
                         /* UNIVERSAL DYNAMIC SYSTEM - CLEAN AND SIMPLE */
                         
-                        /* ALL TEXT SIZES - DYNAMIC */
-                        .text-xs { font-size: calc(var(--cv-small-size) * 0.75) !important; }
+                        /* ALL TEXT SIZES - DYNAMIC - NO SCALE FACTORS */
+                        .text-xs { font-size: var(--cv-small-size) !important; }
                         .text-sm { font-size: var(--cv-small-size) !important; }
                         .text-base { font-size: var(--cv-body-size) !important; }
-                        .text-lg { font-size: calc(var(--cv-subheading-size) * 1.125) !important; }
-                        .text-xl { font-size: calc(var(--cv-heading-size) * 0.83) !important; }
+                        .text-lg { font-size: var(--cv-subheading-size) !important; }
+                        .text-xl { font-size: var(--cv-heading-size) !important; }
                         .text-2xl { font-size: var(--cv-heading-size) !important; }
-                        .text-3xl { font-size: calc(var(--cv-heading-size) * 1.25) !important; }
-                        .text-4xl { font-size: calc(var(--cv-heading-size) * 1.5) !important; }
-                        .text-5xl { font-size: calc(var(--cv-heading-size) * 2) !important; }
+                        .text-3xl { font-size: var(--cv-heading-size) !important; }
+                        .text-4xl { font-size: var(--cv-heading-size) !important; }
+                        .text-5xl { font-size: var(--cv-heading-size) !important; }
                         
-                        /* BASIC TEMPLATE FONT SIZE OVERRIDES - GÜCLÜ */
-                        .basic-template .text-xs { font-size: calc(var(--cv-small-size) * 0.75) !important; }
+                        /* BASIC TEMPLATE FONT SIZE OVERRIDES - NO SCALE FACTORS */
+                        .basic-template .text-xs { font-size: var(--cv-small-size) !important; }
                         .basic-template .text-sm { font-size: var(--cv-small-size) !important; }
                         .basic-template .text-base { font-size: var(--cv-body-size) !important; }
-                        .basic-template .text-lg { font-size: calc(var(--cv-subheading-size) * 1.125) !important; }
-                        .basic-template .text-xl { font-size: calc(var(--cv-heading-size) * 0.83) !important; }
+                        .basic-template .text-lg { font-size: var(--cv-subheading-size) !important; }
+                        .basic-template .text-xl { font-size: var(--cv-heading-size) !important; }
                         .basic-template .text-2xl { font-size: var(--cv-heading-size) !important; }
-                        .basic-template .text-3xl { font-size: calc(var(--cv-heading-size) * 1.25) !important; }
-                        .basic-template .text-4xl { font-size: calc(var(--cv-heading-size) * 1.5) !important; }
-                        .basic-template .text-5xl { font-size: calc(var(--cv-heading-size) * 2) !important; }
+                        .basic-template .text-3xl { font-size: var(--cv-heading-size) !important; }
+                        .basic-template .text-4xl { font-size: var(--cv-heading-size) !important; }
+                        .basic-template .text-5xl { font-size: var(--cv-heading-size) !important; }
                         
                         /* BASIC TEMPLATE ULTRA STRONG OVERRIDES */
                         /* NUCLEAR OPTION - ABSOLUTE FONT SIZE OVERRIDE */
@@ -413,7 +427,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         }
                         
                         .basic-template *[class*="text-xs"] {
-                            font-size: calc(var(--cv-small-size) * 0.75) !important;
+                            font-size: var(--cv-small-size) !important;
                         }
                         
                         .basic-template *[class*="text-sm"] {
@@ -425,11 +439,11 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         }
                         
                         .basic-template *[class*="text-lg"] {
-                            font-size: calc(var(--cv-subheading-size) * 1.125) !important;
+                            font-size: var(--cv-subheading-size) !important;
                         }
                         
                         .basic-template *[class*="text-xl"]:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-5xl"]) {
-                            font-size: calc(var(--cv-heading-size) * 0.83) !important;
+                            font-size: var(--cv-heading-size) !important;
                         }
                         
                         .basic-template *[class*="text-2xl"] {
@@ -437,20 +451,20 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         }
                         
                         .basic-template *[class*="text-3xl"] {
-                            font-size: calc(var(--cv-heading-size) * 1.25) !important;
+                            font-size: var(--cv-heading-size) !important;
                         }
                         
                         .basic-template *[class*="text-4xl"] {
-                            font-size: calc(var(--cv-heading-size) * 1.5) !important;
+                            font-size: var(--cv-heading-size) !important;
                         }
                         
                         .basic-template *[class*="text-5xl"] {
-                            font-size: calc(var(--cv-heading-size) * 2) !important;
+                            font-size: var(--cv-heading-size) !important;
                         }
                         
-                        /* HTML TAGS - DYNAMIC */
+                        /* HTML TAGS - NO SCALE FACTORS */
                         h1 { 
-                            font-size: calc(var(--cv-heading-size) * 1.33) !important;
+                            font-size: var(--cv-heading-size) !important;
                             color: var(--cv-primary-color) !important;
                             margin: var(--cv-spacing-md) 0 !important;
                         }
@@ -460,7 +474,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             margin: var(--cv-spacing-md) 0 !important;
                         }
                         h3 { 
-                            font-size: calc(var(--cv-subheading-size) * 1.125) !important;
+                            font-size: var(--cv-subheading-size) !important;
                             color: var(--cv-primary-color) !important;
                             margin: var(--cv-spacing-sm) 0 !important;
                         }
@@ -585,7 +599,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         html body .basic-template [class*="text-xl"]:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-5xl"]),
                         .basic-template .text-xl[class]:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-5xl"]),
                         .basic-template *[class*="text-xl"]:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-5xl"]) {
-                            font-size: calc(var(--cv-heading-size) * 0.83) !important;
+                            font-size: var(--cv-heading-size) !important;
                             line-height: 1.4 !important;
                         }
                         
@@ -601,7 +615,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         html body .basic-template [class*="text-3xl"],
                         .basic-template .text-3xl[class],
                         .basic-template *[class*="text-3xl"] {
-                            font-size: calc(var(--cv-heading-size) * 1.25) !important;
+                            font-size: var(--cv-heading-size) !important;
                             line-height: 1.3 !important;
                         }
                         
@@ -609,7 +623,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         html body .basic-template [class*="text-4xl"],
                         .basic-template .text-4xl[class],
                         .basic-template *[class*="text-4xl"] {
-                            font-size: calc(var(--cv-heading-size) * 1.5) !important;
+                            font-size: var(--cv-heading-size) !important;
                             line-height: 1.2 !important;
                         }
                         
@@ -617,7 +631,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         html body .basic-template [class*="text-5xl"],
                         .basic-template .text-5xl[class],
                         .basic-template *[class*="text-5xl"] {
-                            font-size: calc(var(--cv-heading-size) * 2) !important;
+                            font-size: var(--cv-heading-size) !important;
                             line-height: 1.2 !important;
                         }
                         
@@ -675,7 +689,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         .space-y-0 > * + * { margin-top: 0 !important; }
                         .space-y-1 > * + * { margin-top: var(--cv-spacing-xs) !important; }
                         .space-y-2 > * + * { margin-top: var(--cv-spacing-sm) !important; }
-                        .space-y-3 > * + * { margin-top: calc(var(--cv-spacing-sm) * 1.5) !important; }
+                        .space-y-3 > * + * { margin-top: var(--cv-spacing-sm) !important; }
                         .space-y-4 > * + * { margin-top: var(--cv-spacing-md) !important; }
                         .space-y-6 > * + * { margin-top: var(--cv-spacing-lg) !important; }
                         .space-y-8 > * + * { margin-top: var(--cv-spacing-xl) !important; }
@@ -1039,7 +1053,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         .pt-0 { padding-top: 0 !important; }
                         .pt-1 { padding-top: var(--cv-spacing-xs) !important; }
                         .pt-2 { padding-top: var(--cv-spacing-sm) !important; }
-                        .pt-3 { padding-top: calc(var(--cv-spacing-sm) * 1.5) !important; }
+                        .pt-3 { padding-top: var(--cv-spacing-sm) !important; }
                         .pt-4 { padding-top: var(--cv-spacing-md) !important; }
                         .pt-6 { padding-top: var(--cv-spacing-lg) !important; }
                         .pt-8 { padding-top: var(--cv-spacing-xl) !important; }
@@ -1047,7 +1061,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         .pb-0 { padding-bottom: 0 !important; }
                         .pb-1 { padding-bottom: var(--cv-spacing-xs) !important; }
                         .pb-2 { padding-bottom: var(--cv-spacing-sm) !important; }
-                        .pb-3 { padding-bottom: calc(var(--cv-spacing-sm) * 1.5) !important; }
+                        .pb-3 { padding-bottom: var(--cv-spacing-sm) !important; }
                         .pb-4 { padding-bottom: var(--cv-spacing-md) !important; }
                         .pb-6 { padding-bottom: var(--cv-spacing-lg) !important; }
                         .pb-8 { padding-bottom: var(--cv-spacing-xl) !important; }
@@ -1055,7 +1069,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         .pl-0 { padding-left: 0 !important; }
                         .pl-1 { padding-left: var(--cv-spacing-xs) !important; }
                         .pl-2 { padding-left: var(--cv-spacing-sm) !important; }
-                        .pl-3 { padding-left: calc(var(--cv-spacing-sm) * 1.5) !important; }
+                        .pl-3 { padding-left: var(--cv-spacing-sm) !important; }
                         .pl-4 { padding-left: var(--cv-spacing-md) !important; }
                         .pl-6 { padding-left: var(--cv-spacing-lg) !important; }
                         .pl-8 { padding-left: var(--cv-spacing-xl) !important; }
@@ -1063,7 +1077,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         .pr-0 { padding-right: 0 !important; }
                         .pr-1 { padding-right: var(--cv-spacing-xs) !important; }
                         .pr-2 { padding-right: var(--cv-spacing-sm) !important; }
-                        .pr-3 { padding-right: calc(var(--cv-spacing-sm) * 1.5) !important; }
+                        .pr-3 { padding-right: var(--cv-spacing-sm) !important; }
                         .pr-4 { padding-right: var(--cv-spacing-md) !important; }
                         .pr-6 { padding-right: var(--cv-spacing-lg) !important; }
                         .pr-8 { padding-right: var(--cv-spacing-xl) !important; }
@@ -1429,17 +1443,53 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
         // Multi-page PDF support üçün CSS əlavə et
         await page.addStyleTag({
             content: `
+                /* PDF Export Font Variables - fontSettings-dən gələn dəyərlər */
+                :root {
+                    --cv-font-family: ${fontSettings.fontFamily};
+                    --cv-heading-size: ${fontSettings.headingSize}px;
+                    --cv-subheading-size: ${fontSettings.subheadingSize}px;
+                    --cv-body-size: ${fontSettings.bodySize}px;
+                    --cv-small-size: ${fontSettings.smallSize}px;
+                    --cv-heading-weight: ${fontSettings.headingWeight};
+                    --cv-subheading-weight: ${fontSettings.subheadingWeight};
+                    --cv-body-weight: ${fontSettings.bodyWeight};
+                    --cv-small-weight: ${fontSettings.smallWeight};
+                    --cv-line-height: 1.4;
+                    --cv-section-spacing: ${fontSettings.sectionSpacing}px;
+                    --cv-item-spacing: ${fontSettings.sectionSpacing}px;
+                    --cv-small-spacing: ${fontSettings.sectionSpacing}px;
+                }
+                
                 @page {
                     size: A4;
-                    margin: 8mm 8mm 23mm 8mm;  /* Top, Right, Bottom (with 15mm extra), Left */
+                    margin: 25mm 15mm 25mm 15mm; /* Default: yuxarı və aşağı 25mm, yan tərəflərdə 15mm */
                     padding: 0;
+                }
+                
+                @page :first {
+                    margin-top: 0; /* 1ci səhifədə yuxarıdan margin yox */
+                    margin-right: 15mm;
+                    margin-bottom: 25mm; /* 1ci səhifənin aşağısı 25mm */
+                    margin-left: 15mm;
+                }
+                
+                /* 2ci səhifədən sonra yuxarıdakı boşluğu artırmaq üçün əlavə margin */
+                .cv-preview, .basic-template {
+                    page-break-inside: avoid;
+                }
+                
+                /* Hər səhifə arasında əlavə boşluq */
+                .cv-preview > *:not(:first-child),
+                .basic-template > *:not(:first-child) {
+                    margin-top: 35mm !important;
+                    page-break-before: always;
                 }
                 
                 /* PDF Multi-page fundamental rules for A4 */
                 html {
                     height: auto !important;
                     overflow: visible !important;
-                    font-size: 12pt !important;
+                    font-size: var(--cv-body-size, 12pt) !important;
                 }
                 
                 body {
@@ -1447,16 +1497,37 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                     min-height: auto !important;
                     overflow: visible !important;
                     margin: 0 !important;
-                    padding: 8mm !important;
+                    padding: 0 !important;
                     -webkit-print-color-adjust: exact !important;
                     color-adjust: exact !important;
-                    line-height: 1.4 !important;
+                    line-height: var(--cv-line-height, 1.4) !important;
+                }
+                
+                /* PDF-də bütün container-lərin kənar boşluqlarını tamamilə sil */
+                .cv-preview,
+                .basic-template, 
+                [class*="template"],
+                .template-container,
+                .cv-container {
+                    margin: 0 !important;
+                    padding: 0 !important; /* Tamamilə kənar boşluq yoxdur */
+                    border: none !important;
+                    box-shadow: none !important;
+                }
+                
+                /* HƏTTA DAHA RADIKAL - Bütün div-lərin edge margin/padding-ini sil */
+                body > div:first-child,
+                html > body > *:first-child,
+                [class*="container"]:first-child,
+                .main:first-child {
+                    margin: 0 !important;
+                    padding: 0 !important;
                 }
                 
                 /* Force multi-page behavior with A4 constraints */
                 .basic-template {
                     width: 100% !important;
-                    max-width: 194mm !important; /* A4 width minus margins */
+                    max-width: 180mm !important; /* A4 genişlik (210mm) - iki tərəfdən 15mm = 180mm */
                     height: auto !important;
                     min-height: auto !important;
                     max-height: none !important;
@@ -1508,26 +1579,26 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                 }
                 
                 /* BASIC TEMPLATE ULTIMATE HARDCODE KILLER */
-                .basic-template .text-xs { font-size: var(--cv-small-size, 12px) !important; }
-                .basic-template .text-sm { font-size: var(--cv-body-size, 14px) !important; }
-                .basic-template .text-base { font-size: var(--cv-subheading-size, 16px) !important; }
-                .basic-template .text-lg { font-size: calc(var(--cv-subheading-size, 16px) * 1.125) !important; }
-                .basic-template .text-xl { font-size: calc(var(--cv-heading-size, 18px) * 0.9) !important; }
-                .basic-template .text-2xl { font-size: var(--cv-heading-size, 18px) !important; }
+                .basic-template .text-xs { font-size: var(--cv-small-size) !important; }
+                .basic-template .text-sm { font-size: var(--cv-body-size) !important; }
+                .basic-template .text-base { font-size: var(--cv-subheading-size) !important; }
+                .basic-template .text-lg { font-size: var(--cv-subheading-size) !important; }
+                .basic-template .text-xl { font-size: var(--cv-heading-size) !important; }
+                .basic-template .text-2xl { font-size: var(--cv-heading-size) !important; }
                 
-                .basic-template .font-medium { font-weight: var(--cv-body-weight, 500) !important; }
-                .basic-template .font-semibold { font-weight: var(--cv-subheading-weight, 600) !important; }
-                .basic-template .font-bold { font-weight: var(--cv-heading-weight, 700) !important; }
+                .basic-template .font-medium { font-weight: var(--cv-body-weight) !important; }
+                .basic-template .font-semibold { font-weight: var(--cv-subheading-weight) !important; }
+                .basic-template .font-bold { font-weight: var(--cv-heading-weight) !important; }
                 
-                .basic-template .mb-1 { margin-bottom: calc(var(--cv-section-spacing, 16px) * 0.25) !important; }
-                .basic-template .mb-2 { margin-bottom: calc(var(--cv-section-spacing, 16px) * 0.5) !important; }
-                .basic-template .mb-3 { margin-bottom: var(--cv-section-spacing, 16px) !important; }
-                .basic-template .mt-1 { margin-top: calc(var(--cv-section-spacing, 16px) * 0.25) !important; }
-                .basic-template .mt-2 { margin-top: calc(var(--cv-section-spacing, 16px) * 0.5) !important; }
-                .basic-template .pl-2 { padding-left: calc(var(--cv-section-spacing, 16px) * 0.5) !important; }
-                .basic-template .pl-3 { padding-left: var(--cv-section-spacing, 16px) !important; }
-                .basic-template .pb-1 { padding-bottom: calc(var(--cv-section-spacing, 16px) * 0.25) !important; }
-                .basic-template .pb-2 { padding-bottom: calc(var(--cv-section-spacing, 16px) * 0.5) !important; }
+                .basic-template .mb-1 { margin-bottom: var(--cv-small-spacing) !important; }
+                .basic-template .mb-2 { margin-bottom: var(--cv-item-spacing) !important; }
+                .basic-template .mb-3 { margin-bottom: var(--cv-section-spacing) !important; }
+                .basic-template .mt-1 { margin-top: var(--cv-small-spacing) !important; }
+                .basic-template .mt-2 { margin-top: var(--cv-item-spacing) !important; }
+                .basic-template .pl-2 { padding-left: var(--cv-item-spacing) !important; }
+                .basic-template .pl-3 { padding-left: var(--cv-section-spacing) !important; }
+                .basic-template .pb-1 { padding-bottom: var(--cv-small-spacing) !important; }
+                .basic-template .pb-2 { padding-bottom: var(--cv-item-spacing) !important; }
                 
                 /* Bütün rənglər dinamik olmalıdır */
                 .basic-template .text-blue-600 { color: #2563eb !important; }
@@ -1536,6 +1607,32 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                 .basic-template .text-gray-900 { color: #111827 !important; }
                 .basic-template .border-blue-200 { border-color: #bfdbfe !important; }
                 .basic-template .border-gray-300 { border-color: #d1d5db !important; }
+                
+                /* CVPreview Tailwind class-larını override et */
+                .cv-preview .text-xs { font-size: var(--cv-small-size) !important; }
+                .cv-preview .text-sm { font-size: var(--cv-body-size) !important; }
+                .cv-preview .text-base { font-size: var(--cv-subheading-size) !important; }
+                .cv-preview .text-lg { font-size: var(--cv-subheading-size) !important; }
+                .cv-preview .text-xl { font-size: var(--cv-heading-size) !important; }
+                .cv-preview .text-2xl { font-size: var(--cv-heading-size) !important; }
+                
+                .cv-preview .font-medium { font-weight: var(--cv-body-weight) !important; }
+                .cv-preview .font-semibold { font-weight: var(--cv-subheading-weight) !important; }
+                .cv-preview .font-bold { font-weight: var(--cv-heading-weight) !important; }
+                
+                /* UNIVERSAL TAILWIND OVERRIDE - HƏR HANSĂ TEMPLATE ÜÇÜN */
+                .text-xs { font-size: var(--cv-small-size) !important; }
+                .text-sm { font-size: var(--cv-body-size) !important; }
+                .text-base { font-size: var(--cv-subheading-size) !important; }
+                .text-lg { font-size: var(--cv-subheading-size) !important; }
+                .text-xl { font-size: var(--cv-heading-size) !important; }
+                .text-2xl { font-size: var(--cv-heading-size) !important; }
+                .text-3xl { font-size: var(--cv-name-size) !important; }
+                .text-4xl { font-size: var(--cv-name-size) !important; }
+                
+                .font-medium { font-weight: var(--cv-body-weight) !important; }
+                .font-semibold { font-weight: var(--cv-subheading-weight) !important; }
+                .font-bold { font-weight: var(--cv-heading-weight) !important; }
             `
         });
         
@@ -1690,21 +1787,19 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             tagged: true,  // PDF/A accessibility və unicode dəstəyi
             outline: false,
             omitBackground: false,  // Background-ları qoruyub saxla
-            // A4 optimized margins with 15mm bottom reserve
+            // PDF margin-ları bütün tərəflərdə bərabər - CSS @page ilə uyğun
             margin: {
-                top: '8mm',
-                right: '8mm', 
-                bottom: '23mm',  // 8mm + 15mm reserve = 23mm total
-                left: '8mm'
+                top: '15mm',
+                right: '15mm', 
+                bottom: '15mm',
+                left: '15mm'
             },
             scale: 1,
-            // Multi-page support - CRITICAL FOR A4 PAGINATION
+            // Multi-page support - CRITICAL FOR A4 PAGINATION  
             pageRanges: '',  // Boş string = bütün səhifələr
-            // Optimize for A4 page flow
-            width: '210mm',   // A4 genişlik
-            height: '297mm'   // A4 hündürlük
-            // AUTO sizing - let Puppeteer determine dimensions
-            // Remove fixed width/height to allow auto-pagination
+            // A4 tam ölçü - kənar boşluq yoxdur
+            width: '210mm',   // A4 tam genişlik
+            height: '297mm'   // A4 tam hündürlük
         });
 
         console.log('PDF yaradıldı, browser bağlanır...');
@@ -1860,21 +1955,21 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
                 margin: 0 !important;
             }
             
-            /* DYNAMIC FONT SIZES - UNIVERSAL */
-            h1 { font-size: calc(var(--cv-heading-size) * 1.33) !important; color: var(--cv-primary-color) !important; }
+            /* DYNAMIC FONT SIZES - NO SCALE FACTORS */
+            h1 { font-size: var(--cv-heading-size) !important; color: var(--cv-primary-color) !important; }
             h2 { font-size: var(--cv-heading-size) !important; color: var(--cv-primary-color) !important; }
-            h3 { font-size: calc(var(--cv-subheading-size) * 1.125) !important; color: var(--cv-primary-color) !important; }
+            h3 { font-size: var(--cv-subheading-size) !important; color: var(--cv-primary-color) !important; }
             h4, h5, h6 { font-size: var(--cv-subheading-size) !important; color: var(--cv-primary-color) !important; }
             p, span, div, li, td, th { font-size: var(--cv-body-size) !important; }
             
-            /* UNIVERSAL TEXT SIZE CLASSES */
-            .text-xs { font-size: calc(var(--cv-small-size) * 0.75) !important; }
+            /* UNIVERSAL TEXT SIZE CLASSES - NO SCALE FACTORS */
+            .text-xs { font-size: var(--cv-small-size) !important; }
             .text-sm { font-size: var(--cv-small-size) !important; }
             .text-base { font-size: var(--cv-body-size) !important; }
-            .text-lg { font-size: calc(var(--cv-subheading-size) * 1.125) !important; }
-            .text-xl { font-size: calc(var(--cv-heading-size) * 0.83) !important; }
+            .text-lg { font-size: var(--cv-subheading-size) !important; }
+            .text-xl { font-size: var(--cv-heading-size) !important; }
             .text-2xl { font-size: var(--cv-heading-size) !important; }
-            .text-3xl { font-size: calc(var(--cv-heading-size) * 1.25) !important; }
+            .text-3xl { font-size: var(--cv-heading-size) !important; }
             
             /* UNIVERSAL MARGIN CLASSES - DİNAMİK */
             .m-0 { margin: 0 !important; }
