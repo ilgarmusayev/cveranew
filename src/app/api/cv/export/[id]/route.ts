@@ -1462,27 +1462,24 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                 
                 @page {
                     size: A4;
-                    margin: 25mm 15mm 25mm 15mm; /* Default: yuxarı və aşağı 25mm, yan tərəflərdə 15mm */
+                    margin: 0; /* Bütün margin-lar sıfır */
                     padding: 0;
                 }
                 
                 @page :first {
-                    margin-top: 0; /* 1ci səhifədə yuxarıdan margin yox */
-                    margin-right: 15mm;
-                    margin-bottom: 25mm; /* 1ci səhifənin aşağısı 25mm */
-                    margin-left: 15mm;
+                    margin: 0; /* 1ci səhifədə də margin yox */
                 }
                 
-                /* 2ci səhifədən sonra yuxarıdakı boşluğu artırmaq üçün əlavə margin */
+                /* Səhifə arası boşluq yox */
                 .cv-preview, .basic-template {
-                    page-break-inside: avoid;
+                    page-break-inside: auto;
                 }
                 
-                /* Hər səhifə arasında əlavə boşluq */
-                .cv-preview > *:not(:first-child),
-                .basic-template > *:not(:first-child) {
-                    margin-top: 35mm !important;
-                    page-break-before: always;
+                /* Səhifə arası əlavə boşluq sil */
+                .cv-preview > *,
+                .basic-template > * {
+                    margin-top: 0 !important;
+                    page-break-before: auto;
                 }
                 
                 /* PDF Multi-page fundamental rules for A4 */
@@ -1787,12 +1784,12 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             tagged: true,  // PDF/A accessibility və unicode dəstəyi
             outline: false,
             omitBackground: false,  // Background-ları qoruyub saxla
-            // PDF margin-ları bütün tərəflərdə bərabər - CSS @page ilə uyğun
+            // PDF margin-ları sıfır - kənar boşluq yox
             margin: {
-                top: '15mm',
-                right: '15mm', 
-                bottom: '15mm',
-                left: '15mm'
+                top: '0mm',
+                right: '0mm', 
+                bottom: '0mm',
+                left: '0mm'
             },
             scale: 1,
             // Multi-page support - CRITICAL FOR A4 PAGINATION  
