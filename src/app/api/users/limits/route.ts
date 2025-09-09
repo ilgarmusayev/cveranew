@@ -36,7 +36,7 @@ async function checkAndCancelExpiredSubscriptions(userId: string) {
     // Check if subscription has expired
     if (latestSubscription.expiresAt && latestSubscription.expiresAt < now) {
       console.log(`🔄 Auto-canceling expired subscription for user ${userId}`);
-
+      
       // Update subscription status to expired AND update user tier to Free
       await prisma.$transaction([
         prisma.subscription.update({
@@ -61,9 +61,7 @@ async function checkAndCancelExpiredSubscriptions(userId: string) {
         status: 'expired',
         tier: 'Free'
       };
-    }
-
-    return latestSubscription;
+    }    return latestSubscription;
   } catch (error) {
     console.error('❌ Error checking subscription expiration:', error);
     return null;

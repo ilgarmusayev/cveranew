@@ -9,8 +9,59 @@ interface JWTPayload {
   email?: string;
 }
 
+// Check and auto-deactivate expired promo codes
+async function checkAndDeactivateExpiredPromoCodes() {
+  try {
+    console.log('🔄 Auto-checking for expired promo codes...');
+    
+    // Find all expired promo codes that are still active
+    const expiredPromoCodes = await prisma.promoCode.findMany({
+      where: {
+        isActive: true,
+        expiresAt: {
+          lt: new Date() // Less than current time = expired
+        }
+      }
+    });
+
+    if (expiredPromoCodes.length === 0) {
+      console.log('✅ No expired promo codes to deactivate');
+      return null;
+    }
+
+    console.log(`🔄 Auto-deactivating ${expiredPromoCodes.length} expired promo codes`);
+
+    // Deactivate expired promo codes
+    const updateResult = await prisma.promoCode.updateMany({
+      where: {
+        isActive: true,
+        expiresAt: {
+          lt: new Date()
+        }
+      },
+      data: {
+        isActive: false,
+        updatedAt: new Date()
+      }
+    });
+
+    console.log(`✅ Auto-deactivated ${updateResult.count} expired promo codes`);
+    
+    return {
+      deactivatedCount: updateResult.count,
+      deactivatedCodes: expiredPromoCodes
+    };
+  } catch (error) {
+    console.error('❌ Error checking expired promo codes:', error);
+    return null;
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
+    // Auto-check and deactivate expired promo codes before application
+    await checkAndDeactivateExpiredPromoCodes();
+    
     // Add CORS headers for production
     const headers = {
       'Access-Control-Allow-Origin': '*',

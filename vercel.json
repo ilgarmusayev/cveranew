@@ -16,6 +16,10 @@
    {
      "path": "/api/cron/cancel-expired-subscriptions",
      "schedule": "15 0 * * *"
+   },
+   {
+     "path": "/api/cron/deactivate-expired-promodes",
+     "schedule": "30 0 * * *"
    }
  ]
 }

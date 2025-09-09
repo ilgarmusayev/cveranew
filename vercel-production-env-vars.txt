@@ -1,0 +1,28 @@
+# Vercel Production Environment Variables
+# Bu dəyərləri Vercel Dashboard > Settings > Environment Variables-da əlavə etməlisiniz
+
+# CRON_SECRET - cron job security üçün mütləqdir
+CRON_SECRET=GRSFF935BBJHJGBV44343HBJ
+
+# Database - artıq əlavədir
+DATABASE_URL=postgres://admincvera:ilqarilqar1M%40@cvera.postgres.database.azure.com:5432/cvera?sslmode=require
+
+# JWT - artıq əlavədir
+JWT_SECRET=az8V!hjkJHKL1231jklADJKU2389@qweTFD
+JWT_REFRESH_SECRET=refresh_az8V!hjkJHKL1231jklADJKU2389@qweTFD
+
+# LinkedIn OAuth - artıq əlavədir
+LINKEDIN_CLIENT_ID=78gi6jtz8ue28i
+LINKEDIN_CLIENT_SECRET=WPL_AP1.tYUQHKB0hjwn5uFV.JqoY8g==
+LINKEDIN_REDIRECT_URI=https://cvera.net/api/auth/linkedin/callback
+
+# ScrapingDog API - artıq əlavədir
+SCRAPINGDOG_API_KEY=6882894b855f5678d36484c8
+
+# Next.js production config
+NODE_ENV=production
+NEXT_PUBLIC_APP_URL=https://cvera.net
+NEXT_PUBLIC_BASE_URL=https://cvera.net
+
+# PDF Export Config - production üçün
+PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true

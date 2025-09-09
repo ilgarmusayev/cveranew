@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Update all expired subscriptions to 'expired' status
+    // Update all expired subscriptions to 'expired' status AND update user tiers to Free
     const updateResult = await prisma.subscription.updateMany({
       where: {
         status: 'active',
@@ -64,6 +64,21 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date()
       }
     });
+
+    // Also update all affected users' tiers to Free
+    const userIds = expiredSubscriptions.map(sub => sub.userId);
+    if (userIds.length > 0) {
+      await prisma.user.updateMany({
+        where: {
+          id: { in: userIds }
+        },
+        data: {
+          tier: 'Free',
+          updatedAt: new Date()
+        }
+      });
+      console.log(`✅ Updated ${userIds.length} users' tiers to Free`);
+    }
 
     console.log(`✅ Successfully canceled ${updateResult.count} expired subscriptions`);
 
