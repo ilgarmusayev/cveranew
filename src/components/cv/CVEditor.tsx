@@ -685,24 +685,6 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 return;
             }
 
-            // 🎯 Font settings convert - useSimpleFontSettings → export format
-            const exportFontSettings = {
-                fontFamily: fontSettings.fontFamily,
-                nameSize: fontSettings.titleSize,      // Şəxsi ad üçün (ən böyük)
-                titleSize: fontSettings.headingSize,    // İş vəzifəsi üçün
-                headingSize: fontSettings.headingSize,  // Bölmə başlıqları
-                subheadingSize: fontSettings.bodySize,  // Alt başlıqlar
-                bodySize: fontSettings.bodySize,        // Əsas mətn
-                smallSize: fontSettings.smallSize,      // Kiçik mətn
-                headingWeight: 700,                     // Bold
-                subheadingWeight: 600,                  // Semi-bold
-                bodyWeight: 400,                        // Normal
-                smallWeight: 400,                       // Normal
-                sectionSpacing: 8                       // Bölmə arası məsafə
-            };
-
-            console.log('🚀 CVEditor PDF Export - Font Settings:', exportFontSettings);
-
             // 🚫 PDF Export zamanı page break indikatorlarını gizlət
             const pageBreakElements = document.querySelectorAll(`
                 .page-break-indicator,
@@ -729,6 +711,24 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     element.style.visibility = 'hidden';
                 }
             });
+
+            // 🎯 Font settings convert - useSimpleFontSettings → export format
+            const exportFontSettings = {
+                fontFamily: fontSettings.fontFamily,
+                nameSize: fontSettings.titleSize,      // Şəxsi ad üçün (ən böyük)
+                titleSize: fontSettings.headingSize,    // İş vəzifəsi üçün
+                headingSize: fontSettings.headingSize,  // Bölmə başlıqları
+                subheadingSize: fontSettings.bodySize,  // Alt başlıqlar
+                bodySize: fontSettings.bodySize,        // Əsas mətn
+                smallSize: fontSettings.smallSize,      // Kiçik mətn
+                headingWeight: 700,                     // Bold
+                subheadingWeight: 600,                  // Semi-bold
+                bodyWeight: 400,                        // Normal
+                smallWeight: 400,                       // Normal
+                sectionSpacing: 8                       // Bölmə arası məsafə
+            };
+
+            console.log('🚀 CVEditor PDF Export - Font Settings:', exportFontSettings);
 
             // CVPreview-in tam HTML content-ini al
             const cvHTML = cvPreviewElement.outerHTML;
@@ -831,14 +831,6 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             console.error('PDF export xətası:', error);
             showError('PDF export zamanı xəta baş verdi');
         } finally {
-            // Page break elementlərinin original style-larını geri qaytar
-            originalStyles.forEach(({ element, display, visibility }) => {
-                if (element instanceof HTMLElement) {
-                    element.style.display = display;
-                    element.style.visibility = visibility;
-                }
-            });
-            
             setSaving(false);
         }
     }, [cv, fontSettings, showSuccess, showError]);

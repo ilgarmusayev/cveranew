@@ -168,7 +168,7 @@ export const createPageBreakIndicatorData = (pageBreaks: number[]) => {
   }));
 };
 
-export default {
+const PageBreakUtils = {
   A4_DIMENSIONS,
   getContentDimensions,
   estimateContentHeight,
@@ -180,3 +180,5 @@ export default {
   useAutoPageBreaks,
   createPageBreakIndicatorData,
 };
+
+export default PageBreakUtils;

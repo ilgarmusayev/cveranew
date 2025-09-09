@@ -26,8 +26,6 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { CVData, PersonalInfo, Experience, Education, Skill, Language, Project, Certification, VolunteerExperience, CustomSection, CustomSectionItem } from '@/types/cv';
 import '@/styles/cv-fonts.css';
-import '@/styles/page-breaks.css';
-import PageBreakIndicator, { usePageBreaks } from './PageBreakIndicator';
 
 interface CVPreviewProps {
     cv: {
@@ -7339,67 +7337,56 @@ export default function CVPreview({
                 background: 'transparent',
             }}
         >
-            {/* CV Preview Container with Page Break Indicators */}
-            <PageBreakIndicator
-                showIndicators={!isMobile} // Only show on desktop
-                pageHeight={297} // A4 height in mm
-                pageWidth={210} // A4 width in mm
-                marginTop={15}
-                marginBottom={15}
-                marginLeft={15}
-                marginRight={15}
-                className="cv-preview-with-breaks"
+            {/* CV Preview Container */}
+            <div
+                id="cv-preview-element"
+                className="cv-preview"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                onClick={(e) => {
+                    // Stop propagation to prevent closing external buttons
+                    e.stopPropagation();
+                }}
+                style={{
+                    width: '210mm',
+                    height: isMobile ? 'fit-content' : 'auto', // Desktop: auto height for long content
+                    minHeight: '297mm', // Minimum A4 hündürlüyü
+                    maxWidth: '210mm', // CV enindən artıq olmaz
+                    maxHeight: isMobile ? 'none' : 'none', // Desktop: no height limit for long CVs
+                    margin: '0',
+                    overflow: isMobile ? 'auto' : 'visible', // Desktop: allow content to be visible
+                    position: 'relative',
+                    background: 'white',
+                    transformOrigin: 'top left',
+                    transform: `scale(${scale}) translateX(${isMobile ? currentTranslateX : 0}px)`,
+                    boxSizing: 'border-box',
+                    // Set CSS Variables for font management
+                ['--cv-font-family' as any]: fontSettings.fontFamily,
+                ['--cv-name-size' as any]: `${fontSettings.nameSize}px`,
+                ['--cv-title-size' as any]: `${fontSettings.titleSize}px`,
+                ['--cv-heading-size' as any]: `${fontSettings.headingSize}px`,
+                ['--cv-subheading-size' as any]: `${fontSettings.subheadingSize}px`,
+                ['--cv-body-size' as any]: `${fontSettings.bodySize}px`,
+                ['--cv-small-size' as any]: `${fontSettings.smallSize}px`,
+                ['--cv-heading-weight' as any]: fontSettings.headingWeight,
+                ['--cv-subheading-weight' as any]: fontSettings.subheadingWeight,
+                ['--cv-body-weight' as any]: fontSettings.bodyWeight,
+                ['--cv-small-weight' as any]: fontSettings.smallWeight,
+                ['--cv-section-spacing' as any]: `${fontSettings.sectionSpacing}px`,
+                ['--cv-section-margin-top' as any]: `${fontSettings.sectionSpacing}px`,
+                ['--cv-section-margin-bottom' as any]: `${fontSettings.sectionSpacing}px`,
+                lineHeight: '1.5',
+                // Enhanced mobile touch optimization for smooth scroll
+                touchAction: isMobile ? 'pan-x pan-y pinch-zoom' : 'pan-y',
+                overscrollBehavior: isMobile ? 'none' : 'contain',
+                WebkitOverflowScrolling: 'touch', // iOS smooth scrolling
+                scrollBehavior: 'smooth',
+                transition: isDragging ? 'none' : 'transform 0.2s ease-out',
+            } as React.CSSProperties}
             >
-                <div
-                    id="cv-preview-element"
-                    className="cv-preview"
-                    onTouchStart={handleTouchStart}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
-                    onClick={(e) => {
-                        // Stop propagation to prevent closing external buttons
-                        e.stopPropagation();
-                    }}
-                    style={{
-                        width: '210mm',
-                        height: isMobile ? 'fit-content' : 'auto', // Desktop: auto height for long content
-                        minHeight: '297mm', // Minimum A4 hündürlüyü
-                        maxWidth: '210mm', // CV enindən artıq olmaz
-                        maxHeight: isMobile ? 'none' : 'none', // Desktop: no height limit for long CVs
-                        margin: '0',
-                        overflow: isMobile ? 'auto' : 'visible', // Desktop: allow content to be visible
-                        position: 'relative',
-                        background: 'white',
-                        transformOrigin: 'top left',
-                        transform: `scale(${scale}) translateX(${isMobile ? currentTranslateX : 0}px)`,
-                        boxSizing: 'border-box',
-                        // Set CSS Variables for font management
-                    ['--cv-font-family' as any]: fontSettings.fontFamily,
-                    ['--cv-name-size' as any]: `${fontSettings.nameSize}px`,
-                    ['--cv-title-size' as any]: `${fontSettings.titleSize}px`,
-                    ['--cv-heading-size' as any]: `${fontSettings.headingSize}px`,
-                    ['--cv-subheading-size' as any]: `${fontSettings.subheadingSize}px`,
-                    ['--cv-body-size' as any]: `${fontSettings.bodySize}px`,
-                    ['--cv-small-size' as any]: `${fontSettings.smallSize}px`,
-                    ['--cv-heading-weight' as any]: fontSettings.headingWeight,
-                    ['--cv-subheading-weight' as any]: fontSettings.subheadingWeight,
-                    ['--cv-body-weight' as any]: fontSettings.bodyWeight,
-                    ['--cv-small-weight' as any]: fontSettings.smallWeight,
-                    ['--cv-section-spacing' as any]: `${fontSettings.sectionSpacing}px`,
-                    ['--cv-section-margin-top' as any]: `${fontSettings.sectionSpacing}px`,
-                    ['--cv-section-margin-bottom' as any]: `${fontSettings.sectionSpacing}px`,
-                    lineHeight: '1.5',
-                    // Enhanced mobile touch optimization for smooth scroll
-                    touchAction: isMobile ? 'pan-x pan-y pinch-zoom' : 'pan-y',
-                    overscrollBehavior: isMobile ? 'none' : 'contain',
-                    WebkitOverflowScrolling: 'touch', // iOS smooth scrolling
-                    scrollBehavior: 'smooth',
-                    transition: isDragging ? 'none' : 'transform 0.2s ease-out',
-                } as React.CSSProperties}
-                >
-                    {renderTemplate()}
-                </div>
-            </PageBreakIndicator>
+                {renderTemplate()}
+            </div>
         </div>
     );
 }
