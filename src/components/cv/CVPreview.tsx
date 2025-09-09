@@ -4037,14 +4037,20 @@ const LumenTemplate: React.FC<{
                 ${isDragActive || isLeftDragActive ? 'drag-mode' : ''}
             `}
         >
-            {/* Left Column - Contact & Skills with WHITE Background */}
+            {/* Left Column - Contact & Skills with BLUE Background */}
             <div 
-                className="w-2/5 bg-white text-gray-800 border-r-2 border-gray-300" 
+                className="w-2/5 bg-blue-600 text-white border-r-2 border-gray-300 atlas-left-panel" 
                 style={{ 
-                    padding: '20mm 10mm 20mm 20mm', /* üst: 20mm, sağ: 10mm, alt: 20mm, sol: 20mm */
+                    padding: '0 10mm 0 20mm', /* üst: 0, sağ: 10mm, alt: 0, sol: 20mm */
                     touchAction: 'none', // Force DnD kit control
                     userSelect: 'none',
-                    minHeight: '297mm' // A4 uzunluğu - 297mm
+                    minHeight: '297mm', // A4 uzunluğu - 297mm
+                    backgroundColor: '#2563eb', // Force blue background for PDF
+                    background: '#2563eb', // Additional background property
+                    backgroundImage: 'none', // Prevent any background images
+                    WebkitPrintColorAdjust: 'exact', // Force print colors
+                    printColorAdjust: 'exact', // Force print colors
+                    color: '#ffffff' // Force white text
                 }}
                 onTouchStart={(e) => {
                     if (isMobile) {
@@ -4067,35 +4073,35 @@ const LumenTemplate: React.FC<{
 
                 {/* Contact Information */}
                 <div className="cv-section avoid-break mb-6">
-                    <h2 className="text-sm font-bold text-gray-800 tracking-wide border-b border-gray-300 pb-1 mb-3" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
+                    <h2 className="text-sm font-bold text-white tracking-wide border-b border-white/30 pb-1 mb-3" style={{ textTransform: data.cvLanguage?.includes('en') ? 'none' : 'uppercase' }}>
                         {data.cvLanguage?.includes('en') ? 'CONTACT' : 
                          data.cvLanguage?.includes('tr') ? 'ILETISIM' : 'ƏLAQƏ'}
                     </h2>
                     <div className="text-xs space-y-3">
                         {personalInfo.email && (
                             <div className="flex items-start gap-3">
-                                <span className="font-medium text-gray-600 min-w-[70px]">
+                                <span className="font-medium text-blue-200 min-w-[70px]">
                                     {data.cvLanguage?.includes('en') ? 'Email: ' : 
                                      data.cvLanguage?.includes('tr') ? 'E-posta: ' : 'E-poçt: '}
                                 </span>
-                                <span className="text-gray-800">{personalInfo.email}</span>
+                                <span className="text-white">{personalInfo.email}</span>
                             </div>
                         )}
                         {personalInfo.phone && (
                             <div className="flex items-start gap-3">
-                                <span className="font-medium text-gray-600 min-w-[70px]">
+                                <span className="font-medium text-blue-200 min-w-[70px]">
                                     {data.cvLanguage === 'english' ? 'Phone: ' : 'Telefon: '}
                                 </span>
-                                <span className="text-gray-800">{personalInfo.phone}</span>
+                                <span className="text-white">{personalInfo.phone}</span>
                             </div>
                         )}
                         {personalInfo.location && (
                             <div className="flex items-start gap-3">
-                                <span className="font-medium text-gray-600 min-w-[70px]">
+                                <span className="font-medium text-blue-200 min-w-[70px]">
                                     {data.cvLanguage?.includes('en') ? 'Address: ' : 
                                      data.cvLanguage?.includes('tr') ? 'Adres: ' : 'Ünvan: '}
                                 </span>
-                                <span className="text-gray-800">{personalInfo.location}</span>
+                                <span className="text-white">{personalInfo.location}</span>
                             </div>
                         )}
                         {personalInfo.linkedin && (
@@ -4201,12 +4207,12 @@ const LumenTemplate: React.FC<{
                                                     {/* Hard Skills */}
                                                     {skills.filter(skill => skill.type === 'hard' && skill.name && skill.name.trim() !== '').length > 0 && (
                                                         <div >
-                                                            <h2 className="text-sm font-bold text-gray-800 mb-3 tracking-wide border-b border-gray-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                            <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-white/30 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                                 {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('skills', data.cvLanguage, data.sectionNames) : getSectionName('skills', data.cvLanguage, data.sectionNames)}
                                                             </h2>
                                                             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing)' }}>
                                                                 {skills.filter(skill => skill.type === 'hard' && skill.name && skill.name.trim() !== '').map((skill) => (
-                                                                    <div key={skill.id} className="text-xs text-gray-700 break-words">
+                                                                    <div key={skill.id} className="text-xs text-blue-100 break-words">
                                                                         • {skill.name}
                                                                     </div>
                                                                 ))}
@@ -4217,12 +4223,12 @@ const LumenTemplate: React.FC<{
                                                     {/* Soft Skills */}
                                                     {skills.filter(skill => skill.type === 'soft' && skill.name && skill.name.trim() !== '').length > 0 && (
                                                         <div >
-                                                            <h2 className="text-sm font-bold text-gray-800 mb-3 tracking-wide border-b border-gray-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                            <h2 className="text-sm font-bold text-white mb-3 tracking-wide border-b border-white/30 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                                 {getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
                                                             </h2>
                                                             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing)' }}>
                                                                 {skills.filter(skill => skill.type === 'soft' && skill.name && skill.name.trim() !== '').map((skill) => (
-                                                                    <div key={skill.id} className="text-xs text-gray-700 break-words">
+                                                                    <div key={skill.id} className="text-xs text-blue-100 break-words">
                                                                         • {skill.name}
                                                                     </div>
                                                                 ))}
@@ -4269,12 +4275,12 @@ const LumenTemplate: React.FC<{
                                                 <div style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
                                                     {languages.filter(lang => lang.language && lang.language.trim() !== '').length > 0 ? (
                                                         <>
-                                                            <h2 className="text-sm font-bold text-gray-800 tracking-wide border-b border-gray-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase', marginBottom: 0 }}>
+                                                            <h2 className="text-sm font-bold text-white tracking-wide border-b border-white/30 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase', marginBottom: 0 }}>
                                                                 {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('languages', data.cvLanguage, data.sectionNames) : getSectionName('languages', data.cvLanguage, data.sectionNames)}
                                                             </h2>
                                                             <div className="space-y-1">
                                                                 {languages.filter(lang => lang.language && lang.language.trim() !== '').map((lang) => (
-                                                                    <div key={lang.id} className="text-xs text-gray-700 break-words">
+                                                                    <div key={lang.id} className="text-xs text-blue-100 break-words">
                                                                         {lang.language} ({getLanguageLevel(lang.level, data.cvLanguage)})
                                                                     </div>
                                                                 ))}
@@ -4303,27 +4309,27 @@ const LumenTemplate: React.FC<{
                                                 isDropTarget={leftDropTargetId === 'leftCertifications'}
                                             >
                                                 <div style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                                                    <h2 className="text-sm font-bold text-gray-800 tracking-wide border-b border-gray-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase', marginBottom: 0 }}>
+                                                    <h2 className="text-sm font-bold text-white tracking-wide border-b border-white/30 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase', marginBottom: 0 }}>
                                                         {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('certifications', data.cvLanguage, data.sectionNames) : getSectionName('certifications', data.cvLanguage, data.sectionNames)}
                                                     </h2>
                                                     {certifications.length > 0 ? (
                                                         <div className="space-y-2">
                                                             {certifications.map((cert) => (
                                                                 <div key={cert.id}>
-                                                                    <div className="text-xs text-gray-800 font-medium">{cert.name}</div>
-                                                                    <div className="text-xs text-gray-600">{cert.issuer}</div>
+                                                                    <div className="text-xs text-white font-medium">{cert.name}</div>
+                                                                    <div className="text-xs text-blue-200">{cert.issuer}</div>
                                                                     {cert.date && (
-                                                                        <div className="text-xs text-gray-500">{formatDate(cert.date, data.cvLanguage)}</div>
+                                                                        <div className="text-xs text-blue-100">{formatDate(cert.date, data.cvLanguage)}</div>
                                                                     )}
                                                                     {cert.description && (
-                                                                        <div className="text-xs text-gray-600 mt-1">{renderHtmlContent(cert.description)}</div>
+                                                                        <div className="text-xs text-blue-200 mt-1">{renderHtmlContent(cert.description)}</div>
                                                                     )}
                                                                 </div>
                                                             ))}
                                                         </div>
                                                     ) : (
                                                         <div className="text-center py-4">
-                                                            <div className="text-gray-500 text-xs">
+                                                            <div className="text-blue-200 text-xs">
                                                                 {data.cvLanguage?.includes('en') ? 'No certifications added yet' : 
                                                                  data.cvLanguage?.includes('tr') ? 'Henüz sertifika eklenmedi' : 'Hələ sertifikat əlavə edilməyib'}
                                                             </div>
@@ -4343,7 +4349,7 @@ const LumenTemplate: React.FC<{
             </div>
 
             {/* Right Column - Main Content with Draggable Sections */}
-            <div className="flex-1" style={{ padding: '20mm 20mm 20mm 10mm' /* üst: 20mm, sağ: 20mm, alt: 20mm, sol: 10mm */ }}>
+            <div className="flex-1" style={{ padding: '0 20mm 0 10mm' /* üst: 0, sağ: 20mm, alt: 0, sol: 10mm */ }}>
                 {/* Header - Name */}
                 <div className="cv-section avoid-break" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
                     <h1 className="text-3xl font-bold text-gray-900 mb-2 leading-tight">
@@ -5841,10 +5847,10 @@ const AuroraTemplate: React.FC<{
     // Helper component for section header
     const SectionHeader: React.FC<{ title: string; sectionId: string }> = ({ title, sectionId }) => (
         <div 
-            className={`mb-3 ${isMobile && activeSection === sectionId ? 'ring-2 ring-gray-400 rounded' : ''}`}
+            className={`mb-1 ${isMobile && activeSection === sectionId ? 'ring-2 ring-gray-400 rounded' : ''}`}
             onClick={() => handleSectionClick(sectionId)}
         >
-            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider border-b border-gray-300 pb-1 mb-2">
+            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider border-b border-gray-300 pb-0.5 mb-0.5">
                 {title}
             </h2>
         </div>
@@ -5962,7 +5968,7 @@ const AuroraTemplate: React.FC<{
                         {/* Hard Skills */}
                         {skills.filter(skill => skill.type === 'hard').length > 0 && (
                             <div style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                                <h3 className="text-sm font-semibold text-gray-800 mb-2">{getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}</h3>
+                                <h3 className="text-sm font-semibold text-gray-800 mb-1">{getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}</h3>
                                 <div className="text-sm text-gray-700">
                                     {skills.filter(skill => skill.type === 'hard').map(skill => skill.name).join(' - ')}
                                 </div>
@@ -5972,7 +5978,7 @@ const AuroraTemplate: React.FC<{
                         {/* Soft Skills */}
                         {skills.filter(skill => skill.type === 'soft').length > 0 && (
                             <div style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                                <h3 className="text-sm font-semibold text-gray-800 mb-2">{getSectionName('softSkills', data.cvLanguage, data.sectionNames)}</h3>
+                                <h3 className="text-sm font-semibold text-gray-800 mb-1">{getSectionName('softSkills', data.cvLanguage, data.sectionNames)}</h3>
                                 <div className="text-sm text-gray-700">
                                     {skills.filter(skill => skill.type === 'soft').map(skill => skill.name).join(' - ')}
                                 </div>
@@ -5982,7 +5988,7 @@ const AuroraTemplate: React.FC<{
                         {/* Default/Other Skills */}
                         {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).length > 0 && (
                             <div style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                                <h3 className="text-sm font-semibold text-gray-800 mb-2">{getSectionName('coreCompetencies', data.cvLanguage, data.sectionNames)}</h3>
+                                <h3 className="text-sm font-semibold text-gray-800 mb-1">{getSectionName('coreCompetencies', data.cvLanguage, data.sectionNames)}</h3>
                                 <div className="text-sm text-gray-700">
                                     {skills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map(skill => skill.name).join(' • ')}
                                 </div>
@@ -6249,7 +6255,7 @@ const AuroraTemplate: React.FC<{
         >
             <div className="cv-template aurora-template bg-white min-h-[297mm]" style={{ 
                 fontFamily: 'var(--cv-font-family, "var(--cv-font-family)")',
-                padding: '20mm'
+                padding: '15mm' // Professional 15mm margins on all sides
             }}>
                 {/* Header Section - Clean and Professional */}
                 <div className="pb-4 border-b-2 border-gray-900" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0 }}>

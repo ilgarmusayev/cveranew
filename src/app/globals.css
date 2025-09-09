@@ -2,6 +2,76 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Atlas Template Left Panel Styles - Force Blue Background */
+.atlas-left-panel {
+  background: #2563eb !important;
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+.atlas-left-panel * {
+  color: #ffffff !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+/* Force Atlas left panel background in all contexts */
+div.atlas-left-panel,
+.w-2\/5.atlas-left-panel,
+.bg-blue-600.atlas-left-panel {
+  background: #2563eb !important;
+  background-color: #2563eb !important;
+}
+
+/* PDF Background Color Fix for Atlas Template */
+@media print {
+  @page {
+    margin: 0;
+    size: A4;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  /* Atlas Template Left Panel - Multiple selectors for maximum compatibility */
+  .atlas-left-panel,
+  .bg-blue-600,
+  .bg-blue-900,
+  .w-2\/5.bg-blue-600,
+  .w-2\/5.bg-blue-900,
+  div[class*="atlas-left-panel"],
+  div[class*="bg-blue-600"] {
+    background: #2563eb !important;
+    background-color: #2563eb !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color: #ffffff !important;
+  }
+  
+  /* Force white text on Atlas left panel */
+  .atlas-left-panel,
+  .atlas-left-panel *,
+  .w-2\/5.bg-blue-600,
+  .w-2\/5.bg-blue-600 * {
+    color: #ffffff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  /* Global print color adjustment */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  /* Force specific background for any blue element */
+  [style*="background"] {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
 :root {
   --background: #f8fafc;
   --brand-blue: #1e40af;

@@ -398,6 +398,35 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             max-width: none !important;
                         }
                         
+                        /* AURORA TEMPLATE ÜÇÜ 15MM PADDING - PROFESSIONAL MARGINS */
+                        .aurora-template,
+                        div.aurora-template,
+                        [class*="aurora-template"],
+                        body .aurora-template,
+                        html .aurora-template {
+                            padding: 15mm !important;  /* Professional 15mm margins on all sides */
+                            box-sizing: border-box !important;
+                            width: 100% !important;
+                            min-height: auto !important;
+                            min-width: auto !important;
+                            max-width: 100% !important;
+                            margin: 0 !important;
+                            border: none !important;
+                        }
+                        
+                        /* Aurora template container-ları da 15mm padding ilə */
+                        .aurora-template .cv-content-with-breaks,
+                        .aurora-template .cv-preview,
+                        .aurora-template .cv-container,
+                        .cv-preview.aurora-template,
+                        .cv-container.aurora-template {
+                            padding: 15mm !important;
+                            margin: 0 !important;
+                            box-sizing: border-box !important;
+                            width: 100% !important;
+                            max-width: none !important;
+                        }
+                        
                         /* Exclusive template content areas - padding parent-dən gəlir */
                         .exclusive-template * {
                             box-sizing: border-box !important;

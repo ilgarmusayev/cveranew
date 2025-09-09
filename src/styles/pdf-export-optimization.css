@@ -35,7 +35,7 @@
     background: transparent !important;
   }
 
-  /* Universal template optimization - applies to ALL templates */
+  /* Specific template optimization - NO universal div[class*="template"] rule */
   .basic-template,
   .modern-template,
   .ats-template,
@@ -43,8 +43,7 @@
   .aurora-template,
   .vertex-template,
   .horizon-template,
-  .lumen-template,
-  div[class*="template"] {
+  .lumen-template {
     width: 210mm !important;
     min-height: 297mm !important;
     max-width: 210mm !important;
@@ -78,7 +77,6 @@
     max-width: 210mm !important;
     margin: 0 !important;
     padding: 0 !important;
-    background: white !important;
     box-shadow: none !important;
     overflow: visible !important;
   }
@@ -219,7 +217,7 @@
 
   /* Aurora Template */
   .aurora-template {
-    padding: 20mm !important;
+    padding: 15mm !important;
   }
 
   /* Vertex Template */
@@ -249,6 +247,75 @@
     width: 150mm !important;
     padding: 15mm 12mm !important;
     background: white !important;
+  }
+
+  /* Atlas Template - Blue Left Panel */
+  .w-2\/5.bg-blue-600,
+  .atlas-template .left-panel,
+  .atlas-left-panel {
+    background: #2563eb !important;
+    background-color: #2563eb !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    color: white !important;
+  }
+
+  /* Atlas Template Blue Panel Text Colors */
+  .w-2\/5.bg-blue-600 *,
+  .atlas-template .left-panel *,
+  .atlas-left-panel * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Force blue background on any div with blue-600 class in PDF */
+  .bg-blue-600 {
+    background: #2563eb !important;
+    background-color: #2563eb !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Very specific selectors for Atlas template to force PDF background */
+  div.w-2\/5[class*="bg-blue"] {
+    background: #2563eb !important;
+    background-color: #2563eb !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Browser-specific print color forcing */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* HIGHEST PRIORITY: Atlas Template Blue Panel - Override ALL white backgrounds */
+  div.atlas-left-panel,
+  div.w-2\/5.atlas-left-panel,
+  div.bg-blue-600.atlas-left-panel,
+  div[class*="atlas-left-panel"],
+  .atlas-left-panel {
+    background: #2563eb !important;
+    background-color: #2563eb !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color: #ffffff !important;
+  }
+
+  /* HIGHEST PRIORITY: Atlas Template Text Colors */
+  div.atlas-left-panel *,
+  div.w-2\/5.atlas-left-panel *,
+  div.bg-blue-600.atlas-left-panel *,
+  div[class*="atlas-left-panel"] *,
+  .atlas-left-panel * {
+    color: #ffffff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
 
