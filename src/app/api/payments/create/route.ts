@@ -7,7 +7,7 @@ import epointService from '@/lib/epoint';
 const prisma = new PrismaClient();
 
 const createPaymentSchema = z.object({
-  tier: z.enum(['free', 'medium', 'premium']),
+  tier: z.enum(['free', 'pro', 'populyar', 'premium']),
   amount: z.number().min(0),
   saveCard: z.boolean().optional(),
 });

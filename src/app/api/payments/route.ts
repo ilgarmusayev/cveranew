@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
     const { planType, amount } = await req.json();
 
-    if (!planType || !amount || !['Medium', 'Premium'].includes(planType)) {
+    if (!planType || !amount || !['Pro', 'Populyar', 'Premium'].includes(planType)) {
       return NextResponse.json(
         { message: 'Yanlış plan tipi və ya məbləğ' },
         { status: 400 }
