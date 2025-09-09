@@ -38,18 +38,18 @@ const DEFAULT_SETTINGS: SimpleFontSettings = {
   xsSize: 10          // xs equivalent
 };
 
-// Function to generate dynamic font sizes based on base size (NO SCALE FACTORS)
+// Function to generate dynamic font sizes based on base size (backward compatibility)
 const generateFontSizes = (baseSize: number): FontSizeScale => {
   return {
-    xs: `${baseSize}px`,
-    sm: `${baseSize}px`,
+    xs: `${Math.max(8, baseSize * 0.75)}px`,
+    sm: `${Math.max(10, baseSize * 0.875)}px`,
     base: `${baseSize}px`,
-    lg: `${baseSize}px`,
-    xl: `${baseSize}px`,
-    '2xl': `${baseSize}px`,
-    '3xl': `${baseSize}px`,
-    '4xl': `${baseSize}px`,
-    '5xl': `${baseSize}px`
+    lg: `${baseSize * 1.125}px`,
+    xl: `${baseSize * 1.25}px`,
+    '2xl': `${baseSize * 1.5}px`,
+    '3xl': `${baseSize * 1.875}px`,
+    '4xl': `${baseSize * 2.25}px`,
+    '5xl': `${baseSize * 3}px`
   };
 };
 
@@ -148,26 +148,6 @@ export const useSimpleFontSettings = (cvId?: string) => {
         const key = `simple-font-${cvId}`;
         localStorage.setItem(key, JSON.stringify(updated));
         console.log(`🎨 Font Hook Debug - Saved to localStorage with key: ${key}`);
-        
-        // Export page üçün də sinxronizasiya et
-        const exportFormatSettings = {
-          fontFamily: updated.fontFamily,
-          nameSize: updated.titleSize,
-          titleSize: updated.subtitleSize,
-          headingSize: updated.headingSize,
-          subheadingSize: updated.headingSize,
-          bodySize: updated.bodySize,
-          smallSize: updated.smallSize,
-          headingWeight: 700,
-          subheadingWeight: 600,
-          bodyWeight: 400,
-          smallWeight: 400,
-          sectionSpacing: 8
-        };
-        
-        localStorage.setItem('exportFontSettings', JSON.stringify(exportFormatSettings));
-        localStorage.setItem('currentFontSettings', JSON.stringify(exportFormatSettings));
-        console.log('🚀 Font Hook: Export page üçün font settings sinxronizasiya edildi');
         
         // Dispatch custom event to notify other components
         const event = new CustomEvent('fontSettingsChanged', {

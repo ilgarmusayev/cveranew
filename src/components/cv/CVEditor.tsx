@@ -270,41 +270,19 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
     const [success, setSuccess] = useState('');
     const [showTranslationPanel, setShowTranslationPanel] = useState(false);
     const [showFontPanel, setShowFontPanel] = useState(false);
-    const [fontSettings, setFontSettings] = useState(() => {
-        // Load font settings from initialData if available
-        if (initialData?.data?.fontSettings) {
-            console.log('🎨 Font CVEditor: Loading font settings from database:', initialData.data.fontSettings);
-            return {
-                fontFamily: initialData.data.fontSettings.fontFamily || 'Arial, sans-serif',
-                nameSize: initialData.data.fontSettings.nameSize || 24,
-                titleSize: initialData.data.fontSettings.titleSize || 16,
-                headingSize: initialData.data.fontSettings.headingSize || 18,
-                subheadingSize: initialData.data.fontSettings.subheadingSize || 16,
-                bodySize: initialData.data.fontSettings.bodySize || 14,
-                smallSize: initialData.data.fontSettings.smallSize || 12,
-                headingWeight: initialData.data.fontSettings.headingWeight || 700,
-                subheadingWeight: initialData.data.fontSettings.subheadingWeight || 600,
-                bodyWeight: initialData.data.fontSettings.bodyWeight || 400,
-                smallWeight: initialData.data.fontSettings.smallWeight || 400,
-                sectionSpacing: initialData.data.fontSettings.sectionSpacing || 8
-            };
-        }
-        
-        console.log('🎨 Font CVEditor: Using default font settings');
-        return {
-            fontFamily: 'Arial, sans-serif',
-            nameSize: 24,         // İsim üçün
-            titleSize: 16,        // Başlıq üçün
-            headingSize: 18,      // Başlıqlar üçün
-            subheadingSize: 16,   // Alt başlıqlar üçün  
-            bodySize: 14,         // Əsas mətn üçün
-            smallSize: 12,        // Kiçik mətn üçün
-            headingWeight: 700,   // Başlıq qalınlığı
-            subheadingWeight: 600, // Alt başlıq qalınlığı
-            bodyWeight: 400,      // Əsas mətn qalınlığı
-            smallWeight: 400,     // Kiçik mətn qalınlığı
-            sectionSpacing: 8    // Bölmələr arası məsafə (px)
-        };
+    const [fontSettings, setFontSettings] = useState({
+        fontFamily: 'Arial, sans-serif',
+        nameSize: 24,         // İsim üçün
+        titleSize: 16,        // Başlıq üçün
+        headingSize: 18,      // Başlıqlar üçün
+        subheadingSize: 16,   // Alt başlıqlar üçün  
+        bodySize: 14,         // Əsas mətn üçün
+        smallSize: 12,        // Kiçik mətn üçün
+        headingWeight: 700,   // Başlıq qalınlığı
+        subheadingWeight: 600, // Alt başlıq qalınlığı
+        bodyWeight: 400,      // Əsas mətn qalınlığı
+        smallWeight: 400,     // Kiçik mətn qalınlığı
+        sectionSpacing: 8    // Bölmələr arası məsafə (px)
     });
     
     // Auto-save states - hybrid system (debounced + periodic)
@@ -638,14 +616,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             const payload = {
                 title: cvData.title,
                 templateId: cvData.templateId,
-                cv_data: cvData.data,
-                fontSettings: fontSettings // CRITICAL: Save font settings to database
+                cv_data: cvData.data
             };
-            
-            console.log('🎨 CVEditor Save Payload:', {
-                fontSettings: payload.fontSettings,
-                templateId: payload.templateId
-            });
 
             if (cv.id) {
                 await apiClient.put(`/api/cv/${cv.id}`, payload);
@@ -669,115 +641,6 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             setSaving(false);
         }
     }, [cv, onSave, showSuccess, showError]); // cv obyekti burada hələ də asılılıqdır, amma əsas buglar həll edilib.
-
-    // 🚀 SENIOR DEV: CVEditor-dən birbaşa PDF export
-    const handleDirectPDFExport = useCallback(async () => {
-        if (!cv.id) return;
-
-        try {
-            setSaving(true);
-            
-            // CVPreview elementini tap
-            const cvPreviewElement = document.querySelector('.cv-preview');
-            if (!cvPreviewElement) {
-                console.error('CVPreview elementi tapılmadı');
-                showError('CV preview hazır deyil');
-                return;
-            }
-
-            // 🎯 Font settings convert - useSimpleFontSettings → export format
-            const exportFontSettings = {
-                fontFamily: fontSettings.fontFamily,
-                nameSize: fontSettings.titleSize,      // Şəxsi ad üçün (ən böyük)
-                titleSize: fontSettings.headingSize,    // İş vəzifəsi üçün
-                headingSize: fontSettings.headingSize,  // Bölmə başlıqları
-                subheadingSize: fontSettings.bodySize,  // Alt başlıqlar
-                bodySize: fontSettings.bodySize,        // Əsas mətn
-                smallSize: fontSettings.smallSize,      // Kiçik mətn
-                headingWeight: 700,                     // Bold
-                subheadingWeight: 600,                  // Semi-bold
-                bodyWeight: 400,                        // Normal
-                smallWeight: 400,                       // Normal
-                sectionSpacing: 8                       // Bölmə arası məsafə
-            };
-
-            console.log('🚀 CVEditor PDF Export - Font Settings:', exportFontSettings);
-
-            // CVPreview-in tam HTML content-ini al
-            const cvHTML = cvPreviewElement.outerHTML;
-            
-            // CSS-ləri də al
-            const styles = Array.from(document.styleSheets)
-                .map(sheet => {
-                    try {
-                        return Array.from(sheet.cssRules)
-                            .map(rule => rule.cssText)
-                            .join('\n');
-                    } catch (e) {
-                        return '';
-                    }
-                })
-                .join('\n');
-
-            // API çağırısı
-            const token = localStorage.getItem('accessToken');
-            const response = await fetch(`/api/cv/export/${cv.id}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(token && { 'Authorization': `Bearer ${token}` })
-                },
-                body: JSON.stringify({
-                    format: 'pdf',
-                    templateId: cv.templateId,
-                    data: {
-                        personalInfo: cv.personalInfo,
-                        experience: cv.experience,
-                        education: cv.education,
-                        skills: cv.skills,
-                        languages: cv.languages,
-                        projects: cv.projects,
-                        certifications: cv.certifications,
-                        volunteerExperience: cv.volunteerExperience,
-                        customSections: cv.customSections,
-                        sectionOrder: cv.sectionOrder,
-                        cvLanguage: cv.cvLanguage
-                    },
-                    fontSettings: exportFontSettings,
-                    htmlContent: cvHTML,
-                    cssContent: styles
-                })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.text();
-                console.error('PDF export xətası:', response.status, errorData);
-                showError(`PDF export xətası: ${response.status}`);
-                return;
-            }
-
-            // PDF faylını download et
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = `${cv.title || 'CV'}.pdf`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-
-            showSuccess('PDF uğurla yükləndi');
-            console.log('✅ PDF export uğurlu oldu');
-
-        } catch (error) {
-            console.error('PDF export xətası:', error);
-            showError('PDF export zamanı xəta baş verdi');
-        } finally {
-            setSaving(false);
-        }
-    }, [cv, fontSettings, showSuccess, showError]);
 
 
     // Get sections for current language with memoization
@@ -847,8 +710,6 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 sectionNames: cv.sectionNames // Section names də əlavə edildi
             } as any
         };
-
-        console.log('🎨 CVEditor renderPreview fontSettings:', fontSettings);
 
         return (
             <CVPreview 
@@ -1067,45 +928,16 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             
                             {/* Action Buttons */}
                             {cv.id && (
-                                <>
-                                    {/* 🚀 SENIOR DEV: Birbaşa PDF Export Button */}
-                                    <button
-                                        onClick={handleDirectPDFExport}
-                                        disabled={saving}
-                                        className="flex items-center justify-center h-10 w-10 sm:h-auto sm:w-auto sm:px-3 sm:py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                        aria-label={cv.cvLanguage === 'english' ? 'Download PDF' : 'PDF Yüklə'}
-                                    >
-                                        {saving ? (
-                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                                        ) : (
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c-.621 0-1.125-.504-1.125-1.125V11.25a9 9 0 00-9-9z" />
-                                            </svg>
-                                        )}
-                                        <span className="hidden sm:inline ml-2">
-                                            {cv.cvLanguage === 'english' ? 'PDF' : 'PDF'}
-                                        </span>
-                                    </button>
-
-                                    {/* Export Page Button */}
-                                    <button
-                                        onClick={() => {
-                                            // Font settings-ləri həm export həm də persistent storage-ə saxla
-                                            const fontSettingsJSON = JSON.stringify(fontSettings);
-                                            localStorage.setItem('exportFontSettings', fontSettingsJSON);
-                                            localStorage.setItem('currentFontSettings', fontSettingsJSON);
-                                            console.log('🚀 CVEditor: Font settings export page üçün hazırlandı:', fontSettings);
-                                            window.open(`/cv/export/${cv.id}`, '_blank');
-                                        }}
-                                        className="flex items-center justify-center h-10 w-10 sm:h-auto sm:w-auto sm:px-3 sm:py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-transparent rounded-lg hover:bg-gray-200 transition-colors"
-                                        aria-label={cv.cvLanguage === 'english' ? 'Export Page' : 'Export Səhifəsi'}
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-                                        <span className="hidden sm:inline ml-2">
-                                            {cv.cvLanguage === 'english' ? 'Export' : 'Export'}
-                                        </span>
-                                    </button>
-                                </>
+                                <button
+                                    onClick={() => window.open(`/cv/export/${cv.id}`, '_blank')}
+                                    className="flex items-center justify-center h-10 w-10 sm:h-auto sm:w-auto sm:px-3 sm:py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-transparent rounded-lg hover:bg-gray-200 transition-colors"
+                                    aria-label={cv.cvLanguage === 'english' ? 'Export CV' : 'CV-ni yüklə'}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                                    <span className="hidden sm:inline ml-2">
+                                        {cv.cvLanguage === 'english' ? 'Export' : 'Yükləyin'}
+                                    </span>
+                                </button>
                             )}
                             
                             <button

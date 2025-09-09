@@ -107,6 +107,20 @@ export default function ContactPage() {
                 </div>
               </div>
 
+      {/* Support Email */}
+              <div className="flex items-center mb-6">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg flex items-center justify-center mr-4">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">Dəstək</h3>
+                  <a href="tel:+9941024242410" className="text-blue-600 hover:text-blue-700 transition-colors">
+                    +994 (10) 424 24 10
+                  </a>
+                </div>
+              </div>
               {/* Social Media */}
               <div className="border-t border-gray-200 pt-6">
                 <h3 className="font-semibold text-gray-900 mb-4">Sosial Şəbəkələr</h3>
