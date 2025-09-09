@@ -94,15 +94,14 @@ export async function PUT(
       );
     }
 
-    const { title, cv_data, templateId, fontSettings } = await request.json();
+    const { title, cv_data, templateId } = await request.json();
     
     console.log('🔍 PUT request received:', {
       cvId: id,
       title,
       templateId,
       personalInfo: cv_data?.personalInfo,
-      hasData: !!cv_data,
-      fontSettings: fontSettings ? 'present' : 'missing'
+      hasData: !!cv_data
     });
 
     // CV-nin mövcudluğunu və sahibliyini yoxla
@@ -156,12 +155,7 @@ export async function PUT(
           languages: cv_data.languages || (existingCV.cv_data as any)?.languages || [],
           volunteerExperience: cv_data.volunteerExperience || (existingCV.cv_data as any)?.volunteerExperience || [],
           publications: cv_data.publications || (existingCV.cv_data as any)?.publications || [],
-          honorsAwards: cv_data.honorsAwards || (existingCV.cv_data as any)?.honorsAwards || [],
-          // CRITICAL: Save font settings to database  
-          fontSettings: fontSettings ? {
-            ...(existingCV.cv_data as any)?.fontSettings,
-            ...fontSettings
-          } : (existingCV.cv_data as any)?.fontSettings
+          honorsAwards: cv_data.honorsAwards || (existingCV.cv_data as any)?.honorsAwards || []
         } : existingCV.cv_data,
         templateId: templateId || existingCV.templateId,
         updatedAt: new Date()
@@ -173,8 +167,7 @@ export async function PUT(
       title: updatedCV.title,
       language: (updatedCV.cv_data as any)?.cvLanguage,
       hasTranslationMetadata: !!(updatedCV.cv_data as any)?.translationMetadata,
-      hasAdditionalSections: !!(updatedCV.cv_data as any)?.additionalSections && Object.keys((updatedCV.cv_data as any).additionalSections).length > 0,
-      savedFontSettings: (updatedCV.cv_data as any)?.fontSettings
+      hasAdditionalSections: !!(updatedCV.cv_data as any)?.additionalSections && Object.keys((updatedCV.cv_data as any).additionalSections).length > 0
     });
 
     // Return the updated CV in the same format as GET

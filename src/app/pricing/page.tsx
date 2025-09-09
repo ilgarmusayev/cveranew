@@ -32,7 +32,7 @@ const plans: PricingPlan[] = [
   {
     id: 'pro',
     name: 'Populyar',
-    price: 2.99, // 2.99 dollara bərabər olan manat qiyməti
+    price: 2.99, // 2.99 AZN
     features: [
       'Gündə 5 CV yaratma ',
       'Pulsuz və Populyar səviyyə şablonlar',
@@ -49,7 +49,7 @@ const plans: PricingPlan[] = [
   {
     id: 'premium',
     name: 'Premium',
-    price: 4.99, // 4.99 dollara bərabər olan manat qiyməti
+    price: 4.99, // 4.99 AZN
     features: [
       'Limitsiz CV yaratma',
       'Bütün şablonlar (Premium daxil)',

@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import CVPreview from '@/components/cv/CVPreview';
 import { apiClient } from '@/lib/api';
-import useSimpleFontSettings from '@/hooks/useSimpleFontSettings';
 
 interface CVData {
     personalInfo: any;
@@ -38,24 +37,21 @@ export default function CVExportPage() {
     const [exporting, setExporting] = useState(false);
     const [showFontPanel, setShowFontPanel] = useState(false);
     
-    // 🚀 SENIOR DEV: useSimpleFontSettings hook istifadə et - Preview ilə TAM EYNİ
-    const { fontSettings, updateFontSettings } = useSimpleFontSettings(cvId);
-    
-    // SimpleFontSettings-i export format-ına convert et
-    const exportFontSettings = React.useMemo(() => ({
-        fontFamily: fontSettings.fontFamily,
-        nameSize: fontSettings.titleSize,      // Şəxsi ad üçün
-        titleSize: fontSettings.subtitleSize,   // İş vəzifəsi üçün
-        headingSize: fontSettings.headingSize,  // Bölmə başlıqları
-        subheadingSize: fontSettings.headingSize, // Alt başlıqlar (eyni ölçü)
-        bodySize: fontSettings.bodySize,        // Əsas mətn
-        smallSize: fontSettings.smallSize,      // Kiçik mətn
-        headingWeight: 700,                     // Bold
-        subheadingWeight: 600,                  // Semi-bold
-        bodyWeight: 400,                        // Normal
-        smallWeight: 400,                       // Normal
-        sectionSpacing: 8                       // Bölmə arası məsafə
-    }), [fontSettings]);
+    // Font settings state (default values matching CVEditor)
+    const [fontSettings, setFontSettings] = useState({
+        fontFamily: 'Arial, sans-serif',
+        nameSize: 24,
+        titleSize: 20,
+        headingSize: 18,
+        subheadingSize: 16,
+        bodySize: 14,
+        smallSize: 12,
+        headingWeight: 700,
+        subheadingWeight: 600,
+        bodyWeight: 400,
+        smallWeight: 400,
+        sectionSpacing: 8
+    });
 
     useEffect(() => {
         const fetchCV = async () => {
@@ -65,7 +61,6 @@ export default function CVExportPage() {
                 
                 if (response.status === 200 && response.data) {
                     setCV(response.data);
-                    console.log('🎨 Export page: CV data loaded, using default font settings');
                 } else {
                     setError('CV məlumatları tapılmadı');
                 }
@@ -88,10 +83,6 @@ export default function CVExportPage() {
         try {
             setExporting(true);
             
-            // 🔍 FONT SETTINGS DEBUG
-            console.log('🚀 Export PDF - useSimpleFontSettings:', fontSettings);
-            console.log('🎯 Export PDF - exportFontSettings:', exportFontSettings);
-            
             // CVPreview elementini render olması üçün bir az gözlə
             await new Promise(resolve => setTimeout(resolve, 100));
             
@@ -112,7 +103,7 @@ export default function CVExportPage() {
                         format: 'pdf',
                         templateId: cv.templateId,
                         data: cv.data,
-                        fontSettings: exportFontSettings
+                        fontSettings: fontSettings
                     })
                 });
 
@@ -209,7 +200,7 @@ export default function CVExportPage() {
                     format: 'pdf',
                     templateId: cv.templateId,
                     data: cv.data,
-                    fontSettings: exportFontSettings,
+                    fontSettings: fontSettings,
                     htmlContent: cvHTML,
                     cssContent: combinedStyles
                 })
@@ -321,23 +312,7 @@ export default function CVExportPage() {
             </div>
 
             {/* CV Preview - Centered without background */}
-            <div 
-                className="flex justify-center py-8"
-                style={{
-                    '--cv-font-family': exportFontSettings.fontFamily,
-                    '--cv-name-size': `${exportFontSettings.nameSize}px`,
-                    '--cv-title-size': `${exportFontSettings.titleSize}px`,
-                    '--cv-heading-size': `${exportFontSettings.headingSize}px`,
-                    '--cv-subheading-size': `${exportFontSettings.subheadingSize}px`,
-                    '--cv-body-size': `${exportFontSettings.bodySize}px`,
-                    '--cv-small-size': `${exportFontSettings.smallSize}px`,
-                    '--cv-heading-weight': exportFontSettings.headingWeight,
-                    '--cv-subheading-weight': exportFontSettings.subheadingWeight,
-                    '--cv-body-weight': exportFontSettings.bodyWeight,
-                    '--cv-small-weight': exportFontSettings.smallWeight,
-                    '--cv-section-spacing': `${exportFontSettings.sectionSpacing}px`
-                } as React.CSSProperties}
-            >
+            <div className="flex justify-center py-8">
                 <CVPreview 
                     cv={{
                         id: cv.id,
@@ -345,7 +320,7 @@ export default function CVExportPage() {
                         data: cv.data as any
                     }}
                     template={cv.templateId}
-                    fontSettings={exportFontSettings}
+                    fontSettings={fontSettings}
                 />
             </div>
 
