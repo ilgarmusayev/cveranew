@@ -6801,7 +6801,7 @@ const ExclusiveTemplate: React.FC<{
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
         >
-            <div className="cv-template exclusive-template bg-white min-h-[297mm]" style={{ fontFamily: 'var(--cv-font-family, "var(--cv-font-family)")', padding: '20mm' }}>
+            <div className="cv-template exclusive-template bg-white min-h-[297mm]" style={{ fontFamily: 'var(--cv-font-family, "var(--cv-font-family)")', padding: '15mm' }}>
                 {/* Header Section - Enhanced Professional Design */}
                 <div style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
                     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg shadow-sm">

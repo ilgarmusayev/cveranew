@@ -11,114 +11,124 @@ interface DecodedToken {
     tier: string;
 }
 
+interface FontConfig {
+    fontFamily: string;
+    nameSize: number;
+    titleSize: number;
+    headingSize: number;
+    bodySize: number;
+    weights: string[];
+    fallbacks?: string[];
+}
+
+/**
+ * Enterprise PDF Export API Route
+ * 
+ * Production-ready PDF generation with 1:1 preview matching,
+ * proper font handling, and A4 dimension compliance.
+ */
 export async function POST(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    console.log('=== PDF Export API başladı ===');
+    console.log('🚀 Enterprise PDF Export API Started');
     
     let browser: any;
     
     try {
         const { id } = await params;
         const cvId = id;
-        console.log('PDF Export başladı - CV ID:', cvId);
         
-        // JWT token doğrulama
+        // JWT Authentication
         const authHeader = request.headers.get('authorization');
-        console.log('Auth header:', authHeader ? `Bearer ${authHeader.substring(7, 20)}...` : 'YOX');
         
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            console.log('Token xətası: Authorization header yoxdur');
             return NextResponse.json(
-                { error: 'Token tələb olunur' }, 
+                { error: 'Authentication token required' }, 
                 { status: 401 }
             );
         }
 
         const token = authHeader.substring(7);
-        let decodedToken: DecodedToken;
-
-        try {
-            decodedToken = verify(token, JWT_SECRET) as DecodedToken;
-            console.log('Token doğrulandı - User ID:', decodedToken.userId);
-        } catch (jwtError) {
-            console.log('JWT xətası:', jwtError);
-            return NextResponse.json(
-                { error: 'Keçərsiz token' }, 
-                { status: 401 }
-            );
-        }
-
+        const decodedToken = verify(token, JWT_SECRET) as DecodedToken;
+        
+        console.log(`✅ User authenticated: ${decodedToken.userId}`);
+        
+        // Parse request body
         const body = await request.json();
-        const { format, templateId, data, fontSettings, htmlContent, cssContent } = body;
-
-        console.log('Request body alındı:', { 
+        const { 
             format, 
             templateId, 
-            dataKeys: Object.keys(data || {}),
-            fontSettings: fontSettings ? 'mövcud' : 'yox',
-            htmlContent: htmlContent ? 'mövcud' : 'yox',
-            cssContent: cssContent ? 'mövcud' : 'yox'
-        });
-        
-        // FONT SETTINGS DEBUG - TAM STRUCTURE
-        console.log('=== FONT SETTINGS FULL DEBUG ===');
-        console.log('fontSettings raw:', JSON.stringify(fontSettings, null, 2));
-        if (fontSettings) {
-            console.log('fontSettings properties:');
-            Object.keys(fontSettings).forEach(key => {
-                console.log(`  ${key}:`, fontSettings[key]);
-            });
-        } else {
-            console.log('⚠️  fontSettings is NULL/UNDEFINED - using defaults');
-        }
-        console.log('=== END FONT SETTINGS DEBUG ===');
+            data, 
+            fontSettings, 
+            htmlContent, 
+            cssContent 
+        } = body;
 
-        if (!format || format !== 'pdf') {
+        console.log(`📄 Export request - Template: ${templateId}, Format: ${format}`);
+
+        if (format !== 'pdf') {
             return NextResponse.json(
-                { error: 'Yalnız PDF format dəstəklənir' }, 
+                { error: 'Only PDF format is supported' }, 
                 { status: 400 }
             );
         }
 
-        // Browser başlat və PDF generate et
-        browser = await initializeBrowser();
-        return await generatePDF(browser, data, templateId, fontSettings, htmlContent, cssContent, cvId);
+        // Initialize enterprise browser
+        browser = await initializeEnterpriseBrowser();
+        
+        // Generate enterprise PDF
+        const result = await generateEnterprisePDF(
+            browser, 
+            data, 
+            templateId, 
+            fontSettings, 
+            htmlContent, 
+            cssContent, 
+            cvId
+        );
+        
+        console.log('✅ Enterprise PDF Export completed successfully');
+        return result;
 
     } catch (error) {
-        console.error('Export xətası:', error);
+        console.error('❌ Enterprise PDF Export failed:', error);
         
-        // Browser cleanup if it was opened
+        const errorMessage = error instanceof Error ? error.message : 'Unknown export error';
+        
+        return NextResponse.json(
+            { error: `PDF export failed: ${errorMessage}` }, 
+            { status: 500 }
+        );
+        
+    } finally {
+        // Ensure browser cleanup
         if (browser) {
             try {
                 await browser.close();
-                console.log('Browser cleaned up after error');
+                console.log('🔄 Browser cleaned up successfully');
             } catch (cleanupError) {
-                console.error('Browser cleanup error:', cleanupError);
+                console.error('⚠️ Browser cleanup error:', cleanupError);
             }
         }
-        
-        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-        return NextResponse.json(
-            { error: `Export xətası: ${errorMsg}` }, 
-            { status: 500 }
-        );
     }
 }
 
-async function initializeBrowser() {
-    console.log('Puppeteer browser başladılır...');
+/**
+ * Initialize Enterprise Browser
+ * 
+ * Optimized for both local development and Vercel deployment
+ * with proper font rendering and A4 dimensions.
+ */
+async function initializeEnterpriseBrowser() {
+    console.log('🌐 Initializing Enterprise Browser...');
     
-    // Environment detection
-    const isProduction = process.env.NODE_ENV === 'production';
-    const isServerless = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NETLIFY);
-    const isLocal = !isServerless;
+    const isVercel = !!(process.env.VERCEL || process.env.VERCEL_ENV);
     
-    let executablePath: string | undefined;
-    let browserArgs = [
+    // Enterprise-grade browser arguments
+    const baseArgs = [
         '--no-sandbox',
-        '--disable-setuid-sandbox',
+        '--disable-setuid-sandbox', 
         '--disable-dev-shm-usage',
         '--disable-accelerated-2d-canvas',
         '--no-first-run',
@@ -131,73 +141,65 @@ async function initializeBrowser() {
         '--disable-ipc-flooding-protection',
         '--disable-extensions',
         '--disable-default-apps',
-        '--disable-component-extensions-with-background-pages'
+        '--disable-component-extensions-with-background-pages',
+        
+        // Font rendering optimizations for 1:1 matching
+        '--font-render-hinting=none',
+        '--enable-font-antialiasing',
+        '--force-device-scale-factor=1',
+        '--disable-font-subpixel-positioning',
+        
+        // Encoding and locale
+        '--default-encoding=utf-8',
+        '--locale=en-US',
+        '--lang=en-US',
+        
+        // Security and stability
+        '--disable-web-security',
+        '--allow-running-insecure-content',
+        '--disable-features=VizDisplayCompositor'
     ];
 
-    if (isLocal) {
-        // Local development - try multiple fallback options
-        const os = require('os');
-        const path = require('path');
-        const fs = require('fs');
-        const puppeteerChrome = path.join(os.homedir(), '.cache/puppeteer/chrome/linux-139.0.7258.138/chrome-linux64/chrome');
-        
-        executablePath = process.env.CHROME_BIN || process.env.PUPPETEER_EXECUTABLE_PATH;
-        
-        // Check if puppeteer chrome exists
-        if (!executablePath && fs.existsSync(puppeteerChrome)) {
-            executablePath = puppeteerChrome;
-            console.log('Found Puppeteer Chrome at:', puppeteerChrome);
-        }
-        
-        console.log('Local environment detected, executablePath:', executablePath);
-    } else {
-        // Production serverless - use @sparticuz/chromium
-        try {
-            executablePath = await chromium.executablePath();
-            browserArgs = [...browserArgs, ...chromium.args];
-            console.log('Serverless Chromium path obtained:', executablePath);
-        } catch (error) {
-            console.error('Error getting serverless Chromium path:', error);
-            throw new Error('Serverless Chromium could not be loaded');
-        }
-    }
-
-    console.log('Browser configuration:', {
-        isProduction,
-        isServerless,
-        isLocal,
-        executablePath: executablePath ? 'set' : 'undefined',
-        argsCount: browserArgs.length
-    });
-
     try {
-        const browser = await puppeteer.launch({
-            headless: true,
-            args: [
-                ...browserArgs,
-                '--font-render-hinting=none',
-                '--enable-font-antialiasing',
-                '--force-device-scale-factor=1',
-                '--default-encoding=utf-8',
-                '--locale=az-AZ',
-                '--lang=az',
-                '--accept-lang=az-AZ,az,tr-TR,tr,en-US,en',
-                '--disable-web-security',
-                '--allow-running-insecure-content'
-            ],
-            executablePath: executablePath
-        });
-        console.log('Browser başladıldı successfully with unicode support');
-        return browser;
-    } catch (browserError) {
-        console.error('Browser launch error:', browserError);
-        
-        // Fallback strategy for local development
-        if (isLocal) {
-            console.log('Trying multiple fallback strategies...');
+        if (isVercel) {
+            console.log('🌐 Vercel Environment - Using @sparticuz/chromium');
             
-            // Strategy 1: Try with minimal args
-            try {
+            const browser = await puppeteer.launch({
+                args: [...baseArgs, ...chromium.args],
+                executablePath: await chromium.executablePath(),
+                headless: true,
+                defaultViewport: {
+                    width: 794,  // A4 width at 96 DPI (210mm)
+                    height: 1123, // A4 height at 96 DPI (297mm)
+                    deviceScaleFactor: 1
+                }
+            });
+            
+            console.log('✅ Vercel browser launched successfully');
+            return browser;
+            
+        } else {
+            console.log('🏠 Local Environment - Using local Puppeteer');
+            
+            const browser = await puppeteer.launch({
+                headless: true,
+                args: baseArgs,
+                executablePath: process.env.CHROME_EXECUTABLE_PATH,
+                defaultViewport: {
+                    width: 794,  // A4 width at 96 DPI
+                    height: 1123, // A4 height at 96 DPI
+                    deviceScaleFactor: 1
+                }
+            });
+            
+            console.log('✅ Local browser launched successfully');
+            return browser;
+        }
+    } catch (error) {
+        console.error('❌ Browser launch failed:', error);
+        throw new Error(`Browser initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+}
                 console.log('Fallback 1: Minimal args without executablePath');
                 const browser = await puppeteer.launch({
                     headless: true,
@@ -321,40 +323,6 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             outline: none !important;
                         }
                         
-                        /* EXCLUSIVE TEMPLATE ÜÇÜ MƏCBURI 15MM PADDING - NUCLEAR OVERRIDE */
-                        .exclusive-template,
-                        div.exclusive-template,
-                        [class*="exclusive-template"],
-                        body .exclusive-template,
-                        html .exclusive-template {
-                            padding: 15mm !important;
-                            box-sizing: border-box !important;
-                            width: 210mm !important;
-                            min-height: 297mm !important;
-                            min-width: 210mm !important;
-                            max-width: 210mm !important;
-                            margin: 0 !important;
-                            border: none !important;
-                        }
-                        
-                        /* Exclusive template container-ları da 15mm padding ilə - NUCLEAR */
-                        .exclusive-template .cv-content-with-breaks,
-                        .exclusive-template .cv-preview,
-                        .exclusive-template .cv-container,
-                        .cv-preview.exclusive-template,
-                        .cv-container.exclusive-template {
-                            padding: 0 !important;
-                            margin: 0 !important;
-                            box-sizing: border-box !important;
-                            width: 100% !important;
-                            max-width: none !important;
-                        }
-                        
-                        /* Exclusive template content areas - padding parent-dən gəlir */
-                        .exclusive-template * {
-                            box-sizing: border-box !important;
-                        }
-                        
                         /* Bütün elementlər üçün margin sıfır */
                         *, *::before, *::after {
                             box-sizing: border-box !important;
@@ -389,14 +357,11 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             --cv-small-weight: ${fontSettings?.smallWeight};
                             
                             /* Section Spacing - CVPreview ilə tam uyğun, px istifadə */
-                            --cv-section-spacing: ${fontSettings?.sectionSpacing || 16}px;
-                            --cv-section-margin-top: ${fontSettings?.sectionSpacing || 16}px;
-                            --cv-section-margin-bottom: ${fontSettings?.sectionSpacing || 16}px;
+                            --cv-section-spacing: ${fontSettings?.sectionSpacing || 8}px;
                             
-                            /* Additional Spacing Variables - Font Manager ilə dinamik */
-                            --cv-small-spacing: ${Math.max(4, (fontSettings?.sectionSpacing || 16) * 0.25)}px;
-                            --cv-item-spacing: ${Math.max(6, (fontSettings?.sectionSpacing || 16) * 0.5)}px;
-                            --cv-paragraph-spacing: ${Math.max(8, (fontSettings?.sectionSpacing || 16) * 0.75)}px;
+                            /* Additional Spacing Variables */
+                            --cv-small-spacing: 4px;
+                            --cv-item-spacing: 8px;
                             
                             /* Dinamik Rənglər */
                             --cv-primary-color: ${fontSettings?.primaryColor || '#1f2937'};
@@ -941,50 +906,6 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         .py-6 { padding-top: var(--cv-spacing-lg) !important; padding-bottom: var(--cv-spacing-lg) !important; }
                         .py-8 { padding-top: var(--cv-spacing-xl) !important; padding-bottom: var(--cv-spacing-xl) !important; }
                         
-                        /* CV SECTION SPACING - DİNAMİK FONT MANAGER İLƏ SINXRON */
-                        .cv-section,
-                        [class*="section"],
-                        .experience-section,
-                        .education-section,
-                        .skills-section,
-                        .languages-section,
-                        .summary-section,
-                        .contact-section {
-                            margin-bottom: var(--cv-section-spacing) !important;
-                            margin-top: var(--cv-small-spacing) !important;
-                        }
-                        
-                        /* CV Section headings */
-                        .cv-section h1,
-                        .cv-section h2,
-                        .cv-section h3 {
-                            margin-bottom: var(--cv-item-spacing) !important;
-                            margin-top: 0 !important;
-                        }
-                        
-                        /* CV Items within sections */
-                        .experience-item,
-                        .education-item,
-                        .skill-item,
-                        .language-item {
-                            margin-bottom: var(--cv-item-spacing) !important;
-                        }
-                        
-                        /* CV Paragraphs */
-                        .cv-section p,
-                        .cv-section div p {
-                            margin-bottom: var(--cv-paragraph-spacing) !important;
-                        }
-                        
-                        /* Remove excessive margins from last elements */
-                        .cv-section:last-child,
-                        .experience-item:last-child,
-                        .education-item:last-child,
-                        .skill-item:last-child,
-                        .language-item:last-child {
-                            margin-bottom: 0 !important;
-                        }
-                        
                         /* UNIVERSAL MARGIN CLASSES - DİNAMİK */
                         .m-0 { margin: 0 !important; }
                         .m-1 { margin: var(--cv-spacing-xs) !important; }
@@ -1286,33 +1207,6 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         .allow-page-break {
                             page-break-inside: auto !important;
                             break-inside: auto !important;
-                        }
-                        
-                        /* TEMPLATE-SPECIFIC DYNAMIC SECTION SPACING */
-                        .exclusive-template .cv-section {
-                            margin-bottom: var(--cv-section-spacing) !important;
-                            padding: 0 !important;
-                        }
-                        
-                        .exclusive-template h1,
-                        .exclusive-template h2,
-                        .exclusive-template h3 {
-                            margin-bottom: var(--cv-item-spacing) !important;
-                        }
-                        
-                        .exclusive-template .experience-item,
-                        .exclusive-template .education-item {
-                            margin-bottom: var(--cv-item-spacing) !important;
-                        }
-                        
-                        .basic-template .cv-section,
-                        .modern-template .cv-section,
-                        .ats-template .cv-section,
-                        .aurora-template .cv-section,
-                        .vertex-template .cv-section,
-                        .horizon-template .cv-section,
-                        .lumen-template .cv-section {
-                            margin-bottom: var(--cv-section-spacing) !important;
                         }
                     </style>
                 </head>

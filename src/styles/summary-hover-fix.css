@@ -1,0 +1,39 @@
+/* Summary section specific overrides for hover styling */
+.cv-section.summary-section {
+    border: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Prevent hover border on sortable items containing summary section */
+.sortable-item:has(.summary-section):hover {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Alternative approach - target parent of summary section */
+[data-section-type="summary"]:hover,
+[data-sortable-id*="summary"]:hover {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Ensure summary content has no extra spacing */
+.summary-section h2,
+.summary-section div {
+    margin: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.summary-section h2 {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+}

@@ -1,0 +1,274 @@
+/* PDF Export Optimization for All Templates */
+
+@media print {
+  /* Page setup for exact PDF export */
+  @page {
+    margin: 0;
+    size: A4;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Remove all page break indicators and preview elements for PDF */
+  .page-break-preview,
+  .page-break-indicator,
+  .page-number,
+  .cv-section.force-next-page::after,
+  .cv-section.in-danger-zone::before,
+  .cv-section.intersects-page-break::before {
+    display: none !important;
+  }
+
+  /* Reset all hover and interactive styles for PDF */
+  .cv-section:hover,
+  .sortable-item:hover,
+  .drag-handle,
+  .section-controls,
+  .mobile-controls {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  /* Universal template optimization - applies to ALL templates */
+  .basic-template,
+  .modern-template,
+  .ats-template,
+  .exclusive-template,
+  .aurora-template,
+  .vertex-template,
+  .horizon-template,
+  .lumen-template,
+  div[class*="template"] {
+    width: 210mm !important;
+    min-height: 297mm !important;
+    max-width: 210mm !important;
+    margin: 0 !important;
+    background: white !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    page-break-after: always !important;
+  }
+
+  /* Left panels for two-column templates */
+  .left-panel,
+  .left-column,
+  .left-sidebar {
+    min-height: 297mm !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Right panels for two-column templates */
+  .right-panel,
+  .right-column,
+  .main-content {
+    min-height: 297mm !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Ensure exact A4 dimensions for preview container */
+  .cv-preview {
+    width: 210mm !important;
+    min-height: 297mm !important;
+    max-width: 210mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  /* Common PDF fixes for all templates */
+  .cv-section h1,
+  .cv-section h2,
+  .cv-section h3 {
+    page-break-after: avoid !important;
+    orphans: 3 !important;
+    widows: 3 !important;
+  }
+
+  .experience-item,
+  .education-item,
+  .skill-group,
+  .certification-item {
+    page-break-inside: avoid !important;
+    margin-bottom: 4mm !important;
+  }
+
+  /* Contact info formatting */
+  .contact-info {
+    font-size: 10pt !important;
+    line-height: 1.3 !important;
+  }
+
+  .contact-info a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+
+  /* Skills and languages lists */
+  .skills-list,
+  .languages-list {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 2mm !important;
+  }
+
+  .skill-tag,
+  .language-tag {
+    padding: 1mm 3mm !important;
+    background: #f3f4f6 !important;
+    border: 0.5pt solid #d1d5db !important;
+    border-radius: 2mm !important;
+    font-size: 9pt !important;
+  }
+
+  /* Ensure proper text rendering */
+  p, span, div {
+    text-rendering: optimizeLegibility !important;
+    -webkit-font-smoothing: antialiased !important;
+  }
+
+  /* Remove any transform or transition effects */
+  * {
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  /* Template-specific content fixes */
+  
+  /* Basic Template */
+  .basic-template {
+    padding: 15mm !important;
+    font-size: 11pt !important;
+    line-height: 1.4 !important;
+  }
+  
+  .basic-template h1 {
+    font-size: 24pt !important;
+    margin-bottom: 4mm !important;
+    color: #2563eb !important;
+  }
+  
+  .basic-template h2 {
+    font-size: 14pt !important;
+    margin-bottom: 3mm !important;
+    border-bottom: 1pt solid #d1d5db !important;
+    padding-bottom: 1mm !important;
+    color: #2563eb !important;
+  }
+
+  /* Modern Template */
+  .modern-template {
+    display: flex !important;
+    padding: 0 !important;
+  }
+  
+  .modern-template .left-column {
+    width: 70mm !important;
+    background: #1f2937 !important;
+    color: white !important;
+    padding: 15mm 10mm !important;
+  }
+  
+  .modern-template .right-column {
+    width: 140mm !important;
+    padding: 15mm 10mm !important;
+    background: white !important;
+  }
+
+  /* ATS Template */
+  .ats-template {
+    display: flex !important;
+    padding: 0 !important;
+  }
+  
+  .ats-template .left-panel {
+    width: 65mm !important;
+    background: #1e40af !important;
+    color: white !important;
+    padding: 15mm 8mm !important;
+  }
+  
+  .ats-template .right-panel {
+    width: 145mm !important;
+    padding: 15mm 12mm !important;
+    background: white !important;
+  }
+
+  /* Exclusive Template - 15mm margin hər tərəfdə */
+  .exclusive-template {
+    padding: 15mm !important;
+    box-sizing: border-box !important;
+    width: 210mm !important;
+    min-height: 297mm !important;
+  }
+  
+  .exclusive-template .header-section {
+    text-align: center !important;
+    margin-bottom: 10mm !important;
+    border-bottom: 2pt solid #dc2626 !important;
+    padding-bottom: 5mm !important;
+  }
+
+  /* Aurora Template */
+  .aurora-template {
+    padding: 20mm !important;
+  }
+
+  /* Vertex Template */
+  .vertex-template {
+    padding: 15mm !important;
+  }
+
+  /* Horizon Template */
+  .horizon-template {
+    padding: 15mm !important;
+  }
+
+  /* Lumen Template */
+  .lumen-template {
+    display: flex !important;
+    padding: 0 !important;
+  }
+  
+  .lumen-template .left-sidebar {
+    width: 60mm !important;
+    background: white !important;
+    border-right: 1pt solid #e5e7eb !important;
+    padding: 15mm 8mm !important;
+  }
+  
+  .lumen-template .main-content {
+    width: 150mm !important;
+    padding: 15mm 12mm !important;
+    background: white !important;
+  }
+}
+
+/* Screen optimizations that also help PDF export */
+.pdf-ready {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  background: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.pdf-ready * {
+  box-sizing: border-box;
+}
+
+/* Ensure consistent font rendering across all templates */
+.template-container {
+  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
