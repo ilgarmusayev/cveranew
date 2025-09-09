@@ -303,10 +303,34 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         
                         /* ROUTE.TS ƏLAVƏ CSS - YALNIZ DINAMIK FONT SISTEMI */
                           
-                        /* MƏCBURI SIFIR MARGIN - PDF ÜÇÜN */
+                        /* 🚫 PAGE BREAK İNDİKATORLARINI TAMİLƏ GİZLƏT - PDF EXPORT ÜÇÜN */
+                        .page-break-indicator,
+                        .page-break-preview,
+                        .page-number,
+                        .page-number-indicator,
+                        .cv-section.force-next-page::after,
+                        .cv-section.in-danger-zone::before,
+                        .cv-section.intersects-page-break::before,
+                        .page-break-line,
+                        .page-break-label,
+                        [class*="page-break"],
+                        [data-page-break],
+                        .cv-content-with-breaks .page-break-indicator,
+                        .cv-preview-with-breaks .page-break-indicator {
+                            display: none !important;
+                            visibility: hidden !important;
+                            opacity: 0 !important;
+                            height: 0 !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            border: none !important;
+                            background: none !important;
+                        }
+                        
+                        /* MƏCBURI OPTİMAL MARGIN - PDF ÜÇÜN */
                         @page {
                             size: A4;
-                            margin: 0 !important;
+                            margin: 12mm 10mm !important;  /* Optimal margin-lar: üst-alt 12mm, yan 10mm */
                             padding: 0 !important;
                             border: none !important;
                         }
@@ -315,24 +339,24 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             margin: 0 !important;
                             padding: 0 !important;
                             width: 100% !important;
-                            height: 100% !important;
+                            height: auto !important;  /* PDF üçün auto hündürlük */
                             box-sizing: border-box !important;
                             border: none !important;
                             outline: none !important;
                         }
                         
-                        /* EXCLUSIVE TEMPLATE ÜÇÜ MƏCBURI 15MM PADDING - NUCLEAR OVERRIDE */
+                        /* EXCLUSIVE TEMPLATE ÜÇÜ OPTİMAL PADDING - NUCLEAR OVERRIDE */
                         .exclusive-template,
                         div.exclusive-template,
                         [class*="exclusive-template"],
                         body .exclusive-template,
                         html .exclusive-template {
-                            padding: 15mm !important;
+                            padding: 0 !important;  /* Template özü padding yoxdur, margin PDF ayarlarından gəlir */
                             box-sizing: border-box !important;
-                            width: 210mm !important;
-                            min-height: 297mm !important;
-                            min-width: 210mm !important;
-                            max-width: 210mm !important;
+                            width: 100% !important;
+                            min-height: auto !important;
+                            min-width: auto !important;
+                            max-width: 100% !important;
                             margin: 0 !important;
                             border: none !important;
                         }
@@ -1272,20 +1296,30 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             page-break-after: avoid !important;
                             break-after: avoid !important;
                         
-                        /* UNIVERSAL MANUAL CONTROL CLASSES */
-                        .force-page-break {
-                            page-break-before: always !important;
-                            break-before: page !important;
+                        /* 🔄 PDF SƏHIFƏ AXINI - TƏBİİ VƏ PROBLEMSIZ */
+                        
+                        /* PDF üçün tam təbii axın - səhifə bölgüsü problemi yox */
+                        * {
+                            page-break-inside: auto !important;
+                            break-inside: auto !important;
+                            page-break-before: auto !important;
+                            break-before: auto !important;
+                            page-break-after: auto !important;
+                            break-after: auto !important;
                         }
                         
-                        .avoid-page-break {
+                        /* Yalnız şəxsi məlumat bölməsini qoru */
+                        .personal-info-section,
+                        .header-section,
+                        .mb-6:first-child {
                             page-break-inside: avoid !important;
                             break-inside: avoid !important;
                         }
                         
-                        .allow-page-break {
-                            page-break-inside: auto !important;
-                            break-inside: auto !important;
+                        /* Başlıqları kiçik mətnlə birlikdə saxla */
+                        h1, h2, h3 {
+                            orphans: 2 !important;
+                            widows: 2 !important;
                         }
                         
                         /* TEMPLATE-SPECIFIC DYNAMIC SECTION SPACING */
@@ -1570,12 +1604,11 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                 
                 @page {
                     size: A4;
-                    margin: 0; /* Bütün margin-lar sıfır */
-                    padding: 0;
+                    margin: 12mm 10mm !important; /* Optimal margin-lar */
                 }
                 
                 @page :first {
-                    margin: 0; /* 1ci səhifədə də margin yox */
+                    margin: 12mm 10mm !important; /* 1ci səhifədə də eyni optimal margin */
                 }
                 
                 /* Səhifə arası boşluq yox */
@@ -1632,7 +1665,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                 /* Force multi-page behavior with A4 constraints */
                 .basic-template {
                     width: 100% !important;
-                    max-width: 180mm !important; /* A4 genişlik (210mm) - iki tərəfdən 15mm = 180mm */
+                    max-width: 100% !important;  /* PDF margin-dan istifadə et, content 100% */
                     height: auto !important;
                     min-height: auto !important;
                     max-height: none !important;
@@ -1762,149 +1795,55 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
         
         console.log('Template exists:', templateExists);
         
-        // Force recalculation of layout
+        // Sadə və təbii PDF axını
         if (templateExists) {
             await page.evaluate(() => {
-                console.log('=== A4 PAGE BREAK ALGORITHM STARTING ===');
+                console.log('=== TƏBİİ PDF AXIN - SADƏ YANAŞMA ===');
                 
-                // Force browser to recalculate layout 
-                document.body.offsetHeight;
-                
-                // Add explicit page breaks if content is too long
+                // Template-i tap
                 const template = document.querySelector('.basic-template') as HTMLElement ||
                                 document.querySelector('[class*="template"]') as HTMLElement ||
                                 document.body as HTMLElement;
                 
                 if (template) {
-                    // A4 calculations with 8mm margins and 15mm bottom reserve
-                    // A4 = 210mm x 297mm
-                    // With 8mm margins: content area = 194mm x 281mm  
-                    // With 15mm bottom reserve: usable height = 266mm
-                    // At 96 DPI: 266mm ≈ 1008px, but conservatively use 950px
+                    // Təbii axın üçün sadə hazırlıq
+                    template.style.height = 'auto';
+                    template.style.minHeight = 'auto';
+                    template.style.overflow = 'visible';
                     
-                    const templateHeight = template.scrollHeight;
-                    const a4UsableHeight = 950; // Conservative A4 height minus bottom reserve
-                    const pageBreakThreshold = a4UsableHeight; // When to break to next page
-                    
-                    console.log('=== A4 PAGE CALCULATIONS ===');
-                    console.log('Template total height:', templateHeight + 'px');
-                    console.log('A4 usable height (with 15mm bottom reserve):', a4UsableHeight + 'px');
-                    console.log('Needs multi-page:', templateHeight > a4UsableHeight);
-                    
-                    if (templateHeight > a4UsableHeight) {
-                        console.log('Content exceeds A4 usable area - applying page breaks');
-                        
-                        // Ensure template can flow across pages
-                        template.style.height = 'auto';
-                        template.style.minHeight = 'auto';
-                        template.style.maxHeight = 'none';
-                        template.style.overflow = 'visible';
-                        template.style.pageBreakInside = 'auto';
-                        template.style.breakInside = 'auto';
-                        
-                        // Find all potential break points - prioritize logical content boundaries
-                        const allElements = template.querySelectorAll(`
-                            div, section, p, h1, h2, h3, h4, h5, h6,
-                            .space-y-6 > *,
-                            .space-y-4 > *,
-                            .mb-6, .mb-8, .mt-6, .mt-8,
-                            [class*="experience"],
-                            [class*="education"], 
-                            [class*="project"],
-                            [class*="skill"]
-                        `);
-                        
-                        console.log('Found', allElements.length, 'potential break elements');
-                        
-                        let currentPageHeight = 0;
-                        let pageNumber = 1;
-                        let pageBreaksAdded = 0;
-                        
-                        allElements.forEach((element, index) => {
-                            const htmlElement = element as HTMLElement;
-                            const elementTop = htmlElement.offsetTop;
-                            const elementHeight = htmlElement.offsetHeight;
-                            
-                            // Enhanced debug info
-                            if (index < 10 || elementTop > (pageNumber * pageBreakThreshold - 100)) {
-                                console.log(`Element ${index}: ${htmlElement.tagName}.${htmlElement.className} at ${elementTop}px, height: ${elementHeight}px`);
-                            }
-                            
-                            // Check if this element would exceed current page
-                            if (elementTop > 0 && elementTop > (pageNumber * pageBreakThreshold)) {
-                                // Add page break before this element
-                                htmlElement.style.pageBreakBefore = 'always';
-                                htmlElement.style.breakBefore = 'page';
-                                pageBreaksAdded++;
-                                pageNumber++;
-                                
-                                console.log(`🔥 PAGE BREAK ${pageBreaksAdded}: Added before element at ${elementTop}px (moving to Page ${pageNumber})`);
-                                console.log(`   Element: ${htmlElement.tagName}.${htmlElement.className}`);
-                                console.log(`   Break threshold was: ${(pageNumber-1) * pageBreakThreshold}px`);
-                                console.log(`   Next break will be at: ${pageNumber * pageBreakThreshold}px`);
-                            }
-                        });
-                        
-                        console.log('Total page breaks added:', pageBreaksAdded);
-                        console.log('Estimated pages:', pageNumber);
-                        
-                        // Additional safety: force breaks at fixed intervals if still too long
-                        if (templateHeight > pageBreakThreshold * 3) {
-                            console.log('Applying safety breaks every', pageBreakThreshold, 'px');
-                            
-                            const allDivs = template.querySelectorAll('div, section');
-                            allDivs.forEach((div) => {
-                                const htmlDiv = div as HTMLElement;
-                                const divTop = htmlDiv.offsetTop;
-                                
-                                // Add breaks near multiples of pageBreakThreshold
-                                if (divTop > 0) {
-                                    const pagePosition = divTop % pageBreakThreshold;
-                                    const nextPageStart = Math.floor(divTop / pageBreakThreshold + 1) * pageBreakThreshold;
-                                    
-                                    // If we're close to the end of a page, break to next page
-                                    if (pagePosition > (pageBreakThreshold - 100)) {
-                                        htmlDiv.style.pageBreakBefore = 'always';
-                                        htmlDiv.style.breakBefore = 'page';
-                                    }
-                                }
-                            });
-                        }
-                        
-                        console.log('=== A4 PAGE BREAK ALGORITHM COMPLETED ===');
-                    } else {
-                        console.log('Content fits in single A4 page, no breaks needed');
-                    }
+                    console.log('✅ Template təbii PDF axını üçün hazırlandı');
+                    console.log('Template yüksəkliyi:', template.scrollHeight + 'px');
                 } else {
-                    console.log('No template element found for page break processing');
+                    console.log('❌ Template tapılmadı');
                 }
+                
+                console.log('=== TƏBİİ PDF AXIN HAZIR ===');
             });
         } else {
-            console.log('Template does not exist, skipping page break logic');
+            console.log('Template yoxdur, təbii axından istifadə edirik');
         }
 
         const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true,
-            preferCSSPageSize: true,  // CSS @page ayarlarını istifadə et - ÇOX VACIB!
+            preferCSSPageSize: false,  // CSS @page-dən istifadə etmə, native ayarlar istifadə et
             displayHeaderFooter: false,
             // Unicode və font support üçün əlavə ayarlar
             tagged: true,  // PDF/A accessibility və unicode dəstəyi
             outline: false,
             omitBackground: false,  // Background-ları qoruyub saxla
-            // PDF margin-ları sıfır - kənar boşluq yox
+            // PDF-də düzgün məsafələr - optimal margin-lar
             margin: {
-                top: '0mm',
-                right: '0mm', 
-                bottom: '0mm',
-                left: '0mm'
+                top: '12mm',      // Minimal təbii margin
+                right: '10mm',    // Yan tərəflərdə kiçik margin  
+                bottom: '12mm',   // Alt margin
+                left: '10mm'      // Sol margin
             },
-            scale: 1,
+            scale: 1.0,
             // Multi-page support - CRITICAL FOR A4 PAGINATION  
             pageRanges: '',  // Boş string = bütün səhifələr
-            // A4 tam ölçü - kənar boşluq yoxdur
-            width: '210mm',   // A4 tam genişlik
-            height: '297mm'   // A4 tam hündürlük
+            // A4 tam ölçü - browser default-dan istifadə et
+            // width və height specify etmə, format: 'A4' kifayətdir
         });
 
         console.log('PDF yaradıldı, browser bağlanır...');
@@ -2027,7 +1966,7 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
             
             @page {
                 size: A4;
-                margin: 0 !important; /* SIFIR MARGIN - TAMAMI PDF ÜÇÜN */
+                margin: 12mm 10mm !important; /* Optimal margin-lar */
                 padding: 0 !important;
                 border: none !important;
             }

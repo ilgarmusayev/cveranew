@@ -703,10 +703,37 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
 
             console.log('🚀 CVEditor PDF Export - Font Settings:', exportFontSettings);
 
+            // 🚫 PDF Export zamanı page break indikatorlarını gizlət
+            const pageBreakElements = document.querySelectorAll(`
+                .page-break-indicator,
+                .page-break-preview,
+                .page-number,
+                .page-number-indicator,
+                .page-break-line,
+                .page-break-label,
+                [class*="page-break"],
+                [data-page-break]
+            `);
+            
+            const originalStyles: { element: Element; display: string; visibility: string }[] = [];
+            
+            // Page break elementlərini gizlət və original style-ları saxla
+            pageBreakElements.forEach(element => {
+                if (element instanceof HTMLElement) {
+                    originalStyles.push({
+                        element,
+                        display: element.style.display,
+                        visibility: element.style.visibility
+                    });
+                    element.style.display = 'none';
+                    element.style.visibility = 'hidden';
+                }
+            });
+
             // CVPreview-in tam HTML content-ini al
             const cvHTML = cvPreviewElement.outerHTML;
             
-            // CSS-ləri də al
+            // CSS-ləri də al və page break indikatorlarını gizlədən CSS əlavə et
             const styles = Array.from(document.styleSheets)
                 .map(sheet => {
                     try {
@@ -717,7 +744,36 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                         return '';
                     }
                 })
-                .join('\n');
+                .join('\n') + `
+                
+                /* 🚫 CVEditor PDF Export - Page Break İndikatorlarını Gizlət */
+                .page-break-indicator,
+                .page-break-preview,
+                .page-number,
+                .page-number-indicator,
+                .page-break-line,
+                .page-break-label,
+                [class*="page-break"],
+                [data-page-break] {
+                    display: none !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                    height: 0 !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    border: none !important;
+                    background: none !important;
+                }
+                
+                @media print {
+                    .page-break-indicator,
+                    .page-break-preview,
+                    .page-number,
+                    .page-number-indicator {
+                        display: none !important;
+                    }
+                }
+            `;
 
             // API çağırısı
             const token = localStorage.getItem('accessToken');
@@ -775,6 +831,14 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             console.error('PDF export xətası:', error);
             showError('PDF export zamanı xəta baş verdi');
         } finally {
+            // Page break elementlərinin original style-larını geri qaytar
+            originalStyles.forEach(({ element, display, visibility }) => {
+                if (element instanceof HTMLElement) {
+                    element.style.display = display;
+                    element.style.visibility = visibility;
+                }
+            });
+            
             setSaving(false);
         }
     }, [cv, fontSettings, showSuccess, showError]);
