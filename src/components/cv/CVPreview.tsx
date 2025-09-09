@@ -1113,7 +1113,7 @@ const BasicTemplate: React.FC<{
                                 <div key={exp.id} className="border-l-2 border-blue-200 pl-3">
                                     <div className="flex justify-between items-start mb-2">
                                         <h3 style={{ 
-                                            fontSize: 'var(--cv-body-size)', 
+                                            fontSize: 'var(--cv-subheading-size)', // Position üçün subheading ölçüsü
                                             fontWeight: 'var(--cv-subheading-weight)',
                                             color: '#111827',
                                             marginBottom: '4px'
@@ -1121,7 +1121,7 @@ const BasicTemplate: React.FC<{
                                         <span style={{ 
                                             fontSize: 'var(--cv-small-size)',
                                             fontWeight: 'var(--cv-body-weight)',
-                                            color: '#2563eb',
+                                            color: '#6b7280',
                                             whiteSpace: 'nowrap',
                                             marginLeft: '16px'
                                         }}>
@@ -1137,7 +1137,7 @@ const BasicTemplate: React.FC<{
                                         </span>
                                     </div>
                                     <p style={{ 
-                                        fontSize: 'var(--cv-small-size)',
+                                        fontSize: 'var(--cv-body-size)', // Company üçün body ölçüsü 
                                         fontWeight: 'var(--cv-body-weight)',
                                         color: '#2563eb',
                                         marginBottom: '8px'
@@ -1178,14 +1178,14 @@ const BasicTemplate: React.FC<{
                                         <div className="flex-1">
                                             {edu.degree ? (
                                                 <h3 style={{ 
-                                                    fontSize: 'var(--cv-body-size)', 
+                                                    fontSize: 'var(--cv-subheading-size)', // Dərəcə üçün subheading ölçüsü
                                                     fontWeight: 'var(--cv-subheading-weight)',
                                                     color: '#111827',
                                                     marginBottom: '4px'
                                                 }}>{edu.degree}</h3>
                                             ) : (
                                                 <h3 style={{ 
-                                                    fontSize: 'var(--cv-body-size)', 
+                                                    fontSize: 'var(--cv-subheading-size)', // Institution üçün subheading ölçüsü
                                                     fontWeight: 'var(--cv-subheading-weight)',
                                                     color: '#111827',
                                                     marginBottom: '4px'
@@ -1193,7 +1193,7 @@ const BasicTemplate: React.FC<{
                                             )}
                                             {edu.degree && (
                                                 <p style={{ 
-                                                    fontSize: 'var(--cv-small-size)',
+                                                    fontSize: 'var(--cv-body-size)', // Institution üçün body ölçüsü (dərəcədən kiçik)
                                                     fontWeight: 'var(--cv-body-weight)',
                                                     color: '#2563eb',
                                                     marginBottom: '4px'
@@ -1212,7 +1212,7 @@ const BasicTemplate: React.FC<{
                                         <span style={{ 
                                             fontSize: 'var(--cv-small-size)',
                                             fontWeight: 'var(--cv-body-weight)',
-                                            color: '#2563eb',
+                                            color: '#6b7280',
                                             whiteSpace: 'nowrap',
                                             marginLeft: '16px'
                                         }}>
@@ -1370,15 +1370,30 @@ const BasicTemplate: React.FC<{
                                                 href={project.url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="font-semibold text-gray-900 text-sm underline hover:text-blue-600 transition-colors cursor-pointer"
+                                                style={{
+                                                    fontSize: 'var(--cv-subheading-size)', // Project adı üçün subheading ölçüsü
+                                                    fontWeight: 'var(--cv-subheading-weight)',
+                                                    color: '#111827',
+                                                    textDecoration: 'underline'
+                                                }}
                                             >
                                                 {project.name}
                                             </a>
                                         ) : (
-                                            <h3 className="font-semibold text-gray-900 text-sm">{project.name}</h3>
+                                            <h3 style={{
+                                                fontSize: 'var(--cv-subheading-size)', // Project adı üçün subheading ölçüsü
+                                                fontWeight: 'var(--cv-subheading-weight)',
+                                                color: '#111827'
+                                            }}>{project.name}</h3>
                                         )}
                                         {(project.startDate || project.endDate || project.current) && (
-                                            <span className="text-xs text-blue-600 font-medium whitespace-nowrap ml-2">
+                                            <span style={{
+                                                fontSize: 'var(--cv-small-size)',
+                                                fontWeight: 'var(--cv-body-weight)',
+                                                color: '#6b7280',
+                                                whiteSpace: 'nowrap',
+                                                marginLeft: '8px'
+                                            }}>
                                                 {project.current ? (
                                                     project.startDate ? `${formatDate(project.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : getCurrentText(data.cvLanguage)
                                                 ) : project.startDate && project.endDate ? (
@@ -1430,17 +1445,39 @@ const BasicTemplate: React.FC<{
                                                     href={cert.url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="font-semibold text-gray-900 text-sm underline hover:text-blue-600 transition-colors cursor-pointer mb-1 block"
+                                                    style={{
+                                                        fontSize: 'var(--cv-subheading-size)', // Sertifikat adı üçün subheading ölçüsü
+                                                        fontWeight: 'var(--cv-subheading-weight)',
+                                                        color: '#111827',
+                                                        textDecoration: 'underline',
+                                                        marginBottom: '4px',
+                                                        display: 'block'
+                                                    }}
                                                 >
                                                     {cert.name}
                                                 </a>
                                             ) : (
-                                                <h3 className="font-semibold text-gray-900 text-sm mb-1">{cert.name}</h3>
+                                                <h3 style={{
+                                                    fontSize: 'var(--cv-subheading-size)', // Sertifikat adı üçün subheading ölçüsü
+                                                    fontWeight: 'var(--cv-subheading-weight)',
+                                                    color: '#111827',
+                                                    marginBottom: '4px'
+                                                }}>{cert.name}</h3>
                                             )}
-                                            <p className="text-blue-600 font-medium text-xs">{cert.issuer}</p>
+                                            <p style={{
+                                                fontSize: 'var(--cv-body-size)', // İssuer üçün body ölçüsü
+                                                fontWeight: 'var(--cv-body-weight)',
+                                                color: '#2563eb'
+                                            }}>{cert.issuer}</p>
                                         </div>
                                         {cert.date && (
-                                            <span className="text-xs text-blue-600 font-medium whitespace-nowrap ml-4">
+                                            <span style={{
+                                                fontSize: 'var(--cv-small-size)',
+                                                fontWeight: 'var(--cv-body-weight)',
+                                                color: '#6b7280',
+                                                whiteSpace: 'nowrap',
+                                                marginLeft: '16px'
+                                            }}>
                                                 {formatDate(cert.date, data.cvLanguage)}
                                             </span>
                                         )}
@@ -1465,7 +1502,7 @@ const BasicTemplate: React.FC<{
                                 <div key={vol.id} className="border-l-2 border-blue-200 pl-3">
                                     <div className="flex justify-between items-start mb-1">
                                         <h3 className="font-semibold text-gray-900 text-sm">{vol.role}</h3>
-                                        <span className="text-xs text-blue-600 font-medium whitespace-nowrap ml-2">
+                                        <span className="text-xs font-medium whitespace-nowrap ml-2" style={{ color: '#6b7280' }}>
                                             {vol.startDate ? (
                                                 vol.current ? `${formatDate(vol.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
                                                 vol.endDate ? `${formatDate(vol.startDate, data.cvLanguage)} - ${formatDate(vol.endDate, data.cvLanguage)}` :
@@ -1597,22 +1634,22 @@ const BasicTemplate: React.FC<{
                         >
                             {personalInfo.email && (
                                 <span className="flex items-center gap-2">
-                                    📧 {personalInfo.email}
+                                    E-poçt: {personalInfo.email}
                                 </span>
                             )}
                             {personalInfo.phone && (
                                 <span className="flex items-center gap-2">
-                                    📱 {personalInfo.phone}
+                                    Telefon: {personalInfo.phone}
                                 </span>
                             )}
                             {personalInfo.location && (
                                 <span className="flex items-center gap-2">
-                                    📍 {personalInfo.location}
+                                    Ünvan: {personalInfo.location}
                                 </span>
                             )}
                             {personalInfo.linkedin && (
                                 <span className="flex items-center gap-2">
-                                    🔗 <a
+                                    LinkedIn: <a
                                         href={getLinkedInDisplay(personalInfo.linkedin).url}
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -1624,13 +1661,13 @@ const BasicTemplate: React.FC<{
                             )}
                             {personalInfo.website && (
                                 <span className="flex items-center gap-2">
-                                    🌐 {personalInfo.website}
+                                    Veb-sayt: {personalInfo.website}
                                 </span>
                             )}
                             {personalInfo.additionalLinks && personalInfo.additionalLinks.length > 0 && (
                                 personalInfo.additionalLinks.map((link) => (
                                     <span key={link.id} className="flex items-center gap-2">
-                                        📎 {link.label}: {link.value}
+                                        {link.label}: {link.value}
                                     </span>
                                 ))
                             )}

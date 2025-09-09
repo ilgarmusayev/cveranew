@@ -335,6 +335,19 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             border: none !important;
                         }
                         
+                        /* Basic template için 2-ci səhifədə top margin */
+                        @page :first {
+                            margin-top: 12mm !important;
+                        }
+                        
+                        @page :left {
+                            margin-top: 15mm !important;  /* 2-ci, 4-cü və s. səhifələrdə əlavə margin */
+                        }
+                        
+                        @page :right {
+                            margin-top: 15mm !important;  /* 3-cü, 5-ci və s. səhifələrdə əlavə margin */
+                        }
+                        
                         html, body {
                             margin: 0 !important;
                             padding: 0 !important;
@@ -343,6 +356,17 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             box-sizing: border-box !important;
                             border: none !important;
                             outline: none !important;
+                            background: white !important;  /* Tam ağ arxa plan */
+                            background-color: #ffffff !important;  /* Tam ağ arxa plan */
+                        }
+                        
+                        /* Bütün template container-ləri üçün ağ arxa plan */
+                        .cv-preview, .cv-container, .basic-template, .modern-template, 
+                        .ats-template, .exclusive-template, .aurora-template, 
+                        .vertex-template, .horizon-template, .lumen-template,
+                        div, section, article, main {
+                            background: white !important;
+                            background-color: #ffffff !important;
                         }
                         
                         /* EXCLUSIVE TEMPLATE ÜÇÜ OPTİMAL PADDING - NUCLEAR OVERRIDE */
@@ -1602,13 +1626,25 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                     --cv-small-spacing: ${fontSettings.sectionSpacing}px;
                 }
                 
+                /* PDF Səhifə Ayarları - İstifadəçi Tələbi Üzrə */
                 @page {
                     size: A4;
-                    margin: 12mm 10mm !important; /* Optimal margin-lar */
+                    margin: 5mm 15mm 15mm 15mm !important; /* Default: top=5mm, sides/bottom=15mm */
                 }
                 
                 @page :first {
-                    margin: 12mm 10mm !important; /* 1ci səhifədə də eyni optimal margin */
+                    margin: 5mm 15mm 15mm 15mm !important; /* 1-ci səhifə: top=5mm - azca artırılmış */
+                }
+                
+                /* 2-ci səhifə və sonrakı səhifələr üçün top margin 15mm */
+                @page :not(:first) {
+                    margin: 15mm 15mm 15mm 15mm !important; /* 2-ci səhifədən başlayaraq: top=15mm avtomatik */
+                }
+                
+                /* Basic Template üçün xüsusi ayarlar */
+                .basic-template {
+                    margin-top: 0 !important; /* Template-in özü yuxarıda boşluq yaratmasın */
+                    padding-top: 0 !important; /* Template-in padding-i də sıfır */
                 }
                 
                 /* Səhifə arası boşluq yox */
@@ -1628,14 +1664,16 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                     height: auto !important;
                     overflow: visible !important;
                     font-size: var(--cv-body-size, 12pt) !important;
+                    margin: 0 !important; /* HTML margin sıfır */
+                    padding: 0 !important; /* HTML padding sıfır */
                 }
                 
                 body {
                     height: auto !important;
                     min-height: auto !important;
                     overflow: visible !important;
-                    margin: 0 !important;
-                    padding: 0 !important;
+                    margin: 0 !important; /* Body margin mütləq sıfır */
+                    padding: 0 !important; /* Body padding mütləq sıfır */
                     -webkit-print-color-adjust: exact !important;
                     color-adjust: exact !important;
                     line-height: var(--cv-line-height, 1.4) !important;
@@ -1643,14 +1681,23 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                 
                 /* PDF-də bütün container-lərin kənar boşluqlarını tamamilə sil */
                 .cv-preview,
-                .basic-template, 
+                .basic-template,
                 [class*="template"],
                 .template-container,
                 .cv-container {
-                    margin: 0 !important;
-                    padding: 0 !important; /* Tamamilə kənar boşluq yoxdur */
+                    margin: 0 !important; /* MÜTLƏQ margin sıfır */
+                    padding: 0 !important; /* MÜTLƏQ padding sıfır */
                     border: none !important;
                     box-shadow: none !important;
+                }
+                
+                /* Basic Template üçün xüsusi top boşluq sıfırlama */
+                .cv-preview:first-child,
+                .basic-template:first-child,
+                .cv-preview > *:first-child,
+                .basic-template > *:first-child {
+                    margin-top: 0 !important; /* İlk element yuxarıda boşluq yaratmasın */
+                    padding-top: 0 !important;
                 }
                 
                 /* HƏTTA DAHA RADIKAL - Bütün div-lərin edge margin/padding-ini sil */
@@ -1831,13 +1878,13 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             // Unicode və font support üçün əlavə ayarlar
             tagged: true,  // PDF/A accessibility və unicode dəstəyi
             outline: false,
-            omitBackground: false,  // Background-ları qoruyub saxla
-            // PDF-də düzgün məsafələr - optimal margin-lar
+            omitBackground: false,  // Background-ları qoruyub saxla ✅ AĞ ARXA PLAN ÜÇÜN
+            // PDF-də düzgün məsafələr - istifadəçi tələbi: 1-ci səhifə top=5mm, digərləri=15mm
             margin: {
-                top: '12mm',      // Minimal təbii margin
-                right: '10mm',    // Yan tərəflərdə kiçik margin  
-                bottom: '12mm',   // Alt margin
-                left: '10mm'      // Sol margin
+                top: '5mm',       // 5mm - 1-ci səhifədə yuxarıda azca boşluq əlavə edildi
+                right: '15mm',    // Sağ margin 15mm
+                bottom: '15mm',   // Alt margin 15mm (aşağısında 15mm boşluq)
+                left: '15mm'      // Sol margin 15mm
             },
             scale: 1.0,
             // Multi-page support - CRITICAL FOR A4 PAGINATION  
@@ -1966,9 +2013,16 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
             
             @page {
                 size: A4;
-                margin: 12mm 10mm !important; /* Optimal margin-lar */
+                margin: 15mm 15mm !important; /* Bütün səhifələrdə bərabər margin-lar */
                 padding: 0 !important;
                 border: none !important;
+                background: white !important; /* Ağ arxa plan */
+            }
+            
+            html {
+                background: white !important; /* HTML ağ arxa plan */
+                margin: 0 !important;
+                padding: 0 !important;
             }
             
             body {
@@ -1980,6 +2034,8 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
                 font-family: var(--cv-font-family) !important;
                 font-size: var(--cv-body-size) !important;
                 color: var(--cv-text-color) !important;
+                background: white !important; /* Body ağ arxa plan */
+                background-color: white !important; /* Əlavə ağ arxa plan təminatı */
                 -webkit-font-feature-settings: "liga", "kern", "clig" !important;
                 font-feature-settings: "liga", "kern", "clig" !important;
                 text-rendering: optimizeLegibility;
@@ -2119,6 +2175,8 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
                 margin: 0 !important;
                 padding: 0 !important;
                 border: none !important;
+                background: white !important; /* CV Preview ağ arxa plan */
+                background-color: white !important; /* Əlavə ağ arxa plan təminatı */
             }
         </style>
     `;
@@ -2138,6 +2196,8 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
             color: var(--cv-text-color); 
             width: 100%;
             max-width: none;
+            background: white;
+            background-color: white;
         ">
             <!-- Header -->
             <div class="cv-section avoid-break text-center mb-8 border-b-2 pb-4" style="border-color: var(--cv-primary-color);">
