@@ -298,22 +298,6 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
                     </div>
                   </div>
 
-                  {/* Date Range Input */}
-                  <DateRangeInput
-                    startDate={project.startDate || ''}
-                    endDate={project.endDate}
-                    current={project.current || false}
-                    onStartDateChange={(date) => updateProject(project.id, 'startDate', date)}
-                    onEndDateChange={(date) => updateProject(project.id, 'endDate', date)}
-                    onCurrentChange={(current) => updateProjectMultiple(project.id, { 
-                      current, 
-                      endDate: current ? '' : project.endDate 
-                    })}
-                    startLabel={cvLanguage === 'english' ? 'Start Date' : 'Başlama tarixi'}
-                    endLabel={cvLanguage === 'english' ? 'End Date' : 'Bitirmə tarixi'}
-                    currentLabel={cvLanguage === 'english' ? 'Currently ongoing' : 'Davam edir'}
-                    cvLanguage={cvLanguage}
-                  />
 
                   <div className="flex items-end">
                     <label className="flex items-center">

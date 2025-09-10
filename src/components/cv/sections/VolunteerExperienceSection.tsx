@@ -100,7 +100,7 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
           </p>
           <button
             onClick={addVolunteerExperience}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
           >
             {cvLanguage === 'english' 
               ? 'Add your first volunteer experience' 
@@ -227,22 +227,7 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
                     />
                   </div>
 
-                  {/* Date Range Input */}
-                  <DateRangeInput
-                    startDate={volunteer.startDate || ''}
-                    endDate={volunteer.endDate}
-                    current={volunteer.current || false}
-                    onStartDateChange={(date) => updateVolunteerExperience(index, { startDate: date })}
-                    onEndDateChange={(date) => updateVolunteerExperience(index, { endDate: date })}
-                    onCurrentChange={(current) => updateVolunteerExperience(index, { 
-                      current, 
-                      endDate: current ? '' : volunteer.endDate 
-                    })}
-                    startLabel={cvLanguage === 'english' ? 'Start Date' : 'Başlama tarixi'}
-                    endLabel={cvLanguage === 'english' ? 'End Date' : 'Bitirmə tarixi'}
-                    currentLabel={cvLanguage === 'english' ? 'Currently volunteering' : 'Davam edir'}
-                    cvLanguage={cvLanguage}
-                  />
+               
 
                   <div className="flex items-end">
                     <label className="flex items-center">
