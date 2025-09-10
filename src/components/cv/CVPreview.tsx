@@ -1888,8 +1888,11 @@ const ModernTemplate: React.FC<{
                                 </div>
                             )}
                             <h1 className="text-3xl font-bold text-gray-900" style={{ marginBottom: 0 }}>
-                                {personalInfo.firstName} {personalInfo.lastName}
+                                {getFullName(personalInfo, data.cvLanguage)}
                             </h1>
+                            <p className="text-lg text-blue-600 font-medium" style={{ marginBottom: 0, marginTop: '4px' }}>
+                                {personalInfo.field || 'Sahə daxil edilməyib'}
+                            </p>
                             {(personalInfo as any).title && (
                                 <p className="text-lg text-blue-600 font-medium" style={{ marginBottom: 0 }}>{(personalInfo as any).title}</p>
                             )}
@@ -3389,6 +3392,11 @@ const ATSFriendlyTemplate: React.FC<{
                     <h1 className="text-3xl font-bold text-gray-900 leading-tight">
                         {getFullName(personalInfo, data.cvLanguage)}
                     </h1>
+                    {personalInfo.field && (
+                        <p className="text-lg text-gray-600 font-medium mt-1">
+                            {personalInfo.field}
+                        </p>
+                    )}
                 </div>
 
                 {/* Draggable Sections */}
@@ -4429,6 +4437,11 @@ const LumenTemplate: React.FC<{
                     <h1 className="text-3xl font-bold text-gray-900 mb-2 leading-tight">
                         {getFullName(personalInfo, data.cvLanguage)}
                     </h1>
+                    {personalInfo.field && (
+                        <p className="text-lg text-purple-600 font-medium mt-1">
+                            {personalInfo.field}
+                        </p>
+                    )}
                 </div>
 
                 {/* Draggable Sections */}
@@ -4777,14 +4790,21 @@ const PrimeTemplate: React.FC<{
                                                 )}
                                                 {project.technologies && project.technologies.length > 0 && (
                                                     <div className="text-xs text-gray-600 mt-2">
-                                                        <span className="font-medium">Technologies: </span>
+                                                        <span className="font-medium">{data.cvLanguage === 'english' ? 'Technologies' : 'Texnologiyalar'}: </span>
                                                         {project.technologies.join(', ')}
                                                     </div>
                                                 )}
                                                 {project.url && (
                                                     <div className="text-xs text-gray-600 mt-1">
                                                         <span className="font-medium">URL: </span>
-                                                        {project.url}
+                                                        <a
+                                                            href={project.url.startsWith('http') ? project.url : `https://${project.url}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-gray-600 hover:text-blue-600 underline transition-colors"
+                                                        >
+                                                            {project.url}
+                                                        </a>
                                                     </div>
                                                 )}
                                                 {project.github && (
@@ -4872,7 +4892,14 @@ const PrimeTemplate: React.FC<{
                                                 {cert.url && (
                                                     <div className="text-xs text-gray-600 mt-1">
                                                         <span className="font-medium">URL: </span>
-                                                        {cert.url}
+                                                        <a
+                                                            href={cert.url.startsWith('http') ? cert.url : `https://${cert.url}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-gray-600 hover:text-blue-600 underline transition-colors"
+                                                        >
+                                                            {cert.url}
+                                                        </a>
                                                     </div>
                                                 )}
                                             </div>
@@ -4990,14 +5017,21 @@ const PrimeTemplate: React.FC<{
                                                     )}
                                                     {item.tags && item.tags.length > 0 && (
                                                         <div className="mt-2 text-xs text-gray-600">
-                                                            <span className="font-medium">Tags: </span>
+                                                            <span className="font-medium">{data.cvLanguage === 'english' ? 'Tags' : 'Etiketlər'}: </span>
                                                             {item.tags.join(', ')}
                                                         </div>
                                                     )}
                                                     {item.url && (
                                                         <div className="text-xs text-gray-600 mt-1">
                                                             <span className="font-medium">URL: </span>
-                                                            {item.url}
+                                                            <a
+                                                                href={item.url.startsWith('http') ? item.url : `https://${item.url}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-gray-600 hover:text-blue-600 underline transition-colors"
+                                                            >
+                                                                {item.url}
+                                                            </a>
                                                         </div>
                                                     )}
                                                 </div>
@@ -5688,6 +5722,11 @@ const VertexTemplate: React.FC<{
                                 {getFullName(personalInfo, data.cvLanguage)}
                             </div>
                         </div>
+                        <div className="mt-4">
+                            <div className="text-lg text-gray-700 font-medium tracking-wide">
+                                {personalInfo.field || 'Sahə daxil edilməyib'}
+                            </div>
+                        </div>
                     </div>
                     
                     {/* Contact Information - Perfect Symmetric Grid */}
@@ -6311,6 +6350,12 @@ const HorizonTemplate: React.FC<{
                     <h1 className="text-4xl font-bold text-gray-900 uppercase tracking-widest" style={{ letterSpacing: '0.3em', marginBottom: 0 }}>
                         {getFullName(personalInfo, data.cvLanguage)}
                     </h1>
+                    
+                    {personalInfo.field && (
+                        <p className="text-lg text-gray-600 font-medium mt-3 tracking-wide">
+                            {personalInfo.field}
+                        </p>
+                    )}
                     
                     {/* Contact Information - Single Row Layout */}
                     <div className="flex flex-wrap justify-center items-center text-sm text-gray-600 gap-8 mt-6">
@@ -7002,6 +7047,12 @@ const AuroraTemplate: React.FC<{
                             {getFullName(personalInfo, data.cvLanguage)}
                         </h1>
                         
+                        {personalInfo.field && (
+                            <p className="text-lg text-gray-600 font-medium mb-4">
+                                {personalInfo.field}
+                            </p>
+                        )}
+                        
                         {/* Contact Information - Split into two lines */}
                         <div className="text-center text-sm text-gray-700 space-y-2 mt-4">
                             {(() => {
@@ -7632,6 +7683,12 @@ const ExclusiveTemplate: React.FC<{
                                     <h1 className="text-2xl font-bold mb-3 tracking-wide text-gray-900">
                                         {getFullName(personalInfo, data.cvLanguage)}
                                     </h1>
+                                    
+                                    {personalInfo.field && (
+                                        <p className="text-lg text-blue-600 font-medium mb-2">
+                                            {personalInfo.field}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                             
@@ -7844,7 +7901,7 @@ const EssenceTemplate: React.FC<{
                         isDropTarget={dropTargetId === 'summary'}
                     >
                         <div className="bg-white p-5 rounded shadow-sm border border-gray-200 mb-4">
-                            <h2 className="text-base font-bold text-gray-800 mb-3 uppercase tracking-wide">
+                            <h2 className="text-base font-bold mb-3 uppercase tracking-wide" style={{ color: '#1F4B43' }}>
                                 {getSectionName('summary', data.cvLanguage, data.sectionNames)}
                             </h2>
                             <div className="text-gray-700 leading-relaxed text-sm">
@@ -7866,7 +7923,7 @@ const EssenceTemplate: React.FC<{
                         isDropTarget={dropTargetId === 'experience'}
                     >
                         <div className="bg-white p-5 rounded shadow-sm border border-gray-200 mb-4">
-                            <h2 className="text-base font-bold text-gray-800 mb-4 uppercase tracking-wide">
+                            <h2 className="text-base font-bold mb-4 uppercase tracking-wide" style={{ color: '#1F4B43' }}>
                                 {getSectionName('experience', data.cvLanguage, data.sectionNames)}
                             </h2>
                             <div className="space-y-4">
@@ -7901,83 +7958,8 @@ const EssenceTemplate: React.FC<{
                     </SortableItem>
                 ) : null;
 
-            case 'education':
-                return education && education.length > 0 ? (
-                    <SortableItem 
-                        key="education" 
-                        id="education"
-                        sectionOrder={sectionOrder}
-                        onSectionReorder={onSectionReorder}
-                        activeSection={activeSection}
-                        onSetActiveSection={onSectionSelect}
-                        isDropTarget={dropTargetId === 'education'}
-                    >
-                        <div className="bg-gray-50 p-5 rounded shadow-sm border border-gray-200 mb-4">
-                            <h2 className="text-base font-bold text-gray-800 mb-4 uppercase tracking-wide">
-                                {getSectionName('education', data.cvLanguage, data.sectionNames)}
-                            </h2>
-                            <div className="space-y-3">
-                                {education.map((edu, index) => (
-                                    <div key={edu.id} className="bg-white p-4 rounded border border-gray-100">
-                                        <div className="flex justify-between items-start">
-                                            <div className="flex-1">
-                                                <h3 className="text-sm font-bold text-black">{edu.degree}</h3>
-                                                <p className="text-sm font-semibold text-gray-600">{edu.institution}</p>
-                                                {edu.gpa && (
-                                                    <p className="text-xs text-gray-500 mt-1">
-                                                        GPA: {edu.gpa}
-                                                    </p>
-                                                )}
-                                            </div>
-                                            {(edu.startDate || edu.endDate) && (
-                                                <span className="text-xs text-gray-500 font-medium whitespace-nowrap flex-shrink-0 ml-4">
-                                                    {edu.startDate ? (
-                                                        edu.current ? `${formatDate(edu.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
-                                                        edu.endDate ? `${formatDate(edu.startDate, data.cvLanguage)} - ${formatDate(edu.endDate, data.cvLanguage)}` :
-                                                        formatDate(edu.startDate, data.cvLanguage)
-                                                    ) : edu.current ? (
-                                                        getCurrentText(data.cvLanguage)
-                                                    ) : edu.endDate ? (
-                                                        formatDate(edu.endDate, data.cvLanguage)
-                                                    ) : ''}
-                                                </span>
-                                            )}
-                                        </div>
-                                        {edu.description && (
-                                            <div className="text-gray-700 text-sm mt-2">{renderHtmlContent(edu.description)}</div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </SortableItem>
-                ) : null;
-
-            case 'skills':
-                return skills && skills.length > 0 ? (
-                    <SortableItem 
-                        key="skills" 
-                        id="skills"
-                        sectionOrder={sectionOrder}
-                        onSectionReorder={onSectionReorder}
-                        activeSection={activeSection}
-                        onSetActiveSection={onSectionSelect}
-                        isDropTarget={dropTargetId === 'skills'}
-                    >
-                        <div className="bg-gray-50 p-5 rounded shadow-sm border border-gray-200 mb-4">
-                            <h2 className="text-base font-bold text-gray-800 mb-4 uppercase tracking-wide">
-                                {getSectionName('skills', data.cvLanguage, data.sectionNames)}
-                            </h2>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                                {skills.map((skill) => (
-                                    <div key={skill.id} className="bg-white px-3 py-2 rounded border border-gray-100">
-                                        <span className="text-sm font-medium text-gray-800">{skill.name}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </SortableItem>
-                ) : null;
+            // Note: education, skills, languages, certifications are rendered in left column
+            // so we don't include them here to avoid duplication
 
             case 'projects':
                 return projects && projects.length > 0 ? (
@@ -7991,7 +7973,7 @@ const EssenceTemplate: React.FC<{
                         isDropTarget={dropTargetId === 'projects'}
                     >
                         <div className="bg-white p-5 rounded shadow-sm border border-gray-200 mb-4">
-                            <h2 className="text-base font-bold text-gray-800 mb-4 uppercase tracking-wide">
+                            <h2 className="text-base font-bold mb-4 uppercase tracking-wide" style={{ color: '#1F4B43' }}>
                                 {getSectionName('projects', data.cvLanguage, data.sectionNames)}
                             </h2>
                             <div className="space-y-4">
@@ -8026,81 +8008,16 @@ const EssenceTemplate: React.FC<{
                                         {project.url && (
                                             <div className="text-xs text-gray-500 mt-2">
                                                 <span className="font-medium">URL: </span>
-                                                {project.url}
+                                                <a 
+                                                    href={project.url.startsWith('http') ? project.url : `https://${project.url}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-blue-600 hover:text-blue-800 hover:underline"
+                                                >
+                                                    {project.url}
+                                                </a>
                                             </div>
                                         )}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </SortableItem>
-                ) : null;
-
-            case 'languages':
-                return languages && languages.length > 0 ? (
-                    <SortableItem 
-                        key="languages" 
-                        id="languages"
-                        sectionOrder={sectionOrder}
-                        onSectionReorder={onSectionReorder}
-                        activeSection={activeSection}
-                        onSetActiveSection={onSectionSelect}
-                        isDropTarget={dropTargetId === 'languages'}
-                    >
-                        <div className="bg-gray-50 p-5 rounded shadow-sm border border-gray-200 mb-4">
-                            <h2 className="text-base font-bold text-gray-800 mb-4 uppercase tracking-wide">
-                                {getSectionName('languages', data.cvLanguage, data.sectionNames)}
-                            </h2>
-                            <div className="grid grid-cols-2 gap-3">
-                                {languages.map((lang) => (
-                                    <div key={lang.id} className="bg-white p-3 rounded border border-gray-100">
-                                        <span className="text-sm font-bold text-black">{lang.language}</span>
-                                        <span className="text-xs text-gray-600 block">{getLanguageLevel(lang.level, data.cvLanguage)}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </SortableItem>
-                ) : null;
-
-            case 'certifications':
-                return certifications && certifications.length > 0 ? (
-                    <SortableItem 
-                        key="certifications" 
-                        id="certifications"
-                        sectionOrder={sectionOrder}
-                        onSectionReorder={onSectionReorder}
-                        activeSection={activeSection}
-                        onSetActiveSection={onSectionSelect}
-                        isDropTarget={dropTargetId === 'certifications'}
-                    >
-                        <div className="bg-gray-50 p-5 rounded shadow-sm border border-gray-200 mb-4">
-                            <h2 className="text-base font-bold text-gray-800 mb-4 uppercase tracking-wide">
-                                {getSectionName('certifications', data.cvLanguage, data.sectionNames)}
-                            </h2>
-                            <div className="space-y-3">
-                                {certifications.map((cert) => (
-                                    <div key={cert.id} className="bg-white p-4 rounded border border-gray-100">
-                                        <div className="flex justify-between items-start">
-                                            <div className="flex-1">
-                                                <h3 className="text-sm font-bold text-black">{cert.name}</h3>
-                                                <p className="text-sm font-semibold text-gray-600">{cert.issuer}</p>
-                                                {cert.description && (
-                                                    <div className="text-gray-700 text-sm mt-1">{renderHtmlContent(cert.description)}</div>
-                                                )}
-                                                {cert.url && (
-                                                    <div className="text-xs text-gray-500 mt-1">
-                                                        <span className="font-medium">URL: </span>
-                                                        {cert.url}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            {cert.date && (
-                                                <span className="text-xs text-gray-500 font-medium whitespace-nowrap flex-shrink-0 ml-4">
-                                                    {formatDate(cert.date, data.cvLanguage)}
-                                                </span>
-                                            )}
-                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -8120,7 +8037,7 @@ const EssenceTemplate: React.FC<{
                         isDropTarget={dropTargetId === 'volunteer'}
                     >
                         <div className="bg-white p-5 rounded shadow-sm border border-gray-200 mb-4">
-                            <h2 className="text-base font-bold text-gray-800 mb-4 uppercase tracking-wide">
+                            <h2 className="text-base font-bold mb-4 uppercase tracking-wide" style={{ color: '#1F4B43' }}>
                                 {getSectionName('volunteerExperience', data.cvLanguage, data.sectionNames)}
                             </h2>
                             <div className="space-y-3">
@@ -8177,7 +8094,7 @@ const EssenceTemplate: React.FC<{
                                 .sort((a, b) => (a.order || 999) - (b.order || 999))
                                 .map((section) => (
                                     <div key={section.id} className="bg-white p-5 rounded shadow-sm border border-gray-200 mb-4">
-                                        <h2 className="text-base font-bold text-gray-800 mb-4 uppercase tracking-wide">
+                                        <h2 className="text-base font-bold mb-4 uppercase tracking-wide" style={{ color: '#1F4B43' }}>
                                             {section.title}
                                         </h2>
                                         <div className="space-y-3">
@@ -8205,14 +8122,21 @@ const EssenceTemplate: React.FC<{
                                                     )}
                                                     {item.tags && item.tags.length > 0 && (
                                                         <div className="mt-2 text-xs text-gray-500">
-                                                            <span className="font-medium">Tags: </span>
+                                                            <span className="font-medium">{data.cvLanguage === 'english' ? 'Tags' : 'Etiketlər'}: </span>
                                                             {item.tags.join(', ')}
                                                         </div>
                                                     )}
                                                     {item.url && (
                                                         <div className="text-xs text-gray-500 mt-1">
                                                             <span className="font-medium">URL: </span>
-                                                            {item.url}
+                                                            <a 
+                                                                href={item.url.startsWith('http') ? item.url : `https://${item.url}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-blue-600 hover:text-blue-800 hover:underline"
+                                                            >
+                                                                {item.url}
+                                                            </a>
                                                         </div>
                                                     )}
                                                 </div>
@@ -8238,55 +8162,66 @@ const EssenceTemplate: React.FC<{
             onDragOver={handleDragOver}
         >
             <div className="essence-template cv-template" style={{ fontFamily: 'Arial, sans-serif', backgroundColor: '#F5F5F5', minHeight: '297mm' }}>
-                {/* Header Section - Full Width White Block */}
-                <div className="bg-white p-6 shadow-sm border-b border-gray-200 mb-6">
+                {/* Header Section - Full Width Dark Green Block */}
+                <div 
+                    className="p-6 shadow-sm border-b mb-6"
+                    style={{ 
+                        backgroundColor: '#1F4B43',
+                        background: '#1F4B43',
+                        backgroundImage: 'none',
+                        WebkitPrintColorAdjust: 'exact',
+                        colorAdjust: 'exact',
+                        printColorAdjust: 'exact'
+                    }}
+                >
                     {/* Name and Title */}
-                    <div className="text-center mb-4">
-                        <h1 className="text-2xl font-bold text-black mb-1 tracking-wide">
+                    <div className="text-center text-white mb-4" style={{ color: '#FFFFFF' }}>
+                        <h1 className="text-2xl font-bold text-white mb-1 tracking-wide" style={{ color: '#FFFFFF' }}>
                             {personalInfo.firstName} {personalInfo.lastName}
                         </h1>
-                        {/* Professional title can be derived from most recent experience */}
-                        {experience && experience.length > 0 && (
-                            <p className="text-base text-gray-600 font-medium">
-                                {experience[0].position}
+                        {/* Professional title - show field if available, otherwise most recent position */}
+                        {(personalInfo.field || (experience && experience.length > 0)) && (
+                            <p className="text-base text-white font-medium opacity-90" style={{ color: '#FFFFFF' }}>
+                                {personalInfo.field || experience[0]?.position}
                             </p>
                         )}
                     </div>
                     
                     {/* Contact Information - Horizontal Layout */}
-                    <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-700">
+                    <div className="flex flex-wrap justify-center gap-6 text-sm text-white opacity-90" style={{ color: '#FFFFFF' }}>
                         {personalInfo.email && (
                             <div className="flex items-center">
-                                <span className="font-medium">{personalInfo.email}</span>
+                                <span className="font-medium" style={{ color: '#FFFFFF' }}>{personalInfo.email}</span>
                             </div>
                         )}
                         {personalInfo.phone && (
                             <div className="flex items-center">
-                                <span className="font-medium">{personalInfo.phone}</span>
+                                <span className="font-medium" style={{ color: '#FFFFFF' }}>{personalInfo.phone}</span>
                             </div>
                         )}
+                       
                         {personalInfo.location && (
                             <div className="flex items-center">
-                                <span className="font-medium">{personalInfo.location}</span>
+                                <span className="font-medium" style={{ color: '#FFFFFF' }}>{personalInfo.location}</span>
                             </div>
                         )}
                         {personalInfo.linkedin && (
                             <div className="flex items-center">
-                                <span className="font-medium text-xs break-all">
+                                <span className="font-medium text-xs break-all" style={{ color: '#FFFFFF' }}>
                                     {getLinkedInDisplay(personalInfo.linkedin).displayText}
                                 </span>
                             </div>
                         )}
                         {personalInfo.github && (
                             <div className="flex items-center">
-                                <span className="font-medium text-xs break-all">
+                                <span className="font-medium text-xs break-all" style={{ color: '#FFFFFF' }}>
                                     {getGitHubDisplay(personalInfo.github).displayText}
                                 </span>
                             </div>
                         )}
                         {personalInfo.website && (
                             <div className="flex items-center">
-                                <span className="font-medium text-xs break-all">{personalInfo.website}</span>
+                                <span className="font-medium text-xs break-all" style={{ color: '#FFFFFF' }}>{personalInfo.website}</span>
                             </div>
                         )}
                     </div>
@@ -8294,12 +8229,12 @@ const EssenceTemplate: React.FC<{
 
                 {/* Main Content - Two Column Layout */}
                 <div className="flex gap-6 px-6">
-                    {/* Left Column - 30% Width - Light Gray Background */}
-                    <div className="w-1/3 space-y-4">
+                    {/* Left Column - 45% Width - Light Gray Background */}
+                    <div className="w-[45%] space-y-4">
                         {/* Education Section */}
                         {education && education.length > 0 && (
-                            <div className="bg-gray-50 p-4 rounded shadow-sm border border-gray-200">
-                                <h2 className="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wide">
+                            <div className="bg-gray-50 p-4 rounded shadow-sm border border-gray-200 ">
+                                <h2 className="text-sm font-bold  mb-3 uppercase tracking-wide" style={{ color: '#1F4B43' }}>
                                     {getSectionName('education', data.cvLanguage, data.sectionNames)}
                                 </h2>
                                 <div className="space-y-3">
@@ -8321,7 +8256,7 @@ const EssenceTemplate: React.FC<{
                                                 </span>
                                             )}
                                             {edu.gpa && (
-                                                <p className="text-xs text-gray-500">GPA: {edu.gpa}</p>
+                                                <p className="text-xs text-gray-500">{data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: {edu.gpa}</p>
                                             )}
                                         </div>
                                     ))}
@@ -8332,7 +8267,7 @@ const EssenceTemplate: React.FC<{
                         {/* Skills Section */}
                         {skills && skills.length > 0 && (
                             <div className="bg-gray-50 p-4 rounded shadow-sm border border-gray-200">
-                                <h2 className="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wide">
+                                <h2 className="text-sm font-bold mb-3 uppercase tracking-wide" style={{ color: '#1F4B43' }}>
                                     {getSectionName('skills', data.cvLanguage, data.sectionNames)}
                                 </h2>
                                 <div className="space-y-2">
@@ -8348,7 +8283,7 @@ const EssenceTemplate: React.FC<{
                         {/* Languages Section */}
                         {languages && languages.length > 0 && (
                             <div className="bg-gray-50 p-4 rounded shadow-sm border border-gray-200">
-                                <h2 className="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wide">
+                                <h2 className="text-sm font-bold mb-3 uppercase tracking-wide" style={{ color: '#1F4B43' }}>
                                     {getSectionName('languages', data.cvLanguage, data.sectionNames)}
                                 </h2>
                                 <div className="space-y-2">
@@ -8365,7 +8300,7 @@ const EssenceTemplate: React.FC<{
                         {/* Certifications Section */}
                         {certifications && certifications.length > 0 && (
                             <div className="bg-gray-50 p-4 rounded shadow-sm border border-gray-200">
-                                <h2 className="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wide">
+                                <h2 className="text-sm font-bold mb-3 uppercase tracking-wide" style={{ color: '#1F4B43' }}>
                                     {getSectionName('certifications', data.cvLanguage, data.sectionNames)}
                                 </h2>
                                 <div className="space-y-2">
@@ -8385,8 +8320,8 @@ const EssenceTemplate: React.FC<{
                         )}
                     </div>
 
-                    {/* Right Column - 70% Width - White Background */}
-                    <div className="w-2/3 space-y-4">
+                    {/* Right Column - 55% Width - White Background */}
+                    <div className="w-[55%] space-y-4">
                         <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
                             <div className={`transition-all duration-300 ${isDragActive ? 'opacity-95' : ''}`}>
                                 {sectionOrder.map((sectionId) => {
@@ -8717,7 +8652,8 @@ export default function CVPreview({
 
         // Essence Template - Modern White and Gray Block Design
         if (normalizedTemplate.includes('essence') ||
-            normalizedTemplate === 'essence') {
+            normalizedTemplate === 'essence' ||
+            templateId === 'essence') {
             return <EssenceTemplate 
                 data={cv.data} 
                 sectionOrder={sectionOrder} 

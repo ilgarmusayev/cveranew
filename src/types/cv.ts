@@ -6,6 +6,7 @@ export interface PersonalInfo {
   phone: string;
   location?: string;
   address?: string;
+  field?: string; // Field of expertise/specialization
   summary?: string;
   linkedin?: string;
   github?: string;
