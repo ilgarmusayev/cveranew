@@ -1646,17 +1646,20 @@ const BasicTemplate: React.FC<{
                         >
                             {personalInfo.email && (
                                 <span className="flex items-center gap-2">
-                                    E-poçt: {personalInfo.email}
+                                                                        {data.cvLanguage === 'english' ? 'Email: ' : 'E-poçt: '}
+ {personalInfo.email}
                                 </span>
                             )}
                             {personalInfo.phone && (
                                 <span className="flex items-center gap-2">
-                                    Telefon: {personalInfo.phone}
+                                    {data.cvLanguage === 'english' ? 'Phone: ' : 'Telefon: '}
+                                    {personalInfo.phone}
                                 </span>
                             )}
                             {personalInfo.location && (
                                 <span className="flex items-center gap-2">
-                                    Ünvan: {personalInfo.location}
+                                    {data.cvLanguage === 'english' ? 'Location: ' : 'Ünvan: '}
+                                    {personalInfo.location}
                                 </span>
                             )}
                             {personalInfo.linkedin && (
@@ -1685,7 +1688,8 @@ const BasicTemplate: React.FC<{
                             )}
                             {personalInfo.website && (
                                 <span className="flex items-center gap-2">
-                                    Veb-sayt: {personalInfo.website}
+                                    {data.cvLanguage === 'english' ? 'Website: ' : 'Veb-sayt: '}
+                                    {personalInfo.website}
                                 </span>
                             )}
                             {personalInfo.additionalLinks && personalInfo.additionalLinks.length > 0 && (
