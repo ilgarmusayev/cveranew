@@ -8340,6 +8340,1268 @@ const EssenceTemplate: React.FC<{
     );
 };
 
+// Clarity Template Component - Clean Design with Dark Orange Accents on White Background
+const ClarityTemplate: React.FC<{ 
+    data: CVData; 
+    sectionOrder: string[]; 
+    onSectionReorder: (newOrder: string[]) => void;
+    activeSection?: string | null;
+    onSectionSelect?: (sectionId: string | null) => void;
+}> = ({ data, sectionOrder, onSectionReorder, activeSection, onSectionSelect }) => {
+    const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
+    const [isDragActive, setIsDragActive] = useState(false);
+    const [activeId, setActiveId] = useState<string | null>(null);
+    const [dropTargetId, setDropTargetId] = useState<string | null>(null);
+    const [isMobile, setIsMobile] = useState(false);
+
+    // Mobile device detection
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 1024);
+        };
+        
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 100,
+                tolerance: 12,
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    const handleDragStart = (event: DragStartEvent) => {
+        if (isMobile) return;
+        
+        setIsDragActive(true);
+        setActiveId(event.active.id as string);
+        document.body.style.userSelect = 'none';
+        document.body.style.cursor = 'grabbing';
+    };
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        setIsDragActive(false);
+        setActiveId(null);
+        setDropTargetId(null);
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            const oldIndex = sectionOrder.indexOf(active.id as string);
+            const newIndex = sectionOrder.indexOf(over.id as string);
+
+            if (oldIndex !== -1 && newIndex !== -1) {
+                const newOrder = arrayMove(sectionOrder, oldIndex, newIndex);
+                onSectionReorder(newOrder);
+            }
+        }
+    };
+
+    const handleDragOver = (event: DragOverEvent) => {
+        const { over } = event;
+        setDropTargetId(over ? over.id as string : null);
+    };
+
+    const renderClaritySection = (sectionType: string) => {
+        switch (sectionType) {
+            case 'summary':
+                return personalInfo.summary ? (
+                    <SortableItem 
+                        key="summary" 
+                        id="summary"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                    >
+                        <div className="mb-4">
+                            <h2 
+                                className="text-2xl font-bold mb-2 pb-2"
+                                style={{ 
+                                    color: '#1f2937',
+                                    fontFamily: '"Inter", "Segoe UI", sans-serif',
+                                    borderBottom: '2px solid #ea580c'
+                                }}
+                            >
+                                {getSectionName('summary', data.cvLanguage, data.sectionNames)}
+                            </h2>
+                            <div 
+                                className="text-gray-700 leading-relaxed"
+                                style={{ 
+                                    fontSize: '15px',
+                                    lineHeight: '1.6'
+                                }}
+                            >
+                                {renderHtmlContent(personalInfo.summary, false, data.cvLanguage)}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'personalInfo':
+                return (
+                    <SortableItem 
+                        key="personalInfo" 
+                        id="personalInfo"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                    >
+                        {/* Professional Header with clean design */}
+                        <div 
+                            className="border-b pb-8"
+                            style={{
+                                backgroundColor: '#ffffff',
+                                borderBottomWidth: '3px',
+                                borderBottomColor: '#ea580c',
+                                WebkitPrintColorAdjust: 'exact',
+                                colorAdjust: 'exact'
+                            }}
+                        >
+                            <div className="flex items-start gap-8">
+                                {personalInfo.profileImage && (
+                                    <div className="flex-shrink-0">
+                                        <img
+                                            src={personalInfo.profileImage}
+                                            alt="Profile"
+                                            className="w-32 h-32 rounded-lg object-cover shadow-lg"
+                                            style={{
+                                                border: '3px solid #ea580c',
+                                                borderRadius: '12px'
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                                
+                                <div className="flex-1">
+                                    <h1 
+                                        className="text-4xl font-bold mb-3 tracking-tight"
+                                        style={{ 
+                                            color: '#1f2937',
+                                            fontFamily: '"Inter", "Segoe UI", sans-serif',
+                                            fontWeight: '700',
+                                            letterSpacing: '-0.015em',
+                                            lineHeight: '1.1',
+                                            marginBottom: '12px',
+                                            WebkitPrintColorAdjust: 'exact',
+                                            colorAdjust: 'exact'
+                                        }}
+                                    >
+                                        {getFullName(personalInfo, data.cvLanguage)}
+                                    </h1>
+                                    <div 
+                                        className="text-xl font-semibold mb-6"
+                                        style={{ 
+                                            color: '#ea580c',
+                                            fontFamily: '"Inter", "Segoe UI", sans-serif',
+                                            fontWeight: '600',
+                                            lineHeight: '1.3',
+                                            marginBottom: '24px',
+                                            WebkitPrintColorAdjust: 'exact',
+                                            colorAdjust: 'exact'
+                                        }}
+                                    >
+                                        {personalInfo.field || 'Sahə daxil edilməyib'}
+                                    </div>
+                                    
+                                    {/* Clean Contact Information without icons */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-base">
+                                        {personalInfo.email && (
+                                            <div 
+                                                className="p-3 rounded-lg border-l-4"
+                                                style={{ 
+                                                    color: '#374151',
+                                                    backgroundColor: '#f9fafb',
+                                                    borderLeftColor: '#ea580c',
+                                                    WebkitPrintColorAdjust: 'exact',
+                                                    colorAdjust: 'exact'
+                                                }}
+                                            >
+                                                <div className="font-medium text-gray-600 text-sm mb-1">Email</div>
+                                                <div className="font-semibold">{personalInfo.email}</div>
+                                            </div>
+                                        )}
+                                            {personalInfo.phone && (
+                                            <div 
+                                                className="p-3 rounded-lg border-l-4"
+                                                style={{ 
+                                                    color: '#374151',
+                                                    backgroundColor: '#f9fafb',
+                                                    borderLeftColor: '#ea580c',
+                                                    WebkitPrintColorAdjust: 'exact',
+                                                    colorAdjust: 'exact'
+                                                }}
+                                            >
+                                                <div className="font-medium text-gray-600 text-sm mb-1">Phone</div>
+                                                <div className="font-semibold">{personalInfo.phone}</div>
+                                            </div>
+                                        )}
+                                    
+                                    {personalInfo.location && (
+                                            <div 
+                                                className="p-3 rounded-lg border-l-4"
+                                                style={{ 
+                                                    color: '#374151',
+                                                    backgroundColor: '#f9fafb',
+                                                    borderLeftColor: '#ea580c',
+                                                    WebkitPrintColorAdjust: 'exact',
+                                                    colorAdjust: 'exact'
+                                                }}
+                                            >
+                                                <div className="font-medium text-gray-600 text-sm mb-1">Location</div>
+                                                <div className="font-semibold">{personalInfo.location}</div>
+                                            </div>
+                                        )}
+
+                                        {personalInfo.linkedin && (
+                                           <div 
+                                                className="p-3 rounded-lg border-l-4"
+                                                style={{ 
+                                                    color: '#374151',
+                                                    backgroundColor: '#f9fafb',
+                                                    borderLeftColor: '#ea580c',
+                                                    WebkitPrintColorAdjust: 'exact',
+                                                    colorAdjust: 'exact'
+                                                }}
+                                            >
+                                                <div className="font-medium text-gray-600 text-sm mb-1">LinkedIn</div>
+                                                <a
+                                                    href={getLinkedInDisplay(personalInfo.linkedin).url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="font-medium hover:text-orange-600 transition-colors underline"
+                                                >
+                                                    {getLinkedInDisplay(personalInfo.linkedin).displayText}
+                                                </a>
+                                            </div>
+                                        )}
+                                        {personalInfo.website && (
+                                            <div 
+                                                className="p-3 rounded-lg border-l-4"
+                                                style={{ 
+                                                    color: '#374151',
+                                                    backgroundColor: '#f9fafb',
+                                                    borderLeftColor: '#ea580c',
+                                                    WebkitPrintColorAdjust: 'exact',
+                                                    colorAdjust: 'exact'
+                                                }}
+                                            >
+                                                <div className="font-medium text-gray-600 text-sm mb-1">Website</div>
+                                                <span className="font-medium">{personalInfo.website}</span>
+                                            </div>
+                                        )}
+                                        {personalInfo.github && (
+                                            <div 
+                                                className="flex items-center gap-3 p-2 rounded-md"
+                                                style={{ 
+                                                    color: '#374151',
+                                                    backgroundColor: '#f9fafb',
+                                                    WebkitPrintColorAdjust: 'exact',
+                                                    colorAdjust: 'exact'
+                                                }}
+                                            >
+                                                <div 
+                                                    className="w-8 h-8 flex items-center justify-center rounded-full text-white font-bold"
+                                                    style={{ backgroundColor: '#ea580c' }}
+                                                >
+                                                    💻
+                                                </div>
+                                                <a
+                                                    href={getGitHubDisplay(personalInfo.github).url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="font-medium hover:text-orange-600 transition-colors underline"
+                                                >
+                                                    {getGitHubDisplay(personalInfo.github).displayText}
+                                                </a>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </SortableItem>
+                );
+
+            case 'experience':
+                return experience.length > 0 ? (
+                    <SortableItem 
+                        key="experience" 
+                        id="experience"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                    >
+                        <div className="mb-4">
+                            <h2 
+                                className="text-2xl font-bold mb-3 pb-2"
+                                style={{ 
+                                    color: '#1f2937',
+                                    fontFamily: '"Inter", "Segoe UI", sans-serif',
+                                    borderBottom: '2px solid #ea580c'
+                                }}
+                            >
+                                {getSectionName('experience', data.cvLanguage, data.sectionNames)}
+                            </h2>
+                            <div className="space-y-6">
+                                {experience.map((exp, index) => (
+                                    <div key={exp.id} className="relative">
+                                        {/* Timeline line for visual appeal */}
+                                        {index < experience.length - 1 && (
+                                            <div 
+                                                className="absolute left-2 top-12 w-0.5 h-12"
+                                                style={{ backgroundColor: '#fed7aa' }}
+                                            ></div>
+                                        )}
+                                        
+                                        <div 
+                                            className="relative bg-white rounded-lg border-l-4 pl-6 pr-4 py-4"
+                                            style={{ 
+                                                borderLeftColor: '#ea580c',
+                                                borderWidth: '0 0 0 4px',
+                                                backgroundColor: '#fefefe'
+                                            }}
+                                        >
+                                            {/* Timeline dot */}
+                                            <div 
+                                                className="absolute left-0 top-4 w-2.5 h-2.5 rounded-full transform -translate-x-1/2"
+                                                style={{ backgroundColor: '#ea580c' }}
+                                            ></div>
+                                            
+                                            <div className="flex justify-between items-start mb-3">
+                                                <div className="flex-1">
+                                                    <h3 
+                                                        className="text-lg font-bold mb-1"
+                                                        style={{ 
+                                                            color: '#1f2937',
+                                                            fontFamily: '"Inter", "Segoe UI", sans-serif'
+                                                        }}
+                                                    >
+                                                        {exp.position}
+                                                    </h3>
+                                                    <p 
+                                                        className="text-base font-semibold mb-1"
+                                                        style={{ color: '#ea580c' }}
+                                                    >
+                                                        {exp.company}
+                                                    </p>
+                                                    {(exp as any).location && (
+                                                        <p 
+                                                            className="text-gray-600 text-sm"
+                                                            style={{ fontSize: '13px' }}
+                                                        >
+                                                            {(exp as any).location}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                {(exp.startDate || exp.endDate) && (
+                                                    <div 
+                                                        className="px-3 py-1 rounded-md text-sm font-medium ml-4 whitespace-nowrap"
+                                                        style={{ 
+                                                            backgroundColor: '#fed7aa',
+                                                            color: '#c2410c'
+                                                        }}
+                                                    >
+                                                        {exp.startDate ? (
+                                                            exp.current ? `${formatDate(exp.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
+                                                            exp.endDate ? `${formatDate(exp.startDate, data.cvLanguage)} - ${formatDate(exp.endDate, data.cvLanguage)}` :
+                                                            formatDate(exp.startDate, data.cvLanguage)
+                                                        ) : exp.current ? (
+                                                            getCurrentText(data.cvLanguage)
+                                                        ) : exp.endDate ? (
+                                                            formatDate(exp.endDate, data.cvLanguage)
+                                                        ) : ''}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {exp.description && (
+                                                <div 
+                                                    className="text-gray-700 leading-relaxed"
+                                                    style={{ 
+                                                        fontSize: '14px',
+                                                        lineHeight: '1.6'
+                                                    }}
+                                                >
+                                                    {renderHtmlContent(exp.description)}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'education':
+                return education.length > 0 ? (
+                    <SortableItem 
+                        key="education" 
+                        id="education"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                    >
+                        <div className="mb-4">
+                            <h2 
+                                className="text-2xl font-bold mb-3 pb-2"
+                                style={{ 
+                                    color: '#1f2937',
+                                    fontFamily: '"Inter", "Segoe UI", sans-serif',
+                                    borderBottom: '2px solid #ea580c'
+                                }}
+                            >
+                                {getSectionName('education', data.cvLanguage, data.sectionNames)}
+                            </h2>
+                            <div className="space-y-4">
+                                {education.map((edu) => (
+                                    <div 
+                                        key={edu.id} 
+                                        className="bg-white rounded-lg border border-gray-100 p-4"
+                                        style={{ backgroundColor: '#fefefe' }}
+                                    >
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div className="flex-1">
+                                                {edu.degree ? (
+                                                    <h3 
+                                                        className="text-lg font-bold mb-1"
+                                                        style={{ 
+                                                            color: '#1f2937',
+                                                            fontFamily: '"Inter", "Segoe UI", sans-serif'
+                                                        }}
+                                                    >
+                                                        {edu.degree}
+                                                    </h3>
+                                                ) : (
+                                                    <h3 
+                                                        className="text-lg font-bold mb-1"
+                                                        style={{ 
+                                                            color: '#1f2937',
+                                                            fontFamily: '"Inter", "Segoe UI", sans-serif'
+                                                        }}
+                                                    >
+                                                        {edu.institution}
+                                                    </h3>
+                                                )}
+                                                {edu.degree && (
+                                                    <p 
+                                                        className="text-base font-semibold mb-1"
+                                                        style={{ color: '#ea580c' }}
+                                                    >
+                                                        {edu.institution}
+                                                    </p>
+                                                )}
+                                                {(edu.field || edu.gpa) && (
+                                                    <p 
+                                                        className="text-gray-600 text-sm mt-1"
+                                                        style={{ fontSize: '13px' }}
+                                                    >
+                                                        {[edu.field, edu.gpa && `${data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: ${edu.gpa}`].filter(Boolean).join(' • ')}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            {(edu.startDate || edu.endDate) && (
+                                                <div 
+                                                    className="px-3 py-1 rounded-md text-sm font-medium ml-4"
+                                                    style={{ 
+                                                        backgroundColor: '#fed7aa',
+                                                        color: '#c2410c'
+                                                    }}
+                                                >
+                                                    {edu.startDate ? (
+                                                        edu.current ? `${formatDate(edu.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
+                                                        edu.endDate ? `${formatDate(edu.startDate, data.cvLanguage)} - ${formatDate(edu.endDate, data.cvLanguage)}` :
+                                                        formatDate(edu.startDate, data.cvLanguage)
+                                                    ) : edu.current ? (
+                                                        getCurrentText(data.cvLanguage)
+                                                    ) : edu.endDate ? (
+                                                        formatDate(edu.endDate, data.cvLanguage)
+                                                    ) : ''}
+                                                </div>
+                                            )}
+                                        </div>
+                                        {edu.description && (
+                                            <div 
+                                                className="text-gray-700 mt-2"
+                                                style={{ 
+                                                    fontSize: '14px',
+                                                    lineHeight: '1.6'
+                                                }}
+                                            >
+                                                {renderHtmlContent(edu.description)}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'skills':
+                const validSkills = skills?.filter(skill => skill.name && skill.name.trim() !== '') || [];
+                return validSkills.length > 0 ? (
+                    <SortableItem 
+                        key="skills" 
+                        id="skills"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                    >
+                        <div className="mb-4">
+                            <h2 
+                                className="text-2xl font-bold mb-3 pb-2"
+                                style={{ 
+                                    color: '#1f2937',
+                                    fontFamily: '"Inter", "Segoe UI", sans-serif',
+                                    borderBottom: '2px solid #ea580c'
+                                }}
+                            >
+                                {getSectionName('skills', data.cvLanguage, data.sectionNames)}
+                            </h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {validSkills.map((skill) => (
+                                    <div 
+                                        key={skill.id} 
+                                        className="bg-white rounded-lg border border-gray-100 p-4 hover:shadow-sm transition-shadow"
+                                        style={{ backgroundColor: '#fefefe' }}
+                                    >
+                                        <div className="mb-2">
+                                            <span 
+                                                className="font-semibold text-base"
+                                                style={{ 
+                                                    color: '#1f2937',
+                                                    fontFamily: '"Inter", "Segoe UI", sans-serif'
+                                                }}
+                                            >
+                                                {skill.name}
+                                            </span>
+                                        </div>
+                                        {skill.description && (
+                                            <p 
+                                                className="text-gray-600"
+                                                style={{ 
+                                                    fontSize: '13px',
+                                                    lineHeight: '1.5'
+                                                }}
+                                            >
+                                                {skill.description}
+                                            </p>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'projects':
+                return projects.length > 0 ? (
+                    <SortableItem 
+                        key="projects" 
+                        id="projects"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                    >
+                        <div>
+                            <h2 
+                                className="text-2xl font-bold pb-2"
+                                style={{ 
+                                    color: '#1f2937',
+                                    fontFamily: '"Inter", "Segoe UI", sans-serif',
+                                    borderBottom: '2px solid #ea580c'
+                                }}
+                            >
+                                {getSectionName('projects', data.cvLanguage, data.sectionNames)}
+                            </h2>
+                            <div className="space-y-6">
+                                {projects.map((project, index) => (
+                                    <div key={project.id} className="relative">
+                                        {/* Timeline line for visual appeal */}
+                                        {index < projects.length - 1 && (
+                                            <div 
+                                                className="absolute left-2 top-12 w-0.5 h-12"
+                                                style={{ backgroundColor: '#fed7aa' }}
+                                            ></div>
+                                        )}
+                                        
+                                        <div 
+                                            className="relative bg-white rounded-lg border-l-4 pl-6 pr-4 py-4"
+                                            style={{ 
+                                                borderLeftColor: '#ea580c',
+                                                borderWidth: '0 0 0 4px',
+                                                backgroundColor: '#fefefe'
+                                            }}
+                                        >
+                                            {/* Timeline dot */}
+                                            <div 
+                                                className="absolute left-0 top-4 w-2.5 h-2.5 rounded-full transform -translate-x-1/2"
+                                                style={{ backgroundColor: '#ea580c' }}
+                                            ></div>
+                                            
+                                            <div className="flex justify-between items-start mb-3">
+                                                <div className="flex-1">
+                                                    <h3 
+                                                        className="text-lg font-bold mb-1"
+                                                        style={{ 
+                                                            color: '#1f2937',
+                                                            fontFamily: '"Inter", "Segoe UI", sans-serif'
+                                                        }}
+                                                    >
+                                                        {project.name}
+                                                    </h3>
+                                                    {project.description && (
+                                                        <div 
+                                                            className="text-gray-700 mb-3 leading-relaxed"
+                                                            style={{ 
+                                                                fontSize: '14px',
+                                                                lineHeight: '1.6'
+                                                            }}
+                                                        >
+                                                            {renderHtmlContent(project.description)}
+                                                        </div>
+                                                    )}
+                                                    {project.technologies && project.technologies.length > 0 && (
+                                                        <div className="mb-2">
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {project.technologies.map((tech, index) => (
+                                                                    <span 
+                                                                        key={index} 
+                                                                        className="px-2 py-1 rounded-md text-xs font-medium"
+                                                                        style={{ 
+                                                                            backgroundColor: '#fed7aa',
+                                                                            color: '#c2410c'
+                                                                        }}
+                                                                    >
+                                                                        {tech}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {project.url && (
+                                                        <div className="mt-2">
+                                                            <a
+                                                                href={project.url.startsWith('http') ? project.url : `https://${project.url}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-sm font-medium hover:underline transition-colors"
+                                                                style={{ color: '#ea580c' }}
+                                                            >
+                                                                {data.cvLanguage === 'english' ? 'View Project' : 'Layihəni Gör'}
+                                                            </a>
+                                                        </div>
+                                                    )}
+                                                    {project.github && (
+                                                        <div className="mt-1">
+                                                            <a
+                                                                href={getGitHubDisplay(project.github).url}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-sm font-medium hover:underline transition-colors"
+                                                                style={{ color: '#ea580c' }}
+                                                            >
+                                                                {data.cvLanguage === 'english' ? 'GitHub' : 'GitHub'}
+                                                            </a>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'languages':
+                const validLanguages = languages?.filter(lang => lang.language && lang.language.trim() !== '') || [];
+                return validLanguages.length > 0 ? (
+                    <SortableItem 
+                        key="languages" 
+                        id="languages"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                    >
+                        <div>
+                            <h2 
+                                className="text-2xl font-bold pb-2"
+                                style={{ 
+                                    color: '#1f2937',
+                                    fontFamily: '"Inter", "Segoe UI", sans-serif',
+                                    borderBottom: '2px solid #ea580c'
+                                }}
+                            >
+                                {getSectionName('languages', data.cvLanguage, data.sectionNames)}
+                            </h2>
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                {validLanguages.map((lang) => (
+                                    <div 
+                                        key={lang.id} 
+                                        className="bg-white rounded-lg border border-gray-100 p-3 text-center hover:shadow-sm transition-shadow"
+                                        style={{ backgroundColor: '#fefefe' }}
+                                    >
+                                        <div 
+                                            className="font-bold text-base mb-2"
+                                            style={{ 
+                                                color: '#1f2937',
+                                                fontFamily: '"Inter", "Segoe UI", sans-serif'
+                                            }}
+                                        >
+                                            {lang.language}
+                                        </div>
+                                        <div 
+                                            className="px-2 py-1 rounded-md text-xs font-medium inline-block"
+                                            style={{ 
+                                                backgroundColor: '#fed7aa',
+                                                color: '#c2410c'
+                                            }}
+                                        >
+                                            {getLanguageLevel(lang.level, data.cvLanguage)}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'certifications':
+                return certifications.length > 0 ? (
+                    <SortableItem 
+                        key="certifications" 
+                        id="certifications"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                    >
+                        <div>
+                            <h2 
+                                className="text-2xl font-bold pb-2"
+                                style={{ 
+                                    color: '#1f2937',
+                                    fontFamily: '"Inter", "Segoe UI", sans-serif',
+                                    borderBottom: '2px solid #ea580c'
+                                }}
+                            >
+                                {getSectionName('certifications', data.cvLanguage, data.sectionNames)}
+                            </h2>
+                            <div className="space-y-6">
+                                {certifications.map((cert, index) => (
+                                    <div key={cert.id} className="relative">
+                                        {/* Timeline line for visual appeal */}
+                                        {index < certifications.length - 1 && (
+                                            <div 
+                                                className="absolute left-2 top-12 w-0.5 h-12"
+                                                style={{ backgroundColor: '#fed7aa' }}
+                                            ></div>
+                                        )}
+                                        
+                                        <div 
+                                            className="relative bg-white rounded-lg border-l-4 pl-6 pr-4 py-4"
+                                            style={{ 
+                                                borderLeftColor: '#ea580c',
+                                                borderWidth: '0 0 0 4px',
+                                                backgroundColor: '#fefefe'
+                                            }}
+                                        >
+                                            {/* Timeline dot */}
+                                            <div 
+                                                className="absolute left-0 top-4 w-2.5 h-2.5 rounded-full transform -translate-x-1/2"
+                                                style={{ backgroundColor: '#ea580c' }}
+                                            ></div>
+                                            
+                                            <div className="flex justify-between items-start mb-3">
+                                                <div className="flex-1">
+                                                    <h3 
+                                                        className="text-lg font-bold mb-1"
+                                                        style={{ 
+                                                            color: '#1f2937',
+                                                            fontFamily: '"Inter", "Segoe UI", sans-serif'
+                                                        }}
+                                                    >
+                                                        {cert.name}
+                                                    </h3>
+                                                    {cert.issuer && (
+                                                        <p 
+                                                            className="text-base font-semibold mb-1"
+                                                            style={{ color: '#ea580c' }}
+                                                        >
+                                                            {cert.issuer}
+                                                        </p>
+                                                    )}
+                                                    {cert.description && (
+                                                        <div 
+                                                            className="text-gray-700 mt-2 leading-relaxed"
+                                                            style={{ 
+                                                                fontSize: '14px',
+                                                                lineHeight: '1.6'
+                                                            }}
+                                                        >
+                                                            {renderHtmlContent(cert.description)}
+                                                        </div>
+                                                    )}
+                                                    {cert.url && (
+                                                        <div className="mt-2">
+                                                            <a
+                                                                href={cert.url.startsWith('http') ? cert.url : `https://${cert.url}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-sm font-medium hover:underline transition-colors"
+                                                                style={{ color: '#ea580c' }}
+                                                            >
+                                                                {data.cvLanguage === 'english' ? 'View Certificate' : 'Sertifikatı Gör'}
+                                                            </a>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {cert.date && (
+                                                    <div 
+                                                        className="px-3 py-1 rounded-md text-sm font-medium ml-4 whitespace-nowrap"
+                                                        style={{ 
+                                                            backgroundColor: '#fed7aa',
+                                                            color: '#c2410c'
+                                                        }}
+                                                    >
+                                                        {formatDate(cert.date, data.cvLanguage)}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'volunteerExperience':
+                return volunteerExperience.length > 0 ? (
+                    <SortableItem 
+                        key="volunteerExperience" 
+                        id="volunteerExperience"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                    >
+                        <div>
+                            <h2 
+                                className="text-2xl font-bold pb-2"
+                                style={{ 
+                                    color: '#1f2937',
+                                    fontFamily: '"Inter", "Segoe UI", sans-serif',
+                                    borderBottom: '2px solid #ea580c'
+                                }}
+                            >
+                                {getSectionName('volunteerExperience', data.cvLanguage, data.sectionNames)}
+                            </h2>
+                            <div className="space-y-6">
+                                {volunteerExperience.map((vol, index) => (
+                                    <div key={vol.id} className="relative">
+                                        {/* Timeline line for visual appeal */}
+                                        {index < volunteerExperience.length - 1 && (
+                                            <div 
+                                                className="absolute left-2 top-12 w-0.5 h-12"
+                                                style={{ backgroundColor: '#fed7aa' }}
+                                            ></div>
+                                        )}
+                                        
+                                        <div 
+                                            className="relative bg-white rounded-lg border-l-4 pl-6 pr-4 py-4"
+                                            style={{ 
+                                                borderLeftColor: '#ea580c',
+                                                borderWidth: '0 0 0 4px',
+                                                backgroundColor: '#fefefe'
+                                            }}
+                                        >
+                                            {/* Timeline dot */}
+                                            <div 
+                                                className="absolute left-0 top-4 w-2.5 h-2.5 rounded-full transform -translate-x-1/2"
+                                                style={{ backgroundColor: '#ea580c' }}
+                                            ></div>
+                                            
+                                            <div className="flex justify-between items-start mb-3">
+                                                <div className="flex-1">
+                                                    <h3 
+                                                        className="text-lg font-bold mb-1"
+                                                        style={{ 
+                                                            color: '#1f2937',
+                                                            fontFamily: '"Inter", "Segoe UI", sans-serif'
+                                                        }}
+                                                    >
+                                                        {vol.role}
+                                                    </h3>
+                                                    <p 
+                                                        className="text-base font-semibold mb-1"
+                                                        style={{ color: '#ea580c' }}
+                                                    >
+                                                        {vol.organization}
+                                                    </p>
+                                                    {vol.cause && (
+                                                        <p 
+                                                            className="text-gray-600 text-sm mb-1"
+                                                            style={{ fontSize: '13px' }}
+                                                        >
+                                                            {data.cvLanguage === 'azerbaijani' ? 'Sahə: ' : 
+                                                             data.cvLanguage?.includes('tr') ? 'Alan: ' : 'Field: '}{vol.cause}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                {(vol.startDate || vol.endDate) && (
+                                                    <div 
+                                                        className="px-3 py-1 rounded-md text-sm font-medium ml-4 whitespace-nowrap"
+                                                        style={{ 
+                                                            backgroundColor: '#fed7aa',
+                                                            color: '#c2410c'
+                                                        }}
+                                                    >
+                                                        {vol.startDate && vol.endDate ? (
+                                                            vol.current ? `${formatDate(vol.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : `${formatDate(vol.startDate, data.cvLanguage)} - ${formatDate(vol.endDate, data.cvLanguage)}`
+                                                        ) : (
+                                                            formatDate((vol.startDate || vol.endDate) || '', data.cvLanguage)
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {vol.description && (
+                                                <div 
+                                                    className="text-gray-700 leading-relaxed"
+                                                    style={{ 
+                                                        fontSize: '14px',
+                                                        lineHeight: '1.6'
+                                                    }}
+                                                >
+                                                    {renderHtmlContent(vol.description)}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'volunteer':
+                return volunteerExperience.length > 0 ? (
+                    <SortableItem 
+                        key="volunteer" 
+                        id="volunteer"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                    >
+                        <div>
+                            <h2 
+                                className="text-2xl font-bold pb-2"
+                                style={{ 
+                                    color: '#1f2937',
+                                    fontFamily: '"Inter", "Segoe UI", sans-serif',
+                                    borderBottom: '2px solid #ea580c'
+                                }}
+                            >
+                                {getSectionName('Volunteer', data.cvLanguage, data.sectionNames)}
+                            </h2>
+                            <div className="space-y-6">
+                                {volunteerExperience.map((vol, index) => (
+                                    <div key={vol.id} className="relative">
+                                        {/* Timeline line for visual appeal */}
+                                        {index < volunteerExperience.length - 1 && (
+                                            <div 
+                                                className="absolute left-2 top-12 w-0.5 h-12"
+                                                style={{ backgroundColor: '#fed7aa' }}
+                                            ></div>
+                                        )}
+                                        
+                                        <div 
+                                            className="relative bg-white rounded-lg border-l-4 pl-6 pr-4 py-4"
+                                            style={{ 
+                                                borderLeftColor: '#ea580c',
+                                                borderWidth: '0 0 0 4px',
+                                                backgroundColor: '#fefefe'
+                                            }}
+                                        >
+                                            {/* Timeline dot */}
+                                            <div 
+                                                className="absolute left-0 top-4 w-2.5 h-2.5 rounded-full transform -translate-x-1/2"
+                                                style={{ backgroundColor: '#ea580c' }}
+                                            ></div>
+                                            
+                                            <div className="flex justify-between items-start mb-3">
+                                                <div className="flex-1">
+                                                    <h3 
+                                                        className="text-lg font-bold mb-1"
+                                                        style={{ 
+                                                            color: '#1f2937',
+                                                            fontFamily: '"Inter", "Segoe UI", sans-serif'
+                                                        }}
+                                                    >
+                                                        {vol.role}
+                                                    </h3>
+                                                    <p 
+                                                        className="text-base font-semibold mb-1"
+                                                        style={{ color: '#ea580c' }}
+                                                    >
+                                                        {vol.organization}
+                                                    </p>
+                                                    {vol.cause && (
+                                                        <p 
+                                                            className="text-gray-600 text-sm mb-1"
+                                                            style={{ fontSize: '13px' }}
+                                                        >
+                                                            {data.cvLanguage === 'azerbaijani' ? 'Sahə: ' : 
+                                                             data.cvLanguage?.includes('tr') ? 'Alan: ' : 'Field: '}{vol.cause}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                {(vol.startDate || vol.endDate) && (
+                                                    <div 
+                                                        className="px-3 py-1 rounded-md text-sm font-medium ml-4 whitespace-nowrap"
+                                                        style={{ 
+                                                            backgroundColor: '#fed7aa',
+                                                            color: '#c2410c'
+                                                        }}
+                                                    >
+                                                        {vol.startDate && vol.endDate ? (
+                                                            vol.current ? `${formatDate(vol.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : `${formatDate(vol.startDate, data.cvLanguage)} - ${formatDate(vol.endDate, data.cvLanguage)}`
+                                                        ) : (
+                                                            formatDate((vol.startDate || vol.endDate) || '', data.cvLanguage)
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {vol.description && (
+                                                <div 
+                                                    className="text-gray-700 leading-relaxed"
+                                                    style={{ 
+                                                        fontSize: '14px',
+                                                        lineHeight: '1.6'
+                                                    }}
+                                                >
+                                                    {renderHtmlContent(vol.description)}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'customSections':
+                return customSections.length > 0 ? (
+                    <SortableItem 
+                        key="customSections" 
+                        id="customSections"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                    >
+                        <div className="space-y-8">
+                            {customSections.map((section) => (
+                                <div key={section.id}>
+                                    <h2 
+                                        className="text-2xl font-bold pb-2"
+                                        style={{ 
+                                            color: '#1f2937',
+                                            fontFamily: '"Inter", "Segoe UI", sans-serif',
+                                            borderBottom: '2px solid #ea580c'
+                                        }}
+                                    >
+                                        {section.title}
+                                    </h2>
+                                    <div className="space-y-6">
+                                        {section.items.map((item, index) => (
+                                            <div key={item.id} className="relative">
+                                                {/* Timeline line for visual appeal */}
+                                                {index < section.items.length - 1 && (
+                                                    <div 
+                                                        className="absolute left-2 top-12 w-0.5 h-12"
+                                                        style={{ backgroundColor: '#fed7aa' }}
+                                                    ></div>
+                                                )}
+                                                
+                                                <div 
+                                                    className="relative bg-white rounded-lg border-l-4 pl-6 pr-4 py-4"
+                                                    style={{ 
+                                                        borderLeftColor: '#ea580c',
+                                                        borderWidth: '0 0 0 4px',
+                                                        backgroundColor: '#fefefe'
+                                                    }}
+                                                >
+                                                    {/* Timeline dot */}
+                                                    <div 
+                                                        className="absolute left-0 top-4 w-2.5 h-2.5 rounded-full transform -translate-x-1/2"
+                                                        style={{ backgroundColor: '#ea580c' }}
+                                                    ></div>
+                                                    
+                                                    <div className="flex justify-between items-start mb-3">
+                                                        <div className="flex-1">
+                                                            <h3 
+                                                                className="text-lg font-bold mb-1"
+                                                                style={{ 
+                                                                    color: '#1f2937',
+                                                                    fontFamily: '"Inter", "Segoe UI", sans-serif'
+                                                                }}
+                                                            >
+                                                                {item.title}
+                                                            </h3>
+                                                            {item.subtitle && (
+                                                                <p 
+                                                                    className="text-base font-semibold mb-1"
+                                                                    style={{ color: '#ea580c' }}
+                                                                >
+                                                                    {item.subtitle}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                        {((item as any).startDate || (item as any).endDate) && (
+                                                            <div 
+                                                                className="px-3 py-1 rounded-md text-sm font-medium ml-4 whitespace-nowrap"
+                                                                style={{ 
+                                                                    backgroundColor: '#fed7aa',
+                                                                    color: '#c2410c'
+                                                                }}
+                                                            >
+                                                                {(item as any).startDate && (item as any).endDate ? (
+                                                                    (item as any).current ? `${formatDate((item as any).startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : `${formatDate((item as any).startDate, data.cvLanguage)} - ${formatDate((item as any).endDate, data.cvLanguage)}`
+                                                                ) : (
+                                                                    formatDate(((item as any).startDate || (item as any).endDate) || '', data.cvLanguage)
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    {item.description && (
+                                                        <div 
+                                                            className="text-gray-700 mb-3 leading-relaxed"
+                                                            style={{ 
+                                                                fontSize: '14px',
+                                                                lineHeight: '1.6'
+                                                            }}
+                                                        >
+                                                            {renderHtmlContent(item.description)}
+                                                        </div>
+                                                    )}
+                                                    {item.technologies && item.technologies.length > 0 && (
+                                                        <div className="mb-2">
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {item.technologies.map((tech, index) => (
+                                                                    <span 
+                                                                        key={index} 
+                                                                        className="px-2 py-1 rounded-md text-xs font-medium"
+                                                                        style={{ 
+                                                                            backgroundColor: '#fed7aa',
+                                                                            color: '#c2410c'
+                                                                        }}
+                                                                    >
+                                                                        {tech}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {item.tags && item.tags.length > 0 && (
+                                                        <div className="mb-2">
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {item.tags.map((tag, index) => (
+                                                                    <span 
+                                                                        key={index} 
+                                                                        className="px-2 py-1 rounded-md text-xs font-medium"
+                                                                        style={{ 
+                                                                            backgroundColor: '#fed7aa',
+                                                                            color: '#c2410c'
+                                                                        }}
+                                                                    >
+                                                                        {tag}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {item.url && (
+                                                        <div className="mt-2">
+                                                            <a
+                                                                href={item.url.startsWith('http') ? item.url : `https://${item.url}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-sm font-medium hover:underline transition-colors"
+                                                                style={{ color: '#ea580c' }}
+                                                            >
+                                                                Link
+                                                            </a>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            default:
+                return null;
+        }
+    };
+
+    return (
+        <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragOver={handleDragOver}
+        >
+            <div 
+                className="w-full h-full text-gray-900"
+                style={{ 
+                    backgroundColor: '#ffffff',
+                    padding: '16mm',
+                    WebkitPrintColorAdjust: 'exact',
+                    colorAdjust: 'exact',
+                    fontFamily: '"Inter", "Segoe UI", sans-serif'
+                }}
+            >
+                <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
+                    <div className="space-y-8">
+                        {sectionOrder.map((sectionType) => renderClaritySection(sectionType)).filter(Boolean)}
+                    </div>
+                </SortableContext>
+            </div>
+        </DndContext>
+    );
+};
+
 // Main CVPreview Component
 export default function CVPreview({
     cv,
@@ -8413,6 +9675,7 @@ export default function CVPreview({
 
     // Default section order
     const defaultSectionOrder = [
+        'personalInfo',
         'summary',
         'experience',
         'education',
@@ -8430,6 +9693,12 @@ export default function CVPreview({
         if (cv.data.sectionOrder && Array.isArray(cv.data.sectionOrder) && cv.data.sectionOrder.length > 0) {
             console.log('Using saved section order from CV:', cv.data.sectionOrder);
             let order = cv.data.sectionOrder as string[];
+
+            // Always ensure personalInfo is at the beginning if not present
+            if (!order.includes('personalInfo')) {
+                order = ['personalInfo', ...order];
+                console.log('Added personalInfo to saved order:', order);
+            }
 
             // If customSections exist but are not in the saved order, add them
             if (cv.data.customSections && cv.data.customSections.length > 0 && !order.includes('customSections')) {
@@ -8663,6 +9932,19 @@ export default function CVPreview({
             />;
         }
 
+        // Clarity Template - Clean Design with Dark Orange Accents on White Background
+        if (normalizedTemplate.includes('clarity') ||
+            normalizedTemplate === 'clarity' ||
+            templateId === 'clarity') {
+            return <ClarityTemplate 
+                data={cv.data} 
+                sectionOrder={sectionOrder} 
+                onSectionReorder={handleSectionReorder}
+                activeSection={activeSection}
+                onSectionSelect={handleSectionSelect}
+            />;
+        }
+
         // Atlas Template - Blue Left Panel Professional Design
         if (normalizedTemplate.includes('atlas') ||
             normalizedTemplate === 'atlas') {
@@ -8807,7 +10089,7 @@ export default function CVPreview({
 }
 
 // Export individual templates for direct use if needed
-export { BasicTemplate, ModernTemplate, ATSFriendlyTemplate, ExclusiveTemplate, AuroraTemplate, HorizonTemplate, LumenTemplate };
+export { BasicTemplate, ModernTemplate, ATSFriendlyTemplate, ExclusiveTemplate, AuroraTemplate, HorizonTemplate, LumenTemplate, ClarityTemplate };
 
 // Export mobile helper functions for external use
 export const useMobileSectionReorder = (sectionOrder: string[], onSectionReorder: (newOrder: string[]) => void) => {
