@@ -1957,6 +1957,52 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                 content: `
                     /* RESUME-ATS TEMPLATE COMPLETE PDF DESIGN FIX */
                     @media print {
+                        /* PDF SƏHİFƏ MARGİN SIFIR - 15MM MESAFE SIFIR */
+                        @page {
+                            size: A4;
+                            margin: 0 !important;
+                            margin-top: 0 !important;
+                            margin-bottom: 0 !important;
+                            margin-left: 0 !important;
+                            margin-right: 0 !important;
+                            padding: 0 !important;
+                            padding-top: 0 !important;
+                        }
+                        
+                        /* HTML/BODY - 15MM MESAFE TAMAMEN SIFIR */
+                        html, body {
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            margin-top: 0 !important;
+                            padding-top: 0 !important;
+                            height: auto !important;
+                            overflow: visible !important;
+                            position: relative !important;
+                            top: 0 !important;
+                            transform: translateY(0) !important;
+                        }
+                        
+                        /* BUTUN ELEMENTLER - 15MM MESAFE SIFIR */
+                        * {
+                            margin-top: 0 !important;
+                            padding-top: 0 !important;
+                            box-sizing: border-box !important;
+                        }
+                        
+                        /* Template container - 15MM MESAFE MUTLEQ SIFIR */
+                        .atlas-template,
+                        .resume-ats,
+                        .ats-template,
+                        .cv-template {
+                            margin: 0 !important;
+                            margin-top: 0 !important;
+                            padding: 0 !important;
+                            padding-top: 0 !important;
+                            position: relative !important;
+                            top: 0 !important;
+                            transform: translateY(0) !important;
+                        }
+                        
                         /* SOL PANEL - #1e3a8a tünd göy background - PADDİNG/MARGİN SİLİNDİ */
                         .atlas-left-panel,
                         .w-2\\/5,
@@ -2058,6 +2104,50 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             await page.evaluate(() => {
                 console.log('🎯 Resume-ATS JavaScript design enforcement executing...');
                 
+                // AGGRESSIV - 15MM MESAFE SIFIR ET
+                console.log('🔧 REMOVING 15MM TOP SPACE COMPLETELY...');
+                
+                // BIRINCI - HTML VE BODY AGGRESSIV SIFIR
+                const htmlBody = document.querySelectorAll('html, body');
+                htmlBody.forEach((el) => {
+                    const element = el as HTMLElement;
+                    element.style.setProperty('margin', '0', 'important');
+                    element.style.setProperty('padding', '0', 'important');
+                    element.style.setProperty('margin-top', '0', 'important');
+                    element.style.setProperty('padding-top', '0', 'important');
+                    element.style.setProperty('position', 'relative', 'important');
+                    element.style.setProperty('top', '0', 'important');
+                    element.style.setProperty('transform', 'translateY(0)', 'important');
+                });
+                
+                // IKINCI - BUTUN ELEMENTLERIN TOP MARGIN/PADDING SIFIR
+                const allElementsForTop = document.querySelectorAll('*');
+                allElementsForTop.forEach((el) => {
+                    const element = el as HTMLElement;
+                    element.style.setProperty('margin-top', '0', 'important');
+                    element.style.setProperty('padding-top', '0', 'important');
+                });
+                
+                const templateContainers = document.querySelectorAll(`
+                    .atlas-template,
+                    .resume-ats,
+                    .ats-template,
+                    .cv-template,
+                    html,
+                    body
+                `);
+                
+                templateContainers.forEach((el) => {
+                    const element = el as HTMLElement;
+                    element.style.setProperty('margin', '0', 'important');
+                    element.style.setProperty('margin-top', '0', 'important');
+                    element.style.setProperty('padding', '0', 'important');
+                    element.style.setProperty('padding-top', '0', 'important');
+                    element.style.setProperty('position', 'relative', 'important');
+                    element.style.setProperty('top', '0', 'important');
+                    element.style.setProperty('transform', 'translateY(0)', 'important');
+                });
+                
                 // İLK - BÜTÜN ELEMENTLƏRI AĞ ET
                 const allElements = document.querySelectorAll('*');
                 console.log('Setting ALL elements to white first:', allElements.length);
@@ -2089,6 +2179,13 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         element.style.setProperty('color', 'white', 'important');
                         element.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
                         element.style.setProperty('print-color-adjust', 'exact', 'important');
+                           element.style.setProperty('height', '100vh', 'important'); 
+                               element.style.setProperty('min-height', '100vh', 'important');
+                                   element.style.setProperty('align-self', 'stretch', 'important');
+        element.style.setProperty('margin', '0', 'important');
+    element.style.setProperty('padding-top', '0', 'important');
+    element.style.setProperty('padding-bottom', '0', 'important');
+
                         totalLeftPanelFixed++;
                         
                         // Sol panel içindəki BÜTÜN elementləri ağ text et - BAŞLIQ XƏTTLƏRİ QORU
@@ -2097,6 +2194,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             const childEl = child as HTMLElement;
                             childEl.style.setProperty('color', 'white', 'important');
                             childEl.style.setProperty('background-color', 'transparent', 'important');
+                            
                             childEl.style.setProperty('background', 'transparent', 'important');
                             childEl.style.setProperty('outline', 'none', 'important');
                             
