@@ -86,6 +86,11 @@ const renderHtmlContent = (htmlContent: string, isDarkBackground = false, cvLang
         processedContent = processedContent.replace(/İ/g, 'I');
     }
     
+    // Convert line breaks to HTML br tags if content doesn't already contain HTML
+    if (!processedContent.includes('<') && !processedContent.includes('>')) {
+        processedContent = processedContent.replace(/\n/g, '<br>');
+    }
+    
     return (
         <div
             dangerouslySetInnerHTML={{ __html: processedContent }}
@@ -94,6 +99,7 @@ const renderHtmlContent = (htmlContent: string, isDarkBackground = false, cvLang
                     ? '[&>*]:text-blue-100 [&>p]:text-blue-100 [&>div]:text-blue-100 [&>span]:text-blue-100 [&>strong]:text-white [&>em]:text-blue-200 [&>li]:text-blue-100' 
                     : ''
             }`}
+            style={{ whiteSpace: 'pre-wrap' }}
         />
     );
 };
@@ -1515,6 +1521,12 @@ const BasicTemplate: React.FC<{
                                         </span>
                                     </div>
                                     <p className="text-blue-600 font-medium text-xs">{vol.organization}</p>
+                                    {vol.cause && (
+                                        <p className="text-gray-600 text-xs mt-0.5 italic">
+                                            {data.cvLanguage === 'azerbaijani' ? 'Sahə: ' : 
+                                             data.cvLanguage?.includes('tr') ? 'Alan: ' : 'Field: '}{vol.cause}
+                                        </p>
+                                    )}
                                     {vol.description && (
                                         <div className="text-gray-700 text-xs mt-1 leading-relaxed">
                                             {renderHtmlContent(vol.description)}
@@ -1843,7 +1855,7 @@ const ModernTemplate: React.FC<{
                             </h2>
                             <div className="bg-green-50 p-4 rounded-lg border-l-4 border-green-400">
                                 <div className="text-gray-700 leading-relaxed">
-                                    {renderHtmlContent(personalInfo.summary)}
+                                    {renderHtmlContent(personalInfo.summary, false, data.cvLanguage)}
                                 </div>
                             </div>
                         </div>
@@ -1920,7 +1932,7 @@ const ModernTemplate: React.FC<{
 
                             {personalInfo.summary && (
                                 <div className="mt-4 text-gray-700 text-sm leading-relaxed max-w-2xl mx-auto">
-                                    {renderHtmlContent(personalInfo.summary)}
+                                    {renderHtmlContent(personalInfo.summary, false, data.cvLanguage)}
                                 </div>
                             )}
                         </div>
@@ -2287,6 +2299,12 @@ const ModernTemplate: React.FC<{
                                             <div className="flex-1">
                                                 <h3 className="font-bold text-gray-900">{vol.role}</h3>
                                                 <p className="text-pink-600 font-medium">{vol.organization}</p>
+                                                {vol.cause && (
+                                                    <p className="text-gray-600 text-sm mt-1 italic">
+                                                        {data.cvLanguage === 'azerbaijani' ? 'Sahə: ' : 
+                                                         data.cvLanguage?.includes('tr') ? 'Alan: ' : 'Field: '}{vol.cause}
+                                                    </p>
+                                                )}
                                             </div>
                                             {(vol.startDate || vol.endDate) && (
                                                 <div className="bg-pink-100 px-3 py-1 rounded-full text-sm text-pink-700 font-medium ml-4">
@@ -2708,7 +2726,7 @@ const ATSFriendlyTemplate: React.FC<{
                                 {getUppercaseSectionName('summary', data.cvLanguage, data.sectionNames)}
                             </h2>
                             <div className="text-gray-700 leading-none text-xs mt-1 mb-0" style={{ margin: 0, padding: 0 }}>
-                                {renderHtmlContent(personalInfo.summary)}
+                                {renderHtmlContent(personalInfo.summary, false, data.cvLanguage)}
                             </div>
                         </div>
                     </SortableItem>
@@ -2919,6 +2937,12 @@ const ATSFriendlyTemplate: React.FC<{
                                             <div>
                                                 <h3 className="text-sm font-bold text-gray-900">{vol.role}</h3>
                                                 <p className="text-xs font-medium text-gray-700">{vol.organization}</p>
+                                                {vol.cause && (
+                                                    <p className="text-gray-600 text-xs mt-0.5 italic">
+                                                        {data.cvLanguage === 'azerbaijani' ? 'Sahə: ' : 
+                                                         data.cvLanguage?.includes('tr') ? 'Alan: ' : 'Field: '}{vol.cause}
+                                                    </p>
+                                                )}
                                             </div>
                                             {(vol.startDate || vol.endDate) && (
                                                 <span className="text-xs text-gray-600 font-medium whitespace-nowrap ml-2">
@@ -3738,7 +3762,7 @@ const LumenTemplate: React.FC<{
                                 {getSectionName('summary', data.cvLanguage, data.sectionNames)}
                             </h2>
                             <div className="text-gray-700 leading-relaxed text-xs">
-                                {renderHtmlContent(personalInfo.summary)}
+                                {renderHtmlContent(personalInfo.summary, false, data.cvLanguage)}
                             </div>
                         </div>
                     </SortableItem>
@@ -3949,6 +3973,12 @@ const LumenTemplate: React.FC<{
                                             <div>
                                                 <h3 className="text-sm font-bold text-gray-900">{vol.role}</h3>
                                                 <p className="text-xs font-medium text-gray-700">{vol.organization}</p>
+                                                {vol.cause && (
+                                                    <p className="text-gray-600 text-xs mt-0.5 italic">
+                                                        {data.cvLanguage === 'azerbaijani' ? 'Sahə: ' : 
+                                                         data.cvLanguage?.includes('tr') ? 'Alan: ' : 'Field: '}{vol.cause}
+                                                    </p>
+                                                )}
                                             </div>
                                             {(vol.startDate || vol.endDate) && (
                                                 <span className="text-xs text-gray-600 font-medium whitespace-nowrap ml-2">
@@ -4873,6 +4903,12 @@ const VertexTemplate: React.FC<{
                                             <div className="border-l-4 border-gray-300 pl-6">
                                                 <h3 className="font-bold text-gray-900 text-lg mb-2">{vol.role}</h3>
                                                 <h4 className="font-semibold text-gray-700 text-base mb-3">{vol.organization}</h4>
+                                                {vol.cause && (
+                                                    <p className="text-gray-600 text-sm mb-3 italic">
+                                                        {data.cvLanguage === 'azerbaijani' ? 'Sahə: ' : 
+                                                         data.cvLanguage?.includes('tr') ? 'Alan: ' : 'Field: '}{vol.cause}
+                                                    </p>
+                                                )}
                                                 {vol.description && (
                                                     <div className="text-gray-600 text-sm leading-relaxed">
                                                         {renderHtmlContent(vol.description, false, data.cvLanguage)}
@@ -6186,6 +6222,12 @@ const AuroraTemplate: React.FC<{
                                         <div className="flex-1">
                                             <h3 className="font-semibold text-gray-900 text-sm">{vol.role}</h3>
                                             <p className="font-medium text-gray-700 text-xs mt-0.5">{vol.organization}</p>
+                                            {vol.cause && (
+                                                <p className="text-gray-600 text-xs mt-0.5 italic">
+                                                    {data.cvLanguage === 'azerbaijani' ? 'Sahə: ' : 
+                                                     data.cvLanguage?.includes('tr') ? 'Alan: ' : 'Field: '}{vol.cause}
+                                                </p>
+                                            )}
                                         </div>
                                         {(vol.startDate || vol.endDate) && (
                                             <div className="text-xs text-gray-600 font-medium text-right ml-4 flex-shrink-0">
@@ -6795,6 +6837,12 @@ const ExclusiveTemplate: React.FC<{
                                         <div className="flex-1">
                                             <h3 className="font-semibold text-sm text-gray-800">{vol.role}</h3>
                                             <h4 className="font-medium text-blue-600 text-xs mt-1">{vol.organization}</h4>
+                                            {vol.cause && (
+                                                <p className="text-gray-600 text-xs mt-1 italic">
+                                                    {data.cvLanguage === 'azerbaijani' ? 'Sahə: ' : 
+                                                     data.cvLanguage?.includes('tr') ? 'Alan: ' : 'Field: '}{vol.cause}
+                                                </p>
+                                            )}
                                         </div>
                                         {(vol.startDate || vol.endDate) && (
                                             <div className="text-xs text-gray-600 font-medium text-right flex-shrink-0">

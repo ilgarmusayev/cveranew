@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getLabel } from '@/lib/cvLanguage';
 import { useNotification } from '@/components/ui/Toast';
+import RichTextEditor from '@/components/ui/RichTextEditor';
 
 interface PersonalInfo {
   fullName: string;      // Tam ad - API-dən gələn
@@ -40,42 +41,6 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
   const isPremium = userTier?.toLowerCase() === 'premium';
   const canUseAI = ['premium', 'populyar', 'medium'].includes(userTier?.toLowerCase());
   const { showSuccess, showError, showWarning, showInfo } = useNotification();
-
-  // Clean HTML content for proper display
-  const cleanHtmlContent = (htmlContent: string): string => {
-    if (!htmlContent) return '';
-
-    let cleaned = htmlContent;
-
-    // Replace &nbsp; with regular spaces
-    cleaned = cleaned.replace(/&nbsp;/g, ' ');
-
-    // Convert div tags to p tags more carefully
-    cleaned = cleaned.replace(/<div>/g, '<p>');
-    cleaned = cleaned.replace(/<\/div>/g, '</p>');
-
-    // Remove empty paragraphs but preserve structure
-    cleaned = cleaned.replace(/<p><\/p>/g, '');
-    cleaned = cleaned.replace(/<p>\s*<\/p>/g, '');
-    
-    // Handle line breaks more carefully
-    cleaned = cleaned.replace(/<p><br><\/p>/g, '<p>&nbsp;</p>'); // Preserve line breaks
-    cleaned = cleaned.replace(/<br><br>/g, '<br>'); // Prevent double breaks
-
-    // Clean up multiple consecutive spaces but preserve single spaces
-    cleaned = cleaned.replace(/\s{2,}/g, ' ');
-
-    // Ensure proper paragraph wrapping for plain text only if no HTML structure exists
-    if (cleaned && !cleaned.includes('<') && cleaned.trim()) {
-      cleaned = `<p>${cleaned.trim()}</p>`;
-    }
-
-    // Fix malformed HTML more carefully
-    cleaned = cleaned.replace(/<p>\s*<p>/g, '<p>');
-    cleaned = cleaned.replace(/<\/p>\s*<\/p>/g, '</p>');
-
-    return cleaned.trim();
-  };
 
   // Form validasiya mesajlarını Azərbaycan dilinə çevirmək
   useEffect(() => {
@@ -543,182 +508,11 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
           </div>
         )}
 
-        {/* Rich Text Editor Toolbar */}
-        <div className="border border-gray-300 rounded-t-lg bg-gray-50 p-2 flex flex-wrap gap-1">
-          <button
-            type="button"
-            onClick={() => document.execCommand('bold', false)}
-            className="p-2 rounded hover:bg-gray-200 transition-colors"
-            title="Bold"
-          >
-            <span className="font-bold">B</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => document.execCommand('italic', false)}
-            className="p-2 rounded hover:bg-gray-200 transition-colors"
-            title="Italic"
-          >
-            <span className="italic">I</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => document.execCommand('underline', false)}
-            className="p-2 rounded hover:bg-gray-200 transition-colors"
-            title="Underline"
-          >
-            <span className="underline">U</span>
-          </button>
-          <div className="w-px bg-gray-300 mx-1"></div>
-          <button
-            type="button"
-            onClick={() => document.execCommand('insertUnorderedList', false)}
-            className="p-2 rounded hover:bg-gray-200 transition-colors"
-            title="Bullet List"
-          >
-            •
-          </button>
-          <button
-            type="button"
-            onClick={() => document.execCommand('insertOrderedList', false)}
-            className="p-2 rounded hover:bg-gray-200 transition-colors"
-            title="Numbered List"
-          >
-            1.
-          </button>
-          <div className="w-px bg-gray-300 mx-1"></div>
-          <button
-            type="button"
-            onClick={() => document.execCommand('justifyLeft', false)}
-            className="p-2 rounded hover:bg-gray-200 transition-colors"
-            title="Align Left"
-          >
-            ←
-          </button>
-          <button
-            type="button"
-            onClick={() => document.execCommand('justifyCenter', false)}
-            className="p-2 rounded hover:bg-gray-200 transition-colors"
-            title="Align Center"
-          >
-            ↔
-          </button>
-          <button
-            type="button"
-            onClick={() => document.execCommand('justifyRight', false)}
-            className="p-2 rounded hover:bg-gray-200 transition-colors"
-            title="Align Right"
-          >
-            →
-          </button>
-        </div>
-
-        {/* Rich Text Editor Content */}
-        <div
-          ref={(el) => {
-            if (el && data.summary !== undefined) {
-              // Only update if content is significantly different to prevent cursor jumps
-              const currentContent = el.innerHTML;
-              const newContent = cleanHtmlContent(data.summary || '');
-              
-              if (currentContent !== newContent && !el.matches(':focus')) {
-                // Only update when element is not focused to prevent cursor disruption
-                el.innerHTML = newContent;
-              } else if (!currentContent && newContent) {
-                // Initial load case
-                el.innerHTML = newContent;
-              }
-            }
-          }}
-          contentEditable
-          suppressContentEditableWarning={true}
-          className="w-full min-h-[120px] px-3 py-2 border border-t-0 border-gray-300 rounded-b-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none prose prose-sm max-w-none"
-          style={{
-            fontSize: '14px',
-            lineHeight: '1.5',
-            fontFamily: 'inherit'
-          }}
-          onInput={(e) => {
-            const target = e.target as HTMLDivElement;
-            const content = target.innerHTML;
-
-            // Save cursor position
-            const selection = window.getSelection();
-            let cursorPosition = 0;
-            if (selection && selection.rangeCount > 0) {
-              const range = selection.getRangeAt(0);
-              cursorPosition = range.startOffset;
-            }
-
-            // Clean content
-            const cleanedContent = cleanHtmlContent(content);
-            
-            // Only update if content actually changed to prevent cursor jumps
-            if (cleanedContent !== content) {
-              target.innerHTML = cleanedContent;
-              
-              // Restore cursor position
-              try {
-                if (selection && target.firstChild) {
-                  const range = document.createRange();
-                  const textNode = target.firstChild.nodeType === Node.TEXT_NODE 
-                    ? target.firstChild 
-                    : target.firstChild.firstChild || target.firstChild;
-                  
-                  if (textNode && textNode.nodeType === Node.TEXT_NODE) {
-                    const maxOffset = Math.min(cursorPosition, textNode.textContent?.length || 0);
-                    range.setStart(textNode, maxOffset);
-                    range.setEnd(textNode, maxOffset);
-                    selection.removeAllRanges();
-                    selection.addRange(range);
-                  }
-                }
-              } catch (error) {
-                // Ignore cursor restoration errors
-              }
-            }
-
-            handleChange('summary', cleanedContent);
-          }}
-          onBlur={(e) => {
-            const target = e.target as HTMLDivElement;
-            const content = target.innerHTML;
-
-            // Final cleanup on blur
-            const cleanedContent = cleanHtmlContent(content);
-            handleChange('summary', cleanedContent);
-          }}
-          onPaste={(e) => {
-            e.preventDefault();
-            const text = e.clipboardData.getData('text/plain');
-            document.execCommand('insertText', false, text);
-          }}
-          onKeyDown={(e) => {
-            // Handle Enter key properly - prevent default behavior that causes cursor jump
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              
-              // Get current selection and position
-              const selection = window.getSelection();
-              if (!selection || selection.rangeCount === 0) return;
-              
-              const range = selection.getRangeAt(0);
-              
-              // Create a new paragraph element instead of br
-              const p = document.createElement('p');
-              p.innerHTML = '<br>'; // Add a br inside p to maintain proper height
-              
-              // Insert the paragraph at cursor position
-              range.insertNode(p);
-              
-              // Move cursor to inside the new paragraph
-              range.setStart(p, 0);
-              range.setEnd(p, 0);
-              selection.removeAllRanges();
-              selection.addRange(range);
-            }
-          }}
-          data-placeholder={canUseAI
+        {/* Rich Text Editor */}
+        <RichTextEditor
+          value={safeData.summary}
+          onChange={(value) => handleChange('summary', value)}
+          placeholder={canUseAI
             ? (cvLanguage === 'english' 
               ? "Write your professional experience or generate automatically with the AI button above..."
               : "Peşəkar təcrübənizi yazın və ya yuxarıdakı AI butonundan avtomatik yaradın..."
@@ -728,64 +522,8 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
               : "Peşəkar təcrübənizi və məqsədlərinizi qısaca təsvir edin..."
             )
           }
+          minHeight="120px"
         />
-
-        <style jsx>{`
-          [contenteditable]:empty:before {
-            content: attr(data-placeholder);
-            color: #9CA3AF;
-            pointer-events: none;
-          }
-          [contenteditable] {
-            background: white;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-          }
-          [contenteditable]:focus {
-            background: white;
-          }
-          [contenteditable] p {
-            margin: 0.5rem 0;
-            line-height: 1.5;
-            min-height: 1.2em;
-          }
-          [contenteditable] p:first-child {
-            margin-top: 0;
-          }
-          [contenteditable] p:last-child {
-            margin-bottom: 0;
-          }
-          [contenteditable] p:empty {
-            min-height: 1.2em;
-          }
-          [contenteditable] ul, [contenteditable] ol {
-            margin: 0.5rem 0;
-            padding-left: 1.5rem;
-          }
-          [contenteditable] li {
-            margin: 0.25rem 0;
-            line-height: 1.4;
-          }
-          [contenteditable] strong {
-            font-weight: 600;
-          }
-          [contenteditable] em {
-            font-style: italic;
-          }
-          [contenteditable] u {
-            text-decoration: underline;
-          }
-          [contenteditable] div {
-            margin: 0.5rem 0;
-          }
-          [contenteditable] br {
-            line-height: 1.5;
-          }
-          /* Prevent cursor jumping issues */
-          [contenteditable] * {
-            outline: none;
-          }
-        `}</style>
       </div>
     </div>
   );

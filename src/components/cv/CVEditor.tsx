@@ -1143,24 +1143,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                         </span>
                                     </button>
 
-                                    {/* Export Page Button */}
-                                    <button
-                                        onClick={() => {
-                                            // Font settings-ləri həm export həm də persistent storage-ə saxla
-                                            const fontSettingsJSON = JSON.stringify(fontSettings);
-                                            localStorage.setItem('exportFontSettings', fontSettingsJSON);
-                                            localStorage.setItem('currentFontSettings', fontSettingsJSON);
-                                            console.log('🚀 CVEditor: Font settings export page üçün hazırlandı:', fontSettings);
-                                            window.open(`/cv/export/${cv.id}`, '_blank');
-                                        }}
-                                        className="flex items-center justify-center h-10 w-10 sm:h-auto sm:w-auto sm:px-3 sm:py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-transparent rounded-lg hover:bg-gray-200 transition-colors"
-                                        aria-label={cv.cvLanguage === 'english' ? 'Export Page' : 'Export Səhifəsi'}
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-                                        <span className="hidden sm:inline ml-2">
-                                            {cv.cvLanguage === 'english' ? 'Export' : 'Export'}
-                                        </span>
-                                    </button>
+                                   
                                 </>
                             )}
                             

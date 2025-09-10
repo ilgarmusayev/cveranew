@@ -39,7 +39,49 @@ export default function RichTextEditor({
 
   const handleInput = useCallback((e: React.FormEvent<HTMLDivElement>) => {
     const target = e.target as HTMLDivElement;
-    const content = target.innerHTML;
+    let content = target.innerHTML;
+    
+    // Store cursor position before cleaning
+    const selection = window.getSelection();
+    const range = selection?.getRangeAt(0);
+    const cursorOffset = range?.startOffset;
+    
+    // Convert &nbsp; to regular spaces immediately during input
+    content = content.replace(/&nbsp;/g, ' ');
+    
+    // Preserve trailing spaces by converting them to &nbsp; only at the very end
+    if (content.endsWith(' ')) {
+      // Count trailing spaces
+      const trailingSpaces = content.match(/ +$/)?.[0].length || 0;
+      if (trailingSpaces > 0) {
+        // Replace only the last trailing space with &nbsp; to preserve it
+        content = content.slice(0, -1) + '&nbsp;';
+      }
+    }
+    
+    // Update the content if it changed
+    if (content !== target.innerHTML) {
+      target.innerHTML = content;
+      
+      // Restore cursor position
+      if (selection && range && cursorOffset !== undefined) {
+        try {
+          const textNode = target.lastChild || target;
+          if (textNode.nodeType === Node.TEXT_NODE) {
+            range.setStart(textNode, Math.min(cursorOffset, textNode.textContent?.length || 0));
+            range.setEnd(textNode, Math.min(cursorOffset, textNode.textContent?.length || 0));
+          } else {
+            range.setStartAfter(textNode);
+            range.setEndAfter(textNode);
+          }
+          selection.removeAllRanges();
+          selection.addRange(range);
+        } catch (e) {
+          // Ignore cursor restoration errors
+        }
+      }
+    }
+    
     onChange(content);
   }, [onChange]);
 
@@ -50,12 +92,17 @@ export default function RichTextEditor({
     // Clean content only on blur to avoid cursor issues
     let cleaned = content;
     
-    // Basic cleaning without affecting cursor
+    // Basic cleaning without affecting cursor - but preserve trailing spaces
     cleaned = cleaned.replace(/&nbsp;/g, ' ');
     cleaned = cleaned.replace(/<div>/g, '<p>');
     cleaned = cleaned.replace(/<\/div>/g, '</p>');
     cleaned = cleaned.replace(/<p><\/p>/g, '');
     cleaned = cleaned.replace(/<p>\s*<\/p>/g, '');
+    
+    // Preserve trailing spaces by converting final space to &nbsp;
+    if (cleaned.endsWith(' ')) {
+      cleaned = cleaned.slice(0, -1) + '&nbsp;';
+    }
     
     if (cleaned !== content) {
       target.innerHTML = cleaned;
@@ -160,6 +207,23 @@ export default function RichTextEditor({
             e.preventDefault();
             document.execCommand('insertHTML', false, '<br>');
           }
+          // Handle spacebar - ensure trailing spaces are preserved
+          if (e.key === ' ') {
+            const selection = window.getSelection();
+            const range = selection?.getRangeAt(0);
+            
+            // Check if we're at the end of content
+            if (range && editorRef.current) {
+              const isAtEnd = range.endOffset === (range.endContainer.textContent?.length || 0) &&
+                             range.endContainer === editorRef.current.lastChild;
+              
+              if (isAtEnd) {
+                // Insert non-breaking space at the end to preserve it
+                e.preventDefault();
+                document.execCommand('insertHTML', false, '&nbsp;');
+              }
+            }
+          }
         }}
         data-placeholder={placeholder}
       />
@@ -172,6 +236,7 @@ export default function RichTextEditor({
         }
         [contenteditable] {
           background: white;
+          white-space: pre-wrap;
         }
         [contenteditable]:focus {
           background: white;
@@ -179,6 +244,7 @@ export default function RichTextEditor({
         [contenteditable] p {
           margin: 0.5rem 0;
           line-height: 1.5;
+          white-space: pre-wrap;
         }
         [contenteditable] p:first-child {
           margin-top: 0;
