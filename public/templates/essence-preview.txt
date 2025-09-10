@@ -1,0 +1,3 @@
+# Essence Template Preview
+# This is a placeholder file for the Essence template preview image
+# The actual image should be created and placed at /templates/essence-preview.jpg

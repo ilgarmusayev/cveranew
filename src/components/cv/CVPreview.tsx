@@ -4490,6 +4490,630 @@ const LumenTemplate: React.FC<{
     );
 };
 
+// Prime Template Component - Professional Executive Style CV Template
+const PrimeTemplate: React.FC<{ 
+    data: CVData; 
+    sectionOrder: string[]; 
+    onSectionReorder: (newOrder: string[]) => void;
+    activeSection?: string | null;
+    onSectionSelect?: (sectionId: string | null) => void;
+}> = ({ data, sectionOrder, onSectionReorder, activeSection, onSectionSelect }) => {
+    const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
+    const [isDragActive, setIsDragActive] = useState(false);
+    const [activeId, setActiveId] = useState<string | null>(null);
+    const [dropTargetId, setDropTargetId] = useState<string | null>(null);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 150,
+                tolerance: 15,
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    const handleDragStart = (event: DragStartEvent) => {
+        setIsDragActive(true);
+        setActiveId(event.active.id as string);
+        document.body.style.userSelect = 'none';
+        document.body.style.cursor = 'grabbing';
+    };
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        setIsDragActive(false);
+        setActiveId(null);
+        setDropTargetId(null);
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            const oldIndex = sectionOrder.indexOf(active.id as string);
+            const newIndex = sectionOrder.indexOf(over.id as string);
+
+            const newOrder = arrayMove(sectionOrder, oldIndex, newIndex);
+            onSectionReorder(newOrder);
+        }
+    };
+
+    const handleDragOver = (event: DragOverEvent) => {
+        const { over } = event;
+        setDropTargetId(over ? over.id as string : null);
+    };
+
+    // Section render functions for Prime template
+    const renderPrimeSection = (sectionType: string) => {
+        switch (sectionType) {
+            case 'summary':
+                return personalInfo.summary ? (
+                    <SortableItem 
+                        key="summary" 
+                        id="summary"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'summary'}
+                    >
+                        <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
+                            <div className="border-b-2 border-green-600 mb-4">
+                                <h2 className="text-lg font-bold text-gray-900 mb-2">
+                                    {getSectionName('summary', data.cvLanguage, data.sectionNames)}
+                                </h2>
+                            </div>
+                            <div className="text-gray-800 leading-relaxed text-sm">
+                                {renderHtmlContent(personalInfo.summary, false, data.cvLanguage)}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'experience':
+                return experience && experience.length > 0 ? (
+                    <SortableItem 
+                        key="experience" 
+                        id="experience"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'experience'}
+                    >
+                        <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
+                            <div className="border-b-2 border-green-600 mb-4">
+                                <h2 className="text-lg font-bold text-gray-900 mb-2">
+                                    {getSectionName('experience', data.cvLanguage, data.sectionNames)}
+                                </h2>
+                            </div>
+                            <div className="space-y-4">
+                                {experience.map((exp, index) => (
+                                    <div key={exp.id} className="border-b border-gray-100 pb-4 last:border-b-0">
+                                        <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="text-base font-bold text-gray-900 leading-tight">{exp.position}</h3>
+                                                <p className="text-sm font-semibold text-green-700 mt-1">{exp.company}</p>
+                                            </div>
+                                            {(exp.startDate || exp.endDate) && (
+                                                <span className="text-xs text-gray-600 font-medium whitespace-nowrap flex-shrink-0">
+                                                    {exp.startDate ? (
+                                                        exp.current ? `${formatDate(exp.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
+                                                        exp.endDate ? `${formatDate(exp.startDate, data.cvLanguage)} - ${formatDate(exp.endDate, data.cvLanguage)}` :
+                                                        formatDate(exp.startDate, data.cvLanguage)
+                                                    ) : exp.current ? (
+                                                        getCurrentText(data.cvLanguage)
+                                                    ) : exp.endDate ? (
+                                                        formatDate(exp.endDate, data.cvLanguage)
+                                                    ) : ''}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {exp.description && (
+                                            <div className="text-gray-700 text-sm leading-relaxed mt-2">
+                                                {renderHtmlContent(exp.description)}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'education':
+                return education && education.length > 0 ? (
+                    <SortableItem 
+                        key="education" 
+                        id="education"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'education'}
+                    >
+                        <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
+                            <div className="border-b-2 border-green-600 mb-4">
+                                <h2 className="text-lg font-bold text-gray-900 mb-2">
+                                    {getSectionName('education', data.cvLanguage, data.sectionNames)}
+                                </h2>
+                            </div>
+                            <div className="space-y-3">
+                                {education.map((edu) => (
+                                    <div key={edu.id} className="border-b border-gray-100 pb-3 last:border-b-0">
+                                        <div className="flex justify-between items-start mb-1 flex-wrap gap-2">
+                                            <div className="flex-1 min-w-0">
+                                                {edu.degree ? (
+                                                    <h3 className="text-base font-bold text-gray-900 leading-tight">{edu.degree}</h3>
+                                                ) : (
+                                                    <h3 className="text-base font-bold text-gray-900 leading-tight">{edu.institution}</h3>
+                                                )}
+                                                {edu.degree && (
+                                                    <p className="text-sm font-semibold text-green-700 mt-1">{edu.institution}</p>
+                                                )}
+                                                {(edu.field || edu.gpa) && (
+                                                    <p className="text-xs text-gray-600 mt-1">
+                                                        {[edu.field, edu.gpa && `${data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: ${edu.gpa}`].filter(Boolean).join(' - ')}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            {(edu.startDate || edu.endDate) && (
+                                                <span className="text-xs text-gray-600 font-medium whitespace-nowrap flex-shrink-0">
+                                                    {edu.startDate ? (
+                                                        edu.current ? `${formatDate(edu.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
+                                                        edu.endDate ? `${formatDate(edu.startDate, data.cvLanguage)} - ${formatDate(edu.endDate, data.cvLanguage)}` :
+                                                        formatDate(edu.startDate, data.cvLanguage)
+                                                    ) : edu.current ? (
+                                                        getCurrentText(data.cvLanguage)
+                                                    ) : edu.endDate ? (
+                                                        formatDate(edu.endDate, data.cvLanguage)
+                                                    ) : ''}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {edu.description && (
+                                            <div className="text-gray-700 text-sm mt-2 leading-relaxed">{renderHtmlContent(edu.description)}</div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'skills':
+                return skills && skills.length > 0 ? (
+                    <SortableItem 
+                        key="skills" 
+                        id="skills"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'skills'}
+                    >
+                        <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
+                            <div className="border-b-2 border-green-600 mb-4">
+                                <h2 className="text-lg font-bold text-gray-900 mb-2">
+                                    {getSectionName('skills', data.cvLanguage, data.sectionNames)}
+                                </h2>
+                            </div>
+                            
+                            {/* Technical Skills */}
+                            {skills.filter(skill => skill.type === 'hard' && skill.name && skill.name.trim() !== '').length > 0 && (
+                                <div className="mb-4">
+                                    <h3 className="text-sm font-semibold text-gray-800 mb-2">
+                                        {getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
+                                    </h3>
+                                    <div className="text-sm text-gray-700 leading-relaxed">
+                                        {skills.filter(skill => skill.type === 'hard' && skill.name && skill.name.trim() !== '').map(skill => skill.name).join(' • ')}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Soft Skills */}
+                            {skills.filter(skill => skill.type === 'soft' && skill.name && skill.name.trim() !== '').length > 0 && (
+                                <div className="mb-4">
+                                    <h3 className="text-sm font-semibold text-gray-800 mb-2">
+                                        {getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
+                                    </h3>
+                                    <div className="text-sm text-gray-700 leading-relaxed">
+                                        {skills.filter(skill => skill.type === 'soft' && skill.name && skill.name.trim() !== '').map(skill => skill.name).join(' • ')}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* General Skills */}
+                            {skills.filter(skill => (!skill.type || (skill.type !== 'hard' && skill.type !== 'soft')) && skill.name && skill.name.trim() !== '').length > 0 && (
+                                <div className="mb-0">
+                                    <h3 className="text-sm font-semibold text-gray-800 mb-2">
+                                        {getSectionName('skills', data.cvLanguage, data.sectionNames)}
+                                    </h3>
+                                    <div className="text-sm text-gray-700 leading-relaxed">
+                                        {skills.filter(skill => (!skill.type || (skill.type !== 'hard' && skill.type !== 'soft')) && skill.name && skill.name.trim() !== '').map(skill => skill.name).join(' • ')}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'projects':
+                return projects && projects.length > 0 ? (
+                    <SortableItem 
+                        key="projects" 
+                        id="projects"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'projects'}
+                    >
+                        <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
+                            <div className="border-b-2 border-green-600 mb-4">
+                                <h2 className="text-lg font-bold text-gray-900 mb-2">
+                                    {getSectionName('projects', data.cvLanguage, data.sectionNames)}
+                                </h2>
+                            </div>
+                            <div className="space-y-3">
+                                {projects.map((project) => (
+                                    <div key={project.id} className="border-b border-gray-100 pb-3 last:border-b-0">
+                                        <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
+                                            <div className="flex-1">
+                                                <h3 className="text-base font-bold text-gray-900">{project.name}</h3>
+                                                {project.description && (
+                                                    <div className="text-gray-700 text-sm mt-1">{renderHtmlContent(project.description)}</div>
+                                                )}
+                                                {project.technologies && project.technologies.length > 0 && (
+                                                    <div className="text-xs text-gray-600 mt-2">
+                                                        <span className="font-medium">Technologies: </span>
+                                                        {project.technologies.join(', ')}
+                                                    </div>
+                                                )}
+                                                {project.url && (
+                                                    <div className="text-xs text-gray-600 mt-1">
+                                                        <span className="font-medium">URL: </span>
+                                                        {project.url}
+                                                    </div>
+                                                )}
+                                                {project.github && (
+                                                    <div className="text-xs text-gray-600 mt-1">
+                                                        <span className="font-medium">GitHub: </span>
+                                                        {getGitHubDisplay(project.github).displayText}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {(project.startDate || project.endDate || project.current) && (
+                                                <span className="text-xs text-gray-600 font-medium whitespace-nowrap flex-shrink-0">
+                                                    {project.current ? (
+                                                        project.startDate ? `${formatDate(project.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : getCurrentText(data.cvLanguage)
+                                                    ) : project.startDate && project.endDate ? (
+                                                        `${formatDate(project.startDate, data.cvLanguage)} - ${formatDate(project.endDate, data.cvLanguage)}`
+                                                    ) : (
+                                                        formatDate((project.startDate || project.endDate) || '', data.cvLanguage)
+                                                    )}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'languages':
+                return languages && languages.length > 0 ? (
+                    <SortableItem 
+                        key="languages" 
+                        id="languages"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'languages'}
+                    >
+                        <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
+                            <div className="border-b-2 border-green-600 mb-4">
+                                <h2 className="text-lg font-bold text-gray-900 mb-2">
+                                    {getSectionName('languages', data.cvLanguage, data.sectionNames)}
+                                </h2>
+                            </div>
+                            <div className="text-sm text-gray-700 leading-relaxed">
+                                {languages.map((lang) => (
+                                    <span key={lang.id} className="inline-block mr-6 mb-2">
+                                        <span className="font-medium">{lang.language}</span>
+                                        <span className="text-gray-600 ml-1">({getLanguageLevel(lang.level, data.cvLanguage)})</span>
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'certifications':
+                return certifications && certifications.length > 0 ? (
+                    <SortableItem 
+                        key="certifications" 
+                        id="certifications"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'certifications'}
+                    >
+                        <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
+                            <div className="border-b-2 border-green-600 mb-4">
+                                <h2 className="text-lg font-bold text-gray-900 mb-2">
+                                    {getSectionName('certifications', data.cvLanguage, data.sectionNames)}
+                                </h2>
+                            </div>
+                            <div className="space-y-3">
+                                {certifications.map((cert) => (
+                                    <div key={cert.id} className="border-b border-gray-100 pb-3 last:border-b-0">
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex-1">
+                                                <h3 className="text-base font-bold text-gray-900">{cert.name}</h3>
+                                                <p className="text-sm font-semibold text-green-700">{cert.issuer}</p>
+                                                {cert.description && (
+                                                    <div className="text-gray-700 text-sm mt-1">{renderHtmlContent(cert.description)}</div>
+                                                )}
+                                                {cert.url && (
+                                                    <div className="text-xs text-gray-600 mt-1">
+                                                        <span className="font-medium">URL: </span>
+                                                        {cert.url}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {cert.date && (
+                                                <span className="text-xs text-gray-600 font-medium whitespace-nowrap flex-shrink-0 ml-4">
+                                                    {formatDate(cert.date, data.cvLanguage)}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'volunteer':
+                return volunteerExperience && volunteerExperience.length > 0 ? (
+                    <SortableItem 
+                        key="volunteer" 
+                        id="volunteer"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'volunteer'}
+                    >
+                        <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
+                            <div className="border-b-2 border-green-600 mb-4">
+                                <h2 className="text-lg font-bold text-gray-900 mb-2">
+                                    {getSectionName('volunteerExperience', data.cvLanguage, data.sectionNames)}
+                                </h2>
+                            </div>
+                            <div className="space-y-3">
+                                {volunteerExperience.map((vol) => (
+                                    <div key={vol.id} className="border-b border-gray-100 pb-3 last:border-b-0">
+                                        <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="text-base font-bold text-gray-900">{vol.role}</h3>
+                                                <p className="text-sm font-semibold text-green-700">{vol.organization}</p>
+                                                {vol.cause && (
+                                                    <p className="text-gray-600 text-xs mt-1">
+                                                        {data.cvLanguage === 'azerbaijani' ? 'Sahə: ' : 
+                                                         data.cvLanguage?.includes('tr') ? 'Alan: ' : 'Field: '}{vol.cause}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            {(vol.startDate || vol.endDate) && (
+                                                <span className="text-xs text-gray-600 font-medium whitespace-nowrap flex-shrink-0">
+                                                    {vol.startDate ? (
+                                                        vol.current ? `${formatDate(vol.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
+                                                        vol.endDate ? `${formatDate(vol.startDate, data.cvLanguage)} - ${formatDate(vol.endDate, data.cvLanguage)}` :
+                                                        formatDate(vol.startDate, data.cvLanguage)
+                                                    ) : vol.current ? (
+                                                        getCurrentText(data.cvLanguage)
+                                                    ) : vol.endDate ? (
+                                                        formatDate(vol.endDate, data.cvLanguage)
+                                                    ) : ''}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {vol.description && (
+                                            <div className="text-gray-700 text-sm mt-2">{renderHtmlContent(vol.description)}</div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'customSections':
+                return customSections && customSections.length > 0 ? (
+                    <SortableItem 
+                        key="customSections" 
+                        id="customSections"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'customSections'}
+                    >
+                        <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
+                            {customSections
+                                .sort((a, b) => (a.order || 999) - (b.order || 999))
+                                .map((section) => (
+                                    <div key={section.id} className="mb-6">
+                                        <div className="border-b-2 border-green-600 mb-4">
+                                            <h2 className="text-lg font-bold text-gray-900 mb-2">
+                                                {section.title}
+                                            </h2>
+                                        </div>
+                                        <div className="space-y-3">
+                                            {section.items.map((item) => (
+                                                <div key={item.id} className="border-b border-gray-100 pb-3 last:border-b-0">
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <div className="flex-1">
+                                                            {item.title && (
+                                                                <h3 className="text-base font-bold text-gray-900">{item.title}</h3>
+                                                            )}
+                                                            {item.subtitle && (
+                                                                <p className="text-sm font-semibold text-green-700">{item.subtitle}</p>
+                                                            )}
+                                                        </div>
+                                                        {item.date && (
+                                                            <span className="text-xs text-gray-600 font-medium whitespace-nowrap flex-shrink-0 ml-4">
+                                                                {item.date}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    {item.description && (
+                                                        <div className="text-gray-700 text-sm mt-2">
+                                                            {renderHtmlContent(item.description)}
+                                                        </div>
+                                                    )}
+                                                    {item.tags && item.tags.length > 0 && (
+                                                        <div className="mt-2 text-xs text-gray-600">
+                                                            <span className="font-medium">Tags: </span>
+                                                            {item.tags.join(', ')}
+                                                        </div>
+                                                    )}
+                                                    {item.url && (
+                                                        <div className="text-xs text-gray-600 mt-1">
+                                                            <span className="font-medium">URL: </span>
+                                                            {item.url}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            default:
+                return null;
+        }
+    };
+
+    return (
+        <div 
+            className={`w-full h-full bg-white text-gray-900 font-sans ${isDragActive ? 'drag-mode' : ''}`}
+            style={{ padding: '20mm', minHeight: '297mm' }}
+        >
+            {/* Header Section with Professional Layout */}
+            <div className="cv-section avoid-break mb-6" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
+                <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1 pr-6">
+                        <h1 className="text-2xl font-bold text-gray-900 mb-2 leading-tight">
+                            {getFullName(personalInfo, data.cvLanguage)}
+                        </h1>
+                        <div className="w-20 h-1 bg-green-600 mb-3"></div>
+                    </div>
+                    {personalInfo.profileImage && (
+                        <div className="flex-shrink-0">
+                            <img
+                                src={personalInfo.profileImage}
+                                alt="Profile"
+                                className="w-16 h-16 rounded object-cover border border-gray-300"
+                            />
+                        </div>
+                    )}
+                </div>
+
+                {/* Contact Information in Simple Layout */}
+                <div className="border-t-2 border-green-600 pt-3 mb-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 text-sm">
+                        {personalInfo.email && (
+                            <div className="flex items-center">
+                                <span className="font-medium text-gray-700 w-16 flex-shrink-0">Email:</span>
+                                <span className="text-gray-900">{personalInfo.email}</span>
+                            </div>
+                        )}
+                        {personalInfo.phone && (
+                            <div className="flex items-center">
+                                <span className="font-medium text-gray-700 w-16 flex-shrink-0">Phone:</span>
+                                <span className="text-gray-900">{personalInfo.phone}</span>
+                            </div>
+                        )}
+                        {personalInfo.location && (
+                            <div className="flex items-center">
+                                <span className="font-medium text-gray-700 w-16 flex-shrink-0">Location:</span>
+                                <span className="text-gray-900">{personalInfo.location}</span>
+                            </div>
+                        )}
+                        {personalInfo.linkedin && (
+                            <div className="flex items-center">
+                                <span className="font-medium text-gray-700 w-16 flex-shrink-0">LinkedIn:</span>
+                                <span className="text-gray-900 text-xs break-all">
+                                    {getLinkedInDisplay(personalInfo.linkedin).displayText}
+                                </span>
+                            </div>
+                        )}
+                        {personalInfo.github && (
+                            <div className="flex items-center">
+                                <span className="font-medium text-gray-700 w-16 flex-shrink-0">GitHub:</span>
+                                <span className="text-gray-900 text-xs break-all">
+                                    {getGitHubDisplay(personalInfo.github).displayText}
+                                </span>
+                            </div>
+                        )}
+                        {personalInfo.website && (
+                            <div className="flex items-center col-span-1 md:col-span-2">
+                                <span className="font-medium text-gray-700 w-16 flex-shrink-0">Website:</span>
+                                <span className="text-gray-900 text-xs break-all">{personalInfo.website}</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Draggable Sections */}
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+                onDragOver={handleDragOver}
+            >
+                <SortableContext
+                    items={sectionOrder}
+                    strategy={verticalListSortingStrategy}
+                >
+                    <div 
+                        className={`transition-all duration-300 ${isDragActive ? 'opacity-95' : ''}`}
+                        style={{ 
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '16px'
+                        }}
+                    >
+                        {sectionOrder.map((sectionType) => {
+                            const sectionContent = renderPrimeSection(sectionType);
+                            if (!sectionContent) return null;
+                            return sectionContent;
+                        })}
+                    </div>
+                </SortableContext>
+            </DndContext>
+        </div>
+    );
+};
+
 // Vertex Template Component - Technology & Innovation Focused ATS-Friendly Design
 const VertexTemplate: React.FC<{ 
     data: CVData; 
@@ -7141,6 +7765,642 @@ const ExclusiveTemplate: React.FC<{
     );
 };
 
+// Essence Template Component - Modern White and Gray Block Design
+const EssenceTemplate: React.FC<{ 
+    data: CVData; 
+    sectionOrder: string[]; 
+    onSectionReorder: (newOrder: string[]) => void;
+    activeSection?: string | null;
+    onSectionSelect?: (sectionId: string | null) => void;
+}> = ({ data, sectionOrder, onSectionReorder, activeSection, onSectionSelect }) => {
+    const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
+    const [isDragActive, setIsDragActive] = useState(false);
+    const [activeId, setActiveId] = useState<string | null>(null);
+    const [dropTargetId, setDropTargetId] = useState<string | null>(null);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 150,
+                tolerance: 15,
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    const handleDragStart = (event: DragStartEvent) => {
+        setIsDragActive(true);
+        setActiveId(event.active.id as string);
+        document.body.style.userSelect = 'none';
+        document.body.style.cursor = 'grabbing';
+    };
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        setIsDragActive(false);
+        setActiveId(null);
+        setDropTargetId(null);
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            const oldIndex = sectionOrder.indexOf(active.id as string);
+            const newIndex = sectionOrder.indexOf(over.id as string);
+
+            const newOrder = arrayMove(sectionOrder, oldIndex, newIndex);
+            onSectionReorder(newOrder);
+        }
+    };
+
+    const handleDragOver = (event: DragOverEvent) => {
+        const { over } = event;
+        setDropTargetId(over ? over.id as string : null);
+    };
+
+    // Section render functions for Essence template
+    const renderEssenceSection = (sectionType: string) => {
+        switch (sectionType) {
+            case 'summary':
+                return personalInfo.summary ? (
+                    <SortableItem 
+                        key="summary" 
+                        id="summary"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'summary'}
+                    >
+                        <div className="bg-white p-5 rounded shadow-sm border border-gray-200 mb-4">
+                            <h2 className="text-base font-bold text-gray-800 mb-3 uppercase tracking-wide">
+                                {getSectionName('summary', data.cvLanguage, data.sectionNames)}
+                            </h2>
+                            <div className="text-gray-700 leading-relaxed text-sm">
+                                {renderHtmlContent(personalInfo.summary, false, data.cvLanguage)}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'experience':
+                return experience && experience.length > 0 ? (
+                    <SortableItem 
+                        key="experience" 
+                        id="experience"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'experience'}
+                    >
+                        <div className="bg-white p-5 rounded shadow-sm border border-gray-200 mb-4">
+                            <h2 className="text-base font-bold text-gray-800 mb-4 uppercase tracking-wide">
+                                {getSectionName('experience', data.cvLanguage, data.sectionNames)}
+                            </h2>
+                            <div className="space-y-4">
+                                {experience.map((exp, index) => (
+                                    <div key={exp.id} className="bg-gray-50 p-4 rounded border border-gray-100">
+                                        <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="text-sm font-bold text-black">{exp.position}</h3>
+                                                <p className="text-sm font-semibold text-gray-600">{exp.company}</p>
+                                            </div>
+                                            {(exp.startDate || exp.endDate) && (
+                                                <span className="text-xs text-gray-500 font-medium whitespace-nowrap flex-shrink-0">
+                                                    {exp.startDate ? (
+                                                        exp.current ? `${formatDate(exp.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
+                                                        exp.endDate ? `${formatDate(exp.startDate, data.cvLanguage)} - ${formatDate(exp.endDate, data.cvLanguage)}` :
+                                                        formatDate(exp.startDate, data.cvLanguage)
+                                                    ) : exp.current ? (
+                                                        getCurrentText(data.cvLanguage)
+                                                    ) : exp.endDate ? (
+                                                        formatDate(exp.endDate, data.cvLanguage)
+                                                    ) : ''}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {exp.description && (
+                                            <div className="text-gray-700 text-sm mt-2">{renderHtmlContent(exp.description)}</div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'education':
+                return education && education.length > 0 ? (
+                    <SortableItem 
+                        key="education" 
+                        id="education"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'education'}
+                    >
+                        <div className="bg-gray-50 p-5 rounded shadow-sm border border-gray-200 mb-4">
+                            <h2 className="text-base font-bold text-gray-800 mb-4 uppercase tracking-wide">
+                                {getSectionName('education', data.cvLanguage, data.sectionNames)}
+                            </h2>
+                            <div className="space-y-3">
+                                {education.map((edu, index) => (
+                                    <div key={edu.id} className="bg-white p-4 rounded border border-gray-100">
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex-1">
+                                                <h3 className="text-sm font-bold text-black">{edu.degree}</h3>
+                                                <p className="text-sm font-semibold text-gray-600">{edu.institution}</p>
+                                                {edu.gpa && (
+                                                    <p className="text-xs text-gray-500 mt-1">
+                                                        GPA: {edu.gpa}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            {(edu.startDate || edu.endDate) && (
+                                                <span className="text-xs text-gray-500 font-medium whitespace-nowrap flex-shrink-0 ml-4">
+                                                    {edu.startDate ? (
+                                                        edu.current ? `${formatDate(edu.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
+                                                        edu.endDate ? `${formatDate(edu.startDate, data.cvLanguage)} - ${formatDate(edu.endDate, data.cvLanguage)}` :
+                                                        formatDate(edu.startDate, data.cvLanguage)
+                                                    ) : edu.current ? (
+                                                        getCurrentText(data.cvLanguage)
+                                                    ) : edu.endDate ? (
+                                                        formatDate(edu.endDate, data.cvLanguage)
+                                                    ) : ''}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {edu.description && (
+                                            <div className="text-gray-700 text-sm mt-2">{renderHtmlContent(edu.description)}</div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'skills':
+                return skills && skills.length > 0 ? (
+                    <SortableItem 
+                        key="skills" 
+                        id="skills"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'skills'}
+                    >
+                        <div className="bg-gray-50 p-5 rounded shadow-sm border border-gray-200 mb-4">
+                            <h2 className="text-base font-bold text-gray-800 mb-4 uppercase tracking-wide">
+                                {getSectionName('skills', data.cvLanguage, data.sectionNames)}
+                            </h2>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                {skills.map((skill) => (
+                                    <div key={skill.id} className="bg-white px-3 py-2 rounded border border-gray-100">
+                                        <span className="text-sm font-medium text-gray-800">{skill.name}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'projects':
+                return projects && projects.length > 0 ? (
+                    <SortableItem 
+                        key="projects" 
+                        id="projects"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'projects'}
+                    >
+                        <div className="bg-white p-5 rounded shadow-sm border border-gray-200 mb-4">
+                            <h2 className="text-base font-bold text-gray-800 mb-4 uppercase tracking-wide">
+                                {getSectionName('projects', data.cvLanguage, data.sectionNames)}
+                            </h2>
+                            <div className="space-y-4">
+                                {projects.map((project) => (
+                                    <div key={project.id} className="bg-gray-50 p-4 rounded border border-gray-100">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div className="flex-1">
+                                                <h3 className="text-sm font-bold text-black">{project.name}</h3>
+                                                {project.technologies && project.technologies.length > 0 && (
+                                                    <p className="text-xs text-gray-500 mt-1">
+                                                        {project.technologies.join(' • ')}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            {(project.startDate || project.endDate) && (
+                                                <span className="text-xs text-gray-500 font-medium whitespace-nowrap flex-shrink-0 ml-4">
+                                                    {project.startDate ? (
+                                                        project.current ? `${formatDate(project.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
+                                                        project.endDate ? `${formatDate(project.startDate, data.cvLanguage)} - ${formatDate(project.endDate, data.cvLanguage)}` :
+                                                        formatDate(project.startDate, data.cvLanguage)
+                                                    ) : project.current ? (
+                                                        getCurrentText(data.cvLanguage)
+                                                    ) : project.endDate ? (
+                                                        formatDate(project.endDate, data.cvLanguage)
+                                                    ) : ''}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {project.description && (
+                                            <div className="text-gray-700 text-sm mt-2">{renderHtmlContent(project.description)}</div>
+                                        )}
+                                        {project.url && (
+                                            <div className="text-xs text-gray-500 mt-2">
+                                                <span className="font-medium">URL: </span>
+                                                {project.url}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'languages':
+                return languages && languages.length > 0 ? (
+                    <SortableItem 
+                        key="languages" 
+                        id="languages"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'languages'}
+                    >
+                        <div className="bg-gray-50 p-5 rounded shadow-sm border border-gray-200 mb-4">
+                            <h2 className="text-base font-bold text-gray-800 mb-4 uppercase tracking-wide">
+                                {getSectionName('languages', data.cvLanguage, data.sectionNames)}
+                            </h2>
+                            <div className="grid grid-cols-2 gap-3">
+                                {languages.map((lang) => (
+                                    <div key={lang.id} className="bg-white p-3 rounded border border-gray-100">
+                                        <span className="text-sm font-bold text-black">{lang.language}</span>
+                                        <span className="text-xs text-gray-600 block">{getLanguageLevel(lang.level, data.cvLanguage)}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'certifications':
+                return certifications && certifications.length > 0 ? (
+                    <SortableItem 
+                        key="certifications" 
+                        id="certifications"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'certifications'}
+                    >
+                        <div className="bg-gray-50 p-5 rounded shadow-sm border border-gray-200 mb-4">
+                            <h2 className="text-base font-bold text-gray-800 mb-4 uppercase tracking-wide">
+                                {getSectionName('certifications', data.cvLanguage, data.sectionNames)}
+                            </h2>
+                            <div className="space-y-3">
+                                {certifications.map((cert) => (
+                                    <div key={cert.id} className="bg-white p-4 rounded border border-gray-100">
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex-1">
+                                                <h3 className="text-sm font-bold text-black">{cert.name}</h3>
+                                                <p className="text-sm font-semibold text-gray-600">{cert.issuer}</p>
+                                                {cert.description && (
+                                                    <div className="text-gray-700 text-sm mt-1">{renderHtmlContent(cert.description)}</div>
+                                                )}
+                                                {cert.url && (
+                                                    <div className="text-xs text-gray-500 mt-1">
+                                                        <span className="font-medium">URL: </span>
+                                                        {cert.url}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {cert.date && (
+                                                <span className="text-xs text-gray-500 font-medium whitespace-nowrap flex-shrink-0 ml-4">
+                                                    {formatDate(cert.date, data.cvLanguage)}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'volunteer':
+                return volunteerExperience && volunteerExperience.length > 0 ? (
+                    <SortableItem 
+                        key="volunteer" 
+                        id="volunteer"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'volunteer'}
+                    >
+                        <div className="bg-white p-5 rounded shadow-sm border border-gray-200 mb-4">
+                            <h2 className="text-base font-bold text-gray-800 mb-4 uppercase tracking-wide">
+                                {getSectionName('volunteerExperience', data.cvLanguage, data.sectionNames)}
+                            </h2>
+                            <div className="space-y-3">
+                                {volunteerExperience.map((vol) => (
+                                    <div key={vol.id} className="bg-gray-50 p-4 rounded border border-gray-100">
+                                        <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="text-sm font-bold text-black">{vol.role}</h3>
+                                                <p className="text-sm font-semibold text-gray-600">{vol.organization}</p>
+                                                {vol.cause && (
+                                                    <p className="text-xs text-gray-500 mt-1">
+                                                        {data.cvLanguage === 'azerbaijani' ? 'Sahə: ' : 
+                                                         data.cvLanguage?.includes('tr') ? 'Alan: ' : 'Field: '}{vol.cause}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            {(vol.startDate || vol.endDate) && (
+                                                <span className="text-xs text-gray-500 font-medium whitespace-nowrap flex-shrink-0">
+                                                    {vol.startDate ? (
+                                                        vol.current ? `${formatDate(vol.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
+                                                        vol.endDate ? `${formatDate(vol.startDate, data.cvLanguage)} - ${formatDate(vol.endDate, data.cvLanguage)}` :
+                                                        formatDate(vol.startDate, data.cvLanguage)
+                                                    ) : vol.current ? (
+                                                        getCurrentText(data.cvLanguage)
+                                                    ) : vol.endDate ? (
+                                                        formatDate(vol.endDate, data.cvLanguage)
+                                                    ) : ''}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {vol.description && (
+                                            <div className="text-gray-700 text-sm mt-2">{renderHtmlContent(vol.description)}</div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'customSections':
+                return customSections && customSections.length > 0 ? (
+                    <SortableItem 
+                        key="customSections" 
+                        id="customSections"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'customSections'}
+                    >
+                        <div className="mb-4">
+                            {customSections
+                                .sort((a, b) => (a.order || 999) - (b.order || 999))
+                                .map((section) => (
+                                    <div key={section.id} className="bg-white p-5 rounded shadow-sm border border-gray-200 mb-4">
+                                        <h2 className="text-base font-bold text-gray-800 mb-4 uppercase tracking-wide">
+                                            {section.title}
+                                        </h2>
+                                        <div className="space-y-3">
+                                            {section.items.map((item) => (
+                                                <div key={item.id} className="bg-gray-50 p-4 rounded border border-gray-100">
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <div className="flex-1">
+                                                            {item.title && (
+                                                                <h3 className="text-sm font-bold text-black">{item.title}</h3>
+                                                            )}
+                                                            {item.subtitle && (
+                                                                <p className="text-sm font-semibold text-gray-600">{item.subtitle}</p>
+                                                            )}
+                                                        </div>
+                                                        {item.date && (
+                                                            <span className="text-xs text-gray-500 font-medium whitespace-nowrap flex-shrink-0 ml-4">
+                                                                {item.date}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    {item.description && (
+                                                        <div className="text-gray-700 text-sm mt-2">
+                                                            {renderHtmlContent(item.description)}
+                                                        </div>
+                                                    )}
+                                                    {item.tags && item.tags.length > 0 && (
+                                                        <div className="mt-2 text-xs text-gray-500">
+                                                            <span className="font-medium">Tags: </span>
+                                                            {item.tags.join(', ')}
+                                                        </div>
+                                                    )}
+                                                    {item.url && (
+                                                        <div className="text-xs text-gray-500 mt-1">
+                                                            <span className="font-medium">URL: </span>
+                                                            {item.url}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            default:
+                return null;
+        }
+    };
+
+    return (
+        <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragOver={handleDragOver}
+        >
+            <div className="essence-template cv-template" style={{ fontFamily: 'Arial, sans-serif', backgroundColor: '#F5F5F5', minHeight: '297mm' }}>
+                {/* Header Section - Full Width White Block */}
+                <div className="bg-white p-6 shadow-sm border-b border-gray-200 mb-6">
+                    {/* Name and Title */}
+                    <div className="text-center mb-4">
+                        <h1 className="text-2xl font-bold text-black mb-1 tracking-wide">
+                            {personalInfo.firstName} {personalInfo.lastName}
+                        </h1>
+                        {/* Professional title can be derived from most recent experience */}
+                        {experience && experience.length > 0 && (
+                            <p className="text-base text-gray-600 font-medium">
+                                {experience[0].position}
+                            </p>
+                        )}
+                    </div>
+                    
+                    {/* Contact Information - Horizontal Layout */}
+                    <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-700">
+                        {personalInfo.email && (
+                            <div className="flex items-center">
+                                <span className="font-medium">{personalInfo.email}</span>
+                            </div>
+                        )}
+                        {personalInfo.phone && (
+                            <div className="flex items-center">
+                                <span className="font-medium">{personalInfo.phone}</span>
+                            </div>
+                        )}
+                        {personalInfo.location && (
+                            <div className="flex items-center">
+                                <span className="font-medium">{personalInfo.location}</span>
+                            </div>
+                        )}
+                        {personalInfo.linkedin && (
+                            <div className="flex items-center">
+                                <span className="font-medium text-xs break-all">
+                                    {getLinkedInDisplay(personalInfo.linkedin).displayText}
+                                </span>
+                            </div>
+                        )}
+                        {personalInfo.github && (
+                            <div className="flex items-center">
+                                <span className="font-medium text-xs break-all">
+                                    {getGitHubDisplay(personalInfo.github).displayText}
+                                </span>
+                            </div>
+                        )}
+                        {personalInfo.website && (
+                            <div className="flex items-center">
+                                <span className="font-medium text-xs break-all">{personalInfo.website}</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Main Content - Two Column Layout */}
+                <div className="flex gap-6 px-6">
+                    {/* Left Column - 30% Width - Light Gray Background */}
+                    <div className="w-1/3 space-y-4">
+                        {/* Education Section */}
+                        {education && education.length > 0 && (
+                            <div className="bg-gray-50 p-4 rounded shadow-sm border border-gray-200">
+                                <h2 className="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wide">
+                                    {getSectionName('education', data.cvLanguage, data.sectionNames)}
+                                </h2>
+                                <div className="space-y-3">
+                                    {education.map((edu) => (
+                                        <div key={edu.id} className="bg-white p-3 rounded border border-gray-100">
+                                            <h3 className="text-xs font-bold text-black">{edu.degree}</h3>
+                                            <p className="text-xs text-gray-600">{edu.institution}</p>
+                                            {(edu.startDate || edu.endDate) && (
+                                                <span className="text-xs text-gray-500">
+                                                    {edu.startDate ? (
+                                                        edu.current ? `${formatDate(edu.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
+                                                        edu.endDate ? `${formatDate(edu.startDate, data.cvLanguage)} - ${formatDate(edu.endDate, data.cvLanguage)}` :
+                                                        formatDate(edu.startDate, data.cvLanguage)
+                                                    ) : edu.current ? (
+                                                        getCurrentText(data.cvLanguage)
+                                                    ) : edu.endDate ? (
+                                                        formatDate(edu.endDate, data.cvLanguage)
+                                                    ) : ''}
+                                                </span>
+                                            )}
+                                            {edu.gpa && (
+                                                <p className="text-xs text-gray-500">GPA: {edu.gpa}</p>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Skills Section */}
+                        {skills && skills.length > 0 && (
+                            <div className="bg-gray-50 p-4 rounded shadow-sm border border-gray-200">
+                                <h2 className="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wide">
+                                    {getSectionName('skills', data.cvLanguage, data.sectionNames)}
+                                </h2>
+                                <div className="space-y-2">
+                                    {skills.map((skill) => (
+                                        <div key={skill.id} className="bg-white px-3 py-2 rounded border border-gray-100">
+                                            <span className="text-xs font-medium text-gray-800">{skill.name}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Languages Section */}
+                        {languages && languages.length > 0 && (
+                            <div className="bg-gray-50 p-4 rounded shadow-sm border border-gray-200">
+                                <h2 className="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wide">
+                                    {getSectionName('languages', data.cvLanguage, data.sectionNames)}
+                                </h2>
+                                <div className="space-y-2">
+                                    {languages.map((lang) => (
+                                        <div key={lang.id} className="bg-white p-2 rounded border border-gray-100">
+                                            <span className="text-xs font-bold text-black block">{lang.language}</span>
+                                            <span className="text-xs text-gray-600">{getLanguageLevel(lang.level, data.cvLanguage)}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Certifications Section */}
+                        {certifications && certifications.length > 0 && (
+                            <div className="bg-gray-50 p-4 rounded shadow-sm border border-gray-200">
+                                <h2 className="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wide">
+                                    {getSectionName('certifications', data.cvLanguage, data.sectionNames)}
+                                </h2>
+                                <div className="space-y-2">
+                                    {certifications.map((cert) => (
+                                        <div key={cert.id} className="bg-white p-3 rounded border border-gray-100">
+                                            <h3 className="text-xs font-bold text-black">{cert.name}</h3>
+                                            <p className="text-xs text-gray-600">{cert.issuer}</p>
+                                            {cert.date && (
+                                                <span className="text-xs text-gray-500">
+                                                    {formatDate(cert.date, data.cvLanguage)}
+                                                </span>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Right Column - 70% Width - White Background */}
+                    <div className="w-2/3 space-y-4">
+                        <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
+                            <div className={`transition-all duration-300 ${isDragActive ? 'opacity-95' : ''}`}>
+                                {sectionOrder.map((sectionId) => {
+                                    // Only render main sections in right column
+                                    if (['education', 'skills', 'languages', 'certifications'].includes(sectionId)) {
+                                        return null; // These are in left column
+                                    }
+                                    return renderEssenceSection(sectionId);
+                                }).filter(Boolean)}
+                            </div>
+                        </SortableContext>
+                    </div>
+                </div>
+            </div>
+        </DndContext>
+    );
+};
+
 // Main CVPreview Component
 export default function CVPreview({
     cv,
@@ -7436,6 +8696,30 @@ export default function CVPreview({
                 onSectionSelect={handleSectionSelect}
                 onLeftSectionReorder={onLeftSectionReorder}
                 leftColumnOrder={externalLeftColumnOrder}
+            />;
+        }
+
+        // Prime Template - Professional Premium Design with Modern Styling
+        if (normalizedTemplate.includes('prime') ||
+            normalizedTemplate === 'prime') {
+            return <PrimeTemplate 
+                data={cv.data} 
+                sectionOrder={sectionOrder} 
+                onSectionReorder={handleSectionReorder}
+                activeSection={activeSection}
+                onSectionSelect={handleSectionSelect}
+            />;
+        }
+
+        // Essence Template - Modern White and Gray Block Design
+        if (normalizedTemplate.includes('essence') ||
+            normalizedTemplate === 'essence') {
+            return <EssenceTemplate 
+                data={cv.data} 
+                sectionOrder={sectionOrder} 
+                onSectionReorder={handleSectionReorder}
+                activeSection={activeSection}
+                onSectionSelect={handleSectionSelect}
             />;
         }
 

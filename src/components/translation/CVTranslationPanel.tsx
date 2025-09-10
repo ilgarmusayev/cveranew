@@ -28,15 +28,11 @@ export function CVTranslationPanel({
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [targetLanguageInTranslation, setTargetLanguageInTranslation] = useState<CVLanguage | null>(null);
   
-  // AI translation permission check
-  const canUseAI = ['premium', 'populyar'].includes(userTier?.toLowerCase());
+  // AI translation permission check - Artıq bütün istifadəçilər AI tercümə edə bilər
+  const canUseAI = true;
 
   const handleFullTranslation = async (targetLanguage: CVLanguage) => {
-    // Check if user can use AI translation
-    if (!canUseAI) {
-      alert(`AI Tərcümə xüsusiyyəti Premium və Populyar istifadəçilər üçün mövcuddur! Sizin abunəliyiniz: ${userTier}`);
-      return;
-    }
+    // AI tercümə artıq bütün istifadəçilər üçün mövcuddur
 
     try {
       setTargetLanguageInTranslation(targetLanguage);
