@@ -51,6 +51,23 @@ async function validateTemplateAccess(userId: string, templateId: string): Promi
   return templateTierLevel <= userTierLevel;
 }
 
+// Check if user has permission to delete CVs (Premium only)
+async function canDeleteCV(userId: string): Promise<boolean> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      subscriptions: {
+        where: { status: "active" },
+        orderBy: { startedAt: "desc" },
+        take: 1,
+      },
+    },
+  });
+
+  const userTier = user?.subscriptions[0]?.tier || user?.tier || "Free";
+  return userTier.toLowerCase() === "premium";
+}
+
 // GET /api/cvs/[id] - Get a single CV's data
 export async function GET(
   req: NextRequest,
@@ -266,6 +283,15 @@ export async function DELETE(
     
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check if user has permission to delete CVs (Premium only)
+    const hasDeletePermission = await canDeleteCV(userId);
+    if (!hasDeletePermission) {
+      return NextResponse.json({ 
+        error: "CV silmə funksiyası yalnız Premium istifadəçilər üçün mövcuddur.",
+        code: "PREMIUM_FEATURE_REQUIRED"
+      }, { status: 403 });
     }
 
     // Check if CV exists and belongs to user

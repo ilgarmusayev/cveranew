@@ -25,6 +25,19 @@ export default function CVManagementPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Check if user can delete CVs based on tier
+  const canDeleteCV = () => {
+    if (!user) return false;
+    
+    // Only Premium users can delete CVs
+    const userTier = user.tier?.toLowerCase() || 'free';
+    const hasActiveSubscription = user.subscriptions?.some(sub => 
+      sub.status === 'active' && sub.tier.toLowerCase() === 'premium'
+    );
+    
+    return userTier === 'premium' || hasActiveSubscription;
+  };
+
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/');
@@ -50,6 +63,12 @@ export default function CVManagementPage() {
   };
 
   const handleDeleteCV = async (cvId: string) => {
+    // Check if user has permission to delete CVs
+    if (!canDeleteCV()) {
+      alert('CV silmə funksiyası yalnız Premium istifadəçilər üçün mövcuddur. Premium plana keçmək üçün profil səhifənizə daxil olun.');
+      return;
+    }
+
     if (!confirm('Bu CV-ni silmək istədiyinizə əminsiniz?')) {
       return;
     }
@@ -57,9 +76,15 @@ export default function CVManagementPage() {
     try {
       await apiClient.delete(`/api/cv/${cvId}`);
       setCvs(cvs.filter(cv => cv.id !== cvId));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting CV:', error);
-      setError('CV silinərkən xəta baş verdi');
+      
+      // Handle specific error codes
+      if (error?.response?.status === 403) {
+        alert('CV silmə funksiyası yalnız Premium istifadəçilər üçün mövcuddur. Premium plana keçmək üçün profil səhifənizə daxil olun.');
+      } else {
+        setError('CV silinərkən xəta baş verdi');
+      }
     }
   };
 
@@ -197,10 +222,18 @@ export default function CVManagementPage() {
                     </Link>
                     <button
                       onClick={() => handleDeleteCV(cv.id)}
-                      className="bg-red-100 hover:bg-red-200 text-red-600 px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                      title="CV-ni sil"
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                        canDeleteCV()
+                          ? 'bg-red-100 hover:bg-red-200 text-red-600'
+                          : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      }`}
+                      title={canDeleteCV() 
+                        ? "CV-ni sil" 
+                        : "CV silmə Premium istifadəçilər üçün mövcuddur"
+                      }
+                      disabled={!canDeleteCV()}
                     >
-                      Sil
+                      {canDeleteCV() ? 'Sil' : 'Sil 🔒'}
                     </button>
                   </div>
                 </div>

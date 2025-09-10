@@ -4,6 +4,23 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// Check if user has permission to delete CVs (Premium only)
+async function canDeleteCV(userId: string): Promise<boolean> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      subscriptions: {
+        where: { status: "active" },
+        orderBy: { startedAt: "desc" },
+        take: 1,
+      },
+    },
+  });
+
+  const userTier = user?.subscriptions[0]?.tier || user?.tier || "Free";
+  return userTier.toLowerCase() === "premium";
+}
+
 // GET /api/cv/[id] - Spesifik CV-ni əldə et
 export async function GET(
   request: NextRequest,
@@ -214,6 +231,15 @@ export async function DELETE(
         { error: 'Etibarsız token' },
         { status: 401 }
       );
+    }
+
+    // Check if user has permission to delete CVs (Premium only)
+    const hasDeletePermission = await canDeleteCV(decoded.userId);
+    if (!hasDeletePermission) {
+      return NextResponse.json({ 
+        error: "CV silmə funksiyası yalnız Premium istifadəçilər üçün mövcuddur.",
+        code: "PREMIUM_FEATURE_REQUIRED"
+      }, { status: 403 });
     }
 
     // CV-nin mövcudluğunu və sahibliyini yoxla

@@ -30,6 +30,19 @@ export default function CVListPage() {
   });
   const { showSuccess, showError, showWarning } = useNotification();
 
+  // Check if user can delete CVs based on tier
+  const canDeleteCV = () => {
+    if (!user) return false;
+    
+    // Only Premium users can delete CVs
+    const userTier = user.tier?.toLowerCase() || 'free';
+    const hasActiveSubscription = user.subscriptions?.some(sub => 
+      sub.status === 'active' && sub.tier.toLowerCase() === 'premium'
+    );
+    
+    return userTier === 'premium' || hasActiveSubscription;
+  };
+
   const fetchCVs = useCallback(async () => {
     try {
       setLoading(true);
@@ -80,6 +93,15 @@ export default function CVListPage() {
   };
 
   const handleDelete = async (cvId: string, title: string) => {
+    // Check if user has permission to delete CVs
+    if (!canDeleteCV()) {
+      showWarning(
+        'CV silmə funksiyası yalnız Premium istifadəçilər üçün mövcuddur. Premium plana keçmək üçün profil səhifənizə daxil olun.',
+        'Premium Funksiya'
+      );
+      return;
+    }
+
     setDeleteModal({
       show: true,
       cvId,
@@ -93,9 +115,19 @@ export default function CVListPage() {
       setDeleteModal({ show: false, cvId: '', title: '' });
       await fetchCVs(); // Reload the list
       showSuccess('CV uğurla silindi');
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ CV silmə xətası:', error);
-      showError('CV silinərkən xəta baş verdi');
+      
+      // Handle specific error codes
+      if (error?.response?.status === 403) {
+        showWarning(
+          'CV silmə funksiyası yalnız Premium istifadəçilər üçün mövcuddur. Premium plana keçmək üçün profil səhifənizə daxil olun.',
+          'Premium Funksiya'
+        );
+      } else {
+        showError('CV silinərkən xəta baş verdi');
+      }
+      
       setDeleteModal({ show: false, cvId: '', title: '' });
     }
   };
@@ -200,12 +232,27 @@ export default function CVListPage() {
 
                       <button
                         onClick={() => handleDelete(cv.id, cv.title)}
-                        className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
-                        title="CV-ni sil"
+                        className={`px-3 py-2 rounded-lg transition-all duration-200 ${
+                          canDeleteCV()
+                            ? 'text-red-600 hover:bg-red-50'
+                            : 'text-gray-400 cursor-not-allowed'
+                        }`}
+                        title={canDeleteCV() 
+                          ? "CV-ni sil" 
+                          : "CV silmə Premium istifadəçilər üçün mövcuddur"
+                        }
+                        disabled={!canDeleteCV()}
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
+                        <div className="relative">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          {!canDeleteCV() && (
+                            <div className="absolute -top-1 -right-1 w-3 h-3">
+                              <span className="text-xs">🔒</span>
+                            </div>
+                          )}
+                        </div>
                       </button>
                     </div>
                   </div>
