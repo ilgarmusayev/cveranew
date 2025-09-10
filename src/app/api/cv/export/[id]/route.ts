@@ -1401,6 +1401,73 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         .lumen-template .cv-section {
                             margin-bottom: var(--cv-section-spacing) !important;
                         }
+                        
+                        /* ATLAS TEMPLATE SOL PANEL PDF EXPORT ÜÇÜN MÜTLƏq GOY RƏNG */
+                        .atlas-left-panel,
+                        .atlas-template .atlas-left-panel,
+                        div.atlas-left-panel,
+                        [class*="atlas-left-panel"] {
+                            background-color: #2563eb !important; /* Goy rəng */
+                            background: #2563eb !important;
+                            color: white !important;
+                            z-index: 999999 !important;
+                            position: relative !important;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        /* Atlas sol panel içindəki BÜTÜN elementlər ağ rəng */
+                        .atlas-left-panel *,
+                        .atlas-left-panel h1,
+                        .atlas-left-panel h2,
+                        .atlas-left-panel h3,
+                        .atlas-left-panel h4,
+                        .atlas-left-panel h5,
+                        .atlas-left-panel h6,
+                        .atlas-left-panel p,
+                        .atlas-left-panel span,
+                        .atlas-left-panel div,
+                        .atlas-left-panel strong,
+                        .atlas-left-panel em,
+                        .atlas-left-panel a,
+                        .atlas-left-panel li,
+                        .atlas-left-panel td,
+                        .atlas-left-panel th {
+                            color: white !important;
+                            border-color: white !important;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        /* Atlas sol panel xətləri də ağ olsun */
+                        .atlas-left-panel .border-b,
+                        .atlas-left-panel .border-t,
+                        .atlas-left-panel .border-l,
+                        .atlas-left-panel .border-r,
+                        .atlas-left-panel .border,
+                        .atlas-left-panel [class*="border"] {
+                            border-color: white !important;
+                        }
+                        
+                        /* Atlas template sol panel container */
+                        .atlas-template .w-2\/5,
+                        .cv-template.atlas-template .w-2\/5 {
+                            background-color: #2563eb !important;
+                            background: #2563eb !important;
+                            color: white !important;
+                            z-index: 999999 !important;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        /* Atlas template sol panel bütün child elementləri */
+                        .atlas-template .w-2\/5 *,
+                        .cv-template.atlas-template .w-2\/5 * {
+                            color: white !important;
+                            border-color: white !important;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
                     </style>
                 </head>
                 <body>
@@ -1870,6 +1937,270 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
         });
         
         console.log('Template exists:', templateExists);
+        
+        // Resume-ATS/Atlas Template PDF Design Fix
+        const normalizedTemplateId = templateId?.toLowerCase() || '';
+        const isResumeATSTemplate = normalizedTemplateId.includes('ats') || 
+                                   normalizedTemplateId.includes('atlas') || 
+                                   normalizedTemplateId === 'resume-ats' ||
+                                   normalizedTemplateId.includes('clean') ||
+                                   normalizedTemplateId.includes('minimal-professional');
+        
+        console.log('🎨 Template ID Check:', templateId, '-> Normalized:', normalizedTemplateId);
+        console.log('🔍 Is Resume-ATS Template:', isResumeATSTemplate);
+        
+        if (isResumeATSTemplate) {
+            console.log('🎯 Resume-ATS Template detected - applying complete design fix...');
+            
+            // CSS injection for Resume-ATS template PDF design
+            await page.addStyleTag({
+                content: `
+                    /* RESUME-ATS TEMPLATE COMPLETE PDF DESIGN FIX */
+                    @media print {
+                        /* SOL PANEL - #1e3a8a tünd göy background - PADDİNG/MARGİN SİLİNDİ */
+                        .atlas-left-panel,
+                        .w-2\\/5,
+                        [class*="w-2/5"],
+                        .atlas-template .w-2\\/5,
+                        .resume-ats .w-2\\/5,
+                        .ats-template .w-2\\/5,
+                        div[class*="w-2/5"].atlas-left-panel,
+                        [class*="bg-blue"] {
+                            background-color: #1e3a8a !important;
+                            background: #1e3a8a !important;
+                            color: white !important;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        /* Sol panel içindəki bütün elementlər ağ text - SOL PANEL BORDER LEĞVİ (başlıq xəttləri istisna) */
+                        .atlas-left-panel *,
+                        .w-2\\/5 *,
+                        [class*="w-2/5"] *,
+                        .atlas-template .w-2\\/5 *,
+                        .resume-ats .w-2\\/5 *,
+                        .ats-template .w-2\\/5 *,
+                        div[class*="w-2/5"].atlas-left-panel *,
+                        [class*="bg-blue"] * {
+                            color: white !important;
+                            background-color: transparent !important;
+                            background: transparent !important;
+                            outline: none !important;
+                        }
+                        
+                        /* Sol paneldə section başlıq xəttləri ağ rəngdə nazik görünsün */
+                        .atlas-left-panel h2,
+                        .atlas-left-panel h3,
+                        .atlas-left-panel .section-title,
+                        .atlas-left-panel .cv-section-title,
+                        .w-2\\/5 h2,
+                        .w-2\\/5 h3,
+                        .w-2\\/5 .section-title,
+                        .w-2\\/5 .cv-section-title,
+                        [class*="w-2/5"] h2,
+                        [class*="w-2/5"] h3,
+                        [class*="w-2/5"] .section-title,
+                        [class*="w-2/5"] .cv-section-title {
+                            border-bottom: 1px solid white !important;
+                            border-color: white !important;
+                        }
+                        
+                        /* Sol paneldə HR elementləri ağ rəngdə */
+                        .atlas-left-panel hr,
+                        .w-2\\/5 hr,
+                        [class*="w-2/5"] hr {
+                            border-color: white !important;
+                            background-color: white !important;
+                            color: white !important;
+                        }
+                        
+                        /* SAĞ PANEL BORDER QORUMA - SAĞ PANELDƏKİ SECTION-LAR BORDER SAXLAYIR */
+                        .w-3\\/5 *,
+                        [class*="w-3/5"] * {
+                            /* Sağ paneldə border saxlanır */
+                        }
+                        
+                        /* SAĞ PANEL - ağ background və qara text */
+                        .w-3\\/5,
+                        [class*="w-3/5"],
+                        .atlas-template .w-3\\/5,
+                        .resume-ats .w-3\\/5,
+                        .ats-template .w-3\\/5 {
+                            background-color: white !important;
+                            background: white !important;
+                            color: #1f2937 !important;
+                        }
+                        
+                        /* BÜTÜN SAĞ PANEL SECTION-LARI AĞ */
+                        body *:not(.atlas-left-panel):not(.w-2\\/5):not([class*="w-2/5"]):not([class*="bg-blue"]):not(.atlas-left-panel *):not(.w-2\\/5 *):not([class*="w-2/5"] *):not([class*="bg-blue"] *) {
+                            background-color: white !important;
+                            background: white !important;
+                            color: #1f2937 !important;
+                        }
+                        
+                        /* Section-lar mütləq ağ */
+                        section:not(.atlas-left-panel):not(.atlas-left-panel section),
+                        .section:not(.atlas-left-panel):not(.atlas-left-panel .section),
+                        .cv-section:not(.atlas-left-panel):not(.atlas-left-panel .cv-section),
+                        div[class*="section"]:not(.atlas-left-panel):not(.atlas-left-panel div[class*="section"]),
+                        .mb-6:not(.atlas-left-panel):not(.atlas-left-panel .mb-6),
+                        .mb-4:not(.atlas-left-panel):not(.atlas-left-panel .mb-4),
+                        .mb-8:not(.atlas-left-panel):not(.atlas-left-panel .mb-8) {
+                            background-color: white !important;
+                            background: white !important;
+                            color: #1f2937 !important;
+                        }
+                    }
+                `
+            });
+            
+            // JavaScript for aggressive Resume-ATS design enforcement
+            await page.evaluate(() => {
+                console.log('🎯 Resume-ATS JavaScript design enforcement executing...');
+                
+                // İLK - BÜTÜN ELEMENTLƏRI AĞ ET
+                const allElements = document.querySelectorAll('*');
+                console.log('Setting ALL elements to white first:', allElements.length);
+                
+                allElements.forEach((el) => {
+                    const element = el as HTMLElement;
+                    element.style.setProperty('background-color', 'white', 'important');
+                    element.style.setProperty('background', 'white', 'important');
+                    element.style.setProperty('color', '#1f2937', 'important');
+                });
+                
+                // İKİNCİ - YALNIZ SOL PANEL CONTAINER-I GÖY ET
+                const leftPanelContainers = [
+                    '.atlas-left-panel',
+                    '.w-2\\/5',
+                    '[class*="w-2/5"]'
+                ];
+                
+                let totalLeftPanelFixed = 0;
+                leftPanelContainers.forEach(selector => {
+                    const elements = document.querySelectorAll(selector);
+                    console.log(`Found ${elements.length} left panel containers for: ${selector}`);
+                    
+                    elements.forEach((el) => {
+                        const element = el as HTMLElement;
+                        // Yalnız sol panel container-ını göy et
+                        element.style.setProperty('background-color', '#1e3a8a', 'important');
+                        element.style.setProperty('background', '#1e3a8a', 'important');
+                        element.style.setProperty('color', 'white', 'important');
+                        element.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
+                        element.style.setProperty('print-color-adjust', 'exact', 'important');
+                        totalLeftPanelFixed++;
+                        
+                        // Sol panel içindəki BÜTÜN elementləri ağ text et - BAŞLIQ XƏTTLƏRİ QORU
+                        const allChildren = element.querySelectorAll('*');
+                        allChildren.forEach((child) => {
+                            const childEl = child as HTMLElement;
+                            childEl.style.setProperty('color', 'white', 'important');
+                            childEl.style.setProperty('background-color', 'transparent', 'important');
+                            childEl.style.setProperty('background', 'transparent', 'important');
+                            childEl.style.setProperty('outline', 'none', 'important');
+                            
+                            // Section başlıqları üçün ağ border
+                            const isHeading = childEl.tagName === 'H2' || childEl.tagName === 'H3' || 
+                                            childEl.classList.contains('section-title') || 
+                                            childEl.classList.contains('cv-section-title');
+                            
+                            const isHR = childEl.tagName === 'HR';
+                            
+                            if (isHeading) {
+                                childEl.style.setProperty('border-bottom', '1px solid white', 'important');
+                                childEl.style.setProperty('border-color', 'white', 'important');
+                            } else if (isHR) {
+                                childEl.style.setProperty('border-color', 'white', 'important');
+                                childEl.style.setProperty('background-color', 'white', 'important');
+                            } else {
+                                // Digər elementlər üçün border yoxdur
+                                childEl.style.setProperty('border', 'none', 'important');
+                                childEl.style.setProperty('border-color', 'transparent', 'important');
+                            }
+                        });
+                    });
+                });
+                
+                // ÜÇÜNCÜ - SOL PANELDƏKİ SECTION-LARI DA GÖY ET
+                console.log('� Making left panel sections blue...');
+                
+                // Sol panel içindəki section-ları tap
+                const leftPanelSections = document.querySelectorAll(`
+                    .atlas-left-panel .cv-section,
+                    .atlas-left-panel section,
+                    .atlas-left-panel .section,
+                    .atlas-left-panel div[class*="section"],
+                    .atlas-left-panel .mb-6,
+                    .atlas-left-panel .mb-4,
+                    .atlas-left-panel .mb-8,
+                    .w-2\\/5 .cv-section,
+                    .w-2\\/5 section,
+                    .w-2\\/5 .section,
+                    .w-2\\/5 div[class*="section"],
+                    .w-2\\/5 .mb-6,
+                    .w-2\\/5 .mb-4,
+                    .w-2\\/5 .mb-8,
+                    [class*="w-2/5"] .cv-section,
+                    [class*="w-2/5"] section,
+                    [class*="w-2/5"] .section,
+                    [class*="w-2/5"] div[class*="section"],
+                    [class*="w-2/5"] .mb-6,
+                    [class*="w-2/5"] .mb-4,
+                    [class*="w-2/5"] .mb-8
+                `);
+                
+                console.log('Found left panel sections:', leftPanelSections.length);
+                
+                leftPanelSections.forEach((el) => {
+                    const element = el as HTMLElement;
+                    element.style.setProperty('background-color', '#1e3a8a', 'important');
+                    element.style.setProperty('background', '#1e3a8a', 'important');
+                    element.style.setProperty('color', 'white', 'important');
+                    // Section-ın özünün border-ini ləğv et
+                    element.style.setProperty('border', 'none', 'important');
+                    element.style.setProperty('border-color', 'transparent', 'important');
+                    element.style.setProperty('outline', 'none', 'important');
+                    
+                    // Section içindəki elementləri də ağ text et və BAŞLIQ XƏTTLƏRİNİ QORU
+                    const sectionChildren = element.querySelectorAll('*');
+                    sectionChildren.forEach((child) => {
+                        const childEl = child as HTMLElement;
+                        childEl.style.setProperty('color', 'white', 'important');
+                        childEl.style.setProperty('background-color', 'transparent', 'important');
+                        childEl.style.setProperty('background', 'transparent', 'important');
+                        childEl.style.setProperty('outline', 'none', 'important');
+                        
+                        // Section başlıqları və HR elementləri üçün ağ border
+                        const isHeading = childEl.tagName === 'H2' || childEl.tagName === 'H3' || 
+                                        childEl.classList.contains('section-title') || 
+                                        childEl.classList.contains('cv-section-title');
+                        
+                        const isHR = childEl.tagName === 'HR';
+                        
+                        if (isHeading) {
+                            childEl.style.setProperty('border-bottom', '1px solid white', 'important');
+                            childEl.style.setProperty('border-color', 'white', 'important');
+                        } else if (isHR) {
+                            childEl.style.setProperty('border-color', 'white', 'important');
+                            childEl.style.setProperty('background-color', 'white', 'important');
+                        } else {
+                            // Digər elementlər üçün border yoxdur
+                            childEl.style.setProperty('border', 'none', 'important');
+                            childEl.style.setProperty('border-color', 'transparent', 'important');
+                        }
+                    });
+                });
+                
+                console.log(`✅ Resume-ATS CORRECT design fix completed:`);
+                console.log(`   🔵 Left panel + sections: #1e3a8a göy + ağ text`);
+                console.log(`   ⚪ Right panel + sections: Ağ background + qara text`);
+                console.log('✅ Sol paneldəki contact, skills, languages: GÖY - BORDER LEĞVİ');
+                console.log('✅ Sağ paneldəki experience, education, projects: AĞ');
+            });
+            
+            console.log('✅ Resume-ATS template complete design fix applied successfully');
+        }
         
         // Sadə və təbii PDF axını
         if (templateExists) {

@@ -7247,16 +7247,20 @@ export default function CVPreview({
             normalizedTemplate === 'resume-ats' ||
             normalizedTemplate.includes('clean') ||
             normalizedTemplate.includes('minimal-professional')) {
-            return <ATSFriendlyTemplate 
-                key={`atlas-${cv.data.skills?.length || 0}-${cv.data.languages?.length || 0}-${cv.data.certifications?.length || 0}-${cv.data.education?.length || 0}`}
-                data={cv.data} 
-                sectionOrder={sectionOrder} 
-                onSectionReorder={handleSectionReorder}
-                activeSection={activeSection}
-                onSectionSelect={handleSectionSelect}
-                onLeftSectionReorder={onLeftSectionReorder}
-                leftColumnOrder={externalLeftColumnOrder}
-            />;
+            return (
+                <div className="atlas-template cv-template resume-ats ats-template">
+                    <ATSFriendlyTemplate 
+                        key={`atlas-${cv.data.skills?.length || 0}-${cv.data.languages?.length || 0}-${cv.data.certifications?.length || 0}-${cv.data.education?.length || 0}`}
+                        data={cv.data} 
+                        sectionOrder={sectionOrder} 
+                        onSectionReorder={handleSectionReorder}
+                        activeSection={activeSection}
+                        onSectionSelect={handleSectionSelect}
+                        onLeftSectionReorder={onLeftSectionReorder}
+                        leftColumnOrder={externalLeftColumnOrder}
+                    />
+                </div>
+            );
         }
 
         // Aurora Template - Modern Minimal ATS-Friendly
@@ -7308,6 +7312,25 @@ export default function CVPreview({
                 onLeftSectionReorder={onLeftSectionReorder}
                 leftColumnOrder={externalLeftColumnOrder}
             />;
+        }
+
+        // Atlas Template - Blue Left Panel Professional Design
+        if (normalizedTemplate.includes('atlas') ||
+            normalizedTemplate === 'atlas') {
+            return (
+                <div className="atlas-template cv-template">
+                    <ATSFriendlyTemplate 
+                        key={`atlas-${cv.data.skills?.length || 0}-${cv.data.languages?.length || 0}-${cv.data.certifications?.length || 0}-${cv.data.education?.length || 0}`}
+                        data={cv.data} 
+                        sectionOrder={sectionOrder} 
+                        onSectionReorder={handleSectionReorder}
+                        activeSection={activeSection}
+                        onSectionSelect={handleSectionSelect}
+                        onLeftSectionReorder={onLeftSectionReorder}
+                        leftColumnOrder={externalLeftColumnOrder}
+                    />
+                </div>
+            );
         }
 
         // Modern templates  

@@ -35,7 +35,7 @@
     background: transparent !important;
   }
 
-  /* Specific template optimization - NO universal div[class*="template"] rule */
+  /* Universal template optimization - applies to ALL templates EXCEPT ATLAS */
   .basic-template,
   .modern-template,
   .ats-template,
@@ -43,7 +43,8 @@
   .aurora-template,
   .vertex-template,
   .horizon-template,
-  .lumen-template {
+  .lumen-template,
+  div[class*="template"]:not(.atlas-template):not(.resume-ats):not(.ats-template) {
     width: 210mm !important;
     min-height: 297mm !important;
     max-width: 210mm !important;
@@ -77,6 +78,7 @@
     max-width: 210mm !important;
     margin: 0 !important;
     padding: 0 !important;
+    background: white !important;
     box-shadow: none !important;
     overflow: visible !important;
   }
@@ -217,7 +219,7 @@
 
   /* Aurora Template */
   .aurora-template {
-    padding: 15mm !important;
+    padding: 20mm !important;
   }
 
   /* Vertex Template */
@@ -249,73 +251,78 @@
     background: white !important;
   }
 
-  /* Atlas Template - Blue Left Panel */
-  .w-2\/5.bg-blue-600,
-  .atlas-template .left-panel,
-  .atlas-left-panel {
-    background: #2563eb !important;
+  /* ATLAS TEMPLATE SOL PANEL - MÜTLƏq GOY RƏNG PDF-də */
+  .atlas-template,
+  .cv-template.atlas-template,
+  div.atlas-template {
+    display: flex !important;
+    padding: 0 !important;
+    width: 210mm !important;
+    min-height: 297mm !important;
+  }
+  
+  /* Atlas sol panel - Maksimal güclü override */
+  .atlas-left-panel,
+  .atlas-template .atlas-left-panel,
+  .cv-template.atlas-template .atlas-left-panel,
+  .atlas-template .w-2\/5,
+  .cv-template.atlas-template .w-2\/5,
+  .atlas-template div[class*="w-2/5"],
+  .cv-template.atlas-template div[class*="w-2/5"] {
     background-color: #2563eb !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    color-adjust: exact !important;
+    background: #2563eb !important;
+    background-image: none !important;
     color: white !important;
+    z-index: 999999 !important;
+    position: relative !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    width: 84mm !important; /* 2/5 of 210mm */
+    min-height: 297mm !important;
   }
-
-  /* Atlas Template Blue Panel Text Colors */
-  .w-2\/5.bg-blue-600 *,
-  .atlas-template .left-panel *,
-  .atlas-left-panel * {
+  
+  /* Atlas sol panel içindəki BÜTÜN elementlər ağ rəng */
+  .atlas-left-panel *,
+  .atlas-template .atlas-left-panel *,
+  .cv-template.atlas-template .atlas-left-panel *,
+  .atlas-template .w-2\/5 *,
+  .cv-template.atlas-template .w-2\/5 *,
+  .atlas-template div[class*="w-2/5"] *,
+  .cv-template.atlas-template div[class*="w-2/5"] * {
+    color: white !important;
+    border-color: white !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     color-adjust: exact !important;
   }
-
-  /* Force blue background on any div with blue-600 class in PDF */
-  .bg-blue-600 {
-    background: #2563eb !important;
-    background-color: #2563eb !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    color-adjust: exact !important;
+  
+  /* Atlas sol panel xətləri də ağ olsun */
+  .atlas-left-panel .border-b,
+  .atlas-left-panel .border-t,
+  .atlas-left-panel .border-l,
+  .atlas-left-panel .border-r,
+  .atlas-left-panel .border,
+  .atlas-left-panel [class*="border"],
+  .atlas-template .w-2\/5 .border-b,
+  .atlas-template .w-2\/5 .border-t,
+  .atlas-template .w-2\/5 .border-l,
+  .atlas-template .w-2\/5 .border-r,
+  .atlas-template .w-2\/5 .border,
+  .atlas-template .w-2\/5 [class*="border"] {
+    border-color: white !important;
   }
-
-  /* Very specific selectors for Atlas template to force PDF background */
-  div.w-2\/5[class*="bg-blue"] {
-    background: #2563eb !important;
-    background-color: #2563eb !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  /* Browser-specific print color forcing */
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    color-adjust: exact !important;
-  }
-
-  /* HIGHEST PRIORITY: Atlas Template Blue Panel - Override ALL white backgrounds */
-  div.atlas-left-panel,
-  div.w-2\/5.atlas-left-panel,
-  div.bg-blue-600.atlas-left-panel,
-  div[class*="atlas-left-panel"],
-  .atlas-left-panel {
-    background: #2563eb !important;
-    background-color: #2563eb !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    color: #ffffff !important;
-  }
-
-  /* HIGHEST PRIORITY: Atlas Template Text Colors */
-  div.atlas-left-panel *,
-  div.w-2\/5.atlas-left-panel *,
-  div.bg-blue-600.atlas-left-panel *,
-  div[class*="atlas-left-panel"] *,
-  .atlas-left-panel * {
-    color: #ffffff !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
+  
+  /* Atlas sağ panel - ağ arxa plan */
+  .atlas-template .w-3\/5,
+  .cv-template.atlas-template .w-3\/5,
+  .atlas-template div[class*="w-3/5"],
+  .cv-template.atlas-template div[class*="w-3/5"] {
+    background-color: white !important;
+    background: white !important;
+    width: 126mm !important; /* 3/5 of 210mm */
+    min-height: 297mm !important;
+    padding: 15mm 12mm !important;
   }
 }
 
