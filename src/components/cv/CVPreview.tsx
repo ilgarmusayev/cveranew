@@ -8130,6 +8130,19 @@ const EssenceTemplate: React.FC<{
                                                 </a>
                                             </div>
                                         )}
+                                        {project.github && (
+                                            <div className="text-xs text-gray-500 mt-2">
+                                                <span className="font-medium">GitHub Linki: </span>
+                                                <a 
+                                                    href={project.github.startsWith('http') ? project.github : `https://github.com/${project.github}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-blue-600 hover:text-blue-800 hover:underline"
+                                                >
+                                                    {project.github}
+                                                </a>
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>
@@ -8298,16 +8311,28 @@ const EssenceTemplate: React.FC<{
                     }}
                 >
                     {/* Name and Title */}
-                    <div className="text-center text-white mb-4" style={{ color: '#FFFFFF' }}>
-                        <h1 className="text-2xl font-bold text-white mb-1 tracking-wide" style={{ color: '#FFFFFF' }}>
-                            {personalInfo.firstName} {personalInfo.lastName}
-                        </h1>
-                        {/* Professional title - show field if available, otherwise most recent position */}
-                        {(personalInfo.field || (experience && experience.length > 0)) && (
-                            <p className="text-base text-white font-medium opacity-90" style={{ color: '#FFFFFF' }}>
-                                {personalInfo.field || experience[0]?.position}
-                            </p>
+                    <div className="flex items-center justify-center gap-6 text-white mb-4" style={{ color: '#FFFFFF' }}>
+                        {personalInfo.profileImage && (
+                            <div className="flex-shrink-0">
+                                <img
+                                    src={personalInfo.profileImage}
+                                    alt="Profile"
+                                    className="w-20 h-20 rounded-full object-cover border-3 border-white shadow-lg"
+                                    style={{ border: '3px solid #FFFFFF' }}
+                                />
+                            </div>
                         )}
+                        <div className="text-center">
+                            <h1 className="text-2xl font-bold text-white mb-1 tracking-wide" style={{ color: '#FFFFFF' }}>
+                                {personalInfo.firstName} {personalInfo.lastName}
+                            </h1>
+                            {/* Professional title - show field if available, otherwise most recent position */}
+                            {(personalInfo.field || (experience && experience.length > 0)) && (
+                                <p className="text-base text-white font-medium opacity-90" style={{ color: '#FFFFFF' }}>
+                                    {personalInfo.field || experience[0]?.position}
+                                </p>
+                            )}
+                        </div>
                     </div>
                     
                     {/* Contact Information - Horizontal Layout */}
@@ -8380,6 +8405,11 @@ const EssenceTemplate: React.FC<{
                                             )}
                                             {edu.gpa && (
                                                 <p className="text-xs text-gray-500">{data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: {edu.gpa}</p>
+                                            )}
+                                            {edu.description && (
+                                                <div className="text-xs text-gray-700 mt-2 leading-relaxed">
+                                                    {renderHtmlContent(edu.description, false, data.cvLanguage)}
+                                                </div>
                                             )}
                                         </div>
                                     ))}
@@ -9127,7 +9157,7 @@ const ClarityTemplate: React.FC<{
                     >
                         <div>
                             <h2 
-                                className="text-2xl font-bold pb-2"
+                                className="text-lg font-bold pb-1 mb-3"
                                 style={{ 
                                     color: '#1f2937',
                                     fontFamily: '"Inter", "Segoe UI", sans-serif',
@@ -9136,7 +9166,7 @@ const ClarityTemplate: React.FC<{
                             >
                                 {getSectionName('projects', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="space-y-6">
+                            <div className="space-y-4">
                                 {projects.map((project, index) => (
                                     <div key={project.id} className="relative">
                                         {/* Timeline line for visual appeal */}
