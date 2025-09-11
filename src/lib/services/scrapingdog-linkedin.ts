@@ -11,6 +11,8 @@ export interface ScrapingDogLinkedInProfile {
   summary: string;
   location: string;
   website?: string;
+  email?: string;
+  phone?: string;
   profilePicture?: string;
   experience: Array<{
     title: string;
@@ -46,6 +48,25 @@ export interface ScrapingDogLinkedInProfile {
     date?: string;
     summary?: string;
     description?: string;
+  }>;
+  honors?: Array<{
+    name: string;
+    title?: string;
+    organization?: string;
+    duration?: string;
+    date?: string;
+    summary?: string;
+    description?: string;
+  }>;
+  certifications?: Array<{
+    name: string;
+    title?: string;
+    organization?: string;
+    issuer?: string;
+    issueDate?: string;
+    expiryDate?: string;
+    credentialId?: string;
+    url?: string;
   }>;
   volunteering?: Array<{
     organization?: string;
@@ -203,8 +224,25 @@ export class ScrapingDogLinkedInService {
       });
 
       return profile;
-    } catch (error) {
+    } catch (error: any) {
       console.error('💥 ScrapingDog LinkedIn scraping error:', error);
+      
+      // Log detailed error information
+      if (error.response) {
+        console.error('❌ HTTP Error Details:');
+        console.error('   Status:', error.response.status);
+        console.error('   Status Text:', error.response.statusText);
+        console.error('   Data:', error.response.data);
+        console.error('   Headers:', error.response.headers);
+      }
+      
+      if (error.request) {
+        console.error('❌ Request Error:', error.request);
+      }
+      
+      if (error.code) {
+        console.error('❌ Error Code:', error.code);
+      }
       
       // Update usage as failed
       try {
@@ -214,7 +252,7 @@ export class ScrapingDogLinkedInService {
         console.error('Failed to update API usage:', updateError);
       }
 
-      return null;
+      throw error; // Re-throw error to see what's really happening
     }
   }
 

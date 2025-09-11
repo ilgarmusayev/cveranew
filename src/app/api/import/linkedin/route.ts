@@ -107,46 +107,143 @@ async function generateLinkedInAISkills(profileData: any, existingSkills: any[])
     `;
 
     const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-    const result = await model.generateContent(prompt);
-    const aiResponse = result.response.text().trim();
+    
+    try {
+      console.log('🔄 AI skills çağırışı...');
+      
+      const result = await model.generateContent(prompt);
+      const aiResponse = result.response.text().trim();
 
-    console.log('🔍 AI Skills Response:', aiResponse);
+      console.log('🔍 AI Skills Response:', aiResponse);
 
-    // JSON parse et
-    const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('AI response-da JSON tapılmadı');
+      // JSON parse et
+      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('AI response-da JSON tapılmadı');
+      }
+
+      const aiSkills = JSON.parse(jsonMatch[0]);
+      
+      // Validate structure
+      if (!aiSkills.hardSkills || !aiSkills.softSkills) {
+        throw new Error('AI response formatı düzgün deyil');
+      }
+      
+      // Skills-ləri format et
+      const formattedSkills = [
+        ...aiSkills.hardSkills.map((skill: any, index: number) => ({
+          id: `ai-hard-skill-${Date.now()}-${index}`,
+          name: skill.name,
+          level: skill.level,
+          type: 'hard',
+          source: 'ai'
+        })),
+        ...aiSkills.softSkills.map((skill: any, index: number) => ({
+          id: `ai-soft-skill-${Date.now()}-${index}`,
+          name: skill.name,
+          level: skill.level,
+          type: 'soft',
+          source: 'ai'
+        }))
+      ];
+
+      console.log(`✅ AI tərəfindən ${formattedSkills.length} skill yaradıldı:`, 
+        formattedSkills.map(s => `${s.name} (${s.type})`));
+
+      return formattedSkills;
+      
+    } catch (error: any) {
+      console.error('❌ AI skills yaradılması xətası:', error.message);
+      // If AI fails, generate fallback skills
+      console.log('🔄 AI uğursuz oldu, fallback skills yaradılır...');
+      return generateFallbackSkills(profileData, existingSkillNames);
     }
 
-    const aiSkills = JSON.parse(jsonMatch[0]);
-    
-    // Skills-ləri format et
-    const formattedSkills = [
-      ...aiSkills.hardSkills.map((skill: any, index: number) => ({
-        id: `ai-hard-skill-${Date.now()}-${index}`,
-        name: skill.name,
-        level: skill.level,
-        type: 'hard',
-        source: 'ai'
-      })),
-      ...aiSkills.softSkills.map((skill: any, index: number) => ({
-        id: `ai-soft-skill-${Date.now()}-${index}`,
-        name: skill.name,
-        level: skill.level,
-        type: 'soft',
-        source: 'ai'
-      }))
-    ];
-
-    console.log(`✅ AI tərəfindən ${formattedSkills.length} skill yaradıldı:`, 
-      formattedSkills.map(s => `${s.name} (${s.type})`));
-
-    return formattedSkills;
-
   } catch (error) {
-    console.error('❌ AI skills yaradılması xətası:', error);
-    return [];
+    console.error('❌ AI skills yaradılması ümumi xətası:', error);
+    return generateFallbackSkills(profileData, existingSkills.map(s => typeof s === 'string' ? s : s.name));
   }
+}
+
+// Fallback skills generation when AI fails
+function generateFallbackSkills(profileData: any, existingSkillNames: string[]) {
+  console.log('🔄 Fallback AI skills yaradılır...');
+  
+  const title = profileData.personalInfo?.title?.toLowerCase() || '';
+  const summary = profileData.personalInfo?.summary?.toLowerCase() || '';
+  const experience = profileData.experience || [];
+  const education = profileData.education || [];
+  
+  // Combine all text for analysis
+  const allText = `${title} ${summary} ${experience.map((e: any) => e.position + ' ' + e.description).join(' ')} ${education.map((e: any) => e.degree + ' ' + e.fieldOfStudy).join(' ')}`.toLowerCase();
+  
+  // Common hard skills by field
+  const hardSkillsMap: {[key: string]: string[]} = {
+    'java': ['Java', 'Spring Framework'],
+    'javascript': ['JavaScript', 'React'],
+    'python': ['Python', 'Django'],
+    'engineer': ['Technical Analysis', 'Problem Solving'],
+    'developer': ['Git', 'APIs'],
+    'data': ['SQL', 'Data Analysis'],
+    'design': ['UI/UX Design', 'Adobe Creative Suite'],
+    'marketing': ['Digital Marketing', 'Google Analytics'],
+    'project': ['Project Management', 'Agile Methodology'],
+    'content': ['Content Creation', 'SEO'],
+    'electric': ['Electrical Engineering', 'Circuit Design'],
+    'software': ['Software Development', 'Testing'],
+    'network': ['Network Administration', 'Cybersecurity']
+  };
+  
+  // Common soft skills
+  const softSkillsOptions = [
+    'Communication', 'Leadership', 'Teamwork', 'Problem Solving',
+    'Critical Thinking', 'Adaptability', 'Time Management', 'Creativity',
+    'Analytical Thinking', 'Collaboration', 'Decision Making', 'Initiative'
+  ];
+  
+  // Find relevant hard skills
+  let selectedHardSkills: string[] = [];
+  for (const [keyword, skills] of Object.entries(hardSkillsMap)) {
+    if (allText.includes(keyword) && selectedHardSkills.length < 2) {
+      selectedHardSkills.push(...skills.slice(0, 2 - selectedHardSkills.length));
+    }
+  }
+  
+  // Fill remaining hard skills if needed
+  if (selectedHardSkills.length < 2) {
+    const defaultHardSkills = ['Microsoft Office', 'Communication Tools'];
+    selectedHardSkills.push(...defaultHardSkills.slice(0, 2 - selectedHardSkills.length));
+  }
+  
+  // Select random soft skills
+  const availableSoftSkills = softSkillsOptions.filter(skill => 
+    !existingSkillNames.some(existing => existing.toLowerCase().includes(skill.toLowerCase()))
+  );
+  
+  const selectedSoftSkills = availableSoftSkills
+    .sort(() => 0.5 - Math.random())
+    .slice(0, 2);
+  
+  // Format skills
+  const formattedSkills = [
+    ...selectedHardSkills.map((skill, index) => ({
+      id: `fallback-hard-skill-${Date.now()}-${index}`,
+      name: skill,
+      level: 'Orta',
+      type: 'hard',
+      source: 'fallback'
+    })),
+    ...selectedSoftSkills.map((skill, index) => ({
+      id: `fallback-soft-skill-${Date.now()}-${index}`,
+      name: skill,
+      level: 'Orta', 
+      type: 'soft',
+      source: 'fallback'
+    }))
+  ];
+  
+  console.log(`✅ Fallback skills yaradıldı: ${formattedSkills.map(s => s.name).join(', ')}`);
+  return formattedSkills;
 }
 
 // RapidAPI LinkedIn Skills - parallel skills extraction
@@ -450,10 +547,13 @@ export async function POST(request: NextRequest) {
       scrapingDogResult = scrapingDogResponse.value;
       console.log('✅ ScrapingDog uğurludur!');
     } else {
-      console.error('❌ ScrapingDog xətası:', scrapingDogResponse.status === 'rejected' ? scrapingDogResponse.reason : 'No data');
+      const errorMessage = scrapingDogResponse.status === 'rejected' 
+        ? (scrapingDogResponse.reason?.message || scrapingDogResponse.reason || 'Unknown error')
+        : 'No data';
+      console.error('❌ ScrapingDog xətası:', errorMessage);
       return NextResponse.json({
         success: false,
-        error: `ScrapingDog import uğursuz: ${scrapingDogResponse.status === 'rejected' ? scrapingDogResponse.reason.message : 'No data received'}`
+        error: `ScrapingDog import uğursuz: ${errorMessage}`
       }, { status: 500 });
     }
 
@@ -468,7 +568,30 @@ export async function POST(request: NextRequest) {
 
     // Transform ScrapingDog data to CV format
     console.log('📍 ScrapingDog məlumatları formatlanır...');
-    const transformedData = transformScrapingDogData(scrapingDogResult, normalizedUrl);
+    const transformedData = {
+      personalInfo: {
+        fullName: scrapingDogResult.name || `${scrapingDogResult.firstName || ''} ${scrapingDogResult.lastName || ''}`.trim(),
+        firstName: scrapingDogResult.firstName || scrapingDogResult.name?.split(' ')[0] || '',
+        lastName: scrapingDogResult.lastName || scrapingDogResult.name?.split(' ').slice(1).join(' ') || '',
+        title: scrapingDogResult.headline || '',
+        email: scrapingDogResult.email || '',
+        phone: scrapingDogResult.phone || '',
+        location: scrapingDogResult.location || '',
+        website: scrapingDogResult.website || '',
+        linkedin: normalizedUrl,
+        summary: scrapingDogResult.summary || '',
+        profilePicture: scrapingDogResult.profilePicture || ''
+      },
+      experience: scrapingDogResult.experience || [],
+      education: scrapingDogResult.education || [],
+      skills: scrapingDogResult.skills || [],
+      projects: scrapingDogResult.projects || [],
+      awards: scrapingDogResult.awards || [],
+      honors: scrapingDogResult.honors || [],
+      certifications: scrapingDogResult.certifications || [],
+      languages: scrapingDogResult.languages || [],
+      volunteering: scrapingDogResult.volunteering || []
+    };
 
     // Add RapidAPI skills if available
     if (rapidApiResult) {
@@ -488,7 +611,7 @@ export async function POST(request: NextRequest) {
     // Generate AI-suggested skills (2 hard + 2 soft)
     console.log('🤖 AI skills yaradılır...');
     const aiSkills = await generateLinkedInAISkills(transformedData, transformedData.skills);
-    if (aiSkills.length > 0) {
+    if (aiSkills && aiSkills.length > 0) {
       transformedData.skills = [...transformedData.skills, ...aiSkills];
       console.log(`✅ ${aiSkills.length} AI skill əlavə edildi (2 hard + 2 soft)`);
     }
@@ -500,7 +623,7 @@ export async function POST(request: NextRequest) {
       experienceCount: transformedData.experience?.length || 0,
       educationCount: transformedData.education?.length || 0,
       skillsCount: transformedData.skills?.length || 0,
-      aiSkillsAdded: aiSkills.length,
+      aiSkillsAdded: aiSkills?.length || 0,
       projectsCount: transformedData.projects?.length || 0,
       awardsCount: transformedData.awards?.length || 0,
       honorsCount: transformedData.honors?.length || 0,
@@ -581,7 +704,7 @@ export async function POST(request: NextRequest) {
         experienceCount: transformedData.experience.length,
         educationCount: transformedData.education.length,
         skillsCount: transformedData.skills.length,
-        aiSkillsAdded: aiSkills.length,
+        aiSkillsAdded: aiSkills?.length || 0,
         projectsCount: transformedData.projects.length,
         awardsCount: transformedData.awards.length,
         honorsCount: transformedData.honors.length,
