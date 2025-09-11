@@ -298,26 +298,23 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
                     </div>
                   </div>
 
+                  {/* Date Range Input */}
+                  <DateRangeInput
+                    startDate={project.startDate || ''}
+                    endDate={project.endDate}
+                    current={project.current || false}
+                    onStartDateChange={(date) => updateProject(project.id, 'startDate', date)}
+                    onEndDateChange={(date) => updateProject(project.id, 'endDate', date)}
+                    onCurrentChange={(current) => updateProjectMultiple(project.id, { 
+                      current, 
+                      endDate: current ? '' : project.endDate 
+                    })}
+                    startLabel={cvLanguage === 'english' ? 'Start Date' : 'Başlama tarixi'}
+                    endLabel={cvLanguage === 'english' ? 'End Date' : 'Bitirmə tarixi'}
+                    currentLabel={cvLanguage === 'english' ? 'Currently ongoing' : 'Davam edir'}
+                    cvLanguage={cvLanguage}
+                  />
 
-                  <div className="flex items-end">
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={Boolean(project.current)}
-                        onChange={(e) => {
-                          const isChecked = e.target.checked;
-                          updateProjectMultiple(project.id, {
-                            current: isChecked,
-                            endDate: isChecked ? '' : project.endDate,
-                          });
-                        }}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">
-                        {cvLanguage === 'english' ? 'Currently ongoing' : 'Davam edir'}
-                      </span>
-                    </label>
-                  </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">

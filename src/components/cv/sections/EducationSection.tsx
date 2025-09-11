@@ -297,25 +297,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                     cvLanguage={cvLanguage}
                   />
 
-                  <div className="flex items-end">
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={Boolean(education.current)}
-                        onChange={(e) => {
-                          const isChecked = e.target.checked;
-                          updateEducation(education.id, {
-                            current: isChecked,
-                            endDate: isChecked ? '' : education.endDate,
-                          });
-                        }}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">
-                        {cvLanguage === 'english' ? 'Currently studying' : 'Davam edir'}
-                      </span>
-                    </label>
-                  </div>
+               
 
                <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">

@@ -227,27 +227,22 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
                     />
                   </div>
 
-               
-
-                  <div className="flex items-end">
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={Boolean(volunteer.current)}
-                        onChange={(e) => {
-                          const isChecked = e.target.checked;
-                          updateVolunteerExperience(index, {
-                            current: isChecked,
-                            endDate: isChecked ? '' : volunteer.endDate,
-                          });
-                        }}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">
-                        {cvLanguage === 'english' ? 'Currently volunteering' : 'Davam edir'}
-                      </span>
-                    </label>
-                  </div>
+                  {/* Date Range Input */}
+                  <DateRangeInput
+                    startDate={volunteer.startDate || ''}
+                    endDate={volunteer.endDate}
+                    current={volunteer.current || false}
+                    onStartDateChange={(date) => updateVolunteerExperience(index, { startDate: date })}
+                    onEndDateChange={(date) => updateVolunteerExperience(index, { endDate: date })}
+                    onCurrentChange={(current) => updateVolunteerExperience(index, { 
+                      current, 
+                      endDate: current ? '' : volunteer.endDate 
+                    })}
+                    startLabel={cvLanguage === 'english' ? 'Start Date' : 'Başlama tarixi'}
+                    endLabel={cvLanguage === 'english' ? 'End Date' : 'Bitirmə tarixi'}
+                    currentLabel={cvLanguage === 'english' ? 'Currently volunteering' : 'Davam edir'}
+                    cvLanguage={cvLanguage}
+                  />
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
