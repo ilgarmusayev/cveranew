@@ -984,6 +984,25 @@ div.atlas-template .w-2\/5,
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+  
+  /* PDF-də Atlas section page break qaydaları */
+  .atlas-left-panel .custom-section,
+  .atlas-template .w-2\/5 .custom-section {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  
+  .atlas-left-panel,
+  .atlas-template .w-2\/5 {
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+  }
+  
+  /* PDF-də Atlas general print styling */
+  .atlas-template {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 }
 
 /* Atlas sol panel üçün əlavə güclü qaydalar */

@@ -1,35 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { PrismaClient } from '@prisma/client';
+import { getGeminiApiKey, recordApiUsage, markApiKeyFailed, getBestApiKey } from '@/lib/api-service';
 
 const prisma = new PrismaClient();
 
-// Multiple Gemini API Keys for load balancing and failover
-const GEMINI_API_KEYS = [
-  process.env.GEMINI_API_KEY,
-  process.env.GEMINI_API_KEY_2,
-  process.env.GEMINI_API_KEY_3
-].filter(Boolean) as string[];
-
-// Initialize multiple Gemini AI instances
-const geminiAIInstances = GEMINI_API_KEYS.map(key => new GoogleGenerativeAI(key));
-
-console.log(`🔑 Initialized ${geminiAIInstances.length} Gemini API instances for /api/ai/generate-summary`);
-
-// Round-robin index for load balancing
-let currentAPIIndex = 0;
-
-// Get next available Gemini AI instance
-const getGeminiAI = () => {
-  if (geminiAIInstances.length === 0) {
-    throw new Error('No Gemini API keys configured');
+// Get Gemini AI instance using API keys from database
+const getGeminiAI = async () => {
+  const apiKeyInfo = await getBestApiKey('gemini');
+  
+  if (!apiKeyInfo) {
+    // Fallback to environment variables if no DB keys available
+    const fallbackKeys = [
+      process.env.GEMINI_API_KEY,
+      process.env.GEMINI_API_KEY_2,
+      process.env.GEMINI_API_KEY_3
+    ].filter(Boolean) as string[];
+    
+    if (fallbackKeys.length === 0) {
+      throw new Error('No Gemini API keys configured');
+    }
+    
+    console.log('🔄 Using fallback Gemini API key from environment');
+    return {
+      geminiAI: new GoogleGenerativeAI(fallbackKeys[0]),
+      apiKeyId: null
+    };
   }
   
-  const instance = geminiAIInstances[currentAPIIndex];
-  currentAPIIndex = (currentAPIIndex + 1) % geminiAIInstances.length;
-  
-  console.log(`🔄 Using Gemini API instance ${currentAPIIndex + 1}/${geminiAIInstances.length}`);
-  return instance;
+  console.log(`� Using Gemini API key from database (ID: ${apiKeyInfo.id})`);
+  return {
+    geminiAI: new GoogleGenerativeAI(apiKeyInfo.apiKey),
+    apiKeyId: apiKeyInfo.id
+  };
 };
 
 // Initialize Gemini AI (deprecated - using load balancer now)
@@ -320,51 +323,55 @@ Xülasəni generasiya et:`;
     let generatedSummary = '';
 
     // Try each API key until one works
-    for (let i = 0; i < geminiAIInstances.length; i++) {
-      try {
-        const geminiAI = getGeminiAI();
-        const model = geminiAI.getGenerativeModel({ 
-          model: 'gemini-1.5-flash',
-          generationConfig: {
-            temperature: 0.9, // High creativity for variety
-            topP: 0.95, // Diverse token sampling
-            topK: 40, // Token variety
-            maxOutputTokens: 150, // Sufficient for summary
-          }
-        });
-
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        generatedSummary = response.text().trim();
-        
-        console.log(`✅ AI Professional Summary generated successfully with API instance ${currentAPIIndex}/${geminiAIInstances.length}`);
-        break; // Success, exit retry loop
-      } catch (error: any) {
-        lastError = error;
-        console.log(`❌ API instance ${currentAPIIndex}/${geminiAIInstances.length} failed:`, error.message);
-        
-        // Check if it's a quota error
-        if (error.message?.includes('429') || error.message?.toLowerCase().includes('quota')) {
-          console.log(`🚫 Quota exceeded for API instance ${currentAPIIndex}/${geminiAIInstances.length}, trying next...`);
-          continue; // Try next API key
-        } else {
-          // For non-quota errors, don't retry
-          break;
+    try {
+      const { geminiAI, apiKeyId } = await getGeminiAI();
+      
+      const model = geminiAI.getGenerativeModel({ 
+        model: 'gemini-1.5-flash',
+        generationConfig: {
+          temperature: 0.9, // High creativity for variety
+          topP: 0.95, // Diverse token sampling
+          topK: 40, // Token variety
+          maxOutputTokens: 150, // Sufficient for summary
         }
+      });
+
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      generatedSummary = response.text().trim();
+      
+      // Record successful usage if using DB API key
+      if (apiKeyId) {
+        await recordApiUsage(apiKeyId, true, 'Summary generated successfully');
+      }
+      
+      console.log(`✅ AI Professional Summary generated successfully`);
+    } catch (error: any) {
+      lastError = error;
+      console.log(`❌ Gemini API failed:`, error.message);
+      
+      // If using DB API key, mark it as failed
+      try {
+        const { apiKeyId } = await getGeminiAI();
+        if (apiKeyId) {
+          await markApiKeyFailed(apiKeyId, error.message);
+        }
+      } catch (e) {
+        console.error('Error marking API key as failed:', e);
       }
     }
 
     if (!generatedSummary) {
-      console.error('❌ All Gemini API keys failed');
+      console.error('❌ Gemini API failed');
       const isQuotaError = lastError?.message?.includes('429') || lastError?.message?.toLowerCase().includes('quota');
       
       return NextResponse.json({
         success: false,
         error: isEnglish 
-          ? 'All AI API quotas exceeded. Please try again in a few minutes.' 
-          : 'Bütün AI API limiti aşıldı. Zəhmət olmasa bir neçə dəqiqə sonra yenidən cəhd edin.',
+          ? 'AI API failed. Please try again in a few minutes.' 
+          : 'AI API uğursuz oldu. Zəhmət olmasa bir neçə dəqiqə sonra yenidən cəhd edin.',
         quotaExceeded: isQuotaError
-      }, { status: 429 });
+      }, { status: isQuotaError ? 429 : 500 });
     }
 
     console.log(`✅ AI Peşəkar Xülasə generasiya edildi (${targetLanguage})`);

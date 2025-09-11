@@ -48,6 +48,7 @@ export default function ApiKeysPage() {
     { value: 'scrapingdog', label: 'ScrapingDog' },
     { value: 'rapidapi', label: 'RapidAPI' },
     { value: 'openai', label: 'OpenAI' },
+    { value: 'gemini', label: 'Google Gemini' },
     { value: 'linkedin', label: 'LinkedIn' }
   ];
 

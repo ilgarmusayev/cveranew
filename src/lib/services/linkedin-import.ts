@@ -1,35 +1,38 @@
 import { PrismaClient } from '@prisma/client';
 import axios from 'axios';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { getScrapingDogApiKey, getGeminiApiKey, recordApiUsage, markApiKeyFailed, getBestApiKey } from '@/lib/api-service';
 
 const prisma = new PrismaClient();
 
-// Multiple Gemini API Keys for load balancing and failover
-const GEMINI_API_KEYS = [
-  process.env.GEMINI_API_KEY,
-  process.env.GEMINI_API_KEY_2,
-  process.env.GEMINI_API_KEY_3
-].filter(Boolean) as string[];
-
-// Initialize multiple Gemini AI instances
-const geminiAIInstances = GEMINI_API_KEYS.map(key => new GoogleGenerativeAI(key));
-
-console.log(`🔑 Initialized ${geminiAIInstances.length} Gemini API instances`);
-
-// Round-robin index for load balancing
-let currentAPIIndex = 0;
-
-// Get next available Gemini AI instance
-const getGeminiAI = () => {
-  if (geminiAIInstances.length === 0) {
-    throw new Error('No Gemini API keys configured');
+// Get Gemini AI instance using API keys from database
+const getGeminiAI = async () => {
+  const apiKeyInfo = await getBestApiKey('gemini');
+  
+  if (!apiKeyInfo) {
+    // Fallback to environment variables if no DB keys available
+    const fallbackKeys = [
+      process.env.GEMINI_API_KEY,
+      process.env.GEMINI_API_KEY_2,
+      process.env.GEMINI_API_KEY_3
+    ].filter(Boolean) as string[];
+    
+    if (fallbackKeys.length === 0) {
+      throw new Error('No Gemini API keys configured');
+    }
+    
+    console.log('🔄 Using fallback Gemini API key from environment');
+    return {
+      geminiAI: new GoogleGenerativeAI(fallbackKeys[0]),
+      apiKeyId: null
+    };
   }
   
-  const instance = geminiAIInstances[currentAPIIndex];
-  currentAPIIndex = (currentAPIIndex + 1) % geminiAIInstances.length;
-  
-  console.log(`🔄 Using Gemini API instance ${currentAPIIndex + 1}/${geminiAIInstances.length}`);
-  return instance;
+  console.log(`� Using Gemini API key from database (ID: ${apiKeyInfo.id})`);
+  return {
+    geminiAI: new GoogleGenerativeAI(apiKeyInfo.apiKey),
+    apiKeyId: apiKeyInfo.id
+  };
 };
 
 // Plan-based LinkedIn import limits
@@ -109,37 +112,29 @@ export class LinkedInImportService {
   // BrightData API for main profile data (replacing ScrapingDog)
   private readonly BRIGHTDATA_URL = 'https://api.brightdata.com/dca/dataset/get_snapshot';
 
-  // RapidAPI for skills only (as backup/enhancement) - but skills are excluded
+  // RapidAPI for skills only (as backup/enhancement) - using API management system
   private readonly RAPIDAPI_URL = 'https://linkedin-data-api.p.rapidapi.com';
-  private readonly RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || 'your-rapidapi-key';
 
   /**
-   * Get active BrightData API key from database (replacing ScrapingDog)
+   * Get active ScrapingDog API key from database
    */
-  private async getActiveBrightDataApiKey(): Promise<string> {
+  private async getActiveScrapingDogApiKey(): Promise<{ apiKey: string; apiKeyId: string }> {
     try {
-      const activeApiKey = await prisma.apiKey.findFirst({
-        where: {
-          service: 'brightdata',
-          active: true
-        },
-        orderBy: {
-          priority: 'asc' // Lower number = higher priority
-        }
-      });
-
-      if (!activeApiKey) {
-        console.warn('❌ No active BrightData API key found in database, using fallback');
-        // Fallback to your working key if no active key in database
-        return '6882894b855f5678d36484c8';
+      const apiKeyInfo = await getBestApiKey('scrapingdog');
+      
+      if (!apiKeyInfo) {
+        console.warn('❌ No active ScrapingDog API key found in database');
+        throw new Error('No ScrapingDog API key configured. Please add one in the admin panel at /sistem/api-keys');
       }
 
-      console.log('✅ Active BrightData API key found:', activeApiKey.apiKey.substring(0, 8) + '***');
-      return activeApiKey.apiKey;
+      console.log(`✅ Using ScrapingDog API key from database (ID: ${apiKeyInfo.id})`);
+      return {
+        apiKey: apiKeyInfo.apiKey,
+        apiKeyId: apiKeyInfo.id
+      };
     } catch (error) {
-      console.error('❌ API key lookup failed:', error);
-      // Fallback to your working key
-      return '6882894b855f5678d36484c8';
+      console.error('❌ ScrapingDog API key lookup failed:', error);
+      throw new Error('Failed to get ScrapingDog API key. Please check admin panel at /sistem/api-keys');
     }
   }
 
@@ -263,72 +258,60 @@ export class LinkedInImportService {
    * Scrape LinkedIn profile using BrightData API (correct format)
    */
   private async scrapeLinkedInProfile(linkedinUsername: string): Promise<LinkedInProfile | null> {
+    let apiKeyId: string | null = null;
+    
     try {
-      console.log(`🔍 Scraping LinkedIn profile with BrightData: ${linkedinUsername}`);
+      console.log(`🔍 Scraping LinkedIn profile with ScrapingDog API: ${linkedinUsername}`);
 
-      const apiKey = await this.getActiveBrightDataApiKey();
+      const { apiKey, apiKeyId: keyId } = await this.getActiveScrapingDogApiKey();
+      apiKeyId = keyId;
 
-      // Correct BrightData API endpoint based on your curl example
-      const url = 'https://api.brightdata.com/datasets/v3/trigger?dataset_id=gd_l1viktl72bvl7bjuj0&include_errors=true';
+      // ScrapingDog LinkedIn profile API endpoint
+      const url = 'https://api.scrapingdog.com/linkedin';
+      
+      // ScrapingDog parameters
+      const params = {
+        api_key: apiKey,
+        type: 'profile',
+        linkId: linkedinUsername,
+        premium: 'false'
+      };
 
-      // Construct full LinkedIn URL
-      const fullLinkedInUrl = `https://www.linkedin.com/in/${linkedinUsername}/`;
+      console.log(`🔍 Calling ScrapingDog API for: ${linkedinUsername}`);
 
-      const requestBody = [
-        {
-          "url": fullLinkedInUrl
-        }
-      ];
-
-      const response = await axios.post(url, requestBody, {
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
+      const response = await axios.get(url, { 
+        params: params,
         timeout: 30000
       });
 
       if (response.status !== 200) {
-        console.error(`❌ BrightData API error: Status ${response.status}`);
-        return null;
+        console.error(`❌ ScrapingDog API error: Status ${response.status}`);
+        throw new Error(`ScrapingDog API returned status ${response.status}`);
       }
 
       let data = response.data;
-      console.log('🔍 BrightData full response:', JSON.stringify(data, null, 2));
+      console.log('🔍 ScrapingDog full response:', JSON.stringify(data, null, 2));
 
-      // Handle different response formats from BrightData
-      if (Array.isArray(data) && data.length > 0) {
-        data = data[0];
-      } else if (data['0']) {
-        data = data['0'];
+      // ScrapingDog returns direct profile data
+      if (!data || typeof data !== 'object') {
+        console.error('❌ Invalid ScrapingDog response format');
+        throw new Error('Invalid response from ScrapingDog API');
       }
 
-      // Transform to our standard format with better name parsing
+      // Transform to our standard format with better name parsing for ScrapingDog
       let firstName = '';
       let lastName = '';
       let fullName = '';
 
-      // Use correct BrightData field names
-      if (data.first_name && data.last_name) {
-        firstName = data.first_name.trim();
-        lastName = data.last_name.trim();
+      // ScrapingDog field mapping
+      if (data.firstName && data.lastName) {
+        firstName = data.firstName.trim();
+        lastName = data.lastName.trim();
         fullName = `${firstName} ${lastName}`.trim();
       }
       // If we have fullName but not separate names, try to split
-      else if (data.fullName) {
-        fullName = data.fullName.trim();
-        const nameParts = fullName.split(' ');
-        if (nameParts.length >= 2) {
-          firstName = nameParts[0];
-          lastName = nameParts.slice(1).join(' ');
-        } else {
-          firstName = fullName;
-          lastName = '';
-        }
-      }
-      // Fallback to other possible field names
-      else if (data.name) {
-        fullName = data.name.trim();
+      else if (data.fullName || data.name) {
+        fullName = (data.fullName || data.name).trim();
         const nameParts = fullName.split(' ');
         if (nameParts.length >= 2) {
           firstName = nameParts[0];
@@ -339,40 +322,49 @@ export class LinkedInImportService {
         }
       }
 
-      // Skills are handled by RapidAPI separately
-      console.log(`✅ BrightData provides main profile data, skills handled by RapidAPI`);
-      const basicSkills = ['Communication', 'Problem Solving', 'Team Collaboration', 'Time Management'];
-
-      console.log(`✅ Using basic placeholder skills for service (${basicSkills.length}):`, basicSkills);
+      // Basic skills - ScrapingDog provides comprehensive data
+      console.log(`✅ ScrapingDog provides comprehensive LinkedIn data`);
+      const profileSkills = Array.isArray(data.skills) ? data.skills : [];
 
       const profile: LinkedInProfile = {
         name: fullName,
         firstName: firstName,
         lastName: lastName,
-        headline: data.headline || data.sub_title || '',
-        summary: data.about || data.summary || '',
-        location: data.location || data.geo_location || '',
-        experience: this.parseExperience(data.experience),
+        headline: data.headline || data.title || '',
+        summary: data.summary || data.about || '',
+        location: data.location || data.geo || '',
+        experience: this.parseExperience(data.experience || data.positions),
         education: this.parseEducation(data.education),
-        skills: basicSkills, // Basic skills, real skills from RapidAPI
+        skills: profileSkills.length > 0 ? profileSkills : ['Communication', 'Problem Solving'], // Use ScrapingDog skills or fallback
         languages: Array.isArray(data.languages) ? data.languages : [],
         projects: Array.isArray(data.projects) ? data.projects : [],
         awards: Array.isArray(data.awards) ? data.awards : [],
         volunteering: this.parseVolunteerExperience(data)
       };
 
-      console.log('✅ Final BrightData profile data:', {
+      console.log('✅ Final ScrapingDog profile data:', {
         name: profile.name,
         experienceCount: profile.experience.length,
         educationCount: profile.education.length,
         skillsCount: profile.skills.length,
         languagesCount: profile.languages.length,
-        apiFormat: 'BrightData v3 datasets'
+        apiFormat: 'ScrapingDog LinkedIn API'
       });
+
+      // Record successful API usage
+      if (apiKeyId) {
+        await recordApiUsage(apiKeyId, true, 'LinkedIn profile scraped successfully');
+      }
 
       return profile;
     } catch (error) {
       console.error('💥 BrightData LinkedIn scraping error:', error);
+      
+      // Record failed API usage
+      if (apiKeyId) {
+        await markApiKeyFailed(apiKeyId, error instanceof Error ? error.message : 'Unknown error');
+      }
+      
       return null;
     }
   }
@@ -712,48 +704,51 @@ export class LinkedInImportService {
       let lastError: Error | null = null;
       let summary = '';
 
-      // Try each API key until one works
-      for (let i = 0; i < geminiAIInstances.length; i++) {
+      // Try to generate summary using API service system
+      try {
+        const { geminiAI, apiKeyId } = await getGeminiAI();
+        const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+        const prompt = `
+          Based on the following LinkedIn profile information, create a professional summary for a CV:
+
+          Name: ${profile.name}
+          Headline: ${profile.headline}
+          Current Summary: ${profile.summary}
+          Location: ${profile.location}
+          
+          Experience:
+          ${profile.experience.map(exp => `- ${exp.title} at ${exp.company} (${exp.duration})`).join('\n')}
+          
+          Education:
+          ${profile.education.map(edu => `- ${edu.degree} in ${edu.field} from ${edu.school}`).join('\n')}
+          
+          Skills: ${profile.skills.join(', ')}
+
+          Create a concise, professional summary (2-3 sentences) that highlights key strengths and experience.
+        `;
+
+        const result = await model.generateContent(prompt);
+        summary = result.response.text().trim();
+        
+        // Record successful API usage
+        if (apiKeyId) {
+          await recordApiUsage(apiKeyId, true, 'Professional summary generated');
+        }
+        
+        console.log(`✅ Professional summary generated successfully`);
+      } catch (error: any) {
+        lastError = error;
+        console.log(`❌ Gemini API failed:`, error.message);
+        
+        // Try to get API key info for error reporting
         try {
-          const geminiAI = getGeminiAI();
-          const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
-          const prompt = `
-            Based on the following LinkedIn profile information, create a professional summary for a CV:
-
-            Name: ${profile.name}
-            Headline: ${profile.headline}
-            Current Summary: ${profile.summary}
-            Location: ${profile.location}
-            
-            Experience:
-            ${profile.experience.map(exp => `- ${exp.title} at ${exp.company} (${exp.duration})`).join('\n')}
-            
-            Education:
-            ${profile.education.map(edu => `- ${edu.degree} in ${edu.field} from ${edu.school}`).join('\n')}
-            
-            Skills: ${profile.skills.join(', ')}
-
-            Create a concise, professional summary (2-3 sentences) that highlights key strengths and experience.
-          `;
-
-          const result = await model.generateContent(prompt);
-          summary = result.response.text().trim();
-          
-          console.log(`✅ Professional summary generated successfully with API instance ${currentAPIIndex}/${geminiAIInstances.length}`);
-          break; // Success, exit retry loop
-        } catch (error: any) {
-          lastError = error;
-          console.log(`❌ API instance ${currentAPIIndex}/${geminiAIInstances.length} failed:`, error.message);
-          
-          // Check if it's a quota error
-          if (error.message?.includes('429') || error.message?.toLowerCase().includes('quota')) {
-            console.log(`🚫 Quota exceeded for API instance ${currentAPIIndex}/${geminiAIInstances.length}, trying next...`);
-            continue; // Try next API key
-          } else {
-            // For non-quota errors, don't retry
-            break;
+          const { apiKeyId } = await getGeminiAI();
+          if (apiKeyId) {
+            await markApiKeyFailed(apiKeyId, error.message);
           }
+        } catch (e) {
+          console.error('Error recording API failure:', e);
         }
       }
 
@@ -1188,41 +1183,44 @@ Tələblər: 3-cü tərəf icraçı baxımından, vaxt əsaslı ifadələr yox, 
         let lastError: Error | null = null;
         let aiSummary = '';
 
-        // Try each API key until one works
-        for (let i = 0; i < geminiAIInstances.length; i++) {
-          try {
-            const geminiAI = getGeminiAI();
-            const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        // Try to generate summary using API service system
+        try {
+          const { geminiAI, apiKeyId } = await getGeminiAI();
+          const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-            const result = await model.generateContent(prompt);
-            aiSummary = result.response.text().trim();
-            
-            console.log(`✅ AI summary generated successfully with API instance ${currentAPIIndex}/${geminiAIInstances.length}`);
-            break; // Success, exit retry loop
-          } catch (error: any) {
-            lastError = error;
-            console.log(`❌ API instance ${currentAPIIndex}/${geminiAIInstances.length} failed:`, error.message);
-            
-            // Check if it's a quota error
-            if (error.message?.includes('429') || error.message?.toLowerCase().includes('quota')) {
-              console.log(`🚫 Quota exceeded for API instance ${currentAPIIndex}/${geminiAIInstances.length}, trying next...`);
-              continue; // Try next API key
-            } else {
-              // For non-quota errors, don't retry
-              break;
+          const result = await model.generateContent(prompt);
+          aiSummary = result.response.text().trim();
+          
+          // Record successful API usage
+          if (apiKeyId) {
+            await recordApiUsage(apiKeyId, true, 'AI summary generated');
+          }
+          
+          console.log(`✅ AI summary generated successfully`);
+        } catch (error: any) {
+          lastError = error;
+          console.log(`❌ Gemini API failed:`, error.message);
+          
+          // Try to get API key info for error reporting
+          try {
+            const { apiKeyId } = await getGeminiAI();
+            if (apiKeyId) {
+              await markApiKeyFailed(apiKeyId, error.message);
             }
+          } catch (e) {
+            console.error('Error recording API failure:', e);
           }
         }
 
         if (!aiSummary) {
-          console.error('❌ All Gemini API keys failed');
+          console.error('❌ Gemini API failed');
           const isQuotaError = lastError?.message?.includes('429') || lastError?.message?.toLowerCase().includes('quota');
           
           return {
             success: false,
             error: isEnglish 
-              ? 'All AI API quotas exceeded. Please try again in a few minutes.' 
-              : 'Bütün AI API limiti aşıldı. Zəhmət olmasa bir neçə dəqiqə sonra yenidən cəhd edin.',
+              ? 'AI API failed. Please try again in a few minutes.' 
+              : 'AI API uğursuz oldu. Zəhmət olmasa bir neçə dəqiqə sonra yenidən cəhd edin.',
             quotaExceeded: isQuotaError
           };
         }
@@ -1425,64 +1423,69 @@ Tələblər: 3-cü tərəf icraçı baxımından, vaxt əsaslı ifadələr yox, 
       }
 
       try {
-        let lastError: Error | null = null;
         let extractedSkills: string[] = [];
 
-        // Try each API key until one works
-        for (let i = 0; i < geminiAIInstances.length; i++) {
+        // Try to extract skills using API service system
+        try {
+          const { geminiAI, apiKeyId } = await getGeminiAI();
+          const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+          const prompt = `
+            Analyze this LinkedIn profile text and extract technical skills, programming languages, frameworks, tools, and technologies mentioned. 
+            Return ONLY a JSON array of skill names, no explanations:
+
+            Profile Text: "${textContent.substring(0, 2000)}"
+
+            Examples of skills to look for:
+            - Programming languages (JavaScript, Python, Java, etc.)
+            - Frameworks (React, Next.js, Spring, etc.)
+            - Databases (PostgreSQL, MongoDB, etc.)
+            - Tools (Docker, Git, etc.)
+            - Cloud platforms (AWS, Azure, etc.)
+            - Other technical skills
+
+            Return format: ["skill1", "skill2", "skill3"]
+            Maximum 15 skills.
+          `;
+
+          const result = await model.generateContent(prompt);
+          const aiResponse = result.response.text().trim();
+
+          // Parse AI response
           try {
-            const geminiAI = getGeminiAI();
-            const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+            const skillsResult = JSON.parse(aiResponse);
+            if (Array.isArray(skillsResult)) {
+              extractedSkills = skillsResult
+                .filter(skill => typeof skill === 'string' && skill.trim())
+                .map(skill => skill.trim())
+                .slice(0, 15);
 
-            const prompt = `
-              Analyze this LinkedIn profile text and extract technical skills, programming languages, frameworks, tools, and technologies mentioned. 
-              Return ONLY a JSON array of skill names, no explanations:
-
-              Profile Text: "${textContent.substring(0, 2000)}"
-
-              Examples of skills to look for:
-              - Programming languages (JavaScript, Python, Java, etc.)
-              - Frameworks (React, Next.js, Spring, etc.)
-              - Databases (PostgreSQL, MongoDB, etc.)
-              - Tools (Docker, Git, etc.)
-              - Cloud platforms (AWS, Azure, etc.)
-              - Other technical skills
-
-              Return format: ["skill1", "skill2", "skill3"]
-              Maximum 15 skills.
-            `;
-
-            const result = await model.generateContent(prompt);
-            const aiResponse = result.response.text().trim();
-
-            // Parse AI response
-            try {
-              const skillsResult = JSON.parse(aiResponse);
-              if (Array.isArray(skillsResult)) {
-                extractedSkills = skillsResult
-                  .filter(skill => typeof skill === 'string' && skill.trim())
-                  .map(skill => skill.trim())
-                  .slice(0, 15);
-
-                console.log(`✅ AI extracted ${extractedSkills.length} skills with API instance ${currentAPIIndex}/${geminiAIInstances.length}`);
-                break; // Success, exit retry loop
+              // Record successful API usage
+              if (apiKeyId) {
+                await recordApiUsage(apiKeyId, true, 'Skills extracted successfully');
               }
-            } catch (parseError) {
-              console.log('❌ Failed to parse AI skills response:', aiResponse);
-              break; // Parse error, don't retry
+
+              console.log(`✅ AI extracted ${extractedSkills.length} skills`);
             }
-          } catch (error: any) {
-            lastError = error;
-            console.log(`❌ API instance ${currentAPIIndex}/${geminiAIInstances.length} failed:`, error.message);
+          } catch (parseError) {
+            console.log('❌ Failed to parse AI skills response:', aiResponse);
             
-            // Check if it's a quota error
-            if (error.message?.includes('429') || error.message?.toLowerCase().includes('quota')) {
-              console.log(`🚫 Quota exceeded for API instance ${currentAPIIndex}/${geminiAIInstances.length}, trying next...`);
-              continue; // Try next API key
-            } else {
-              // For non-quota errors, don't retry
-              break;
+            // Record failed API usage
+            if (apiKeyId) {
+              await markApiKeyFailed(apiKeyId, 'Failed to parse skills response');
             }
+          }
+        } catch (error: any) {
+          console.log(`❌ Gemini API failed:`, error.message);
+          
+          // Try to get API key info for error reporting
+          try {
+            const { apiKeyId } = await getGeminiAI();
+            if (apiKeyId) {
+              await markApiKeyFailed(apiKeyId, error.message);
+            }
+          } catch (e) {
+            console.error('Error recording API failure:', e);
           }
         }
 
@@ -1604,37 +1607,40 @@ Tələblər: 3-cü tərəf icraçı baxımından, vaxt əsaslı ifadələr yox, 
       let lastError: Error | null = null;
       let aiDescription = '';
 
-      // Try each API key until one works
-      for (let i = 0; i < geminiAIInstances.length; i++) {
-        try {
-          const geminiAI = getGeminiAI();
-          const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      // Try to generate skill description using API service system
+      try {
+        const { geminiAI, apiKeyId } = await getGeminiAI();
+        const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-          const result = await model.generateContent(prompt);
-          aiDescription = result.response.text().trim();
-          
-          console.log(`✅ AI skill description generated successfully with API instance ${currentAPIIndex}/${geminiAIInstances.length}`);
-          break; // Success, exit retry loop
-        } catch (error: any) {
-          lastError = error;
-          console.log(`❌ API instance ${currentAPIIndex}/${geminiAIInstances.length} failed:`, error.message);
-          
-          // Check if it's a quota error
-          if (error.message?.includes('429') || error.message?.toLowerCase().includes('quota')) {
-            console.log(`🚫 Quota exceeded for API instance ${currentAPIIndex}/${geminiAIInstances.length}, trying next...`);
-            continue; // Try next API key
-          } else {
-            // For non-quota errors, don't retry
-            break;
+        const result = await model.generateContent(prompt);
+        aiDescription = result.response.text().trim();
+        
+        // Record successful API usage
+        if (apiKeyId) {
+          await recordApiUsage(apiKeyId, true, 'Skill description generated');
+        }
+        
+        console.log(`✅ AI skill description generated successfully`);
+      } catch (error: any) {
+        lastError = error;
+        console.log(`❌ Gemini API failed:`, error.message);
+        
+        // Try to get API key info for error reporting
+        try {
+          const { apiKeyId } = await getGeminiAI();
+          if (apiKeyId) {
+            await markApiKeyFailed(apiKeyId, error.message);
           }
+        } catch (e) {
+          console.error('Error recording API failure:', e);
         }
       }
 
       if (!aiDescription) {
-        console.error('❌ All Gemini API keys failed');
+        console.error('❌ Gemini API failed');
         return {
           success: false,
-          error: 'AI API limiti aşıldı. Zəhmət olmasa bir neçə dəqiqə sonra yenidən cəhd edin.'
+          error: 'AI API uğursuz oldu. Zəhmət olmasa bir neçə dəqiqə sonra yenidən cəhd edin.'
         };
       }
 

@@ -2287,6 +2287,30 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             background: white !important;
                             color: #1f2937 !important;
                         }
+                        
+                        /* Atlas template specific section header styling for PDF */
+                        .atlas-left-panel h2,
+                        .atlas-template .w-2\\/5 h2,
+                        .atlas .w-2\\/5 h2 {
+                            border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+                            padding-bottom: 8px !important;
+                            margin-bottom: 16px !important;
+                        }
+                        
+                        /* Atlas template proper spacing between sections */
+                        .atlas-left-panel .custom-section,
+                        .atlas-template .w-2\\/5 .custom-section {
+                            margin-bottom: 24px !important;
+                            page-break-inside: avoid !important;
+                        }
+                        
+                        /* Atlas left panel proper styling */
+                        .atlas-left-panel,
+                        .atlas-template .w-2\\/5 {
+                            background-color: #1e3a8a !important;
+                            padding: 32px 24px !important;
+                            min-height: 100vh !important;
+                        }
                     }
                 `
             });
