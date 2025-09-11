@@ -279,18 +279,48 @@ export class LinkedInImportService {
 
       console.log(`🔍 Calling ScrapingDog API for: ${linkedinUsername}`);
 
-      const response = await axios.get(url, { 
-        params: params,
-        timeout: 90000
-      });
+      let response;
+      let data;
+      
+      // Try with premium: false first, then premium: true as fallback
+      try {
+        response = await axios.get(url, { 
+          params: params,
+          timeout: 90000,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          }
+        });
+        data = response.data;
+        console.log('✅ ScrapingDog API successful with premium: false');
+      } catch (error: any) {
+        console.log(`❌ Failed with premium: false (${error.message}), trying premium: true...`);
+        
+        // Try with premium: true as fallback
+        const premiumParams = { ...params, premium: 'true' };
+        
+        response = await axios.get(url, { 
+          params: premiumParams,
+          timeout: 90000,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          }
+        });
+        data = response.data;
+        console.log('✅ ScrapingDog API successful with premium: true');
+      }
 
       if (response.status !== 200) {
         console.error(`❌ ScrapingDog API error: Status ${response.status}`);
         throw new Error(`ScrapingDog API returned status ${response.status}`);
       }
 
-      let data = response.data;
-      console.log('🔍 ScrapingDog full response:', JSON.stringify(data, null, 2));
+      console.log('🔍 ScrapingDog response type:', typeof data, Array.isArray(data) ? 'array' : 'object');
+
+      // Handle array response
+      if (Array.isArray(data) && data.length > 0) {
+        data = data[0]; // Take first profile
+      }
 
       // ScrapingDog returns direct profile data
       if (!data || typeof data !== 'object') {
