@@ -977,7 +977,7 @@ const BasicTemplate: React.FC<{
         subheadingWeight: 600,
         bodyWeight: 400,
         smallWeight: 400,
-        sectionSpacing: 16
+        sectionSpacing: 12
     }
 }) => {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
@@ -8161,14 +8161,25 @@ const EssenceTemplate: React.FC<{
             onDragEnd={handleDragEnd}
             onDragOver={handleDragOver}
         >
-            <div className="essence-template cv-template" style={{ fontFamily: 'Arial, sans-serif', backgroundColor: '#F5F5F5', minHeight: '297mm' }}>
+            <div className="essence-template cv-template" style={{ 
+                fontFamily: 'Arial, sans-serif', 
+                backgroundColor: '#F5F5F5', 
+                minHeight: '297mm',
+                margin: '0',
+                marginTop: '0',
+                paddingTop: '0',
+                WebkitPrintColorAdjust: 'exact',
+                colorAdjust: 'exact',
+                printColorAdjust: 'exact'
+            }}>
                 {/* Header Section - Full Width Dark Green Block */}
                 <div 
-                    className="p-6 shadow-sm border-b mb-6"
+                    className="essence-green-header p-6 shadow-sm border-b mb-6"
                     style={{ 
                         backgroundColor: '#1F4B43',
                         background: '#1F4B43',
                         backgroundImage: 'none',
+                        marginTop: '0',
                         WebkitPrintColorAdjust: 'exact',
                         colorAdjust: 'exact',
                         printColorAdjust: 'exact'
@@ -8347,7 +8358,8 @@ const ClarityTemplate: React.FC<{
     onSectionReorder: (newOrder: string[]) => void;
     activeSection?: string | null;
     onSectionSelect?: (sectionId: string | null) => void;
-}> = ({ data, sectionOrder, onSectionReorder, activeSection, onSectionSelect }) => {
+    fontSettings?: any;
+}> = ({ data, sectionOrder, onSectionReorder, activeSection, onSectionSelect, fontSettings }) => {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
     const [isDragActive, setIsDragActive] = useState(false);
     const [activeId, setActiveId] = useState<string | null>(null);
@@ -8428,12 +8440,13 @@ const ClarityTemplate: React.FC<{
                         activeSection={activeSection}
                         onSetActiveSection={onSectionSelect}
                     >
-                        <div className="mb-4">
+                        <div>
                             <h2 
-                                className="text-2xl font-bold mb-2 pb-2"
+                                className="font-bold pb-2"
                                 style={{ 
                                     color: '#1f2937',
-                                    fontFamily: '"Inter", "Segoe UI", sans-serif',
+                                    fontFamily: fontSettings?.fontFamily || '"Inter", "Segoe UI", sans-serif',
+                                    fontSize: `${fontSettings?.headingSize || 18}px`,
                                     borderBottom: '2px solid #ea580c'
                                 }}
                             >
@@ -8442,7 +8455,7 @@ const ClarityTemplate: React.FC<{
                             <div 
                                 className="text-gray-700 leading-relaxed"
                                 style={{ 
-                                    fontSize: '15px',
+                                    fontSize: `${fontSettings?.bodySize || 13}px`,
                                     lineHeight: '1.6'
                                 }}
                             >
@@ -8490,14 +8503,14 @@ const ClarityTemplate: React.FC<{
                                 
                                 <div className="flex-1">
                                     <h1 
-                                        className="text-4xl font-bold mb-3 tracking-tight"
+                                        className="font-bold tracking-tight"
                                         style={{ 
                                             color: '#1f2937',
-                                            fontFamily: '"Inter", "Segoe UI", sans-serif',
+                                            fontFamily: fontSettings?.fontFamily || '"Inter", "Segoe UI", sans-serif',
+                                            fontSize: `${fontSettings?.nameSize || 28}px`,
                                             fontWeight: '700',
                                             letterSpacing: '-0.015em',
                                             lineHeight: '1.1',
-                                            marginBottom: '12px',
                                             WebkitPrintColorAdjust: 'exact',
                                             colorAdjust: 'exact'
                                         }}
@@ -8505,13 +8518,13 @@ const ClarityTemplate: React.FC<{
                                         {getFullName(personalInfo, data.cvLanguage)}
                                     </h1>
                                     <div 
-                                        className="text-xl font-semibold mb-6"
+                                        className="font-semibold"
                                         style={{ 
                                             color: '#ea580c',
-                                            fontFamily: '"Inter", "Segoe UI", sans-serif',
+                                            fontFamily: fontSettings?.fontFamily || '"Inter", "Segoe UI", sans-serif',
+                                            fontSize: `${fontSettings?.titleSize || 16}px`,
                                             fontWeight: '600',
                                             lineHeight: '1.3',
-                                            marginBottom: '24px',
                                             WebkitPrintColorAdjust: 'exact',
                                             colorAdjust: 'exact'
                                         }}
@@ -8520,7 +8533,14 @@ const ClarityTemplate: React.FC<{
                                     </div>
                                     
                                     {/* Clean Contact Information without icons */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-base">
+                                    <div 
+                                        className="grid gap-4 text-base"
+                                        style={{
+                                            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                                            WebkitPrintColorAdjust: 'exact',
+                                            colorAdjust: 'exact'
+                                        }}
+                                    >
                                         {personalInfo.email && (
                                             <div 
                                                 className="p-3 rounded-lg border-l-4"
@@ -8532,11 +8552,20 @@ const ClarityTemplate: React.FC<{
                                                     colorAdjust: 'exact'
                                                 }}
                                             >
-                                                <div className="font-medium text-gray-600 text-sm mb-1">Email</div>
+                                                <div 
+                                                    className="font-medium text-sm"
+                                                    style={{ 
+                                                        color: '#6b7280',
+                                                        WebkitPrintColorAdjust: 'exact',
+                                                        colorAdjust: 'exact'
+                                                    }}
+                                                >
+                                                    Email
+                                                </div>
                                                 <div className="font-semibold">{personalInfo.email}</div>
                                             </div>
                                         )}
-                                            {personalInfo.phone && (
+                                        {personalInfo.phone && (
                                             <div 
                                                 className="p-3 rounded-lg border-l-4"
                                                 style={{ 
@@ -8547,12 +8576,20 @@ const ClarityTemplate: React.FC<{
                                                     colorAdjust: 'exact'
                                                 }}
                                             >
-                                                <div className="font-medium text-gray-600 text-sm mb-1">Phone</div>
+                                                <div 
+                                                    className="font-medium text-sm"
+                                                    style={{ 
+                                                        color: '#6b7280',
+                                                        WebkitPrintColorAdjust: 'exact',
+                                                        colorAdjust: 'exact'
+                                                    }}
+                                                >
+                                                    Phone
+                                                </div>
                                                 <div className="font-semibold">{personalInfo.phone}</div>
                                             </div>
                                         )}
-                                    
-                                    {personalInfo.location && (
+                                        {personalInfo.location && (
                                             <div 
                                                 className="p-3 rounded-lg border-l-4"
                                                 style={{ 
@@ -8563,11 +8600,19 @@ const ClarityTemplate: React.FC<{
                                                     colorAdjust: 'exact'
                                                 }}
                                             >
-                                                <div className="font-medium text-gray-600 text-sm mb-1">Location</div>
+                                                <div 
+                                                    className="font-medium text-sm"
+                                                    style={{ 
+                                                        color: '#6b7280',
+                                                        WebkitPrintColorAdjust: 'exact',
+                                                        colorAdjust: 'exact'
+                                                    }}
+                                                >
+                                                    Location
+                                                </div>
                                                 <div className="font-semibold">{personalInfo.location}</div>
                                             </div>
                                         )}
-
                                         {personalInfo.linkedin && (
                                            <div 
                                                 className="p-3 rounded-lg border-l-4"
@@ -8579,7 +8624,16 @@ const ClarityTemplate: React.FC<{
                                                     colorAdjust: 'exact'
                                                 }}
                                             >
-                                                <div className="font-medium text-gray-600 text-sm mb-1">LinkedIn</div>
+                                                <div 
+                                                    className="font-medium text-sm"
+                                                    style={{ 
+                                                        color: '#6b7280',
+                                                        WebkitPrintColorAdjust: 'exact',
+                                                        colorAdjust: 'exact'
+                                                    }}
+                                                >
+                                                    LinkedIn
+                                                </div>
                                                 <a
                                                     href={getLinkedInDisplay(personalInfo.linkedin).url}
                                                     target="_blank"
@@ -8601,33 +8655,47 @@ const ClarityTemplate: React.FC<{
                                                     colorAdjust: 'exact'
                                                 }}
                                             >
-                                                <div className="font-medium text-gray-600 text-sm mb-1">Website</div>
+                                                <div 
+                                                    className="font-medium text-sm"
+                                                    style={{ 
+                                                        color: '#6b7280',
+                                                        WebkitPrintColorAdjust: 'exact',
+                                                        colorAdjust: 'exact'
+                                                    }}
+                                                >
+                                                    Website
+                                                </div>
                                                 <span className="font-medium">{personalInfo.website}</span>
                                             </div>
                                         )}
                                         {personalInfo.github && (
                                             <div 
-                                                className="flex items-center gap-3 p-2 rounded-md"
+                                                className="p-3 rounded-lg border-l-4"
                                                 style={{ 
                                                     color: '#374151',
                                                     backgroundColor: '#f9fafb',
+                                                    borderLeftColor: '#ea580c',
                                                     WebkitPrintColorAdjust: 'exact',
                                                     colorAdjust: 'exact'
                                                 }}
                                             >
                                                 <div 
-                                                    className="w-8 h-8 flex items-center justify-center rounded-full text-white font-bold"
-                                                    style={{ backgroundColor: '#ea580c' }}
+                                                    className="font-medium text-sm"
+                                                    style={{ 
+                                                        color: '#6b7280',
+                                                        WebkitPrintColorAdjust: 'exact',
+                                                        colorAdjust: 'exact'
+                                                    }}
                                                 >
-                                                    💻
+                                                    GitHub
                                                 </div>
                                                 <a
-                                                    href={getGitHubDisplay(personalInfo.github).url}
+                                                    href={getGitHubDisplay(personalInfo.github || '').url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="font-medium hover:text-orange-600 transition-colors underline"
                                                 >
-                                                    {getGitHubDisplay(personalInfo.github).displayText}
+                                                    {getGitHubDisplay(personalInfo.github || '').displayText}
                                                 </a>
                                             </div>
                                         )}
@@ -8648,12 +8716,13 @@ const ClarityTemplate: React.FC<{
                         activeSection={activeSection}
                         onSetActiveSection={onSectionSelect}
                     >
-                        <div className="mb-4">
+                        <div>
                             <h2 
-                                className="text-2xl font-bold mb-3 pb-2"
+                                className="font-bold pb-2"
                                 style={{ 
                                     color: '#1f2937',
-                                    fontFamily: '"Inter", "Segoe UI", sans-serif',
+                                    fontFamily: fontSettings?.fontFamily || '"Inter", "Segoe UI", sans-serif',
+                                    fontSize: `${fontSettings?.headingSize || 18}px`,
                                     borderBottom: '2px solid #ea580c'
                                 }}
                             >
@@ -8666,7 +8735,12 @@ const ClarityTemplate: React.FC<{
                                         {index < experience.length - 1 && (
                                             <div 
                                                 className="absolute left-2 top-12 w-0.5 h-12"
-                                                style={{ backgroundColor: '#fed7aa' }}
+                                                style={{ 
+                                                    backgroundColor: '#fed7aa',
+                                                    WebkitPrintColorAdjust: 'exact',
+                                                    colorAdjust: 'exact',
+                                                    printColorAdjust: 'exact'
+                                                }}
                                             ></div>
                                         )}
                                         
@@ -8696,7 +8770,7 @@ const ClarityTemplate: React.FC<{
                                                         {exp.position}
                                                     </h3>
                                                     <p 
-                                                        className="text-base font-semibold mb-1"
+                                                        className="text-base font-semibold"
                                                         style={{ color: '#ea580c' }}
                                                     >
                                                         {exp.company}
@@ -8712,10 +8786,14 @@ const ClarityTemplate: React.FC<{
                                                 </div>
                                                 {(exp.startDate || exp.endDate) && (
                                                     <div 
-                                                        className="px-3 py-1 rounded-md text-sm font-medium ml-4 whitespace-nowrap"
+                                                        className="px-3 py-1.5 rounded-lg text-sm font-semibold ml-4 whitespace-nowrap"
                                                         style={{ 
-                                                            backgroundColor: '#fed7aa',
-                                                            color: '#c2410c'
+                                                            backgroundColor: '#fef3e2',
+                                                            color: '#b45309',
+                                                            WebkitPrintColorAdjust: 'exact',
+                                                            colorAdjust: 'exact',
+                                                            border: '1px solid #fbbf24',
+                                                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
                                                         }}
                                                     >
                                                         {exp.startDate ? (
@@ -8759,12 +8837,13 @@ const ClarityTemplate: React.FC<{
                         activeSection={activeSection}
                         onSetActiveSection={onSectionSelect}
                     >
-                        <div className="mb-4">
+                        <div>
                             <h2 
-                                className="text-2xl font-bold mb-3 pb-2"
+                                className="font-bold pb-2"
                                 style={{ 
                                     color: '#1f2937',
-                                    fontFamily: '"Inter", "Segoe UI", sans-serif',
+                                    fontFamily: fontSettings?.fontFamily || '"Inter", "Segoe UI", sans-serif',
+                                    fontSize: `${fontSettings?.headingSize || 18}px`,
                                     borderBottom: '2px solid #ea580c'
                                 }}
                             >
@@ -8777,11 +8856,11 @@ const ClarityTemplate: React.FC<{
                                         className="bg-white rounded-lg border border-gray-100 p-4"
                                         style={{ backgroundColor: '#fefefe' }}
                                     >
-                                        <div className="flex justify-between items-start mb-2">
+                                        <div className="flex justify-between items-start">
                                             <div className="flex-1">
                                                 {edu.degree ? (
                                                     <h3 
-                                                        className="text-lg font-bold mb-1"
+                                                        className="text-lg font-bold"
                                                         style={{ 
                                                             color: '#1f2937',
                                                             fontFamily: '"Inter", "Segoe UI", sans-serif'
@@ -8791,7 +8870,7 @@ const ClarityTemplate: React.FC<{
                                                     </h3>
                                                 ) : (
                                                     <h3 
-                                                        className="text-lg font-bold mb-1"
+                                                        className="text-lg font-bold"
                                                         style={{ 
                                                             color: '#1f2937',
                                                             fontFamily: '"Inter", "Segoe UI", sans-serif'
@@ -8802,7 +8881,7 @@ const ClarityTemplate: React.FC<{
                                                 )}
                                                 {edu.degree && (
                                                     <p 
-                                                        className="text-base font-semibold mb-1"
+                                                        className="text-base font-semibold"
                                                         style={{ color: '#ea580c' }}
                                                     >
                                                         {edu.institution}
@@ -8819,10 +8898,14 @@ const ClarityTemplate: React.FC<{
                                             </div>
                                             {(edu.startDate || edu.endDate) && (
                                                 <div 
-                                                    className="px-3 py-1 rounded-md text-sm font-medium ml-4"
+                                                    className="px-3 py-1.5 rounded-lg text-sm font-semibold ml-4"
                                                     style={{ 
-                                                        backgroundColor: '#fed7aa',
-                                                        color: '#c2410c'
+                                                        backgroundColor: '#fef3e2',
+                                                        color: '#b45309',
+                                                        WebkitPrintColorAdjust: 'exact',
+                                                        colorAdjust: 'exact',
+                                                        border: '1px solid #fbbf24',
+                                                        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
                                                     }}
                                                 >
                                                     {edu.startDate ? (
@@ -8856,7 +8939,7 @@ const ClarityTemplate: React.FC<{
                 ) : null;
 
             case 'skills':
-                const validSkills = skills?.filter(skill => skill.name && skill.name.trim() !== '') || [];
+                const validSkills = data.skills?.filter((skill: any) => skill.name && skill.name.trim() !== '') || [];
                 return validSkills.length > 0 ? (
                     <SortableItem 
                         key="skills" 
@@ -8866,9 +8949,9 @@ const ClarityTemplate: React.FC<{
                         activeSection={activeSection}
                         onSetActiveSection={onSectionSelect}
                     >
-                        <div className="mb-4">
+                        <div>
                             <h2 
-                                className="text-2xl font-bold mb-3 pb-2"
+                                className="text-2xl font-bold pb-2"
                                 style={{ 
                                     color: '#1f2937',
                                     fontFamily: '"Inter", "Segoe UI", sans-serif',
@@ -8884,7 +8967,7 @@ const ClarityTemplate: React.FC<{
                                         className="bg-white rounded-lg border border-gray-100 p-4 hover:shadow-sm transition-shadow"
                                         style={{ backgroundColor: '#fefefe' }}
                                     >
-                                        <div className="mb-2">
+                                        <div>
                                             <span 
                                                 className="font-semibold text-base"
                                                 style={{ 
@@ -8987,10 +9070,14 @@ const ClarityTemplate: React.FC<{
                                                                 {project.technologies.map((tech, index) => (
                                                                     <span 
                                                                         key={index} 
-                                                                        className="px-2 py-1 rounded-md text-xs font-medium"
+                                                                        className="px-2 py-1 rounded-lg text-xs font-semibold"
                                                                         style={{ 
-                                                                            backgroundColor: '#fed7aa',
-                                                                            color: '#c2410c'
+                                                                            backgroundColor: '#fef3e2',
+                                                                            color: '#b45309',
+                                                                            WebkitPrintColorAdjust: 'exact',
+                                                                            colorAdjust: 'exact',
+                                                                            border: '1px solid #fbbf24',
+                                                                            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
                                                                         }}
                                                                     >
                                                                         {tech}
@@ -9036,7 +9123,7 @@ const ClarityTemplate: React.FC<{
                 ) : null;
 
             case 'languages':
-                const validLanguages = languages?.filter(lang => lang.language && lang.language.trim() !== '') || [];
+                const validLanguages = data.languages?.filter((lang: any) => lang.language && lang.language.trim() !== '') || [];
                 return validLanguages.length > 0 ? (
                     <SortableItem 
                         key="languages" 
@@ -9057,15 +9144,27 @@ const ClarityTemplate: React.FC<{
                             >
                                 {getSectionName('languages', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            <div 
+                                className="grid gap-4"
+                                style={{
+                                    gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                                    WebkitPrintColorAdjust: 'exact',
+                                    colorAdjust: 'exact'
+                                }}
+                            >
                                 {validLanguages.map((lang) => (
                                     <div 
                                         key={lang.id} 
                                         className="bg-white rounded-lg border border-gray-100 p-3 text-center hover:shadow-sm transition-shadow"
-                                        style={{ backgroundColor: '#fefefe' }}
+                                        style={{ 
+                                            backgroundColor: '#fefefe',
+                                            WebkitPrintColorAdjust: 'exact',
+                                            colorAdjust: 'exact',
+                                            border: '1px solid #e5e7eb'
+                                        }}
                                     >
                                         <div 
-                                            className="font-bold text-base mb-2"
+                                            className="font-bold text-base"
                                             style={{ 
                                                 color: '#1f2937',
                                                 fontFamily: '"Inter", "Segoe UI", sans-serif'
@@ -9074,10 +9173,14 @@ const ClarityTemplate: React.FC<{
                                             {lang.language}
                                         </div>
                                         <div 
-                                            className="px-2 py-1 rounded-md text-xs font-medium inline-block"
+                                            className="px-2 py-1 rounded-lg text-xs font-semibold inline-block mt-2"
                                             style={{ 
-                                                backgroundColor: '#fed7aa',
-                                                color: '#c2410c'
+                                                backgroundColor: '#fef3e2',
+                                                color: '#b45309',
+                                                WebkitPrintColorAdjust: 'exact',
+                                                colorAdjust: 'exact',
+                                                border: '1px solid #fbbf24',
+                                                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
                                             }}
                                         >
                                             {getLanguageLevel(lang.level, data.cvLanguage)}
@@ -9181,10 +9284,14 @@ const ClarityTemplate: React.FC<{
                                                 </div>
                                                 {cert.date && (
                                                     <div 
-                                                        className="px-3 py-1 rounded-md text-sm font-medium ml-4 whitespace-nowrap"
+                                                        className="px-3 py-1.5 rounded-lg text-sm font-semibold ml-4 whitespace-nowrap"
                                                         style={{ 
-                                                            backgroundColor: '#fed7aa',
-                                                            color: '#c2410c'
+                                                            backgroundColor: '#fef3e2',
+                                                            color: '#b45309',
+                                                            WebkitPrintColorAdjust: 'exact',
+                                                            colorAdjust: 'exact',
+                                                            border: '1px solid #fbbf24',
+                                                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
                                                         }}
                                                     >
                                                         {formatDate(cert.date, data.cvLanguage)}
@@ -9382,10 +9489,14 @@ const ClarityTemplate: React.FC<{
                                                 </div>
                                                 {(vol.startDate || vol.endDate) && (
                                                     <div 
-                                                        className="px-3 py-1 rounded-md text-sm font-medium ml-4 whitespace-nowrap"
+                                                        className="px-3 py-1.5 rounded-lg text-sm font-semibold ml-4 whitespace-nowrap"
                                                         style={{ 
-                                                            backgroundColor: '#fed7aa',
-                                                            color: '#c2410c'
+                                                            backgroundColor: '#fef3e2',
+                                                            color: '#b45309',
+                                                            WebkitPrintColorAdjust: 'exact',
+                                                            colorAdjust: 'exact',
+                                                            border: '1px solid #fbbf24',
+                                                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
                                                         }}
                                                     >
                                                         {vol.startDate && vol.endDate ? (
@@ -9425,7 +9536,7 @@ const ClarityTemplate: React.FC<{
                         activeSection={activeSection}
                         onSetActiveSection={onSectionSelect}
                     >
-                        <div className="space-y-8">
+                        <div>
                             {customSections.map((section) => (
                                 <div key={section.id}>
                                     <h2 
@@ -9485,10 +9596,14 @@ const ClarityTemplate: React.FC<{
                                                         </div>
                                                         {((item as any).startDate || (item as any).endDate) && (
                                                             <div 
-                                                                className="px-3 py-1 rounded-md text-sm font-medium ml-4 whitespace-nowrap"
+                                                                className="px-3 py-1.5 rounded-lg text-sm font-semibold ml-4 whitespace-nowrap"
                                                                 style={{ 
-                                                                    backgroundColor: '#fed7aa',
-                                                                    color: '#c2410c'
+                                                                    backgroundColor: '#fef3e2',
+                                                                    color: '#b45309',
+                                                                    WebkitPrintColorAdjust: 'exact',
+                                                                    colorAdjust: 'exact',
+                                                                    border: '1px solid #fbbf24',
+                                                                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
                                                                 }}
                                                             >
                                                                 {(item as any).startDate && (item as any).endDate ? (
@@ -9516,10 +9631,14 @@ const ClarityTemplate: React.FC<{
                                                                 {item.technologies.map((tech, index) => (
                                                                     <span 
                                                                         key={index} 
-                                                                        className="px-2 py-1 rounded-md text-xs font-medium"
+                                                                        className="px-2 py-1 rounded-lg text-xs font-semibold"
                                                                         style={{ 
-                                                                            backgroundColor: '#fed7aa',
-                                                                            color: '#c2410c'
+                                                                            backgroundColor: '#fef3e2',
+                                                                            color: '#b45309',
+                                                                            WebkitPrintColorAdjust: 'exact',
+                                                                            colorAdjust: 'exact',
+                                                                            border: '1px solid #fbbf24',
+                                                                            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
                                                                         }}
                                                                     >
                                                                         {tech}
@@ -9534,10 +9653,14 @@ const ClarityTemplate: React.FC<{
                                                                 {item.tags.map((tag, index) => (
                                                                     <span 
                                                                         key={index} 
-                                                                        className="px-2 py-1 rounded-md text-xs font-medium"
+                                                                        className="px-2 py-1 rounded-lg text-xs font-semibold"
                                                                         style={{ 
-                                                                            backgroundColor: '#fed7aa',
-                                                                            color: '#c2410c'
+                                                                            backgroundColor: '#fef3e2',
+                                                                            color: '#b45309',
+                                                                            WebkitPrintColorAdjust: 'exact',
+                                                                            colorAdjust: 'exact',
+                                                                            border: '1px solid #fbbf24',
+                                                                            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
                                                                         }}
                                                                     >
                                                                         {tag}
@@ -9589,12 +9712,64 @@ const ClarityTemplate: React.FC<{
                     padding: '16mm',
                     WebkitPrintColorAdjust: 'exact',
                     colorAdjust: 'exact',
-                    fontFamily: '"Inter", "Segoe UI", sans-serif'
-                }}
+                    printColorAdjust: 'exact',
+                    fontFamily: fontSettings?.fontFamily || '"Inter", "Segoe UI", sans-serif',
+                    // Set CSS Variables for font management in Clarity template (smaller defaults for more compact CV)
+                    '--cv-section-spacing': `${fontSettings?.sectionSpacing || 12}px`,
+                    '--cv-font-family': fontSettings?.fontFamily || '"Inter", "Segoe UI", sans-serif',
+                    '--cv-heading-size': `${fontSettings?.headingSize || 18}px`,
+                    '--cv-subheading-size': `${fontSettings?.subheadingSize || 16}px`,
+                    '--cv-body-size': `${fontSettings?.bodySize || 13}px`,
+                    '--cv-small-size': `${fontSettings?.smallSize || 11}px`
+                } as React.CSSProperties}
             >
+                <style dangerouslySetInnerHTML={{
+                    __html: `
+                        /* Global print color adjustment for all background colors in Clarity template */
+                        .w-full.h-full.text-gray-900 * {
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        /* Specific fixes for background colors */
+                        div[style*="backgroundColor"], 
+                        div[style*="background-color"],
+                        span[style*="backgroundColor"],
+                        span[style*="background-color"] {
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        /* Force all badges and colored elements to show in export */
+                        .text-xs.px-2.py-1.rounded,
+                        .inline-block.px-2.py-1.text-xs.rounded,
+                        .absolute.left-2.top-12,
+                        .absolute.left-0.top-4 {
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                    `
+                }} />
                 <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
-                    <div className="space-y-8">
-                        {sectionOrder.map((sectionType) => renderClaritySection(sectionType)).filter(Boolean)}
+                    <div style={{ 
+                        '--section-spacing': `${fontSettings?.sectionSpacing || 16}px`
+                    } as React.CSSProperties}>
+                        {sectionOrder.map((sectionType, index) => {
+                            const section = renderClaritySection(sectionType);
+                            return section ? (
+                                <div 
+                                    key={sectionType}
+                                    style={{
+                                        marginBottom: index < sectionOrder.length - 1 ? `${fontSettings?.sectionSpacing || 16}px` : '0'
+                                    }}
+                                >
+                                    {section}
+                                </div>
+                            ) : null;
+                        })}
                     </div>
                 </SortableContext>
             </div>
@@ -9942,6 +10117,7 @@ export default function CVPreview({
                 onSectionReorder={handleSectionReorder}
                 activeSection={activeSection}
                 onSectionSelect={handleSectionSelect}
+                fontSettings={fontSettings}
             />;
         }
 
@@ -10034,6 +10210,67 @@ export default function CVPreview({
                 background: 'transparent',
             }}
         >
+            {/* Global CSS to fix background color export issues for ALL templates */}
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                    /* Force all background colors to appear in PDF/export mode */
+                    * {
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    
+                    /* Specific selector patterns for background colors */
+                    div[style*="backgroundColor"], 
+                    div[style*="background-color"],
+                    span[style*="backgroundColor"],
+                    span[style*="background-color"],
+                    [style*="background:"],
+                    .text-xs.px-2.py-1.rounded,
+                    .inline-block.px-2.py-1.text-xs.rounded,
+                    .absolute.left-2.top-12,
+                    .absolute.left-0.top-4,
+                    .rounded-full,
+                    .border-l-4,
+                    .bg-blue-600,
+                    .bg-gray-100,
+                    .bg-white,
+                    .bg-amber-100,
+                    .bg-orange-100,
+                    .bg-green-100,
+                    .bg-red-100,
+                    .bg-purple-100 {
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    
+                    /* Template-specific fixes */
+                    .essence-template,
+                    .clarity-template,
+                    .basic-template,
+                    .modern-template,
+                    .exclusive-template,
+                    .aurora-template,
+                    .vertex-template,
+                    .horizon-template,
+                    .lumen-template,
+                    .ats-template {
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    
+                    /* Override browser default print behavior */
+                    @media print {
+                        * {
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                    }
+                `
+            }} />
             {/* CV Preview Container */}
             <div
                 id="cv-preview-element"

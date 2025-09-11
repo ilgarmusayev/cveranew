@@ -330,9 +330,174 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         /* MƏCBURI OPTİMAL MARGIN - PDF ÜÇÜN */
                         @page {
                             size: A4;
-                            margin: 12mm 10mm !important;  /* Optimal margin-lar: üst-alt 12mm, yan 10mm */
+
+                            margin: 0 10mm !important;  /* Optimal margin-lar: üst 0(yalniz ilk sehifede. novbeti sehifede 12mm) alt 12mm, yan 10mm */
                             padding: 0 !important;
                             border: none !important;
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        /* Essence template specific - remove top margin on first page */
+                        @page :first {
+                            margin-top: 8mm !important; /* Reduced top margin for Essence template first page */
+                        }
+                        
+                        /* Essence template - ensure no extra spacing */
+                        .essence-template {
+                            margin: 0 !important;
+                            margin-top: 0 !important;
+                            padding-top: 0 !important;
+                        }
+                        
+                        /* GLOBAL BACKGROUND COLOR PRESERVATION FOR ALL TEMPLATES */
+                        * {
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        /* Remove PDF viewer default backgrounds */
+                        html, body {
+                            background: transparent !important;
+                            background-color: transparent !important;
+                            background-image: none !important;
+                        }
+                        
+                        /* Force all background colors to appear in PDF */
+                        div[style*="background-color"],
+                        div[style*="backgroundColor"],
+                        span[style*="background-color"],
+                        span[style*="backgroundColor"],
+                        .bg-blue-600, .bg-blue-500, .bg-gray-100, .bg-gray-200,
+                        .bg-orange-100, .bg-amber-100, .bg-yellow-100,
+                        .bg-green-100, .bg-red-100, .bg-purple-100,
+                        [class*="bg-"],
+                        .timeline-dot, .badge, .tag, .chip {
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                            background-image: none !important;
+                        }
+                        
+                        /* Specific fixes for common background colors - FORCE EXACT COLORS */
+                        .bg-blue-600 { 
+                            background-color: #2563eb !important; 
+                            background: #2563eb !important;
+                            -webkit-print-color-adjust: exact !important;
+                        }
+                        .bg-blue-500 { 
+                            background-color: #3b82f6 !important; 
+                            background: #3b82f6 !important;
+                            -webkit-print-color-adjust: exact !important;
+                        }
+                        .bg-gray-100 { 
+                            background-color: #f3f4f6 !important; 
+                            background: #f3f4f6 !important;
+                            -webkit-print-color-adjust: exact !important;
+                        }
+                        .bg-gray-200 { 
+                            background-color: #e5e7eb !important; 
+                            background: #e5e7eb !important;
+                            -webkit-print-color-adjust: exact !important;
+                        }
+                        .bg-orange-100 { 
+                            background-color: #fed7aa !important; 
+                            background: #fed7aa !important;
+                            -webkit-print-color-adjust: exact !important;
+                        }
+                        .bg-amber-100 { 
+                            background-color: #fef3e2 !important; 
+                            background: #fef3e2 !important;
+                            -webkit-print-color-adjust: exact !important;
+                        }
+                        .bg-yellow-100 { 
+                            background-color: #fef3c7 !important; 
+                            background: #fef3c7 !important;
+                            -webkit-print-color-adjust: exact !important;
+                        }
+                        .bg-green-100 { 
+                            background-color: #dcfce7 !important; 
+                            background: #dcfce7 !important;
+                            -webkit-print-color-adjust: exact !important;
+                        }
+                        .bg-red-100 { 
+                            background-color: #fee2e2 !important; 
+                            background: #fee2e2 !important;
+                            -webkit-print-color-adjust: exact !important;
+                        }
+                        .bg-purple-100 { 
+                            background-color: #f3e8ff !important; 
+                            background: #f3e8ff !important;
+                            -webkit-print-color-adjust: exact !important;
+                        }
+                        
+                        /* Ensure Clarity template background colors show */
+                        .text-xs.px-2.py-1.rounded,
+                        .inline-block.px-2.py-1.text-xs.rounded {
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        /* Essence Template - Force green header and template backgrounds */
+                        .essence-template {
+                            background-color: #F5F5F5 !important;
+                            background: #F5F5F5 !important;
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        /* Essence template green header - multiple selectors for maximum compatibility */
+                        .essence-green-header,
+                        .essence-template .essence-green-header,
+                        .essence-template .p-6.shadow-sm.border-b.mb-6,
+                        .essence-template div[style*="backgroundColor: '#1F4B43'"],
+                        .essence-template div[style*="background-color: #1F4B43"],
+                        .essence-template div[style*="background: #1F4B43"] {
+                            background-color: #1F4B43 !important;
+                            background: #1F4B43 !important;
+                            background-image: none !important;
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        /* Essence template green header text - force white color */
+                        .essence-green-header *,
+                        .essence-green-header h1,
+                        .essence-green-header p,
+                        .essence-green-header span,
+                        .essence-green-header div,
+                        .essence-template .essence-green-header *,
+                        .essence-template .p-6.shadow-sm.border-b.mb-6 *,
+                        .essence-template div[style*="background-color: #1F4B43"] *,
+                        .essence-template div[style*="background: #1F4B43"] * {
+                            color: #FFFFFF !important;
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        /* Essence template - remove top margin/padding from first page */
+                        .essence-template {
+                            margin-top: 0 !important;
+                            padding-top: 0 !important;
+                        }
+                        
+                        .essence-template .essence-green-header {
+                            margin-top: 0 !important;
+                            padding-top: 1.5rem !important; /* Keep internal padding but remove external margin */
+                        }
+                        
+                        /* Force all template-specific background colors */
+                        [style*="backgroundColor"]:not([style*="transparent"]):not([style*="#ffffff"]):not([style*="white"]),
+                        [style*="background-color"]:not([style*="transparent"]):not([style*="#ffffff"]):not([style*="white"]) {
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
                         }
                         
                         /* Basic template için 2-ci səhifədə top margin */
@@ -356,17 +521,39 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             box-sizing: border-box !important;
                             border: none !important;
                             outline: none !important;
-                            background: white !important;  /* Tam ağ arxa plan */
-                            background-color: #ffffff !important;  /* Tam ağ arxa plan */
+                            background: none !important;  /* PDF arxa planını tamamilə sil */
+                            background-color: transparent !important;  /* Tam şəffaf arxa plan */
+                            background-image: none !important;
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
                         }
                         
-                        /* Bütün template container-ləri üçün ağ arxa plan */
-                        .cv-preview, .cv-container, .basic-template, .modern-template, 
-                        .ats-template, .exclusive-template, .aurora-template, 
-                        .vertex-template, .horizon-template, .lumen-template,
-                        div, section, article, main {
-                            background: white !important;
-                            background-color: #ffffff !important;
+                        /* Template container-ləri - yalnız ağ arxa planları sil, rəngli olanları saxla */
+                        .cv-preview, .cv-container {
+                            background: transparent !important;
+                            background-color: transparent !important;
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        /* Template-lərin özlərində rəngli arxa planlar saxlanılsın */
+                        .basic-template, .modern-template, .ats-template, .exclusive-template, 
+                        .aurora-template, .vertex-template, .horizon-template, .lumen-template, 
+                        .clarity-template, .essence-template {
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        /* Ümumi div/section-ları şəffaf et, amma template-specific olanları yox */
+                        div:not([style*="background"]):not([class*="bg-"]):not(.essence-template):not([class*="template"]), 
+                        section:not([style*="background"]):not([class*="bg-"]), 
+                        article:not([style*="background"]):not([class*="bg-"]), 
+                        main:not([style*="background"]):not([class*="bg-"]) {
+                            background: transparent !important;
+                            background-color: transparent !important;
                         }
                         
                         /* EXCLUSIVE TEMPLATE ÜÇÜ OPTİMAL PADDING - NUCLEAR OVERRIDE */
@@ -2328,15 +2515,166 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             console.log('Template yoxdur, təbii axından istifadə edirik');
         }
 
+        // SELECTIVE BACKGROUND COLOR ENFORCEMENT - Preserve colored backgrounds, remove generic white
+        await page.evaluate(() => {
+            console.log('=== SELECTIVE BACKGROUND COLOR ENFORCEMENT ===');
+            
+            // First, remove PDF viewer base backgrounds but keep template backgrounds
+            document.body.style.setProperty('background', 'transparent', 'important');
+            document.body.style.setProperty('background-color', 'transparent', 'important');
+            document.documentElement.style.setProperty('background', 'transparent', 'important');
+            document.documentElement.style.setProperty('background-color', 'transparent', 'important');
+            
+            // Remove white backgrounds from generic containers only
+            const genericContainers = document.querySelectorAll(
+                '.cv-preview, .cv-container'
+            );
+            
+            genericContainers.forEach(el => {
+                const element = el as HTMLElement;
+                element.style.setProperty('background', 'transparent', 'important');
+                element.style.setProperty('background-color', 'transparent', 'important');
+                element.style.setProperty('background-image', 'none', 'important');
+            });
+            
+            // Force specific template backgrounds to show
+            const essenceTemplate = document.querySelector('.essence-template') as HTMLElement;
+            if (essenceTemplate) {
+                essenceTemplate.style.setProperty('background-color', '#F5F5F5', 'important');
+                essenceTemplate.style.setProperty('background', '#F5F5F5', 'important');
+                essenceTemplate.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
+                essenceTemplate.style.setProperty('color-adjust', 'exact', 'important');
+                essenceTemplate.style.setProperty('print-color-adjust', 'exact', 'important');
+                
+                // Force green header in Essence template using specific class
+                const greenHeader = essenceTemplate.querySelector('.essence-green-header') as HTMLElement;
+                if (greenHeader) {
+                    greenHeader.style.setProperty('background-color', '#1F4B43', 'important');
+                    greenHeader.style.setProperty('background', '#1F4B43', 'important');
+                    greenHeader.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
+                    greenHeader.style.setProperty('color-adjust', 'exact', 'important');
+                    greenHeader.style.setProperty('print-color-adjust', 'exact', 'important');
+                    console.log('✅ Essence template green header background forced via class name');
+                } else {
+                    // Fallback to previous selector
+                    const greenHeaderFallback = essenceTemplate.querySelector('.p-6.shadow-sm.border-b.mb-6') as HTMLElement;
+                    if (greenHeaderFallback) {
+                        greenHeaderFallback.style.setProperty('background-color', '#1F4B43', 'important');
+                        greenHeaderFallback.style.setProperty('background', '#1F4B43', 'important');
+                        greenHeaderFallback.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
+                        greenHeaderFallback.style.setProperty('color-adjust', 'exact', 'important');
+                        greenHeaderFallback.style.setProperty('print-color-adjust', 'exact', 'important');
+                        console.log('✅ Essence template green header background forced via fallback selector');
+                    }
+                }
+            }
+            
+            // Force all elements with non-white background colors to have print-color-adjust
+            const elementsWithBg = document.querySelectorAll('*');
+            let backgroundElementsFixed = 0;
+            
+            elementsWithBg.forEach(el => {
+                const element = el as HTMLElement;
+                const style = window.getComputedStyle(element);
+                
+                // Preserve any colored backgrounds (not white, transparent, or default)
+                if (style.backgroundColor && 
+                    style.backgroundColor !== 'rgba(0, 0, 0, 0)' && 
+                    style.backgroundColor !== 'transparent' &&
+                    style.backgroundColor !== 'rgb(255, 255, 255)' &&
+                    style.backgroundColor !== '#ffffff' &&
+                    style.backgroundColor !== 'white') {
+                    
+                    element.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
+                    element.style.setProperty('color-adjust', 'exact', 'important');
+                    element.style.setProperty('print-color-adjust', 'exact', 'important');
+                    // Force background color to stay
+                    element.style.setProperty('background-color', style.backgroundColor, 'important');
+                    element.style.setProperty('background', style.backgroundColor, 'important');
+                    backgroundElementsFixed++;
+                }
+                
+                // Check if element has inline colored background style
+                if (element.style.backgroundColor && 
+                    element.style.backgroundColor !== 'transparent' &&
+                    element.style.backgroundColor !== '#ffffff' &&
+                    element.style.backgroundColor !== 'white') {
+                    
+                    element.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
+                    element.style.setProperty('color-adjust', 'exact', 'important');
+                    element.style.setProperty('print-color-adjust', 'exact', 'important');
+                    backgroundElementsFixed++;
+                }
+            });
+            
+            // Force specific background colors for common elements
+            const specificBackgrounds = [
+                { selector: '.bg-blue-600', color: '#2563eb' },
+                { selector: '.bg-blue-500', color: '#3b82f6' },
+                { selector: '.bg-gray-100', color: '#f3f4f6' },
+                { selector: '.bg-gray-200', color: '#e5e7eb' },
+                { selector: '.bg-orange-100', color: '#fed7aa' },
+                { selector: '.bg-amber-100', color: '#fef3e2' },
+                { selector: '.bg-yellow-100', color: '#fef3c7' },
+                { selector: '.bg-green-100', color: '#dcfce7' },
+                { selector: '.bg-red-100', color: '#fee2e2' },
+                { selector: '.bg-purple-100', color: '#f3e8ff' }
+            ];
+            
+            specificBackgrounds.forEach(({ selector, color }) => {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(el => {
+                    const element = el as HTMLElement;
+                    element.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
+                    element.style.setProperty('color-adjust', 'exact', 'important');
+                    element.style.setProperty('print-color-adjust', 'exact', 'important');
+                    element.style.setProperty('background-color', color, 'important');
+                    element.style.setProperty('background', color, 'important');
+                });
+            });
+            
+            // Force all badge-like elements
+            const badgeSelectors = [
+                '.badge', '.tag', '.chip', 
+                '.text-xs.px-2.py-1.rounded',
+                '.inline-block.px-2.py-1.text-xs.rounded',
+                '[style*="background-color"]',
+                '[style*="backgroundColor"]'
+            ];
+            
+            badgeSelectors.forEach(selector => {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(el => {
+                    const element = el as HTMLElement;
+                    element.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
+                    element.style.setProperty('color-adjust', 'exact', 'important');
+                    element.style.setProperty('print-color-adjust', 'exact', 'important');
+                    
+                    // If element has a background color in style, preserve it
+                    const currentBg = element.style.backgroundColor;
+                    if (currentBg) {
+                        element.style.setProperty('background-color', currentBg, 'important');
+                        element.style.setProperty('background', currentBg, 'important');
+                    }
+                });
+            });
+            
+            console.log(`✅ Fixed ${backgroundElementsFixed} elements with background colors for PDF export`);
+            console.log('=== AGGRESSIVE BACKGROUND COLOR ENFORCEMENT COMPLETE ===');
+        });
+
         const pdfBuffer = await page.pdf({
             format: 'A4',
-            printBackground: true,
+            printBackground: true,  // ✅ Background colors göstərilsin
             preferCSSPageSize: false,  // CSS @page-dən istifadə etmə, native ayarlar istifadə et
             displayHeaderFooter: false,
             // Unicode və font support üçün əlavə ayarlar
             tagged: true,  // PDF/A accessibility və unicode dəstəyi
             outline: false,
-            omitBackground: false,  // Background-ları qoruyub saxla ✅ AĞ ARXA PLAN ÜÇÜN
+            omitBackground: true,  // ✅ PDF özünün arxa planını sil, yalnız bizim rənglər göstərilsin
+            // Additional background color preservation settings
+            generateDocumentOutline: false,
+            generateTaggedPDF: true,
             // PDF-də düzgün məsafələr - istifadəçi tələbi: 1-ci səhifə top=5mm, digərləri=15mm
             margin: {
                 top: '5mm',       // 5mm - 1-ci səhifədə yuxarıda azca boşluq əlavə edildi
