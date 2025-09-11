@@ -32,13 +32,18 @@ export const exportToPDF = async (
       (el as HTMLElement).style.display = 'none';
     });
 
-    // Apply exact styling to match preview
+    // Apply exact styling to match preview with UTF-8 support
     const style = document.createElement('style');
     style.textContent = 
-      '#' + elementId + ' { background: white !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; border: none !important; transform: none !important; width: 794px !important; min-height: 1123px !important; font-family: -apple-system, BlinkMacSystemFont, sans-serif !important; }' +
-      '#' + elementId + ' * { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box !important; }' +
-      '#' + elementId + ' .hover\\:bg-gray-50:hover, #' + elementId + ' .hover\\:bg-blue-50:hover, #' + elementId + ' .hover\\:bg-gray-100:hover, #' + elementId + ' .hover\\:bg-blue-100:hover, #' + elementId + ' .hover\\:shadow-md:hover, #' + elementId + ' .hover\\:shadow-lg:hover { background-color: transparent !important; box-shadow: none !important; transform: none !important; }' +
-      '#' + elementId + ' .drag-handle, #' + elementId + ' .section-drag-indicator, #' + elementId + ' .cursor-move, #' + elementId + ' .cursor-pointer, #' + elementId + ' .group, #' + elementId + ' .relative.group { cursor: default !important; transform: none !important; background-color: transparent !important; box-shadow: none !important; }' +
+      '@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"); ' +
+      '@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap"); ' +
+      '@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"); ' +
+      '@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&display=swap"); ' +
+      '* { font-family: "Inter", "Open Sans", "Roboto", "Noto Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important; text-rendering: optimizeLegibility !important; -webkit-font-smoothing: antialiased !important; -moz-osx-font-smoothing: grayscale !important; font-feature-settings: "kern" 1, "liga" 1, "clig" 1 !important; } ' +
+      '#' + elementId + ' { background: white !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; border: none !important; transform: none !important; width: 794px !important; min-height: 1123px !important; font-family: "Inter", "Open Sans", "Roboto", "Noto Sans", -apple-system, BlinkMacSystemFont, sans-serif !important; } ' +
+      '#' + elementId + ' * { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box !important; font-feature-settings: "kern" 1, "liga" 1, "clig" 1 !important; text-rendering: optimizeLegibility !important; } ' +
+      '#' + elementId + ' .hover\\:bg-gray-50:hover, #' + elementId + ' .hover\\:bg-blue-50:hover, #' + elementId + ' .hover\\:bg-gray-100:hover, #' + elementId + ' .hover\\:bg-blue-100:hover, #' + elementId + ' .hover\\:shadow-md:hover, #' + elementId + ' .hover\\:shadow-lg:hover { background-color: transparent !important; box-shadow: none !important; transform: none !important; } ' +
+      '#' + elementId + ' .drag-handle, #' + elementId + ' .section-drag-indicator, #' + elementId + ' .cursor-move, #' + elementId + ' .cursor-pointer, #' + elementId + ' .group, #' + elementId + ' .relative.group { cursor: default !important; transform: none !important; background-color: transparent !important; box-shadow: none !important; } ';
     document.head.appendChild(style);
 
     // Wait for styles to apply
@@ -54,7 +59,38 @@ export const exportToPDF = async (
       scrollX: 0,
       scrollY: 0,
       logging: false,
+      // UTF-8 və Azərbaycan hərfləri üçün əlavə ayarlar
+      foreignObjectRendering: true,
+      removeContainer: true,
+      imageTimeout: 15000,
       onclone: (clonedDoc) => {
+        // UTF-8 encoding və font loading üçün meta taglar əlavə et
+        const metaCharset = clonedDoc.createElement('meta');
+        metaCharset.setAttribute('charset', 'UTF-8');
+        clonedDoc.head.insertBefore(metaCharset, clonedDoc.head.firstChild);
+        
+        const metaContentType = clonedDoc.createElement('meta');
+        metaContentType.setAttribute('http-equiv', 'Content-Type');
+        metaContentType.setAttribute('content', 'text/html; charset=UTF-8');
+        clonedDoc.head.appendChild(metaContentType);
+        
+        // Font loading üçün əlavə time
+        const fontStyle = clonedDoc.createElement('style');
+        fontStyle.textContent = `
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&display=swap');
+          * { 
+            font-family: 'Inter', 'Open Sans', 'Roboto', 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif !important;
+            text-rendering: optimizeLegibility !important;
+            -webkit-font-smoothing: antialiased !important;
+            -moz-osx-font-smoothing: grayscale !important;
+            font-feature-settings: "kern" 1, "liga" 1, "clig" 1 !important;
+          }
+        `;
+        clonedDoc.head.appendChild(fontStyle);
+        
         // Remove any remaining interactive elements from the clone
         const clonedElement = clonedDoc.getElementById(elementId);
         if (clonedElement) {
@@ -66,11 +102,22 @@ export const exportToPDF = async (
       }
     });
 
-    // Create PDF with exact A4 dimensions
+    // Create PDF with exact A4 dimensions and UTF-8 support
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
-      format: 'a4'
+      format: 'a4',
+      compress: true,
+      userUnit: 1.0,
+      precision: 2
+    });
+    
+    // UTF-8 metadata əlavə et
+    pdf.setProperties({
+      title: `${filename} CV`,
+      subject: 'Curriculum Vitae',
+      author: 'CV Creator',
+      creator: 'CV App'
     });
 
     const imgData = canvas.toDataURL('image/png');
@@ -557,10 +604,20 @@ export const exportToDocx = async (
     });
 
     const doc = new Document({
+      creator: 'CV Creator App',
+      title: `${filename} CV`,
+      description: 'Curriculum Vitae document with Azerbaijani character support',
+      subject: 'CV Export',
       sections: [{
         properties: {},
         children: documentSections,
       }],
+      features: {
+        updateFields: true,
+      },
+      numbering: {
+        config: []
+      }
     });
 
     const buffer = await Packer.toBuffer(doc);

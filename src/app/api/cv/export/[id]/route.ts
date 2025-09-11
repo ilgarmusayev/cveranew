@@ -131,7 +131,13 @@ async function initializeBrowser() {
         '--disable-ipc-flooding-protection',
         '--disable-extensions',
         '--disable-default-apps',
-        '--disable-component-extensions-with-background-pages'
+        '--disable-component-extensions-with-background-pages',
+        // Azərbaycan hərfləri üçün UTF-8 dəstəyi
+        '--font-render-hinting=none',
+        '--enable-font-antialiasing',
+        '--force-color-profile=srgb',
+        '--lang=az-AZ',
+        '--accept-lang=az-AZ,az,en-US,en'
     ];
 
     if (isLocal) {
@@ -299,6 +305,28 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                     <meta name="viewport" content="width=device-width, initial-scale=1">
                     <title>CV Export</title>
                     <style>
+                        /* AZERBAYCAN HARFLARI ÜÇÜN FONT IMPORT */
+                        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+                        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap');
+                        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+                        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&display=swap');
+                        
+                        /* AZERBAYCAN HARFLARI UNICODE DESTEGI */
+                        * {
+                            font-family: 'Inter', 'Open Sans', 'Roboto', 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif !important;
+                            text-rendering: optimizeLegibility !important;
+                            -webkit-font-smoothing: antialiased !important;
+                            -moz-osx-font-smoothing: grayscale !important;
+                            unicode-bidi: embed !important;
+                        }
+                        
+                        /* AZERBAYCAN HARFLARI ÖZEL DESTEGI */
+                        body, p, span, div, h1, h2, h3, h4, h5, h6, li, td, th {
+                            font-feature-settings: "kern" 1, "liga" 1, "clig" 1 !important;
+                            font-variant-ligatures: common-ligatures !important;
+                            text-rendering: optimizeLegibility !important;
+                        }
+                        
                         ${cssContent}
                         
                         /* ROUTE.TS ƏLAVƏ CSS - YALNIZ DINAMIK FONT SISTEMI */
@@ -1709,6 +1737,23 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             document.head?.appendChild(style);
         });
         
+        // UTF-8 və Azərbaycan hərfləri üçün page encoding ayarları
+        await page.setExtraHTTPHeaders({
+            'Accept-Charset': 'utf-8',
+            'Content-Type': 'text/html; charset=utf-8'
+        });
+        
+        // Azərbaycan hərflərini düzgün render etmək üçün font loading gözlə
+        await page.evaluateOnNewDocument(() => {
+            document.addEventListener('DOMContentLoaded', () => {
+                const docStyle = document.documentElement.style as any;
+                docStyle.fontFeatureSettings = '"kern" 1, "liga" 1, "clig" 1';
+                docStyle.textRendering = 'optimizeLegibility';
+                docStyle.webkitFontSmoothing = 'antialiased';
+                docStyle.mozOsxFontSmoothing = 'grayscale';
+            });
+        });
+        
         await page.setContent(html, { 
             waitUntil: 'networkidle0',
             timeout: 30000
@@ -2703,6 +2748,8 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             // Additional background color preservation settings
             generateDocumentOutline: false,
             generateTaggedPDF: true,
+            // Azərbaycan hərfləri üçün font encoding
+            timeout: 60000,  // Extended timeout for font loading
             // PDF-də düzgün məsafələr - istifadəçi tələbi: 1-ci səhifə top=5mm, digərləri=15mm
             margin: {
                 top: '5mm',       // 5mm - 1-ci səhifədə yuxarıda azca boşluq əlavə edildi

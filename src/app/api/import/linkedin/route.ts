@@ -65,43 +65,67 @@ async function generateLinkedInAISkills(profileData: any, existingSkills: any[])
     LinkedIn Profil Analizi və Bacarıq Təklifləri
     ============================================
     
-    Aşağıdakı LinkedIn profil məlumatlarını analiz edərək DƏQIQ 2 hard skill və 2 soft skill təklif et:
+    Aşağıdakı LinkedIn profil məlumatlarını ƏTRAFLY analiz edərək DƏQIQ 3 hard skill və 3 soft skill təklif et:
 
     PROFİL MƏLUMATLARI:
     - Ad: ${profileData.personalInfo?.fullName || 'Bilinmir'}
-    - Başlıq: ${profileData.personalInfo?.title || 'Bilinmir'}
+    - Başlıq/Vəzifə: ${profileData.personalInfo?.title || profileData.personalInfo?.headline || 'Bilinmir'}
     - Yer: ${profileData.personalInfo?.location || 'Bilinmir'}
-    - Xülasə: ${profileData.personalInfo?.summary || 'Bilinmir'}
-    - İş təcrübəsi sayı: ${profileData.experience?.length || 0}
-    - Təhsil sayı: ${profileData.education?.length || 0}
+    - Xülasə: ${profileData.personalInfo?.summary || 'Məlumat yoxdur - təhsil və təcrübəyə əsaslanın'}
+    
+    DETAYLI İŞ TƏCRÜBƏSİ (${profileData.experience?.length || 0} məlumat):
+    ${profileData.experience?.map((exp: any, i: number) => 
+      `${i+1}. Vəzifə: ${exp.position || exp.title || 'Bilinmir'}
+         Şirkət: ${exp.company || 'Bilinmir'}
+         Müddət: ${exp.duration || exp.startDate + ' - ' + (exp.endDate || 'İndi') || 'Bilinmir'}
+         Təsvir: ${exp.description?.substring(0, 200) || 'Təsvir yoxdur'}
+         Sahə: ${exp.industry || 'Bilinmir'}`
+    ).join('\n\n') || 'İş təcrübəsi məlumatı yoxdur'}
+
+    DETAYLI TƏHSİL (${profileData.education?.length || 0} məlumat):
+    ${profileData.education?.map((edu: any, i: number) => 
+      `${i+1}. Dərəcə: ${edu.degree || edu.title || 'Bilinmir'}
+         Universitet: ${edu.institution || edu.school || 'Bilinmir'}
+         Sahə: ${edu.fieldOfStudy || edu.field || 'Bilinmir'}
+         Tarix: ${edu.startDate + ' - ' + (edu.endDate || 'İndi') || 'Bilinmir'}
+         Təsvir: ${edu.description?.substring(0, 100) || 'Təsvir yoxdur'}`
+    ).join('\n\n') || 'Təhsil məlumatı yoxdur'}
+
+    DİGER BÖLMƏLƏR:
+    - Layihələr: ${profileData.projects?.length || 0} məlumat
+    - Sertifikatlar: ${profileData.certifications?.length || 0} məlumat  
+    - Könüllü təcrübə: ${profileData.volunteerExperience?.length || 0} məlumat
+    - Dillər: ${profileData.languages?.join(', ') || 'Məlumat yoxdur'}
     - Mövcud bacarıqlar: ${existingSkillNames.join(', ') || 'Heç biri'}
 
-    İŞ TƏCRÜBƏSİ:
-    ${profileData.experience?.map((exp: any, i: number) => 
-      `${i+1}. ${exp.position} @ ${exp.company} (${exp.description?.substring(0, 100) || ''})`
-    ).join('\n') || 'Məlumat yoxdur'}
-
-    TƏHSİL:
-    ${profileData.education?.map((edu: any, i: number) => 
-      `${i+1}. ${edu.degree} - ${edu.institution} (${edu.fieldOfStudy || ''})`
-    ).join('\n') || 'Məlumat yoxdur'}
+    ANALIZ QAYDASI:
+    1. Əgər summary varsa, əsas məlumat kimi istifadə et
+    2. Əgər summary yoxdursa:
+       - İş təcrübəsindən vəzifə və təsvirləri analiz et
+       - Təhsil sahəsini və dərəcəsini nəzərə al
+       - Layihələr və sertifikatları qiymətləndir
+    3. Sahəyə uyğun ən populyar hard skills təklif et
+    4. İş mühitində lazım olan soft skills seç
 
     TƏLƏBLƏR:
-    1. DƏQIQ 2 hard skill (texniki bacarıqlar)
-    2. DƏQIQ 2 soft skill (şəxsi bacarıqlar)
+    1. DƏQIQ 3 hard skill (texniki/peşəkar bacarıqlar)
+    2. DƏQIQ 3 soft skill (şəxsi/liderlik bacarıqlar)
     3. Mövcud bacarıqları təkrar etmə
-    4. Profil məlumatlarına uyğun olsun
-    5. İş bazarında axtarılan bacarıqlar olsun
+    4. Profil məlumatlarına uyğun və real olsun
+    5. İş bazarında axtarılan və tələb olunan bacarıqlar
+    6. Level düzgün təyin et (Başlanğıc/Orta/Təcrübəli)
 
     Nəticəni JSON formatında ver:
     {
       "hardSkills": [
         {"name": "Hard Skill 1", "level": "Başlanğıc|Orta|Təcrübəli"},
-        {"name": "Hard Skill 2", "level": "Başlanğıc|Orta|Təcrübəli"}
+        {"name": "Hard Skill 2", "level": "Başlanğıc|Orta|Təcrübəli"},
+        {"name": "Hard Skill 3", "level": "Başlanğıc|Orta|Təcrübəli"}
       ],
       "softSkills": [
         {"name": "Soft Skill 1", "level": "Başlanğıc|Orta|Təcrübəli"},
-        {"name": "Soft Skill 2", "level": "Başlanğıc|Orta|Təcrübəli"}
+        {"name": "Soft Skill 2", "level": "Başlanğıc|Orta|Təcrübəli"},
+        {"name": "Soft Skill 3", "level": "Başlanğıc|Orta|Təcrübəli"}
       ]
     }
     `;
@@ -170,79 +194,175 @@ function generateFallbackSkills(profileData: any, existingSkillNames: string[]) 
   console.log('🔄 Fallback AI skills yaradılır...');
   
   const title = profileData.personalInfo?.title?.toLowerCase() || '';
+  const headline = profileData.personalInfo?.headline?.toLowerCase() || '';
   const summary = profileData.personalInfo?.summary?.toLowerCase() || '';
   const experience = profileData.experience || [];
   const education = profileData.education || [];
   
-  // Combine all text for analysis
-  const allText = `${title} ${summary} ${experience.map((e: any) => e.position + ' ' + e.description).join(' ')} ${education.map((e: any) => e.degree + ' ' + e.fieldOfStudy).join(' ')}`.toLowerCase();
+  // Combine all text for analysis including detailed education
+  const experienceText = experience.map((e: any) => 
+    `${e.position || ''} ${e.company || ''} ${e.description || ''} ${e.industry || ''}`
+  ).join(' ').toLowerCase();
   
-  // Common hard skills by field
+  const educationText = education.map((e: any) => 
+    `${e.degree || ''} ${e.fieldOfStudy || ''} ${e.field || ''} ${e.institution || ''} ${e.description || ''}`
+  ).join(' ').toLowerCase();
+  
+  const allText = `${title} ${headline} ${summary} ${experienceText} ${educationText}`.toLowerCase();
+  
+  // Enhanced hard skills mapping by field/education
   const hardSkillsMap: {[key: string]: string[]} = {
+    // Programming & Development
     'java': ['Java', 'Spring Framework'],
     'javascript': ['JavaScript', 'React'],
     'python': ['Python', 'Django'],
-    'engineer': ['Technical Analysis', 'Problem Solving'],
-    'developer': ['Git', 'APIs'],
-    'data': ['SQL', 'Data Analysis'],
+    'programming': ['Programming', 'Software Development'],
+    'development': ['Web Development', 'Software Testing'],
+    'software': ['Software Engineering', 'Code Review'],
+    
+    // Engineering disciplines
+    'engineering': ['Technical Analysis', 'Problem Solving'],
+    'engineer': ['Engineering Design', 'Technical Documentation'],
+    'electrical': ['Electrical Engineering', 'Circuit Design'],
+    'mechanical': ['Mechanical Engineering', 'CAD Design'],
+    'civil': ['Civil Engineering', 'Project Planning'],
+    'computer': ['Computer Science', 'System Design'],
+    
+    // Business & Management
+    'management': ['Project Management', 'Team Leadership'],
+    'business': ['Business Analysis', 'Strategic Planning'],
+    'finance': ['Financial Analysis', 'Budget Management'],
+    'accounting': ['Financial Reporting', 'Accounting Software'],
+    'economics': ['Economic Analysis', 'Market Research'],
+    
+    // Design & Creative
     'design': ['UI/UX Design', 'Adobe Creative Suite'],
+    'graphic': ['Graphic Design', 'Visual Communication'],
+    'architecture': ['Architectural Design', 'AutoCAD'],
+    'art': ['Creative Design', 'Visual Arts'],
+    
+    // Marketing & Sales
     'marketing': ['Digital Marketing', 'Google Analytics'],
-    'project': ['Project Management', 'Agile Methodology'],
-    'content': ['Content Creation', 'SEO'],
-    'electric': ['Electrical Engineering', 'Circuit Design'],
-    'software': ['Software Development', 'Testing'],
-    'network': ['Network Administration', 'Cybersecurity']
+    'sales': ['Sales Strategy', 'Customer Relations'],
+    'social media': ['Social Media Marketing', 'Content Creation'],
+    
+    // Data & Analytics
+    'data': ['Data Analysis', 'SQL'],
+    'analytics': ['Data Analytics', 'Statistical Analysis'],
+    'statistics': ['Statistical Modeling', 'Data Visualization'],
+    'research': ['Research Methodology', 'Data Collection'],
+    
+    // Healthcare & Science
+    'medical': ['Medical Knowledge', 'Healthcare Management'],
+    'nursing': ['Patient Care', 'Medical Procedures'],
+    'biology': ['Laboratory Skills', 'Research Methods'],
+    'chemistry': ['Chemical Analysis', 'Laboratory Techniques'],
+    
+    // Education
+    'education': ['Curriculum Development', 'Educational Technology'],
+    'teaching': ['Instructional Design', 'Student Assessment'],
+    'training': ['Training Development', 'Learning Management'],
+    
+    // Operations & Logistics
+    'operations': ['Operations Management', 'Process Improvement'],
+    'logistics': ['Supply Chain Management', 'Inventory Management'],
+    'quality': ['Quality Assurance', 'Quality Control'],
+    
+    // Default/General
+    'default': ['Microsoft Office', 'Communication Tools']
   };
   
-  // Common soft skills
+  // Enhanced soft skills with more variety
   const softSkillsOptions = [
     'Communication', 'Leadership', 'Teamwork', 'Problem Solving',
     'Critical Thinking', 'Adaptability', 'Time Management', 'Creativity',
-    'Analytical Thinking', 'Collaboration', 'Decision Making', 'Initiative'
+    'Analytical Thinking', 'Collaboration', 'Decision Making', 'Initiative',
+    'Emotional Intelligence', 'Negotiation', 'Public Speaking', 'Mentoring',
+    'Conflict Resolution', 'Strategic Thinking', 'Innovation', 'Flexibility',
+    'Customer Service', 'Interpersonal Skills', 'Project Coordination', 'Organization'
   ];
   
-  // Find relevant hard skills
+  // Find relevant hard skills based on text analysis
   let selectedHardSkills: string[] = [];
+  
+  // Check each keyword category
   for (const [keyword, skills] of Object.entries(hardSkillsMap)) {
-    if (allText.includes(keyword) && selectedHardSkills.length < 2) {
-      selectedHardSkills.push(...skills.slice(0, 2 - selectedHardSkills.length));
+    if (keyword !== 'default' && allText.includes(keyword) && selectedHardSkills.length < 2) {
+      const remainingSlots = 2 - selectedHardSkills.length;
+      selectedHardSkills.push(...skills.slice(0, remainingSlots));
     }
   }
   
-  // Fill remaining hard skills if needed
+  // If still need more skills, try education-specific matching
   if (selectedHardSkills.length < 2) {
-    const defaultHardSkills = ['Microsoft Office', 'Communication Tools'];
-    selectedHardSkills.push(...defaultHardSkills.slice(0, 2 - selectedHardSkills.length));
+    const educationKeywords = ['bachelor', 'master', 'phd', 'degree', 'university', 'college'];
+    const hasEducation = educationKeywords.some(keyword => allText.includes(keyword));
+    
+    if (hasEducation) {
+      if (allText.includes('computer') || allText.includes('it') || allText.includes('information')) {
+        selectedHardSkills.push('Computer Skills', 'Technical Analysis');
+      } else if (allText.includes('business') || allText.includes('management')) {
+        selectedHardSkills.push('Business Analysis', 'Project Management');
+      } else if (allText.includes('engineer')) {
+        selectedHardSkills.push('Technical Skills', 'Engineering Analysis');
+      }
+    }
   }
   
-  // Select random soft skills
+  // Fill with default if still not enough
+  if (selectedHardSkills.length < 3) {
+    const defaultSkills = ['Microsoft Office', 'Communication Tools', 'Data Analysis', 'Project Coordination', 'Technical Writing', 'Research Skills'];
+    const needed = 3 - selectedHardSkills.length;
+    selectedHardSkills.push(...defaultSkills.slice(0, needed));
+  }
+  
+  // Ensure we have exactly 3 hard skills
+  selectedHardSkills = selectedHardSkills.slice(0, 3);
+  
+  // Select appropriate soft skills avoiding duplicates
   const availableSoftSkills = softSkillsOptions.filter(skill => 
-    !existingSkillNames.some(existing => existing.toLowerCase().includes(skill.toLowerCase()))
+    !existingSkillNames.some(existing => 
+      existing.toLowerCase().includes(skill.toLowerCase()) ||
+      skill.toLowerCase().includes(existing.toLowerCase())
+    )
   );
   
   const selectedSoftSkills = availableSoftSkills
     .sort(() => 0.5 - Math.random())
-    .slice(0, 2);
+    .slice(0, 3);
   
-  // Format skills
+  // If not enough unique soft skills, use defaults
+  if (selectedSoftSkills.length < 3) {
+    const defaultSoftSkills = ['Communication', 'Problem Solving', 'Teamwork', 'Leadership', 'Critical Thinking', 'Adaptability'];
+    const needed = 3 - selectedSoftSkills.length;
+    selectedSoftSkills.push(...defaultSoftSkills.filter(skill => 
+      !selectedSoftSkills.includes(skill)
+    ).slice(0, needed));
+  }
+  
+  // Format skills with appropriate levels based on experience
+  const hasExperience = experience.length > 0;
+  const hasEducation = education.length > 0;
+  const defaultLevel = hasExperience && hasEducation ? 'Təcrübəli' : hasExperience || hasEducation ? 'Orta' : 'Başlanğıc';
+  
   const formattedSkills = [
     ...selectedHardSkills.map((skill, index) => ({
       id: `fallback-hard-skill-${Date.now()}-${index}`,
       name: skill,
-      level: 'Orta',
+      level: defaultLevel,
       type: 'hard',
       source: 'fallback'
     })),
     ...selectedSoftSkills.map((skill, index) => ({
       id: `fallback-soft-skill-${Date.now()}-${index}`,
       name: skill,
-      level: 'Orta', 
+      level: defaultLevel, 
       type: 'soft',
       source: 'fallback'
     }))
   ];
   
-  console.log(`✅ Fallback skills yaradıldı: ${formattedSkills.map(s => s.name).join(', ')}`);
+  console.log(`✅ Fallback skills yaradıldı (${defaultLevel} səviyyə): ${formattedSkills.map(s => s.name).join(', ')}`);
   return formattedSkills;
 }
 
@@ -392,15 +512,15 @@ function transformScrapingDogData(scrapingDogData: any, normalizedUrl: string) {
     status: cert.status || (cert.expiryDate ? 'active' : 'permanent')
   }));
 
-  // Languages - dillər
+  // Languages - dillər  
   const languages = (scrapingDogData.languages || []).map((lang: any, index: number) => ({
     id: `lang-scrapingdog-${Date.now()}-${index}`,
-    name: typeof lang === 'string' ? lang : (lang.name || lang.language || ''),
-    proficiency: typeof lang === 'object' ? (lang.proficiency || lang.level || '') : ''
+    language: typeof lang === 'string' ? lang : (lang.name || lang.language || ''),
+    level: typeof lang === 'object' ? (lang.proficiency || lang.level || 'Orta') : 'Orta'
   }));
 
   // Volunteer Experience - könüllü təcrübə
-  const volunteering = (scrapingDogData.volunteering || []).map((vol: any, index: number) => ({
+  const volunteerExperience = (scrapingDogData.volunteering || []).map((vol: any, index: number) => ({
     id: `vol-scrapingdog-${Date.now()}-${index}`,
     organization: vol.organization || vol.company || '',
     role: vol.role || vol.position || '',
@@ -422,7 +542,7 @@ function transformScrapingDogData(scrapingDogData: any, normalizedUrl: string) {
     honorsCount: honors.length,
     certificationsCount: certifications.length,
     languagesCount: languages.length,
-    volunteeringCount: volunteering.length
+    volunteerExperienceCount: volunteerExperience.length
   });
 
   return {
@@ -435,7 +555,7 @@ function transformScrapingDogData(scrapingDogData: any, normalizedUrl: string) {
     honors,
     certifications,
     languages,
-    volunteering
+    volunteerExperience
   };
 }
 
@@ -566,32 +686,9 @@ export async function POST(request: NextRequest) {
       console.log('⚠️ RapidAPI skills alınmadı (optional):', rapidApiResponse.status === 'rejected' ? rapidApiResponse.reason : 'No data');
     }
 
-    // Transform ScrapingDog data to CV format
+    // Transform ScrapingDog data to CV format using comprehensive transformation
     console.log('📍 ScrapingDog məlumatları formatlanır...');
-    const transformedData = {
-      personalInfo: {
-        fullName: scrapingDogResult.name || `${scrapingDogResult.firstName || ''} ${scrapingDogResult.lastName || ''}`.trim(),
-        firstName: scrapingDogResult.firstName || scrapingDogResult.name?.split(' ')[0] || '',
-        lastName: scrapingDogResult.lastName || scrapingDogResult.name?.split(' ').slice(1).join(' ') || '',
-        title: scrapingDogResult.headline || '',
-        email: scrapingDogResult.email || '',
-        phone: scrapingDogResult.phone || '',
-        location: scrapingDogResult.location || '',
-        website: scrapingDogResult.website || '',
-        linkedin: normalizedUrl,
-        summary: scrapingDogResult.summary || '',
-        profilePicture: scrapingDogResult.profilePicture || ''
-      },
-      experience: scrapingDogResult.experience || [],
-      education: scrapingDogResult.education || [],
-      skills: scrapingDogResult.skills || [],
-      projects: scrapingDogResult.projects || [],
-      awards: scrapingDogResult.awards || [],
-      honors: scrapingDogResult.honors || [],
-      certifications: scrapingDogResult.certifications || [],
-      languages: scrapingDogResult.languages || [],
-      volunteering: scrapingDogResult.volunteering || []
-    };
+    const transformedData = transformScrapingDogData(scrapingDogResult, normalizedUrl);
 
     // Add RapidAPI skills if available
     if (rapidApiResult) {
@@ -608,12 +705,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Generate AI-suggested skills (2 hard + 2 soft)
+    // Generate AI-suggested skills (3 hard + 3 soft)
     console.log('🤖 AI skills yaradılır...');
     const aiSkills = await generateLinkedInAISkills(transformedData, transformedData.skills);
     if (aiSkills && aiSkills.length > 0) {
       transformedData.skills = [...transformedData.skills, ...aiSkills];
-      console.log(`✅ ${aiSkills.length} AI skill əlavə edildi (2 hard + 2 soft)`);
+      console.log(`✅ ${aiSkills.length} AI skill əlavə edildi (3 hard + 3 soft)`);
     }
 
     console.log('📋 Combined data preview:', {
@@ -629,7 +726,7 @@ export async function POST(request: NextRequest) {
       honorsCount: transformedData.honors?.length || 0,
       certificationsCount: transformedData.certifications?.length || 0,
       languagesCount: transformedData.languages?.length || 0,
-      volunteeringCount: transformedData.volunteering?.length || 0,
+      volunteerExperienceCount: transformedData.volunteerExperience?.length || 0,
       dataSource: 'scrapingdog + rapidapi + ai'
     });
 
@@ -659,7 +756,7 @@ export async function POST(request: NextRequest) {
           honors: transformedData.honors,
           certifications: transformedData.certifications,
           languages: transformedData.languages,
-          volunteering: transformedData.volunteering,
+          volunteerExperience: transformedData.volunteerExperience,
           language: 'en' // CV dili ingilis dili olaraq təyin edilir
         }
       }
@@ -683,7 +780,7 @@ export async function POST(request: NextRequest) {
             honorsCount: transformedData.honors.length,
             certificationsCount: transformedData.certifications.length,
             languagesCount: transformedData.languages.length,
-            volunteeringCount: transformedData.volunteering.length
+            volunteerExperienceCount: transformedData.volunteerExperience.length
           },
           dataSource: 'scrapingdog + rapidapi'
         }),
@@ -710,7 +807,7 @@ export async function POST(request: NextRequest) {
         honorsCount: transformedData.honors.length,
         certificationsCount: transformedData.certifications.length,
         languagesCount: transformedData.languages.length,
-        volunteeringCount: transformedData.volunteering.length,
+        volunteerExperienceCount: transformedData.volunteerExperience.length,
         source: 'ScrapingDog + RapidAPI + AI Skills',
         totalSections: 9
       }

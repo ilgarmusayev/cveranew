@@ -210,14 +210,14 @@ export const FONT_OPTIONS: FontOption[] = [
     name: 'Open Sans',
     displayName: 'Open Sans',
     category: 'sans-serif',
-    fontFamily: '"Open Sans", Arial, sans-serif',
+    fontFamily: '"Open Sans", "Noto Sans", Arial, sans-serif',
     googleFont: 'Open+Sans:400,600,700',
     weight: ['400', '600', '700'],
-    preview: 'Dost-canlısı və oxunması asan',
-    description: 'Modern CV-lər üçün ən populyar seçim',
-    fallback: 'Arial, sans-serif',
+    preview: 'Dost-canlısı və oxunması asan - Azərbaycan hərflərini dəstəkləyir',
+    description: 'Modern CV-lər üçün ən populyar seçim - Unicode character support',
+    fallback: '"Noto Sans", Arial, sans-serif',
     loadPriority: 'high',
-    suitableFor: ['tech', 'startup', 'nonprofit', 'education']
+    suitableFor: ['tech', 'startup', 'nonprofit', 'education', 'azerbaijani']
   },
   {
     id: 'lato',
@@ -242,11 +242,26 @@ export const FONT_OPTIONS: FontOption[] = [
     googleFont: 'Inter:400,500,600,700',
     weight: ['400', '500', '600', '700'],
     preview: 'Müasir və texnoloji görünüş',
-    description: 'IT və texnoloji sahələr üçün ideal',
+    description: 'IT və texnoloji sahələr üçün ideal - Azərbaycan hərflərini dəstəkləyir',
     isPremium: true,
     fallback: 'Arial, sans-serif',
-    loadPriority: 'medium',
-    suitableFor: ['tech', 'software', 'ai', 'data-science']
+    loadPriority: 'high',
+    suitableFor: ['tech', 'software', 'ai', 'data-science', 'azerbaijani']
+  },
+  {
+    id: 'noto-sans',
+    name: 'Noto Sans',
+    displayName: 'Noto Sans (Azərbaycan hərfləri)',
+    category: 'sans-serif',
+    fontFamily: '"Noto Sans", Inter, "Open Sans", Arial, sans-serif',
+    googleFont: 'Noto+Sans:400,500,600,700',
+    weight: ['400', '500', '600', '700'],
+    preview: 'Azərbaycan hərfləri üçün ən yaxşı seçim - ə, ş, ç, ğ, ı, ö, ü',
+    description: 'Google Noto - Azərbaycan, türk və digər Unicode hərflərini tam dəstəkləyir',
+    isPremium: false,
+    fallback: 'Inter, Arial, sans-serif',
+    loadPriority: 'high',
+    suitableFor: ['azerbaijani', 'turkish', 'multilingual', 'international', 'unicode']
   },
   {
     id: 'montserrat',
@@ -268,15 +283,15 @@ export const FONT_OPTIONS: FontOption[] = [
     name: 'Roboto',
     displayName: 'Roboto',
     category: 'sans-serif',
-    fontFamily: 'Roboto, Arial, sans-serif',
+    fontFamily: 'Roboto, "Noto Sans", Arial, sans-serif',
     googleFont: 'Roboto:400,500,700',
     weight: ['400', '500', '700'],
-    preview: 'Modern və dəqiq görünüş',
-    description: 'Google tərəfindən hazırlanmış müasir şrift',
+    preview: 'Modern və dəqiq görünüş - Unicode dəstəyi',
+    description: 'Google tərəfindən hazırlanmış müasir şrift - Azərbaycan hərflərini dəstəkləyir',
     isPremium: true,
-    fallback: 'Arial, sans-serif',
+    fallback: '"Noto Sans", Arial, sans-serif',
     loadPriority: 'medium',
-    suitableFor: ['tech', 'engineering', 'product', 'ux-ui']
+    suitableFor: ['tech', 'engineering', 'product', 'ux-ui', 'azerbaijani']
   },
   {
     id: 'source-sans',
@@ -388,8 +403,8 @@ export const FONT_OPTIONS: FontOption[] = [
 ];
 
 export const DEFAULT_FONT_SETTINGS: FontSettings = {
-  headingFont: 'calibri', // Calibri as preferred modern font
-  bodyFont: 'calibri',
+  headingFont: 'noto-sans', // Noto Sans - Azərbaycan hərflərini dəstəkləyir
+  bodyFont: 'noto-sans',    // Noto Sans - Unicode full support
   fontSize: 11, // Ideal body text size (10.5-11.5 pt range)
   lineHeight: 1.15, // Optimal readability range (1.15-1.3)
   letterSpacing: 0,
@@ -713,14 +728,23 @@ export class FontManager {
     const bodyFallback = bodyFont?.fallback || 'Arial, sans-serif';
 
     return `
-      /* Base font styles with enhanced fallbacks and higher specificity */
+      /* Base font styles with enhanced fallbacks and Azerbaijani character support */
       .cv-container {
-        font-feature-settings: "liga" 1, "kern" 1;
+        font-feature-settings: "liga" 1, "kern" 1, "clig" 1;
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         background-color: ${colors.background};
         color: ${colors.primary};
+        unicode-bidi: embed;
+        font-variant-ligatures: common-ligatures;
+      }
+      
+      /* Azərbaycan hərfləri üçün əlavə dəstək */
+      .cv-container * {
+        font-feature-settings: "kern" 1, "liga" 1, "clig" 1;
+        text-rendering: optimizeLegibility;
+        unicode-bidi: embed;
       }
 
       /* CV Section Spacing - Professional Standards */
