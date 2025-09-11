@@ -9100,7 +9100,7 @@ const ClarityTemplate: React.FC<{
                     >
                         <div>
                             <h2 
-                                className="text-2xl font-bold pb-2"
+                                className="text-lg font-bold pb-1 mb-3"
                                 style={{ 
                                     color: '#1f2937',
                                     fontFamily: '"Inter", "Segoe UI", sans-serif',
@@ -9109,16 +9109,16 @@ const ClarityTemplate: React.FC<{
                             >
                                 {getSectionName('skills', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-2">
                                 {validSkills.map((skill) => (
                                     <div 
                                         key={skill.id} 
-                                        className="bg-white rounded-lg border border-gray-100 p-4 hover:shadow-sm transition-shadow"
+                                        className="bg-white rounded-lg border border-gray-100 p-2 hover:shadow-sm transition-shadow"
                                         style={{ backgroundColor: '#fefefe' }}
                                     >
                                         <div>
                                             <span 
-                                                className="font-semibold text-base"
+                                                className="font-semibold text-sm"
                                                 style={{ 
                                                     color: '#1f2937',
                                                     fontFamily: '"Inter", "Segoe UI", sans-serif'
@@ -9131,8 +9131,8 @@ const ClarityTemplate: React.FC<{
                                             <p 
                                                 className="text-gray-600"
                                                 style={{ 
-                                                    fontSize: '13px',
-                                                    lineHeight: '1.5'
+                                                    fontSize: '11px',
+                                                    lineHeight: '1.4'
                                                 }}
                                             >
                                                 {skill.description}
@@ -9166,19 +9166,19 @@ const ClarityTemplate: React.FC<{
                             >
                                 {getSectionName('projects', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="space-y-4">
+                            <div className="space-y-3">
                                 {projects.map((project, index) => (
                                     <div key={project.id} className="relative">
                                         {/* Timeline line for visual appeal */}
                                         {index < projects.length - 1 && (
                                             <div 
-                                                className="absolute left-2 top-12 w-0.5 h-12"
+                                                className="absolute left-2 top-8 w-0.5 h-6"
                                                 style={{ backgroundColor: '#fed7aa' }}
                                             ></div>
                                         )}
                                         
                                         <div 
-                                            className="relative bg-white rounded-lg border-l-4 pl-6 pr-4 py-4"
+                                            className="relative bg-white rounded-lg border-l-4 pl-6 pr-4 py-3"
                                             style={{ 
                                                 borderLeftColor: '#ea580c',
                                                 borderWidth: '0 0 0 4px',
@@ -9187,14 +9187,14 @@ const ClarityTemplate: React.FC<{
                                         >
                                             {/* Timeline dot */}
                                             <div 
-                                                className="absolute left-0 top-4 w-2.5 h-2.5 rounded-full transform -translate-x-1/2"
+                                                className="absolute left-0 top-3 w-2.5 h-2.5 rounded-full transform -translate-x-1/2"
                                                 style={{ backgroundColor: '#ea580c' }}
                                             ></div>
                                             
-                                            <div className="flex justify-between items-start mb-3">
+                                            <div className="flex justify-between items-start mb-2">
                                                 <div className="flex-1">
                                                     <h3 
-                                                        className="text-lg font-bold mb-1"
+                                                        className="text-base font-bold mb-1"
                                                         style={{ 
                                                             color: '#1f2937',
                                                             fontFamily: '"Inter", "Segoe UI", sans-serif'
@@ -9202,66 +9202,81 @@ const ClarityTemplate: React.FC<{
                                                     >
                                                         {project.name}
                                                     </h3>
-                                                    {project.description && (
-                                                        <div 
-                                                            className="text-gray-700 mb-3 leading-relaxed"
-                                                            style={{ 
-                                                                fontSize: '14px',
-                                                                lineHeight: '1.6'
-                                                            }}
-                                                        >
-                                                            {renderHtmlContent(project.description)}
-                                                        </div>
-                                                    )}
-                                                    {project.technologies && project.technologies.length > 0 && (
-                                                        <div className="mb-2">
-                                                            <div className="flex flex-wrap gap-2">
-                                                                {project.technologies.map((tech, index) => (
-                                                                    <span 
-                                                                        key={index} 
-                                                                        className="px-2 py-1 rounded-lg text-xs font-semibold"
-                                                                        style={{ 
-                                                                            backgroundColor: '#fef3e2',
-                                                                            color: '#b45309',
-                                                                            WebkitPrintColorAdjust: 'exact',
-                                                                            colorAdjust: 'exact',
-                                                                            border: '1px solid #fbbf24',
-                                                                            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
-                                                                        }}
-                                                                    >
-                                                                        {tech}
-                                                                    </span>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                    {project.url && (
-                                                        <div className="mt-2">
-                                                            <a
-                                                                href={project.url.startsWith('http') ? project.url : `https://${project.url}`}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="text-sm font-medium hover:underline transition-colors"
-                                                                style={{ color: '#ea580c' }}
-                                                            >
-                                                                {data.cvLanguage === 'english' ? 'View Project' : 'Layihəni Gör'}
-                                                            </a>
-                                                        </div>
-                                                    )}
-                                                    {project.github && (
-                                                        <div className="mt-1">
-                                                            <a
-                                                                href={getGitHubDisplay(project.github).url}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="text-sm font-medium hover:underline transition-colors"
-                                                                style={{ color: '#ea580c' }}
-                                                            >
-                                                                {data.cvLanguage === 'english' ? 'GitHub' : 'GitHub'}
-                                                            </a>
-                                                        </div>
-                                                    )}
                                                 </div>
+                                                {(project.startDate || project.endDate) && (
+                                                    <div 
+                                                        className="px-2 py-1 rounded text-xs font-semibold ml-3"
+                                                        style={{ 
+                                                            backgroundColor: '#fef3e2',
+                                                            color: '#b45309',
+                                                            border: '1px solid #fbbf24'
+                                                        }}
+                                                    >
+                                                        {project.startDate ? (
+                                                            project.current ? `${formatDate(project.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
+                                                            project.endDate ? `${formatDate(project.startDate, data.cvLanguage)} - ${formatDate(project.endDate, data.cvLanguage)}` :
+                                                            formatDate(project.startDate, data.cvLanguage)
+                                                        ) : project.current ? (
+                                                            getCurrentText(data.cvLanguage)
+                                                        ) : project.endDate ? (
+                                                            formatDate(project.endDate, data.cvLanguage)
+                                                        ) : ''}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {project.description && (
+                                                <div 
+                                                    className="text-gray-700 mb-2 leading-relaxed"
+                                                    style={{ 
+                                                        fontSize: '13px',
+                                                        lineHeight: '1.5'
+                                                    }}
+                                                >
+                                                    {renderHtmlContent(project.description)}
+                                                </div>
+                                            )}
+                                            {project.technologies && project.technologies.length > 0 && (
+                                                <div className="mb-2">
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {project.technologies.map((tech, index) => (
+                                                            <span 
+                                                                key={index} 
+                                                                className="px-2 py-0.5 rounded text-xs font-semibold"
+                                                                style={{ 
+                                                                    backgroundColor: '#fef3e2',
+                                                                    color: '#b45309',
+                                                                    border: '1px solid #fbbf24'
+                                                                }}
+                                                            >
+                                                                {tech}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            <div className="flex flex-wrap gap-3 mt-1">
+                                                {project.url && (
+                                                    <a
+                                                        href={project.url.startsWith('http') ? project.url : `https://${project.url}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-xs font-medium hover:underline transition-colors"
+                                                        style={{ color: '#ea580c' }}
+                                                    >
+                                                        {data.cvLanguage === 'english' ? 'View Project' : 'Layihəni Gör'}
+                                                    </a>
+                                                )}
+                                                {project.github && (
+                                                    <a
+                                                        href={getGitHubDisplay(project.github).url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-xs font-medium hover:underline transition-colors"
+                                                        style={{ color: '#ea580c' }}
+                                                    >
+                                                        GitHub Linki
+                                                    </a>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
