@@ -4102,20 +4102,20 @@ const LumenTemplate: React.FC<{
                 ${isDragActive || isLeftDragActive ? 'drag-mode' : ''}
             `}
         >
-            {/* Left Column - Contact & Skills with WHITE Background */}
+            {/* Left Column - Contact & Skills with DARK Background for Atlas Template */}
             <div 
-                className="w-5/12 bg-white text-gray-900 border-r-2 border-gray-300 atlas-left-panel" 
+                className="w-5/12 bg-gray-800 text-white border-r-2 border-gray-700 atlas-left-panel" 
                 style={{ 
                     padding: '15mm 8mm 15mm 15mm', /* üst: 15mm, sağ: 8mm (daha da azaldıldı), alt: 15mm, sol: 15mm */
                     touchAction: 'none', // Force DnD kit control
                     userSelect: 'none',
                     minHeight: '297mm', // A4 uzunluğu - 297mm
-                    backgroundColor: '#ffffff', // Force white background for PDF
-                    background: '#ffffff', // Additional background property
+                    backgroundColor: '#1f2937', // Force dark gray background for Atlas template
+                    background: '#1f2937', // Additional background property
                     backgroundImage: 'none', // Prevent any background images
                     WebkitPrintColorAdjust: 'exact', // Force print colors
                     printColorAdjust: 'exact', // Force print colors
-                    color: '#111827' // Force black text
+                    color: '#ffffff' // Force white text for Atlas template
                 }}
                 onTouchStart={(e) => {
                     if (isMobile) {
@@ -4613,7 +4613,7 @@ const PrimeTemplate: React.FC<{
                             </div>
                             <div className="space-y-4">
                                 {experience.map((exp, index) => (
-                                    <div key={exp.id} className="border-b border-gray-100 pb-4 last:border-b-0">
+                                    <div key={exp.id} className="border-b border-blue-200 pb-4 last:border-b-0">
                                         <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
                                             <div className="flex-1 min-w-0">
                                                 <h3 className="text-base font-bold text-gray-900 leading-tight">{exp.position}</h3>
@@ -4664,7 +4664,7 @@ const PrimeTemplate: React.FC<{
                             </div>
                             <div className="space-y-3">
                                 {education.map((edu) => (
-                                    <div key={edu.id} className="border-b border-gray-100 pb-3 last:border-b-0">
+                                    <div key={edu.id} className="border-b border-blue-200 pb-3 last:border-b-0">
                                         <div className="flex justify-between items-start mb-1 flex-wrap gap-2">
                                             <div className="flex-1 min-w-0">
                                                 {edu.degree ? (
@@ -4781,7 +4781,7 @@ const PrimeTemplate: React.FC<{
                             </div>
                             <div className="space-y-3">
                                 {projects.map((project) => (
-                                    <div key={project.id} className="border-b border-gray-100 pb-3 last:border-b-0">
+                                    <div key={project.id} className="border-b border-blue-200 pb-3 last:border-b-0">
                                         <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
                                             <div className="flex-1">
                                                 <h3 className="text-base font-bold text-gray-900">{project.name}</h3>
@@ -4881,7 +4881,7 @@ const PrimeTemplate: React.FC<{
                             </div>
                             <div className="space-y-3">
                                 {certifications.map((cert) => (
-                                    <div key={cert.id} className="border-b border-gray-100 pb-3 last:border-b-0">
+                                    <div key={cert.id} className="border-b border-blue-200 pb-3 last:border-b-0">
                                         <div className="flex justify-between items-start">
                                             <div className="flex-1">
                                                 <h3 className="text-base font-bold text-gray-900">{cert.name}</h3>
@@ -4935,7 +4935,7 @@ const PrimeTemplate: React.FC<{
                             </div>
                             <div className="space-y-3">
                                 {volunteerExperience.map((vol) => (
-                                    <div key={vol.id} className="border-b border-gray-100 pb-3 last:border-b-0">
+                                    <div key={vol.id} className="border-b border-blue-200 pb-3 last:border-b-0">
                                         <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
                                             <div className="flex-1 min-w-0">
                                                 <h3 className="text-base font-bold text-gray-900">{vol.role}</h3>
@@ -4994,7 +4994,7 @@ const PrimeTemplate: React.FC<{
                                         </div>
                                         <div className="space-y-3">
                                             {section.items.map((item) => (
-                                                <div key={item.id} className="border-b border-gray-100 pb-3 last:border-b-0">
+                                                <div key={item.id} className="border-b border-blue-200 pb-3 last:border-b-0">
                                                     <div className="flex justify-between items-start mb-2">
                                                         <div className="flex-1">
                                                             {item.title && (
