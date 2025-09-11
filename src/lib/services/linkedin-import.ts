@@ -281,7 +281,7 @@ export class LinkedInImportService {
 
       const response = await axios.get(url, { 
         params: params,
-        timeout: 30000
+        timeout: 90000
       });
 
       if (response.status !== 200) {
