@@ -2419,7 +2419,7 @@ const ModernTemplate: React.FC<{
 
 // ATS-Friendly Professional Template Component with Drag and Drop
 // ATS-Friendly Professional Template Component with Drag and Drop
-const ATSFriendlyTemplate: React.FC<{ 
+const AtlasTemplate: React.FC<{ 
     data: CVData; 
     sectionOrder: string[]; 
     onSectionReorder: (newOrder: string[]) => void;
@@ -2557,7 +2557,7 @@ const ATSFriendlyTemplate: React.FC<{
         
         setIsDragActive(true);
         setActiveId(event.active.id as string);
-        console.log('=== ATS TEMPLATE DRAG STARTED ===');
+        console.log('=== ATLAS TEMPLATE DRAG STARTED ===');
         console.log('Device type:', 'ontouchstart' in window ? 'Touch Device' : 'Mouse Device');
         console.log('Active element:', event.active.id);
         // Add subtle body class for global styling if needed
@@ -2690,7 +2690,7 @@ const ATSFriendlyTemplate: React.FC<{
 
         const { active, over } = event;
 
-        console.log('=== ATS TEMPLATE DRAG ENDED ===');
+        console.log('=== ATLAS TEMPLATE DRAG ENDED ===');
         console.log('Active:', active.id);
         console.log('Over:', over?.id);
 
@@ -3063,12 +3063,18 @@ const ATSFriendlyTemplate: React.FC<{
         >
             {/* Left Column - Contact & Skills */}
             <div 
-                className="w-2/5 bg-blue-900 text-white border-r border-blue-800" 
+                className="w-2/5 bg-blue-900 text-white border-r border-blue-800 left-panel" 
                 style={{ 
                     padding: '12mm 12mm 15mm 12mm', /* üst: 12mm, sağ: 12mm, alt: 15mm, sol: 12mm - reduced top padding */
                     touchAction: 'none', // Force DnD kit control
                     userSelect: 'none',
-                    minHeight: '297mm' // A4 uzunluğu - 297mm
+                    minHeight: '297mm', // A4 uzunluğu - 297mm
+                    backgroundColor: '#1e3a8a', // Force dark blue background for Atlas template
+                    background: '#1e3a8a', // Additional background property
+                    backgroundImage: 'none', // Prevent any background images
+                    WebkitPrintColorAdjust: 'exact', // Force print colors
+                    printColorAdjust: 'exact', // Force print colors
+                    color: '#ffffff' // Force white text for Atlas template
                 }}
                 onTouchStart={(e) => {
                     if (isMobile) {
@@ -3091,7 +3097,7 @@ const ATSFriendlyTemplate: React.FC<{
 
                 {/* Contact Information */}
                 <div className="cv-section avoid-break mb-6">
-                    <h2 className="text-sm font-bold text-white tracking-wide border-b border-blue-300 pb-1 uppercase mb-3">
+                    <h2 className="text-sm font-bold text-white tracking-wide pb-1 uppercase mb-3">
                         {data.cvLanguage === 'english' ? 'CONTACT' : 'ƏLAQƏ'}
                     </h2>
                     <div className="text-xs space-y-3">
@@ -3212,7 +3218,7 @@ const ATSFriendlyTemplate: React.FC<{
                                                         {/* Hard Skills */}
                                                         {skills.filter(skill => skill.type === 'hard' && skill.name && skill.name.trim() !== '').length > 0 && (
                                                             <div>
-                                                                <h2 className="text-sm font-bold text-white tracking-wide border-b border-blue-300 pb-1 mb-3" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                                <h2 className="text-sm font-bold text-white tracking-wide pb-1 mb-3" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                                     {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('technicalSkills', data.cvLanguage, data.sectionNames) : getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
                                                                 </h2>
                                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing)' }}>
@@ -3235,7 +3241,7 @@ const ATSFriendlyTemplate: React.FC<{
                                                         {/* Soft Skills */}
                                                         {skills.filter(skill => skill.type === 'soft' && skill.name && skill.name.trim() !== '').length > 0 && (
                                                             <div>
-                                                                <h2 className="text-sm font-bold text-white tracking-wide border-b border-blue-300 pb-1 mb-3" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                                <h2 className="text-sm font-bold text-white tracking-wide pb-1 mb-3" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                                     {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('softSkills', data.cvLanguage, data.sectionNames) : getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
                                                                 </h2>
                                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing)' }}>
@@ -3258,7 +3264,7 @@ const ATSFriendlyTemplate: React.FC<{
                                                         {/* General Skills */}
                                                         {skills.filter(skill => (!skill.type || (skill.type !== 'hard' && skill.type !== 'soft')) && skill.name && skill.name.trim() !== '').length > 0 && (
                                                             <div>
-                                                                <h2 className="text-sm font-bold text-white tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                                <h2 className="text-sm font-bold text-white tracking-wide pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                                     {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('skills', data.cvLanguage, data.sectionNames) : getSectionName('skills', data.cvLanguage, data.sectionNames)}
                                                                 </h2>
                                                                 <div className="space-y-2">
@@ -3300,7 +3306,7 @@ const ATSFriendlyTemplate: React.FC<{
                                                 isDropTarget={leftDropTargetId === 'leftLanguages'}
                                             >
                                                 <div>
-                                                    <h2 className="text-sm font-bold text-white tracking-wide border-b border-blue-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                    <h2 className="text-sm font-bold text-white tracking-wide pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                         {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('languages', data.cvLanguage, data.sectionNames) : getSectionName('languages', data.cvLanguage, data.sectionNames)}
                                                     </h2>
                                                     {languages.filter(lang => lang.language && lang.language.trim() !== '').length > 0 && (
@@ -3336,7 +3342,7 @@ const ATSFriendlyTemplate: React.FC<{
                                                 <div>
                                                     {certifications.filter(cert => cert.name && cert.name.trim() !== '').length > 0 && (
                                                         <>
-                                                            <h2 className="text-sm font-bold text-gray-800 tracking-wide border-b border-gray-300 pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
+                                                            <h2 className="text-sm font-bold text-white tracking-wide pb-1" style={{ textTransform: data.cvLanguage?.toLowerCase().includes('en') ? 'none' : 'uppercase' }}>
                                                                 {data.cvLanguage?.toLowerCase().includes('en') ? getUppercaseSectionName('certifications', data.cvLanguage, data.sectionNames) : getSectionName('certifications', data.cvLanguage, data.sectionNames)}
                                                             </h2>
                                                             <div className="space-y-2">
@@ -3349,20 +3355,20 @@ const ATSFriendlyTemplate: React.FC<{
                                                                                         href={cert.url}
                                                                                         target="_blank"
                                                                                         rel="noopener noreferrer"
-                                                                                        className="text-xs font-medium text-gray-800 underline hover:text-gray-600 transition-colors cursor-pointer"
+                                                                                        className="text-xs font-medium text-white underline hover:text-blue-200 transition-colors cursor-pointer"
                                                                                     >
                                                                                         {cert.name}
                                                                                     </a>
                                                                                 ) : (
-                                                                                    <h3 className="text-xs font-medium text-gray-800">{cert.name}</h3>
+                                                                                    <h3 className="text-xs font-medium text-white">{cert.name}</h3>
                                                                                 )}
-                                                                                <p className="text-xs text-gray-600">{cert.issuer}</p>
+                                                                                <p className="text-xs text-blue-100">{cert.issuer}</p>
                                                                                 {cert.description && (
-                                                                                    <div className="text-gray-600 text-xs mt-1">{renderHtmlContent(cert.description, true)}</div>
+                                                                                    <div className="text-blue-100 text-xs mt-1">{renderHtmlContent(cert.description, true)}</div>
                                                                                 )}
                                                                             </div>
                                                                             {cert.date && (
-                                                                                <span className="text-xs text-gray-600 font-medium whitespace-nowrap ml-2">
+                                                                                <span className="text-xs text-blue-100 font-medium whitespace-nowrap ml-2">
                                                                                     {formatDate(cert.date, data.cvLanguage)}
                                                                                 </span>
                                                                             )}
@@ -3386,7 +3392,7 @@ const ATSFriendlyTemplate: React.FC<{
             </div>
 
             {/* Right Column - Main Content with Draggable Sections */}
-            <div className="flex-1" style={{ padding: '12mm 10mm 15mm 8mm' /* üst: 12mm, sağ: 10mm, alt: 15mm, sol: 8mm - reduced right padding */ }}>
+            <div className="flex-1 right-panel" style={{ padding: '12mm 10mm 15mm 8mm' /* üst: 12mm, sağ: 10mm, alt: 15mm, sol: 8mm - reduced right padding */ }}>
                 {/* Header - Name */}
                 <div className="cv-section avoid-break" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
                     <h1 className="text-3xl font-bold text-gray-900 leading-tight">
@@ -4102,20 +4108,20 @@ const LumenTemplate: React.FC<{
                 ${isDragActive || isLeftDragActive ? 'drag-mode' : ''}
             `}
         >
-            {/* Left Column - Contact & Skills with DARK Background for Atlas Template */}
+            {/* Left Column - Contact & Skills with WHITE Background for Lumen Template */}
             <div 
-                className="w-5/12 bg-gray-800 text-white border-r-2 border-gray-700 atlas-left-panel" 
+                className="w-5/12 bg-white text-gray-900 border-r-2 border-gray-300 lumen-left-panel" 
                 style={{ 
                     padding: '15mm 8mm 15mm 15mm', /* üst: 15mm, sağ: 8mm (daha da azaldıldı), alt: 15mm, sol: 15mm */
                     touchAction: 'none', // Force DnD kit control
                     userSelect: 'none',
                     minHeight: '297mm', // A4 uzunluğu - 297mm
-                    backgroundColor: '#1f2937', // Force dark gray background for Atlas template
-                    background: '#1f2937', // Additional background property
+                    backgroundColor: '#ffffff', // Force white background for Lumen template
+                    background: '#ffffff', // Additional background property
                     backgroundImage: 'none', // Prevent any background images
                     WebkitPrintColorAdjust: 'exact', // Force print colors
                     printColorAdjust: 'exact', // Force print colors
-                    color: '#ffffff' // Force white text for Atlas template
+                    color: '#111827' // Force dark text for Lumen template
                 }}
                 onTouchStart={(e) => {
                     if (isMobile) {
@@ -10021,15 +10027,15 @@ export default function CVPreview({
         // Normalize template ID for better matching
         const normalizedTemplate = templateId.toLowerCase();
 
-        // ATS-Friendly Template
+        // Atlas Template (formerly ATS-Friendly)
         if (normalizedTemplate.includes('ats') ||
             normalizedTemplate === 'ats-friendly' ||
-            normalizedTemplate === 'resume-ats' ||
+            normalizedTemplate === 'atlas' ||
             normalizedTemplate.includes('clean') ||
             normalizedTemplate.includes('minimal-professional')) {
             return (
-                <div className="atlas-template cv-template resume-ats ats-template">
-                    <ATSFriendlyTemplate 
+                <div className="atlas-template cv-template">
+                    <AtlasTemplate 
                         key={`atlas-${cv.data.skills?.length || 0}-${cv.data.languages?.length || 0}-${cv.data.certifications?.length || 0}-${cv.data.education?.length || 0}`}
                         data={cv.data} 
                         sectionOrder={sectionOrder} 
@@ -10126,7 +10132,7 @@ export default function CVPreview({
             normalizedTemplate === 'atlas') {
             return (
                 <div className="atlas-template cv-template">
-                    <ATSFriendlyTemplate 
+                    <AtlasTemplate 
                         key={`atlas-${cv.data.skills?.length || 0}-${cv.data.languages?.length || 0}-${cv.data.certifications?.length || 0}-${cv.data.education?.length || 0}`}
                         data={cv.data} 
                         sectionOrder={sectionOrder} 
@@ -10255,7 +10261,7 @@ export default function CVPreview({
                     .vertex-template,
                     .horizon-template,
                     .lumen-template,
-                    .ats-template {
+                    .atlas-template {
                         -webkit-print-color-adjust: exact !important;
                         color-adjust: exact !important;
                         print-color-adjust: exact !important;
@@ -10326,7 +10332,7 @@ export default function CVPreview({
 }
 
 // Export individual templates for direct use if needed
-export { BasicTemplate, ModernTemplate, ATSFriendlyTemplate, ExclusiveTemplate, AuroraTemplate, HorizonTemplate, LumenTemplate, ClarityTemplate };
+export { BasicTemplate, ModernTemplate, AtlasTemplate, ExclusiveTemplate, AuroraTemplate, HorizonTemplate, LumenTemplate, ClarityTemplate };
 
 // Export mobile helper functions for external use
 export const useMobileSectionReorder = (sectionOrder: string[], onSectionReorder: (newOrder: string[]) => void) => {

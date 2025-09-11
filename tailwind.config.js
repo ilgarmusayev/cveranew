@@ -6,6 +6,24 @@ module.exports = {
     './app/**/*.{js,ts,jsx,tsx,mdx}',
     './src/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  safelist: [
+    // Atlas template specific classes to prevent purging
+    'atlas-template',
+    'atlas-left-panel',
+    'bg-blue-600',
+    'text-white',
+    'border-blue-700',
+    'w-5/12',
+    'w-2/5',
+    // Template container classes
+    'cv-template',
+    'atlas',
+    'atlas-template',
+    // Common template colors that might be purged
+    {
+      pattern: /^(bg|text|border)-(blue|gray|white)-(100|200|300|400|500|600|700|800|900)$/
+    }
+  ],
   theme: {
     extend: {
       fontFamily: {

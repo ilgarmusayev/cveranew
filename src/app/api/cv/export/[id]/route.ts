@@ -383,8 +383,8 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         
                         /* Specific fixes for common background colors - FORCE EXACT COLORS */
                         .bg-blue-600 { 
-                            background-color: #2563eb !important; 
-                            background: #2563eb !important;
+                            background-color: #1e3a8a !important; 
+                            background: #1e3a8a !important;
                             -webkit-print-color-adjust: exact !important;
                         }
                         .bg-blue-500 { 
@@ -539,7 +539,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         }
                         
                         /* Template-lərin özlərində rəngli arxa planlar saxlanılsın */
-                        .basic-template, .modern-template, .ats-template, .exclusive-template, 
+                        .basic-template, .modern-template, .atlas-template, .exclusive-template, 
                         .aurora-template, .vertex-template, .horizon-template, .lumen-template, 
                         .clarity-template, .essence-template {
                             -webkit-print-color-adjust: exact !important;
@@ -1120,7 +1120,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         
                         /* ALL TEMPLATES USE DYNAMIC FONT FAMILY */
                         .aurora-template, .vertex-template, .horizon-template, .lumen-template,
-                        .modern-template, .ats-template, .basic-template, .traditional-template,
+                        .modern-template, .atlas-template, .basic-template, .traditional-template,
                         .classic-template, .exclusive-template {
                             font-family: var(--cv-font-family) !important;
                         }
@@ -1356,7 +1356,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         
                         /* UNIVERSAL BORDER COLORS - DİNAMİK */
                         .border-white { border-color: white !important; }
-                        .border-blue-600 { border-color: #2563eb !important; }
+                        .border-blue-600 { border-color: #1e3a8a !important; }
                         .border-gray-200 { border-color: #e5e7eb !important; }
                         .border-gray-300 { border-color: #d1d5db !important; }
                         
@@ -1384,7 +1384,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         .text-gray-500 { color: #6b7280 !important; }
                         .text-gray-400 { color: #9ca3af !important; }
                         .text-gray-300 { color: #d1d5db !important; }
-                        .text-blue-600 { color: #2563eb !important; }
+                        .text-blue-600 { color: #1e3a8a !important; }
                         .text-blue-500 { color: #3b82f6 !important; }
                         .text-blue-700 { color: #1d4ed8 !important; }
                         
@@ -1581,7 +1581,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         
                         .basic-template .cv-section,
                         .modern-template .cv-section,
-                        .ats-template .cv-section,
+                        .atlas-template .cv-section,
                         .aurora-template .cv-section,
                         .vertex-template .cv-section,
                         .horizon-template .cv-section,
@@ -1594,8 +1594,8 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         .atlas-template .atlas-left-panel,
                         div.atlas-left-panel,
                         [class*="atlas-left-panel"] {
-                            background-color: #2563eb !important; /* Goy rəng */
-                            background: #2563eb !important;
+                            background-color: #1e3a8a !important; /* Goy rəng */
+                            background: #1e3a8a !important;
                             color: white !important;
                             z-index: 999999 !important;
                             position: relative !important;
@@ -1638,9 +1638,13 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         
                         /* Atlas template sol panel container */
                         .atlas-template .w-2\/5,
-                        .cv-template.atlas-template .w-2\/5 {
-                            background-color: #2563eb !important;
-                            background: #2563eb !important;
+                        .atlas-template .w-5\/12,
+                        .cv-template.atlas-template .w-2\/5,
+                        .cv-template.atlas-template .w-5\/12,
+                        .atlas-template div[class*="w-5/12"],
+                        .atlas-template div[class*="w-2/5"] {
+                            background-color: #1e3a8a !important;
+                            background: #1e3a8a !important;
                             color: white !important;
                             z-index: 999999 !important;
                             -webkit-print-color-adjust: exact !important;
@@ -2069,7 +2073,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                 .basic-template .pb-2 { padding-bottom: var(--cv-item-spacing) !important; }
                 
                 /* Bütün rənglər dinamik olmalıdır */
-                .basic-template .text-blue-600 { color: #2563eb !important; }
+                .basic-template .text-blue-600 { color: #1e3a8a !important; }
                 .basic-template .text-gray-700 { color: #374151 !important; }
                 .basic-template .text-gray-600 { color: #6b7280 !important; }
                 .basic-template .text-gray-900 { color: #111827 !important; }
@@ -2125,24 +2129,24 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
         
         console.log('Template exists:', templateExists);
         
-        // Resume-ATS/Atlas Template PDF Design Fix
+        // Atlas/Atlas Template PDF Design Fix
         const normalizedTemplateId = templateId?.toLowerCase() || '';
-        const isResumeATSTemplate = normalizedTemplateId.includes('ats') || 
+        const isAtlasTemplate = normalizedTemplateId.includes('ats') || 
                                    normalizedTemplateId.includes('atlas') || 
-                                   normalizedTemplateId === 'resume-ats' ||
+                                   normalizedTemplateId === 'atlas' ||
                                    normalizedTemplateId.includes('clean') ||
                                    normalizedTemplateId.includes('minimal-professional');
         
         console.log('🎨 Template ID Check:', templateId, '-> Normalized:', normalizedTemplateId);
-        console.log('🔍 Is Resume-ATS Template:', isResumeATSTemplate);
+        console.log('🔍 Is Atlas Template:', isAtlasTemplate);
         
-        if (isResumeATSTemplate) {
-            console.log('🎯 Resume-ATS Template detected - applying complete design fix...');
+        if (isAtlasTemplate) {
+            console.log('🎯 Atlas Template detected - applying complete design fix...');
             
-            // CSS injection for Resume-ATS template PDF design
+            // CSS injection for Atlas template PDF design
             await page.addStyleTag({
                 content: `
-                    /* RESUME-ATS TEMPLATE COMPLETE PDF DESIGN FIX */
+                    /* ATLAS TEMPLATE COMPLETE PDF DESIGN FIX */
                     @media print {
                         /* PDF SƏHİFƏ MARGİN SIFIR - 15MM MESAFE SIFIR */
                         @page {
@@ -2178,8 +2182,8 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         
                         /* Template container - 15MM MESAFE MUTLEQ SIFIR */
                         .atlas-template,
-                        .resume-ats,
-                        .ats-template,
+                        .atlas,
+                        .atlas-template,
                         .cv-template {
                             margin: 0 !important;
                             margin-top: 0 !important;
@@ -2195,8 +2199,8 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         .w-2\\/5,
                         [class*="w-2/5"],
                         .atlas-template .w-2\\/5,
-                        .resume-ats .w-2\\/5,
-                        .ats-template .w-2\\/5,
+                        .atlas .w-2\\/5,
+                        .atlas-template .w-2\\/5,
                         div[class*="w-2/5"].atlas-left-panel,
                         [class*="bg-blue"] {
                             background-color: #1e3a8a !important;
@@ -2211,8 +2215,8 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         .w-2\\/5 *,
                         [class*="w-2/5"] *,
                         .atlas-template .w-2\\/5 *,
-                        .resume-ats .w-2\\/5 *,
-                        .ats-template .w-2\\/5 *,
+                        .atlas .w-2\\/5 *,
+                        .atlas-template .w-2\\/5 *,
                         div[class*="w-2/5"].atlas-left-panel *,
                         [class*="bg-blue"] * {
                             color: white !important;
@@ -2257,8 +2261,8 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         .w-3\\/5,
                         [class*="w-3/5"],
                         .atlas-template .w-3\\/5,
-                        .resume-ats .w-3\\/5,
-                        .ats-template .w-3\\/5 {
+                        .atlas .w-3\\/5,
+                        .atlas-template .w-3\\/5 {
                             background-color: white !important;
                             background: white !important;
                             color: #1f2937 !important;
@@ -2287,9 +2291,9 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                 `
             });
             
-            // JavaScript for aggressive Resume-ATS design enforcement
+            // JavaScript for aggressive Atlas design enforcement
             await page.evaluate(() => {
-                console.log('🎯 Resume-ATS JavaScript design enforcement executing...');
+                console.log('🎯 Atlas JavaScript design enforcement executing...');
                 
                 // AGGRESSIV - 15MM MESAFE SIFIR ET
                 console.log('🔧 REMOVING 15MM TOP SPACE COMPLETELY...');
@@ -2317,8 +2321,8 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                 
                 const templateContainers = document.querySelectorAll(`
                     .atlas-template,
-                    .resume-ats,
-                    .ats-template,
+                    .atlas,
+                    .atlas-template,
                     .cv-template,
                     html,
                     body
@@ -2477,14 +2481,14 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                     });
                 });
                 
-                console.log(`✅ Resume-ATS CORRECT design fix completed:`);
+                console.log(`✅ Atlas CORRECT design fix completed:`);
                 console.log(`   🔵 Left panel + sections: #1e3a8a göy + ağ text`);
                 console.log(`   ⚪ Right panel + sections: Ağ background + qara text`);
                 console.log('✅ Sol paneldəki contact, skills, languages: GÖY - BORDER LEĞVİ');
                 console.log('✅ Sağ paneldəki experience, education, projects: AĞ');
             });
             
-            console.log('✅ Resume-ATS template complete design fix applied successfully');
+            console.log('✅ Atlas template complete design fix applied successfully');
         }
         
         // Sadə və təbii PDF axını
@@ -2609,7 +2613,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             
             // Force specific background colors for common elements
             const specificBackgrounds = [
-                { selector: '.bg-blue-600', color: '#2563eb' },
+                { selector: '.bg-blue-600', color: '#1e3a8a' },
                 { selector: '.bg-blue-500', color: '#3b82f6' },
                 { selector: '.bg-gray-100', color: '#f3f4f6' },
                 { selector: '.bg-gray-200', color: '#e5e7eb' },

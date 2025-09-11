@@ -38,13 +38,12 @@
   /* Universal template optimization - applies to ALL templates EXCEPT ATLAS */
   .basic-template,
   .modern-template,
-  .ats-template,
   .exclusive-template,
   .aurora-template,
   .vertex-template,
   .horizon-template,
   .lumen-template,
-  div[class*="template"]:not(.atlas-template):not(.resume-ats):not(.ats-template) {
+  div[class*="template"]:not(.atlas-template) {
     width: 210mm !important;
     min-height: 297mm !important;
     max-width: 210mm !important;
@@ -153,7 +152,7 @@
   .basic-template h1 {
     font-size: 24pt !important;
     margin-bottom: 4mm !important;
-    color: #2563eb !important;
+    color: #111827 !important;
   }
   
   .basic-template h2 {
@@ -161,7 +160,7 @@
     margin-bottom: 3mm !important;
     border-bottom: 1pt solid #d1d5db !important;
     padding-bottom: 1mm !important;
-    color: #2563eb !important;
+    color: #111827 !important;
   }
 
   /* Modern Template */
@@ -183,20 +182,20 @@
     background: white !important;
   }
 
-  /* ATS Template */
-  .ats-template {
+  /* Atlas Template */
+  .atlas-template {
     display: flex !important;
     padding: 0 !important;
   }
   
-  .ats-template .left-panel {
+  .atlas-template .left-panel {
     width: 65mm !important;
-    background: #1e40af !important;
+    background: #1e3a8a !important;
     color: white !important;
     padding: 15mm 8mm !important;
   }
   
-  .ats-template .right-panel {
+  .atlas-template .right-panel {
     width: 145mm !important;
     padding: 15mm 12mm !important;
     background: white !important;
@@ -230,6 +229,25 @@
   /* Horizon Template */
   .horizon-template {
     padding: 15mm !important;
+  }
+
+  /* Atlas Template */
+  .atlas-template {
+    display: flex !important;
+    padding: 0 !important;
+  }
+  
+  .atlas-template .left-panel {
+    width: 65mm !important;
+    background: #1e3a8a !important;
+    color: white !important;
+    padding: 15mm 8mm !important;
+  }
+  
+  .atlas-template .right-panel {
+    width: 145mm !important;
+    padding: 15mm 12mm !important;
+    background: white !important;
   }
 
   /* Lumen Template */
@@ -269,20 +287,19 @@
   .cv-template.atlas-template .w-2\/5,
   .atlas-template div[class*="w-2/5"],
   .cv-template.atlas-template div[class*="w-2/5"] {
-    background-color: #2563eb !important;
-    background: #2563eb !important;
+    background-color: white !important;
+    background: white !important;
     background-image: none !important;
-    color: white !important;
+    color: #111827 !important;
     z-index: 999999 !important;
     position: relative !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-    color-adjust: exact !important;
     width: 84mm !important; /* 2/5 of 210mm */
     min-height: 297mm !important;
   }
   
-  /* Atlas sol panel içindəki BÜTÜN elementlər ağ rəng */
+  /* Atlas sol panel içindəki BÜTÜN elementlər qara rəng */
   .atlas-left-panel *,
   .atlas-template .atlas-left-panel *,
   .cv-template.atlas-template .atlas-left-panel *,
@@ -290,14 +307,13 @@
   .cv-template.atlas-template .w-2\/5 *,
   .atlas-template div[class*="w-2/5"] *,
   .cv-template.atlas-template div[class*="w-2/5"] * {
-    color: white !important;
-    border-color: white !important;
+    color: #111827 !important;
+    border-color: #374151 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-    color-adjust: exact !important;
   }
   
-  /* Atlas sol panel xətləri də ağ olsun */
+  /* Atlas sol panel xətləri də qara olsun */
   .atlas-left-panel .border-b,
   .atlas-left-panel .border-t,
   .atlas-left-panel .border-l,
@@ -310,7 +326,7 @@
   .atlas-template .w-2\/5 .border-r,
   .atlas-template .w-2\/5 .border,
   .atlas-template .w-2\/5 [class*="border"] {
-    border-color: white !important;
+    border-color: #374151 !important;
   }
   
   /* Atlas sağ panel - ağ arxa plan */

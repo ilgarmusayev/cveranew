@@ -11,7 +11,7 @@
   --card-background: #ffffff;
   --border-color: #e2e8f0;
   --primary-color: #3b82f6;
-  --primary-hover: #2563eb;
+  --primary-hover: #1e3a8a;
   --secondary-color: #64748b;
   --success-color: #10b981;
   --error-color: #ef4444;
@@ -855,34 +855,41 @@ section, div[role="main"], .main-content {
   }
 }
 
-/* ATLAS/RESUME-ATS TEMPLATE SOL PANEL ÜÇÜN GÜCLÜ CSS - PDF EXPORT */
+/* ATLAS/ATLAS TEMPLATE SOL PANEL ÜÇÜN GÜCLÜ CSS - PDF EXPORT */
 .atlas-left-panel,
-.resume-ats .atlas-left-panel,
-.ats-template .atlas-left-panel {
-  background-color: #2563eb !important; /* Goy rəng */
+.atlas .atlas-left-panel,
+.atlas-template .atlas-left-panel {
+  background-color: #1e3a8a !important; /* Goy rəng */
   color: white !important;
   z-index: 9999 !important;
   position: relative !important;
 }
 
-/* Atlas/Resume-ATS template specific - daha güclü selector */
+/* Atlas sol panel section başlıkları üçün ağ alt xətt */
+.atlas-template .w-2\/5 h2,
+.atlas-left-panel h2,
+.atlas .w-2\/5 h2 {
+  border-bottom: 2px solid rgb(255, 255, 255) !important;
+}
+
+/* Atlas/Atlas template specific - daha güclü selector */
 .atlas-template .w-2\/5,
 .cv-template.atlas-template .w-2\/5,
 div.atlas-template .w-2\/5,
 .atlas-template div[class*="w-2/5"],
 .cv-template.atlas-template div[class*="w-2/5"],
-.resume-ats .w-2\/5,
-.cv-template.resume-ats .w-2\/5,
-div.resume-ats .w-2\/5,
-.resume-ats div[class*="w-2/5"],
-.cv-template.resume-ats div[class*="w-2/5"],
-.ats-template .w-2\/5,
-.cv-template.ats-template .w-2\/5,
-div.ats-template .w-2\/5,
-.ats-template div[class*="w-2/5"],
-.cv-template.ats-template div[class*="w-2/5"] {
-  background-color: #2563eb !important;
-  background: #2563eb !important;
+.atlas .w-2\/5,
+.cv-template.atlas .w-2\/5,
+div.atlas .w-2\/5,
+.atlas div[class*="w-2/5"],
+.cv-template.atlas div[class*="w-2/5"],
+.atlas-template .w-2\/5,
+.cv-template.atlas-template .w-2\/5,
+div.atlas-template .w-2\/5,
+.atlas-template div[class*="w-2/5"],
+.cv-template.atlas-template div[class*="w-2/5"] {
+  background-color: #1e3a8a !important;
+  background: #1e3a8a !important;
   color: white !important;
   z-index: 99999 !important;
   position: relative !important;
@@ -916,13 +923,12 @@ div.ats-template .w-2\/5,
 .atlas-template .w-2\/5 em,
 .atlas-template .w-2\/5 a {
   color: white !important;
-  border-color: white !important;
 }
 
 /* PDF export zamanı Atlas sol panel */
 @media print {
   .atlas-left-panel {
-    background-color: #2563eb !important;
+    background-color: #1e3a8a !important;
     color: white !important;
     z-index: 9999 !important;
     position: relative !important;
@@ -938,8 +944,8 @@ div.ats-template .w-2\/5,
   .cv-template.atlas-template div[class*="w-2/5"],
   .atlas-template [class*="bg-blue"],
   .cv-template.atlas-template [class*="bg-blue"] {
-    background-color: #2563eb !important;
-    background: #2563eb !important;
+    background-color: #1e3a8a !important;
+    background: #1e3a8a !important;
     color: white !important;
     z-index: 99999 !important;
     position: relative !important;
@@ -975,29 +981,61 @@ div.ats-template .w-2\/5,
   .atlas-template .w-2\/5 em,
   .atlas-template .w-2\/5 a {
     color: white !important;
-    border-color: white !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-  }
-  
-  /* Atlas sol panel xətləri də ağ olsun */
-  .atlas-left-panel .border-b,
-  .atlas-left-panel .border-t,
-  .atlas-left-panel .border-l,
-  .atlas-left-panel .border-r,
-  .atlas-left-panel .border,
-  .atlas-template .w-2\/5 .border-b,
-  .atlas-template .w-2\/5 .border-t,
-  .atlas-template .w-2\/5 .border-l,
-  .atlas-template .w-2\/5 .border-r,
-  .atlas-template .w-2\/5 .border {
-    border-color: white !important;
   }
 }
 
 /* Atlas sol panel üçün əlavə güclü qaydalar */
 .cv-template.atlas-template .atlas-left-panel {
-  background-color: #2563eb !important;
+  background-color: #1e3a8a !important;
   color: white !important;
   z-index: 9999 !important;
+}
+
+/* PRODUCTION ATLAS TEMPLATE FIX - Comprehensive Atlas Template Styles */
+.atlas-template {
+  /* Ensure the template container is properly set up */
+  display: flex !important;
+}
+
+.atlas-template .atlas-left-panel,
+.atlas-template .w-5\/12,
+.atlas-template .w-2\/5 {
+  /* Force blue background for Atlas left panel */
+  background-color: #1e3a8a !important;
+  background: #1e3a8a !important;
+  background-image: none !important;
+  color: white !important;
+  
+  /* Ensure proper print colors */
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  color-adjust: exact !important;
+}
+
+/* Override all text colors in Atlas left panel */
+.atlas-template .atlas-left-panel *,
+.atlas-template .w-5\/12 *,
+.atlas-template .w-2\/5 * {
+  color: white !important;
+}
+
+/* Override specific Tailwind text color classes in Atlas */
+.atlas-template .atlas-left-panel .text-gray-900,
+.atlas-template .atlas-left-panel .text-gray-800,
+.atlas-template .atlas-left-panel .text-gray-700,
+.atlas-template .atlas-left-panel .text-gray-600,
+.atlas-template .atlas-left-panel .text-gray-500 {
+  color: white !important;
+}
+
+/* Atlas links should be white with light blue hover */
+.atlas-template .atlas-left-panel a {
+  color: white !important;
+  text-decoration: underline;
+}
+
+.atlas-template .atlas-left-panel a:hover {
+  color: #bfdbfe !important;
 }

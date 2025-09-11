@@ -450,7 +450,7 @@ export default function CVExportPage() {
                     .cv-section, 
                     .aurora-template .mb-4, .vertex-template .mb-4, .horizon-template .mb-4,
                     .lumen-template .mb-4, .modern-template .mb-4, .exclusive-template .mb-4,
-                    .ats-template .mb-4, .basic-template .mb-4, .traditional-template .mb-4 {
+                    .atlas-template .mb-4, .basic-template .mb-4, .traditional-template .mb-4 {
                         page-break-inside: avoid !important;
                         break-inside: avoid !important;
                         margin-bottom: 12px !important;
@@ -460,7 +460,7 @@ export default function CVExportPage() {
                     .cv-section.large-section,
                     .aurora-template .mb-6, .vertex-template .mb-6, .horizon-template .mb-6,
                     .lumen-template .mb-6, .modern-template .mb-6, .exclusive-template .mb-6,
-                    .ats-template .mb-6, .basic-template .mb-6, .traditional-template .mb-6 {
+                    .atlas-template .mb-6, .basic-template .mb-6, .traditional-template .mb-6 {
                         page-break-inside: auto !important;
                         break-inside: auto !important;
                         margin-bottom: 16px !important;
@@ -470,10 +470,10 @@ export default function CVExportPage() {
                     .cv-section h1, .cv-section h2, .cv-section h3,
                     .aurora-template h1, .vertex-template h1, .horizon-template h1,
                     .lumen-template h1, .modern-template h1, .exclusive-template h1,
-                    .ats-template h1, .basic-template h1, .traditional-template h1,
+                    .atlas-template h1, .basic-template h1, .traditional-template h1,
                     .aurora-template h2, .vertex-template h2, .horizon-template h2,
                     .lumen-template h2, .modern-template h2, .exclusive-template h2,
-                    .ats-template h2, .basic-template h2, .traditional-template h2 {
+                    .atlas-template h2, .basic-template h2, .traditional-template h2 {
                         page-break-after: avoid !important;
                         break-after: avoid !important;
                         orphans: 3 !important; /* Minimum 3 lines before page break */
@@ -484,7 +484,7 @@ export default function CVExportPage() {
                     .experience-item, .education-item, .project-item,
                     .aurora-template .space-y-2 > div, .vertex-template .space-y-2 > div,
                     .lumen-template .space-y-2 > div, .modern-template .space-y-2 > div,
-                    .exclusive-template .space-y-2 > div, .ats-template .space-y-2 > div,
+                    .exclusive-template .space-y-2 > div, .atlas-template .space-y-2 > div,
                     .basic-template .space-y-2 > div, .traditional-template .space-y-2 > div {
                         page-break-inside: avoid !important;
                         break-inside: avoid !important;
@@ -505,7 +505,7 @@ export default function CVExportPage() {
                     .personal-info-section,
                     .aurora-template .mb-6:first-child, .vertex-template .mb-6:first-child,
                     .lumen-template .mb-6:first-child, .modern-template .mb-6:first-child,
-                    .exclusive-template .mb-6:first-child, .ats-template .mb-6:first-child,
+                    .exclusive-template .mb-6:first-child, .atlas-template .mb-6:first-child,
                     .basic-template .mb-6:first-child, .traditional-template .mb-6:first-child {
                         page-break-inside: avoid !important;
                         break-inside: avoid !important;

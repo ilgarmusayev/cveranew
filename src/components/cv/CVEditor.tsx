@@ -322,8 +322,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
     const [leftColumnOrder, setLeftColumnOrder] = useState<string[]>(['skills', 'languages', 'certifications']);
     
     // Check if current template is ATS or Aurora or Vertex
-    const isATSTemplate = cv.templateId?.toLowerCase().includes('ats') || 
-                         cv.templateId?.toLowerCase().includes('resume-ats') || 
+    const isAtlasTemplate = cv.templateId?.toLowerCase().includes('ats') || 
+                         cv.templateId?.toLowerCase().includes('atlas') || 
                          cv.templateId?.toLowerCase().includes('clean') ||
                          cv.templateId?.toLowerCase().includes('minimal-professional') ||
                          cv.templateId?.toLowerCase().includes('aurora') ||
@@ -343,8 +343,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
         if (cv.experience && cv.experience.length > 0) count++; // experience
         if (cv.education && cv.education.length > 0) count++; // education
         
-        // For ATS template, don't count skills/languages/certifications as they're in left panel
-        if (!isATSTemplate) {
+        // For Atlas template, don't count skills/languages/certifications as they're in left panel
+        if (!isAtlasTemplate) {
             if (cv.skills && cv.skills.length > 0) count++; // skills
             if (cv.languages && cv.languages.length > 0) count++; // languages
             if (cv.certifications && cv.certifications.length > 0) count++; // certifications
@@ -355,7 +355,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
         if (cv.customSections && cv.customSections.length > 0) count++; // customSections
         
         return count;
-    }, [cv, isATSTemplate]);
+    }, [cv, isAtlasTemplate]);
 
     // Function to get visible sections order
     const getVisibleSections = useCallback(() => {
@@ -373,19 +373,19 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     if (cv.education && cv.education.length > 0) visibleSections.push(section);
                     break;
                 case 'skills':
-                    // For ATS template, skills are in left panel, don't count in main order
-                    if (!isATSTemplate && cv.skills && cv.skills.length > 0) visibleSections.push(section);
+                    // For Atlas template, skills are in left panel, don't count in main order
+                    if (!isAtlasTemplate && cv.skills && cv.skills.length > 0) visibleSections.push(section);
                     break;
                 case 'languages':
-                    // For ATS template, languages are in left panel, don't count in main order
-                    if (!isATSTemplate && cv.languages && cv.languages.length > 0) visibleSections.push(section);
+                    // For Atlas template, languages are in left panel, don't count in main order
+                    if (!isAtlasTemplate && cv.languages && cv.languages.length > 0) visibleSections.push(section);
                     break;
                 case 'projects':
                     if (cv.projects && cv.projects.length > 0) visibleSections.push(section);
                     break;
                 case 'certifications':
-                    // For ATS template, certifications are in left panel, don't count in main order
-                    if (!isATSTemplate && cv.certifications && cv.certifications.length > 0) visibleSections.push(section);
+                    // For Atlas template, certifications are in left panel, don't count in main order
+                    if (!isAtlasTemplate && cv.certifications && cv.certifications.length > 0) visibleSections.push(section);
                     break;
                 case 'volunteer':
                     if (cv.volunteerExperience && cv.volunteerExperience.length > 0) visibleSections.push(section);
@@ -397,7 +397,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
         });
         
         return visibleSections;
-    }, [cv, sectionOrder, isATSTemplate]);
+    }, [cv, sectionOrder, isAtlasTemplate]);
     
     // Define mobile section movement function that will use direct CV state updates
     const moveSection = useCallback((activeSection: string, direction: 'up' | 'down') => {
@@ -445,7 +445,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
         }
     }, [sectionOrder, setCv, setIsDirty]);
 
-    // Move function for left panel sections (ATS template)
+    // Move function for left panel sections (Atlas template)
     const moveLeftSection = useCallback((sectionId: string, direction: 'up' | 'down') => {
         console.log('📱 CVEditor Moving left section:', { sectionId, direction, currentOrder: leftColumnOrder });
         
@@ -857,7 +857,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             currentActiveMobileSection: activeMobileSection
         });
         
-        // Check if this is a left panel section (ATS template)
+        // Check if this is a left panel section (Atlas template)
         const leftPanelSections = ['leftSkills', 'leftLanguages', 'leftCertifications'];
         
         if (sectionId && leftPanelSections.includes(sectionId)) {

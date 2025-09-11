@@ -8,6 +8,7 @@ import TawkToWidget from "@/components/TawkToWidget";
 import CustomCursor from "@/components/CustomCursor";
 import AOSProvider from "@/components/providers/AOSProvider";
 import "./globals.css";
+import "../styles/pdf-export-optimization.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
