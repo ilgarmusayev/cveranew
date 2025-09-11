@@ -220,25 +220,7 @@ export default function ExperienceSection({ data, onChange, cvLanguage = 'azerba
                     currentLabel={cvLanguage === 'english' ? 'Currently working' : 'Davam edir'}
                     cvLanguage={cvLanguage}
                   />
-    <div className="flex items-end">
-                      <label className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={Boolean(experience.current)}
-                          onChange={(e) => {
-                            const isChecked = e.target.checked;
-                            updateExperience(experience.id, {
-                              current: isChecked,
-                              endDate: isChecked ? '' : experience.endDate,
-                            });
-                          }}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                        <span className="ml-2 text-sm text-gray-700">
-                          {cvLanguage === 'english' ? 'Currently working' : 'Davam edir'}
-                        </span>
-                      </label>
-                    </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       {cvLanguage === 'english' ? 'Description (optional)' : 'Təsvir (ixtiyari)'}

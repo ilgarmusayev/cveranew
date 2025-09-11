@@ -1349,7 +1349,7 @@ const BasicTemplate: React.FC<{
                         <div className="border-l-2 border-blue-200 pl-3" style={{ 
                             display: validLanguages.length <= 2 ? 'flex' : 'grid', 
                             flexDirection: validLanguages.length <= 2 ? 'column' : undefined,
-                            gridTemplateColumns: validLanguages.length > 2 ? 'repeat(4, 1fr)' : undefined,
+                            gridTemplateColumns: validLanguages.length > 2 ? 'repeat(auto-fit, minmax(120px, 1fr))' : undefined,
                             gap: 'var(--cv-section-spacing)' 
                         }}>
                             {validLanguages.map((lang) => (
@@ -1636,8 +1636,8 @@ const BasicTemplate: React.FC<{
                         >
                             {getFullName(personalInfo, data.cvLanguage)}
                         </h1>
-                        <div 
-                            className="grid grid-cols-2 text-gray-600 gap-3"
+                        <div
+                            className="grid grid-cols-1 sm:grid-cols-2 text-gray-600 gap-x-4 gap-y-2"
                             style={{
                                 fontSize: 'var(--cv-small-size)',
                                 fontWeight: 'var(--cv-small-weight)',
@@ -1645,58 +1645,76 @@ const BasicTemplate: React.FC<{
                             }}
                         >
                             {personalInfo.email && (
-                                <span className="flex items-center gap-2">
-                                                                        {data.cvLanguage === 'english' ? 'Email: ' : 'E-poçt: '}
- {personalInfo.email}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium min-w-[50px] flex-shrink-0">
+                                        {data.cvLanguage === 'english' ? 'Email:' : 'E-poçt:'}
+                                    </span>
+                                    <span className="break-all">{personalInfo.email}</span>
+                                </div>
                             )}
                             {personalInfo.phone && (
-                                <span className="flex items-center gap-2">
-                                    {data.cvLanguage === 'english' ? 'Phone: ' : 'Telefon: '}
-                                    {personalInfo.phone}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium min-w-[50px] flex-shrink-0">
+                                        {data.cvLanguage === 'english' ? 'Phone:' : 'Telefon:'}
+                                    </span>
+                                    <span>{personalInfo.phone}</span>
+                                </div>
                             )}
                             {personalInfo.location && (
-                                <span className="flex items-center gap-2">
-                                    {data.cvLanguage === 'english' ? 'Location: ' : 'Ünvan: '}
-                                    {personalInfo.location}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium min-w-[50px] flex-shrink-0">
+                                        {data.cvLanguage === 'english' ? 'Location:' : 'Ünvan:'}
+                                    </span>
+                                    <span>{personalInfo.location}</span>
+                                </div>
                             )}
                             {personalInfo.linkedin && (
-                                <span className="flex items-center gap-2">
-                                    LinkedIn: <a
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium min-w-[50px] flex-shrink-0">LinkedIn:</span>
+                                    <a
                                         href={getLinkedInDisplay(personalInfo.linkedin).url}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer underline"
+                                        className="text-gray-900 hover:text-gray-700 transition-colors cursor-pointer underline break-all"
                                     >
                                         {getLinkedInDisplay(personalInfo.linkedin).displayText}
                                     </a>
-                                </span>
+                                </div>
                             )}
                             {personalInfo.github && (
-                                <span className="flex items-center gap-2">
-                                    GitHub: <a
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium min-w-[50px] flex-shrink-0">GitHub Linki:</span>
+                                    <a
                                         href={getGitHubDisplay(personalInfo.github).url}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer underline"
+                                        className="text-gray-900 hover:text-gray-700 transition-colors cursor-pointer underline break-all"
                                     >
                                         {getGitHubDisplay(personalInfo.github).displayText}
                                     </a>
-                                </span>
+                                </div>
                             )}
                             {personalInfo.website && (
-                                <span className="flex items-center gap-2">
-                                    {data.cvLanguage === 'english' ? 'Website: ' : 'Veb-sayt: '}
-                                    {personalInfo.website}
-                                </span>
+                                <div className="flex items-center gap-2 col-span-1 sm:col-span-2">
+                                    <span className="font-medium min-w-[50px] flex-shrink-0">
+                                        {data.cvLanguage === 'english' ? 'Website:' : 'Veb-sayt:'}
+                                    </span>
+                                    <a
+                                        href={personalInfo.website?.startsWith('http') ? personalInfo.website : `https://${personalInfo.website}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-gray-900 hover:text-gray-700 transition-colors cursor-pointer underline break-all"
+                                    >
+                                        {personalInfo.website}
+                                    </a>
+                                </div>
                             )}
                             {personalInfo.additionalLinks && personalInfo.additionalLinks.length > 0 && (
                                 personalInfo.additionalLinks.map((link) => (
-                                    <span key={link.id} className="flex items-center gap-2">
-                                        {link.label}: {link.value}
-                                    </span>
+                                    <div key={link.id} className="flex items-center gap-2">
+                                        <span className="font-medium min-w-[50px] flex-shrink-0">{link.label}:</span>
+                                        <span className="break-all">{link.value}</span>
+                                    </div>
                                 ))
                             )}
                         </div>
@@ -1897,43 +1915,50 @@ const ModernTemplate: React.FC<{
                                 <p className="text-lg text-blue-600 font-medium" style={{ marginBottom: 0 }}>{(personalInfo as any).title}</p>
                             )}
 
-                            <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600 mt-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 justify-center gap-x-6 gap-y-2 text-sm text-gray-600 mt-4">
                                 {personalInfo.email && (
-                                    <span className="flex items-center gap-2">
-                                        <span className="w-4 h-4">📧</span>
-                                        {personalInfo.email}
-                                    </span>
+                                    <div className="flex items-center justify-center sm:justify-start gap-2">
+                                        <span className="w-4 h-4 flex-shrink-0">📧</span>
+                                        <span className="break-all">{personalInfo.email}</span>
+                                    </div>
                                 )}
                                 {personalInfo.phone && (
-                                    <span className="flex items-center gap-2">
-                                        <span className="w-4 h-4">📱</span>
-                                        {personalInfo.phone}
-                                    </span>
+                                    <div className="flex items-center justify-center sm:justify-start gap-2">
+                                        <span className="w-4 h-4 flex-shrink-0">📱</span>
+                                        <span>{personalInfo.phone}</span>
+                                    </div>
                                 )}
                                 {personalInfo.location && (
-                                    <span className="flex items-center gap-2">
-                                        <span className="w-4 h-4">📍</span>
-                                        {personalInfo.location}
-                                    </span>
+                                    <div className="flex items-center justify-center sm:justify-start gap-2">
+                                        <span className="w-4 h-4 flex-shrink-0">📍</span>
+                                        <span>{personalInfo.location}</span>
+                                    </div>
                                 )}
                                 {personalInfo.linkedin && (
-                                    <span className="flex items-center gap-2">
-                                        <span className="w-4 h-4">🔗</span>
+                                    <div className="flex items-center justify-center sm:justify-start gap-2">
+                                        <span className="w-4 h-4 flex-shrink-0">🔗</span>
                                         <a
                                             href={getLinkedInDisplay(personalInfo.linkedin).url}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer underline"
+                                            className="text-gray-900 hover:text-gray-700 transition-colors cursor-pointer underline"
                                         >
                                             {getLinkedInDisplay(personalInfo.linkedin).displayText}
                                         </a>
-                                    </span>
+                                    </div>
                                 )}
                                 {personalInfo.website && (
-                                    <span className="flex items-center gap-2">
-                                        <span className="w-4 h-4">🌐</span>
-                                        {personalInfo.website}
-                                    </span>
+                                    <div className="flex items-center justify-center sm:justify-start gap-2">
+                                        <span className="w-4 h-4 flex-shrink-0">🌐</span>
+                                        <a
+                                            href={personalInfo.website.startsWith('http') ? personalInfo.website : `https://${personalInfo.website}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-gray-900 hover:text-gray-700 transition-colors cursor-pointer underline break-all"
+                                        >
+                                            {personalInfo.website}
+                                        </a>
+                                    </div>
                                 )}
                             </div>
 
@@ -2871,7 +2896,7 @@ const AtlasTemplate: React.FC<{
                                                         href={project.url}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="text-sm font-bold text-gray-900 underline hover:text-blue-600 transition-colors cursor-pointer"
+                                                        className="text-sm font-bold text-gray-900 underline hover:text-gray-700 transition-colors cursor-pointer"
                                                     >
                                                         {project.name}
                                                     </a>
@@ -3144,14 +3169,28 @@ const AtlasTemplate: React.FC<{
                                 <span className="font-medium text-blue-200 min-w-[50px]">
                                     {data.cvLanguage === 'english' ? 'Website:' : 'Sayt:'}
                                 </span>
-                                <span className="text-white break-all">{personalInfo.website}</span>
+                                <a
+                                    href={personalInfo.website.startsWith('http') ? personalInfo.website : `https://${personalInfo.website}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-white break-all hover:text-blue-200 transition-colors cursor-pointer underline"
+                                >
+                                    {personalInfo.website}
+                                </a>
                             </div>
                         )}
                         {personalInfo.additionalLinks && personalInfo.additionalLinks.length > 0 && (
                             personalInfo.additionalLinks.map((link) => (
                                 <div key={link.id} className="flex items-start gap-3">
                                     <span className="font-medium text-blue-200 min-w-[50px]">{link.label}:</span>
-                                    <span className="text-white break-all">{link.value}</span>
+                                    <a
+                                        href={link.value.startsWith('http') ? link.value : `https://${link.value}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-white break-all hover:text-blue-200 transition-colors cursor-pointer underline"
+                                    >
+                                        {link.value}
+                                    </a>
                                 </div>
                             ))
                         )}
@@ -3918,7 +3957,7 @@ const LumenTemplate: React.FC<{
                                                         href={project.url}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="text-sm font-bold text-gray-900 underline hover:text-blue-600 transition-colors cursor-pointer"
+                                                        className="text-sm font-bold text-gray-900 underline hover:text-gray-700 transition-colors cursor-pointer"
                                                     >
                                                         {project.name}
                                                     </a>
@@ -4182,7 +4221,7 @@ const LumenTemplate: React.FC<{
                                     href={getLinkedInDisplay(personalInfo.linkedin).url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-gray-800 break-all hover:text-blue-600 transition-colors cursor-pointer underline"
+                                    className="text-gray-800 break-all hover:text-gray-700 transition-colors cursor-pointer underline"
                                 >
                                     {getLinkedInDisplay(personalInfo.linkedin).displayText}
                                 </a>
@@ -4190,12 +4229,12 @@ const LumenTemplate: React.FC<{
                         )}
                         {personalInfo.github && (
                             <div className="flex items-start gap-3">
-                                <span className="font-medium text-gray-600 min-w-[70px]">GitHub: </span>
+                                <span className="font-medium text-gray-600 min-w-[70px]">GitHub Linki: </span>
                                 <a
                                     href={getGitHubDisplay(personalInfo.github).url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-gray-800 break-all hover:text-blue-600 transition-colors cursor-pointer underline"
+                                    className="text-gray-800 break-all hover:text-gray-700 transition-colors cursor-pointer underline"
                                 >
                                     {getGitHubDisplay(personalInfo.github).displayText}
                                 </a>
@@ -4206,14 +4245,28 @@ const LumenTemplate: React.FC<{
                                 <span className="font-medium text-gray-600 min-w-[70px]">
                                     {data.cvLanguage === 'english' ? 'Website: ' : 'Sayt: '}
                                 </span>
-                                <span className="text-gray-800 break-all">{personalInfo.website}</span>
+                                <a
+                                    href={personalInfo.website.startsWith('http') ? personalInfo.website : `https://${personalInfo.website}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-gray-800 break-all hover:text-gray-700 transition-colors cursor-pointer underline"
+                                >
+                                    {personalInfo.website}
+                                </a>
                             </div>
                         )}
                         {personalInfo.additionalLinks && personalInfo.additionalLinks.length > 0 && (
                             personalInfo.additionalLinks.map((link) => (
-                                <div key={link.id} className="flex items-start" style={{ gap: 0, marginBottom: 0 }}>
+                                <div key={link.id} className="flex items-start" style={{ gap: 12, marginBottom: 0 }}>
                                     <span className="font-medium text-gray-600 min-w-[60px]">{link.label}: </span>
-                                    <span className="text-gray-800 break-all">{link.value}</span>
+                                    <a
+                                        href={link.value.startsWith('http') ? link.value : `https://${link.value}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-gray-800 break-all hover:text-gray-700 transition-colors cursor-pointer underline"
+                                    >
+                                        {link.value}
+                                    </a>
                                 </div>
                             ))
                         )}
@@ -4807,7 +4860,7 @@ const PrimeTemplate: React.FC<{
                                                             href={project.url.startsWith('http') ? project.url : `https://${project.url}`}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="text-gray-600 hover:text-blue-600 underline transition-colors"
+                                                            className="text-gray-900 hover:text-gray-700 underline transition-colors"
                                                         >
                                                             {project.url}
                                                         </a>
@@ -4815,8 +4868,15 @@ const PrimeTemplate: React.FC<{
                                                 )}
                                                 {project.github && (
                                                     <div className="text-xs text-gray-600 mt-1">
-                                                        <span className="font-medium">GitHub: </span>
-                                                        {getGitHubDisplay(project.github).displayText}
+                                                        <span className="font-medium">GitHub Linki: </span>
+                                                        <a
+                                                            href={getGitHubDisplay(project.github).url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-gray-900 hover:text-gray-700 underline transition-colors"
+                                                        >
+                                                            {getGitHubDisplay(project.github).displayText}
+                                                        </a>
                                                     </div>
                                                 )}
                                             </div>
@@ -4851,14 +4911,14 @@ const PrimeTemplate: React.FC<{
                         isDropTarget={dropTargetId === 'languages'}
                     >
                         <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                            <div className="border-b-2 border-green-600 mb-4">
-                                <h2 className="text-lg font-bold text-gray-900 mb-2">
+                            <div className="border-b-2 border-green-600 mb-2">
+                                <h2 className="text-lg font-bold text-gray-900 mb-1">
                                     {getSectionName('languages', data.cvLanguage, data.sectionNames)}
                                 </h2>
                             </div>
                             <div className="text-sm text-gray-700 leading-relaxed">
                                 {languages.map((lang) => (
-                                    <span key={lang.id} className="inline-block mr-6 mb-2">
+                                    <span key={lang.id} className="inline-block mr-4 mb-1">
                                         <span className="font-medium">{lang.language}</span>
                                         <span className="text-gray-600 ml-1">({getLanguageLevel(lang.level, data.cvLanguage)})</span>
                                     </span>
@@ -4880,14 +4940,14 @@ const PrimeTemplate: React.FC<{
                         isDropTarget={dropTargetId === 'certifications'}
                     >
                         <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                            <div className="border-b-2 border-green-600 mb-4">
-                                <h2 className="text-lg font-bold text-gray-900 mb-2">
+                            <div className="border-b-2 border-green-600 mb-2">
+                                <h2 className="text-lg font-bold text-gray-900 mb-1">
                                     {getSectionName('certifications', data.cvLanguage, data.sectionNames)}
                                 </h2>
                             </div>
-                            <div className="space-y-3">
+                            <div className="space-y-2">
                                 {certifications.map((cert) => (
-                                    <div key={cert.id} className="border-b border-blue-200 pb-3 last:border-b-0">
+                                    <div key={cert.id} className="border-b border-blue-200 pb-2 last:border-b-0">
                                         <div className="flex justify-between items-start">
                                             <div className="flex-1">
                                                 <h3 className="text-base font-bold text-gray-900">{cert.name}</h3>
@@ -4902,7 +4962,7 @@ const PrimeTemplate: React.FC<{
                                                             href={cert.url.startsWith('http') ? cert.url : `https://${cert.url}`}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="text-gray-600 hover:text-blue-600 underline transition-colors"
+                                                            className="text-gray-900 hover:text-gray-700 underline transition-colors"
                                                         >
                                                             {cert.url}
                                                         </a>
@@ -4934,14 +4994,14 @@ const PrimeTemplate: React.FC<{
                         isDropTarget={dropTargetId === 'volunteer'}
                     >
                         <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                            <div className="border-b-2 border-green-600 mb-4">
-                                <h2 className="text-lg font-bold text-gray-900 mb-2">
+                            <div className="border-b-2 border-green-600 mb-2">
+                                <h2 className="text-lg font-bold text-gray-900 mb-1">
                                     {getSectionName('volunteerExperience', data.cvLanguage, data.sectionNames)}
                                 </h2>
                             </div>
-                            <div className="space-y-3">
+                            <div className="space-y-2">
                                 {volunteerExperience.map((vol) => (
-                                    <div key={vol.id} className="border-b border-blue-200 pb-3 last:border-b-0">
+                                    <div key={vol.id} className="border-b border-blue-200 pb-2 last:border-b-0">
                                         <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
                                             <div className="flex-1 min-w-0">
                                                 <h3 className="text-base font-bold text-gray-900">{vol.role}</h3>
@@ -4992,15 +5052,15 @@ const PrimeTemplate: React.FC<{
                             {customSections
                                 .sort((a, b) => (a.order || 999) - (b.order || 999))
                                 .map((section) => (
-                                    <div key={section.id} className="mb-6">
-                                        <div className="border-b-2 border-green-600 mb-4">
-                                            <h2 className="text-lg font-bold text-gray-900 mb-2">
+                                    <div key={section.id} className="mb-4">
+                                        <div className="border-b-2 border-green-600 mb-2">
+                                            <h2 className="text-lg font-bold text-gray-900 mb-1">
                                                 {section.title}
                                             </h2>
                                         </div>
-                                        <div className="space-y-3">
+                                        <div className="space-y-2">
                                             {section.items.map((item) => (
-                                                <div key={item.id} className="border-b border-blue-200 pb-3 last:border-b-0">
+                                                <div key={item.id} className="border-b border-blue-200 pb-2 last:border-b-0">
                                                     <div className="flex justify-between items-start mb-2">
                                                         <div className="flex-1">
                                                             {item.title && (
@@ -5034,7 +5094,7 @@ const PrimeTemplate: React.FC<{
                                                                 href={item.url.startsWith('http') ? item.url : `https://${item.url}`}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
-                                                                className="text-gray-600 hover:text-blue-600 underline transition-colors"
+                                                                className="text-gray-900 hover:text-gray-700 underline transition-colors"
                                                             >
                                                                 {item.url}
                                                             </a>
@@ -5081,45 +5141,70 @@ const PrimeTemplate: React.FC<{
 
                 {/* Contact Information in Simple Layout */}
                 <div className="border-t-2 border-green-600 pt-3 mb-3">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-sm">
                         {personalInfo.email && (
-                            <div className="flex items-center">
-                                <span className="font-medium text-gray-700 w-16 flex-shrink-0">Email:</span>
+                            <div className="flex items-center gap-2">
+                                <span className="font-medium text-gray-700 min-w-[70px] flex-shrink-0">
+                                    {data.cvLanguage === 'english' ? 'Email:' : 'E-poçt:'}
+                                </span>
                                 <span className="text-gray-900">{personalInfo.email}</span>
                             </div>
                         )}
                         {personalInfo.phone && (
-                            <div className="flex items-center">
-                                <span className="font-medium text-gray-700 w-16 flex-shrink-0">Phone:</span>
+                            <div className="flex items-center gap-2">
+                                <span className="font-medium text-gray-700 min-w-[70px] flex-shrink-0">
+                                    {data.cvLanguage === 'english' ? 'Phone:' : 'Telefon:'}
+                                </span>
                                 <span className="text-gray-900">{personalInfo.phone}</span>
                             </div>
                         )}
                         {personalInfo.location && (
-                            <div className="flex items-center">
-                                <span className="font-medium text-gray-700 w-16 flex-shrink-0">Location:</span>
+                            <div className="flex items-center gap-2">
+                                <span className="font-medium text-gray-700 min-w-[70px] flex-shrink-0">
+                                    {data.cvLanguage === 'english' ? 'Location:' : 'Ünvan:'}
+                                </span>
                                 <span className="text-gray-900">{personalInfo.location}</span>
                             </div>
                         )}
                         {personalInfo.linkedin && (
-                            <div className="flex items-center">
-                                <span className="font-medium text-gray-700 w-16 flex-shrink-0">LinkedIn:</span>
-                                <span className="text-gray-900 text-xs break-all">
+                            <div className="flex items-center gap-2">
+                                <span className="font-medium text-gray-700 min-w-[70px] flex-shrink-0">LinkedIn:</span>
+                                <a
+                                    href={getLinkedInDisplay(personalInfo.linkedin).url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-gray-900 text-xs break-all hover:text-gray-700 transition-colors"
+                                >
                                     {getLinkedInDisplay(personalInfo.linkedin).displayText}
-                                </span>
+                                </a>
                             </div>
                         )}
                         {personalInfo.github && (
-                            <div className="flex items-center">
-                                <span className="font-medium text-gray-700 w-16 flex-shrink-0">GitHub:</span>
-                                <span className="text-gray-900 text-xs break-all">
+                            <div className="flex items-center gap-2">
+                                <span className="font-medium text-gray-700 min-w-[70px] flex-shrink-0">GitHub Linki:</span>
+                                <a
+                                    href={getGitHubDisplay(personalInfo.github).url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-gray-900 text-xs break-all hover:text-gray-700 transition-colors"
+                                >
                                     {getGitHubDisplay(personalInfo.github).displayText}
-                                </span>
+                                </a>
                             </div>
                         )}
                         {personalInfo.website && (
-                            <div className="flex items-center col-span-1 md:col-span-2">
-                                <span className="font-medium text-gray-700 w-16 flex-shrink-0">Website:</span>
-                                <span className="text-gray-900 text-xs break-all">{personalInfo.website}</span>
+                            <div className="flex items-center gap-2 col-span-1 md:col-span-2">
+                                <span className="font-medium text-gray-700 min-w-[70px] flex-shrink-0">
+                                    {data.cvLanguage === 'english' ? 'Website:' : 'Sayt:'}
+                                </span>
+                                <a
+                                    href={personalInfo.website?.startsWith('http') ? personalInfo.website : `https://${personalInfo.website}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-gray-900 text-xs break-all hover:text-gray-700 transition-colors"
+                                >
+                                    {personalInfo.website}
+                                </a>
                             </div>
                         )}
                     </div>
@@ -5761,7 +5846,14 @@ const VertexTemplate: React.FC<{
                                         <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-28 font-semibold">
                                             {data.cvLanguage === 'english' ? 'Website' : 'Sayt'}
                                         </span>
-                                        <span className="text-sm text-gray-900 font-mono flex-1 text-right truncate">{personalInfo.website}</span>
+                                        <a
+                                            href={personalInfo.website.startsWith('http') ? personalInfo.website : `https://${personalInfo.website}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-sm text-gray-900 font-mono hover:underline flex-1 text-right truncate"
+                                        >
+                                            {personalInfo.website}
+                                        </a>
                                     </div>
                                 )}
                             </div>
@@ -5806,7 +5898,14 @@ const VertexTemplate: React.FC<{
                                     personalInfo.additionalLinks.slice(0, 1).map((link) => (
                                         <div key={link.id} className="flex items-center justify-between border-b border-gray-300 pb-2">
                                             <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-24 font-semibold">{link.label}</span>
-                                            <span className="text-sm text-gray-900 font-mono flex-1 text-right truncate">{link.value}</span>
+                                            <a
+                                                href={link.value.startsWith('http') ? link.value : `https://${link.value}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-sm text-gray-900 font-mono hover:underline flex-1 text-right truncate"
+                                            >
+                                                {link.value}
+                                            </a>
                                         </div>
                                     ))
                                 )}
@@ -6386,7 +6485,14 @@ const HorizonTemplate: React.FC<{
                         {personalInfo.website && (
                             <div className="flex items-center gap-3">
                                 <span>🌐</span>
-                                <span>{personalInfo.website}</span>
+                                <a
+                                    href={personalInfo.website.startsWith('http') ? personalInfo.website : `https://${personalInfo.website}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:underline"
+                                >
+                                    {personalInfo.website}
+                                </a>
                             </div>
                         )}
                         {personalInfo.linkedin && (
@@ -7108,7 +7214,7 @@ const AuroraTemplate: React.FC<{
                                                                 href={item.url}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
-                                                                className="text-gray-700 hover:text-blue-600 underline transition-colors"
+                                                                className="text-gray-700 hover:text-gray-600 underline transition-colors"
                                                             >
                                                                 {item.text}
                                                             </a>
@@ -7484,7 +7590,7 @@ const ExclusiveTemplate: React.FC<{
                                                     href={cert.url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="font-semibold text-sm text-gray-800 hover:text-blue-600 underline transition-colors"
+                                                    className="font-semibold text-sm text-gray-800 hover:text-gray-700 underline transition-colors"
                                                 >
                                                     {cert.name}
                                                 </a>
@@ -7746,7 +7852,7 @@ const ExclusiveTemplate: React.FC<{
                                                 href={getLinkedInDisplay(personalInfo.linkedin).url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="text-gray-800 font-medium text-sm hover:text-blue-600 underline"
+                                                className="text-gray-800 font-medium text-sm hover:text-gray-700 underline"
                                             >
                                                 {getLinkedInDisplay(personalInfo.linkedin).displayText}
                                             </a>
@@ -7756,13 +7862,13 @@ const ExclusiveTemplate: React.FC<{
                                     {personalInfo.github && (
                                         <div className="bg-white p-3 rounded-md shadow-sm">
                                             <div className="text-blue-600 uppercase font-bold text-xs mb-2">
-                                                <p>GitHub</p>
+                                                <p>GitHub Linki</p>
                                             </div>
                                             <a
                                                 href={getGitHubDisplay(personalInfo.github).url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="text-gray-800 font-medium text-sm hover:text-blue-600 underline"
+                                                className="text-gray-800 font-medium text-sm hover:text-gray-700 underline"
                                             >
                                                 {getGitHubDisplay(personalInfo.github).displayText}
                                             </a>
@@ -8566,7 +8672,7 @@ const ClarityTemplate: React.FC<{
                                                         colorAdjust: 'exact'
                                                     }}
                                                 >
-                                                    Email
+                                                    {data.cvLanguage === 'english' ? 'Email' : 'E-poçt'}
                                                 </div>
                                                 <div className="font-semibold">{personalInfo.email}</div>
                                             </div>
@@ -8590,7 +8696,7 @@ const ClarityTemplate: React.FC<{
                                                         colorAdjust: 'exact'
                                                     }}
                                                 >
-                                                    Phone
+                                                    {data.cvLanguage === 'english' ? 'Phone' : 'Telefon'}
                                                 </div>
                                                 <div className="font-semibold">{personalInfo.phone}</div>
                                             </div>
@@ -8614,7 +8720,7 @@ const ClarityTemplate: React.FC<{
                                                         colorAdjust: 'exact'
                                                     }}
                                                 >
-                                                    Location
+                                                    {data.cvLanguage === 'english' ? 'Location' : 'Ünvan'}
                                                 </div>
                                                 <div className="font-semibold">{personalInfo.location}</div>
                                             </div>
@@ -8669,9 +8775,16 @@ const ClarityTemplate: React.FC<{
                                                         colorAdjust: 'exact'
                                                     }}
                                                 >
-                                                    Website
+                                                    {data.cvLanguage === 'english' ? 'Website' : 'Sayt'}
                                                 </div>
-                                                <span className="font-medium">{personalInfo.website}</span>
+                                                <a
+                                                    href={personalInfo.website?.startsWith('http') ? personalInfo.website : `https://${personalInfo.website}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="font-medium hover:text-orange-600 transition-colors underline"
+                                                >
+                                                    {personalInfo.website}
+                                                </a>
                                             </div>
                                         )}
                                         {personalInfo.github && (
@@ -8693,7 +8806,7 @@ const ClarityTemplate: React.FC<{
                                                         colorAdjust: 'exact'
                                                     }}
                                                 >
-                                                    GitHub
+                                                    GitHub Linki
                                                 </div>
                                                 <a
                                                     href={getGitHubDisplay(personalInfo.github || '').url}
