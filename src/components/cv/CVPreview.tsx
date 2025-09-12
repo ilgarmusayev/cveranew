@@ -5203,6 +5203,11 @@ const PrimeTemplate: React.FC<{
                         <h1 className="text-2xl font-bold text-gray-900 mb-2 leading-tight">
                             {getFullName(personalInfo, data.cvLanguage)}
                         </h1>
+                        {personalInfo.field && (
+                            <p className="text-lg text-green-700 font-medium mb-2">
+                                {personalInfo.field}
+                            </p>
+                        )}
                         <div className="w-20 h-1 bg-green-600 mb-3"></div>
                     </div>
                     {personalInfo.profileImage && (
@@ -5216,75 +5221,114 @@ const PrimeTemplate: React.FC<{
                     )}
                 </div>
 
-                {/* Contact Information in Simple Layout */}
+                {/* Contact Information in Dynamic Layout */}
                 <div className="border-t-2 border-green-600 pt-3 mb-3">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                        {personalInfo.email && (
-                            <div className="flex items-center gap-2">
-                                <span className="font-medium text-gray-700 min-w-[70px] flex-shrink-0">
-                                    {data.cvLanguage === 'english' ? 'Email:' : 'E-poçt:'}
-                                </span>
-                                <span className="text-gray-900">{personalInfo.email}</span>
+                    {(() => {
+                        // Collect all contact items
+                        const contactItems = [];
+                        
+                        if (personalInfo.email) {
+                            contactItems.push({
+                                label: data.cvLanguage === 'english' ? 'Email:' : 'E-poçt:',
+                                value: personalInfo.email,
+                                type: 'text'
+                            });
+                        }
+                        
+                        if (personalInfo.phone) {
+                            contactItems.push({
+                                label: data.cvLanguage === 'english' ? 'Phone:' : 'Telefon:',
+                                value: personalInfo.phone,
+                                type: 'text'
+                            });
+                        }
+                        
+                        if (personalInfo.location) {
+                            contactItems.push({
+                                label: data.cvLanguage === 'english' ? 'Location:' : 'Ünvan:',
+                                value: personalInfo.location,
+                                type: 'text'
+                            });
+                        }
+                        
+                        if (personalInfo.linkedin) {
+                            contactItems.push({
+                                label: 'LinkedIn:',
+                                value: personalInfo.linkedin,
+                                type: 'linkedin'
+                            });
+                        }
+                        
+                        if (personalInfo.github) {
+                            contactItems.push({
+                                label: 'GitHub:',
+                                value: personalInfo.github,
+                                type: 'github'
+                            });
+                        }
+                        
+                        if (personalInfo.website) {
+                            contactItems.push({
+                                label: data.cvLanguage === 'english' ? 'Website:' : 'Sayt:',
+                                value: personalInfo.website,
+                                type: 'website'
+                            });
+                        }
+
+                        // Dynamic grid layout based on contact items count
+                        const itemCount = contactItems.length;
+                        let gridCols;
+                        
+                        if (itemCount <= 2) {
+                            gridCols = 'grid-cols-1 md:grid-cols-2';
+                        } else if (itemCount <= 4) {
+                            gridCols = 'grid-cols-2';
+                        } else {
+                            gridCols = 'grid-cols-2 lg:grid-cols-3';
+                        }
+
+                        return (
+                            <div className={`grid gap-x-6 gap-y-2 text-sm ${gridCols}`}>
+                                {contactItems.map((item, index) => (
+                                    <div key={index} className="flex items-center gap-2">
+                                        <span className="font-medium text-gray-700 min-w-[70px] flex-shrink-0">
+                                            {item.label}
+                                        </span>
+                                        {item.type === 'linkedin' ? (
+                                            <a
+                                                href={getLinkedInDisplay(item.value).url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-gray-900 text-xs break-all hover:text-gray-700 transition-colors"
+                                            >
+                                                {getLinkedInDisplay(item.value).displayText}
+                                            </a>
+                                        ) : item.type === 'github' ? (
+                                            <a
+                                                href={getGitHubDisplay(item.value).url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-gray-900 text-xs break-all hover:text-gray-700 transition-colors"
+                                            >
+                                                {getGitHubDisplay(item.value).displayText}
+                                            </a>
+                                        ) : item.type === 'website' ? (
+                                            <a
+                                                href={item.value?.startsWith('http') ? item.value : `https://${item.value}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-gray-900 text-xs break-all hover:text-gray-700 transition-colors"
+                                            >
+                                                {item.value}
+                                            </a>
+                                        ) : (
+                                            <span className="text-gray-900">{item.value}</span>
+                                        )}
+                                    </div>
+                                ))}
                             </div>
-                        )}
-                        {personalInfo.phone && (
-                            <div className="flex items-center gap-2">
-                                <span className="font-medium text-gray-700 min-w-[70px] flex-shrink-0">
-                                    {data.cvLanguage === 'english' ? 'Phone:' : 'Telefon:'}
-                                </span>
-                                <span className="text-gray-900">{personalInfo.phone}</span>
-                            </div>
-                        )}
-                        {personalInfo.location && (
-                            <div className="flex items-center gap-2">
-                                <span className="font-medium text-gray-700 min-w-[70px] flex-shrink-0">
-                                    {data.cvLanguage === 'english' ? 'Location:' : 'Ünvan:'}
-                                </span>
-                                <span className="text-gray-900">{personalInfo.location}</span>
-                            </div>
-                        )}
-                        {personalInfo.linkedin && (
-                            <div className="flex items-center gap-2">
-                                <span className="font-medium text-gray-700 min-w-[70px] flex-shrink-0">LinkedIn:</span>
-                                <a
-                                    href={getLinkedInDisplay(personalInfo.linkedin).url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-gray-900 text-xs break-all hover:text-gray-700 transition-colors"
-                                >
-                                    {getLinkedInDisplay(personalInfo.linkedin).displayText}
-                                </a>
-                            </div>
-                        )}
-                        {personalInfo.github && (
-                            <div className="flex items-center gap-2">
-                                <span className="font-medium text-gray-700 min-w-[70px] flex-shrink-0">GitHub Linki:</span>
-                                <a
-                                    href={getGitHubDisplay(personalInfo.github).url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-gray-900 text-xs break-all hover:text-gray-700 transition-colors"
-                                >
-                                    {getGitHubDisplay(personalInfo.github).displayText}
-                                </a>
-                            </div>
-                        )}
-                        {personalInfo.website && (
-                            <div className="flex items-center gap-2 col-span-1 md:col-span-2">
-                                <span className="font-medium text-gray-700 min-w-[70px] flex-shrink-0">
-                                    {data.cvLanguage === 'english' ? 'Website:' : 'Sayt:'}
-                                </span>
-                                <a
-                                    href={personalInfo.website?.startsWith('http') ? personalInfo.website : `https://${personalInfo.website}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-gray-900 text-xs break-all hover:text-gray-700 transition-colors"
-                                >
-                                    {personalInfo.website}
-                                </a>
-                            </div>
-                        )}
-                    </div>
+                        );
+                    })()}
                 </div>
             </div>
 
