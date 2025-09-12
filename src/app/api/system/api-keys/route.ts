@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 
-const prisma = new PrismaClient();
 
 // API Keys configuration (since we don't have apiKey model in database)
 const API_KEYS_CONFIG = {

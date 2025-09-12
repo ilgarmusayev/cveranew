@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { verifyJWT } from '@/lib/auth';
 
-const prisma = new PrismaClient();
 
 // POST /api/payments/complete-development - Complete development mode payment
 export async function POST(req: NextRequest) {

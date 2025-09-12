@@ -3,10 +3,9 @@
  * Ensures that all translated CV data is properly saved and maintained in the correct format
  */
 
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { CVLanguage } from './cvLanguage';
 
-const prisma = new PrismaClient();
 
 export interface TranslationMetadata {
   sourceLanguage: string;

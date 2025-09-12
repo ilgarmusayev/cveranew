@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyJWT } from '@/lib/jwt';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import EpointService from '@/lib/epoint';
 import { v4 as uuidv4 } from 'uuid';
-
-const prisma = new PrismaClient();
 
 // POST /api/payments/create - Create payment
 export async function POST(req: NextRequest) {

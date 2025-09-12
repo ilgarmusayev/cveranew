@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { verifyJWT } from "@/lib/jwt";
 import { FileGenerationService } from "@/lib/fileGeneration";
 import { CVData } from "@/types/cv";
 import { v4 as uuidv4 } from "uuid";
 import { canExportFormat, incrementDailyUsage } from "@/lib/subscription-limits";
 
-const prisma = new PrismaClient();
 
 // POST /api/cvs/[id]/download - Initiates the file generation job
 export async function POST(

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import epointService from '@/lib/epoint';
 
-const prisma = new PrismaClient();
 
 // POST /api/webhooks/epoint - epoint.az webhook handler
 export async function POST(req: NextRequest) {

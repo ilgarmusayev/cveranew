@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { verifyJWT } from "@/lib/jwt";
 
-const prisma = new PrismaClient();
 
 async function getUserIdFromRequest(req: NextRequest): Promise<string | null> {
   const auth = req.headers.get("authorization");

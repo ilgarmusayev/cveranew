@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { verifyJWT } from '@/lib/auth';
 import epointService from '@/lib/epoint';
 
-const prisma = new PrismaClient();
 
 const createPaymentSchema = z.object({
   tier: z.enum(['free', 'pro', 'populyar', 'premium']),

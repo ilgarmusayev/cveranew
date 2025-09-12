@@ -1,45 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyJWT } from '@/lib/jwt';
-import { PrismaClient } from '@prisma/client';
+import { prisma, withRetry } from '@/lib/prisma';
 import { checkCVCreationLimit, incrementCVUsage, getLimitMessage } from '@/lib/cvLimits';
-
-// Use a singleton pattern for Prisma client to avoid connection issues
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
-
-const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  log: ['error'],
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL,
-    },
-  },
-});
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
-
-// Retry function for database operations
-async function withRetry<T>(operation: () => Promise<T>, maxRetries = 3): Promise<T> {
-  let lastError: Error | undefined;
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      return await operation();
-    } catch (error) {
-      lastError = error as Error;
-      console.log(`❌ Database operation failed (attempt ${attempt}/${maxRetries}):`, error);
-
-      if (attempt < maxRetries) {
-        const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000); // Exponential backoff
-        console.log(`⏳ Retrying in ${delay}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
-    }
-  }
-
-  throw lastError || new Error('All retry attempts failed');
-}
 
 // GET /api/cv - Bütün CV-ləri əldə et
 export async function GET(request: NextRequest) {

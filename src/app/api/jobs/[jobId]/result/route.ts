@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 import fs from "fs";
 import path from "path";
 
-const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || "";
 
 function getUserIdFromRequest(req: NextRequest): string | null {

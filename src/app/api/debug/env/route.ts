@@ -21,7 +21,6 @@ export async function GET(req: NextRequest) {
   try {
     // Test database connection
     const { PrismaClient } = require('@prisma/client');
-    const prisma = new PrismaClient();
 
     const promoCount = await prisma.promoCode.count();
     envCheck.promo_system_status = `✅ ${promoCount} promo codes in database`;

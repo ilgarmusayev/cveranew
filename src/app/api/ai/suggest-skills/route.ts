@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyJWT } from '@/lib/jwt';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 
 // Type definitions for CV data structures
 interface Experience {
@@ -198,7 +198,6 @@ function determineIndustryContext(experience: any[], education: any[]): string {
   }
 }
 
-const prisma = new PrismaClient();
 const geminiAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 export async function POST(request: NextRequest) {

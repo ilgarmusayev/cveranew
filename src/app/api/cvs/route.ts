@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 import { canCreateCV, canUseTemplate, incrementDailyUsage } from "@/lib/subscription-limits";
 import { isValidCVLanguage, getDefaultCVLanguage } from "@/lib/cvLanguage";
 
-const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || "";
 
 function getUserIdFromRequest(req: NextRequest): string | null {

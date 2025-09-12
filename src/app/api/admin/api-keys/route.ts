@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyJWT } from '@/lib/jwt';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { APIKeyManager } from '@/lib/apiKeyManager';
 
-const prisma = new PrismaClient();
 
 // Admin yetkilendirme yoxlaması
 async function verifyAdminAccess(request: NextRequest) {

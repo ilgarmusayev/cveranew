@@ -1,9 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import axios from 'axios';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getScrapingDogApiKey, getGeminiApiKey, recordApiUsage, markApiKeyFailed, getBestApiKey } from '@/lib/api-service';
 
-const prisma = new PrismaClient();
 
 // Get Gemini AI instance using API keys from database
 const getGeminiAI = async () => {

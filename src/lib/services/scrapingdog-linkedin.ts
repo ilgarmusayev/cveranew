@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import axios from 'axios';
-
-const prisma = new PrismaClient();
 
 export interface ScrapingDogLinkedInProfile {
   name: string;

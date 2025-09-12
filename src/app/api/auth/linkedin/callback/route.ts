@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { generateJWT } from '@/lib/jwt';
 
-const prisma = new PrismaClient();
 
 // LinkedIn OAuth configuration with validation
 const LINKEDIN_CONFIG = {

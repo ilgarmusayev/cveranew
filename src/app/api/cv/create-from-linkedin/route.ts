@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyJWT } from '@/lib/jwt';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { checkCVCreationLimit, incrementCVUsage, getLimitMessage } from '@/lib/cvLimits';
 import { LinkedInImportService } from '@/lib/linkedinImportService';
 
-const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {

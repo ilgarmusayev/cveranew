@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyJWT } from '@/lib/jwt';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { ScrapingDogLinkedInService } from '@/lib/services/scrapingdog-linkedin';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import axios from 'axios';
-
-const prisma = new PrismaClient();
 
 // Helper function to extract and normalize LinkedIn username from various URL formats
 function extractLinkedInUsername(input: string): { username: string; normalizedUrl: string } | null {
@@ -414,6 +412,7 @@ function transformScrapingDogData(scrapingDogData: any, normalizedUrl: string) {
     firstName: scrapingDogData.firstName || scrapingDogData.name?.split(' ')[0] || '',
     lastName: scrapingDogData.lastName || scrapingDogData.name?.split(' ').slice(1).join(' ') || '',
     title: scrapingDogData.headline || '',
+    field: scrapingDogData.headline || '', // Add field property for templates like Prime
     email: scrapingDogData.email || '',
     phone: scrapingDogData.phone || '',
     location: scrapingDogData.location || '',

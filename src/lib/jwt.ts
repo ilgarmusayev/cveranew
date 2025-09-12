@@ -1,8 +1,7 @@
 // JWT utilities for server-side authentication
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 
-const prisma = new PrismaClient();
 
 export function verifyJWT(token: string): { userId: string; email: string } | null {
   try {
