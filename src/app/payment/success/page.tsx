@@ -34,10 +34,25 @@ function PaymentSuccessContent() {
           throw new Error('Keçersiz abunəlik növü');
         }
 
-        // Create subscription via API
+        // First, check if subscription already exists (maybe webhook already created it)
+        const checkResponse = await apiClient.get('/api/user/subscription');
+        
+        if (checkResponse.data.success && checkResponse.data.subscription) {
+          const existingSub = checkResponse.data.subscription;
+          
+          // If subscription exists and matches the tier, use it
+          if (existingSub.tier === tier && existingSub.status === 'active') {
+            console.log('✅ Subscription already exists from webhook:', existingSub);
+            setSubscriptionCreated(true);
+            setSubscriptionInfo(existingSub);
+            return;
+          }
+        }
+
+        // If no existing subscription or different tier, create new one
         const response = await apiClient.post('/api/subscription/create', {
           tier,
-          paymentId,
+          paymentId: paymentId, // This is actually orderId from the URL
           amount: amount ? parseFloat(amount) : 0
         });
 

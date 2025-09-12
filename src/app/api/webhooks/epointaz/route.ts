@@ -78,6 +78,7 @@ export async function POST(request: NextRequest) {
             tier: payment.planType,
             status: 'active',
             provider: 'epoint',
+            providerRef: transactionId || orderId,
             startedAt: new Date(),
             expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           }

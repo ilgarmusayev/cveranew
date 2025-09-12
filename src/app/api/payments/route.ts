@@ -57,8 +57,8 @@ export async function POST(req: NextRequest) {
       currency: 'AZN',
       orderId: orderId,
       description: `CVera ${planType} Abunəliyi`,
-      successRedirectUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/success`,
-      errorRedirectUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/fail`,
+      successRedirectUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/success?tier=${encodeURIComponent(planType)}&payment_id=${encodeURIComponent(orderId)}&amount=${encodeURIComponent(amount)}`,
+      errorRedirectUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/fail?order_id=${encodeURIComponent(orderId)}`,
       customerEmail: user.email,
       customerName: user.name || user.email
     });
