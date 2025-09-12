@@ -528,17 +528,47 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             print-color-adjust: exact !important;
                         }
                         
-                        /* Basic template için 2-ci səhifədə top margin */
+                        /* 📄 SMART NATURAL PAGINATION CSS */
+                        @page {
+                            size: A4;
+                            margin: 10mm 15mm;
+                            orphans: 2;
+                            widows: 2;
+                        }
+                        
                         @page :first {
                             margin-top: 12mm !important;
                         }
                         
-                        @page :left {
-                            margin-top: 15mm !important;  /* 2-ci, 4-cü və s. səhifələrdə əlavə margin */
+                        @page :not(:first) {
+                            margin-top: 15mm !important;  /* 2-ci və növbəti səhifələrdə əlavə margin */
                         }
                         
-                        @page :right {
-                            margin-top: 15mm !important;  /* 3-cü, 5-ci və s. səhifələrdə əlavə margin */
+                        /* Allow natural content flow for pagination */
+                        * {
+                            box-sizing: border-box !important;
+                        }
+                        
+                        /* Keep sections together when possible, but allow splitting if needed */
+                        .cv-section, .experience-item, .education-item, .skill-group {
+                            page-break-inside: avoid !important;
+                            break-inside: avoid !important;
+                        }
+                        
+                        /* Headings should stay with their content */
+                        h1, h2, h3, h4, h5, h6 {
+                            page-break-after: avoid !important;
+                            break-after: avoid !important;
+                        }
+                        
+                        /* Template containers - allow natural height */
+                        .basic-template, .traditional-template, .modern-template, 
+                        .exclusive-template, .prime-template, .aurora-template,
+                        .clarity-template, .horizon-template, .lumen-template,
+                        .vertex-template, .essence-template {
+                            height: auto !important;
+                            max-height: none !important;
+                            overflow: visible !important;
                         }
                         
                         html, body {
@@ -2761,59 +2791,79 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             console.log('=== AGGRESSIVE BACKGROUND COLOR ENFORCEMENT COMPLETE ===');
         });
 
-        // 🚫 NUCLEAR BLANK PAGE PREVENTION SYSTEM
-        console.log('🚫 Nuclear blank page prevention activated...');
+        // � SMART NATURAL PAGINATION SYSTEM
+        console.log('� Real pagination system activated - no restrictions!');
         
-        // Step 1: Content height monitoring və cleanup
-        await page.evaluate(() => {
+        // Step 1: Natural content flow check
+        const needsSecondPage = await page.evaluate(() => {
             // A4 hündürlük (297mm = 1123px at 96 DPI)
             const A4_HEIGHT_PX = 1123;
+            const SAFE_MARGIN = 50; // Safety margin for content
+            const USABLE_HEIGHT = A4_HEIGHT_PX - SAFE_MARGIN;
             
             // Body content yoxlanışı
             const body = document.body;
             const actualHeight = body.scrollHeight;
-            console.log('📏 Body scroll height:', actualHeight, 'px vs A4 max:', A4_HEIGHT_PX, 'px');
+            console.log('📏 Body content height:', actualHeight, 'px vs A4 usable:', USABLE_HEIGHT, 'px');
             
-            // Force all elements to fit in single page
-            if (actualHeight > A4_HEIGHT_PX) {
-                console.log('⚠️ Content exceeds A4 height, forcing compression...');
-                
-                // Aggressive height limiting
-                body.style.setProperty('max-height', A4_HEIGHT_PX + 'px', 'important');
-                body.style.setProperty('overflow', 'hidden', 'important');
-                
-                // Scale down if needed
-                const scaleFactor = Math.min(1, A4_HEIGHT_PX / actualHeight);
-                if (scaleFactor < 1) {
-                    body.style.setProperty('transform', 'scale(' + scaleFactor + ')', 'important');
-                    body.style.setProperty('transform-origin', 'top left', 'important');
-                    console.log('🔄 Applied scaling:', scaleFactor);
-                }
+            // Natural content decision
+            if (actualHeight > USABLE_HEIGHT) {
+                console.log('📄 Content exceeds 1 page - allowing natural flow to 2nd page');
+                return true; // Allow natural pagination
+            } else {
+                console.log('✅ Content fits in 1 page - keeping single page');
+                return false; // Single page is sufficient
             }
+        });
+        
+        // Step 2: FORCE NATURAL PAGINATION - Remove ALL page-break restrictions
+        await page.evaluate(() => {
+            // Add CSS to force natural pagination
+            const style = document.createElement('style');
+            style.textContent = `
+                * {
+                    page-break-inside: auto !important;
+                    break-inside: auto !important;
+                    page-break-before: auto !important;
+                    break-before: auto !important;
+                    page-break-after: auto !important;
+                    break-after: auto !important;
+                }
+                
+                body {
+                    page-break-inside: auto !important;
+                    break-inside: auto !important;
+                    height: auto !important;
+                    max-height: none !important;
+                    overflow: visible !important;
+                }
+                
+                /* Force content to flow naturally */
+                .cv-section, .experience-item, .education-item {
+                    page-break-inside: auto !important;
+                    break-inside: auto !important;
+                }
+            `;
+            document.head.appendChild(style);
             
-            // Step 2: Remove all trailing whitespace and margins that could cause page breaks
             const allElements = document.querySelectorAll('*');
             allElements.forEach(el => {
                 if (el instanceof HTMLElement) {
-                    // Remove bottom margins from last elements
-                    if (el.parentElement && el === el.parentElement.lastElementChild) {
-                        el.style.setProperty('margin-bottom', '0', 'important');
-                        el.style.setProperty('padding-bottom', '0', 'important');
+                    // Clean up excessive margins
+                    const currentMarginBottom = parseInt(getComputedStyle(el).marginBottom) || 0;
+                    if (currentMarginBottom > 20) {
+                        el.style.setProperty('margin-bottom', '15px', 'important');
                     }
                     
-                    // Remove page-break-after that could create blank pages
-                    el.style.setProperty('page-break-after', 'auto', 'important');
-                    el.style.setProperty('break-after', 'auto', 'important');
+                    // Force natural page breaks
+                    el.style.setProperty('page-break-inside', 'auto', 'important');
+                    el.style.setProperty('break-inside', 'auto', 'important');
+                    el.style.setProperty('height', 'auto', 'important');
+                    el.style.setProperty('max-height', 'none', 'important');
                 }
             });
             
-            // Step 3: Force body to exact content size
-            body.style.setProperty('height', 'auto', 'important');
-            body.style.setProperty('min-height', 'auto', 'important');
-            body.style.setProperty('margin', '0', 'important');
-            body.style.setProperty('padding', '0', 'important');
-            
-            console.log('🚫 Nuclear blank page prevention measures applied');
+            console.log('🔥 FORCED natural pagination - removed ALL restrictions');
         });
 
         const pdfBuffer = await page.pdf({
@@ -2821,28 +2871,28 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             printBackground: true,  // ✅ Background colors göstərilsin
             preferCSSPageSize: false,  // CSS @page-dən istifadə etmə, native ayarlar istifadə et
             displayHeaderFooter: false,
-            // 🚫 CRITICAL: Force single page only if content fits
-            pageRanges: '1',  // ⚠️ AGGRESSIVE: Generate only page 1 to prevent blank pages
+            // � SMART PAGINATION: Allow natural flow to 2nd page if needed
+            pageRanges: undefined, // REAL PAGINATION: Always allow multiple pages
             // Unicode və font support üçün əlavə ayarlar
             tagged: true,  // PDF/A accessibility və unicode dəstəyi
             outline: false,
             omitBackground: false,  // ✅ Background colors qoru
-            // Additional settings to prevent blank pages
+            // Additional settings for clean pagination
             generateDocumentOutline: false,
             generateTaggedPDF: false,  // Disable tagging to prevent extra pages
             // Azərbaycan hərfləri üçün font encoding
             timeout: 60000,  // Extended timeout for font loading
-            // PDF-də düzgün məsafələr - istifadəçi tələbi: 1-ci səhifə top=5mm, digərləri=15mm
+            // PDF margins - same as before
             margin: {
-                top: '5mm',       // 5mm - 1-ci səhifədə yuxarıda azca boşluq əlavə edildi
+                top: '10mm',      // Standard top margin
                 right: '15mm',    // Sağ margin 15mm
-                bottom: '5mm',    // Alt margin azaldıldı blank page-dən qaçınmaq üçün
+                bottom: '10mm',   // Standard bottom margin  
                 left: '15mm'      // Sol margin 15mm
             },
-            scale: 1.0,
-            // Force exact A4 dimensions
-            width: '210mm',
-            height: '297mm'
+            scale: 1.0
+            // 🔥 REMOVED width/height restrictions to allow natural pagination
+            // width: '210mm',
+            // height: '297mm'
         });
 
         console.log('PDF yaradıldı, browser bağlanır...');
