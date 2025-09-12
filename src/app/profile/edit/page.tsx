@@ -31,6 +31,9 @@ export default function ProfileEditPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showPasswordSection, setShowPasswordSection] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
 
   // Load user profile - wrapped in useCallback to fix dependency issue
@@ -68,9 +71,9 @@ export default function ProfileEditPage() {
         setFormData({
           name: data.user.name,
           email: data.user.email,
-          currentPassword: '',
-          newPassword: '',
-          confirmPassword: ''
+          currentPassword: '', // Həmişə boş başlasın
+          newPassword: '',     // Həmişə boş başlasın
+          confirmPassword: ''  // Həmişə boş başlasın
         });
       } else {
         console.error('❌ Failed to load profile:', response.status);
@@ -169,6 +172,11 @@ export default function ProfileEditPage() {
           confirmPassword: ''
         });
         setShowPasswordSection(false);
+        
+        // Clear password visibility states when passwords are cleared
+        setShowCurrentPassword(false);
+        setShowNewPassword(false);
+        setShowConfirmPassword(false);
       } else {
         setError(data.message || 'Profil yenilənərkən xəta baş verdi');
       }
@@ -361,7 +369,23 @@ export default function ProfileEditPage() {
                     <h3 className="text-lg font-medium text-gray-900">Şifrə Dəyişikliyi</h3>
                     <button
                       type="button"
-                      onClick={() => setShowPasswordSection(!showPasswordSection)}
+                      onClick={() => {
+                        const newState = !showPasswordSection;
+                        setShowPasswordSection(newState);
+                        
+                        // Şifrə bölməsi bağlanarkən və ya açılarkən sahələri təmizlə
+                        setFormData({
+                          ...formData,
+                          currentPassword: '',
+                          newPassword: '',
+                          confirmPassword: ''
+                        });
+                        
+                        // Şifrə görünürlük state-lərini də sıfırla
+                        setShowCurrentPassword(false);
+                        setShowNewPassword(false);
+                        setShowConfirmPassword(false);
+                      }}
                       className="text-blue-600 hover:text-blue-700 text-sm font-medium"
                     >
                       {showPasswordSection ? 'Ləğv et' : 'Şifrəni dəyiş'}
@@ -374,14 +398,33 @@ export default function ProfileEditPage() {
                         <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-2">
                           Hazırki Şifrə
                         </label>
-                        <input
-                          id="currentPassword"
-                          type="password"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                          placeholder="Hazırki şifrənizi daxil edin"
-                          value={formData.currentPassword}
-                          onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
-                        />
+                        <div className="relative">
+                          <input
+                            id="currentPassword"
+                            type={showCurrentPassword ? "text" : "password"}
+                            autoComplete="current-password"
+                            className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                            placeholder="Hazırki şifrənizi daxil edin"
+                            value={formData.currentPassword}
+                            onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
+                          />
+                          <button
+                            type="button"
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                          >
+                            {showCurrentPassword ? (
+                              <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                              </svg>
+                            ) : (
+                              <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                              </svg>
+                            )}
+                          </button>
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -389,28 +432,66 @@ export default function ProfileEditPage() {
                           <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
                             Yeni Şifrə
                           </label>
-                          <input
-                            id="newPassword"
-                            type="password"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                            placeholder="Yeni şifrənizi daxil edin"
-                            value={formData.newPassword}
-                            onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
-                          />
+                          <div className="relative">
+                            <input
+                              id="newPassword"
+                              type={showNewPassword ? "text" : "password"}
+                              autoComplete="new-password"
+                              className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                              placeholder="Yeni şifrənizi daxil edin"
+                              value={formData.newPassword}
+                              onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
+                            />
+                            <button
+                              type="button"
+                              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                              onClick={() => setShowNewPassword(!showNewPassword)}
+                            >
+                              {showNewPassword ? (
+                                <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                                </svg>
+                              ) : (
+                                <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                              )}
+                            </button>
+                          </div>
                         </div>
 
                         <div>
                           <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
                             Şifrəni Təsdiq Edin
                           </label>
-                          <input
-                            id="confirmPassword"
-                            type="password"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                            placeholder="Yeni şifrənizi təkrar edin"
-                            value={formData.confirmPassword}
-                            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                          />
+                          <div className="relative">
+                            <input
+                              id="confirmPassword"
+                              type={showConfirmPassword ? "text" : "password"}
+                              autoComplete="new-password"
+                              className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                              placeholder="Yeni şifrənizi təkrar edin"
+                              value={formData.confirmPassword}
+                              onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                            />
+                            <button
+                              type="button"
+                              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            >
+                              {showConfirmPassword ? (
+                                <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                                </svg>
+                              ) : (
+                                <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                              )}
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>

@@ -402,6 +402,11 @@ async function getRapidAPISkills(linkedinUrl: string) {
 // Transform ScrapingDog data to our format
 function transformScrapingDogData(scrapingDogData: any, normalizedUrl: string) {
   console.log('🔄 ScrapingDog data transform edilir...');
+  console.log('📊 RAW ScrapingDog Data Keys:', Object.keys(scrapingDogData));
+  console.log('📊 Raw projects data:', scrapingDogData.projects);
+  console.log('📊 Raw certifications data:', scrapingDogData.certifications || scrapingDogData.certificates);
+  console.log('📊 Raw awards data:', scrapingDogData.awards);
+  console.log('📊 Raw experience data:', scrapingDogData.experience);
 
   // Personal Information - şəxsi məlumatlar
   const personalInfo = {
@@ -418,9 +423,11 @@ function transformScrapingDogData(scrapingDogData: any, normalizedUrl: string) {
     profilePicture: scrapingDogData.profilePicture || ''
   };  // Work Experience - tam təcrübə məlumatları
   const experience = (scrapingDogData.experience || []).map((exp: any, index: number) => {
+    console.log(`📊 RAW Experience ${index + 1}:`, exp);
+    
     // Tarix formatlarını düzəlt
-    let startDate = exp.startDate || exp.starts_at || '';
-    let endDate = exp.endDate || exp.ends_at || '';
+    let startDate = exp.startDate || exp.starts_at || exp.start_date || '';
+    let endDate = exp.endDate || exp.ends_at || exp.end_date || '';
     let current = false;
     
     // "Present", "Current", "Hal-hazırda" və ya boş endDate-i yoxla
@@ -431,18 +438,21 @@ function transformScrapingDogData(scrapingDogData: any, normalizedUrl: string) {
       endDate = '';
     }
 
-    return {
+    const mappedExp = {
       id: `exp-scrapingdog-${Date.now()}-${index}`,
-      position: exp.title || exp.position || '',
-      company: exp.company || exp.company_name || '',
+      position: exp.title || exp.position || exp.job_title || exp.role || '',
+      company: exp.company || exp.company_name || exp.companyName || exp.organization || '',
       startDate: startDate,
       endDate: endDate,
       current: current,
-      description: exp.description || exp.summary || '',
-      location: exp.location || '',
-      employmentType: exp.employmentType || exp.type || '',
+      description: exp.description || exp.summary || exp.details || '',
+      location: exp.location || exp.geo_location || '',
+      employmentType: exp.employmentType || exp.type || exp.employment_type || '',
       duration: exp.duration || (startDate && endDate ? `${startDate} - ${endDate}` : '')
     };
+    
+    console.log(`✅ Mapped Experience ${index + 1}:`, mappedExp);
+    return mappedExp;
   });
 
   // Education - tam təhsil məlumatları
@@ -466,51 +476,79 @@ function transformScrapingDogData(scrapingDogData: any, normalizedUrl: string) {
     level: typeof skill === 'object' ? (skill.level || skill.proficiency || '') : ''
   }));
 
-  // Projects - layihələr
-  const projects = (scrapingDogData.projects || []).map((project: any, index: number) => ({
-    id: `project-scrapingdog-${Date.now()}-${index}`,
-    name: project.title || project.name || '',
-    description: project.description || project.summary || '',
-    url: project.link || project.url || project.website || '',
-    startDate: project.startDate || project.start_date || '',
-    endDate: project.endDate || project.end_date || '',
-    skills: project.skills || project.technologies || '',
-    duration: project.duration || ''
-  }));
+  // Projects - layihələr - Enhanced Mapping
+  const projects = (scrapingDogData.projects || []).map((project: any, index: number) => {
+    console.log(`📊 RAW Project ${index + 1}:`, project);
+    
+    const mappedProject = {
+      id: `project-scrapingdog-${Date.now()}-${index}`,
+      name: project.title || project.name || project.project_name || project.projectName || `Project ${index + 1}`,
+      description: project.description || project.summary || project.details || project.about || '',
+      url: project.link || project.url || project.website || project.project_url || '',
+      startDate: project.startDate || project.start_date || project.started_at || '',
+      endDate: project.endDate || project.end_date || project.ended_at || '',
+      skills: project.skills || project.technologies || project.tech_stack || '',
+      duration: project.duration || ''
+    };
+    
+    console.log(`✅ Mapped Project ${index + 1}:`, mappedProject);
+    return mappedProject;
+  });
 
-  // Awards & Honors - mükafatlar və şərəflər
-  const awards = (scrapingDogData.awards || []).map((award: any, index: number) => ({
-    id: `award-scrapingdog-${Date.now()}-${index}`,
-    name: award.name || award.title || '',
-    issuer: award.organization || award.issuer || award.authority || '',
-    date: award.date || award.duration || award.year || award.time || '',
-    description: award.description || award.summary || '',
-    type: 'award' // Award tipini təyin edirik
-  }));
+  // Awards & Honors - mükafatlar və şərəflər - Enhanced Mapping
+  const awards = (scrapingDogData.awards || []).map((award: any, index: number) => {
+    console.log(`📊 RAW Award ${index + 1}:`, award);
+    
+    const mappedAward = {
+      id: `award-scrapingdog-${Date.now()}-${index}`,
+      name: award.name || award.title || award.award_name || `Award ${index + 1}`,
+      issuer: award.organization || award.issuer || award.authority || award.provider || award.company || '',
+      date: award.date || award.duration || award.year || award.time || award.awarded_at || '',
+      description: award.description || award.summary || award.details || '',
+      type: 'award' // Award tipini təyin edirik
+    };
+    
+    console.log(`✅ Mapped Award ${index + 1}:`, mappedAward);
+    return mappedAward;
+  });
 
-  // Honors - şərəf mükafatları (akademik və peşəkar)
-  const honors = (scrapingDogData.honors || scrapingDogData.achievements || []).map((honor: any, index: number) => ({
-    id: `honor-scrapingdog-${Date.now()}-${index}`,
-    name: honor.name || honor.title || '',
-    issuer: honor.organization || honor.issuer || honor.institution || '',
-    date: honor.date || honor.duration || honor.year || '',
-    description: honor.description || honor.summary || '',
-    type: 'honor' // Honor tipini təyin edirik
-  }));
+  // Honors - şərəf mükafatları (akademik və peşəkar) - Enhanced Mapping
+  const honors = (scrapingDogData.honors || scrapingDogData.achievements || []).map((honor: any, index: number) => {
+    console.log(`📊 RAW Honor ${index + 1}:`, honor);
+    
+    const mappedHonor = {
+      id: `honor-scrapingdog-${Date.now()}-${index}`,
+      name: honor.name || honor.title || honor.honor_name || `Honor ${index + 1}`,
+      issuer: honor.organization || honor.issuer || honor.institution || honor.authority || '',
+      date: honor.date || honor.duration || honor.year || honor.awarded_at || '',
+      description: honor.description || honor.summary || honor.details || '',
+      type: 'honor' // Honor tipini təyin edirik
+    };
+    
+    console.log(`✅ Mapped Honor ${index + 1}:`, mappedHonor);
+    return mappedHonor;
+  });
 
-  // Certifications - professional sertifikatlar
-  const certifications = (scrapingDogData.certifications || scrapingDogData.certificates || []).map((cert: any, index: number) => ({
-    id: `cert-scrapingdog-${Date.now()}-${index}`,
-    name: cert.name || cert.title || cert.certification || '',
-    issuer: cert.organization || cert.issuer || cert.authority || cert.provider || '',
-    issueDate: cert.date || cert.issueDate || cert.startDate || cert.year || '',
-    expiryDate: cert.expiryDate || cert.expires || cert.endDate || '',
-    credentialId: cert.credentialId || cert.id || cert.certificate_id || '',
-    url: cert.url || cert.link || cert.verificationUrl || '',
-    description: cert.description || cert.summary || '',
-    skills: cert.skills || cert.relatedSkills || '',
-    status: cert.status || (cert.expiryDate ? 'active' : 'permanent')
-  }));
+  // Certifications - professional sertifikatlar - Enhanced Mapping
+  const certifications = (scrapingDogData.certifications || scrapingDogData.certificates || []).map((cert: any, index: number) => {
+    console.log(`📊 RAW Certification ${index + 1}:`, cert);
+    
+    const mappedCert = {
+      id: `cert-scrapingdog-${Date.now()}-${index}`,
+      name: cert.name || cert.title || cert.certification || cert.certificate_name || `Certification ${index + 1}`,
+      issuer: cert.organization || cert.issuer || cert.authority || cert.provider || cert.company || '',
+      issueDate: cert.date || cert.issueDate || cert.startDate || cert.year || cert.issued_at || '',
+      expiryDate: cert.expiryDate || cert.expires || cert.endDate || cert.expires_at || '',
+      credentialId: cert.credentialId || cert.id || cert.certificate_id || cert.credential_id || '',
+      url: cert.url || cert.link || cert.verificationUrl || cert.verification_url || '',
+      description: cert.description || cert.summary || cert.details || '',
+      skills: cert.skills || cert.relatedSkills || cert.related_skills || '',
+      status: cert.status || (cert.expiryDate ? 'active' : 'permanent')
+    };
+    
+    console.log(`✅ Mapped Certification ${index + 1}:`, mappedCert);
+    return mappedCert;
+  });
 
   // Languages - dillər  
   const languages = (scrapingDogData.languages || []).map((lang: any, index: number) => ({
