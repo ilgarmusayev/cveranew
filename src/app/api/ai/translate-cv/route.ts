@@ -207,16 +207,51 @@ function getTranslatableFields(cvData: any): any {
     
     // Include ALL personal info fields including names for translation
     Object.keys(cvData.personalInfo).forEach(key => {
-      // NEVER translate: contact details only
-      const neverTranslate = ['email', 'phone', 'website', 'linkedin', 'github'];
+      // NEVER translate: contact details, images, and binary data
+      const neverTranslate = [
+        'email', 
+        'phone', 
+        'website', 
+        'linkedin', 
+        'github',
+        'profileImage', // 🔥 CRITICAL: Profil şəkli tərcümə edilməməli (base64 data)
+        'image',
+        'avatar',
+        'photo',
+        'picture'
+      ];
       
-      if (!neverTranslate.includes(key) && cvData.personalInfo[key]) {
-        translatableFields[key] = cvData.personalInfo[key];
+      const fieldValue = cvData.personalInfo[key];
+      
+      // Skip fields that shouldn't be translated
+      if (neverTranslate.includes(key)) {
+        return;
       }
+      
+      // Skip empty values
+      if (!fieldValue) {
+        return;
+      }
+      
+      // Skip very large values (likely base64 images)
+      if (typeof fieldValue === 'string' && fieldValue.length > 10000) {
+        console.log(`⚠️ Skipping large field ${key} (${fieldValue.length} chars) - likely base64 image`);
+        return;
+      }
+      
+      // Skip data URLs (base64 images)
+      if (typeof fieldValue === 'string' && fieldValue.startsWith('data:')) {
+        console.log(`⚠️ Skipping data URL field ${key} - base64 image detected`);
+        return;
+      }
+      
+      translatableFields[key] = fieldValue;
     });
     
-    // Send all fields including names to AI for translation
-    translatableContent.personalInfo = translatableFields;
+    // Only add personalInfo if we have translatable fields
+    if (Object.keys(translatableFields).length > 0) {
+      translatableContent.personalInfo = translatableFields;
+    }
   }
 
   // Experience translations
@@ -378,6 +413,15 @@ function getTranslatableFields(cvData: any): any {
   translatableContent.sectionNames = enhancedSectionNames;
 
   console.log('📝 Section names for translation:', translatableContent.sectionNames);
+  console.log('🔍 Translatable fields extracted:', {
+    personalInfo: translatableContent.personalInfo ? Object.keys(translatableContent.personalInfo) : 'none',
+    experience: translatableContent.experience ? `${translatableContent.experience.length} items` : 'none',
+    education: translatableContent.education ? `${translatableContent.education.length} items` : 'none',
+    skills: translatableContent.skills ? `${translatableContent.skills.length} items` : 'none',
+    projects: translatableContent.projects ? `${translatableContent.projects.length} items` : 'none',
+    certifications: translatableContent.certifications ? `${translatableContent.certifications.length} items` : 'none',
+    totalFields: Object.keys(translatableContent).length
+  });
 
   return translatableContent;
 }
@@ -483,6 +527,16 @@ export async function POST(req: NextRequest) {
 
     // Translate the content
     console.log('🚀 Starting translation with content keys:', Object.keys(translatableContent));
+    
+    // Check content size before sending to AI
+    const contentString = JSON.stringify(translatableContent);
+    const contentSize = new Blob([contentString]).size; // Get accurate byte size
+    console.log(`📊 Content size for AI: ${contentSize} bytes (${(contentSize / 1024).toFixed(2)} KB)`);
+    
+    if (contentSize > 500000) { // 500KB limit
+      console.warn(`⚠️ Large content detected: ${(contentSize / 1024).toFixed(2)} KB - this may cause API issues`);
+    }
+    
     const translatedContent = await translateCVContent(translatableContent, mappedTargetLanguage, sourceLanguage);
     console.log('🎯 Translation completed with keys:', Object.keys(translatedContent || {}));
 
