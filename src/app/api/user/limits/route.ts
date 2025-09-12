@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { prisma, withRetry } from '@/lib/prisma';
+import { checkCVCreationLimit, getLimitMessage } from '@/lib/cvLimits';
 
 // Simple JWT verification function
 function verifyToken(token: string): any {
@@ -35,15 +36,22 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Use retry logic for database queries
+    // Use the same CV limits logic as creation API
+    const cvLimits = await checkCVCreationLimit(decoded.userId);
+    
+    // Get total CV count for additional info
+    const totalCVs = await withRetry(async () => {
+      return await prisma.cV.count({
+        where: { userId: decoded.userId }
+      });
+    });
+
+    // Get user subscription info
     const user = await withRetry(async () => {
       return await prisma.user.findUnique({
         where: { id: decoded.userId },
         select: {
           tier: true,
-          _count: {
-            select: { cvs: true }
-          },
           subscriptions: {
             where: {
               status: 'active'
@@ -73,70 +81,28 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Determine user tier
-    let currentTier = user.tier || 'Free';
-    if (user.subscriptions.length > 0) {
-      currentTier = user.subscriptions[0].tier;
-    }
-
-    // Define limits based on tier
-    const tierLimits = {
-      Free: { cvCount: 2, dailyLimit: null, limitType: 'total', aiFeatures: false },
-      Medium: { cvCount: null, dailyLimit: 5, limitType: 'daily', aiFeatures: true },
-      Pro: { cvCount: null, dailyLimit: 5, limitType: 'daily', aiFeatures: true }, // Add Pro tier as alias for Medium
-      Premium: { cvCount: null, dailyLimit: null, limitType: 'unlimited', aiFeatures: true },
-    };
-
-    const limits = tierLimits[currentTier as keyof typeof tierLimits] || tierLimits.Free;
-
-    // Calculate usage and remaining limits
-    let remainingLimit = 0;
-    let hasReachedLimit = false;
-
-    if (limits.limitType === 'total') {
-      remainingLimit = Math.max(0, limits.cvCount! - user._count.cvs);
-      hasReachedLimit = user._count.cvs >= limits.cvCount!;
-    } else if (limits.limitType === 'daily') {
-      // For daily limits, we need to check today's usage
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      const todaysUsage = await withRetry(async () => {
-        return await prisma.cV.count({
-          where: {
-            userId: decoded.userId,
-            createdAt: {
-              gte: today
-            }
-          }
-        });
-      });
-
-      remainingLimit = Math.max(0, limits.dailyLimit! - todaysUsage);
-      hasReachedLimit = todaysUsage >= limits.dailyLimit!;
-    } else {
-      // Unlimited
-      remainingLimit = 999;
-      hasReachedLimit = false;
-    }
-
+    // Map CV limits to dashboard format
     const response = {
-      tier: currentTier,
+      tier: cvLimits.tierName,
       limits: {
-        ...limits,
-        templatesAccess: currentTier === 'Free' ? ['Basic'] :
-                        (currentTier === 'Medium' || currentTier === 'Pro') ? ['Basic', 'Medium'] :
-                        ['Basic', 'Medium', 'Premium']
+        cvCount: cvLimits.limit,
+        templatesAccess: cvLimits.tierName === 'Pulsuz' ? ['Basic'] :
+                        (cvLimits.tierName === 'Populyar' || cvLimits.tierName === 'Pro') ? ['Basic', 'Medium'] :
+                        ['Basic', 'Medium', 'Premium'],
+        dailyLimit: cvLimits.limit,
+        aiFeatures: cvLimits.tierName !== 'Pulsuz',
+        limitType: cvLimits.limit === null ? 'unlimited' : (cvLimits.resetTime ? 'daily' : 'total')
       },
       usage: {
-        cvCount: user._count.cvs,
-        dailyUsage: limits.limitType === 'daily' ? (limits.dailyLimit! - remainingLimit) : 0,
-        hasReachedLimit,
-        remainingLimit
+        cvCount: totalCVs,
+        dailyUsage: cvLimits.currentCount,
+        hasReachedLimit: cvLimits.limitReached,
+        remainingLimit: cvLimits.limit ? (cvLimits.limit - cvLimits.currentCount) : 999
       },
       subscription: user.subscriptions[0] || null
     };
 
+    console.log('🔍 User Limits API Response:', JSON.stringify(response, null, 2));
     return NextResponse.json(response);
 
   } catch (error) {

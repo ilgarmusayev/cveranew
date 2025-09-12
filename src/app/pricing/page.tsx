@@ -32,7 +32,7 @@ const plans: PricingPlan[] = [
   {
     id: 'pro',
     name: 'Populyar',
-    price: 2.99, // 2.99 AZN
+    price: 0.01, // TEST PRICE - was 2.99 AZN
     features: [
       'Gündə 5 CV yaratma ',
       'Pulsuz və Populyar səviyyə şablonlar',
@@ -49,7 +49,7 @@ const plans: PricingPlan[] = [
   {
     id: 'premium',
     name: 'Premium',
-    price: 4.99, // 4.99 AZN
+    price: 0.01, // TEST PRICE - was 4.99 AZN
     features: [
       'Limitsiz CV yaratma',
       'Bütün şablonlar (Premium daxil)',
@@ -134,7 +134,7 @@ export default function PricingPage() {
       offers: {
         "@type": "AggregateOffer",
         lowPrice: "0",
-        highPrice: "8",
+        highPrice: "0.01", // Updated for test pricing
         priceCurrency: "AZN",
         availability: "https://schema.org/InStock",
         offerCount: plans.length.toString()

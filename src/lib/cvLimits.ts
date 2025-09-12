@@ -16,7 +16,7 @@ export async function checkCVCreationLimit(userId: string): Promise<CVLimits> {
     // Get user's tier
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { tier: true }
+      select: { tier: true, email: true }
     });
 
     if (!user) {
@@ -24,6 +24,7 @@ export async function checkCVCreationLimit(userId: string): Promise<CVLimits> {
     }
 
     const tier = user.tier.toLowerCase();
+    console.log(`🔍 CV Limit Check - User: ${user.email}, Tier: ${tier}`);
 
     // Get today's date for daily usage
     const today = new Date();
@@ -47,8 +48,11 @@ export async function checkCVCreationLimit(userId: string): Promise<CVLimits> {
       }
 
       case 'medium':
-      case 'orta': {
-        // Medium tier: 5 CV per day limit
+      case 'orta':
+      case 'populyar':
+      case 'pro': {
+        // Medium/Pro tier: 5 CV per day limit
+        console.log(`📊 Checking daily usage for tier: ${tier}`);
         let dailyUsage = await prisma.dailyUsage.findUnique({
           where: {
             userId_date: {
@@ -60,6 +64,7 @@ export async function checkCVCreationLimit(userId: string): Promise<CVLimits> {
 
         // Create daily usage record if it doesn't exist
         if (!dailyUsage) {
+          console.log('📝 Creating new daily usage record');
           dailyUsage = await prisma.dailyUsage.create({
             data: {
               userId,
@@ -71,17 +76,22 @@ export async function checkCVCreationLimit(userId: string): Promise<CVLimits> {
           });
         }
 
+        console.log(`📈 Daily usage: ${dailyUsage.cvCreated}/5 CV created today`);
+
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
 
-        return {
+        const result = {
           canCreate: dailyUsage.cvCreated < 5,
           limitReached: dailyUsage.cvCreated >= 5,
           currentCount: dailyUsage.cvCreated,
           limit: 5,
           resetTime: tomorrow,
-          tierName: 'Orta'
+          tierName: 'Populyar'
         };
+
+        console.log(`✅ CV Limit Result: canCreate=${result.canCreate}, count=${result.currentCount}/5`);
+        return result;
       }
 
       case 'premium': {
@@ -134,8 +144,8 @@ export async function incrementCVUsage(userId: string): Promise<void> {
 
     const tier = user.tier.toLowerCase();
 
-    // Only increment daily usage for medium tier
-    if (tier === 'medium' || tier === 'orta') {
+    // Only increment daily usage for medium/pro tier (premium is unlimited)
+    if (tier === 'medium' || tier === 'orta' || tier === 'populyar' || tier === 'pro') {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 

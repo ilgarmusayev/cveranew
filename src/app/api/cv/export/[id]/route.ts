@@ -2816,11 +2816,12 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             }
         });
         
-        // Step 2: FORCE NATURAL PAGINATION - Remove ALL page-break restrictions
+        // Step 2: FORCE NATURAL PAGINATION + Manual Page Spacing
         await page.evaluate(() => {
-            // Add CSS to force natural pagination
+            // Add CSS to force natural pagination with manual spacing
             const style = document.createElement('style');
             style.textContent = `
+                /* Force natural pagination */
                 * {
                     page-break-inside: auto !important;
                     break-inside: auto !important;
@@ -2838,6 +2839,15 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                     overflow: visible !important;
                 }
                 
+                /* Manual spacing for page breaks */
+                .page-break-spacer {
+                    height: 15mm !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    page-break-before: always !important;
+                    break-before: page !important;
+                }
+                
                 /* Force content to flow naturally */
                 .cv-section, .experience-item, .education-item {
                     page-break-inside: auto !important;
@@ -2845,6 +2855,20 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                 }
             `;
             document.head.appendChild(style);
+            
+            // Add manual spacers between major sections
+            const sections = document.querySelectorAll('.cv-section');
+            let addedSpacers = 0;
+            
+            sections.forEach((section, index) => {
+                if (index > 0 && index % 2 === 0) { // Every 2nd section, add spacer for page break
+                    const spacer = document.createElement('div');
+                    spacer.className = 'page-break-spacer';
+                    spacer.innerHTML = '&nbsp;'; // Non-breaking space
+                    section.parentNode?.insertBefore(spacer, section);
+                    addedSpacers++;
+                }
+            });
             
             const allElements = document.querySelectorAll('*');
             allElements.forEach(el => {
@@ -2863,7 +2887,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                 }
             });
             
-            console.log('🔥 FORCED natural pagination - removed ALL restrictions');
+            console.log(`🔥 FORCED natural pagination with ${addedSpacers} manual spacers`);
         });
 
         const pdfBuffer = await page.pdf({
@@ -2882,12 +2906,12 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             generateTaggedPDF: false,  // Disable tagging to prevent extra pages
             // Azərbaycan hərfləri üçün font encoding
             timeout: 60000,  // Extended timeout for font loading
-            // PDF margins - same as before
+            // Professional PDF margins for multi-page documents  
             margin: {
-                top: '10mm',      // Standard top margin
-                right: '15mm',    // Sağ margin 15mm
-                bottom: '10mm',   // Standard bottom margin  
-                left: '15mm'      // Sol margin 15mm
+                top: '20mm',      // Increased top margin for page separation
+                right: '15mm',    // Standard right margin
+                bottom: '20mm',   // Increased bottom margin for page separation  
+                left: '15mm'      // Standard left margin
             },
             scale: 1.0
             // 🔥 REMOVED width/height restrictions to allow natural pagination
