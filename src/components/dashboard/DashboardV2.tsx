@@ -43,11 +43,12 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
   const [userLimits, setUserLimits] = useState<UserLimits | null>(null);
   const [loading, setLoading] = useState(true);
   const [logoutLoading, setLogoutLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout, fetchCurrentUser } = useAuth();
 
   // Use user prop to display user info if needed
-  console.log('Dashboard user:', user?.email);
+  console.log('Dashboard user:', user?.email, 'tier:', user?.tier);
 
   const fetchDashboardData = useCallback(async () => {
     try {
@@ -159,6 +160,26 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
+  // Manual refresh function to update user data and dashboard
+  const handleRefreshUserData = async () => {
+    try {
+      setRefreshing(true);
+      console.log('🔄 Manual refresh: Updating user data...');
+      
+      // Refresh user data in auth context first
+      await fetchCurrentUser();
+      
+      // Then refresh dashboard data
+      await fetchDashboardData();
+      
+      console.log('✅ Manual refresh: Complete');
+    } catch (error) {
+      console.error('❌ Manual refresh error:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const handleLogout = async () => {
     try {
       setLogoutLoading(true);
@@ -188,11 +209,31 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
       <div className="w-full max-w-full mx-auto px-6 sm:px-8 md:px-12 lg:px-16 xl:px-24 2xl:px-32 py-8 sm:py-12 lg:py-16">
         {/* Welcome Section */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            İdarəetmə Paneli
-            <span className="block text-2xl font-normal text-gray-600 mt-2">Peşəkar CV-lərinizi idarə edin</span>
-          </h1>
-          <div className="w-24 h-1 bg-blue-600 mx-auto rounded-full"></div>
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <h1 className="text-4xl font-bold text-gray-900">
+              İdarəetmə Paneli
+            </h1>
+            <button
+              onClick={handleRefreshUserData}
+              disabled={refreshing}
+              className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center gap-2"
+              title="Məlumatları yenilə"
+            >
+              {refreshing ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Yenilənir...
+                </>
+              ) : (
+                <>
+                  🔄
+                  Yenilə
+                </>
+              )}
+            </button>
+          </div>
+          <span className="block text-2xl font-normal text-gray-600 mt-2">Peşəkar CV-lərinizi idarə edin</span>
+          <div className="w-24 h-1 bg-blue-600 mx-auto rounded-full mt-4"></div>
         </div>
 
         {/* Stats Cards */}

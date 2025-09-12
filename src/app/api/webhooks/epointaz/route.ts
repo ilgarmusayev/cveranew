@@ -84,7 +84,14 @@ export async function POST(request: NextRequest) {
           }
         });
 
+        // Update user tier to match subscription tier
+        await prisma.user.update({
+          where: { id: payment.userId },
+          data: { tier: payment.planType }
+        });
+
         console.log('Subscription created:', subscription);
+        console.log('User tier updated to:', payment.planType);
 
       } else if (status === 'failed' || status === 'cancelled' || status === 'error') {
         await prisma.payment.update({

@@ -52,6 +52,7 @@ export async function GET(request: NextRequest) {
         where: { id: decoded.userId },
         select: {
           tier: true,
+          email: true, // Add for debugging
           subscriptions: {
             where: {
               status: 'active'
@@ -74,6 +75,15 @@ export async function GET(request: NextRequest) {
       });
     });
 
+    console.log('🔍 Limits API - User data:', {
+      userId: decoded.userId,
+      userTier: user?.tier,
+      userEmail: user?.email,
+      activeSubscriptions: user?.subscriptions.length,
+      subscriptionTier: user?.subscriptions[0]?.tier,
+      cvLimitsTier: cvLimits.tierName
+    });
+
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
@@ -81,23 +91,26 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Use database user tier as the primary source of truth
+    const actualTier = user.tier || 'Free';
+    
     // Map CV limits to dashboard format
     const response = {
-      tier: cvLimits.tierName,
+      tier: actualTier, // Use actual user tier from database
       limits: {
         cvCount: cvLimits.limit,
-        templatesAccess: cvLimits.tierName === 'Pulsuz' ? ['Basic'] :
-                        (cvLimits.tierName === 'Populyar' || cvLimits.tierName === 'Pro') ? ['Basic', 'Medium'] :
+        templatesAccess: actualTier === 'Free' || actualTier === 'Pulsuz' ? ['Basic'] :
+                        (actualTier === 'Populyar' || actualTier === 'Pro' || actualTier === 'Medium') ? ['Basic', 'Medium'] :
                         ['Basic', 'Medium', 'Premium'],
         dailyLimit: cvLimits.limit,
-        aiFeatures: cvLimits.tierName !== 'Pulsuz',
+        aiFeatures: actualTier !== 'Free' && actualTier !== 'Pulsuz',
         limitType: cvLimits.limit === null ? 'unlimited' : (cvLimits.resetTime ? 'daily' : 'total')
       },
       usage: {
         cvCount: totalCVs,
         // For Free tier, dailyUsage should be same as currentCount (total CVs)
         // For daily tiers, currentCount is already the daily usage
-        dailyUsage: cvLimits.tierName === 'Pulsuz' ? totalCVs : cvLimits.currentCount,
+        dailyUsage: actualTier === 'Free' || actualTier === 'Pulsuz' ? totalCVs : cvLimits.currentCount,
         hasReachedLimit: cvLimits.limitReached,
         remainingLimit: cvLimits.limit ? (cvLimits.limit - cvLimits.currentCount) : 999
       },

@@ -4,12 +4,14 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
 import StandardHeader from '@/components/ui/StandardHeader';
 import Footer from '@/components/Footer';
 
 function PaymentSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { fetchCurrentUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [subscriptionCreated, setSubscriptionCreated] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +47,10 @@ function PaymentSuccessContent() {
             console.log('✅ Subscription already exists from webhook:', existingSub);
             setSubscriptionCreated(true);
             setSubscriptionInfo(existingSub);
+            
+            // 🔄 CRITICAL: Refresh user data even if subscription exists
+            console.log('🔄 Refreshing user data after finding existing subscription...');
+            await fetchCurrentUser();
             return;
           }
         }
@@ -61,6 +67,10 @@ function PaymentSuccessContent() {
         if (response.data.success) {
           setSubscriptionCreated(true);
           setSubscriptionInfo(response.data.subscription);
+          
+          // 🔄 CRITICAL: Refresh user data to update tier in auth context
+          console.log('🔄 Refreshing user data after subscription creation...');
+          await fetchCurrentUser();
         } else {
           throw new Error(response.data.error || 'Abunəlik yaradıla bilmədi');
         }
@@ -74,7 +84,7 @@ function PaymentSuccessContent() {
     };
 
     createSubscription();
-  }, [searchParams]);
+  }, [searchParams, fetchCurrentUser]);
 
   const handleContinue = () => {
     router.push('/dashboard');

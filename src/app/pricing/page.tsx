@@ -151,8 +151,8 @@ export default function PricingPage() {
     };
   }, []);
 
-  const loadUserInfo = useCallback(async () => {
-    setUserLoading(true);
+  const loadUserInfo = useCallback(async (force = false) => {
+    if (!force) setUserLoading(true);
     try {
       const token = localStorage.getItem('accessToken');
       if (!token) {
@@ -160,7 +160,9 @@ export default function PricingPage() {
         return;
       }
 
-      const response = await fetch('/api/user/limits', {
+      console.log('🔍 Pricing: Loading user info...');
+      // Use the same API that auth context uses for consistency
+      const response = await fetch('/api/users/me', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -168,36 +170,47 @@ export default function PricingPage() {
 
       if (response.ok) {
         const userData = await response.json();
-        console.log('User data from API:', userData); // Debug log
+        console.log('📥 Pricing: User data from /api/users/me:', userData);
 
-        // Get the user's current tier
+        // Get the user's current tier from database
         const tier = userData.tier || 'Free';
-        console.log('Setting userTier to:', tier); // Debug log
+        console.log('🎯 Pricing: Setting userTier to:', tier);
         setUserTier(tier);
 
         // Set subscription details if available
-        if (userData.subscription) {
+        if (userData.subscriptions && userData.subscriptions.length > 0) {
+          const activeSub = userData.subscriptions[0];
           setSubscriptionDetails({
-            status: userData.subscription.status,
-            currentPeriodEnd: userData.subscription.currentPeriodEnd,
-            cancelAtPeriodEnd: userData.subscription.cancelAtPeriodEnd
+            status: activeSub.status,
+            expiresAt: activeSub.expiresAt,
+            tier: activeSub.tier
           });
         } else {
           setSubscriptionDetails(null);
         }
       } else {
+        console.log('❌ Pricing: API response not ok, setting Free tier');
         setUserTier('Free');
       }
     } catch (error) {
-      console.error('Error loading user info:', error);
+      console.error('❌ Pricing: Error loading user info:', error);
       setUserTier('Free');
     } finally {
-      setUserLoading(false);
+      if (!force) setUserLoading(false);
     }
   }, []);
 
   useEffect(() => {
     loadUserInfo();
+    
+    // Check if coming from payment success - refresh user data
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('success') || urlParams.has('payment_success')) {
+      console.log('🎉 Pricing: Detected payment success, refreshing user data...');
+      setTimeout(() => {
+        loadUserInfo(true); // Force refresh
+      }, 1000);
+    }
   }, [loadUserInfo]);
 
   const handleUpgrade = async (planId: string) => {
