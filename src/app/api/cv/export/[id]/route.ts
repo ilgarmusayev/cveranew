@@ -258,9 +258,8 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
         const page = await browser.newPage();
 
         // A4 page ayarları - 210mm x 297mm at 96 DPI
-        // Force desktop viewport to ensure desktop layout in all templates
         await page.setViewport({ 
-            width: 1280,  // Desktop width to prevent mobile layout
+            width: 794,   // 210mm at 96 DPI
             height: 1123, // 297mm at 96 DPI
             deviceScaleFactor: 1
         });
@@ -278,14 +277,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             console.log('Template ID:', templateId);
             
             // Check if basic template
-            const isBasicTemplate = templateId === 'basic';
-            const isExclusiveTemplate = templateId === 'exclusive';
-            console.log('=== TEMPLATE DETECTION ===');
-            console.log('Template ID:', templateId);
-            console.log('Is Basic Template:', isBasicTemplate);
-            console.log('Is Exclusive Template:', isExclusiveTemplate);
-            
-            if (isBasicTemplate) {
+            if (templateId === 'basic') {
                 console.log('=== BASIC TEMPLATE DETECTED - EXTRA DEBUGGING ===');
                 console.log('Font Settings Object Keys:', Object.keys(fontSettings || {}));
                 console.log('Available font settings:');
@@ -336,591 +328,6 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         }
                         
                         ${cssContent}
-                        
-                        /* BASIC TEMPLATE COLOR FIXES - FORCE BLUE BORDERS AND CONSISTENT COLORS */
-                        .basic-template h2,
-                        .basic-template h3,
-                        .basic-template .section-header,
-                        .basic-template [style*="color: #2563eb"],
-                        .basic-template [style*="borderBottom"],
-                        .basic-template [style*="border-bottom"] {
-                            color: #2563eb !important;
-                            border-bottom-color: #2563eb !important;
-                            border-color: #2563eb !important;
-                        }
-                        
-                        /* TEMPLATE-SPECIFIC MARGIN ADJUSTMENTS */
-                        ${isBasicTemplate ? `
-                        @page {
-                            size: A4;
-                            margin: 0 8mm !important;  /* Basic template: 8mm side margins */
-                            padding: 0 !important;
-                            border: none !important;
-                            -webkit-print-color-adjust: exact !important;
-                            color-adjust: exact !important;
-                            print-color-adjust: exact !important;
-                        }
-                        
-                        .basic-template {
-                            padding-left: 8mm !important;
-                            padding-right: 8mm !important;
-                            max-width: 100% !important;
-                            box-sizing: border-box !important;
-                        }
-                        ` : isExclusiveTemplate ? `
-                        @page {
-                            size: A4;
-                            margin: 0 !important;  /* No page margins */
-                            padding: 0 !important;
-                            border: none !important;
-                            -webkit-print-color-adjust: exact !important;
-                            color-adjust: exact !important;
-                            print-color-adjust: exact !important;
-                        }
-                        
-                        html, body {
-                            margin: 0 !important;
-                            padding: 0 !important;
-                            height: auto !important;
-                            overflow: visible !important; /* Allow natural content flow */
-                        }
-                        
-                        .exclusive-template {
-                            padding: 15mm !important;  /* Same as preview */
-                            margin: 0 !important;
-                            width: 210mm !important;
-                            max-width: 210mm !important;
-                            box-sizing: border-box !important;
-                            height: auto !important;
-                            max-height: none !important; /* Allow content to flow naturally */
-                            min-height: auto !important;  /* No min-height */
-                            overflow: visible !important;  /* Allow content to flow to next page if needed */
-                            page-break-after: auto !important; /* Allow page breaks if content is long */
-                            page-break-inside: auto !important; /* Allow content to break across pages */
-                        }
-                        
-                        /* AGGRESSIVE: Force template to only take space it needs */
-                        .exclusive-template {
-                            contain: size layout !important; /* Contain size to prevent expansion */
-                            display: block !important;
-                            position: relative !important;
-                        }
-                        
-                        /* Remove all bottom margins and paddings that could create extra pages */
-                        .exclusive-template > *,
-                        .exclusive-template * {
-                            page-break-after: auto !important;
-                        }
-                        
-                        /* Super aggressive: limit document height */
-                        body:has(.exclusive-template) {
-                            max-height: fit-content !important;
-                            overflow: hidden !important;
-                        }
-                        
-                        /* Force last elements to have no trailing space */
-                        .exclusive-template > div:last-child,
-                        .exclusive-template > section:last-child,
-                        .exclusive-template *:last-child {
-                            margin-bottom: 0 !important;
-                            padding-bottom: 0 !important;
-                            border-bottom: none !important;
-                            page-break-after: avoid !important;
-                        }
-                        
-                        /* Prevent empty pages by controlling spacing and margins */
-                        .exclusive-template > *:last-child {
-                            margin-bottom: 0 !important;
-                            padding-bottom: 0 !important;
-                        }
-                        
-                        /* Remove any pseudo-elements that might create empty space */
-                        .exclusive-template::after,
-                        .exclusive-template *::after {
-                            content: none !important;
-                            display: none !important;
-                        }
-                        
-                        /* Smart page break control - allow breaks between sections */
-                        .exclusive-template .section,
-                        .exclusive-template .custom-section {
-                            page-break-inside: avoid !important; /* Keep sections together */
-                            page-break-after: auto !important; /* Allow breaks between sections */
-                        }
-                        
-                        /* Prevent orphaned headers */
-                        .exclusive-template h1,
-                        .exclusive-template h2,
-                        .exclusive-template h3 {
-                            page-break-after: avoid !important;
-                            orphans: 3 !important;
-                            widows: 3 !important;
-                        }
-                        ` : `
-                        @page {
-                            size: A4;
-                            margin: 0 10mm !important;  /* Other templates: 10mm side margins */
-                            padding: 0 !important;
-                            border: none !important;
-                            -webkit-print-color-adjust: exact !important;
-                            color-adjust: exact !important;
-                            print-color-adjust: exact !important;
-                        }
-                        `}
-                        
-                        /* BASIC TEMPLATE BORDER FIXES - LEFT BORDERS */
-                        .basic-template .border-l-2,
-                        .basic-template .border-blue-200,
-                        .basic-template [style*="borderLeft"],
-                        .basic-template [style*="border-left"] {
-                            border-left-color: #2563eb !important;
-                            border-left-width: 2px !important;
-                            border-left-style: solid !important;
-                        }
-                        
-                        /* BASIC TEMPLATE TEXT COLORS - COMPANY NAMES, INSTITUTIONS */
-                        .basic-template [style*="color: var(--cv-primary-color"],
-                        .basic-template .text-blue-600 {
-                            color: #2563eb !important;
-                        }
-                        
-                        /* BASIC TEMPLATE GRID FIXES - PROPER CONTACT LAYOUT */
-                        .basic-template .grid.grid-cols-1.sm\\:grid-cols-2,
-                        .basic-template .grid-cols-1,
-                        .basic-template .sm\\:grid-cols-2 {
-                            display: grid !important;
-                            grid-template-columns: 1fr 1fr !important;
-                            gap: 1rem !important;
-                            align-items: start !important;
-                        }
-                        
-                        /* BASIC TEMPLATE CONTACT INFO LAYOUT - HORIZONTAL GRID */
-                        .basic-template .contact-info-grid {
-                            display: grid !important;
-                            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
-                            gap: 8px 16px !important;
-                            color: #6b7280 !important;
-                        }
-                        
-                        .basic-template .contact-info-grid .flex.items-center.gap-2 {
-                            display: flex !important;
-                            align-items: center !important;
-                            gap: 0.5rem !important;
-                            margin-bottom: 0 !important;
-                        }
-                        
-                        .basic-template .contact-info-grid .font-medium.min-w-\\[50px\\].flex-shrink-0,
-                        .basic-template .contact-info-grid .font-medium {
-                            font-weight: 500 !important;
-                            min-width: 60px !important;
-                            flex-shrink: 0 !important;
-                        }
-                        
-                        /* CSS VARIABLES FOR CONSISTENT COLORS */
-                        :root {
-                            --cv-primary-color: #2563eb !important;
-                        }
-                        
-                        /* BASIC TEMPLATE COLOR ENFORCEMENT */
-                        .basic-template h1,
-                        .basic-template h2[style*="color: var(--cv-primary-color"],
-                        .basic-template [style*="border-bottom: 1px solid var(--cv-primary-color"],
-                        .basic-template [style*="borderBottom: '2px solid var(--cv-primary-color"],
-                        .basic-template [style*="borderLeft: '2px solid var(--cv-primary-color"] {
-                            color: #2563eb !important;
-                            border-color: #2563eb !important;
-                        }
-                        
-                        /* EXCLUSIVE TEMPLATE COLOR FIXES - FORCE BLUE BORDERS */
-                        .exclusive-template .border-b-2,
-                        .exclusive-template h2,
-                        .exclusive-template [style*="border-bottom"],
-                        .exclusive-template [style*="borderBottom"] {
-                            border-bottom-color: #2563eb !important;
-                            border-color: #2563eb !important;
-                        }
-                        
-                        /* EXCLUSIVE TEMPLATE HEADER BACKGROUND - CVPreview eyni */
-                        .exclusive-template .bg-gradient-to-r.from-blue-50.to-indigo-50,
-                        .exclusive-template [class*="bg-gradient"] {
-                            background: linear-gradient(to right, #eff6ff, #e0e7ff) !important;
-                            background-color: #eff6ff !important;
-                            -webkit-print-color-adjust: exact !important;
-                            print-color-adjust: exact !important;
-                            color-adjust: exact !important;
-                        }
-                        
-                        /* CONTACT INFO BOXES - CVPreview eyni ağ background */
-                        .exclusive-template .bg-white.p-3.rounded-md.shadow-sm,
-                        .exclusive-template .bg-white {
-                            background: white !important;
-                            background-color: white !important;
-                            -webkit-print-color-adjust: exact !important;
-                            print-color-adjust: exact !important;
-                            color-adjust: exact !important;
-                            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
-                        }
-                        
-                        /* BORDER COLORS - CVPreview eyni */
-                        .exclusive-template .border-blue-200,
-                        .exclusive-template .border-t.border-blue-200 {
-                            border-color: #bfdbfe !important;
-                        }
-                        
-                        /* EXCLUSIVE TEMPLATE SECTION HEADERS */
-                        .exclusive-template .text-sm.font-bold.text-gray-800.border-b-2.border-blue-600,
-                        .exclusive-template h2.text-sm.font-bold.text-gray-800 {
-                            border-bottom: 2px solid #2563eb !important;
-                            border-color: #2563eb !important;
-                        }
-                        
-                        /* EXCLUSIVE TEMPLATE - TAM CVPreview KİMİ DİNAMİK SPACING */
-                        
-                        /* Template container - CVPreview eyni ayarlar */
-                        .exclusive-template {
-                            font-family: var(--cv-font-family) !important;
-                            padding: 15mm !important;
-                            background: white !important;
-                            min-height: 297mm !important;
-                        }
-                        
-                        /* Header section - CVPreview eyni gradient və struktur */
-                        .exclusive-template > div:first-child {
-                            margin-top: 0 !important;
-                            margin-bottom: 0 !important;
-                            padding-top: 0 !important;
-                            padding-bottom: 0 !important;
-                        }
-                        
-                        .exclusive-template .bg-gradient-to-r {
-                            background: linear-gradient(to right, #eff6ff, #e0e7ff) !important;
-                            border: 1px solid #bfdbfe !important;
-                            border-radius: 8px !important;
-                            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
-                            -webkit-print-color-adjust: exact !important;
-                            print-color-adjust: exact !important;
-                        }
-                        
-                        .exclusive-template .p-6 {
-                            padding: 1.5rem !important; /* 24px */
-                        }
-                        
-                        .exclusive-template .flex.flex-row.gap-6 {
-                            display: flex !important;
-                            flex-direction: row !important;
-                            gap: 1.5rem !important;
-                            align-items: center !important;
-                        }
-                        
-                        /* Name styling - CVPreview eyni */
-                        .exclusive-template h1.text-2xl {
-                            font-size: 1.5rem !important; /* 24px */
-                            font-weight: 700 !important;
-                            margin-bottom: 0.75rem !important; /* 12px */
-                            letter-spacing: 0.025em !important;
-                            color: #111827 !important;
-                        }
-                        
-                        .exclusive-template .text-lg.text-blue-600 {
-                            font-size: 1.125rem !important; /* 18px */
-                            color: #2563eb !important;
-                            font-weight: 500 !important;
-                            margin-bottom: 0.5rem !important; /* 8px */
-                        }
-                        
-                        /* Contact section - CVPreview eyni spacing */
-                        .exclusive-template .mt-6.pt-4.border-t {
-                            margin-top: 1.5rem !important; /* 24px */
-                            padding-top: 1rem !important; /* 16px */
-                            border-top: 1px solid #bfdbfe !important;
-                        }
-                        
-                        .exclusive-template .grid.grid-cols-3.gap-4 {
-                            display: grid !important;
-                            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-                            gap: 1rem !important; /* 16px */
-                        }
-                        
-                        .exclusive-template .bg-white.p-3.rounded-md.shadow-sm {
-                            background: white !important;
-                            padding: 0.75rem !important; /* 12px */
-                            border-radius: 6px !important;
-                            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
-                            -webkit-print-color-adjust: exact !important;
-                            print-color-adjust: exact !important;
-                        }
-                        
-                        .exclusive-template .text-blue-600.uppercase.font-bold.text-xs.mb-2 {
-                            color: #2563eb !important;
-                            text-transform: uppercase !important;
-                            font-weight: 700 !important;
-                            font-size: 0.75rem !important; /* 12px */
-                            margin-bottom: 0.5rem !important; /* 8px */
-                        }
-                        
-                        .exclusive-template .text-gray-800.font-medium.text-sm {
-                            color: #1f2937 !important;
-                            font-weight: 500 !important;
-                            font-size: 0.875rem !important; /* 14px */
-                        }
-                        
-                        /* Section spacing - CVPreview var(--cv-section-spacing) dinamik */
-                        .exclusive-template [style*="gap: 'var(--cv-section-spacing)'"] {
-                            display: flex !important;
-                            flex-direction: column !important;
-                            gap: var(--cv-section-spacing) !important;
-                        }
-                        
-                        /* Section headers - CVPreview eyni .mb-2 və h2 */
-                        .exclusive-template .mb-2 {
-                            margin-bottom: 0.5rem !important; /* 8px - CVPreview eyni */
-                        }
-                        
-                        .exclusive-template h2.text-sm.font-bold.text-gray-800.border-b-2.border-blue-600.pb-1,
-                        .exclusive-template h2 {
-                            font-size: 0.875rem !important; /* 14px */
-                            font-weight: 700 !important;
-                            color: #1f2937 !important;
-                            border-bottom: 2px solid #2563eb !important;
-                            padding-bottom: 0.25rem !important; /* 4px - CVPreview eyni pb-1 */
-                            margin-bottom: 0 !important; /* h2 özündə margin yox */
-                            margin-top: 0 !important;
-                        }
-                        
-                        /* BÜTÜN SECTION CONTENT-LƏR - başlıqdan dərhal sonra */
-                        .exclusive-template .mb-2 + div,
-                        .exclusive-template .mb-2 + .text-gray-700,
-                        .exclusive-template .mb-2 + .space-y-2,
-                        .exclusive-template .mb-2 + .space-y-3,
-                        .exclusive-template .mb-2 + .grid {
-                            margin-top: 0 !important;
-                            padding-top: 0 !important;
-                        }
-                        
-                        /* Skills section flex wrap - CVPreview eyni */
-                        .exclusive-template [style*="display: flex"][style*="flexWrap: 'wrap'"] {
-                            display: flex !important;
-                            flex-wrap: wrap !important;
-                            gap: var(--cv-section-spacing) !important;
-                            margin-top: 0 !important;
-                        }
-                        
-                        /* Languages grid - CVPreview eyni */
-                        .exclusive-template .grid.grid-cols-2.gap-2 {
-                            display: grid !important;
-                            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-                            gap: 0.5rem !important; /* 8px */
-                            margin-top: 0 !important;
-                        }
-                        
-                        /* Summary section - CVPreview marginTop: '16px' */
-                        .exclusive-template [style*="marginTop: '16px'"] {
-                            margin-top: 16px !important;
-                        }
-                        
-                        /* Summary section header və content arasında gap yox */
-                        .exclusive-template [style*="marginTop: '16px'"] .mb-2 {
-                            margin-bottom: 0.5rem !important; /* 8px başlıq container */
-                        }
-                        
-                        .exclusive-template [style*="marginTop: '16px'"] .mb-2 + div {
-                            margin-top: 0 !important; /* Məzmun dərhal başlasın */
-                        }
-                        
-                        /* Content spacing - CVPreview eyni space-y classes */
-                        .exclusive-template .space-y-2 > *:not(:first-child) {
-                            margin-top: 0.5rem !important; /* 8px */
-                        }
-                        
-                        .exclusive-template .space-y-3 > *:not(:first-child) {
-                            margin-top: 0.75rem !important; /* 12px */
-                        }
-                        
-                        /* SECTION İÇİNDƏ MƏZMUN SPACING - CVPreview eyni */
-                        /* Başlıqdan sonra məzmun dərhal başlasın */
-                        .exclusive-template div[class*="mb-2"] + div:not([class*="mb-"]):not([class*="mt-"]) {
-                            margin-top: 0 !important;
-                        }
-                        
-                        /* Summary content - CVPreview eyni leading-relaxed */
-                        .exclusive-template .text-gray-700.leading-relaxed.text-sm {
-                            color: #374151 !important;
-                            line-height: 1.625 !important; /* leading-relaxed */
-                            font-size: 0.875rem !important; /* text-sm */
-                            margin-left: 0 !important;
-                            padding-left: 0 !important;
-                            margin-top: 0 !important;
-                            padding-top: 0 !important;
-                        }
-                        
-                        /* Experience description - CVPreview eyni */
-                        .exclusive-template .text-gray-700.leading-relaxed.text-xs.mt-1 {
-                            color: #374151 !important;
-                            line-height: 1.625 !important;
-                            font-size: 0.75rem !important; /* text-xs */
-                            margin-top: 0.25rem !important; /* mt-1 */
-                        }
-                        
-                        /* Skills tags - CVPreview eyni background və spacing */
-                        .exclusive-template .bg-gray-100.text-gray-800.px-2.py-1.text-xs.rounded {
-                            background-color: #f3f4f6 !important;
-                            color: #1f2937 !important;
-                            padding: 0.25rem 0.5rem !important; /* px-2 py-1 */
-                            font-size: 0.75rem !important; /* text-xs */
-                            border-radius: 0.25rem !important;
-                            -webkit-print-color-adjust: exact !important;
-                            print-color-adjust: exact !important;
-                        }
-                        
-                        /* Languages grid items - CVPreview eyni */
-                        .exclusive-template .bg-gray-50.p-2.rounded {
-                            background-color: #f9fafb !important;
-                            padding: 0.5rem !important; /* p-2 */
-                            border-radius: 0.25rem !important;
-                            -webkit-print-color-adjust: exact !important;
-                            print-color-adjust: exact !important;
-                        }
-                        
-                        /* Təcrübə və təhsil item-ları arasında space-y-2 (8px) */
-                        .exclusive-template .space-y-2 > div {
-                            margin-bottom: 0 !important;
-                        }
-                        
-                        .exclusive-template .space-y-2 > div + div {
-                            margin-top: 0.5rem !important; /* 8px */
-                        }
-                        
-                        /* Section-lar arasında dinamik gap */
-                        .exclusive-template [style*="gap: 'var(--cv-section-spacing)'"] > * + * {
-                            margin-top: var(--cv-section-spacing) !important;
-                        }
-                        
-                        /* Experience items - CVPreview eyni pb-1 və mb-1 */
-                        .exclusive-template .pb-1 {
-                            padding-bottom: 0.25rem !important; /* 4px */
-                        }
-                        
-                        .exclusive-template .mb-1 {
-                            margin-bottom: 0.25rem !important; /* 4px */
-                        }
-                        
-                        .exclusive-template .mt-0\\.5 {
-                            margin-top: 0.125rem !important; /* 2px */
-                        }
-                        
-                        /* Text sizes - CVPreview eyni */
-                        .exclusive-template .text-sm {
-                            font-size: 0.875rem !important; /* 14px */
-                            line-height: 1.25 !important;
-                        }
-                        
-                        .exclusive-template .text-xs {
-                            font-size: 0.75rem !important; /* 12px */
-                            line-height: 1.333 !important;
-                        }
-                        
-                        .exclusive-template .leading-relaxed {
-                            line-height: 1.625 !important;
-                        }
-                        
-                        /* EXCLUSIVE TEMPLATE - EXACT SAME AS PREVIEW */
-                        .exclusive-template,
-                        .cv-template.exclusive-template,
-                        div.exclusive-template {
-                            padding: 15mm !important;  /* Same as preview */
-                            margin: 0 !important;
-                            width: 210mm !important;
-                            box-sizing: border-box !important;
-                            height: auto !important;
-                            min-height: auto !important;  /* No forced height */
-                            max-height: none !important;  /* No height limit */
-                            overflow: hidden !important;  /* Hide any overflow that might cause extra page */
-                            page-break-after: avoid !important;  /* Prevent page break after template */
-                            page-break-inside: avoid !important;  /* Prevent page break inside template */
-                            line-height: 1.4 !important; /* Better line spacing */
-                            font-family: var(--cv-font-family) !important;
-                            background: white !important;
-                        }
-                        
-                        /* DİNAMİK SPACING SİSTEMİ - CVPreview ilə 1:1 uyğun */
-                        .exclusive-template {
-                            /* CSS variables CVPreview ilə eyni */
-                            --cv-section-spacing: ${fontSettings?.sectionSpacing || 24}px !important;
-                        }
-                        
-                        /* Main section container - CVPreview ilə tam eyni */
-                        .exclusive-template [style*="display: flex"][style*="flex-direction: column"][style*="gap: 'var(--cv-section-spacing)'"] {
-                            display: flex !important;
-                            flex-direction: column !important;
-                            gap: var(--cv-section-spacing) !important;
-                        }
-                        
-                        /* Fallback üçün section spacing */
-                        .exclusive-template > div + div,
-                        .exclusive-template .sortable-item + .sortable-item {
-                            margin-top: var(--cv-section-spacing) !important;
-                        }
-                        
-                        /* AGGRESSIVE BLANK PAGE PREVENTION FOR EXCLUSIVE TEMPLATE */
-                        .exclusive-template *:last-child {
-                            margin-bottom: 0 !important;
-                            padding-bottom: 0 !important;
-                            page-break-after: avoid !important;
-                        }
-                        
-                        /* Remove any pseudo-elements that might create extra space */
-                        .exclusive-template::after,
-                        .exclusive-template *::after {
-                            content: none !important;
-                            display: none !important;
-                        }
-                        
-                        /* Smart content flow - prevent empty pages */
-                        .exclusive-template {
-                            contain: layout !important; /* Contain layout to prevent overflow issues */
-                        }
-                        
-                        /* If content exceeds one page, allow intelligent page breaks */
-                        @media print {
-                            /* Only create new page if there's actual content */
-                            .exclusive-template {
-                                orphans: 4 !important; /* Minimum lines at bottom of page */
-                                widows: 4 !important;   /* Minimum lines at top of new page */
-                            }
-                            
-                            /* Prevent page break if last element is empty or has minimal content */
-                            .exclusive-template > div:last-child:empty,
-                            .exclusive-template > section:last-child:empty {
-                                display: none !important;
-                            }
-                        }
-                        }
-                        
-                        /* EXCLUSIVE TEMPLATE - PREVENT EXTRA PAGE */
-                        .exclusive-template::after {
-                            content: none !important;  /* Remove any pseudo-content */
-                        }
-                        
-                        .exclusive-template > *:last-child {
-                            page-break-after: avoid !important;
-                            margin-bottom: 0 !important;
-                            padding-bottom: 0 !important;
-                        }
-                        
-                        /* FORCE DESKTOP LAYOUT FOR ALL TEMPLATES IN EXPORT */
-                        @media (max-width: 1023px) {
-                            .lg\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
-                            .lg\\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
-                            .md\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-                            .md\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
-                            .md\\:flex { display: flex !important; }
-                            .md\\:justify-between { justify-content: space-between !important; }
-                            .lg\\:text-right { text-align: right !important; }
-                            .lg\\:max-w-xs { max-width: 20rem !important; }
-                            .lg\\:w-64 { width: 16rem !important; }
-                            .lg\\:w-80 { width: 20rem !important; }
-                            /* Override any mobile-specific styles to force desktop layout */
-                        }
                         
                         /* ROUTE.TS ƏLAVƏ CSS - YALNIZ DINAMIK FONT SISTEMI */
                           
@@ -1284,7 +691,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             --cv-paragraph-spacing: ${Math.max(8, (fontSettings?.sectionSpacing || 16) * 0.75)}px;
                             
                             /* Dinamik Rənglər */
-                            --cv-primary-color: #2563eb;
+                            --cv-primary-color: ${fontSettings?.primaryColor || '#1f2937'};
                             --cv-secondary-color: ${fontSettings?.secondaryColor || '#6b7280'};
                             --cv-accent-color: ${fontSettings?.accentColor || '#3b82f6'};
                             --cv-text-color: ${fontSettings?.textColor || '#374151'};
@@ -2551,19 +1958,22 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                     --cv-small-spacing: ${fontSettings.sectionSpacing}px;
                 }
                 
-                /* PDF Səhifə Ayarları - İstifadəçi Tələbi Üzrə */
+                /* 🚫 NUCLEAR BLANK PAGE PREVENTION - FORCE SINGLE PAGE */
                 @page {
                     size: A4;
-                    margin: 5mm 15mm 15mm 15mm !important; /* Default: top=5mm, sides/bottom=15mm */
+                    margin: 5mm 15mm 5mm 15mm !important; /* Reduced margins to prevent overflow */
                 }
                 
-                @page :first {
-                    margin: 5mm 15mm 15mm 15mm !important; /* 1-ci səhifə: top=5mm - azca artırılmış */
-                }
-                
-                /* 2-ci səhifə və sonrakı səhifələr üçün top margin 15mm */
-                @page :not(:first) {
-                    margin: 15mm 15mm 15mm 15mm !important; /* 2-ci səhifədən başlayaraq: top=15mm avtomatik */
+                /* 🚫 AGGRESSIVE: Disable all page breaks */
+                * {
+                    page-break-after: avoid !important;
+                    page-break-before: avoid !important;
+                    page-break-inside: avoid !important;
+                    break-after: avoid !important;
+                    break-before: avoid !important;
+                    break-inside: avoid !important;
+                    orphans: 4 !important;
+                    widows: 4 !important;
                 }
                 
                 /* Basic Template üçün xüsusi ayarlar */
@@ -2584,10 +1994,11 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                     page-break-before: auto;
                 }
                 
-                /* PDF Multi-page fundamental rules for A4 */
+                /* PDF Multi-page fundamental rules for A4 - 🚫 NUCLEAR SINGLE PAGE MODE */
                 html {
                     height: auto !important;
-                    overflow: visible !important;
+                    max-height: 297mm !important; /* Force A4 max height */
+                    overflow: hidden !important; /* Hide overflow to prevent new pages */
                     font-size: var(--cv-body-size, 12pt) !important;
                     margin: 0 !important; /* HTML margin sıfır */
                     padding: 0 !important; /* HTML padding sıfır */
@@ -2595,18 +2006,33 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                 
                 body {
                     height: auto !important;
+                    max-height: 280mm !important; /* Slightly less than A4 for content area */
                     min-height: auto !important;
-                    overflow: visible !important;
+                    overflow: hidden !important; /* 🚫 CRITICAL: Hide overflow */
                     margin: 0 !important; /* Body margin mütləq sıfır */
                     padding: 0 !important; /* Body padding mütləq sıfır */
                     -webkit-print-color-adjust: exact !important;
                     color-adjust: exact !important;
                     line-height: var(--cv-line-height, 1.4) !important;
+                    /* 🚫 DISABLE ALL PAGE BREAKS */
+                    page-break-after: avoid !important;
+                    page-break-before: avoid !important;
+                    page-break-inside: avoid !important;
                 }
                 
-                /* PDF-də bütün container-lərin kənar boşluqlarını tamamilə sil */
+                /* PDF-də bütün container-lərin kənar boşluqlarını tamamilə sil + 🚫 NUCLEAR MODE */
                 .cv-preview,
                 .basic-template,
+                .exclusive-template,
+                .modern-template,
+                .atlas-template,
+                .aurora-template,
+                .vertex-template,
+                .horizon-template,
+                .lumen-template,
+                .clarity-template,
+                .essence-template,
+                .prime-template,
                 [class*="template"],
                 .template-container,
                 .cv-container {
@@ -2614,6 +2040,12 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                     padding: 0 !important; /* MÜTLƏQ padding sıfır */
                     border: none !important;
                     box-shadow: none !important;
+                    /* 🚫 NUCLEAR: Force height limits */
+                    max-height: 280mm !important; /* Slightly less than A4 for margins */
+                    overflow: hidden !important; /* Hide overflow completely */
+                    page-break-after: avoid !important;
+                    page-break-before: avoid !important;
+                    page-break-inside: avoid !important;
                 }
                 
                 /* Basic Template üçün xüsusi top boşluq sıfırlama */
@@ -2777,96 +2209,6 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
         
         console.log('🎨 Template ID Check:', templateId, '-> Normalized:', normalizedTemplateId);
         console.log('🔍 Is Atlas Template:', isAtlasTemplate);
-        
-        // Check if Basic template
-        const isBasicTemplate = normalizedTemplateId.includes('basic') || 
-                                   normalizedTemplateId === 'basic' ||
-                                   normalizedTemplateId === 'traditional' ||
-                                   normalizedTemplateId.includes('traditional') ||
-                                   normalizedTemplateId.includes('simple') ||
-                                   normalizedTemplateId.includes('professional');
-        
-        console.log('🔍 Is Basic Template:', isBasicTemplate);
-        
-        // Check if Exclusive template
-        const isExclusiveTemplate = normalizedTemplateId.includes('exclusive') || 
-                                       normalizedTemplateId === 'exclusive';
-        
-        console.log('🔍 Is Exclusive Template:', isExclusiveTemplate);
-        
-        // Exclusive template: Clean up empty elements that might cause blank pages
-        if (isExclusiveTemplate) {
-            await page.evaluate(() => {
-                console.log('🧹 Cleaning up empty elements for Exclusive template...');
-                
-                // Remove empty divs, sections, and elements that might create blank pages
-                const emptyElements = document.querySelectorAll('.exclusive-template *:empty');
-                emptyElements.forEach(el => {
-                    const element = el as HTMLElement;
-                    // Only remove if it's truly empty (no text content and no important styling)
-                    if (!element.textContent?.trim() && 
-                        !element.querySelector('img, svg, canvas') &&
-                        !element.style.backgroundColor &&
-                        !element.style.borderBottom) {
-                        element.remove();
-                    }
-                });
-                
-                // Remove trailing empty space elements
-                const exclusiveTemplate = document.querySelector('.exclusive-template');
-                if (exclusiveTemplate) {
-                    const lastChild = exclusiveTemplate.lastElementChild;
-                    if (lastChild && !lastChild.textContent?.trim()) {
-                        // Check if it's just a spacing element
-                        const hasImportantContent = lastChild.querySelector('img, svg, canvas, input, button');
-                        if (!hasImportantContent) {
-                            console.log('🗑️ Removing trailing empty element:', lastChild.tagName);
-                            lastChild.remove();
-                        }
-                    }
-                }
-                
-                // AGGRESSIVE: Remove all elements with only whitespace or empty margin/padding
-                const allElements = exclusiveTemplate?.querySelectorAll('*');
-                allElements?.forEach(el => {
-                    const element = el as HTMLElement;
-                    const computedStyle = window.getComputedStyle(element);
-                    const hasContent = element.textContent?.trim() || 
-                                     element.querySelector('img, svg, canvas, input, button, select, textarea');
-                    
-                    // Remove elements that are just spacing/margin creators
-                    if (!hasContent && 
-                        !element.style.backgroundColor && 
-                        !element.style.borderBottom &&
-                        !element.classList.contains('border-b') &&
-                        computedStyle.height === '0px') {
-                        element.remove();
-                    }
-                });
-                
-                console.log('✅ Exclusive template cleanup completed');
-            });
-            
-            // Force content height calculation and remove anything beyond reasonable limits
-            await page.evaluate(() => {
-                const exclusiveTemplate = document.querySelector('.exclusive-template');
-                if (exclusiveTemplate) {
-                    const templateElement = exclusiveTemplate as HTMLElement;
-                    
-                    // Calculate actual content height
-                    const contentHeight = templateElement.scrollHeight;
-                    console.log('📏 Exclusive template content height:', contentHeight, 'px');
-                    
-                    // If content is very short, ensure no extra spacing
-                    if (contentHeight < 800) { // Less than A4 page height
-                        templateElement.style.setProperty('height', 'auto', 'important');
-                        templateElement.style.setProperty('max-height', `${contentHeight + 50}px`, 'important');
-                        templateElement.style.setProperty('overflow', 'hidden', 'important');
-                        console.log('🔒 Limited template height to prevent blank pages');
-                    }
-                }
-            });
-        }
         
         if (isAtlasTemplate) {
             console.log('🎯 Atlas Template detected - applying complete design fix...');
@@ -3243,84 +2585,6 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             console.log('✅ Atlas template complete design fix applied successfully');
         }
         
-        // Basic Template üçün border rəng və layout düzəlişi
-        if (isBasicTemplate) {
-            console.log('🎯 Basic Template detected - applying border color and layout fix');
-            
-            await page.addStyleTag({
-                content: `
-                    /* Basic template border color fix */
-                    .basic-template .border-b-2,
-                    .cv-section.border-b-2,
-                    div[style*="border-bottom"]:not([style*="border-color"]) {
-                        border-color: var(--cv-primary-color) !important;
-                        border-bottom-color: var(--cv-primary-color) !important;
-                    }
-                    
-                    /* All section headers use primary color for border */
-                    .cv-section h2 {
-                        border-bottom-color: var(--cv-primary-color) !important;
-                        border-color: var(--cv-primary-color) !important;
-                    }
-                    
-                    /* Contact info layout fix */
-                    .contact-info {
-                        text-align: center !important;
-                        line-height: 1.4 !important;
-                        color: var(--cv-secondary-color) !important;
-                        font-size: var(--cv-small-size) !important;
-                    }
-                    
-                    /* Basic template header styling */
-                    .basic-template .text-center .border-b-2 {
-                        border-bottom: 2px solid var(--cv-primary-color) !important;
-                    }
-                    
-                    /* Force primary color on all borders in basic template */
-                    .basic-template [style*="border-bottom"],
-                    .basic-template .border-b,
-                    .basic-template .border-b-2 {
-                        border-bottom-color: var(--cv-primary-color) !important;
-                    }
-                    
-                    /* Override any hardcoded border colors */
-                    .basic-template * {
-                        --tw-border-opacity: 1;
-                        border-color: var(--cv-primary-color);
-                    }
-                `
-            });
-            
-            console.log('✅ Basic template border color and layout fix applied successfully');
-        }
-        
-        // Basic Template üçün border rəng düzəlişi
-        if (normalizedTemplateId.includes('basic') || normalizedTemplateId === 'traditional') {
-            console.log('🎯 Basic Template detected - applying border color fix');
-            
-            await page.addStyleTag({
-                content: `
-                    /* Basic template border color fix */
-                    .basic-template .border-b-2,
-                    .cv-section.border-b-2,
-                    div[style*="border-bottom"]:not([style*="border-color"]) {
-                        border-color: var(--cv-primary-color) !important;
-                        border-bottom-color: var(--cv-primary-color) !important;
-                    }
-                    
-                    /* Contact info layout fix */
-                    .contact-info {
-                        text-align: center !important;
-                        line-height: 1.4 !important;
-                        color: var(--cv-secondary-color) !important;
-                        font-size: var(--cv-small-size) !important;
-                    }
-                `
-            });
-            
-            console.log('✅ Basic template border color fix applied successfully');
-        }
-        
         // Sadə və təbii PDF axını
         if (templateExists) {
             await page.evaluate(() => {
@@ -3497,205 +2761,89 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             console.log('=== AGGRESSIVE BACKGROUND COLOR ENFORCEMENT COMPLETE ===');
         });
 
-        // EXCLUSIVE TEMPLATE: Calculate actual content and prevent blank pages
-        let pdfOptions: any = {
-            format: 'A4',
-            printBackground: true,
-            preferCSSPageSize: false,
-            displayHeaderFooter: false,
-            tagged: true,
-            outline: false,
-            omitBackground: true,
-            generateDocumentOutline: false,
-            generateTaggedPDF: true,
-            timeout: 60000,
-            margin: {
-                top: '5mm',
-                right: isBasicTemplate ? '8mm' : isExclusiveTemplate ? '0mm' : '15mm',
-                bottom: '15mm',
-                left: isBasicTemplate ? '8mm' : isExclusiveTemplate ? '0mm' : '15mm'
-            },
-            scale: 1.0,
-            pageRanges: '',
-        };
-
-        // For Exclusive template: Check content height and optimize PDF generation
-        if (isExclusiveTemplate) {
-            console.log('🎯 Exclusive Template - Applying RADICAL blank page prevention...');
+        // 🚫 NUCLEAR BLANK PAGE PREVENTION SYSTEM
+        console.log('🚫 Nuclear blank page prevention activated...');
+        
+        // Step 1: Content height monitoring və cleanup
+        await page.evaluate(() => {
+            // A4 hündürlük (297mm = 1123px at 96 DPI)
+            const A4_HEIGHT_PX = 1123;
             
-            // STEP 1: Force remove ALL empty elements and trailing spaces
-            await page.evaluate(() => {
-                const template = document.querySelector('.exclusive-template') as HTMLElement;
-                if (template) {
-                    // Remove ALL empty divs, spans, sections
-                    const emptyEls = template.querySelectorAll('*:empty');
-                    emptyEls.forEach(el => el.remove());
-                    
-                    // Remove elements with only whitespace
-                    const allEls = template.querySelectorAll('*');
-                    allEls.forEach(el => {
-                        if (el.textContent?.trim() === '' && 
-                            !el.querySelector('img, svg, canvas, input, button')) {
-                            el.remove();
-                        }
-                    });
-                    
-                    // Force template height to EXACT content
-                    const actualContentHeight = template.scrollHeight;
-                    console.log('📏 Setting template height to:', actualContentHeight + 'px');
-                    template.style.setProperty('height', actualContentHeight + 'px', 'important');
-                    template.style.setProperty('max-height', actualContentHeight + 'px', 'important');
-                    template.style.setProperty('overflow', 'hidden', 'important');
-                    
-                    // Remove ALL bottom margins and paddings
-                    const allChildren = template.querySelectorAll('*');
-                    allChildren.forEach(child => {
-                        const el = child as HTMLElement;
+            // Body content yoxlanışı
+            const body = document.body;
+            const actualHeight = body.scrollHeight;
+            console.log('📏 Body scroll height:', actualHeight, 'px vs A4 max:', A4_HEIGHT_PX, 'px');
+            
+            // Force all elements to fit in single page
+            if (actualHeight > A4_HEIGHT_PX) {
+                console.log('⚠️ Content exceeds A4 height, forcing compression...');
+                
+                // Aggressive height limiting
+                body.style.setProperty('max-height', A4_HEIGHT_PX + 'px', 'important');
+                body.style.setProperty('overflow', 'hidden', 'important');
+                
+                // Scale down if needed
+                const scaleFactor = Math.min(1, A4_HEIGHT_PX / actualHeight);
+                if (scaleFactor < 1) {
+                    body.style.setProperty('transform', 'scale(' + scaleFactor + ')', 'important');
+                    body.style.setProperty('transform-origin', 'top left', 'important');
+                    console.log('🔄 Applied scaling:', scaleFactor);
+                }
+            }
+            
+            // Step 2: Remove all trailing whitespace and margins that could cause page breaks
+            const allElements = document.querySelectorAll('*');
+            allElements.forEach(el => {
+                if (el instanceof HTMLElement) {
+                    // Remove bottom margins from last elements
+                    if (el.parentElement && el === el.parentElement.lastElementChild) {
                         el.style.setProperty('margin-bottom', '0', 'important');
                         el.style.setProperty('padding-bottom', '0', 'important');
-                    });
+                    }
+                    
+                    // Remove page-break-after that could create blank pages
+                    el.style.setProperty('page-break-after', 'auto', 'important');
+                    el.style.setProperty('break-after', 'auto', 'important');
                 }
             });
             
-            // STEP 2: Force CSS to prevent ANY page breaks AND MATCH PREVIEW SPACING
-            await page.addStyleTag({
-                content: `
-                    /* NUCLEAR OPTION - FORCE SINGLE PAGE */
-                    @page {
-                        size: A4;
-                        margin: 0 !important;
-                    }
-                    
-                    body, html {
-                        height: auto !important;
-                        max-height: 297mm !important;
-                        overflow: hidden !important;
-                        page-break-after: avoid !important;
-                    }
-                    
-                    .exclusive-template {
-                        page-break-after: avoid !important;
-                        page-break-inside: avoid !important;
-                        break-after: avoid !important;
-                        break-inside: avoid !important;
-                        height: auto !important;
-                        overflow: hidden !important;
-                        padding: 15mm !important; /* Same as preview */
-                    }
-                    
-                    .exclusive-template * {
-                        page-break-after: avoid !important;
-                        page-break-inside: avoid !important;
-                        page-break-before: avoid !important;
-                        break-after: avoid !important;
-                        break-inside: avoid !important;
-                        break-before: avoid !important;
-                    }
-                    
-                    /* MATCH PREVIEW SPACING EXACTLY */
-                    
-                    /* Header spacing - same as preview */
-                    .exclusive-template .mb-6 {
-                        margin-bottom: 1.5rem !important; /* 24px - main sections spacing */
-                    }
-                    
-                    /* Section headers - same as preview */
-                    .exclusive-template .mb-2 {
-                        margin-bottom: 0.5rem !important; /* 8px - section header spacing */
-                    }
-                    
-                    .exclusive-template .pb-1 {
-                        padding-bottom: 0.25rem !important; /* 4px - header padding */
-                    }
-                    
-                    /* Content spacing - same as preview */
-                    .exclusive-template .space-y-2 > * + * {
-                        margin-top: 0.5rem !important; /* 8px - items in experience/education */
-                    }
-                    
-                    .exclusive-template .space-y-3 > * + * {
-                        margin-top: 0.75rem !important; /* 12px - larger items spacing */
-                    }
-                    
-                    /* Experience/Education item spacing */
-                    .exclusive-template .pb-1 {
-                        padding-bottom: 0.25rem !important; /* 4px */
-                    }
-                    
-                    .exclusive-template .pb-2 {
-                        padding-bottom: 0.5rem !important; /* 8px */
-                    }
-                    
-                    /* Text spacing */
-                    .exclusive-template .mb-1 {
-                        margin-bottom: 0.25rem !important; /* 4px - small spacing */
-                    }
-                    
-                    .exclusive-template .mt-0\\.5 {
-                        margin-top: 0.125rem !important; /* 2px - very small spacing */
-                    }
-                    
-                    .exclusive-template .mt-1 {
-                        margin-top: 0.25rem !important; /* 4px - description spacing */
-                    }
-                    
-                    /* Skills and languages */
-                    .exclusive-template .gap-2 {
-                        gap: 0.5rem !important; /* 8px - grid gap */
-                    }
-                    
-                    .exclusive-template .gap-1 {
-                        gap: 0.25rem !important; /* 4px - flex gap */
-                    }
-                    
-                    /* Summary section specific */
-                    .exclusive-template [style*="marginTop: 16px"] {
-                        margin-top: 1rem !important; /* 16px - summary section top margin */
-                    }
-                    
-                    /* Custom sections spacing */
-                    .exclusive-template [style*="gap: 4px"] {
-                        gap: 0.25rem !important; /* 4px - custom sections gap */
-                    }
-                    
-                    .exclusive-template [style*="marginBottom: 8px"] {
-                        margin-bottom: 0.5rem !important; /* 8px - between custom sections */
-                    }
-                    
-                    /* Hide anything that goes beyond first page */
-                    @media print {
-                        .exclusive-template {
-                            max-height: 267mm !important; /* A4 minus padding */
-                            overflow: hidden !important;
-                        }
-                    }
-                `
-            });
+            // Step 3: Force body to exact content size
+            body.style.setProperty('height', 'auto', 'important');
+            body.style.setProperty('min-height', 'auto', 'important');
+            body.style.setProperty('margin', '0', 'important');
+            body.style.setProperty('padding', '0', 'important');
             
-            // STEP 3: Force viewport to exact A4 size
-            await page.setViewport({
-                width: 794,   // A4 width
-                height: 1123, // A4 height
-                deviceScaleFactor: 1
-            });
-            
-            pdfOptions.pageRanges = '1'; // FORCE only first page
-            pdfOptions.height = '297mm';
-            pdfOptions.width = '210mm';
-            pdfOptions.margin = { top: '0mm', bottom: '0mm', left: '0mm', right: '0mm' };
-        }
+            console.log('🚫 Nuclear blank page prevention measures applied');
+        });
 
-        const pdfBuffer = await page.pdf(pdfOptions);
-
-        // EXCLUSIVE TEMPLATE POST-PROCESSING: Verify PDF page count
-        if (isExclusiveTemplate) {
-            console.log('📄 PDF generated for Exclusive template, size:', pdfBuffer.length, 'bytes');
-            
-            // Check if PDF has multiple pages (basic check by file size)
-            if (pdfBuffer.length > 50000) { // If PDF is suspiciously large, might have extra pages
-                console.log('⚠️ Warning: PDF might contain extra pages. File size:', pdfBuffer.length);
-            }
-        }
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,  // ✅ Background colors göstərilsin
+            preferCSSPageSize: false,  // CSS @page-dən istifadə etmə, native ayarlar istifadə et
+            displayHeaderFooter: false,
+            // 🚫 CRITICAL: Force single page only if content fits
+            pageRanges: '1',  // ⚠️ AGGRESSIVE: Generate only page 1 to prevent blank pages
+            // Unicode və font support üçün əlavə ayarlar
+            tagged: true,  // PDF/A accessibility və unicode dəstəyi
+            outline: false,
+            omitBackground: false,  // ✅ Background colors qoru
+            // Additional settings to prevent blank pages
+            generateDocumentOutline: false,
+            generateTaggedPDF: false,  // Disable tagging to prevent extra pages
+            // Azərbaycan hərfləri üçün font encoding
+            timeout: 60000,  // Extended timeout for font loading
+            // PDF-də düzgün məsafələr - istifadəçi tələbi: 1-ci səhifə top=5mm, digərləri=15mm
+            margin: {
+                top: '5mm',       // 5mm - 1-ci səhifədə yuxarıda azca boşluq əlavə edildi
+                right: '15mm',    // Sağ margin 15mm
+                bottom: '5mm',    // Alt margin azaldıldı blank page-dən qaçınmaq üçün
+                left: '15mm'      // Sol margin 15mm
+            },
+            scale: 1.0,
+            // Force exact A4 dimensions
+            width: '210mm',
+            height: '297mm'
+        });
 
         console.log('PDF yaradıldı, browser bağlanır...');
         await browser.close();
@@ -4004,17 +3152,19 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
             background-color: white;
         ">
             <!-- Header -->
-            <div class="cv-section avoid-break text-center mb-8 border-b-2 pb-4" style="border-bottom: 2px solid var(--cv-primary-color) !important; border-color: var(--cv-primary-color) !important;">
+            <div class="cv-section avoid-break text-center mb-8 border-b-2 pb-4" style="border-color: var(--cv-primary-color);">
                 <h1 style="color: var(--cv-primary-color); font-size: var(--cv-heading-size); font-weight: bold; margin: 0; margin-bottom: var(--cv-spacing-sm);">${personalInfo.fullName || personalInfo.name || `${personalInfo.firstName || ''} ${personalInfo.lastName || ''}`.trim()}</h1>
-                <div class="contact-info" style="color: var(--cv-secondary-color); font-size: var(--cv-small-size); text-align: center; line-height: 1.4;">
-                    ${[personalInfo.email, personalInfo.phone, personalInfo.location].filter(Boolean).join(' | ')}
+                <div style="color: var(--cv-secondary-color); font-size: var(--cv-small-size);">
+                    ${personalInfo.email ? `${personalInfo.email}` : ''}
+                    ${personalInfo.phone ? ` | ${personalInfo.phone}` : ''}
+                    ${personalInfo.location ? ` | ${personalInfo.location}` : ''}
                 </div>
             </div>
 
             <!-- Summary -->
             ${personalInfo.summary ? `
             <div class="cv-section mb-6">
-                <h2 style="color: var(--cv-primary-color); font-size: var(--cv-subheading-size); font-weight: bold; margin-bottom: var(--cv-spacing-sm); border-bottom: 1px solid var(--cv-primary-color) !important; padding-bottom: var(--cv-spacing-xs);">
+                <h2 style="color: var(--cv-primary-color); font-size: var(--cv-subheading-size); font-weight: bold; margin-bottom: var(--cv-spacing-sm); border-bottom: 1px solid var(--cv-border-color); padding-bottom: var(--cv-spacing-xs);">
                     ÖZƏT
                 </h2>
                 <p style="color: var(--cv-text-color); font-size: var(--cv-body-size); line-height: 1.5; margin: 0;">
@@ -4026,7 +3176,7 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
             <!-- Experience -->
             ${experience.length > 0 ? `
             <div class="cv-section mb-6">
-                <h2 style="color: var(--cv-primary-color); font-size: var(--cv-subheading-size); font-weight: bold; margin-bottom: var(--cv-spacing-sm); border-bottom: 1px solid var(--cv-primary-color) !important; padding-bottom: var(--cv-spacing-xs);">
+                <h2 style="color: var(--cv-primary-color); font-size: var(--cv-subheading-size); font-weight: bold; margin-bottom: var(--cv-spacing-sm); border-bottom: 1px solid var(--cv-border-color); padding-bottom: var(--cv-spacing-xs);">
                     İŞ TƏCRÜBƏSİ
                 </h2>
                 ${experience.map((exp: any) => `
@@ -4047,7 +3197,7 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
             <!-- Education -->
             ${education.length > 0 ? `
             <div class="cv-section mb-6">
-                <h2 style="color: var(--cv-primary-color); font-size: var(--cv-subheading-size); font-weight: bold; margin-bottom: var(--cv-spacing-sm); border-bottom: 1px solid var(--cv-primary-color) !important; padding-bottom: var(--cv-spacing-xs);">
+                <h2 style="color: var(--cv-primary-color); font-size: var(--cv-subheading-size); font-weight: bold; margin-bottom: var(--cv-spacing-sm); border-bottom: 1px solid var(--cv-border-color); padding-bottom: var(--cv-spacing-xs);">
                     TƏHSİL
                 </h2>
                 ${education.map((edu: any) => `
@@ -4069,7 +3219,7 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
             <!-- Skills -->
             ${skills.length > 0 ? `
             <div class="cv-section avoid-break mb-6">
-                <h2 style="color: var(--cv-primary-color); font-size: var(--cv-subheading-size); font-weight: bold; margin-bottom: var(--cv-spacing-sm); border-bottom: 1px solid var(--cv-primary-color) !important; padding-bottom: var(--cv-spacing-xs);">
+                <h2 style="color: var(--cv-primary-color); font-size: var(--cv-subheading-size); font-weight: bold; margin-bottom: var(--cv-spacing-sm); border-bottom: 1px solid var(--cv-border-color); padding-bottom: var(--cv-spacing-xs);">
                     BACARIQLAR
                 </h2>
                 <p style="color: var(--cv-text-color); font-size: var(--cv-body-size); line-height: 1.4; margin: 0;">
@@ -4081,7 +3231,7 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
             <!-- Languages -->
             ${languages.length > 0 ? `
             <div class="cv-section avoid-break mb-6">
-                <h2 style="color: var(--cv-primary-color); font-size: var(--cv-subheading-size); font-weight: bold; margin-bottom: var(--cv-spacing-sm); border-bottom: 1px solid var(--cv-primary-color) !important; padding-bottom: var(--cv-spacing-xs);">
+                <h2 style="color: var(--cv-primary-color); font-size: var(--cv-subheading-size); font-weight: bold; margin-bottom: var(--cv-spacing-sm); border-bottom: 1px solid var(--cv-border-color); padding-bottom: var(--cv-spacing-xs);">
                     DİLLƏR
                 </h2>
                 <p style="color: var(--cv-text-color); font-size: var(--cv-body-size); line-height: 1.4; margin: 0;">

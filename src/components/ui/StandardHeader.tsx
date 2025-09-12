@@ -250,6 +250,9 @@ export default function StandardHeader() {
             <Link href="/linkedin-import" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
               LinkedIn İdxal
             </Link>
+            <Link href="/sablonlar" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
+              Şablonlar
+            </Link>
             <Link href="/pricing" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
               Qiymətlər
             </Link>
@@ -403,6 +406,13 @@ export default function StandardHeader() {
                 className="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all"
               >
                 LinkedIn İdxal
+              </Link>
+              <Link
+                href="/sablonlar"
+                onClick={closeMobileMenu}
+                className="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all"
+              >
+                Şablonlar
               </Link>
               <Link
                 href="/pricing"
