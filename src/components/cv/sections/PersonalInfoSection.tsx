@@ -216,7 +216,19 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
       if (result.success && result.summary) {
         console.log('✅ AI Summary generated successfully:', result.summary.length, 'characters');
+        
+        // Update the summary field
         handleChange('summary', result.summary);
+        
+        // Small delay to ensure DOM is updated, then scroll to summary section
+        setTimeout(() => {
+          const summarySection = document.querySelector('[data-testid="summary-editor"]') as HTMLElement;
+          if (summarySection) {
+            summarySection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            summarySection.focus();
+          }
+        }, 100);
+        
         showSuccess(
           `${userTier === 'Premium' ? 'Executive-level' : 'Peşəkar'} səviyyədə hazırlandı və ATS üçün optimallaşdırıldı.`,
           'AI Peşəkar Xülasə Yaradıldı! 🎉'
@@ -538,6 +550,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
             )
           }
           minHeight="120px"
+          data-testid="summary-editor"
         />
       </div>
     </div>

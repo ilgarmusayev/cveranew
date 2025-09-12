@@ -8,6 +8,7 @@ interface RichTextEditorProps {
   placeholder?: string;
   className?: string;
   minHeight?: string;
+  'data-testid'?: string;
 }
 
 export default function RichTextEditor({
@@ -15,7 +16,8 @@ export default function RichTextEditor({
   onChange,
   placeholder = "Məzmunu daxil edin...",
   className = "",
-  minHeight = "120px"
+  minHeight = "120px",
+  'data-testid': dataTestId
 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const valueRef = useRef(value);
@@ -25,17 +27,29 @@ export default function RichTextEditor({
     valueRef.current = value;
   }, [value]);
 
-  // Only update editor content on initial load or when completely empty
+  // Update editor content when value changes from parent
   useEffect(() => {
     if (editorRef.current) {
       const currentContent = editorRef.current.innerHTML;
+      const cleanCurrentContent = currentContent.replace(/&nbsp;/g, ' ').trim();
+      const cleanNewValue = (value || '').trim();
       
-      // Only update if editor is empty and we have value, or on initial load
-      if ((!currentContent || currentContent === '<br>' || currentContent === '') && value) {
+      // Update if content is significantly different (not just typing changes)
+      // Or if current content is empty and we have new value
+      const shouldUpdate = (!cleanCurrentContent && cleanNewValue) || 
+                          (cleanCurrentContent !== cleanNewValue && 
+                           !editorRef.current.contains(document.activeElement)); // Don't update if user is typing
+      
+      if (shouldUpdate) {
+        console.log('🔄 RichTextEditor: Updating content', { 
+          from: cleanCurrentContent.slice(0, 50) + '...', 
+          to: cleanNewValue.slice(0, 50) + '...',
+          reason: !cleanCurrentContent ? 'empty' : 'different'
+        });
         editorRef.current.innerHTML = value || '';
       }
     }
-  }, []);
+  }, [value]);
 
   const handleInput = useCallback((e: React.FormEvent<HTMLDivElement>) => {
     const target = e.target as HTMLDivElement;
@@ -226,6 +240,7 @@ export default function RichTextEditor({
           }
         }}
         data-placeholder={placeholder}
+        data-testid={dataTestId}
       />
 
       <style jsx>{`
