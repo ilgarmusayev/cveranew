@@ -184,7 +184,7 @@ export class ScrapingDogLinkedInService {
         api_key: apiKey,
         type: 'profile',
         linkId: linkedinUsername,
-        premium: 'false',
+        premium: 'true', // Enable premium mode for full data
       };
 
       console.log('📡 Making request to ScrapingDog API...');
@@ -209,6 +209,7 @@ export class ScrapingDogLinkedInService {
       }
 
       console.log('🔍 ScrapingDog response keys:', Object.keys(data));
+      console.log('🔍 ScrapingDog full response sample:', JSON.stringify(data, null, 2).substring(0, 1000) + '...');
 
       // Transform to our standard format
       const profile = this.transformScrapingDogData(data);
