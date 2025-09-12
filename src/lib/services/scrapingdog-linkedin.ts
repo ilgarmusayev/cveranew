@@ -82,13 +82,15 @@ export interface ScrapingDogLinkedInProfile {
 
 export class ScrapingDogLinkedInService {
   private readonly SCRAPINGDOG_URL = 'https://api.scrapingdog.com/linkedin';
+  private currentKeyIndex = 0; // Track current key rotation index
+  private lastRotationTime = 0; // Track last rotation time to avoid rapid switching
 
   /**
-   * Get active ScrapingDog API key from database
+   * Get active ScrapingDog API keys from database (all active keys for rotation)
    */
-  private async getActiveScrapingDogApiKey(): Promise<string> {
+  private async getActiveScrapingDogApiKeys(): Promise<string[]> {
     try {
-      const activeApiKey = await prisma.apiKey.findFirst({
+      const activeApiKeys = await prisma.apiKey.findMany({
         where: {
           service: 'scrapingdog',
           active: true
@@ -98,19 +100,47 @@ export class ScrapingDogLinkedInService {
         }
       });
 
-      if (!activeApiKey) {
-        console.warn('❌ No active ScrapingDog API key found in database, using fallback');
-        // Fallback to your working key if no active key in database
-        return '68a99929b4148b34852a88be';
+      if (!activeApiKeys || activeApiKeys.length === 0) {
+        console.warn('❌ No active ScrapingDog API keys found in database, using fallback keys');
+        // Fallback to multiple working keys
+        return [
+          '68a99929b4148b34852a88be', // Your main working key
+          '6882894b855f5678d36484c8'  // Secondary key from instructions
+        ];
       }
 
-      console.log('✅ Active ScrapingDog API key found:', activeApiKey.apiKey.substring(0, 8) + '***');
-      return activeApiKey.apiKey;
+      const keys = activeApiKeys.map(key => key.apiKey);
+      console.log(`✅ Found ${keys.length} active ScrapingDog API keys for rotation`);
+      return keys;
     } catch (error) {
-      console.error('❌ API key lookup failed:', error);
-      // Fallback to your working key
-      return '68a99929b4148b34852a88be';
+      console.error('❌ API keys lookup failed:', error);
+      // Fallback to multiple working keys
+      return [
+        '68a99929b4148b34852a88be',
+        '6882894b855f5678d36484c8'
+      ];
     }
+  }
+
+  /**
+   * Get next API key using round-robin rotation
+   */
+  private async getNextScrapingDogApiKey(): Promise<string> {
+    const apiKeys = await this.getActiveScrapingDogApiKeys();
+    
+    if (apiKeys.length === 1) {
+      console.log('✅ Using single API key:', apiKeys[0].substring(0, 8) + '***');
+      return apiKeys[0];
+    }
+
+    // Round-robin rotation
+    const selectedKey = apiKeys[this.currentKeyIndex];
+    console.log(`🔄 Using API key ${this.currentKeyIndex + 1}/${apiKeys.length}:`, selectedKey.substring(0, 8) + '***');
+    
+    // Move to next key for next request
+    this.currentKeyIndex = (this.currentKeyIndex + 1) % apiKeys.length;
+    
+    return selectedKey;
   }
 
   /**
@@ -166,6 +196,89 @@ export class ScrapingDogLinkedInService {
   }
 
   /**
+   * Add delay between requests to prevent rate limiting
+   */
+  private async delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Retry API request with different keys if rate limited
+   */
+  private async makeRequestWithRetry(linkedinUsername: string, maxRetries: number = 3): Promise<any> {
+    let lastError: any = null;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`📡 Making request to ScrapingDog API (attempt ${attempt}/${maxRetries})...`);
+        
+        const apiKey = await this.getNextScrapingDogApiKey();
+        
+        const params = {
+          api_key: apiKey,
+          type: 'profile',
+          linkId: linkedinUsername,
+          premium: 'true', // Enable premium mode for full data
+        };
+
+        // Add small delay between requests to prevent rate limiting
+        if (attempt > 1) {
+          const delayMs = attempt * 1000; // 1s, 2s, 3s delay
+          console.log(`⏳ Waiting ${delayMs}ms before retry...`);
+          await this.delay(delayMs);
+        }
+
+        const response = await axios.get(this.SCRAPINGDOG_URL, {
+          params: params,
+          timeout: 30000
+        });
+
+        if (response.status !== 200) {
+          throw new Error(`ScrapingDog API responded with status ${response.status}`);
+        }
+
+        await this.updateApiKeyUsage(apiKey, true);
+        return response.data;
+        
+      } catch (error: any) {
+        lastError = error;
+        console.error(`❌ Attempt ${attempt} failed:`, error.message);
+        
+        // Update usage as failed for this API key
+        try {
+          const apiKey = await this.getNextScrapingDogApiKey();
+          await this.updateApiKeyUsage(apiKey, false);
+        } catch (updateError) {
+          console.error('Failed to update API usage:', updateError);
+        }
+        
+        // If it's the last attempt or not a rate limit error, break
+        if (attempt === maxRetries || !this.isRateLimitError(error)) {
+          break;
+        }
+        
+        console.log(`🔄 Retrying with next API key...`);
+      }
+    }
+    
+    throw lastError;
+  }
+
+  /**
+   * Check if error is related to rate limiting
+   */
+  private isRateLimitError(error: any): boolean {
+    const errorMessage = error.message?.toLowerCase() || '';
+    const errorStatus = error.response?.status;
+    
+    // Common rate limit indicators
+    return errorStatus === 429 || 
+           errorMessage.includes('rate limit') ||
+           errorMessage.includes('too many requests') ||
+           errorMessage.includes('quota exceeded');
+  }
+
+  /**
    * Scrape LinkedIn profile using ScrapingDog API
    */
   async scrapeLinkedInProfile(linkedinInput: string): Promise<ScrapingDogLinkedInProfile | null> {
@@ -178,29 +291,8 @@ export class ScrapingDogLinkedInService {
 
       console.log(`🔍 Scraping LinkedIn profile with ScrapingDog: ${linkedinUsername}`);
 
-      const apiKey = await this.getActiveScrapingDogApiKey();
-
-      const params = {
-        api_key: apiKey,
-        type: 'profile',
-        linkId: linkedinUsername,
-        premium: 'true', // Enable premium mode for full data
-      };
-
-      console.log('📡 Making request to ScrapingDog API...');
-      const response = await axios.get(this.SCRAPINGDOG_URL, {
-        params: params,
-        timeout: 30000
-      });
-
-      if (response.status !== 200) {
-        console.error(`❌ ScrapingDog API error: Status ${response.status}`);
-        throw new Error(`ScrapingDog API responded with status ${response.status}`);
-      }
-
-      await this.updateApiKeyUsage(apiKey, true);
-
-      const data = response.data;
+      // Use retry mechanism with multiple API keys
+      const data = await this.makeRequestWithRetry(linkedinUsername);
       console.log('🔍 ScrapingDog response received');
 
       if (!data) {
@@ -241,14 +333,6 @@ export class ScrapingDogLinkedInService {
       
       if (error.code) {
         console.error('❌ Error Code:', error.code);
-      }
-      
-      // Update usage as failed
-      try {
-        const apiKey = await this.getActiveScrapingDogApiKey();
-        await this.updateApiKeyUsage(apiKey, false);
-      } catch (updateError) {
-        console.error('Failed to update API usage:', updateError);
       }
 
       throw error; // Re-throw error to see what's really happening

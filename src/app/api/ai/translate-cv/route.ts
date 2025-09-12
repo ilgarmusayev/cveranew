@@ -29,6 +29,83 @@ const LANGUAGE_NAMES = {
   'ko': '한국어'
 };
 
+// Link protection functions
+function extractAndProtectLinks(content: any): { content: any, linkMap: Map<string, string> } {
+  const linkMap = new Map<string, string>();
+  let linkCounter = 0;
+  
+  // URL patterns to detect links
+  const urlPatterns = [
+    /https?:\/\/[^\s<>"{}|\\^`[\]]+/gi,
+    /www\.[^\s<>"{}|\\^`[\]]+/gi,
+    /[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\/[^\s<>"{}|\\^`[\]]*)?/gi
+  ];
+  
+  function replaceLinkInText(text: string): string {
+    if (typeof text !== 'string') return text;
+    
+    urlPatterns.forEach(pattern => {
+      text = text.replace(pattern, (match) => {
+        const placeholder = `__LINK_PLACEHOLDER_${linkCounter}__`;
+        linkMap.set(placeholder, match);
+        linkCounter++;
+        return placeholder;
+      });
+    });
+    
+    return text;
+  }
+  
+  function recursivelyProtectLinks(obj: any): any {
+    if (Array.isArray(obj)) {
+      return obj.map(item => recursivelyProtectLinks(item));
+    } else if (obj && typeof obj === 'object') {
+      const newObj: any = {};
+      for (const [key, value] of Object.entries(obj)) {
+        newObj[key] = recursivelyProtectLinks(value);
+      }
+      return newObj;
+    } else if (typeof obj === 'string') {
+      return replaceLinkInText(obj);
+    }
+    return obj;
+  }
+  
+  return {
+    content: recursivelyProtectLinks(content),
+    linkMap
+  };
+}
+
+function restoreLinks(content: any, linkMap: Map<string, string>): any {
+  function restoreLinkInText(text: string): string {
+    if (typeof text !== 'string') return text;
+    
+    linkMap.forEach((originalLink, placeholder) => {
+      text = text.replace(new RegExp(placeholder, 'g'), originalLink);
+    });
+    
+    return text;
+  }
+  
+  function recursivelyRestoreLinks(obj: any): any {
+    if (Array.isArray(obj)) {
+      return obj.map(item => recursivelyRestoreLinks(item));
+    } else if (obj && typeof obj === 'object') {
+      const newObj: any = {};
+      for (const [key, value] of Object.entries(obj)) {
+        newObj[key] = recursivelyRestoreLinks(value);
+      }
+      return newObj;
+    } else if (typeof obj === 'string') {
+      return restoreLinkInText(obj);
+    }
+    return obj;
+  }
+  
+  return recursivelyRestoreLinks(content);
+}
+
 // Function to translate CV sections
 async function translateCVContent(content: any, targetLanguage: string, sourceLanguage: string = 'auto') {
   const geminiAI = initializeGeminiAI();
@@ -43,13 +120,26 @@ Siz peşəkar CV tərcümə mütəxəssisiniz. Aşağıdakı CV məzmununu ${sou
 🔥 MÜTLƏQ QAYDALAR:
 1. 📧 Email, telefon nömrəsi, URL-lər olduğu kimi saxla
 2. 📅 Tarixlər (dates) olduğu kimi saxla - dəyişmə! 
-3. 🎯 MÜTLƏQ: "sectionNames" bölməsindəki BÜTÜN dəyərləri tərcümə edin
-4. 💼 MÜTLƏQ: Skills hissəsində "category" və ya "type" olan skillsləri olduğu kimi AYRI saxla:
+3. 🔗 MÜTLƏQ: Bütün linkləri (URLs) olduğu kimi saxla:
+   - https://... başlayan bütün linklər
+   - http://... başlayan bütün linklər  
+   - www... başlayan linklər
+   - github.com, linkedin.com, behance.net və s. linklər
+   - HEÇBIR URL/LİNKİ TƏRCÜMə ETMə!
+4. 🎯 MÜTLƏQ: "sectionNames" bölməsindəki BÜTÜN dəyərləri tərcümə edin
+5. 💼 MÜTLƏQ: Skills hissəsində "category" və ya "type" olan skillsləri olduğu kimi AYRI saxla:
    - Soft skills → ayrı qrup (məs: category: "soft" və ya type: "soft")
    - Hard skills → ayrı qrup (məs: category: "hard", "technical", "programming" və ya type: "hard")
    - Skills-in strukturunu və category/type-ını heç vaxt qarışdırma!
-4. 📋 JSON strukturunu dəqiq saxlayın - heç bir field silinməsin
-5. 🔒 Boş/null dəyərləri olduğu kimi saxlayın
+6. 📋 JSON strukturunu dəqiq saxlayın - heç bir field silinməsin
+7. 🔒 Boş/null dəyərləri olduğu kimi saxlayın
+
+🚫 LİNK QORUMA MİSALLARI:
+✅ DOĞRU: "https://github.com/user/project" → "https://github.com/user/project"
+✅ DOĞRU: "www.example.com" → "www.example.com"
+✅ DOĞRU: "https://portfolio.com" → "https://portfolio.com"
+❌ SƏHV: "https://github.com" ni tərcümə etmə!
+❌ SƏHV: URL-lərin heç bir hissəsini dəyişmə!
 
 ${targetLanguage === 'az' ? `
 � Azərbaycan Tərcümə Qaydaları:
@@ -118,22 +208,31 @@ OUTPUT: [
   {name: ${targetLanguage === 'az' ? '"Kommunikasiya"' : '"Communication"'}, type: "soft"}
 ]
 
-INPUT JSON:
-${JSON.stringify(content, null, 2)}
-
 ⚠️ ÇOX ÖNƏMLİ: Cavabınızda "sectionNames" obyektini MÜTLƏQ daxil edin!
 ⚠️ SKILLS XƏBƏRDARLıĞı: Skills array-də hər skill-in category/type-ini (soft/hard/technical) heç vaxt dəyişmə və qarışdırma!
 🚫 ÖNƏMLİ: Mövcud olmayan yeni skill-lər əlavə etmə - YALNIZ mövcud skill-ləri tərcümə et!
 🎯 YALNIZ tərcümə edilmiş JSON qaytarın, başqa heç nə yazmayın:`;
 
+  // Extract and protect all links before translation
+  const { content: protectedContent, linkMap } = extractAndProtectLinks(content);
+  
+  // Add protected content to prompt
+  const fullPrompt = prompt + `\n\nINPUT JSON:\n${JSON.stringify(protectedContent, null, 2)}`;
+
   try {
-    const result = await model.generateContent(prompt);
+    const result = await model.generateContent(fullPrompt);
     const response = await result.response;
     const translatedText = response.text().trim();
 
     // Clean the response and parse JSON
     const cleanedResponse = translatedText.replace(/```json\s*|\s*```/g, '').trim();
-    return JSON.parse(cleanedResponse);
+    const translatedContent = JSON.parse(cleanedResponse);
+    
+    // Restore all protected links
+    const finalContent = restoreLinks(translatedContent, linkMap);
+    
+    console.log('✅ Link protection applied successfully:', linkMap.size, 'links protected');
+    return finalContent;
   } catch (error) {
     console.error('Translation error:', error);
     throw new Error('Tərcümə zamanı xəta baş verdi');
