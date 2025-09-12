@@ -201,12 +201,29 @@
     background: white !important;
   }
 
-  /* Exclusive Template - 15mm margin hər tərəfdə */
+  /* Exclusive Template - Exact same as preview */
   .exclusive-template {
-    padding: 15mm !important;
+    padding: 15mm !important;  /* Same as preview */
+    margin: 0 !important;
     box-sizing: border-box !important;
     width: 210mm !important;
-    min-height: 297mm !important;
+    height: auto !important;
+    min-height: auto !important;  /* No forced height */
+    max-height: none !important;  /* No height limit */
+    overflow: visible !important;  /* Natural flow */
+    page-break-after: avoid !important;  /* Prevent page break after */
+    page-break-inside: avoid !important;  /* Prevent page break inside */
+  }
+  
+  /* Prevent extra page in exclusive template */
+  .exclusive-template::after {
+    content: none !important;
+  }
+  
+  .exclusive-template > *:last-child {
+    page-break-after: avoid !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
   }
   
   .exclusive-template .header-section {

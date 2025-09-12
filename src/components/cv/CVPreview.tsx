@@ -42,6 +42,7 @@ interface CVPreviewProps {
     // Left panel section reordering (for ATS template)
     onLeftSectionReorder?: (activeSection: string, direction: 'up' | 'down') => void;
     leftColumnOrder?: string[];
+    isExport?: boolean; // Export mode - forces desktop layout
     fontSettings?: {
         fontFamily: string;
         nameSize: number;
@@ -1081,17 +1082,19 @@ const BasicTemplate: React.FC<{
                             fontWeight: 'var(--cv-subheading-weight)',
                             color: '#2563eb',
                             margin: '0',
-                            borderBottom: '1px solid #d1d5db',
-                            paddingBottom: '4px'
+                            marginBottom: '12px',
+                            borderBottom: '1px solid #2563eb',
+                            paddingBottom: '8px'
                         }}>
                             {getSectionName('summary', data.cvLanguage, data.sectionNames)}
                         </h2>
-                        <div style={{ 
+                        <div className="pl-3" style={{ 
+                            borderLeft: '2px solid #2563eb',
                             fontSize: 'var(--cv-small-size)',
                             fontWeight: 'var(--cv-small-weight)',
                             color: '#374151',
                             lineHeight: '1.6',
-                            marginTop: '4px',
+                            marginTop: '0',
                             marginBottom: '0',
                             paddingBottom: '0'
                         }}>
@@ -1109,14 +1112,14 @@ const BasicTemplate: React.FC<{
                             fontWeight: 'var(--cv-subheading-weight)',
                             color: '#2563eb',
                             marginBottom: '12px',
-                            borderBottom: '1px solid #d1d5db',
+                            borderBottom: '1px solid #2563eb',
                             paddingBottom: '8px'
                         }}>
                             {getSectionName('experience', data.cvLanguage, data.sectionNames)}
                         </h2>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing)' }}>
                             {experience.map((exp) => (
-                                <div key={exp.id} className="border-l-2 border-blue-200 pl-3">
+                                <div key={exp.id} className="pl-3" style={{ borderLeft: '2px solid #2563eb' }}>
                                     <div className="flex justify-between items-start mb-2">
                                         <h3 style={{ 
                                             fontSize: 'var(--cv-subheading-size)', // Position üçün subheading ölçüsü
@@ -1172,14 +1175,14 @@ const BasicTemplate: React.FC<{
                             fontWeight: 'var(--cv-subheading-weight)',
                             color: '#2563eb',
                             marginBottom: '12px',
-                            borderBottom: '1px solid #d1d5db',
+                            borderBottom: '1px solid #2563eb',
                             paddingBottom: '8px'
                         }}>
                             {getSectionName('education', data.cvLanguage, data.sectionNames)}
                         </h2>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing)' }}>
                             {education.map((edu) => (
-                                <div key={edu.id} className="border-l-2 border-blue-200 pl-3">
+                                <div key={edu.id} className="pl-3" style={{ borderLeft: '2px solid #2563eb' }}>
                                     <div className="flex justify-between items-start mb-2">
                                         <div className="flex-1">
                                             {edu.degree ? (
@@ -1261,14 +1264,14 @@ const BasicTemplate: React.FC<{
                                     fontWeight: 'var(--cv-subheading-weight)',
                                     color: '#2563eb',
                                     marginBottom: '8px',
-                                    borderBottom: '1px solid #d1d5db',
+                                    borderBottom: '1px solid #2563eb',
                                     paddingBottom: '4px'
                                 }}>
                                     {getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
                                 </h2>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing)' }}>
                                     {validSkills.filter(skill => skill.type === 'hard').map((skill) => (
-                                        <div key={skill.id} className="border-l-2 border-blue-200 pl-2">
+                                        <div key={skill.id} className="pl-2" style={{ borderLeft: '2px solid #2563eb' }}>
                                             <div className="mb-1">
                                                 <span className="text-gray-700 text-xs font-medium">{skill.name}</span>
                                             </div>
@@ -1286,12 +1289,19 @@ const BasicTemplate: React.FC<{
                         {/* Soft Skills */}
                         {validSkills.filter(skill => skill.type === 'soft').length > 0 && (
                             <div >
-                                <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
+                                <h2 style={{ 
+                                    fontSize: 'var(--cv-subheading-size)', 
+                                    fontWeight: 'var(--cv-subheading-weight)',
+                                    color: '#2563eb',
+                                    marginBottom: '8px',
+                                    borderBottom: '1px solid #2563eb',
+                                    paddingBottom: '4px'
+                                }}>
                                     {getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
                                 </h2>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing)' }}>
                                     {validSkills.filter(skill => skill.type === 'soft').map((skill) => (
-                                        <div key={skill.id} className="border-l-2 border-blue-200 pl-2">
+                                        <div key={skill.id} className="pl-2" style={{ borderLeft: '2px solid #2563eb' }}>
                                             <div className="mb-1">
                                                 <span className="text-gray-700 text-xs font-medium">{skill.name}</span>
                                             </div>
@@ -1309,12 +1319,19 @@ const BasicTemplate: React.FC<{
                         {/* General Skills */}
                         {validSkills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).length > 0 && (
                             <div >
-                                <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
+                                <h2 style={{ 
+                                    fontSize: 'var(--cv-subheading-size)', 
+                                    fontWeight: 'var(--cv-subheading-weight)',
+                                    color: '#2563eb',
+                                    marginBottom: '8px',
+                                    borderBottom: '1px solid #2563eb',
+                                    paddingBottom: '4px'
+                                }}>
                                     {getSectionName('skills', data.cvLanguage, data.sectionNames)}
                                 </h2>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing)' }}>
                                     {validSkills.filter(skill => !skill.type || (skill.type !== 'hard' && skill.type !== 'soft')).map((skill) => (
-                                        <div key={skill.id} className="border-l-2 border-blue-200 pl-2">
+                                        <div key={skill.id} className="pl-2" style={{ borderLeft: '2px solid #2563eb' }}>
                                             <div className="mb-1">
                                                 <span className="text-gray-700 text-xs font-medium">{skill.name}</span>
                                             </div>
@@ -1341,16 +1358,17 @@ const BasicTemplate: React.FC<{
                             fontWeight: 'var(--cv-subheading-weight)',
                             color: '#2563eb',
                             marginBottom: '8px',
-                            borderBottom: '1px solid #d1d5db',
+                            borderBottom: '1px solid #2563eb',
                             paddingBottom: '8px'
                         }}>
                             {getSectionName('languages', data.cvLanguage, data.sectionNames)}
                         </h2>
-                        <div className="border-l-2 border-blue-200 pl-3" style={{ 
+                        <div className="pl-3" style={{ 
                             display: validLanguages.length <= 2 ? 'flex' : 'grid', 
                             flexDirection: validLanguages.length <= 2 ? 'column' : undefined,
                             gridTemplateColumns: validLanguages.length > 2 ? 'repeat(auto-fit, minmax(120px, 1fr))' : undefined,
-                            gap: 'var(--cv-section-spacing)' 
+                            gap: 'var(--cv-section-spacing)',
+                            borderLeft: '2px solid #2563eb'
                         }}>
                             {validLanguages.map((lang) => (
                                 <div key={lang.id} className="text-xs text-gray-700 break-words">
@@ -1364,12 +1382,19 @@ const BasicTemplate: React.FC<{
             case 'projects':
                 return projects && projects.length > 0 ? (
                     <div >
-                        <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
+                        <h2 style={{ 
+                            fontSize: 'var(--cv-subheading-size)', 
+                            fontWeight: 'var(--cv-subheading-weight)',
+                            color: '#2563eb',
+                            marginBottom: '12px',
+                            borderBottom: '1px solid #2563eb',
+                            paddingBottom: '8px'
+                        }}>
                             {getSectionName('projects', data.cvLanguage, data.sectionNames)}
                         </h2>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing)' }}>
                             {projects.map((project) => (
-                                <div key={project.id} className="border-l-2 border-blue-200 pl-3">
+                                <div key={project.id} className="pl-3" style={{ borderLeft: '2px solid #2563eb' }}>
                                     <div className="flex justify-between items-start mb-1">
                                         {project.url ? (
                                             <a
@@ -1438,12 +1463,19 @@ const BasicTemplate: React.FC<{
             case 'certifications':
                 return certifications && certifications.length > 0 ? (
                     <div >
-                        <h2 className="text-base font-semibold text-blue-600 mb-3 border-b border-gray-300 pb-2">
+                        <h2 style={{ 
+                            fontSize: 'var(--cv-subheading-size)', 
+                            fontWeight: 'var(--cv-subheading-weight)',
+                            color: '#2563eb',
+                            marginBottom: '12px',
+                            borderBottom: '1px solid #2563eb',
+                            paddingBottom: '8px'
+                        }}>
                             {getSectionName('certifications', data.cvLanguage, data.sectionNames)}
                         </h2>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing)' }}>
                             {certifications.map((cert) => (
-                                <div key={cert.id} className="border-l-2 border-blue-200 pl-3">
+                                <div key={cert.id} className="pl-3" style={{ borderLeft: '2px solid #2563eb' }}>
                                     <div className="flex justify-between items-start mb-2">
                                         <div className="flex-1">
                                             {cert.url ? (
@@ -1500,12 +1532,19 @@ const BasicTemplate: React.FC<{
             case 'volunteer':
                 return volunteerExperience && volunteerExperience.length > 0 ? (
                     <div >
-                        <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
+                        <h2 style={{ 
+                            fontSize: 'var(--cv-subheading-size)', 
+                            fontWeight: 'var(--cv-subheading-weight)',
+                            color: '#2563eb',
+                            marginBottom: '12px',
+                            borderBottom: '1px solid #2563eb',
+                            paddingBottom: '8px'
+                        }}>
                             {getSectionName('volunteerExperience', data.cvLanguage, data.sectionNames)}
                         </h2>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing)' }}>
                             {volunteerExperience.map((vol) => (
-                                <div key={vol.id} className="border-l-2 border-blue-200 pl-3">
+                                <div key={vol.id} className="pl-3" style={{ borderLeft: '2px solid #2563eb' }}>
                                     <div className="flex justify-between items-start mb-1">
                                         <h3 className="font-semibold text-gray-900 text-sm">{vol.role}</h3>
                                         <span className="text-xs font-medium whitespace-nowrap ml-2" style={{ color: '#6b7280' }}>
@@ -1543,12 +1582,19 @@ const BasicTemplate: React.FC<{
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing)' }}>
                         {customSections.map((section) => (
                             <div key={section.id} >
-                                <h2 className="text-base font-semibold text-blue-600 mb-2 border-b border-gray-300 pb-1">
+                                <h2 style={{ 
+                                    fontSize: 'var(--cv-subheading-size)', 
+                                    fontWeight: 'var(--cv-subheading-weight)',
+                                    color: '#2563eb',
+                                    marginBottom: '12px',
+                                    borderBottom: '1px solid #2563eb',
+                                    paddingBottom: '8px'
+                                }}>
                                     {section.title}
                                 </h2>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing)' }}>
                                     {section.items.map((item) => (
-                                        <div key={item.id} className="border-l-2 border-blue-200 pl-3">
+                                        <div key={item.id} className="pl-3" style={{ borderLeft: '2px solid #2563eb' }}>
                                             <h3 className="font-semibold text-gray-900 text-sm">{item.title}</h3>
                                             {item.subtitle && (
                                                 <p className="text-blue-600 font-medium text-xs">{item.subtitle}</p>
@@ -1593,7 +1639,7 @@ const BasicTemplate: React.FC<{
                 ${isDragActive ? 'drag-mode' : ''}
             `}
             style={{
-                padding: '20mm',
+                padding: '12mm 12mm', // Reduced side padding from 20mm to 12mm
                 '--cv-font-family': fontSettings.fontFamily,
                 '--cv-name-size': `${fontSettings.nameSize}px`,
                 '--cv-title-size': `${fontSettings.titleSize}px`,
@@ -1611,7 +1657,12 @@ const BasicTemplate: React.FC<{
 
 
             {/* Header */}
-            <div className="border-b-2 border-blue-600 pb-3 cv-section avoid-break" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0 }}>
+            <div className="pb-3 cv-section avoid-break" style={{ 
+                marginTop: 0, 
+                marginBottom: 0, 
+                paddingTop: 0,
+                borderBottom: '2px solid #2563eb'
+            }}>
                 <div className="flex items-start gap-4">
                     {/* Profile Image */}
                     {personalInfo.profileImage && (
@@ -1619,7 +1670,10 @@ const BasicTemplate: React.FC<{
                             <img
                                 src={personalInfo.profileImage}
                                 alt="Profile"
-                                className="w-20 h-20 rounded-full object-cover border-2 border-blue-600"
+                                className="w-20 h-20 rounded-full object-cover"
+                                style={{
+                                    border: '2px solid #2563eb'
+                                }}
                             />
                         </div>
                     )}
@@ -1627,21 +1681,40 @@ const BasicTemplate: React.FC<{
                     {/* Name and Contact Info */}
                     <div className="flex-1">
                         <h1 
-                            className="font-bold text-blue-600 mb-2"
+                            className="font-bold mb-2"
                             style={{
                                 fontSize: 'var(--cv-name-size)',
                                 fontWeight: 'var(--cv-heading-weight, 700)',
-                                fontFamily: 'var(--cv-font-family)'
+                                fontFamily: 'var(--cv-font-family)',
+                                color: '#2563eb'
                             }}
                         >
                             {getFullName(personalInfo, data.cvLanguage)}
                         </h1>
+                        {personalInfo.field && (
+                            <h2
+                                className="mb-3"
+                                style={{
+                                    fontSize: 'var(--cv-title-size)',
+                                    fontWeight: 'var(--cv-body-weight, 400)',
+                                    fontFamily: 'var(--cv-font-family)',
+                                    color: '#374151',
+                                    marginTop: '-8px'
+                                }}
+                            >
+                                {personalInfo.field}
+                            </h2>
+                        )}
                         <div
-                            className="grid grid-cols-1 sm:grid-cols-2 text-gray-600 gap-x-4 gap-y-2"
+                            className="contact-info-grid"
                             style={{
                                 fontSize: 'var(--cv-small-size)',
                                 fontWeight: 'var(--cv-small-weight)',
-                                fontFamily: 'var(--cv-font-family)'
+                                fontFamily: 'var(--cv-font-family)',
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                                gap: '8px 16px',
+                                color: '#6b7280'
                             }}
                         >
                             {personalInfo.email && (
@@ -1683,7 +1756,7 @@ const BasicTemplate: React.FC<{
                             )}
                             {personalInfo.github && (
                                 <div className="flex items-center gap-2">
-                                    <span className="font-medium min-w-[50px] flex-shrink-0">GitHub Linki:</span>
+                                    <span className="font-medium min-w-[50px] flex-shrink-0">GitHub:</span>
                                     <a
                                         href={getGitHubDisplay(personalInfo.github).url}
                                         target="_blank"
@@ -1695,7 +1768,7 @@ const BasicTemplate: React.FC<{
                                 </div>
                             )}
                             {personalInfo.website && (
-                                <div className="flex items-center gap-2 col-span-1 sm:col-span-2">
+                                <div className="flex items-center gap-2">
                                     <span className="font-medium min-w-[50px] flex-shrink-0">
                                         {data.cvLanguage === 'english' ? 'Website:' : 'Veb-sayt:'}
                                     </span>
@@ -2452,7 +2525,8 @@ const AtlasTemplate: React.FC<{
     onSectionSelect?: (sectionId: string | null) => void;
     onLeftSectionReorder?: (activeSection: string, direction: 'up' | 'down') => void;
     leftColumnOrder?: string[];
-}> = ({ data, sectionOrder, onSectionReorder, activeSection, onSectionSelect, onLeftSectionReorder, leftColumnOrder: externalLeftColumnOrder }) => {
+    isExport?: boolean;
+}> = ({ data, sectionOrder, onSectionReorder, activeSection, onSectionSelect, onLeftSectionReorder, leftColumnOrder: externalLeftColumnOrder, isExport = false }) => {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], customSections = [] } = data;
     const [isDragActive, setIsDragActive] = useState(false);
     const [activeId, setActiveId] = useState<string | null>(null);
@@ -2522,13 +2596,16 @@ const AtlasTemplate: React.FC<{
     // Detect mobile device
     useEffect(() => {
         const checkMobile = () => {
-            setIsMobile(window.innerWidth < 1024);
+            // Don't set mobile mode during export - always use desktop layout
+            if (!isExport) {
+                setIsMobile(window.innerWidth < 1024);
+            }
         };
         
         checkMobile();
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
-    }, []);
+    }, [isExport]);
 
     // Real-time left panel updates for Atlas template
     useEffect(() => {
@@ -7345,7 +7422,7 @@ const ExclusiveTemplate: React.FC<{
             case 'summary':
                 if (!personalInfo.summary) return null;
                 return (
-                    <div key="summary" >
+                    <div key="summary" style={{ marginTop: '16px' }}>
                         <SectionHeader title={getSectionName('summary', data.cvLanguage, data.sectionNames)} icon="📝" sectionId="summary" />
                         <div className="text-gray-700 leading-relaxed text-sm text-left" style={{ marginLeft: 0, paddingLeft: 0 }}>
                             {renderHtmlContent(personalInfo.summary, false, data.cvLanguage)}
@@ -7396,7 +7473,7 @@ const ExclusiveTemplate: React.FC<{
                         <SectionHeader title={getSectionName('education', data.cvLanguage, data.sectionNames)} icon="🎓" sectionId="education" />
                         <div className="space-y-3">
                             {education.map((edu, index) => (
-                                <div key={edu.id || index} className="pb-2">
+                                <div key={edu.id || index}>
                                     <div className="flex flex-row items-start justify-between gap-3 mb-2">
                                         <div className="flex-1">
                                             {edu.degree ? (
@@ -7661,14 +7738,14 @@ const ExclusiveTemplate: React.FC<{
             case 'customSections':
                 if (!customSections.length) return null;
                 return (
-                    <div key="customSections" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing)' }}>
+                    <div key="customSections" style={{ display: 'flex', flexDirection: 'column', gap: '4px', margin: 0, padding: 0 }}>
                         {customSections.map((customSection, sectionIndex) => (
-                            <div key={customSection.id || sectionIndex} >
+                            <div key={customSection.id || sectionIndex} style={{ margin: 0, padding: 0, marginBottom: sectionIndex === customSections.length - 1 ? '0' : '8px' }}>
                                 <SectionHeader title={customSection.title} icon="📋" sectionId={`custom-${customSection.id}`} />
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing)' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                     {customSection.items.map((item, index) => (
-                                        <div key={item.id || index} className="pb-2">
-                                            <div className="flex flex-row items-start justify-between gap-3 mb-2">
+                                        <div key={item.id || index} style={{ marginBottom: '4px' }}>
+                                            <div className="flex flex-row items-start justify-between gap-3 mb-1">
                                                 <div className="flex-1">
                                                     {item.title && (
                                                         <h3 className="font-semibold text-sm text-gray-800">{item.title}</h3>
@@ -9951,6 +10028,7 @@ export default function CVPreview({
     onSectionSelect: externalOnSectionSelect,
     onLeftSectionReorder,
     leftColumnOrder: externalLeftColumnOrder,
+    isExport = false, // Export mode prop
     fontSettings = {
         fontFamily: 'var(--cv-font-family)',
         nameSize: 24,
@@ -9969,7 +10047,7 @@ export default function CVPreview({
     const templateId = template || cv.templateId || 'basic';
     const [scale, setScale] = React.useState(1.0);
     
-    // Mobile swipe states
+    // Mobile swipe states - disabled during export
     const [isMobile, setIsMobile] = React.useState(false);
     const [touchStartX, setTouchStartX] = React.useState(0);
     const [touchStartY, setTouchStartY] = React.useState(0);
@@ -10133,7 +10211,10 @@ export default function CVPreview({
     React.useEffect(() => {
         const handleResize = () => {
             setScale(getResponsiveScale());
-            setIsMobile(window.innerWidth < 1024);
+            // Don't set mobile mode during export - always use desktop layout
+            if (!isExport) {
+                setIsMobile(window.innerWidth < 1024);
+            }
         };
 
         // Set initial scale and mobile state
@@ -10144,7 +10225,7 @@ export default function CVPreview({
 
         // Cleanup
         return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    }, [isExport]);
 
     // Mobile touch handlers
     const handleTouchStart = (e: React.TouchEvent) => {
