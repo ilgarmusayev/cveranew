@@ -5221,14 +5221,14 @@ const PrimeTemplate: React.FC<{
                     )}
                 </div>
 
-                {/* Contact Information in Dynamic Layout */}
+                {/* Contact Information in Optimized Dynamic Layout */}
                 <div className="border-t-2 border-green-600 pt-3 mb-3">
                     {(() => {
-                        // Collect all contact items
-                        const contactItems = [];
+                        // Collect contact items in priority order (excluding location for now)
+                        const primaryContactItems = [];
                         
                         if (personalInfo.email) {
-                            contactItems.push({
+                            primaryContactItems.push({
                                 label: data.cvLanguage === 'english' ? 'Email:' : 'E-poçt:',
                                 value: personalInfo.email,
                                 type: 'text'
@@ -5236,23 +5236,15 @@ const PrimeTemplate: React.FC<{
                         }
                         
                         if (personalInfo.phone) {
-                            contactItems.push({
+                            primaryContactItems.push({
                                 label: data.cvLanguage === 'english' ? 'Phone:' : 'Telefon:',
                                 value: personalInfo.phone,
                                 type: 'text'
                             });
                         }
                         
-                        if (personalInfo.location) {
-                            contactItems.push({
-                                label: data.cvLanguage === 'english' ? 'Location:' : 'Ünvan:',
-                                value: personalInfo.location,
-                                type: 'text'
-                            });
-                        }
-                        
                         if (personalInfo.linkedin) {
-                            contactItems.push({
+                            primaryContactItems.push({
                                 label: 'LinkedIn:',
                                 value: personalInfo.linkedin,
                                 type: 'linkedin'
@@ -5260,7 +5252,7 @@ const PrimeTemplate: React.FC<{
                         }
                         
                         if (personalInfo.github) {
-                            contactItems.push({
+                            primaryContactItems.push({
                                 label: 'GitHub:',
                                 value: personalInfo.github,
                                 type: 'github'
@@ -5268,64 +5260,82 @@ const PrimeTemplate: React.FC<{
                         }
                         
                         if (personalInfo.website) {
-                            contactItems.push({
+                            primaryContactItems.push({
                                 label: data.cvLanguage === 'english' ? 'Website:' : 'Sayt:',
                                 value: personalInfo.website,
                                 type: 'website'
                             });
                         }
 
-                        // Dynamic grid layout based on contact items count
-                        const itemCount = contactItems.length;
-                        let gridCols;
-                        
-                        if (itemCount <= 2) {
-                            gridCols = 'grid-cols-1 md:grid-cols-2';
-                        } else if (itemCount <= 4) {
-                            gridCols = 'grid-cols-2';
-                        } else {
-                            gridCols = 'grid-cols-2 lg:grid-cols-3';
-                        }
+                        // Location as separate item (will be placed strategically)
+                        const locationItem = personalInfo.location ? {
+                            label: data.cvLanguage === 'english' ? 'Location:' : 'Ünvan:',
+                            value: personalInfo.location,
+                            type: 'text'
+                        } : null;
+
+                        const primaryCount = primaryContactItems.length;
 
                         return (
-                            <div className={`grid gap-x-6 gap-y-2 text-sm ${gridCols}`}>
-                                {contactItems.map((item, index) => (
-                                    <div key={index} className="flex items-center gap-2">
-                                        <span className="font-medium text-gray-700 min-w-[70px] flex-shrink-0">
-                                            {item.label}
-                                        </span>
-                                        {item.type === 'linkedin' ? (
-                                            <a
-                                                href={getLinkedInDisplay(item.value).url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-gray-900 text-xs break-all hover:text-gray-700 transition-colors"
-                                            >
-                                                {getLinkedInDisplay(item.value).displayText}
-                                            </a>
-                                        ) : item.type === 'github' ? (
-                                            <a
-                                                href={getGitHubDisplay(item.value).url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-gray-900 text-xs break-all hover:text-gray-700 transition-colors"
-                                            >
-                                                {getGitHubDisplay(item.value).displayText}
-                                            </a>
-                                        ) : item.type === 'website' ? (
-                                            <a
-                                                href={item.value?.startsWith('http') ? item.value : `https://${item.value}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-gray-900 text-xs break-all hover:text-gray-700 transition-colors"
-                                            >
-                                                {item.value}
-                                            </a>
-                                        ) : (
-                                            <span className="text-gray-900">{item.value}</span>
-                                        )}
+                            <div className="space-y-2">
+                                {/* Primary contact items - dynamic grid */}
+                                {primaryContactItems.length > 0 && (
+                                    <div className={`grid gap-x-6 gap-y-2 text-sm ${
+                                        primaryCount === 1 ? 'grid-cols-1' :
+                                        primaryCount === 2 ? 'grid-cols-2' :
+                                        primaryCount === 3 ? 'grid-cols-2 lg:grid-cols-3' :
+                                        primaryCount === 4 ? 'grid-cols-2' :
+                                        'grid-cols-2 lg:grid-cols-3'
+                                    }`}>
+                                        {primaryContactItems.map((item, index) => (
+                                            <div key={index} className="flex items-center gap-2">
+                                                <span className="font-medium text-gray-700 min-w-[70px] flex-shrink-0">
+                                                    {item.label}
+                                                </span>
+                                                {item.type === 'linkedin' ? (
+                                                    <a
+                                                        href={getLinkedInDisplay(item.value).url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-gray-900 text-xs break-all hover:text-gray-700 transition-colors"
+                                                    >
+                                                        {getLinkedInDisplay(item.value).displayText}
+                                                    </a>
+                                                ) : item.type === 'github' ? (
+                                                    <a
+                                                        href={getGitHubDisplay(item.value).url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-gray-900 text-xs break-all hover:text-gray-700 transition-colors"
+                                                    >
+                                                        {getGitHubDisplay(item.value).displayText}
+                                                    </a>
+                                                ) : item.type === 'website' ? (
+                                                    <a
+                                                        href={item.value?.startsWith('http') ? item.value : `https://${item.value}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-gray-900 text-xs break-all hover:text-gray-700 transition-colors"
+                                                    >
+                                                        {item.value}
+                                                    </a>
+                                                ) : (
+                                                    <span className="text-gray-900">{item.value}</span>
+                                                )}
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
+                                )}
+                                
+                                {/* Location on separate line if exists */}
+                                {locationItem && (
+                                    <div className="flex items-center gap-2 text-sm">
+                                        <span className="font-medium text-gray-700 min-w-[70px] flex-shrink-0">
+                                            {locationItem.label}
+                                        </span>
+                                        <span className="text-gray-900">{locationItem.value}</span>
+                                    </div>
+                                )}
                             </div>
                         );
                     })()}
