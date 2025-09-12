@@ -300,7 +300,15 @@ export class ScrapingDogLinkedInService {
       languages: this.parseLanguages(profileData.languages || []),
       projects: this.parseProjects(profileData.projects || []),
       awards: this.parseAwards(profileData.awards || []),
-      volunteering: this.parseVolunteering(profileData.volunteering || [])
+      certifications: this.parseCertifications(profileData.certifications || profileData.certificates || []),
+      volunteering: this.parseVolunteering(
+        profileData.volunteering || 
+        profileData.volunteer || 
+        profileData.volunteer_experience || 
+        profileData.volunteerExperience ||
+        profileData.volunteer_work ||
+        []
+      )
     };
 
     return profile;
@@ -391,6 +399,24 @@ export class ScrapingDogLinkedInService {
   }
 
   /**
+   * Parse certifications from ScrapingDog response
+   */
+  private parseCertifications(certificationsData: any[]): ScrapingDogLinkedInProfile['certifications'] {
+    if (!Array.isArray(certificationsData)) return [];
+
+    return certificationsData.map(cert => ({
+      name: cert.name || cert.title || cert.certification || '',
+      title: cert.title || cert.name || '',
+      organization: cert.organization || cert.issuer || cert.authority || '',
+      issuer: cert.issuer || cert.organization || cert.authority || '',
+      issueDate: cert.issueDate || cert.date || cert.startDate || '',
+      expiryDate: cert.expiryDate || cert.expires || cert.endDate || '',
+      credentialId: cert.credentialId || cert.id || '',
+      url: cert.url || cert.link || cert.verificationUrl || ''
+    }));
+  }
+
+  /**
    * Parse languages from ScrapingDog response
    */
   private parseLanguages(languagesData: any[]): string[] {
@@ -412,17 +438,26 @@ export class ScrapingDogLinkedInService {
   private parseVolunteering(volunteeringData: any[]): ScrapingDogLinkedInProfile['volunteering'] {
     if (!Array.isArray(volunteeringData)) return [];
 
-    return volunteeringData.map(vol => ({
-      organization: vol.organization || vol.company || '',
-      company: vol.company || vol.organization || '',
-      role: vol.role || vol.position || '',
-      position: vol.position || vol.role || '',
-      cause: vol.cause || vol.field || '',
-      field: vol.field || vol.cause || '',
-      duration: vol.duration || vol.dateRange || '',
-      description: vol.description || vol.summary || '',
-      summary: vol.summary || vol.description || '',
-      current: vol.current || false
-    }));
+    console.log('🤝 Parsing volunteer data:', volunteeringData.length, 'items');
+
+    return volunteeringData.map((vol, index) => {
+      console.log(`📊 Raw volunteer ${index + 1}:`, vol);
+      
+      const parsed = {
+        organization: vol.organization || vol.company || vol.org || vol.institution || '',
+        company: vol.company || vol.organization || vol.org || vol.institution || '',
+        role: vol.role || vol.position || vol.title || vol.job_title || '',
+        position: vol.position || vol.role || vol.title || vol.job_title || '',
+        cause: vol.cause || vol.field || vol.category || vol.type || '',
+        field: vol.field || vol.cause || vol.category || vol.type || '',
+        duration: vol.duration || vol.dateRange || vol.period || '',
+        description: vol.description || vol.summary || vol.details || '',
+        summary: vol.summary || vol.description || vol.details || '',
+        current: vol.current || vol.is_current || false
+      };
+      
+      console.log(`✅ Parsed volunteer ${index + 1}:`, parsed);
+      return parsed;
+    });
   }
 }

@@ -405,6 +405,16 @@ function transformScrapingDogData(scrapingDogData: any, normalizedUrl: string) {
   console.log('📊 Raw certifications data:', scrapingDogData.certifications || scrapingDogData.certificates);
   console.log('📊 Raw awards data:', scrapingDogData.awards);
   console.log('📊 Raw experience data:', scrapingDogData.experience);
+  console.log('📊 Raw volunteering data:', scrapingDogData.volunteering);
+  console.log('📊 Raw volunteer data:', scrapingDogData.volunteer);
+  console.log('📊 Raw volunteer_experience data:', scrapingDogData.volunteer_experience);
+  console.log('📊 All possible volunteer fields:', {
+    volunteering: scrapingDogData.volunteering,
+    volunteer: scrapingDogData.volunteer,
+    volunteer_experience: scrapingDogData.volunteer_experience,
+    volunteerExperience: scrapingDogData.volunteerExperience,
+    volunteer_work: scrapingDogData.volunteer_work
+  });
 
   // Personal Information - şəxsi məlumatlar
   const personalInfo = {
@@ -556,18 +566,32 @@ function transformScrapingDogData(scrapingDogData: any, normalizedUrl: string) {
     level: typeof lang === 'object' ? (lang.proficiency || lang.level || 'Orta') : 'Orta'
   }));
 
-  // Volunteer Experience - könüllü təcrübə
-  const volunteerExperience = (scrapingDogData.volunteering || []).map((vol: any, index: number) => ({
-    id: `vol-scrapingdog-${Date.now()}-${index}`,
-    organization: vol.organization || vol.company || '',
-    role: vol.role || vol.position || '',
-    cause: vol.cause || vol.field || '',
-    startDate: vol.startDate || vol.start_date || '',
-    endDate: vol.endDate || vol.end_date || '',
-    description: vol.description || vol.summary || '',
-    current: vol.current || false,
-    duration: vol.duration || ''
-  }));
+  // Volunteer Experience - könüllü təcrübə - Enhanced field checking
+  const volunteerExperience = (
+    scrapingDogData.volunteering || 
+    scrapingDogData.volunteer || 
+    scrapingDogData.volunteer_experience || 
+    scrapingDogData.volunteerExperience ||
+    scrapingDogData.volunteer_work ||
+    []
+  ).map((vol: any, index: number) => {
+    console.log(`📊 RAW Volunteer ${index + 1}:`, vol);
+    
+    const mappedVol = {
+      id: `vol-scrapingdog-${Date.now()}-${index}`,
+      organization: vol.organization || vol.company || vol.org || vol.institution || '',
+      role: vol.role || vol.position || vol.title || vol.job_title || '',
+      cause: vol.cause || vol.field || vol.category || vol.type || '',
+      startDate: vol.startDate || vol.start_date || vol.starts_at || '',
+      endDate: vol.endDate || vol.end_date || vol.ends_at || '',
+      description: vol.description || vol.summary || vol.details || '',
+      current: vol.current || vol.is_current || false,
+      duration: vol.duration || vol.period || ''
+    };
+    
+    console.log(`✅ Mapped Volunteer ${index + 1}:`, mappedVol);
+    return mappedVol;
+  });
 
   console.log('✅ ScrapingDog məlumatları tam formata çevrildi:', {
     personalInfo: personalInfo.fullName,
