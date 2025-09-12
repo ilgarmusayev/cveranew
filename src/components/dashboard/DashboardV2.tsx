@@ -282,21 +282,21 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
                   {loading || !userLimits ? '...' : (
                     userLimits?.limits.limitType === 'total'
                       ? (() => {
-                          // For free plan (total limit), show only remaining count
-                          if (userLimits?.tier === 'Free') {
-                            return `${userLimits?.usage.remainingLimit}`;
+                          // For free plan (total limit), show current/total format
+                          if (userLimits?.tier === 'Free' || userLimits?.tier === 'Pulsuz') {
+                            return `${userLimits?.usage.cvCount}/${userLimits?.limits.cvCount}`;
                           }
                           // For other plans, keep the old format
                           return `${userLimits?.usage.remainingLimit}/${userLimits?.limits.cvCount}`;
                         })()
                       : userLimits?.limits.limitType === 'daily'
-                        ? `${userLimits?.usage.remainingLimit}/${userLimits?.limits.dailyLimit}`
+                        ? `${userLimits?.usage.dailyUsage}/${userLimits?.limits.dailyLimit}`
                         : '∞'
                   )}
                 </p>
                 <p className="text-xs text-gray-600">
                   {loading || !userLimits ? '...' : (
-                    userLimits?.limits.limitType === 'total' ? 'CV yaratma limiti' :
+                    userLimits?.limits.limitType === 'total' ? 'Ümumi qalan' :
                     userLimits?.limits.limitType === 'daily' ? 'Bu gün qalan' :
                     'Limitsiz istifadə'
                   )}

@@ -95,7 +95,9 @@ export async function GET(request: NextRequest) {
       },
       usage: {
         cvCount: totalCVs,
-        dailyUsage: cvLimits.currentCount,
+        // For Free tier, dailyUsage should be same as currentCount (total CVs)
+        // For daily tiers, currentCount is already the daily usage
+        dailyUsage: cvLimits.tierName === 'Pulsuz' ? totalCVs : cvLimits.currentCount,
         hasReachedLimit: cvLimits.limitReached,
         remainingLimit: cvLimits.limit ? (cvLimits.limit - cvLimits.currentCount) : 999
       },
