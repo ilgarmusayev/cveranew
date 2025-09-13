@@ -104,6 +104,18 @@ function testLinkProtectionLocal() {
         github: "https://github.com/musayev/portfolio",
         demo: "https://portfolio-demo.vercel.app"
       }
+    ],
+    customSections: [
+      {
+        title: "Layihələr",
+        content: "GitHub: github.com/musayev/project1 və portfolio: musayev.dev",
+        link: "https://github.com/musayev"
+      },
+      {
+        title: "Əlavə",
+        content: "Portfolio saytım https://portfolio.dev da və demo: demo.vercel.app da mövcuddur",
+        url: "portfolio.dev"
+      }
     ]
   };
   

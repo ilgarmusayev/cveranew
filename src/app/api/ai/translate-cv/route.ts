@@ -34,26 +34,43 @@ function extractAndProtectLinks(content: any): { content: any, linkMap: Map<stri
   const linkMap = new Map<string, string>();
   let linkCounter = 0;
   
-  // URL patterns to detect links
+  // Enhanced URL patterns to detect ALL types of links
   const urlPatterns = [
-    /https?:\/\/[^\s<>"{}|\\^`[\]]+/gi,
-    /www\.[^\s<>"{}|\\^`[\]]+/gi,
-    /[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\/[^\s<>"{}|\\^`[\]]*)?/gi
+    // Full URLs with protocols
+    /https?:\/\/[^\s<>"{}|\\^`[\]\u00A0-\u9999\uF900-\uFDCF\uFDF0-\uFFEF]+/gi,
+    // GitHub patterns specifically
+    /github\.com\/[a-zA-Z0-9\-_.\/]+/gi,
+    // LinkedIn patterns
+    /linkedin\.com\/[a-zA-Z0-9\-_.\/]+/gi,
+    // Common domain patterns
+    /(?:www\.)?[a-zA-Z0-9][a-zA-Z0-9\-_.]*\.[a-zA-Z]{2,}(?:\/[^\s<>"{}|\\^`[\]\u00A0-\u9999\uF900-\uFDCF\uFDF0-\uFFEF]*)?/gi,
+    // Email addresses
+    /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/gi,
+    // Domain.com patterns without www
+    /[a-zA-Z0-9][a-zA-Z0-9\-_.]*\.(?:com|net|org|edu|gov|io|dev|co|me|tech|app|ly|be|to|tv|ai)/gi
   ];
   
   function replaceLinkInText(text: string): string {
     if (typeof text !== 'string') return text;
     
+    let modifiedText = text;
+    
     urlPatterns.forEach(pattern => {
-      text = text.replace(pattern, (match) => {
+      modifiedText = modifiedText.replace(pattern, (match) => {
+        // Skip if already replaced
+        if (match.includes('__LINK_PLACEHOLDER_')) {
+          return match;
+        }
+        
         const placeholder = `__LINK_PLACEHOLDER_${linkCounter}__`;
         linkMap.set(placeholder, match);
         linkCounter++;
+        console.log(`🔗 Protected link: ${match} → ${placeholder}`);
         return placeholder;
       });
     });
     
-    return text;
+    return modifiedText;
   }
   
   function recursivelyProtectLinks(obj: any): any {
@@ -81,11 +98,18 @@ function restoreLinks(content: any, linkMap: Map<string, string>): any {
   function restoreLinkInText(text: string): string {
     if (typeof text !== 'string') return text;
     
+    let restoredText = text;
+    let restoredCount = 0;
+    
     linkMap.forEach((originalLink, placeholder) => {
-      text = text.replace(new RegExp(placeholder, 'g'), originalLink);
+      if (restoredText.includes(placeholder)) {
+        restoredText = restoredText.replace(new RegExp(placeholder, 'g'), originalLink);
+        restoredCount++;
+        console.log(`🔄 Restored link: ${placeholder} → ${originalLink}`);
+      }
     });
     
-    return text;
+    return restoredText;
   }
   
   function recursivelyRestoreLinks(obj: any): any {
@@ -120,26 +144,38 @@ Siz peşəkar CV tərcümə mütəxəssisiniz. Aşağıdakı CV məzmununu ${sou
 🔥 MÜTLƏQ QAYDALAR:
 1. 📧 Email, telefon nömrəsi, URL-lər olduğu kimi saxla
 2. 📅 Tarixlər (dates) olduğu kimi saxla - dəyişmə! 
-3. 🔗 MÜTLƏQ: Bütün linkləri (URLs) olduğu kimi saxla:
+3. 🔗 PLACEHOLDER QORUMA: __LINK_PLACEHOLDER_X__ formatındakı bütün placeholder-ləri DƏQIQ olduğu kimi saxla:
+   - __LINK_PLACEHOLDER_0__, __LINK_PLACEHOLDER_1__ və s.
+   - Bu placeholder-lər link-ləri təmsil edir - HEÇBIR dəyişiklik etmə!
+   - Placeholder-ləri tərcümə etmə, silmə və ya dəyişmə!
+4. 🔗 MÜTLƏQ: Bütün linkləri və URL-ləri olduğu kimi saxla:
    - https://... başlayan bütün linklər
    - http://... başlayan bütün linklər  
    - www... başlayan linklər
    - github.com, linkedin.com, behance.net və s. linklər
+   - domain.com formatında domainlər
    - HEÇBIR URL/LİNKİ TƏRCÜMə ETMə!
-4. 🎯 MÜTLƏQ: "sectionNames" bölməsindəki BÜTÜN dəyərləri tərcümə edin
-5. 💼 MÜTLƏQ: Skills hissəsində "category" və ya "type" olan skillsləri olduğu kimi AYRI saxla:
+5. 🎯 MÜTLƏQ: "sectionNames" bölməsindəki BÜTÜN dəyərləri tərcümə edin
+6. 💼 MÜTLƏQ: Skills hissəsində "category" və ya "type" olan skillsləri olduğu kimi AYRI saxla:
    - Soft skills → ayrı qrup (məs: category: "soft" və ya type: "soft")
    - Hard skills → ayrı qrup (məs: category: "hard", "technical", "programming" və ya type: "hard")
    - Skills-in strukturunu və category/type-ını heç vaxt qarışdırma!
-6. 📋 JSON strukturunu dəqiq saxlayın - heç bir field silinməsin
-7. 🔒 Boş/null dəyərləri olduğu kimi saxlayın
+7. 📋 JSON strukturunu dəqiq saxlayın - heç bir field silinməsin
+8. 🔒 Boş/null dəyərləri olduğu kimi saxlayın
 
 🚫 LİNK QORUMA MİSALLARI:
-✅ DOĞRU: "https://github.com/user/project" → "https://github.com/user/project"
+✅ DOĞRU: "https://github.com/user/project" → "https://github.com/user/project"  
 ✅ DOĞRU: "www.example.com" → "www.example.com"
 ✅ DOĞRU: "https://portfolio.com" → "https://portfolio.com"
+✅ DOĞRU: "__LINK_PLACEHOLDER_0__" → "__LINK_PLACEHOLDER_0__" (dəqiq olduğu kimi!)
+✅ DOĞRU: "__LINK_PLACEHOLDER_15__" → "__LINK_PLACEHOLDER_15__" (dəqiq olduğu kimi!)
 ❌ SƏHV: "https://github.com" ni tərcümə etmə!
 ❌ SƏHV: URL-lərin heç bir hissəsini dəyişmə!
+❌ SƏHV: Placeholder-ləri dəyişmə və ya silmə!
+
+🔗 PLACEHOLDER NÜMUNƏ:
+INPUT: "Portfolio saytım __LINK_PLACEHOLDER_5__ da mövcuddur"
+OUTPUT: "My portfolio website is available at __LINK_PLACEHOLDER_5__" (placeholder dəqiq saxlanır!)
 
 ${targetLanguage === 'az' ? `
 � Azərbaycan Tərcümə Qaydaları:
@@ -216,6 +252,12 @@ OUTPUT: [
   // Extract and protect all links before translation
   const { content: protectedContent, linkMap } = extractAndProtectLinks(content);
   
+  console.log('🔗 Link protection summary:');
+  console.log(`   - Total links found: ${linkMap.size}`);
+  linkMap.forEach((link, placeholder) => {
+    console.log(`   - ${placeholder}: ${link}`);
+  });
+  
   // Add protected content to prompt
   const fullPrompt = prompt + `\n\nINPUT JSON:\n${JSON.stringify(protectedContent, null, 2)}`;
 
@@ -227,6 +269,19 @@ OUTPUT: [
     // Clean the response and parse JSON
     const cleanedResponse = translatedText.replace(/```json\s*|\s*```/g, '').trim();
     const translatedContent = JSON.parse(cleanedResponse);
+    
+    // Validate that placeholders are preserved in translation
+    const translatedString = JSON.stringify(translatedContent);
+    const missingPlaceholders: string[] = [];
+    linkMap.forEach((_, placeholder) => {
+      if (!translatedString.includes(placeholder)) {
+        missingPlaceholders.push(placeholder);
+      }
+    });
+    
+    if (missingPlaceholders.length > 0) {
+      console.warn('⚠️ WARNING: Some placeholders missing in translation:', missingPlaceholders);
+    }
     
     // Restore all protected links
     const finalContent = restoreLinks(translatedContent, linkMap);

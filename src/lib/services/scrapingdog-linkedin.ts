@@ -385,7 +385,12 @@ export class ScrapingDogLinkedInService {
       languages: this.parseLanguages(profileData.languages || []),
       projects: this.parseProjects(profileData.projects || []),
       awards: this.parseAwards(profileData.awards || []),
-      certifications: this.parseCertifications(profileData.certifications || profileData.certificates || []),
+      certifications: this.parseCertifications(
+        profileData.certifications || 
+        profileData.certificates || 
+        profileData.certification ||
+        []
+      ),
       volunteering: this.parseVolunteering(
         profileData.volunteering || 
         profileData.volunteer || 
@@ -395,6 +400,10 @@ export class ScrapingDogLinkedInService {
         []
       )
     };
+
+    console.log('🎯 Final transformed profile:');
+    console.log('Certifications count:', profile.certifications?.length || 0);
+    console.log('Volunteering count:', profile.volunteering?.length || 0);
 
     return profile;
   }
@@ -487,18 +496,32 @@ export class ScrapingDogLinkedInService {
    * Parse certifications from ScrapingDog response
    */
   private parseCertifications(certificationsData: any[]): ScrapingDogLinkedInProfile['certifications'] {
-    if (!Array.isArray(certificationsData)) return [];
+    console.log('🏆 Raw certifications data:', certificationsData);
+    
+    if (!Array.isArray(certificationsData)) {
+      console.log('❌ Certifications data is not an array:', typeof certificationsData);
+      return [];
+    }
+    
+    console.log('🔍 Found', certificationsData.length, 'certifications to parse');
 
-    return certificationsData.map(cert => ({
-      name: cert.name || cert.title || cert.certification || '',
-      title: cert.title || cert.name || '',
-      organization: cert.organization || cert.issuer || cert.authority || '',
-      issuer: cert.issuer || cert.organization || cert.authority || '',
-      issueDate: cert.issueDate || cert.date || cert.startDate || '',
-      expiryDate: cert.expiryDate || cert.expires || cert.endDate || '',
-      credentialId: cert.credentialId || cert.id || '',
-      url: cert.url || cert.link || cert.verificationUrl || ''
-    }));
+    return certificationsData.map((cert, index) => {
+      console.log(`📜 Raw cert ${index + 1}:`, cert);
+      
+      const parsed = {
+        name: cert.name || cert.title || cert.certification || '',
+        title: cert.title || cert.name || '',
+        organization: cert.organization || cert.issuer || cert.authority || '',
+        issuer: cert.issuer || cert.organization || cert.authority || '',
+        issueDate: cert.issueDate || cert.date || cert.startDate || '',
+        expiryDate: cert.expiryDate || cert.expires || cert.endDate || '',
+        credentialId: cert.credentialId || cert.id || '',
+        url: cert.url || cert.link || cert.verificationUrl || ''
+      };
+      
+      console.log(`✅ Parsed cert ${index + 1}:`, parsed);
+      return parsed;
+    });
   }
 
   /**
@@ -521,9 +544,14 @@ export class ScrapingDogLinkedInService {
    * Parse volunteering from ScrapingDog response
    */
   private parseVolunteering(volunteeringData: any[]): ScrapingDogLinkedInProfile['volunteering'] {
-    if (!Array.isArray(volunteeringData)) return [];
+    console.log('🤝 Raw volunteering data:', volunteeringData);
+    
+    if (!Array.isArray(volunteeringData)) {
+      console.log('❌ Volunteering data is not an array:', typeof volunteeringData);
+      return [];
+    }
 
-    console.log('🤝 Parsing volunteer data:', volunteeringData.length, 'items');
+    console.log('🔍 Found', volunteeringData.length, 'volunteer items to parse');
 
     return volunteeringData.map((vol, index) => {
       console.log(`📊 Raw volunteer ${index + 1}:`, vol);
