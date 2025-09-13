@@ -385,6 +385,42 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         }
                         ` : ''}
                         
+                        /* EXCLUSIVE TEMPLATE @PAGE AYARLARI - BASIC TEMPLATE KİMİ */
+                        ${templateId === 'exclusive' || templateId?.toLowerCase() === 'exclusive' || templateId?.toLowerCase().includes('exclusive') ? `
+                        @page {
+                            size: A4;
+                            margin-top: 10mm !important;
+                            margin-bottom: 10mm !important;
+                            margin-left: 10mm !important;
+                            margin-right: 10mm !important;
+                            padding: 0 !important;
+                            border: none !important;
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        @page :first {
+                            margin-top: 6mm !important;
+                            margin-left: 10mm !important;
+                            margin-right: 10mm !important;
+                        }
+                        
+                        @page :left {
+                            margin-top: 10mm !important;
+                            margin-bottom: 10mm !important;
+                            margin-left: 10mm !important;
+                            margin-right: 10mm !important;
+                        }
+                        
+                        @page :right {
+                            margin-top: 10mm !important;
+                            margin-bottom: 10mm !important;
+                            margin-left: 10mm !important;
+                            margin-right: 10mm !important;
+                        }
+                        ` : ''}
+                        
                         /* BASIC TEMPLATE - PAGE BREAK OPTİMİZASYONU */
                         .basic-template .cv-section,
                         .cv-template.basic-template .cv-section {
@@ -431,6 +467,306 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         .cv-template.basic-template .cv-section {
                             page-break-inside: avoid !important;
                             break-inside: avoid !important;
+                        }
+                        
+                        /* EXCLUSIVE TEMPLATE - BASIC TEMPLATE KİMİ MARGIN SİSTEMİ */
+                        /* EXCLUSIVE TEMPLATE - PAGE BREAK OPTİMİZASYONU */
+                        .exclusive-template .cv-section,
+                        .cv-template.exclusive-template .cv-section,
+                        .exclusive .cv-section,
+                        .cv-template.exclusive .cv-section {
+                            page-break-inside: avoid;
+                            break-inside: avoid;
+                            margin-bottom: 8mm !important; /* Sectionlar arası boşluq azaldıldı */
+                        }
+                        
+                        /* EXCLUSIVE TEMPLATE - Səhifə keçid problemi olan elementlər üçün */
+                        .exclusive-template .cv-section:last-child,
+                        .cv-template.exclusive-template .cv-section:last-child,
+                        .exclusive .cv-section:last-child,
+                        .cv-template.exclusive .cv-section:last-child {
+                            margin-bottom: 12mm !important; /* Son section üçün əlavə boşluq azaldıldı */
+                        }
+                        
+                        /* EXCLUSIVE TEMPLATE - BODY VƏ HTML SƏHİFƏ SPACING */
+                        .exclusive-template body,
+                        .cv-template.exclusive-template body,
+                        .exclusive body,
+                        .cv-template.exclusive body {
+                            margin: 0 !important;
+                            padding: 0 !important;
+                        }
+                        
+                        /* EXCLUSIVE TEMPLATE - CV container-də səhifə padding əlavə et */
+                        .exclusive-template .cv-container, 
+                        .exclusive-template .cv-content,
+                        .cv-template.exclusive-template .cv-container,
+                        .cv-template.exclusive-template .cv-content,
+                        .exclusive .cv-container,
+                        .exclusive .cv-content,
+                        .cv-template.exclusive .cv-container,
+                        .cv-template.exclusive .cv-content {
+                            padding-top: 0 !important;
+                            padding-bottom: 0 !important;
+                            box-sizing: border-box !important;
+                            max-width: none !important;     /* Max-width məhdudiyyətini sil */
+                            width: 100% !important;         /* Tam genişlik @page margin-ləri içində */
+                            margin: 0 !important;           /* Heç bir əlavə margin yoxdur */
+                        }
+                        
+                        /* EXCLUSIVE TEMPLATE - Səhifə keçidində məzmun kəsilməsin */
+                        .exclusive-template h1, .exclusive-template h2, .exclusive-template h3, 
+                        .exclusive-template h4, .exclusive-template h5, .exclusive-template h6,
+                        .cv-template.exclusive-template h1, .cv-template.exclusive-template h2, 
+                        .cv-template.exclusive-template h3, .cv-template.exclusive-template h4, 
+                        .cv-template.exclusive-template h5, .cv-template.exclusive-template h6,
+                        .exclusive h1, .exclusive h2, .exclusive h3, 
+                        .exclusive h4, .exclusive h5, .exclusive h6,
+                        .cv-template.exclusive h1, .cv-template.exclusive h2, 
+                        .cv-template.exclusive h3, .cv-template.exclusive h4, 
+                        .cv-template.exclusive h5, .cv-template.exclusive h6 {
+                            page-break-after: avoid !important;
+                            break-after: avoid !important;
+                        }
+                        
+                        /* EXCLUSIVE TEMPLATE - Sectionlar səhifədə kəsilməsin */
+                        .exclusive-template .cv-section,
+                        .cv-template.exclusive-template .cv-section,
+                        .exclusive .cv-section,
+                        .cv-template.exclusive .cv-section {
+                            page-break-inside: avoid !important;
+                            break-inside: avoid !important;
+                        }
+                        
+                        /* EXCLUSIVE TEMPLATE - KƏNAR ÇIXMAMASI ÜÇÜN CONTAINER SİSTEMİ */
+                        .exclusive-template,
+                        .cv-template.exclusive-template,
+                        .exclusive,
+                        .cv-template.exclusive {
+                            box-sizing: border-box !important;
+                            max-width: 190mm !important;    /* 210mm - 30mm (15mm sol + 15mm sağ margin) */
+                            width: 100% !important;         /* @page margin-ləri içində tam genişlik */
+                            margin: 0 !important;           /* Heç bir margin yoxdur - @page margin-ləri kifayət edir */
+                            padding: 0 !important;          /* Heç bir padding yoxdur */
+                        }
+                        
+                        /* EXCLUSIVE TEMPLATE - BÜTÜN İÇ ELEMENTLER ÜÇÜN GENİŞLİK KONTROLU */
+                        .exclusive-template *[class*="max-w"],
+                        .exclusive-template *[class*="mx-auto"],
+                        .cv-template.exclusive-template *[class*="max-w"],
+                        .cv-template.exclusive-template *[class*="mx-auto"],
+                        .exclusive *[class*="max-w"],
+                        .exclusive *[class*="mx-auto"],
+                        .cv-template.exclusive *[class*="max-w"],
+                        .cv-template.exclusive *[class*="mx-auto"] {
+                            max-width: 190mm !important;    /* 210mm - 30mm margin */
+                            margin-left: 0 !important;      /* Auto margin-ləri sil */
+                            margin-right: 0 !important;     /* Auto margin-ləri sil */
+                            width: 100% !important;         /* @page margin-ləri içində tam genişlik */
+                            box-sizing: border-box !important;
+                        }
+                        
+                        /* EXCLUSIVE TEMPLATE - BÜTÜN CONTAINER VƏ WRAPPER ELEMENTLER */
+                        .exclusive-template div,
+                        .exclusive-template section,
+                        .exclusive-template main,
+                        .exclusive-template article,
+                        .cv-template.exclusive-template div,
+                        .cv-template.exclusive-template section,
+                        .cv-template.exclusive-template main,
+                        .cv-template.exclusive-template article,
+                        .exclusive div,
+                        .exclusive section,
+                        .exclusive main,
+                        .exclusive article,
+                        .cv-template.exclusive div,
+                        .cv-template.exclusive section,
+                        .cv-template.exclusive main,
+                        .cv-template.exclusive article {
+                            max-width: 190mm !important;    /* 210mm - 30mm margin */
+                            box-sizing: border-box !important;
+                        }
+                        
+                        /* EXCLUSIVE TEMPLATE - TAILWIND CONTAINER CLASS-LARINI OVERRIDE ET */
+                        .exclusive-template .container,
+                        .exclusive-template .max-w-sm,
+                        .exclusive-template .max-w-md,
+                        .exclusive-template .max-w-lg,
+                        .exclusive-template .max-w-xl,
+                        .exclusive-template .max-w-2xl,
+                        .exclusive-template .max-w-3xl,
+                        .exclusive-template .max-w-4xl,
+                        .exclusive-template .max-w-5xl,
+                        .exclusive-template .max-w-6xl,
+                        .exclusive-template .max-w-7xl,
+                        .exclusive-template .max-w-full,
+                        .exclusive-template .w-full,
+                        .cv-template.exclusive-template .container,
+                        .cv-template.exclusive-template .max-w-sm,
+                        .cv-template.exclusive-template .max-w-md,
+                        .cv-template.exclusive-template .max-w-lg,
+                        .cv-template.exclusive-template .max-w-xl,
+                        .cv-template.exclusive-template .max-w-2xl,
+                        .cv-template.exclusive-template .max-w-3xl,
+                        .cv-template.exclusive-template .max-w-4xl,
+                        .cv-template.exclusive-template .max-w-5xl,
+                        .cv-template.exclusive-template .max-w-6xl,
+                        .cv-template.exclusive-template .max-w-7xl,
+                        .cv-template.exclusive-template .max-w-full,
+                        .cv-template.exclusive-template .w-full,
+                        .exclusive .container,
+                        .exclusive .max-w-sm,
+                        .exclusive .max-w-md,
+                        .exclusive .max-w-lg,
+                        .exclusive .max-w-xl,
+                        .exclusive .max-w-2xl,
+                        .exclusive .max-w-3xl,
+                        .exclusive .max-w-4xl,
+                        .exclusive .max-w-5xl,
+                        .exclusive .max-w-6xl,
+                        .exclusive .max-w-7xl,
+                        .exclusive .max-w-full,
+                        .exclusive .w-full,
+                        .cv-template.exclusive .container,
+                        .cv-template.exclusive .max-w-sm,
+                        .cv-template.exclusive .max-w-md,
+                        .cv-template.exclusive .max-w-lg,
+                        .cv-template.exclusive .max-w-xl,
+                        .cv-template.exclusive .max-w-2xl,
+                        .cv-template.exclusive .max-w-3xl,
+                        .cv-template.exclusive .max-w-4xl,
+                        .cv-template.exclusive .max-w-5xl,
+                        .cv-template.exclusive .max-w-6xl,
+                        .cv-template.exclusive .max-w-7xl,
+                        .cv-template.exclusive .max-w-full,
+                        .cv-template.exclusive .w-full {
+                            max-width: 180mm !important;    /* 210mm - 30mm margin */
+                            width: 100% !important;
+                            margin-left: 0 !important;
+                            margin-right: 0 !important;
+                            padding-left: 0 !important;
+                            padding-right: 0 !important;
+                            box-sizing: border-box !important;
+                        }
+                        
+                        /* EXCLUSIVE TEMPLATE - CV SECTIONS TAM GENİŞLİK */
+                        .exclusive-template .cv-section,
+                        .cv-template.exclusive-template .cv-section,
+                        .exclusive .cv-section,
+                        .cv-template.exclusive .cv-section {
+                            width: 100% !important;
+                            max-width: 190mm !important;    /* 210mm - 30mm margin */
+                            margin-left: 0 !important;
+                            margin-right: 0 !important;
+                            box-sizing: border-box !important;
+                        }
+                        
+                        /* EXCLUSIVE TEMPLATE - BODY VƏ HTML TAM GENİŞLİK */
+                        .exclusive-template body,
+                        .exclusive-template html,
+                        .cv-template.exclusive-template body,
+                        .cv-template.exclusive-template html,
+                        .exclusive body,
+                        .exclusive html,
+                        .cv-template.exclusive body,
+                        .cv-template.exclusive html {
+                            width: 100% !important;
+                            max-width: 190mm !important;    /* 210mm - 30mm margin */
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            box-sizing: border-box !important;
+                        }
+                        
+                        /* EXCLUSIVE TEMPLATE - AYIRICI XƏTLƏRİN GÖY RƏNGİ */
+                        /* Section başlıqlarından sonra olan xətlər */
+                        .exclusive-template hr,
+                        .cv-template.exclusive-template hr,
+                        .exclusive hr,
+                        .cv-template.exclusive hr {
+                            border-color: #3b82f6 !important;    /* Göy rəng */
+                            background-color: #3b82f6 !important;
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        /* Section title altındakı border-bottom xətləri - YALNIZ SECTİON BAŞLIQLARINDAN SONRA */
+                        /* h1, h2, h3 özünün border-bottom rəngi */
+                        .exclusive-template h1[class*="border-b"],
+                        .exclusive-template h2[class*="border-b"],
+                        .exclusive-template h3[class*="border-b"],
+                        .cv-template.exclusive-template h1[class*="border-b"],
+                        .cv-template.exclusive-template h2[class*="border-b"],
+                        .cv-template.exclusive-template h3[class*="border-b"],
+                        .exclusive h1[class*="border-b"],
+                        .exclusive h2[class*="border-b"],
+                        .exclusive h3[class*="border-b"],
+                        .cv-template.exclusive h1[class*="border-b"],
+                        .cv-template.exclusive h2[class*="border-b"],
+                        .cv-template.exclusive h3[class*="border-b"] {
+                            border-bottom-color: #3b82f6 !important;  /* Göy rəng */
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        /* Section başlıqlarından DƏRHAL sonra gələn border elementləri */
+                        .exclusive-template h1 + .border-b,
+                        .exclusive-template h2 + .border-b,
+                        .exclusive-template h3 + .border-b,
+                        .exclusive-template h1 + [class*="border-b"],
+                        .exclusive-template h2 + [class*="border-b"],
+                        .exclusive-template h3 + [class*="border-b"],
+                        .cv-template.exclusive-template h1 + .border-b,
+                        .cv-template.exclusive-template h2 + .border-b,
+                        .cv-template.exclusive-template h3 + .border-b,
+                        .cv-template.exclusive-template h1 + [class*="border-b"],
+                        .cv-template.exclusive-template h2 + [class*="border-b"],
+                        .cv-template.exclusive-template h3 + [class*="border-b"] {
+                            border-bottom-color: #3b82f6 !important;  /* Göy rəng */
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        /* Section başlıqları üçün xüsusi border */
+                        .exclusive-template h1,
+                        .exclusive-template h2,
+                        .exclusive-template h3,
+                        .cv-template.exclusive-template h1,
+                        .cv-template.exclusive-template h2,
+                        .cv-template.exclusive-template h3,
+                        .exclusive h1,
+                        .exclusive h2,
+                        .exclusive h3,
+                        .cv-template.exclusive h1,
+                        .cv-template.exclusive h2,
+                        .cv-template.exclusive h3 {
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        /* Tailwind border class-ları üçün göy rəng */
+                        .exclusive-template .border-gray-200,
+                        .exclusive-template .border-gray-300,
+                        .exclusive-template .border-slate-200,
+                        .exclusive-template .border-neutral-200,
+                        .cv-template.exclusive-template .border-gray-200,
+                        .cv-template.exclusive-template .border-gray-300,
+                        .cv-template.exclusive-template .border-slate-200,
+                        .cv-template.exclusive-template .border-neutral-200,
+                        .exclusive .border-gray-200,
+                        .exclusive .border-gray-300,
+                        .exclusive .border-slate-200,
+                        .exclusive .border-neutral-200,
+                        .cv-template.exclusive .border-gray-200,
+                        .cv-template.exclusive .border-gray-300,
+                        .cv-template.exclusive .border-slate-200,
+                        .cv-template.exclusive .border-neutral-200 {
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
                         }
                         
                         /* SƏHİFƏ AYIRMA VƏ BOŞLUQ SİSTEMİ */
