@@ -1026,11 +1026,16 @@ div.atlas-template .w-2\/5,
   background: #1e3a8a !important;
   background-image: none !important;
   color: white !important;
-  
+  min-height: 100vh;
   /* Ensure proper print colors */
   -webkit-print-color-adjust: exact !important;
   print-color-adjust: exact !important;
   color-adjust: exact !important;
+    margin: 0 !important;
+  padding: 0 !important;
+  z-index: 9999 !important;
+  position: relative !important;
+  
 }
 
 /* Override all text colors in Atlas left panel */

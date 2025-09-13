@@ -355,13 +355,14 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             background: none !important;
                         }
                         
-                        /* MƏCBURI OPTİMAL MARGIN - HƏR SƏHİFƏ ÜÇÜN */
+                        /* BASIC TEMPLATE @PAGE AYARLARI - ŞƏRTI TEMPLATE YOXLAMASI */
+                        ${templateId === 'basic' ? `
                         @page {
                             size: A4;
-                            margin-top: 10mm !important;    /* Hər səhifənin yuxarısında 10mm */
-                            margin-bottom: 10mm !important; /* Hər səhifənin aşağısında 10mm */
-                            margin-left: 10mm !important;   /* Sol margin */
-                            margin-right: 10mm !important;  /* Sağ margin */
+                            margin-top: 10mm !important;
+                            margin-bottom: 10mm !important;
+                            margin-left: 10mm !important;
+                            margin-right: 10mm !important;
                             padding: 0 !important;
                             border: none !important;
                             -webkit-print-color-adjust: exact !important;
@@ -369,12 +370,10 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             print-color-adjust: exact !important;
                         }
                         
-                        /* Birinci səhifə üçün xüsusi ayar */
                         @page :first {
-                            margin-top: 6mm !important; /* İlk səhifədə daha az üst margin */
+                            margin-top: 6mm !important;
                         }
                         
-                        /* İkinci və sonrakı səhifələr üçün */
                         @page :left {
                             margin-top: 10mm !important;
                             margin-bottom: 10mm !important;
@@ -384,40 +383,52 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             margin-top: 10mm !important;
                             margin-bottom: 10mm !important;
                         }
+                        ` : ''}
                         
-                        /* PAGE BREAK OPTİMİZASYONU */
-                        .cv-section {
+                        /* BASIC TEMPLATE - PAGE BREAK OPTİMİZASYONU */
+                        .basic-template .cv-section,
+                        .cv-template.basic-template .cv-section {
                             page-break-inside: avoid;
                             break-inside: avoid;
                             margin-bottom: 8mm !important; /* Sectionlar arası boşluq azaldıldı */
                         }
                         
-                        /* Səhifə keçid problemi olan elementlər üçün */
-                        .cv-section:last-child {
+                        /* BASIC TEMPLATE - Səhifə keçid problemi olan elementlər üçün */
+                        .basic-template .cv-section:last-child,
+                        .cv-template.basic-template .cv-section:last-child {
                             margin-bottom: 12mm !important; /* Son section üçün əlavə boşluq azaldıldı */
                         }
                         
-                        /* BODY VƏ HTML SƏHİFƏ SPACING */
-                        body {
+                        /* BASIC TEMPLATE - BODY VƏ HTML SƏHİFƏ SPACING */
+                        .basic-template body,
+                        .cv-template.basic-template body {
                             margin: 0 !important;
                             padding: 0 !important;
                         }
                         
-                        /* CV container-də səhifə padding əlavə et */
-                        .cv-container, .cv-content {
+                        /* BASIC TEMPLATE - CV container-də səhifə padding əlavə et */
+                        .basic-template .cv-container, 
+                        .basic-template .cv-content,
+                        .cv-template.basic-template .cv-container,
+                        .cv-template.basic-template .cv-content {
                             padding-top: 0 !important;
                             padding-bottom: 0 !important;
                             box-sizing: border-box !important;
                         }
                         
-                        /* Səhifə keçidində məzmun kəsilməsin */
-                        h1, h2, h3, h4, h5, h6 {
+                        /* BASIC TEMPLATE - Səhifə keçidində məzmun kəsilməsin */
+                        .basic-template h1, .basic-template h2, .basic-template h3, 
+                        .basic-template h4, .basic-template h5, .basic-template h6,
+                        .cv-template.basic-template h1, .cv-template.basic-template h2, 
+                        .cv-template.basic-template h3, .cv-template.basic-template h4, 
+                        .cv-template.basic-template h5, .cv-template.basic-template h6 {
                             page-break-after: avoid !important;
                             break-after: avoid !important;
                         }
                         
-                        /* Sectionlar səhifədə kəsilməsin */
-                        .cv-section {
+                        /* BASIC TEMPLATE - Sectionlar səhifədə kəsilməsin */
+                        .basic-template .cv-section,
+                        .cv-template.basic-template .cv-section {
                             page-break-inside: avoid !important;
                             break-inside: avoid !important;
                         }
