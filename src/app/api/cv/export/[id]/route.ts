@@ -421,6 +421,42 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         }
                         ` : ''}
                         
+                        /* AURORA TEMPLATE @PAGE AYARLARI - BASIC TEMPLATE KİMİ */
+                        ${templateId === 'aurora' || templateId?.toLowerCase() === 'aurora' || templateId?.toLowerCase().includes('aurora') ? `
+                        @page {
+                            size: A4;
+                            margin-top: 10mm !important;
+                            margin-bottom: 10mm !important;
+                            margin-left: 10mm !important;
+                            margin-right: 10mm !important;
+                            padding: 0 !important;
+                            border: none !important;
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        @page :first {
+                            margin-top: 6mm !important;
+                            margin-left: 10mm !important;
+                            margin-right: 10mm !important;
+                        }
+                        
+                        @page :left {
+                            margin-top: 10mm !important;
+                            margin-bottom: 10mm !important;
+                            margin-left: 10mm !important;
+                            margin-right: 10mm !important;
+                        }
+                        
+                        @page :right {
+                            margin-top: 10mm !important;
+                            margin-bottom: 10mm !important;
+                            margin-left: 10mm !important;
+                            margin-right: 10mm !important;
+                        }
+                        ` : ''}
+                        
                         /* BASIC TEMPLATE - PAGE BREAK OPTİMİZASYONU */
                         .basic-template .cv-section,
                         .cv-template.basic-template .cv-section {
@@ -767,6 +803,214 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             -webkit-print-color-adjust: exact !important;
                             color-adjust: exact !important;
                             print-color-adjust: exact !important;
+                        }
+                        
+                        /* AURORA TEMPLATE - BASIC VƏ EXCLUSIVE TEMPLATE KİMİ MARGIN SİSTEMİ */
+                        /* AURORA TEMPLATE - PAGE BREAK OPTİMİZASYONU */
+                        .aurora-template .cv-section,
+                        .cv-template.aurora-template .cv-section,
+                        .aurora .cv-section,
+                        .cv-template.aurora .cv-section {
+                            page-break-inside: avoid;
+                            break-inside: avoid;
+                            margin-bottom: 8mm !important; /* Sectionlar arası boşluq azaldıldı */
+                        }
+                        
+                        /* AURORA TEMPLATE - Səhifə keçid problemi olan elementlər üçün */
+                        .aurora-template .cv-section:last-child,
+                        .cv-template.aurora-template .cv-section:last-child,
+                        .aurora .cv-section:last-child,
+                        .cv-template.aurora .cv-section:last-child {
+                            margin-bottom: 12mm !important; /* Son section üçün əlavə boşluq azaldıldı */
+                        }
+                        
+                        /* AURORA TEMPLATE - BODY VƏ HTML SƏHİFƏ SPACING */
+                        .aurora-template body,
+                        .cv-template.aurora-template body,
+                        .aurora body,
+                        .cv-template.aurora body {
+                            margin: 0 !important;
+                            padding: 0 !important;
+                        }
+                        
+                        /* AURORA TEMPLATE - CV container-də səhifə padding əlavə et */
+                        .aurora-template .cv-container, 
+                        .aurora-template .cv-content,
+                        .cv-template.aurora-template .cv-container,
+                        .cv-template.aurora-template .cv-content,
+                        .aurora .cv-container,
+                        .aurora .cv-content,
+                        .cv-template.aurora .cv-container,
+                        .cv-template.aurora .cv-content {
+                            padding-top: 0 !important;
+                            padding-bottom: 0 !important;
+                            box-sizing: border-box !important;
+                            max-width: 190mm !important;    /* 210mm - 20mm margin */
+                            width: 100% !important;         /* Tam genişlik @page margin-ləri içində */
+                            margin: 0 !important;           /* Heç bir əlavə margin yoxdur */
+                        }
+                        
+                        /* AURORA TEMPLATE - Səhifə keçidində məzmun kəsilməsin */
+                        .aurora-template h1, .aurora-template h2, .aurora-template h3, 
+                        .aurora-template h4, .aurora-template h5, .aurora-template h6,
+                        .cv-template.aurora-template h1, .cv-template.aurora-template h2, 
+                        .cv-template.aurora-template h3, .cv-template.aurora-template h4, 
+                        .cv-template.aurora-template h5, .cv-template.aurora-template h6,
+                        .aurora h1, .aurora h2, .aurora h3, 
+                        .aurora h4, .aurora h5, .aurora h6,
+                        .cv-template.aurora h1, .cv-template.aurora h2, 
+                        .cv-template.aurora h3, .cv-template.aurora h4, 
+                        .cv-template.aurora h5, .cv-template.aurora h6 {
+                            page-break-after: avoid !important;
+                            break-after: avoid !important;
+                        }
+                        
+                        /* AURORA TEMPLATE - Sectionlar səhifədə kəsilməsin */
+                        .aurora-template .cv-section,
+                        .cv-template.aurora-template .cv-section,
+                        .aurora .cv-section,
+                        .cv-template.aurora .cv-section {
+                            page-break-inside: avoid !important;
+                            break-inside: avoid !important;
+                        }
+                        
+                        /* AURORA TEMPLATE - KƏNAR ÇIXMAMASI ÜÇÜN CONTAINER SİSTEMİ */
+                        .aurora-template,
+                        .cv-template.aurora-template,
+                        .aurora,
+                        .cv-template.aurora {
+                            box-sizing: border-box !important;
+                            max-width: 190mm !important;    /* 210mm - 20mm margin */
+                            width: 100% !important;         /* @page margin-ləri içində tam genişlik */
+                            margin: 0 !important;           /* Heç bir margin yoxdur - @page margin-ləri kifayət edir */
+                            padding: 0 !important;          /* Heç bir padding yoxdur */
+                        }
+                        
+                        /* AURORA TEMPLATE - BÜTÜN İÇ ELEMENTLER ÜÇÜN GENİŞLİK KONTROLU */
+                        .aurora-template *[class*="max-w"],
+                        .aurora-template *[class*="mx-auto"],
+                        .cv-template.aurora-template *[class*="max-w"],
+                        .cv-template.aurora-template *[class*="mx-auto"],
+                        .aurora *[class*="max-w"],
+                        .aurora *[class*="mx-auto"],
+                        .cv-template.aurora *[class*="max-w"],
+                        .cv-template.aurora *[class*="mx-auto"] {
+                            max-width: 190mm !important;    /* 210mm - 20mm margin */
+                            margin-left: 0 !important;      /* Auto margin-ləri sil */
+                            margin-right: 0 !important;     /* Auto margin-ləri sil */
+                            width: 100% !important;         /* @page margin-ləri içində tam genişlik */
+                            box-sizing: border-box !important;
+                        }
+                        
+                        /* AURORA TEMPLATE - BÜTÜN CONTAINER VƏ WRAPPER ELEMENTLER */
+                        .aurora-template div,
+                        .aurora-template section,
+                        .aurora-template main,
+                        .aurora-template article,
+                        .cv-template.aurora-template div,
+                        .cv-template.aurora-template section,
+                        .cv-template.aurora-template main,
+                        .cv-template.aurora-template article,
+                        .aurora div,
+                        .aurora section,
+                        .aurora main,
+                        .aurora article,
+                        .cv-template.aurora div,
+                        .cv-template.aurora section,
+                        .cv-template.aurora main,
+                        .cv-template.aurora article {
+                            max-width: 190mm !important;    /* 210mm - 20mm margin */
+                            box-sizing: border-box !important;
+                        }
+                        
+                        /* AURORA TEMPLATE - TAILWIND CONTAINER CLASS-LARINI OVERRIDE ET */
+                        .aurora-template .container,
+                        .aurora-template .max-w-sm,
+                        .aurora-template .max-w-md,
+                        .aurora-template .max-w-lg,
+                        .aurora-template .max-w-xl,
+                        .aurora-template .max-w-2xl,
+                        .aurora-template .max-w-3xl,
+                        .aurora-template .max-w-4xl,
+                        .aurora-template .max-w-5xl,
+                        .aurora-template .max-w-6xl,
+                        .aurora-template .max-w-7xl,
+                        .aurora-template .max-w-full,
+                        .aurora-template .w-full,
+                        .cv-template.aurora-template .container,
+                        .cv-template.aurora-template .max-w-sm,
+                        .cv-template.aurora-template .max-w-md,
+                        .cv-template.aurora-template .max-w-lg,
+                        .cv-template.aurora-template .max-w-xl,
+                        .cv-template.aurora-template .max-w-2xl,
+                        .cv-template.aurora-template .max-w-3xl,
+                        .cv-template.aurora-template .max-w-4xl,
+                        .cv-template.aurora-template .max-w-5xl,
+                        .cv-template.aurora-template .max-w-6xl,
+                        .cv-template.aurora-template .max-w-7xl,
+                        .cv-template.aurora-template .max-w-full,
+                        .cv-template.aurora-template .w-full,
+                        .aurora .container,
+                        .aurora .max-w-sm,
+                        .aurora .max-w-md,
+                        .aurora .max-w-lg,
+                        .aurora .max-w-xl,
+                        .aurora .max-w-2xl,
+                        .aurora .max-w-3xl,
+                        .aurora .max-w-4xl,
+                        .aurora .max-w-5xl,
+                        .aurora .max-w-6xl,
+                        .aurora .max-w-7xl,
+                        .aurora .max-w-full,
+                        .aurora .w-full,
+                        .cv-template.aurora .container,
+                        .cv-template.aurora .max-w-sm,
+                        .cv-template.aurora .max-w-md,
+                        .cv-template.aurora .max-w-lg,
+                        .cv-template.aurora .max-w-xl,
+                        .cv-template.aurora .max-w-2xl,
+                        .cv-template.aurora .max-w-3xl,
+                        .cv-template.aurora .max-w-4xl,
+                        .cv-template.aurora .max-w-5xl,
+                        .cv-template.aurora .max-w-6xl,
+                        .cv-template.aurora .max-w-7xl,
+                        .cv-template.aurora .max-w-full,
+                        .cv-template.aurora .w-full {
+                            max-width: 190mm !important;    /* 210mm - 20mm margin */
+                            width: 100% !important;
+                            margin-left: 0 !important;
+                            margin-right: 0 !important;
+                            padding-left: 0 !important;
+                            padding-right: 0 !important;
+                            box-sizing: border-box !important;
+                        }
+                        
+                        /* AURORA TEMPLATE - CV SECTIONS TAM GENİŞLİK */
+                        .aurora-template .cv-section,
+                        .cv-template.aurora-template .cv-section,
+                        .aurora .cv-section,
+                        .cv-template.aurora .cv-section {
+                            width: 100% !important;
+                            max-width: 190mm !important;    /* 210mm - 20mm margin */
+                            margin-left: 0 !important;
+                            margin-right: 0 !important;
+                            box-sizing: border-box !important;
+                        }
+                        
+                        /* AURORA TEMPLATE - BODY VƏ HTML TAM GENİŞLİK */
+                        .aurora-template body,
+                        .aurora-template html,
+                        .cv-template.aurora-template body,
+                        .cv-template.aurora-template html,
+                        .aurora body,
+                        .aurora html,
+                        .cv-template.aurora body,
+                        .cv-template.aurora html {
+                            width: 100% !important;
+                            max-width: 190mm !important;    /* 210mm - 20mm margin */
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            box-sizing: border-box !important;
                         }
                         
                         /* SƏHİFƏ AYIRMA VƏ BOŞLUQ SİSTEMİ */
