@@ -355,11 +355,13 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             background: none !important;
                         }
                         
-                        /* MƏCBURI OPTİMAL MARGIN - PDF ÜÇÜN */
+                        /* MƏCBURI OPTİMAL MARGIN - HƏR SƏHİFƏ ÜÇÜN */
                         @page {
                             size: A4;
-
-                            margin: 0 10mm !important;  /* Optimal margin-lar: üst 0(yalniz ilk sehifede. novbeti sehifede 12mm) alt 12mm, yan 10mm */
+                            margin-top: 10mm !important;    /* Hər səhifənin yuxarısında 10mm */
+                            margin-bottom: 10mm !important; /* Hər səhifənin aşağısında 10mm */
+                            margin-left: 10mm !important;   /* Sol margin */
+                            margin-right: 10mm !important;  /* Sağ margin */
                             padding: 0 !important;
                             border: none !important;
                             -webkit-print-color-adjust: exact !important;
@@ -367,9 +369,81 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             print-color-adjust: exact !important;
                         }
                         
-                        /* Essence template specific - remove top margin on first page */
+                        /* Birinci səhifə üçün xüsusi ayar */
                         @page :first {
-                            margin-top: 8mm !important; /* Reduced top margin for Essence template first page */
+                            margin-top: 6mm !important; /* İlk səhifədə daha az üst margin */
+                        }
+                        
+                        /* İkinci və sonrakı səhifələr üçün */
+                        @page :left {
+                            margin-top: 10mm !important;
+                            margin-bottom: 10mm !important;
+                        }
+                        
+                        @page :right {
+                            margin-top: 10mm !important;
+                            margin-bottom: 10mm !important;
+                        }
+                        
+                        /* PAGE BREAK OPTİMİZASYONU */
+                        .cv-section {
+                            page-break-inside: avoid;
+                            break-inside: avoid;
+                            margin-bottom: 8mm !important; /* Sectionlar arası boşluq azaldıldı */
+                        }
+                        
+                        /* Səhifə keçid problemi olan elementlər üçün */
+                        .cv-section:last-child {
+                            margin-bottom: 12mm !important; /* Son section üçün əlavə boşluq azaldıldı */
+                        }
+                        
+                        /* BODY VƏ HTML SƏHİFƏ SPACING */
+                        body {
+                            margin: 0 !important;
+                            padding: 0 !important;
+                        }
+                        
+                        /* CV container-də səhifə padding əlavə et */
+                        .cv-container, .cv-content {
+                            padding-top: 0 !important;
+                            padding-bottom: 0 !important;
+                            box-sizing: border-box !important;
+                        }
+                        
+                        /* Səhifə keçidində məzmun kəsilməsin */
+                        h1, h2, h3, h4, h5, h6 {
+                            page-break-after: avoid !important;
+                            break-after: avoid !important;
+                        }
+                        
+                        /* Sectionlar səhifədə kəsilməsin */
+                        .cv-section {
+                            page-break-inside: avoid !important;
+                            break-inside: avoid !important;
+                        }
+                        
+                        /* SƏHİFƏ AYIRMA VƏ BOŞLUQ SİSTEMİ */
+                        .page-spacer {
+                            height: 20mm !important;
+                            width: 100% !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            page-break-after: always !important;
+                            break-after: page !important;
+                        }
+                        
+                        .page-top-spacer {
+                            height: 15mm !important;
+                            width: 100% !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
+                        }
+                        
+                        .page-bottom-spacer {
+                            height: 15mm !important;
+                            width: 100% !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
                         }
                         
                         /* Essence template - ensure no extra spacing */
@@ -2893,9 +2967,8 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
         const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true,  // ✅ Background colors göstərilsin
-            preferCSSPageSize: false,  // CSS @page-dən istifadə etmə, native ayarlar istifadə et
+            preferCSSPageSize: true,  // ✅ CSS @page ayarlarından istifadə et
             displayHeaderFooter: false,
-            // � SMART PAGINATION: Allow natural flow to 2nd page if needed
             pageRanges: undefined, // REAL PAGINATION: Always allow multiple pages
             // Unicode və font support üçün əlavə ayarlar
             tagged: true,  // PDF/A accessibility və unicode dəstəyi
@@ -2904,19 +2977,10 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             // Additional settings for clean pagination
             generateDocumentOutline: false,
             generateTaggedPDF: false,  // Disable tagging to prevent extra pages
-            // Azərbaycan hərfləri üçün font encoding
             timeout: 60000,  // Extended timeout for font loading
-            // Professional PDF margins for multi-page documents  
-            margin: {
-                top: '20mm',      // Increased top margin for page separation
-                right: '15mm',    // Standard right margin
-                bottom: '20mm',   // Increased bottom margin for page separation  
-                left: '15mm'      // Standard left margin
-            },
+            // ✅ CSS @page margin rules-u Puppeteer tərəfindən override edilməsin
+            // margin: undefined,  // CSS @page-dən margin götür
             scale: 1.0
-            // 🔥 REMOVED width/height restrictions to allow natural pagination
-            // width: '210mm',
-            // height: '297mm'
         });
 
         console.log('PDF yaradıldı, browser bağlanır...');

@@ -811,7 +811,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             margin: {
                 top: '8mm',       // 8mm üst boşluq - çox minimal
                 right: '6mm',     // 6mm sağ boşluq - çox minimal  
-                bottom: '8mm',    // 8mm alt boşluq - çox minimal
+                bottom: '15mm',   // 15mm alt boşluq - as requested
                 left: '6mm'       // 6mm sol boşluq - çox minimal
             },
             scale: 1,

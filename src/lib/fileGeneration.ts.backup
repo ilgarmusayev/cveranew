@@ -139,7 +139,7 @@ export class FileGenerationService {
         displayHeaderFooter: false,
         margin: {
           top: '0',
-          bottom: '0',
+          bottom: '15mm',  // 15mm bottom padding as requested
           left: '0',
           right: '0',
         },
@@ -535,7 +535,7 @@ export class FileGenerationService {
         printBackground: true,
         margin: {
           top: '0.25in',
-          bottom: '0.25in',
+          bottom: '0.59in',  // 15mm as requested
           left: '0.25in',
           right: '0.25in',
         },
