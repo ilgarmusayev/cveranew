@@ -371,7 +371,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         }
                         
                         @page :first {
-                            margin-top: 6mm !important;
+                            margin-top: 15mm !important;
                         }
                         
                         @page :left {
@@ -457,6 +457,42 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         }
                         ` : ''}
                         
+                        /* LUMEN TEMPLATE @PAGE AYARLARI - BASIC TEMPLATE KİMİ + YUXARI MARGIN 0 */
+                        ${templateId === 'lumen' || templateId?.toLowerCase() === 'lumen' || templateId?.toLowerCase().includes('lumen') ? `
+                        @page {
+                            size: A4;
+                            margin-top: 0mm !important;     /* Lumen: yuxarıdan margin 0 - ortada ayırıcı xətt var */
+                            margin-bottom: 10mm !important;
+                            margin-left: 10mm !important;
+                            margin-right: 10mm !important;
+                            padding: 0 !important;
+                            border: none !important;
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        @page :first {
+                            margin-top: 0mm !important;     /* İlk səhifədə də yuxarıdan boşluq yoxdur */
+                            margin-left: 0 !important;
+                            margin-right: 0 !important;
+                        }
+                        
+                        @page :left {
+                            margin-top: 0mm !important;     /* Sol səhifələrdə yuxarıdan boşluq yoxdur */
+                            margin-bottom: 10mm !important;
+                            margin-left: 0 !important;
+                            margin-right: 0 !important;
+                        }
+                        
+                        @page :right {
+                            margin-top: 0mm !important;     /* Sağ səhifələrdə yuxarıdan boşluq yoxdur */
+                            margin-bottom: 10mm !important;
+                            margin-left: 0 !important;
+                            margin-right: 0 !important;
+                        }
+                        ` : ''}
+                        
                         /* BASIC TEMPLATE - PAGE BREAK OPTİMİZASYONU */
                         .basic-template .cv-section,
                         .cv-template.basic-template .cv-section {
@@ -503,6 +539,86 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         .cv-template.basic-template .cv-section {
                             page-break-inside: avoid !important;
                             break-inside: avoid !important;
+                        }
+                        
+                        /* LUMEN TEMPLATE - BASIC TEMPLATE KİMİ BÜTÜN AYARLAR + YUXARI MARGIN 0 */
+                        /* LUMEN TEMPLATE - PAGE BREAK OPTİMİZASYONU */
+                        .lumen-template .cv-section,
+                        .cv-template.lumen-template .cv-section,
+                        .lumen .cv-section,
+                        .cv-template.lumen .cv-section {
+                            page-break-inside: avoid;
+                            break-inside: avoid;
+                            margin-bottom: 8mm !important; /* Basic template kimi sectionlar arası boşluq */
+                        }
+                        
+                        /* LUMEN TEMPLATE - Səhifə keçid problemi olan elementlər üçün */
+                        .lumen-template .cv-section:last-child,
+                        .cv-template.lumen-template .cv-section:last-child,
+                        .lumen .cv-section:last-child,
+                        .cv-template.lumen .cv-section:last-child {
+                            margin-bottom: 12mm !important; /* Basic template kimi son section üçün əlavə boşluq */
+                        }
+                        
+                        /* LUMEN TEMPLATE - BODY VƏ HTML SƏHİFƏ SPACING - YUXARI MARGIN 0 */
+                        .lumen-template body,
+                        .cv-template.lumen-template body,
+                        .lumen body,
+                        .cv-template.lumen body {
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            padding-top: 0 !important;     /* Lumen: yuxarıdan padding də 0 */
+                        }
+                        
+                        /* LUMEN TEMPLATE - CV container-də səhifə padding əlavə et - YUXARI 0 */
+                        .lumen-template .cv-container, 
+                        .lumen-template .cv-content,
+                        .cv-template.lumen-template .cv-container,
+                        .cv-template.lumen-template .cv-content,
+                        .lumen .cv-container,
+                        .lumen .cv-content,
+                        .cv-template.lumen .cv-container,
+                        .cv-template.lumen .cv-content {
+                            padding-top: 0 !important;     /* Lumen: yuxarıdan padding 0 - ayırıcı xətt var */
+                            padding-bottom: 0 !important;
+                            box-sizing: border-box !important;
+                        }
+                        
+                        /* LUMEN TEMPLATE - Səhifə keçidində məzmun kəsilməsin */
+                        .lumen-template h1, .lumen-template h2, .lumen-template h3, 
+                        .lumen-template h4, .lumen-template h5, .lumen-template h6,
+                        .cv-template.lumen-template h1, .cv-template.lumen-template h2, 
+                        .cv-template.lumen-template h3, .cv-template.lumen-template h4, 
+                        .cv-template.lumen-template h5, .cv-template.lumen-template h6,
+                        .lumen h1, .lumen h2, .lumen h3, 
+                        .lumen h4, .lumen h5, .lumen h6,
+                        .cv-template.lumen h1, .cv-template.lumen h2, 
+                        .cv-template.lumen h3, .cv-template.lumen h4, 
+                        .cv-template.lumen h5, .cv-template.lumen h6 {
+                            page-break-after: avoid !important;
+                            break-after: avoid !important;
+                        }
+                        
+                        /* LUMEN TEMPLATE - Sectionlar səhifədə kəsilməsin */
+                        .lumen-template .cv-section,
+                        .cv-template.lumen-template .cv-section,
+                        .lumen .cv-section,
+                        .cv-template.lumen .cv-section {
+                            page-break-inside: avoid !important;
+                            break-inside: avoid !important;
+                        }
+                        
+                        /* LUMEN TEMPLATE - HEADER SECTION ÖZEL AYARLARI - YUXARI MARGIN 0 */
+                        .lumen-template .cv-header,
+                        .lumen-template .header-section,
+                        .cv-template.lumen-template .cv-header,
+                        .cv-template.lumen-template .header-section,
+                        .lumen .cv-header,
+                        .lumen .header-section,
+                        .cv-template.lumen .cv-header,
+                        .cv-template.lumen .header-section {
+                            margin-top: 0 !important;      /* Header yuxarıdan boşluq olmaz */
+                            padding-top: 0 !important;     /* Header padding də yoxdur */
                         }
                         
                         /* EXCLUSIVE TEMPLATE - BASIC TEMPLATE KİMİ MARGIN SİSTEMİ */
@@ -806,22 +922,137 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         }
                         
                         /* AURORA TEMPLATE - BASIC VƏ EXCLUSIVE TEMPLATE KİMİ MARGIN SİSTEMİ */
-                        /* AURORA TEMPLATE - PAGE BREAK OPTİMİZASYONU */
+                        /* AURORA TEMPLATE - PAGE BREAK OPTİMİZASYONU - SPACING AZALDILDI */
                         .aurora-template .cv-section,
                         .cv-template.aurora-template .cv-section,
                         .aurora .cv-section,
                         .cv-template.aurora .cv-section {
                             page-break-inside: avoid;
                             break-inside: avoid;
-                            margin-bottom: 8mm !important; /* Sectionlar arası boşluq azaldıldı */
+                            margin-bottom: 4mm !important; /* Sectionlar arası boşluq çox azaldıldı - preview ilə uyğunlaşdırıldı */
                         }
                         
-                        /* AURORA TEMPLATE - Səhifə keçid problemi olan elementlər üçün */
+                        /* AURORA TEMPLATE - Səhifə keçid problemi olan elementlər üçün - SPACING AZALDILDI */
                         .aurora-template .cv-section:last-child,
                         .cv-template.aurora-template .cv-section:last-child,
                         .aurora .cv-section:last-child,
                         .cv-template.aurora .cv-section:last-child {
-                            margin-bottom: 12mm !important; /* Son section üçün əlavə boşluq azaldıldı */
+                            margin-bottom: 6mm !important; /* Son section üçün əlavə boşluq çox azaldıldı */
+                        }
+                        
+                        /* AURORA TEMPLATE - SECTION AÇIQLAMALARINDAN SONRAKI SPACING AZALDILDI */
+                        .aurora-template .cv-section > div,
+                        .aurora-template .cv-section > p,
+                        .aurora-template .cv-section .experience-item,
+                        .aurora-template .cv-section .education-item,
+                        .aurora-template .cv-section .project-item,
+                        .cv-template.aurora-template .cv-section > div,
+                        .cv-template.aurora-template .cv-section > p,
+                        .cv-template.aurora-template .cv-section .experience-item,
+                        .cv-template.aurora-template .cv-section .education-item,
+                        .cv-template.aurora-template .cv-section .project-item,
+                        .aurora .cv-section > div,
+                        .aurora .cv-section > p,
+                        .aurora .cv-section .experience-item,
+                        .aurora .cv-section .education-item,
+                        .aurora .cv-section .project-item,
+                        .cv-template.aurora .cv-section > div,
+                        .cv-template.aurora .cv-section > p,
+                        .cv-template.aurora .cv-section .experience-item,
+                        .cv-template.aurora .cv-section .education-item,
+                        .cv-template.aurora .cv-section .project-item {
+                        }
+                        
+                        /* AURORA TEMPLATE - SECTION BAŞLIQLARI SONRASI SPACING AZALDILDI */
+                        .aurora-template .cv-section h2,
+                        .aurora-template .cv-section h3,
+                        .cv-template.aurora-template .cv-section h2,
+                        .cv-template.aurora-template .cv-section h3,
+                        .aurora .cv-section h2,
+                        .aurora .cv-section h3,
+                        .cv-template.aurora .cv-section h2,
+                        .cv-template.aurora .cv-section h3 {
+                            margin-bottom: 1.5mm !important; /* Section başlıqlarından sonra kiçik boşluq */
+                        }
+                        
+                        /* AURORA TEMPLATE - ITEM DESCRIPTIONS SONRASI SPACING AZALDILDI */
+                        .aurora-template .cv-section .experience-item p,
+                        .aurora-template .cv-section .education-item p,
+                        .aurora-template .cv-section .project-item p,
+                        .cv-template.aurora-template .cv-section .experience-item p,
+                        .cv-template.aurora-template .cv-section .education-item p,
+                        .cv-template.aurora-template .cv-section .project-item p,
+                        .aurora .cv-section .experience-item p,
+                        .aurora .cv-section .education-item p,
+                        .aurora .cv-section .project-item p,
+                        .cv-template.aurora .cv-section .experience-item p,
+                        .cv-template.aurora .cv-section .education-item p,
+                        .cv-template.aurora .cv-section .project-item p {
+                            margin-bottom: 1mm !important; /* Açıqlamalardan sonra minimum boşluq */
+                        }
+                        
+                        /* AURORA TEMPLATE - GAP VƏ FLEXBOX SPACING AZALDILDI */
+                        .aurora-template div[style*="gap"],
+                        .aurora-template div[style*="gap: 20px"],
+                        .aurora-template div[style*="gap: var(--cv-section-spacing)"],
+                        .cv-template.aurora-template div[style*="gap"],
+                        .cv-template.aurora-template div[style*="gap: 20px"],
+                        .cv-template.aurora-template div[style*="gap: var(--cv-section-spacing)"],
+                        .aurora div[style*="gap"],
+                        .aurora div[style*="gap: 20px"],
+                        .aurora div[style*="gap: var(--cv-section-spacing)"],
+                        .cv-template.aurora div[style*="gap"],
+                        .cv-template.aurora div[style*="gap: 20px"],
+                        .cv-template.aurora div[style*="gap: var(--cv-section-spacing)"] {
+                            gap: 4mm !important; /* Flexbox gap-i azaldıldı */
+                        }
+                        
+                        /* AURORA TEMPLATE - TAILWIND MARGIN CLASSES OVERRIDE */
+                        .aurora-template .mb-6,
+                        .aurora-template .mb-8,
+                        .aurora-template .mb-4,
+                        .aurora-template .my-6,
+                        .aurora-template .my-8,
+                        .cv-template.aurora-template .mb-6,
+                        .cv-template.aurora-template .mb-8,
+                        .cv-template.aurora-template .mb-4,
+                        .cv-template.aurora-template .my-6,
+                        .cv-template.aurora-template .my-8,
+                        .aurora .mb-6,
+                        .aurora .mb-8,
+                        .aurora .mb-4,
+                        .aurora .my-6,
+                        .aurora .my-8,
+                        .cv-template.aurora .mb-6,
+                        .cv-template.aurora .mb-8,
+                        .cv-template.aurora .mb-4,
+                        .cv-template.aurora .my-6,
+                        .cv-template.aurora .my-8 {
+                            margin-bottom: 3mm !important; /* Tailwind margin class-ları azaldıldı */
+                        }
+                        
+                        /* AURORA TEMPLATE - PB PADDING CLASSES OVERRIDE */
+                        .aurora-template .pb-6,
+                        .aurora-template .pb-8,
+                        .aurora-template .pb-4,
+                        .aurora-template .py-6,
+                        .aurora-template .py-8,
+                        .cv-template.aurora-template .pb-6,
+                        .cv-template.aurora-template .pb-8,
+                        .cv-template.aurora-template .pb-4,
+                        .cv-template.aurora-template .py-6,
+                        .cv-template.aurora-template .py-8,
+                        .aurora .pb-6,
+                        .aurora .pb-8,
+                        .aurora .pb-4,
+                        .aurora .py-6,
+                        .aurora .py-8,
+                        .cv-template.aurora .pb-6,
+                        .cv-template.aurora .pb-8,
+                        .cv-template.aurora .pb-4,
+                        .cv-template.aurora .py-6,
+                        .cv-template.aurora .py-8 {
+                            padding-bottom: 2mm !important; /* Tailwind padding class-ları azaldıldı */
                         }
                         
                         /* AURORA TEMPLATE - BODY VƏ HTML SƏHİFƏ SPACING */
@@ -1201,14 +1432,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             widows: 2;
                         }
                         
-                        @page :first {
-                            margin-top: 12mm !important;
-                        }
-                        
-                        @page :not(:first) {
-                            margin-top: 15mm !important;  /* 2-ci və növbəti səhifələrdə əlavə margin */
-                        }
-                        
+                    
                         /* Allow natural content flow for pagination */
                         * {
                             box-sizing: border-box !important;
