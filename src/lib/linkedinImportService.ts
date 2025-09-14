@@ -189,6 +189,7 @@ export class LinkedInImportService {
     if (!Array.isArray(experiences)) return [];
 
     return experiences.map(exp => ({
+      id: this.generateId(),
       position: exp.title || exp.position || exp.job_title || '',
       company: exp.company || exp.company_name || exp.organization || '',
       location: exp.location || '',
@@ -204,6 +205,7 @@ export class LinkedInImportService {
     if (!Array.isArray(education)) return [];
 
     return education.map(edu => ({
+      id: this.generateId(),
       degree: edu.degree || edu.qualification || '',
       institution: edu.school || edu.institution || edu.university || '',
       field: edu.field || edu.field_of_study || '',
@@ -219,6 +221,7 @@ export class LinkedInImportService {
     if (!Array.isArray(skills)) return [];
 
     return skills.map(skill => ({
+      id: this.generateId(),
       name: typeof skill === 'string' ? skill : (skill.name || skill.skill || ''),
       level: skill.level || skill.proficiency || ''
     })).filter(skill => skill.name);
@@ -229,6 +232,7 @@ export class LinkedInImportService {
     if (!Array.isArray(languages)) return [];
 
     return languages.map(lang => ({
+      id: this.generateId(),
       language: typeof lang === 'string' ? lang : (lang.name || lang.language || ''),
       proficiency: lang.proficiency || lang.level || ''
     })).filter(lang => lang.language);
@@ -239,6 +243,7 @@ export class LinkedInImportService {
     if (!Array.isArray(certifications)) return [];
 
     return certifications.map(cert => ({
+      id: this.generateId(),
       name: cert.name || cert.title || '',
       issuer: cert.issuer || cert.organization || cert.authority || '',
       date: this.formatDate(cert.date || cert.issue_date || cert.issued_date),
@@ -251,6 +256,7 @@ export class LinkedInImportService {
     if (!Array.isArray(volunteer)) return [];
 
     return volunteer.map(vol => ({
+      id: this.generateId(),
       role: vol.role || vol.position || vol.title || '',
       organization: vol.organization || vol.company || '',
       cause: vol.cause || vol.field || '',
@@ -266,6 +272,7 @@ export class LinkedInImportService {
     if (!Array.isArray(projects)) return [];
 
     return projects.map(project => ({
+      id: this.generateId(),
       name: project.name || project.title || '',
       description: project.description || project.summary || '',
       url: project.url || project.link || '',
@@ -412,5 +419,10 @@ export class LinkedInImportService {
         sequence: 'brightdata-first-then-rapidapi'
       }
     };
+  }
+
+  // ID generatoru
+  private static generateId(): string {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
   }
 }
