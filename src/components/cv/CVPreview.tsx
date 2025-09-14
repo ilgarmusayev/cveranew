@@ -4719,12 +4719,12 @@ const PrimeTemplate: React.FC<{
                         isDropTarget={dropTargetId === 'summary'}
                     >
                         <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                            <div className="border-b-2 border-green-600 mb-4">
-                                <h2 className="text-lg font-bold text-gray-900 mb-2">
+                            <div className="border-b-2 border-green-600 mb-0">
+                                <h2 className="text-lg font-bold text-gray-900 mb-0" style={{ marginBottom: 0, paddingBottom: '4px' }}>
                                     {getSectionName('summary', data.cvLanguage, data.sectionNames)}
                                 </h2>
                             </div>
-                            <div className="text-gray-800 leading-relaxed text-sm">
+                            <div className="text-gray-800 leading-relaxed text-sm" style={{ marginTop: '4px', marginBottom: 0, paddingBottom: 0 }}>
                                 {renderHtmlContent(personalInfo.summary, false, data.cvLanguage)}
                             </div>
                         </div>
@@ -4743,18 +4743,18 @@ const PrimeTemplate: React.FC<{
                         isDropTarget={dropTargetId === 'experience'}
                     >
                         <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                            <div className="border-b-2 border-green-600 mb-4">
-                                <h2 className="text-lg font-bold text-gray-900 mb-2">
+                            <div className="border-b-2 border-green-600 mb-0">
+                                <h2 className="text-lg font-bold text-gray-900 mb-0" style={{ marginBottom: 0, paddingBottom: '4px' }}>
                                     {getSectionName('experience', data.cvLanguage, data.sectionNames)}
                                 </h2>
                             </div>
-                            <div className="space-y-4">
+                            <div className="space-y-2" style={{ marginTop: '4px' }}>
                                 {experience.map((exp, index) => (
-                                    <div key={exp.id} className="border-b border-blue-200 pb-4 last:border-b-0">
-                                        <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
+                                    <div key={exp.id} className="border-b border-blue-200 pb-1 last:border-b-0">
+                                        <div className="flex justify-between items-start mb-1 flex-wrap gap-1">
                                             <div className="flex-1 min-w-0">
                                                 <h3 className="text-base font-bold text-gray-900 leading-tight">{exp.position}</h3>
-                                                <p className="text-sm font-semibold text-green-700 mt-1">{exp.company}</p>
+                                                <p className="text-sm font-semibold text-green-700 mt-0">{exp.company}</p>
                                             </div>
                                             {(exp.startDate || exp.endDate) && (
                                                 <span className="text-xs text-gray-600 font-medium whitespace-nowrap flex-shrink-0">
@@ -4771,7 +4771,7 @@ const PrimeTemplate: React.FC<{
                                             )}
                                         </div>
                                         {exp.description && (
-                                            <div className="text-gray-700 text-sm leading-relaxed mt-2">
+                                            <div className="text-gray-700 text-sm leading-relaxed mt-1" style={{ marginBottom: 0, paddingBottom: 0 }}>
                                                 {renderHtmlContent(exp.description)}
                                             </div>
                                         )}
@@ -4794,15 +4794,15 @@ const PrimeTemplate: React.FC<{
                         isDropTarget={dropTargetId === 'education'}
                     >
                         <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                            <div className="border-b-2 border-green-600 mb-4">
-                                <h2 className="text-lg font-bold text-gray-900 mb-2">
+                            <div className="border-b-2 border-green-600 mb-0">
+                                <h2 className="text-lg font-bold text-gray-900 mb-0" style={{ marginBottom: 0, paddingBottom: '4px' }}>
                                     {getSectionName('education', data.cvLanguage, data.sectionNames)}
                                 </h2>
                             </div>
-                            <div className="space-y-3">
+                            <div className="space-y-2" style={{ marginTop: '4px' }}>
                                 {education.map((edu) => (
-                                    <div key={edu.id} className="border-b border-blue-200 pb-3 last:border-b-0">
-                                        <div className="flex justify-between items-start mb-1 flex-wrap gap-2">
+                                    <div key={edu.id} className="border-b border-blue-200 pb-1 last:border-b-0">
+                                        <div className="flex justify-between items-start mb-1 flex-wrap gap-1">
                                             <div className="flex-1 min-w-0">
                                                 {edu.degree ? (
                                                     <h3 className="text-base font-bold text-gray-900 leading-tight">{edu.degree}</h3>
@@ -4810,10 +4810,10 @@ const PrimeTemplate: React.FC<{
                                                     <h3 className="text-base font-bold text-gray-900 leading-tight">{edu.institution}</h3>
                                                 )}
                                                 {edu.degree && (
-                                                    <p className="text-sm font-semibold text-green-700 mt-1">{edu.institution}</p>
+                                                    <p className="text-sm font-semibold text-green-700 mt-0">{edu.institution}</p>
                                                 )}
                                                 {(edu.field || edu.gpa) && (
-                                                    <p className="text-xs text-gray-600 mt-1">
+                                                    <p className="text-xs text-gray-600 mt-0">
                                                         {[edu.field, edu.gpa && `${data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: ${edu.gpa}`].filter(Boolean).join(' - ')}
                                                     </p>
                                                 )}
@@ -4833,7 +4833,7 @@ const PrimeTemplate: React.FC<{
                                             )}
                                         </div>
                                         {edu.description && (
-                                            <div className="text-gray-700 text-sm mt-2 leading-relaxed">{renderHtmlContent(edu.description)}</div>
+                                            <div className="text-gray-700 text-sm mt-1 leading-relaxed" style={{ marginBottom: 0, paddingBottom: 0 }}>{renderHtmlContent(edu.description)}</div>
                                         )}
                                     </div>
                                 ))}
@@ -4854,19 +4854,19 @@ const PrimeTemplate: React.FC<{
                         isDropTarget={dropTargetId === 'skills'}
                     >
                         <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                            <div className="border-b-2 border-green-600 mb-4">
-                                <h2 className="text-lg font-bold text-gray-900 mb-2">
+                            <div className="border-b-2 border-green-600 mb-0">
+                                <h2 className="text-lg font-bold text-gray-900 mb-0" style={{ marginBottom: 0, paddingBottom: '4px' }}>
                                     {getSectionName('skills', data.cvLanguage, data.sectionNames)}
                                 </h2>
                             </div>
                             
                             {/* Technical Skills */}
                             {skills.filter(skill => skill.type === 'hard' && skill.name && skill.name.trim() !== '').length > 0 && (
-                                <div className="mb-4">
-                                    <h3 className="text-sm font-semibold text-gray-800 mb-2">
+                                <div className="mb-1" style={{ marginTop: '4px' }}>
+                                    <h3 className="text-sm font-semibold text-gray-800 mb-0">
                                         {getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
                                     </h3>
-                                    <div className="text-sm text-gray-700 leading-relaxed">
+                                    <div className="text-sm text-gray-700 leading-relaxed" style={{ marginTop: '2px', marginBottom: 0 }}>
                                         {skills.filter(skill => skill.type === 'hard' && skill.name && skill.name.trim() !== '').map(skill => skill.name).join(' • ')}
                                     </div>
                                 </div>
@@ -4874,11 +4874,11 @@ const PrimeTemplate: React.FC<{
 
                             {/* Soft Skills */}
                             {skills.filter(skill => skill.type === 'soft' && skill.name && skill.name.trim() !== '').length > 0 && (
-                                <div className="mb-4">
-                                    <h3 className="text-sm font-semibold text-gray-800 mb-2">
+                                <div className="mb-1">
+                                    <h3 className="text-sm font-semibold text-gray-800 mb-0">
                                         {getSectionName('softSkills', data.cvLanguage, data.sectionNames)}
                                     </h3>
-                                    <div className="text-sm text-gray-700 leading-relaxed">
+                                    <div className="text-sm text-gray-700 leading-relaxed" style={{ marginTop: '2px', marginBottom: 0 }}>
                                         {skills.filter(skill => skill.type === 'soft' && skill.name && skill.name.trim() !== '').map(skill => skill.name).join(' • ')}
                                     </div>
                                 </div>
@@ -4887,10 +4887,10 @@ const PrimeTemplate: React.FC<{
                             {/* General Skills */}
                             {skills.filter(skill => (!skill.type || (skill.type !== 'hard' && skill.type !== 'soft')) && skill.name && skill.name.trim() !== '').length > 0 && (
                                 <div className="mb-0">
-                                    <h3 className="text-sm font-semibold text-gray-800 mb-2">
+                                    <h3 className="text-sm font-semibold text-gray-800 mb-0">
                                         {getSectionName('skills', data.cvLanguage, data.sectionNames)}
                                     </h3>
-                                    <div className="text-sm text-gray-700 leading-relaxed">
+                                    <div className="text-sm text-gray-700 leading-relaxed" style={{ marginTop: '2px', marginBottom: 0 }}>
                                         {skills.filter(skill => (!skill.type || (skill.type !== 'hard' && skill.type !== 'soft')) && skill.name && skill.name.trim() !== '').map(skill => skill.name).join(' • ')}
                                     </div>
                                 </div>
@@ -4911,8 +4911,8 @@ const PrimeTemplate: React.FC<{
                         isDropTarget={dropTargetId === 'projects'}
                     >
                         <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                            <div className="border-b-2 border-green-600 mb-4">
-                                <h2 className="text-lg font-bold text-gray-900 mb-2">
+                            <div className="border-b-2 border-green-600 mb-0">
+                                <h2 className="text-lg font-bold text-gray-900 mb-0" style={{ marginBottom: 0, paddingBottom: '4px' }}>
                                     {getSectionName('projects', data.cvLanguage, data.sectionNames)}
                                 </h2>
                             </div>
@@ -4989,8 +4989,8 @@ const PrimeTemplate: React.FC<{
                         isDropTarget={dropTargetId === 'languages'}
                     >
                         <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                            <div className="border-b-2 border-green-600 mb-2">
-                                <h2 className="text-lg font-bold text-gray-900 mb-1">
+                            <div className="border-b-2 border-green-600 mb-0">
+                                <h2 className="text-lg font-bold text-gray-900 mb-0" style={{ marginBottom: 0, paddingBottom: '4px' }}>
                                     {getSectionName('languages', data.cvLanguage, data.sectionNames)}
                                 </h2>
                             </div>
@@ -5018,8 +5018,8 @@ const PrimeTemplate: React.FC<{
                         isDropTarget={dropTargetId === 'certifications'}
                     >
                         <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                            <div className="border-b-2 border-green-600 mb-2">
-                                <h2 className="text-lg font-bold text-gray-900 mb-1">
+                            <div className="border-b-2 border-green-600 mb-0">
+                                <h2 className="text-lg font-bold text-gray-900 mb-0" style={{ marginBottom: 0, paddingBottom: '4px' }}>
                                     {getSectionName('certifications', data.cvLanguage, data.sectionNames)}
                                 </h2>
                             </div>
@@ -5072,8 +5072,8 @@ const PrimeTemplate: React.FC<{
                         isDropTarget={dropTargetId === 'volunteer'}
                     >
                         <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
-                            <div className="border-b-2 border-green-600 mb-2">
-                                <h2 className="text-lg font-bold text-gray-900 mb-1">
+                            <div className="border-b-2 border-green-600 mb-0">
+                                <h2 className="text-lg font-bold text-gray-900 mb-0" style={{ marginBottom: 0, paddingBottom: '4px' }}>
                                     {getSectionName('volunteerExperience', data.cvLanguage, data.sectionNames)}
                                 </h2>
                             </div>
@@ -5130,9 +5130,9 @@ const PrimeTemplate: React.FC<{
                             {customSections
                                 .sort((a, b) => (a.order || 999) - (b.order || 999))
                                 .map((section) => (
-                                    <div key={section.id} className="mb-4">
-                                        <div className="border-b-2 border-green-600 mb-2">
-                                            <h2 className="text-lg font-bold text-gray-900 mb-1">
+                                    <div key={section.id} className="mb-0">
+                                        <div className="border-b-2 border-green-600 mb-0">
+                                            <h2 className="text-lg font-bold text-gray-900 mb-0" style={{ marginBottom: 0, paddingBottom: '4px' }}>
                                                 {section.title}
                                             </h2>
                                         </div>
@@ -5195,7 +5195,7 @@ const PrimeTemplate: React.FC<{
     return (
         <div 
             className={`cv-template prime-template w-full h-full bg-white text-gray-900 font-sans ${isDragActive ? 'drag-mode' : ''}`}
-            style={{ padding: '20mm' }}
+            style={{ padding: '12mm' }}
         >
             {/* Header Section with Professional Layout */}
             <div className="cv-section avoid-break mb-6" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
@@ -5209,7 +5209,6 @@ const PrimeTemplate: React.FC<{
                                 {personalInfo.field}
                             </p>
                         )}
-                        <div className="w-20 h-1 bg-green-600 mb-3"></div>
                     </div>
                     {personalInfo.profileImage && (
                         <div className="flex-shrink-0">

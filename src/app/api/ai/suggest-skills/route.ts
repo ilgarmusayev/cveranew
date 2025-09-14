@@ -319,13 +319,23 @@ export async function POST(request: NextRequest) {
     console.log('🔍 DEBUG - Previous Suggestions:', previousSuggestions);
     console.log('🔍 DEBUG - Current Skills:', currentSkills.map((s: any) => s.name));
     
-    // If no CV-based suggestions found, return error
+    // If no CV-based suggestions found, check if we have enough education data
     if (cvBasedSuggestions.length === 0) {
       console.log('❌ DEBUG - No CV-based suggestions found');
-      return NextResponse.json({
-        error: 'CV-də kifayət qədər texniki məlumat tapılmadı. Təcrübə, layihə və ya təhsil məlumatlarında texnologiyalar qeyd edin.',
-        suggestions: []
-      }, { status: 400 });
+      
+      // Check if we have education data as fallback
+      const hasEducationData = education.length > 0 && education.some(edu => 
+        (edu.field || edu.fieldOfStudy || edu.degree || '').trim().length > 0
+      );
+      
+      if (!hasEducationData) {
+        return NextResponse.json({
+          error: 'CV-də kifayət qədər məlumat tapılmadı. Təcrübə, layihə və ya təhsil məlumatlarını doldurun.',
+          suggestions: []
+        }, { status: 400 });
+      }
+      
+      console.log('✅ DEBUG - Found education data, proceeding with AI analysis');
     }
 
     // Advanced AI prompt for professional skill analysis - Updated Structure
