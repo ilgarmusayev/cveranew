@@ -386,7 +386,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         }
                         ` : ''}
                         
-                        /* EXCLUSIVE TEMPLATE @PAGE AYARLARI - BASIC TEMPLATE KİMİ */
+                        /* EXCLUSIVE TEMPLATE @PAGE AYARLARI - BASIC TEMPLATE KİMİ TAM 1-1 */
                         ${templateId === 'exclusive' || templateId?.toLowerCase() === 'exclusive' || templateId?.toLowerCase().includes('exclusive') ? `
                         @page {
                             size: A4;
@@ -402,23 +402,19 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         }
                         
                         @page :first {
-                            margin-top: 6mm !important;
-                            margin-left: 10mm !important;
-                            margin-right: 10mm !important;
+                            margin-top: 10mm !important;
+                            max-height: 257mm !important; /* Exclusive: ilk səhifədə minimum hündürlük 287mm */
+                            min-width: 190mm !important;
                         }
                         
                         @page :left {
                             margin-top: 10mm !important;
                             margin-bottom: 10mm !important;
-                            margin-left: 10mm !important;
-                            margin-right: 10mm !important;
                         }
                         
                         @page :right {
                             margin-top: 10mm !important;
                             margin-bottom: 10mm !important;
-                            margin-left: 10mm !important;
-                            margin-right: 10mm !important;
                         }
                         ` : ''}
                         
@@ -441,6 +437,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             margin-top: 6mm !important;
                             margin-left: 10mm !important;
                             margin-right: 10mm !important;
+                            
                         }
                         
                         @page :left {
@@ -491,6 +488,36 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             margin-bottom: 10mm !important;
                             margin-left: 0 !important;
                             margin-right: 0 !important;
+                        }
+                        ` : ''}
+                        
+                        /* PRIME TEMPLATE @PAGE AYARLARI - BASIC TEMPLATE KİMİ */
+                        ${templateId === 'prime' || templateId?.toLowerCase() === 'prime' || templateId?.toLowerCase().includes('prime') ? `
+                        @page {
+                            size: A4;
+                            margin-top: 10mm !important;
+                            margin-bottom: 10mm !important;
+                            margin-left: 10mm !important;
+                            margin-right: 10mm !important;
+                            padding: 0 !important;
+                            border: none !important;
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        @page :first {
+                            margin-top: 10mm !important;
+                        }
+                        
+                        @page :left {
+                            margin-top: 10mm !important;
+                            margin-bottom: 10mm !important;
+                        }
+                        
+                        @page :right {
+                            margin-top: 10mm !important;
+                            margin-bottom: 10mm !important;
                         }
                         ` : ''}
                         
@@ -622,7 +649,8 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             padding-top: 0 !important;     /* Header padding də yoxdur */
                         }
                         
-                        /* EXCLUSIVE TEMPLATE - BASIC TEMPLATE KİMİ MARGIN SİSTEMİ */
+
+  /* EXCLUSIVE TEMPLATE - BASIC TEMPLATE KİMİ MARGIN SİSTEMİ */
                         /* EXCLUSIVE TEMPLATE - PAGE BREAK OPTİMİZASYONU */
                         .exclusive-template .cv-section,
                         .cv-template.exclusive-template .cv-section,
@@ -632,7 +660,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             break-inside: avoid;
                             margin-bottom: 8mm !important; /* Sectionlar arası boşluq azaldıldı */
                         }
-                        
+
                         /* EXCLUSIVE TEMPLATE - Səhifə keçid problemi olan elementlər üçün */
                         .exclusive-template .cv-section:last-child,
                         .cv-template.exclusive-template .cv-section:last-child,
@@ -920,6 +948,72 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             -webkit-print-color-adjust: exact !important;
                             color-adjust: exact !important;
                             print-color-adjust: exact !important;
+                        }
+                        
+                        /* PRIME TEMPLATE - BASIC TEMPLATE KİMİ BÜTÜN AYARLAR */
+                        /* PRIME TEMPLATE - PAGE BREAK OPTİMİZASYONU */
+                        .prime-template .cv-section,
+                        .cv-template.prime-template .cv-section,
+                        .prime .cv-section,
+                        .cv-template.prime .cv-section {
+                            page-break-inside: avoid;
+                            break-inside: avoid;
+                            margin-bottom: 8mm !important; /* Basic template kimi sectionlar arası boşluq */
+                        }
+                        
+                        /* PRIME TEMPLATE - Səhifə keçid problemi olan elementlər üçün */
+                        .prime-template .cv-section:last-child,
+                        .cv-template.prime-template .cv-section:last-child,
+                        .prime .cv-section:last-child,
+                        .cv-template.prime .cv-section:last-child {
+                            margin-bottom: 12mm !important; /* Basic template kimi son section üçün əlavə boşluq */
+                        }
+                        
+                        /* PRIME TEMPLATE - BODY VƏ HTML SƏHİFƏ SPACING */
+                        .prime-template body,
+                        .cv-template.prime-template body,
+                        .prime body,
+                        .cv-template.prime body {
+                            margin: 0 !important;
+                            padding: 0 !important;
+                        }
+                        
+                        /* PRIME TEMPLATE - CV container-də səhifə padding əlavə et */
+                        .prime-template .cv-container, 
+                        .prime-template .cv-content,
+                        .cv-template.prime-template .cv-container,
+                        .cv-template.prime-template .cv-content,
+                        .prime .cv-container,
+                        .prime .cv-content,
+                        .cv-template.prime .cv-container,
+                        .cv-template.prime .cv-content {
+                            padding-top: 0 !important;
+                            padding-bottom: 0 !important;
+                            box-sizing: border-box !important;
+                        }
+                        
+                        /* PRIME TEMPLATE - Səhifə keçidində məzmun kəsilməsin */
+                        .prime-template h1, .prime-template h2, .prime-template h3, 
+                        .prime-template h4, .prime-template h5, .prime-template h6,
+                        .cv-template.prime-template h1, .cv-template.prime-template h2, 
+                        .cv-template.prime-template h3, .cv-template.prime-template h4, 
+                        .cv-template.prime-template h5, .cv-template.prime-template h6,
+                        .prime h1, .prime h2, .prime h3, 
+                        .prime h4, .prime h5, .prime h6,
+                        .cv-template.prime h1, .cv-template.prime h2, 
+                        .cv-template.prime h3, .cv-template.prime h4, 
+                        .cv-template.prime h5, .cv-template.prime h6 {
+                            page-break-after: avoid !important;
+                            break-after: avoid !important;
+                        }
+                        
+                        /* PRIME TEMPLATE - Sectionlar səhifədə kəsilməsin */
+                        .prime-template .cv-section,
+                        .cv-template.prime-template .cv-section,
+                        .prime .cv-section,
+                        .cv-template.prime .cv-section {
+                            page-break-inside: avoid !important;
+                            break-inside: avoid !important;
                         }
                         
                         /* AURORA TEMPLATE - BASIC VƏ EXCLUSIVE TEMPLATE KİMİ MARGIN SİSTEMİ */
@@ -2187,33 +2281,6 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         .rounded-2xl { border-radius: 1rem !important; }
                         .rounded-full { border-radius: 9999px !important; }
                         
-                        .exclusive-template .shadow-sm {
-                            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
-                        }
-                        
-                        .exclusive-template .border {
-                            border-width: 1px !important;
-                            border-style: solid !important;
-                        }
-                        
-                        /* Profile image and content layout */
-                        .exclusive-template .flex {
-                            display: flex !important;
-                        }
-                        
-                        .exclusive-template .flex-row {
-                            flex-direction: row !important;
-                        }
-                        
-                        .exclusive-template .items-center {
-                            align-items: center !important;
-                        }
-                        
-                        .exclusive-template .gap-6 {
-                            gap: 1.5rem !important;
-                        }
-                        
-                        
                         /* UNIVERSAL FLEX SHRINK - DİNAMİK */
                         .flex-shrink-0 { flex-shrink: 0 !important; }
                         .flex-shrink { flex-shrink: 1 !important; }
@@ -2315,55 +2382,6 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         .pr-8 { padding-right: var(--cv-spacing-xl) !important; }
                         }
                         
-                        .exclusive-template .mt-4 {
-                            margin-top: 1rem !important;
-                        }
-                        
-                        .exclusive-template .grid {
-                            display: grid !important;
-                        }
-                        
-                        .exclusive-template .grid-cols-3 {
-                            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-                        }
-                        
-                        .exclusive-template .gap-4 {
-                            gap: 1rem !important;
-                        }
-                        
-                        /* Contact info items */
-                        .exclusive-template .p-3 {
-                            padding: 0.75rem !important;
-                        }
-                        
-                        .exclusive-template .rounded-md {
-                            border-radius: 0.375rem !important;
-                        }
-                        
-                        .exclusive-template .text-center {
-                            text-align: center !important;
-                        }
-                        
-                        .exclusive-template .mb-1 {
-                            margin-bottom: 0.25rem !important;
-                        }
-                        
-                        .exclusive-template .uppercase {
-                            text-transform: uppercase !important;
-                        }
-                        
-                        .exclusive-template .text-gray-500 {
-                            color: #6b7280 !important;
-                        }
-                        
-                        .exclusive-template .text-gray-800 {
-                            color: #1f2937 !important;
-                        }
-                        
-                        .exclusive-template .break-all {
-                            word-break: break-all !important;
-                        }
-                        
                         /* PROFESSIONAL PAGE BREAK SİSTEMİ - AUTOMATIC MULTI-PAGE SUPPORT */
                         
                         /* A4 page setup - bütün səhifələr üçün eyni margin */
@@ -2378,6 +2396,80 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             height: auto !important;
                             page-break-inside: auto !important; /* İçerik çox olsa növbəti səhifəyə keçsin */
                             break-inside: auto !important;
+                        }
+                        
+                        /* EXCLUSIVE TEMPLATE - REAL CONTENT HEIGHT, NO FORCED MIN-HEIGHT */
+                        .cv-template.exclusive-template,
+                        .exclusive-template,
+                        .exclusive-template.cv-template,
+                        body .exclusive-template,
+                        body .cv-template.exclusive-template {
+                            min-height: 0 !important; /* Tamamilə təbii hündürlük */
+                            height: auto !important;
+                            max-height: none !important;
+                            overflow: visible !important;
+                        }
+                        
+                        /* EXCLUSIVE TEMPLATE - CONTAINER VƏ CONTENT TƏBİİ ÖLÇÜ */
+                        .exclusive-template .cv-container,
+                        .exclusive-template .cv-content,
+                        .cv-template.exclusive-template .cv-container,
+                        .cv-template.exclusive-template .cv-content {
+                            min-height: 0 !important;
+                            height: auto !important;
+                            padding-bottom: 0 !important; /* Əlavə boşluq yoxdur */
+                        }
+                        
+                        /* AURORA TEMPLATE - REAL CONTENT HEIGHT, NO FORCED MIN-HEIGHT */
+                        .cv-template.aurora-template,
+                        .aurora-template,
+                        .aurora-template.cv-template,
+                        body .aurora-template,
+                        body .cv-template.aurora-template {
+                            min-height: 0 !important; /* Tamamilə təbii hündürlük */
+                            height: auto !important;
+                            max-height: none !important;
+                            overflow: visible !important;
+                        }
+                        
+                        /* AURORA TEMPLATE - CONTAINER VƏ CONTENT TƏBİİ ÖLÇÜ */
+                        .aurora-template .cv-container,
+                        .aurora-template .cv-content,
+                        .cv-template.aurora-template .cv-container,
+                        .cv-template.aurora-template .cv-content {
+                            min-height: 0 !important;
+                            height: auto !important;
+                            padding-bottom: 0 !important; /* Əlavə boşluq yoxdur */
+                        }
+                        
+                        /* LUMEN TEMPLATE - REAL CONTENT HEIGHT, NO FORCED MIN-HEIGHT */
+                        .cv-template.lumen-template,
+                        .lumen-template,
+                        .lumen-template.cv-template,
+                        body .lumen-template,
+                        body .cv-template.lumen-template,
+                        .lumen,
+                        .cv-template.lumen,
+                        body .lumen,
+                        body .cv-template.lumen {
+                            min-height: 0 !important; /* Tamamilə təbii hündürlük */
+                            height: auto !important;
+                            max-height: none !important;
+                            overflow: visible !important;
+                        }
+                        
+                        /* LUMEN TEMPLATE - CONTAINER VƏ CONTENT TƏBİİ ÖLÇÜ */
+                        .lumen-template .cv-container,
+                        .lumen-template .cv-content,
+                        .cv-template.lumen-template .cv-container,
+                        .cv-template.lumen-template .cv-content,
+                        .lumen .cv-container,
+                        .lumen .cv-content,
+                        .cv-template.lumen .cv-container,
+                        .cv-template.lumen .cv-content {
+                            min-height: 0 !important;
+                            height: auto !important;
+                            padding-bottom: 0 !important; /* Əlavə boşluq yoxdur */
                         }
                         
                         /* UNIVERSAL SECTION BREAKS - Məzmun əsaslı qırılmalar */
@@ -2450,22 +2542,6 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         }
                         
                         /* TEMPLATE-SPECIFIC DYNAMIC SECTION SPACING */
-                        .exclusive-template .cv-section {
-                            margin-bottom: var(--cv-section-spacing) !important;
-                            padding: 0 !important;
-                        }
-                        
-                        .exclusive-template h1,
-                        .exclusive-template h2,
-                        .exclusive-template h3 {
-                            margin-bottom: var(--cv-item-spacing) !important;
-                        }
-                        
-                        .exclusive-template .experience-item,
-                        .exclusive-template .education-item {
-                            margin-bottom: var(--cv-item-spacing) !important;
-                        }
-                        
                         .basic-template .cv-section,
                         .modern-template .cv-section,
                         .atlas-template .cv-section,
@@ -3455,9 +3531,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                                 document.body as HTMLElement;
                 
                 if (template) {
-                    // Təbii axın üçün sadə hazırlıq
-                    template.style.height = 'auto';
-                    template.style.minHeight = 'auto';
+                    // Təbii axın üçün sadə hazırlıq - HEIGHT UNIVERSAL CSS QAYDALARINDA TƏYIN EDİLİR
                     template.style.overflow = 'visible';
                     
                     console.log('✅ Template təbii PDF axını üçün hazırlandı');
@@ -4118,42 +4192,6 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
             
             .page-break {
                 page-break-before: always;
-            }
-            
-            /* Exclusive Template üçün əlavə page-break qaydaları */
-            .exclusive-template .cv-section,
-            .exclusive-template [key] {
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
-            }
-            
-            /* Section headers heç vaxt tək qalmasın */
-            .exclusive-template h2[class*="text-sm"],
-            .exclusive-template h2[class*="font-bold"] {
-                page-break-after: avoid !important;
-                keep-with-next: always !important;
-            }
-            
-            /* Experience, education item-ları */
-            .exclusive-template div[class*="p-3"],
-            .exclusive-template div[class*="p-4"] {
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
-            }
-            
-            /* Section container-ları */
-            .exclusive-template div[class*="mb-4"] {
-                page-break-inside: avoid !important;
-                orphans: 2 !important;
-                widows: 2 !important;
-            }
-            
-            /* Skills section - birlikdə qalsın */
-            .exclusive-template div[key="skills"],
-            .exclusive-template div[key="technical-skills"],
-            .exclusive-template div[key="soft-skills"] {
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
             }
             
             .cv-preview {
