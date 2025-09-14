@@ -356,14 +356,14 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             background: none !important;
                         }
                         
-                        /* BASIC TEMPLATE @PAGE AYARLARI - ŞƏRTI TEMPLATE YOXLAMASI */
+                        /* BASIC TEMPLATE @PAGE AYARLARI - SAĞ VƏ SOL BOŞLUQLAR AZALDILDI */
                         ${templateId === 'basic' ? `
                         @page {
                             size: A4;
                             margin-top: 10mm !important;
                             margin-bottom: 10mm !important;
-                            margin-left: 10mm !important;
-                            margin-right: 10mm !important;
+                            margin-left: 8mm !important;    /* Sol boşluq azaldıldı: 15mm -> 8mm */
+                            margin-right: 8mm !important;   /* Sağ boşluq azaldıldı: 15mm -> 8mm */
                             padding: 0 !important;
                             border: none !important;
                             -webkit-print-color-adjust: exact !important;
@@ -373,16 +373,22 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         
                         @page :first {
                             margin-top: 15mm !important;
+                            margin-left: 8mm !important;    /* İlk səhifədə sol boşluq azaldıldı */
+                            margin-right: 8mm !important;   /* İlk səhifədə sağ boşluq azaldıldı */
                         }
                         
                         @page :left {
                             margin-top: 10mm !important;
                             margin-bottom: 10mm !important;
+                            margin-left: 8mm !important;    /* Sol səhifələrdə sol boşluq azaldıldı */
+                            margin-right: 8mm !important;   /* Sol səhifələrdə sağ boşluq azaldıldı */
                         }
                         
                         @page :right {
                             margin-top: 10mm !important;
                             margin-bottom: 10mm !important;
+                            margin-left: 8mm !important;    /* Sağ səhifələrdə sol boşluq azaldıldı */
+                            margin-right: 8mm !important;   /* Sağ səhifələrdə sağ boşluq azaldıldı */
                         }
                         ` : ''}
                         
@@ -455,14 +461,14 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         }
                         ` : ''}
                         
-                        /* LUMEN TEMPLATE @PAGE AYARLARI - BASIC TEMPLATE KİMİ + YUXARI MARGIN 0 */
+                        /* LUMEN TEMPLATE @PAGE AYARLARI - SOL VƏ SAĞ BOŞLUQ YOX */
                         ${templateId === 'lumen' || templateId?.toLowerCase() === 'lumen' || templateId?.toLowerCase().includes('lumen') ? `
                         @page {
                             size: A4;
-                            margin-top: 0mm !important;     /* Lumen: yuxarıdan margin 0 - ortada ayırıcı xətt var */
+                            margin-top: 10mm !important;    
                             margin-bottom: 10mm !important;
-                            margin-left: 10mm !important;
-                            margin-right: 10mm !important;
+                            margin-left: 0mm !important;    /* Sol boşluq silindi */
+                            margin-right: 0mm !important;   /* Sağ boşluq silindi */
                             padding: 0 !important;
                             border: none !important;
                             -webkit-print-color-adjust: exact !important;
@@ -471,34 +477,35 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         }
                         
                         @page :first {
-                            margin-top: 0mm !important;     /* İlk səhifədə də yuxarıdan boşluq yoxdur */
-                            margin-left: 0 !important;
-                            margin-right: 0 !important;
+                            margin-top: 0mm !important; 
+                            margin-left: 0mm !important;    /* İlk səhifədə sol boşluq yox */
+                            margin-right: 0mm !important;   /* İlk səhifədə sağ boşluq yox */
+                            max-height: 257mm;
                         }
                         
                         @page :left {
-                            margin-top: 0mm !important;     /* Sol səhifələrdə yuxarıdan boşluq yoxdur */
+                            margin-top: 10mm !important;    
                             margin-bottom: 10mm !important;
-                            margin-left: 0 !important;
-                            margin-right: 0 !important;
+                            margin-left: 0mm !important;    /* Sol səhifələrdə sol boşluq yox */
+                            margin-right: 0mm !important;   /* Sol səhifələrdə sağ boşluq yox */
                         }
                         
                         @page :right {
-                            margin-top: 0mm !important;     /* Sağ səhifələrdə yuxarıdan boşluq yoxdur */
+                            margin-top: 10mm !important;    
                             margin-bottom: 10mm !important;
-                            margin-left: 0 !important;
-                            margin-right: 0 !important;
+                            margin-left: 0mm !important;    /* Sağ səhifələrdə sol boşluq yox */
+                            margin-right: 0mm !important;   /* Sağ səhifələrdə sağ boşluq yox */
                         }
                         ` : ''}
                         
-                        /* PRIME TEMPLATE @PAGE AYARLARI - BASIC TEMPLATE KİMİ */
-                        ${templateId === 'prime' || templateId?.toLowerCase() === 'prime' || templateId?.toLowerCase().includes('prime') ? `
+                        /* CLARITY TEMPLATE @PAGE AYARLARI - SAĞ VƏ SOL BOŞLUQLAR AZALDILDI */
+                        ${templateId === 'clarity' || templateId?.toLowerCase() === 'clarity' || templateId?.toLowerCase().includes('clarity') ? `
                         @page {
                             size: A4;
                             margin-top: 10mm !important;
                             margin-bottom: 10mm !important;
-                            margin-left: 10mm !important;
-                            margin-right: 10mm !important;
+                            margin-left: 8mm !important;    /* Sol boşluq azaldıldı: 15mm -> 8mm */
+                            margin-right: 8mm !important;   /* Sağ boşluq azaldıldı: 15mm -> 8mm */
                             padding: 0 !important;
                             border: none !important;
                             -webkit-print-color-adjust: exact !important;
@@ -508,16 +515,22 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         
                         @page :first {
                             margin-top: 10mm !important;
+                            margin-left: 8mm !important;    /* İlk səhifədə sol boşluq azaldıldı */
+                            margin-right: 8mm !important;   /* İlk səhifədə sağ boşluq azaldıldı */
                         }
                         
                         @page :left {
                             margin-top: 10mm !important;
                             margin-bottom: 10mm !important;
+                            margin-left: 8mm !important;    /* Sol səhifələrdə sol boşluq azaldıldı */
+                            margin-right: 8mm !important;   /* Sol səhifələrdə sağ boşluq azaldıldı */
                         }
                         
                         @page :right {
                             margin-top: 10mm !important;
                             margin-bottom: 10mm !important;
+                            margin-left: 8mm !important;    /* Sağ səhifələrdə sol boşluq azaldıldı */
+                            margin-right: 8mm !important;   /* Sağ səhifələrdə sağ boşluq azaldıldı */
                         }
                         ` : ''}
                         
@@ -569,6 +582,57 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             break-inside: avoid !important;
                         }
                         
+                        /* CLARITY TEMPLATE - PAGE BREAK OPTİMİZASYONU - BASIC TEMPLATE KİMİ */
+                        .clarity-template .cv-section,
+                        .cv-template.clarity-template .cv-section {
+                            page-break-inside: avoid;
+                            break-inside: avoid;
+                            margin-bottom: 8mm !important; /* Basic template kimi sectionlar arası boşluq azaldıldı */
+                        }
+                        
+                        /* CLARITY TEMPLATE - Səhifə keçid problemi olan elementlər üçün */
+                        .clarity-template .cv-section:last-child,
+                        .cv-template.clarity-template .cv-section:last-child {
+                            margin-bottom: 12mm !important; /* Basic template kimi son section üçün əlavə boşluq azaldıldı */
+                        }
+                        
+                        /* CLARITY TEMPLATE - BODY VƏ HTML SƏHİFƏ SPACING - BASIC KİMİ */
+                        .clarity-template body,
+                        .cv-template.clarity-template body {
+                            margin: 0 !important;
+                            padding: 0 !important;
+                        }
+                        
+                        /* CLARITY TEMPLATE - CV container-də səhifə padding əlavə et - BASIC KİMİ */
+                        .clarity-template .cv-container, 
+                        .clarity-template .cv-content,
+                        .cv-template.clarity-template .cv-container,
+                        .cv-template.clarity-template .cv-content {
+                            padding-top: 0 !important;
+                            padding-bottom: 0 !important;
+                            box-sizing: border-box !important;
+                            max-width: none !important;     /* Max-width məhdudiyyətini sil - BASIC KİMİ */
+                            width: 100% !important;         /* Tam genişlik @page margin-ləri içində */
+                            margin: 0 !important;           /* Heç bir əlavə margin yoxdur */
+                        }
+                        
+                        /* CLARITY TEMPLATE - Səhifə keçidində məzmun kəsilməsin */
+                        .clarity-template h1, .clarity-template h2, .clarity-template h3, 
+                        .clarity-template h4, .clarity-template h5, .clarity-template h6,
+                        .cv-template.clarity-template h1, .cv-template.clarity-template h2, 
+                        .cv-template.clarity-template h3, .cv-template.clarity-template h4, 
+                        .cv-template.clarity-template h5, .cv-template.clarity-template h6 {
+                            page-break-after: avoid !important;
+                            break-after: avoid !important;
+                        }
+                        
+                        /* CLARITY TEMPLATE - Sectionlar səhifədə kəsilməsin */
+                        .clarity-template .cv-section,
+                        .cv-template.clarity-template .cv-section {
+                            page-break-inside: avoid !important;
+                            break-inside: avoid !important;
+                        }
+                        
                         /* LUMEN TEMPLATE - BASIC TEMPLATE KİMİ BÜTÜN AYARLAR + YUXARI MARGIN 0 */
                         /* LUMEN TEMPLATE - PAGE BREAK OPTİMİZASYONU */
                         .lumen-template .cv-section,
@@ -588,17 +652,16 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             margin-bottom: 12mm !important; /* Basic template kimi son section üçün əlavə boşluq */
                         }
                         
-                        /* LUMEN TEMPLATE - BODY VƏ HTML SƏHİFƏ SPACING - YUXARI MARGIN 0 */
+                        /* LUMEN TEMPLATE - BODY VƏ HTML SƏHİFƏ SPACING - BASIC KİMİ */
                         .lumen-template body,
                         .cv-template.lumen-template body,
                         .lumen body,
                         .cv-template.lumen body {
                             margin: 0 !important;
                             padding: 0 !important;
-                            padding-top: 0 !important;     /* Lumen: yuxarıdan padding də 0 */
                         }
                         
-                        /* LUMEN TEMPLATE - CV container-də səhifə padding əlavə et - YUXARI 0 */
+                        /* LUMEN TEMPLATE - CV container-də səhifə padding əlavə et - BASIC KİMİ */
                         .lumen-template .cv-container, 
                         .lumen-template .cv-content,
                         .cv-template.lumen-template .cv-container,
@@ -607,9 +670,12 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         .lumen .cv-content,
                         .cv-template.lumen .cv-container,
                         .cv-template.lumen .cv-content {
-                            padding-top: 0 !important;     /* Lumen: yuxarıdan padding 0 - ayırıcı xətt var */
+                            padding-top: 0 !important;     /* Basic template kimi */
                             padding-bottom: 0 !important;
                             box-sizing: border-box !important;
+                            max-width: none !important;     /* Max-width məhdudiyyətini sil - BASIC KİMİ */
+                            width: 100% !important;         /* Tam genişlik @page margin-ləri içində */
+                            margin: 0 !important;           /* Heç bir əlavə margin yoxdur */
                         }
                         
                         /* LUMEN TEMPLATE - Səhifə keçidində məzmun kəsilməsin */
@@ -636,17 +702,78 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             break-inside: avoid !important;
                         }
                         
-                        /* LUMEN TEMPLATE - HEADER SECTION ÖZEL AYARLARI - YUXARI MARGIN 0 */
-                        .lumen-template .cv-header,
-                        .lumen-template .header-section,
-                        .cv-template.lumen-template .cv-header,
-                        .cv-template.lumen-template .header-section,
-                        .lumen .cv-header,
-                        .lumen .header-section,
-                        .cv-template.lumen .cv-header,
-                        .cv-template.lumen .header-section {
-                            margin-top: 0 !important;      /* Header yuxarıdan boşluq olmaz */
-                            padding-top: 0 !important;     /* Header padding də yoxdur */
+                        /* LUMEN TEMPLATE - CONTAINER SİSTEMİ KONTROLU - BASIC/EXCLUSIVE KİMİ */
+                        .lumen-template,
+                        .cv-template.lumen-template,
+                        .lumen,
+                        .cv-template.lumen {
+                            box-sizing: border-box !important;
+                            max-width: none !important;     /* Tam genişlik @page margin-ləri içində */
+                            width: 100% !important;         
+                            margin: 0 !important;           /* Heç bir margin yoxdur */
+                            padding: 0 !important;          /* Heç bir padding yoxdur */
+                        }
+                        
+                        /* LUMEN TEMPLATE - TAILWIND CONTAINER CLASS-LARINI OVERRIDE ET */
+                        .lumen-template .container,
+                        .lumen-template .max-w-sm,
+                        .lumen-template .max-w-md,
+                        .lumen-template .max-w-lg,
+                        .lumen-template .max-w-xl,
+                        .lumen-template .max-w-2xl,
+                        .lumen-template .max-w-3xl,
+                        .lumen-template .max-w-4xl,
+                        .lumen-template .max-w-5xl,
+                        .lumen-template .max-w-6xl,
+                        .lumen-template .max-w-7xl,
+                        .lumen-template .max-w-full,
+                        .lumen-template .w-full,
+                        .cv-template.lumen-template .container,
+                        .cv-template.lumen-template .max-w-sm,
+                        .cv-template.lumen-template .max-w-md,
+                        .cv-template.lumen-template .max-w-lg,
+                        .cv-template.lumen-template .max-w-xl,
+                        .cv-template.lumen-template .max-w-2xl,
+                        .cv-template.lumen-template .max-w-3xl,
+                        .cv-template.lumen-template .max-w-4xl,
+                        .cv-template.lumen-template .max-w-5xl,
+                        .cv-template.lumen-template .max-w-6xl,
+                        .cv-template.lumen-template .max-w-7xl,
+                        .cv-template.lumen-template .max-w-full,
+                        .cv-template.lumen-template .w-full,
+                        .lumen .container,
+                        .lumen .max-w-sm,
+                        .lumen .max-w-md,
+                        .lumen .max-w-lg,
+                        .lumen .max-w-xl,
+                        .lumen .max-w-2xl,
+                        .lumen .max-w-3xl,
+                        .lumen .max-w-4xl,
+                        .lumen .max-w-5xl,
+                        .lumen .max-w-6xl,
+                        .lumen .max-w-7xl,
+                        .lumen .max-w-full,
+                        .lumen .w-full,
+                        .cv-template.lumen .container,
+                        .cv-template.lumen .max-w-sm,
+                        .cv-template.lumen .max-w-md,
+                        .cv-template.lumen .max-w-lg,
+                        .cv-template.lumen .max-w-xl,
+                        .cv-template.lumen .max-w-2xl,
+                        .cv-template.lumen .max-w-3xl,
+                        .cv-template.lumen .max-w-4xl,
+                        .cv-template.lumen .max-w-5xl,
+                        .cv-template.lumen .max-w-6xl,
+                        .cv-template.lumen .max-w-7xl,
+                        .cv-template.lumen .max-w-full,
+                        .cv-template.lumen .w-full {
+                            max-width: none !important;     /* Tam genişlik istifadə et */
+                            width: 100% !important;
+                            margin-left: 0 !important;
+                            margin-right: 0 !important;
+                            padding-left: 0 !important;
+                            padding-right: 0 !important;
+                            box-sizing: border-box !important;
                         }
                         
 
@@ -948,72 +1075,6 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             -webkit-print-color-adjust: exact !important;
                             color-adjust: exact !important;
                             print-color-adjust: exact !important;
-                        }
-                        
-                        /* PRIME TEMPLATE - BASIC TEMPLATE KİMİ BÜTÜN AYARLAR */
-                        /* PRIME TEMPLATE - PAGE BREAK OPTİMİZASYONU */
-                        .prime-template .cv-section,
-                        .cv-template.prime-template .cv-section,
-                        .prime .cv-section,
-                        .cv-template.prime .cv-section {
-                            page-break-inside: avoid;
-                            break-inside: avoid;
-                            margin-bottom: 8mm !important; /* Basic template kimi sectionlar arası boşluq */
-                        }
-                        
-                        /* PRIME TEMPLATE - Səhifə keçid problemi olan elementlər üçün */
-                        .prime-template .cv-section:last-child,
-                        .cv-template.prime-template .cv-section:last-child,
-                        .prime .cv-section:last-child,
-                        .cv-template.prime .cv-section:last-child {
-                            margin-bottom: 12mm !important; /* Basic template kimi son section üçün əlavə boşluq */
-                        }
-                        
-                        /* PRIME TEMPLATE - BODY VƏ HTML SƏHİFƏ SPACING */
-                        .prime-template body,
-                        .cv-template.prime-template body,
-                        .prime body,
-                        .cv-template.prime body {
-                            margin: 0 !important;
-                            padding: 0 !important;
-                        }
-                        
-                        /* PRIME TEMPLATE - CV container-də səhifə padding əlavə et */
-                        .prime-template .cv-container, 
-                        .prime-template .cv-content,
-                        .cv-template.prime-template .cv-container,
-                        .cv-template.prime-template .cv-content,
-                        .prime .cv-container,
-                        .prime .cv-content,
-                        .cv-template.prime .cv-container,
-                        .cv-template.prime .cv-content {
-                            padding-top: 0 !important;
-                            padding-bottom: 0 !important;
-                            box-sizing: border-box !important;
-                        }
-                        
-                        /* PRIME TEMPLATE - Səhifə keçidində məzmun kəsilməsin */
-                        .prime-template h1, .prime-template h2, .prime-template h3, 
-                        .prime-template h4, .prime-template h5, .prime-template h6,
-                        .cv-template.prime-template h1, .cv-template.prime-template h2, 
-                        .cv-template.prime-template h3, .cv-template.prime-template h4, 
-                        .cv-template.prime-template h5, .cv-template.prime-template h6,
-                        .prime h1, .prime h2, .prime h3, 
-                        .prime h4, .prime h5, .prime h6,
-                        .cv-template.prime h1, .cv-template.prime h2, 
-                        .cv-template.prime h3, .cv-template.prime h4, 
-                        .cv-template.prime h5, .cv-template.prime h6 {
-                            page-break-after: avoid !important;
-                            break-after: avoid !important;
-                        }
-                        
-                        /* PRIME TEMPLATE - Sectionlar səhifədə kəsilməsin */
-                        .prime-template .cv-section,
-                        .cv-template.prime-template .cv-section,
-                        .prime .cv-section,
-                        .cv-template.prime .cv-section {
-                            page-break-inside: avoid !important;
-                            break-inside: avoid !important;
                         }
                         
                         /* AURORA TEMPLATE - BASIC VƏ EXCLUSIVE TEMPLATE KİMİ MARGIN SİSTEMİ */
@@ -1522,7 +1583,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         /* 📄 SMART NATURAL PAGINATION CSS */
                         @page {
                             size: A4;
-                            margin: 10mm 15mm;
+                       
                             orphans: 2;
                             widows: 2;
                         }
@@ -1547,7 +1608,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         
                         /* Template containers - allow natural height */
                         .basic-template, .traditional-template, .modern-template, 
-                        .exclusive-template, .prime-template, .aurora-template,
+                        .exclusive-template, .aurora-template,
                         .clarity-template, .horizon-template, .lumen-template,
                         .vertex-template, .essence-template {
                             height: auto !important;
@@ -2390,12 +2451,35 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             margin: 0 !important; /* TAMAMİLƏ SIFIR */
                         }
                         
-                        /* CV Container - otomatik səhifə keçidi */
+                        /* CV Container - TƏBİİ CONTENT HEIGHT - ZORLA HEIGHT YOX */
                         .cv-template {
-                            min-height: 257mm; /* A4 content area (297mm - 40mm margins) */
                             height: auto !important;
+                            min-height: 0 !important; /* ZORLA HEIGHT YOX */
+                            max-height: none !important;
                             page-break-inside: auto !important; /* İçerik çox olsa növbəti səhifəyə keçsin */
                             break-inside: auto !important;
+                        }
+                        
+                        /* LUMEN TEMPLATE - UNIVERSAL OVERRIDE - NUCLEAR OPTION */
+                        .cv-template.lumen-template,
+                        .lumen-template.cv-template,
+                        .lumen-template,
+                        .lumen,
+                        .cv-template.lumen,
+                        body .cv-template.lumen-template,
+                        body .lumen-template.cv-template,
+                        body .lumen-template,
+                        body .lumen,
+                        body .cv-template.lumen,
+                        html body .cv-template.lumen-template,
+                        html body .lumen-template.cv-template,
+                        html body .lumen-template,
+                        html body .lumen,
+                        html body .cv-template.lumen {
+                            min-height: 0 !important; /* UNIVERSAL QAYDANı OVERRIDE ET */
+                            height: auto !important;
+                            max-height: none !important;
+                            overflow: visible !important;
                         }
                         
                         /* EXCLUSIVE TEMPLATE - REAL CONTENT HEIGHT, NO FORCED MIN-HEIGHT */
@@ -2458,6 +2542,32 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             overflow: visible !important;
                         }
                         
+                        /* PRIME TEMPLATE - REAL CONTENT HEIGHT, NO FORCED MIN-HEIGHT */
+                        .cv-template.prime-template,
+                        .prime-template,
+                        .prime-template.cv-template,
+                        body .prime-template,
+                        body .cv-template.prime-template,
+                        .prime,
+                        .cv-template.prime,
+                        body .prime,
+                        body .cv-template.prime {
+                            min-height: 0 !important; /* Tamamilə təbii hündürlük */
+                            height: auto !important;
+                            max-height: none !important;
+                            overflow: visible !important;
+                        }
+                        
+                        /* PRIME TEMPLATE - CONTAINER VƏ CONTENT TƏBİİ ÖLÇÜ */
+                        .prime-template .cv-container,
+                        .prime-template .cv-content,
+                        .cv-template.prime-template .cv-container,
+                        .cv-template.prime-template .cv-content {
+                            min-height: 0 !important;
+                            height: auto !important;
+                            padding-bottom: 0 !important; /* Əlavə boşluq yoxdur */
+                        }
+                        
                         /* LUMEN TEMPLATE - CONTAINER VƏ CONTENT TƏBİİ ÖLÇÜ */
                         .lumen-template .cv-container,
                         .lumen-template .cv-content,
@@ -2470,6 +2580,44 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             min-height: 0 !important;
                             height: auto !important;
                             padding-bottom: 0 !important; /* Əlavə boşluq yoxdur */
+                        }
+                        .cv-template.lumen .cv-container,
+                        .cv-template.lumen .cv-content,
+                        body .lumen-template .cv-container,
+                        body .lumen-template .cv-content,
+                        body .cv-template.lumen-template .cv-container,
+                        body .cv-template.lumen-template .cv-content,
+                        body .lumen .cv-container,
+                        body .lumen .cv-content,
+                        body .cv-template.lumen .cv-container,
+                        body .cv-template.lumen .cv-content {
+                            min-height: 0 !important;
+                            height: auto !important;
+                            padding-bottom: 0 !important; /* Əlavə boşluq yoxdur */
+                            max-height: none !important;
+                            overflow: visible !important;
+                        }
+                        
+                        /* LUMEN TEMPLATE - BÜTÜN DIV VƏ SECTION ELEMENTLER */
+                        .lumen-template div,
+                        .lumen-template section,
+                        .lumen-template main,
+                        .lumen-template article,
+                        .cv-template.lumen-template div,
+                        .cv-template.lumen-template section,
+                        .cv-template.lumen-template main,
+                        .cv-template.lumen-template article,
+                        .lumen div,
+                        .lumen section,
+                        .lumen main,
+                        .lumen article,
+                        .cv-template.lumen div,
+                        .cv-template.lumen section,
+                        .cv-template.lumen main,
+                        .cv-template.lumen article {
+                            min-height: 0 !important;
+                            height: auto !important;
+                            max-height: none !important;
                         }
                         
                         /* UNIVERSAL SECTION BREAKS - Məzmun əsaslı qırılmalar */
@@ -2798,6 +2946,135 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             console.log('✅ BASIC TEMPLATE CSS INJECTION COMPLETED - SIMPLE VERSION');
         }
         
+        // LUMEN TEMPLATE üçün runtime CSS injection - BLANK PAGE KILLER
+        if (templateId === 'lumen' || templateId?.toLowerCase().includes('lumen')) {
+            console.log('=== LUMEN TEMPLATE - BLANK PAGE KILLER CSS INJECTION ===');
+            
+            await page.addStyleTag({
+                content: `
+                    /* LUMEN TEMPLATE - NUCLEAR BLANK PAGE PREVENTION */
+                    
+                    .lumen-template,
+                    .cv-template.lumen-template,
+                    .lumen-template.cv-template,
+                    .lumen,
+                    .cv-template.lumen,
+                    body .lumen-template,
+                    body .cv-template.lumen-template,
+                    html body .lumen-template,
+                    html body .cv-template.lumen-template {
+                        min-height: 0 !important; /* ZORLA HEIGHT KILLER */
+                        height: auto !important;
+                        max-height: none !important;
+                        overflow: visible !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        page-break-inside: auto !important;
+                        break-inside: auto !important;
+                    }
+                    
+                    /* LUMEN CONTAINER RESET */
+                    .lumen-template .cv-container,
+                    .lumen-template .cv-content,
+                    .lumen-template div,
+                    .lumen-template section,
+                    .cv-template.lumen-template .cv-container,
+                    .cv-template.lumen-template .cv-content,
+                    .cv-template.lumen-template div,
+                    .cv-template.lumen-template section {
+                        min-height: 0 !important;
+                        height: auto !important;
+                        max-height: none !important;
+                        padding-bottom: 0 !important;
+                        margin-bottom: 0 !important;
+                    }
+                    
+                    /* FORCE SINGLE PAGE FOR LUMEN */
+                    .lumen-template {
+                        max-height: 280mm !important; /* A4 yüksekliğinden az */
+                        overflow: hidden !important; /* Aşan content gizlət */
+                    }
+                `
+            });
+            
+            console.log('✅ LUMEN TEMPLATE BLANK PAGE KILLER CSS INJECTION COMPLETED');
+        }
+        
+        // PRIME TEMPLATE üçün runtime CSS injection - BLANK PAGE KILLER
+        if (templateId === 'prime' || templateId?.toLowerCase().includes('prime')) {
+            console.log('=== PRIME TEMPLATE - BLANK PAGE KILLER CSS INJECTION ===');
+            
+            await page.addStyleTag({
+                content: `
+                    /* PRIME TEMPLATE - UNIVERSAL HEIGHT KILLER */
+                    .prime-template,
+                    .cv-template.prime-template,
+                    .prime-template.cv-template,
+                    .prime,
+                    .cv-template.prime,
+                    body .prime-template,
+                    body .cv-template.prime-template,
+                    html body .prime-template,
+                    html body .cv-template.prime-template {
+                        min-height: 0 !important; /* ZORLA HEIGHT KILLER */
+                        height: auto !important;
+                        max-height: none !important;
+                        overflow: visible !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        page-break-inside: auto !important;
+                        break-inside: auto !important;
+                        box-sizing: border-box !important;
+                    }
+                    
+                    /* PRIME CONTAINER RESET */
+                    .prime-template .cv-container,
+                    .prime-template .cv-content,
+                    .prime-template div,
+                    .prime-template section,
+                    .cv-template.prime-template .cv-container,
+                    .cv-template.prime-template .cv-content,
+                    .cv-template.prime-template div,
+                    .cv-template.prime-template section {
+                        min-height: 0 !important;
+                        height: auto !important;
+                        padding-bottom: 0 !important;
+                        margin-bottom: 0 !important;
+                        box-sizing: border-box !important;
+                    }
+                `
+            });
+            
+            console.log('✅ PRIME TEMPLATE BLANK PAGE KILLER CSS INJECTION COMPLETED');
+        }
+        
+        // ESSENCE TEMPLATE üçün runtime CSS injection - YALNIZ PDF SƏHIFƏ MARGIN SİLMƏ
+        if (templateId === 'essence' || templateId?.toLowerCase().includes('essence')) {
+            console.log('=== ESSENCE TEMPLATE - PDF SƏHIFƏ MARGIN SİLMƏ CSS INJECTION ===');
+            
+            await page.addStyleTag({
+                content: `
+                    /* ESSENCE TEMPLATE - YALNIZ PDF SƏHIFƏ MARGIN SİFIR, CONTENT DƏYİŞMİR */
+                    
+                    /* PDF səhifə margin tamamilə sıfır */
+                    @page {
+                        margin: 0 !important;
+                        padding: 0 !important;
+                    }
+                    
+                    /* Essence template container sıfır margin/padding - yalnız səhifə səviyyəsi */
+                    .essence-template,
+                    .cv-template.essence-template {
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        /* Content daxili spacing dəyişmir */
+                    }
+                `
+            });
+            
+            console.log('✅ ESSENCE TEMPLATE PDF SƏHIFƏ MARGIN SİLMƏ CSS INJECTION COMPLETED');
+        }
+        
         // Azərbaycan dili və encoding dəstəyi üçün əlavə ayarlar
         await page.setExtraHTTPHeaders({
             'Accept-Charset': 'utf-8',
@@ -2964,10 +3241,9 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                 .aurora-template,
                 .vertex-template,
                 .horizon-template,
-                .lumen-template,
                 .clarity-template,
                 .essence-template,
-                .prime-template,
+                .lumen-template,
                 [class*="template"],
                 .template-container,
                 .cv-container {
@@ -2976,11 +3252,31 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                     border: none !important;
                     box-shadow: none !important;
                     /* 🚫 NUCLEAR: Force height limits */
-                    max-height: 277mm !important; /* Slightly less than A4 for margins */
+                    max-height: 257mm !important; /* Slightly less than A4 for margins */
                     overflow: hidden !important; /* Hide overflow completely */
                     page-break-after: avoid !important;
                     page-break-before: avoid !important;
                     page-break-inside: avoid !important;
+                }
+                
+                /* LUMEN TEMPLATE - SPECIAL EXCEPTION - NO HEIGHT LIMITS */
+                .lumen-template,
+                .cv-template.lumen-template,
+                .lumen-template.cv-template,
+                .lumen,
+                .cv-template.lumen {
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    border: none !important;
+                    box-shadow: none !important;
+                    /* 🚫 LUMEN: NO HEIGHT LIMITS */
+                    max-height: none !important; /* Lumen: height limit yox */
+                    min-height: 0 !important;    /* Lumen: zorla height yox */
+                    height: auto !important;     /* Lumen: təbii height */
+                    overflow: visible !important; /* Lumen: content görsənsin */
+                    page-break-after: auto !important;
+                    page-break-before: auto !important;
+                    page-break-inside: auto !important;
                 }
                 
                 /* Basic Template üçün xüsusi top boşluq sıfırlama */
@@ -3053,6 +3349,14 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                 .flex, .grid {
                     page-break-inside: avoid;
                     break-inside: avoid;
+                }
+                
+                /* ESSENCE TEMPLATE - YALNIZ PDF SƏHIFƏ MARGIN SİLMƏ, CONTENT-Ə TƏSİR YOX */
+                .essence-template,
+                .cv-template.essence-template,
+                .essence-template.cv-template {
+                    /* YALNIZ PDF EXPORT ÜÇÜN KƏNAR SƏHİFƏ BOŞLUQLARI */
+                    box-sizing: border-box !important;
                 }
                 
                 /* BASIC TEMPLATE ULTIMATE HARDCODE KILLER */
@@ -4074,7 +4378,6 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
             
             @page {
                 size: A4;
-                margin: 15mm 15mm !important; /* Bütün səhifələrdə bərabər margin-lar */
                 padding: 0 !important;
                 border: none !important;
                 background: white !important; /* Ağ arxa plan */

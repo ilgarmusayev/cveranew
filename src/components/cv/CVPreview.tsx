@@ -5194,8 +5194,8 @@ const PrimeTemplate: React.FC<{
 
     return (
         <div 
-            className={`w-full h-full bg-white text-gray-900 font-sans ${isDragActive ? 'drag-mode' : ''}`}
-            style={{ padding: '20mm', minHeight: '297mm' }}
+            className={`cv-template prime-template w-full h-full bg-white text-gray-900 font-sans ${isDragActive ? 'drag-mode' : ''}`}
+            style={{ padding: '20mm' }}
         >
             {/* Header Section with Professional Layout */}
             <div className="cv-section avoid-break mb-6" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
@@ -10568,18 +10568,6 @@ export default function CVPreview({
                             color-adjust: exact !important;
                             print-color-adjust: exact !important;
                         }
-                    }
-                    
-                    /* Lumen template separator line - yuxarı və aşağıdan 25mm məsafə (daha qısa) */
-                    .lumen-left-panel::after {
-                        content: '';
-                        position: absolute;
-                        right: 0;
-                        top: 25mm;
-                        bottom: 25mm;
-                        width: 2px;
-                        background-color: #d1d5db;
-                        z-index: 10;
                     }
                 `
             }} />
