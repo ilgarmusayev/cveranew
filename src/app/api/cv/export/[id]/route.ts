@@ -1504,68 +1504,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             background-color: transparent !important;
                         }
                         
-                        /* EXCLUSIVE TEMPLATE ÜÇÜ OPTİMAL PADDING - NUCLEAR OVERRIDE */
-                        .exclusive-template,
-                        div.exclusive-template,
-                        [class*="exclusive-template"],
-                        body .exclusive-template,
-                        html .exclusive-template {
-                            padding: 0 !important;  /* Template özü padding yoxdur, margin PDF ayarlarından gəlir */
-                            box-sizing: border-box !important;
-                            width: 100% !important;
-                            min-height: auto !important;
-                            min-width: auto !important;
-                            max-width: 100% !important;
-                            margin: 0 !important;
-                            border: none !important;
-                        }
-                        
-                        /* Exclusive template container-ları da 15mm padding ilə - NUCLEAR */
-                        .exclusive-template .cv-content-with-breaks,
-                        .exclusive-template .cv-preview,
-                        .exclusive-template .cv-container,
-                        .cv-preview.exclusive-template,
-                        .cv-container.exclusive-template {
-                            padding: 0 !important;
-                            margin: 0 !important;
-                            box-sizing: border-box !important;
-                            width: 100% !important;
-                            max-width: none !important;
-                        }
-                        
-                        /* AURORA TEMPLATE ÜÇÜ 15MM PADDING - PROFESSIONAL MARGINS */
-                        .aurora-template,
-                        div.aurora-template,
-                        [class*="aurora-template"],
-                        body .aurora-template,
-                        html .aurora-template {
-                            padding: 15mm !important;  /* Professional 15mm margins on all sides */
-                            box-sizing: border-box !important;
-                            width: 100% !important;
-                            min-height: auto !important;
-                            min-width: auto !important;
-                            max-width: 100% !important;
-                            margin: 0 !important;
-                            border: none !important;
-                        }
-                        
-                        /* Aurora template container-ları da 15mm padding ilə */
-                        .aurora-template .cv-content-with-breaks,
-                        .aurora-template .cv-preview,
-                        .aurora-template .cv-container,
-                        .cv-preview.aurora-template,
-                        .cv-container.aurora-template {
-                            padding: 15mm !important;
-                            margin: 0 !important;
-                            box-sizing: border-box !important;
-                            width: 100% !important;
-                            max-width: none !important;
-                        }
-                        
-                        /* Exclusive template content areas - padding parent-dən gəlir */
-                        .exclusive-template * {
-                            box-sizing: border-box !important;
-                        }
+                      
                         
                         /* Bütün elementlər üçün margin sıfır */
                         *, *::before, *::after {
@@ -2961,7 +2900,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                     border: none !important;
                     box-shadow: none !important;
                     /* 🚫 NUCLEAR: Force height limits */
-                    max-height: 280mm !important; /* Slightly less than A4 for margins */
+                    max-height: 277mm !important; /* Slightly less than A4 for margins */
                     overflow: hidden !important; /* Hide overflow completely */
                     page-break-after: avoid !important;
                     page-break-before: avoid !important;
