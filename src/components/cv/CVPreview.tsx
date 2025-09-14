@@ -3165,9 +3165,9 @@ const AtlasTemplate: React.FC<{
         >
             {/* Left Column - Contact & Skills */}
             <div 
-                className="w-2/5 bg-blue-900 text-white border-r border-blue-800 left-panel" 
+                className="w-2/5 bg-blue-900 text-white border-r border-blue-800 left-panel atlas-left-spacing" 
                 style={{ 
-                    padding: '12mm 12mm 15mm 12mm', /* üst: 12mm, sağ: 12mm, alt: 15mm, sol: 12mm - reduced top padding */
+                    padding: '12mm 12mm 12mm 12mm', /* üst: 12mm, sağ: 12mm, alt: 15mm, sol: 12mm - sol və sağ boşluq artırıldı */
                     touchAction: 'none', // Force DnD kit control
                     userSelect: 'none',
                     minHeight: '297mm', // A4 uzunluğu - 297mm
@@ -4226,11 +4226,12 @@ const LumenTemplate: React.FC<{
         >
             {/* Left Column - Contact & Skills with WHITE Background for Lumen Template */}
             <div 
-                className="w-5/12 bg-white text-gray-900 border-r-2 border-gray-300 lumen-left-panel" 
+                className="w-5/12 bg-white text-gray-900 lumen-left-panel" 
                 style={{ 
                     padding: '15mm 8mm 15mm 15mm', /* üst: 15mm, sağ: 8mm (daha da azaldıldı), alt: 15mm, sol: 15mm */
                     touchAction: 'none', // Force DnD kit control
                     userSelect: 'none',
+                    position: 'relative', // For pseudo-element positioning
                     minHeight: '297mm', // A4 uzunluğu - 297mm
                     backgroundColor: '#ffffff', // Force white background for Lumen template
                     background: '#ffffff', // Additional background property
@@ -10567,6 +10568,18 @@ export default function CVPreview({
                             color-adjust: exact !important;
                             print-color-adjust: exact !important;
                         }
+                    }
+                    
+                    /* Lumen template separator line - yuxarı və aşağıdan 25mm məsafə (daha qısa) */
+                    .lumen-left-panel::after {
+                        content: '';
+                        position: absolute;
+                        right: 0;
+                        top: 25mm;
+                        bottom: 25mm;
+                        width: 2px;
+                        background-color: #d1d5db;
+                        z-index: 10;
                     }
                 `
             }} />

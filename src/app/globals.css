@@ -1,3 +1,4 @@
+@import '../styles/atlas-spacing.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -1037,6 +1038,7 @@ div.atlas-template .w-2\/5,
   position: relative !important;
   
 }
+
 
 /* Override all text colors in Atlas left panel */
 .atlas-template .atlas-left-panel *,

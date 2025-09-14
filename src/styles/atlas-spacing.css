@@ -1,0 +1,29 @@
+/* Atlas Template Left Panel Spacing Override */
+.atlas-left-spacing {
+    padding: 8mm !important;
+}
+
+/* Ensure this padding applies even with other CSS overrides */
+.atlas-template .atlas-left-spacing,
+.cv-template.atlas-template .atlas-left-spacing,
+div.atlas-left-spacing {
+    padding: 8mm !important;
+}
+
+/* Atlas Template Right Panel Spacing - 12mm left and right */
+.atlas-right-spacing {
+    padding: 10mm 12mm 15mm 12mm !important; /* top: 10mm, right: 12mm, bottom: 15mm, left: 12mm */
+}
+
+/* Atlas Template Container - Top margin 10mm */
+.atlas-template-container {
+    margin-top: 10mm !important;
+    padding-top: 0 !important;
+}
+
+/* Ensure right panel spacing applies with CSS overrides */
+.atlas-template .atlas-right-spacing,
+.cv-template.atlas-template .atlas-right-spacing,
+div.atlas-right-spacing {
+    padding: 10mm 12mm 15mm 12mm !important;
+}

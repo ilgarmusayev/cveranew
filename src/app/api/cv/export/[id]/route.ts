@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verify } from 'jsonwebtoken';
 import puppeteer from 'puppeteer';
 import chromium from '@sparticuz/chromium';
+import { PDFDocument } from 'pdf-lib';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key';
 
@@ -3801,9 +3802,14 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
         console.log('PDF yaradıldı, browser bağlanır...');
         await browser.close();
 
+        // ✅ REMOVE BLANK PAGES FROM PDF USING PDF-LIB
+        console.log('🔍 Checking for blank pages to remove...');
+        const cleanedPdfBuffer = await removeBlankPages(pdfBuffer);
+        console.log('✅ Blank page removal completed');
+
         // PDF faylını geri qaytar
-        console.log('PDF response qaytarılır, ölçü:', pdfBuffer.length, 'bytes');
-        return new NextResponse(Buffer.from(pdfBuffer), {
+        console.log('PDF response qaytarılır, ölçü:', cleanedPdfBuffer.length, 'bytes');
+        return new NextResponse(Buffer.from(cleanedPdfBuffer), {
             status: 200,
             headers: {
                 'Content-Type': 'application/pdf',
@@ -3830,6 +3836,143 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             { error: `PDF export xətası: ${errorMsg}` }, 
             { status: 500 }
         );
+    }
+}
+
+/**
+ * 🚀 BLANK PAGE REMOVAL FUNCTION
+ * Automatically detects and removes completely blank pages from PDF
+ * Uses pdf-lib to analyze text content and filter out empty pages
+ */
+async function removeBlankPages(pdfBuffer: Uint8Array): Promise<Uint8Array> {
+    try {
+        console.log('📄 Loading PDF document for blank page analysis...');
+        
+        // Load the original PDF
+        const originalPdf = await PDFDocument.load(pdfBuffer);
+        const totalPages = originalPdf.getPageCount();
+        console.log(`📊 Original PDF has ${totalPages} pages`);
+        
+        if (totalPages <= 1) {
+            console.log('📄 Single page PDF - no blank page removal needed');
+            return pdfBuffer;
+        }
+        
+        // Create a new PDF document for clean pages
+        const cleanPdf = await PDFDocument.create();
+        
+        // Copy non-blank pages
+        let keptPages = 0;
+        let removedPages = 0;
+        
+        for (let i = 0; i < totalPages; i++) {
+            console.log(`🔍 Analyzing page ${i + 1}/${totalPages}...`);
+            
+            // Extract text content from the page
+            const pageHasContent = await checkPageHasContent(originalPdf, i);
+            
+            if (pageHasContent) {
+                // Copy this page to the clean PDF
+                const [copiedPage] = await cleanPdf.copyPages(originalPdf, [i]);
+                cleanPdf.addPage(copiedPage);
+                keptPages++;
+                console.log(`✅ Page ${i + 1} has content - keeping`);
+            } else {
+                removedPages++;
+                console.log(`🗑️ Page ${i + 1} is blank - removing`);
+            }
+        }
+        
+        console.log(`📊 Blank page removal summary:`);
+        console.log(`   - Original pages: ${totalPages}`);
+        console.log(`   - Kept pages: ${keptPages}`);
+        console.log(`   - Removed blank pages: ${removedPages}`);
+        
+        // Return the cleaned PDF
+        const cleanedPdfBytes = await cleanPdf.save();
+        console.log(`✅ Cleaned PDF size: ${cleanedPdfBytes.length} bytes`);
+        
+        return cleanedPdfBytes;
+        
+    } catch (error) {
+        console.error('❌ Error removing blank pages:', error);
+        console.log('🔄 Falling back to original PDF...');
+        return pdfBuffer;
+    }
+}
+
+/**
+ * 🔍 CHECK IF PAGE HAS TEXT CONTENT
+ * Analyzes a PDF page to determine if it contains any text content
+ * Returns true if page has text, false if completely blank
+ */
+async function checkPageHasContent(pdfDoc: PDFDocument, pageIndex: number): Promise<boolean> {
+    try {
+        const page = pdfDoc.getPage(pageIndex);
+        
+        // Get page content stream
+        const contentStream = page.node.Contents();
+        if (!contentStream) {
+            console.log(`   Page ${pageIndex + 1}: No content stream - considering blank`);
+            return false;
+        }
+        
+        let contentBytes: Uint8Array | undefined;
+        
+        // Handle different content stream types
+        if (Array.isArray(contentStream)) {
+            // Multiple content streams - check the first one
+            const firstStream = contentStream[0];
+            if (firstStream && 'getContents' in firstStream) {
+                contentBytes = firstStream.getContents();
+            }
+        } else {
+            // Single content stream
+            if ('getContents' in contentStream) {
+                contentBytes = contentStream.getContents();
+            }
+        }
+            
+        if (!contentBytes || contentBytes.length === 0) {
+            console.log(`   Page ${pageIndex + 1}: No content bytes - considering blank`);
+            return false;
+        }
+        
+        // Convert content to string and look for text operators
+        const contentString = new TextDecoder('latin1').decode(contentBytes);
+        
+        // Look for common text-drawing operators in PDF content streams
+        const textOperators = [
+            'Tj',    // Show text
+            'TJ',    // Show text with individual glyph positioning  
+            "'",     // Move to next line and show text
+            '"',     // Set word and character spacing, move to next line and show text
+            'Td',    // Move text position
+            'TD',    // Move text position and set leading
+            'Tm',    // Set text matrix
+        ];
+        
+        const hasTextOperators = textOperators.some(op => 
+            contentString.includes(op)
+        );
+        
+        // Also check for actual text content (within parentheses or angle brackets)
+        const hasTextContent = /\([^)]+\)|<[^>]+>/.test(contentString);
+        
+        // Additional check for visible content length
+        const hasSubstantialContent = contentString.trim().length > 50;
+        
+        const hasContent = hasTextOperators || hasTextContent || hasSubstantialContent;
+        
+        console.log(`   Page ${pageIndex + 1}: Text operators: ${hasTextOperators}, Text content: ${hasTextContent}, Substantial: ${hasSubstantialContent} → ${hasContent ? 'HAS CONTENT' : 'BLANK'}`);
+        
+        return hasContent;
+        
+    } catch (error) {
+        console.error(`❌ Error checking page ${pageIndex + 1} content:`, error);
+        // If we can't analyze the page, assume it has content (safer approach)
+        console.log(`   Page ${pageIndex + 1}: Analysis failed - assuming has content`);
+        return true;
     }
 }
 
