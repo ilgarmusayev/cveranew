@@ -14,6 +14,7 @@ import LanguagesSection from './sections/LanguagesSection';
 import ProjectsSection from './sections/ProjectsSection';
 import CertificationsSection from './sections/CertificationsSection';
 import VolunteerExperienceSection from './sections/VolunteerExperienceSection';
+import PublicationsSection from './sections/PublicationsSection';
 import ElaveSections from './sections/ElaveSections';
 
 // Import preview components
@@ -40,6 +41,7 @@ interface CVDataType {
     testScores: any[];
     recommendations: any[];
     courses: any[];
+    organizations: any[];
     customSections: any[];
     sectionOrder?: any[];
     cvLanguage: CVLanguage;
@@ -70,6 +72,7 @@ interface CVEditorState {
     testScores: any[];
     recommendations: any[];
     courses: any[];
+    organizations: any[];
     customSections: any[];
     sectionOrder: any[];
     cvLanguage: CVLanguage;
@@ -109,6 +112,7 @@ const getDefaultCVData = (): Omit<CVEditorState, 'id' | 'title' | 'templateId'> 
     testScores: [],
     recommendations: [],
     courses: [],
+    organizations: [],
     customSections: [],
     sectionOrder: [],
     cvLanguage: 'azerbaijani'
@@ -157,7 +161,12 @@ const getSections = (language: CVLanguage, translatedSectionNames?: Record<strin
             'projects': 'projects',
             'certifications': 'certifications',
             'volunteer': 'volunteerExperience',
-            'template': 'template'
+            'template': 'template',
+            'publications': 'publications',
+            'honorsAwards': 'honorsAwards',
+            'courses': 'courses',
+            'testScores': 'testScores',
+            'organizations': 'organizations'
         };
 
         const updatedSections = sections.map(section => {
@@ -217,6 +226,11 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
         'projects',
         'certifications',
         'volunteer',
+        'publications',
+        'honorsAwards',
+        'courses',
+        'testScores',
+        'organizations',
         'customSections'
     ];
     
@@ -225,6 +239,14 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
         if (initialData) {
             // Check if initialData has a 'data' property (API format)
             const cvData = initialData.data || initialData;
+            
+            console.log('🔍 CVEditor loading CV with initialData:', {
+                hasInitialData: !!initialData,
+                hasPublications: !!cvData.publications,
+                publicationsCount: cvData.publications?.length || 0,
+                publications: cvData.publications,
+                fullCvData: cvData
+            });
             
             const result = {
                 id: initialData.id || cvId,
@@ -243,11 +265,13 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 testScores: cvData.testScores || [],
                 recommendations: cvData.recommendations || [],
                 courses: cvData.courses || [],
+                organizations: cvData.organizations || [],
                 customSections: cvData.customSections || [],
                 sectionOrder: cvData.sectionOrder && cvData.sectionOrder.length > 0 ? cvData.sectionOrder : defaultSectionOrder,
                 cvLanguage: cvData.cvLanguage || 'azerbaijani'
             };
 
+            console.log('✅ CVEditor initialized CV state with publications:', result.publications);
             return result;
         }
         
@@ -332,7 +356,9 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
     // Mobile section reorder hook - Define sectionOrder first
     const sectionOrder = cv.sectionOrder || [
         'summary', 'experience', 'education', 'skills', 
-        'languages', 'projects', 'certifications', 'volunteer', 'customSections'
+        'languages', 'projects', 'certifications', 'volunteer', 
+        'publications', 'honorsAwards', 'courses', 'testScores', 
+        'organizations', 'customSections'
     ];
 
     // Function to get actual visible sections count
@@ -352,6 +378,11 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
         
         if (cv.projects && cv.projects.length > 0) count++; // projects
         if (cv.volunteerExperience && cv.volunteerExperience.length > 0) count++; // volunteer
+        if (cv.publications && cv.publications.length > 0) count++; // publications
+        if (cv.honorsAwards && cv.honorsAwards.length > 0) count++; // honors & awards
+        if (cv.courses && cv.courses.length > 0) count++; // courses
+        if (cv.testScores && cv.testScores.length > 0) count++; // test scores
+        if (cv.organizations && cv.organizations.length > 0) count++; // organizations
         if (cv.customSections && cv.customSections.length > 0) count++; // customSections
         
         return count;
@@ -389,6 +420,21 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     break;
                 case 'volunteer':
                     if (cv.volunteerExperience && cv.volunteerExperience.length > 0) visibleSections.push(section);
+                    break;
+                case 'publications':
+                    if (cv.publications && cv.publications.length > 0) visibleSections.push(section);
+                    break;
+                case 'honorsAwards':
+                    if (cv.honorsAwards && cv.honorsAwards.length > 0) visibleSections.push(section);
+                    break;
+                case 'courses':
+                    if (cv.courses && cv.courses.length > 0) visibleSections.push(section);
+                    break;
+                case 'testScores':
+                    if (cv.testScores && cv.testScores.length > 0) visibleSections.push(section);
+                    break;
+                case 'organizations':
+                    if (cv.organizations && cv.organizations.length > 0) visibleSections.push(section);
                     break;
                 case 'customSections':
                     if (cv.customSections && cv.customSections.length > 0) visibleSections.push(section);
@@ -570,6 +616,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     testScores: cv.testScores,
                     recommendations: cv.recommendations,
                     courses: cv.courses,
+                    organizations: cv.organizations,
                     customSections: cv.customSections,
                     sectionOrder: cv.sectionOrder,
                     cvLanguage: cv.cvLanguage
@@ -599,18 +646,29 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             section,
             dataType: typeof data,
             dataLength: Array.isArray(data) ? data.length : 'not array',
-            data: section === 'customSections' ? data : 'other section'
+            data: section === 'publications' ? data : 'not publications'
         });
+        
+        // Publications üçün əlavə debug
+        if (section === 'publications') {
+            console.log('📚 Publications data updated:', data);
+        }
+        
         setCv(prev => ({
             ...prev,
             [section]: data
         }));
+        
+        // isDirty set et ki save edilsin
+        setIsDirty(true);
     };
 
       const handleSave = useCallback(async () => {
         setSaving(true);
         
         try {
+            console.log('💾 Starting CV save with publications:', cv.publications);
+            
             const cvData: CVEditorData = {
                 id: cv.id,
                 title: cv.title || 'Adsız CV',
@@ -629,11 +687,14 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     testScores: cv.testScores,
                     recommendations: cv.recommendations,
                     courses: cv.courses,
+                    organizations: cv.organizations,
                     customSections: cv.customSections,
                     sectionOrder: cv.sectionOrder,
                     cvLanguage: cv.cvLanguage
                 }
             };
+
+            console.log('📚 Publications being saved:', cvData.data.publications);
 
             const payload = {
                 title: cvData.title,
@@ -644,7 +705,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             
             console.log('🎨 CVEditor Save Payload:', {
                 fontSettings: payload.fontSettings,
-                templateId: payload.templateId
+                templateId: payload.templateId,
+                publications_count: payload.cv_data.publications?.length || 0
             });
 
             if (cv.id) {
@@ -897,6 +959,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 testScores: cv.testScores,
                 recommendations: cv.recommendations,
                 courses: cv.courses,
+                organizations: cv.organizations,
                 customSections: cv.customSections,
                 cvLanguage: cv.cvLanguage,
                 sectionOrder: cv.sectionOrder,
@@ -1013,6 +1076,15 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     <VolunteerExperienceSection
                         data={cv.volunteerExperience}
                         onChange={(data: any) => updateCVData('volunteerExperience', data)}
+                        cvLanguage={cv.cvLanguage}
+                    />
+                );
+
+            case 'publications':
+                return (
+                    <PublicationsSection
+                        data={cv.publications}
+                        onChange={(data: any) => updateCVData('publications', data)}
                         cvLanguage={cv.cvLanguage}
                     />
                 );

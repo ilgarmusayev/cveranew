@@ -172,7 +172,44 @@ export class LinkedInImportService {
           ],
           volunteerExperience: this.formatVolunteerExperience(rawData.volunteering || rawData.volunteer_experience || []),
           projects: this.formatProjects(rawData.projects || []),
+          publications: this.formatPublications(rawData.publications || []),
+          honorsAwards: this.formatHonorsAwards(rawData.honors_and_awards || []),
+          courses: this.formatCourses(rawData.courses || rawData.education_courses || []),
+          testScores: this.formatTestScores(rawData.test_scores || []),
+          organizations: this.formatOrganizations(rawData.organizations || rawData.memberships || []),
           importSource: 'brightdata',
+          importDate: new Date().toISOString()
+        };
+      }
+
+      // ScrapingDog formatı
+      if (source === 'scrapingdog') {
+        return {
+          personalInfo: {
+            fullName: rawData.name || rawData.full_name || '',
+            title: rawData.headline || rawData.title || rawData.position || '',
+            email: rawData.email || '',
+            phone: rawData.phone || '',
+            location: rawData.location || rawData.geo_location || rawData.city || '',
+            linkedin: rawData.url || rawData.input_url || '',
+            summary: rawData.summary || rawData.about || ''
+          },
+          experience: this.formatExperience(rawData.experience || []),
+          education: this.formatEducation(rawData.educations_details || rawData.education || []),
+          skills: this.formatSkills(rawData.skills || []),
+          languages: this.formatLanguages(rawData.languages || []),
+          certifications: [
+            ...this.formatCertifications(rawData.certifications || []),
+            ...this.formatHonorsAwards(rawData.honors || rawData.awards || [])
+          ],
+          volunteerExperience: this.formatVolunteerExperience(rawData.volunteering || rawData.volunteer_experience || []),
+          projects: this.formatProjects(rawData.projects || []),
+          publications: this.formatPublications(rawData.publications || []),
+          honorsAwards: this.formatHonorsAwards(rawData.honors || rawData.awards || []),
+          courses: this.formatCourses(rawData.courses || []),
+          testScores: this.formatTestScores(rawData.test_scores || []),
+          organizations: this.formatOrganizations(rawData.organizations || rawData.memberships || []),
+          importSource: 'scrapingdog',
           importDate: new Date().toISOString()
         };
       }
@@ -255,16 +292,134 @@ export class LinkedInImportService {
   private static formatVolunteerExperience(volunteer: any[]): any[] {
     if (!Array.isArray(volunteer)) return [];
 
-    return volunteer.map(vol => ({
-      id: this.generateId(),
-      role: vol.role || vol.position || vol.title || '',
-      organization: vol.organization || vol.company || '',
-      cause: vol.cause || vol.field || '',
-      startDate: this.formatDate(vol.start_date || vol.startDate),
-      endDate: this.formatDate(vol.end_date || vol.endDate),
-      current: vol.current || false,
-      description: vol.description || vol.summary || ''
-    })).filter(vol => vol.role || vol.organization);
+    console.log('🤝 Formatting volunteer experience:', volunteer);
+
+    return volunteer.map(vol => {
+      console.log('📋 Processing volunteer item:', vol);
+      
+      // ScrapingDog duration-dan tarixi çıxarmağa çalış
+      let startDate = '';
+      let endDate = '';
+      let current = vol.current || vol.is_current || false;
+
+      // Duration parsing (ScrapingDog format: "Jan 2022 - Present", "Mar 2021 - Dec 2023", etc.)
+      if (vol.duration && typeof vol.duration === 'string') {
+        const durationParsed = this.parseDurationToDate(vol.duration);
+        startDate = durationParsed.startDate;
+        endDate = durationParsed.endDate;
+        current = durationParsed.current;
+      }
+
+      const formatted = {
+        id: this.generateId(),
+        role: vol.role || vol.position || vol.title || vol.job_title || '',
+        organization: vol.organization || vol.company || vol.org || vol.institution || '',
+        cause: vol.cause || vol.field || vol.category || vol.type || '',
+        startDate: startDate || this.formatDate(vol.start_date || vol.startDate),
+        endDate: endDate || this.formatDate(vol.end_date || vol.endDate),
+        current: current,
+        description: vol.description || vol.summary || vol.details || ''
+      };
+
+      console.log('✅ Formatted volunteer item:', formatted);
+      return formatted;
+    }).filter(vol => vol.role || vol.organization);
+  }
+
+  // Duration string-ini tarixi çevir (ScrapingDog formatı üçün)
+  private static parseDurationToDate(duration: string): { startDate: string; endDate: string; current: boolean } {
+    if (!duration || typeof duration !== 'string') {
+      return { startDate: '', endDate: '', current: false };
+    }
+
+    try {
+      // "Jan 2022 - Present", "Mar 2021 - Dec 2023", "2020 - 2022" tipli formatları parse et
+      const durationClean = duration.trim();
+      
+      // Present/Current check
+      const isCurrent = /present|current|hazır|davam|edir/i.test(durationClean);
+      
+      // Split by dash
+      const parts = durationClean.split(/\s*[-–—]\s*/);
+      
+      if (parts.length >= 2) {
+        const startPart = parts[0].trim();
+        const endPart = parts[1].trim();
+        
+        return {
+          startDate: this.parsePartialDate(startPart),
+          endDate: isCurrent ? '' : this.parsePartialDate(endPart),
+          current: isCurrent
+        };
+      } else if (parts.length === 1) {
+        // Yalnız bir tarix verilmişsə
+        return {
+          startDate: this.parsePartialDate(parts[0]),
+          endDate: '',
+          current: isCurrent
+        };
+      }
+    } catch (error) {
+      console.error('Duration parsing error:', error);
+    }
+
+    return { startDate: '', endDate: '', current: false };
+  }
+
+  // Qismən tarixi parse et (Jan 2022, 2022, Mar 2021, etc.)
+  private static parsePartialDate(dateStr: string): string {
+    if (!dateStr) return '';
+
+    try {
+      const cleaned = dateStr.trim();
+      
+      // Yalnız il (2022)
+      if (/^\d{4}$/.test(cleaned)) {
+        return `${cleaned}-01`;
+      }
+      
+      // Ay və il (Jan 2022, March 2021)
+      const monthYearMatch = cleaned.match(/^(\w+)\s+(\d{4})$/);
+      if (monthYearMatch) {
+        const monthName = monthYearMatch[1];
+        const year = monthYearMatch[2];
+        const month = this.parseMonthName(monthName);
+        return `${year}-${month.padStart(2, '0')}`;
+      }
+      
+      // ISO format (2022-01-01)
+      if (/^\d{4}-\d{1,2}(-\d{1,2})?$/.test(cleaned)) {
+        const parts = cleaned.split('-');
+        const year = parts[0];
+        const month = parts[1].padStart(2, '0');
+        return `${year}-${month}`;
+      }
+      
+      return '';
+    } catch (error) {
+      console.error('Partial date parsing error:', error);
+      return '';
+    }
+  }
+
+  // Ay adını rəqəmə çevir
+  private static parseMonthName(monthName: string): string {
+    const months: { [key: string]: string } = {
+      'jan': '01', 'january': '01', 'yanvar': '01',
+      'feb': '02', 'february': '02', 'fevral': '02',
+      'mar': '03', 'march': '03', 'mart': '03',
+      'apr': '04', 'april': '04', 'aprel': '04',
+      'may': '05',
+      'jun': '06', 'june': '06', 'iyun': '06',
+      'jul': '07', 'july': '07', 'iyul': '07',
+      'aug': '08', 'august': '08', 'avqust': '08',
+      'sep': '09', 'september': '09', 'sentyabr': '09',
+      'oct': '10', 'october': '10', 'oktyabr': '10',
+      'nov': '11', 'november': '11', 'noyabr': '11',
+      'dec': '12', 'december': '12', 'dekabr': '12'
+    };
+
+    return months[monthName.toLowerCase()] || '01';
   }
 
   // Layihələri format et
@@ -419,6 +574,80 @@ export class LinkedInImportService {
         sequence: 'brightdata-first-then-rapidapi'
       }
     };
+  }
+
+  // Publications-ı format et
+  private static formatPublications(publications: any[]): any[] {
+    if (!Array.isArray(publications)) return [];
+
+    return publications.map(pub => ({
+      id: this.generateId(),
+      title: pub.title || pub.name || '',
+      description: pub.description || pub.summary || '',
+      date: this.formatDate(pub.date || pub.published_date),
+      publisher: pub.publisher || pub.journal || '',
+      url: pub.url || pub.link || '',
+      authors: pub.authors || []
+    })).filter(pub => pub.title);
+  }
+
+  // Honors & Awards-ı format et
+  private static formatHonorsAwards(awards: any[]): any[] {
+    if (!Array.isArray(awards)) return [];
+
+    return awards.map(award => ({
+      id: this.generateId(),
+      title: award.title || award.name || '',
+      description: award.description || award.summary || '',
+      date: this.formatDate(award.date || award.issued_date),
+      issuer: award.issuer || award.organization || award.authority || '',
+      url: award.url || award.credential_url || ''
+    })).filter(award => award.title);
+  }
+
+  // Courses-ları format et
+  private static formatCourses(courses: any[]): any[] {
+    if (!Array.isArray(courses)) return [];
+
+    return courses.map(course => ({
+      id: this.generateId(),
+      name: course.name || course.title || '',
+      institution: course.institution || course.school || course.provider || '',
+      description: course.description || course.summary || '',
+      completionDate: this.formatDate(course.completion_date || course.end_date),
+      certificate: course.certificate || course.has_certificate || false,
+      url: course.url || course.certificate_url || ''
+    })).filter(course => course.name);
+  }
+
+  // Test Scores-ları format et
+  private static formatTestScores(testScores: any[]): any[] {
+    if (!Array.isArray(testScores)) return [];
+
+    return testScores.map(test => ({
+      id: this.generateId(),
+      testName: test.test_name || test.name || '',
+      score: test.score || '',
+      date: this.formatDate(test.date || test.test_date),
+      description: test.description || '',
+      maxScore: test.max_score || test.total_score || ''
+    })).filter(test => test.testName && test.score);
+  }
+
+  // Organizations-ları format et
+  private static formatOrganizations(organizations: any[]): any[] {
+    if (!Array.isArray(organizations)) return [];
+
+    return organizations.map(org => ({
+      id: this.generateId(),
+      name: org.name || org.organization || '',
+      role: org.role || org.position || org.title || '',
+      startDate: this.formatDate(org.start_date || org.startDate),
+      endDate: this.formatDate(org.end_date || org.endDate),
+      current: org.current || org.is_current || false,
+      description: org.description || org.summary || '',
+      url: org.url || org.website || ''
+    })).filter(org => org.name);
   }
 
   // ID generatoru

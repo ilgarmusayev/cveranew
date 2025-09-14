@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import axios from 'axios';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getScrapingDogApiKey, getGeminiApiKey, recordApiUsage, markApiKeyFailed, getBestApiKey } from '@/lib/api-service';
+import { validateApiKeyForService, formatApiKeyDisplay } from '@/lib/api-key-validator';
 
 
 // Get Gemini AI instance using API keys from database
@@ -20,14 +21,28 @@ const getGeminiAI = async () => {
       throw new Error('No Gemini API keys configured');
     }
     
-    console.log('🔄 Using fallback Gemini API key from environment');
+    // Validate fallback key format
+    const isValidFormat = validateApiKeyForService(fallbackKeys[0], 'gemini');
+    if (!isValidFormat) {
+      console.error(`❌ Invalid Gemini API key format in environment: ${formatApiKeyDisplay(fallbackKeys[0])}`);
+      throw new Error('Invalid Gemini API key format in environment variables');
+    }
+    
+    console.log(`🔄 Using fallback Gemini API key from environment: ${formatApiKeyDisplay(fallbackKeys[0])}`);
     return {
       geminiAI: new GoogleGenerativeAI(fallbackKeys[0]),
       apiKeyId: null
     };
   }
   
-  console.log(`� Using Gemini API key from database (ID: ${apiKeyInfo.id})`);
+  // Validate database API key format
+  const isValidFormat = validateApiKeyForService(apiKeyInfo.apiKey, 'gemini');
+  if (!isValidFormat) {
+    console.error(`❌ Invalid Gemini API key format in database: ${formatApiKeyDisplay(apiKeyInfo.apiKey)}`);
+    throw new Error('Invalid Gemini API key format in database');
+  }
+  
+  console.log(`✅ Using valid Gemini API key from database (ID: ${apiKeyInfo.id}): ${formatApiKeyDisplay(apiKeyInfo.apiKey)}`);
   return {
     geminiAI: new GoogleGenerativeAI(apiKeyInfo.apiKey),
     apiKeyId: apiKeyInfo.id
@@ -76,27 +91,20 @@ export interface LinkedInProfile {
     skills?: string;
     technologies?: string;
   }>;
-  awards?: Array<{
-    name: string;
-    title?: string;
-    organization?: string;
-    duration?: string;
-    date?: string;
-    summary?: string;
-    description?: string;
-  }>;
   volunteering?: Array<{
-    organization?: string;
-    company?: string;
-    role?: string;
-    position?: string;
-    cause?: string;
-    field?: string;
-    duration?: string;
+    company_name: string;
+    company_position: string;
+    company_url?: string;
+    company_duration?: string;
+    starts_at?: string;
+    ends_at?: string;
     description?: string;
-    summary?: string;
-    current?: boolean;
   }>;
+  // Additional LinkedIn API fields
+  publications?: Array<any>;
+  courses?: Array<any>;
+  organizations?: Array<any>;
+  recommendations?: Array<any>;
 }
 
 export interface LinkedInImportResult {
@@ -126,7 +134,14 @@ export class LinkedInImportService {
         throw new Error('No ScrapingDog API key configured. Please add one in the admin panel at /sistem/api-keys');
       }
 
-      console.log(`✅ Using ScrapingDog API key from database (ID: ${apiKeyInfo.id})`);
+      // Validate API key format for ScrapingDog
+      const isValidFormat = validateApiKeyForService(apiKeyInfo.apiKey, 'scrapingdog');
+      if (!isValidFormat) {
+        console.error(`❌ Invalid ScrapingDog API key format: ${formatApiKeyDisplay(apiKeyInfo.apiKey)}`);
+        throw new Error('Invalid ScrapingDog API key format. ScrapingDog keys should be 24-character hex strings.');
+      }
+
+      console.log(`✅ Using valid ScrapingDog API key from database (ID: ${apiKeyInfo.id}): ${formatApiKeyDisplay(apiKeyInfo.apiKey)}`);
       return {
         apiKey: apiKeyInfo.apiKey,
         apiKeyId: apiKeyInfo.id
@@ -134,6 +149,93 @@ export class LinkedInImportService {
     } catch (error) {
       console.error('❌ ScrapingDog API key lookup failed:', error);
       throw new Error('Failed to get ScrapingDog API key. Please check admin panel at /sistem/api-keys');
+    }
+  }
+
+  /**
+   * Get all active ScrapingDog API keys for fallback
+   */
+  private async getAllActiveScrapingDogApiKeys(): Promise<Array<{ apiKey: string; apiKeyId: string }>> {
+    try {
+      const apiKeys = await prisma.apiKey.findMany({
+        where: {
+          service: 'scrapingdog',
+          active: true,
+          dailyUsage: {
+            lt: prisma.apiKey.fields.dailyLimit
+          },
+          // Skip keys that recently failed (within last hour)
+          NOT: {
+            AND: [
+              { lastResult: 'error' },
+              { 
+                lastUsed: {
+                  gte: new Date(Date.now() - 60 * 60 * 1000) // 1 hour ago
+                }
+              }
+            ]
+          }
+        },
+        orderBy: [
+          { priority: 'asc' },
+          { usageCount: 'asc' },
+          { lastUsed: 'asc' }
+        ]
+      });
+
+      // Filter and validate API keys
+      const validApiKeys = apiKeys
+        .filter(key => validateApiKeyForService(key.apiKey, 'scrapingdog'))
+        .map(key => ({
+          apiKey: key.apiKey,
+          apiKeyId: key.id
+        }));
+
+      console.log(`🔄 Found ${validApiKeys.length} valid ScrapingDog API keys out of ${apiKeys.length} total keys`);
+      return validApiKeys;
+    } catch (error) {
+      console.error('❌ Failed to get ScrapingDog API keys:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Mark API key as failed
+   */
+  private async markApiKeyAsFailed(apiKeyId: string): Promise<void> {
+    try {
+      await prisma.apiKey.update({
+        where: { id: apiKeyId },
+        data: {
+          lastResult: 'error',
+          lastUsed: new Date(),
+          usageCount: { increment: 1 },
+          dailyUsage: { increment: 1 }
+        }
+      });
+      console.log(`🚫 Marked API key as failed: ${apiKeyId}`);
+    } catch (error) {
+      console.error('❌ Failed to mark API key as failed:', error);
+    }
+  }
+
+  /**
+   * Record successful API usage
+   */
+  private async recordSuccessfulApiUsage(apiKeyId: string): Promise<void> {
+    try {
+      await prisma.apiKey.update({
+        where: { id: apiKeyId },
+        data: {
+          lastResult: 'success',
+          lastUsed: new Date(),
+          usageCount: { increment: 1 },
+          dailyUsage: { increment: 1 }
+        }
+      });
+      console.log(`✅ Recorded successful API usage: ${apiKeyId}`);
+    } catch (error) {
+      console.error('❌ Failed to record API usage:', error);
     }
   }
 
@@ -262,58 +364,99 @@ export class LinkedInImportService {
     try {
       console.log(`🔍 Scraping LinkedIn profile with ScrapingDog API: ${linkedinUsername}`);
 
-      const { apiKey, apiKeyId: keyId } = await this.getActiveScrapingDogApiKey();
-      apiKeyId = keyId;
-
       // ScrapingDog LinkedIn profile API endpoint
       const url = 'https://api.scrapingdog.com/linkedin';
       
-      // ScrapingDog parameters
-      const params = {
-        api_key: apiKey,
-        type: 'profile',
-        linkId: linkedinUsername,
-        premium: 'false'
-      };
-
-      console.log(`🔍 Calling ScrapingDog API for: ${linkedinUsername}`);
-
       let response;
       let data;
+      let successfulApiKey: string | null = null;
+      let lastError: any = null;
       
-      // Try with premium: false first, then premium: true as fallback
-      try {
-        response = await axios.get(url, { 
-          params: params,
-          timeout: 90000,
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      // Get all available ScrapingDog API keys for fallback
+      const allApiKeys = await this.getAllActiveScrapingDogApiKeys();
+      console.log(`🔄 Found ${allApiKeys.length} ScrapingDog API keys to try`);
+
+      // Try each API key until one works
+      for (let i = 0; i < allApiKeys.length; i++) {
+        const currentApiKey = allApiKeys[i];
+        apiKeyId = currentApiKey.apiKeyId; // Set current API key ID for tracking
+        console.log(`🔍 Trying API key ${i + 1}/${allApiKeys.length}: ${formatApiKeyDisplay(currentApiKey.apiKey)}`);
+
+        try {
+          // Try with premium: false first
+          const params = {
+            api_key: currentApiKey.apiKey,
+            type: 'profile',
+            linkId: linkedinUsername,
+            premium: 'false'
+          };
+
+          try {
+            response = await axios.get(url, { 
+              params: params,
+              timeout: 90000,
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+              }
+            });
+            
+            if (response.status === 200) {
+              data = response.data;
+              successfulApiKey = currentApiKey.apiKey;
+              apiKeyId = currentApiKey.apiKeyId;
+              console.log(`✅ API key ${i + 1} successful with premium: false`);
+              break;
+            }
+          } catch (premiumFalseError: any) {
+            console.log(`⚠️ API key ${i + 1} failed with premium: false (${premiumFalseError.message}), trying premium: true...`);
+            
+            // Try with premium: true as fallback
+            const premiumParams = { ...params, premium: 'true' };
+            
+            response = await axios.get(url, { 
+              params: premiumParams,
+              timeout: 90000,
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+              }
+            });
+            
+            if (response.status === 200) {
+              data = response.data;
+              successfulApiKey = currentApiKey.apiKey;
+              apiKeyId = currentApiKey.apiKeyId;
+              console.log(`✅ API key ${i + 1} successful with premium: true`);
+              break;
+            }
           }
-        });
-        data = response.data;
-        console.log('✅ ScrapingDog API successful with premium: false');
-      } catch (error: any) {
-        console.log(`❌ Failed with premium: false (${error.message}), trying premium: true...`);
-        
-        // Try with premium: true as fallback
-        const premiumParams = { ...params, premium: 'true' };
-        
-        response = await axios.get(url, { 
-          params: premiumParams,
-          timeout: 90000,
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        } catch (error: any) {
+          console.error(`❌ API key ${i + 1} failed:`, error.message);
+          lastError = error;
+          
+          // Mark this API key as failed if it's a 400/401/403 error
+          if (error.response?.status === 400 || error.response?.status === 401 || error.response?.status === 403) {
+            console.log(`🚫 Marking API key ${i + 1} as failed due to status ${error.response.status}`);
+            await this.markApiKeyAsFailed(currentApiKey.apiKeyId);
           }
-        });
-        data = response.data;
-        console.log('✅ ScrapingDog API successful with premium: true');
+          
+          // Continue to next API key
+          continue;
+        }
       }
 
-      if (response.status !== 200) {
-        console.error(`❌ ScrapingDog API error: Status ${response.status}`);
-        throw new Error(`ScrapingDog API returned status ${response.status}`);
+      // If no API key worked, throw error
+      if (!successfulApiKey || !response || response.status !== 200) {
+        console.error(`❌ All ${allApiKeys.length} ScrapingDog API keys failed. Last error:`, lastError?.message || 'Unknown error');
+        throw new Error(`All ScrapingDog API keys failed. Tried ${allApiKeys.length} keys. Last error: ${lastError?.message || 'Unknown error'}`);
       }
 
+      console.log(`✅ Successfully scraped LinkedIn profile using API key: ${formatApiKeyDisplay(successfulApiKey)}`);
+      
+      // Record successful API usage
+      if (apiKeyId) {
+        await this.recordSuccessfulApiUsage(apiKeyId);
+      }
+      
       console.log('🔍 ScrapingDog response type:', typeof data, Array.isArray(data) ? 'array' : 'object');
 
       // Handle array response
@@ -367,8 +510,7 @@ export class LinkedInImportService {
         skills: profileSkills.length > 0 ? profileSkills : ['Communication', 'Problem Solving'], // Use ScrapingDog skills or fallback
         languages: Array.isArray(data.languages) ? data.languages : [],
         projects: Array.isArray(data.projects) ? data.projects : [],
-        awards: Array.isArray(data.awards) ? data.awards : [],
-        volunteering: this.parseVolunteerExperience(data)
+        volunteering: Array.isArray(data.volunteering) ? data.volunteering : []
       };
 
       console.log('✅ Final ScrapingDog profile data:', {
@@ -377,6 +519,7 @@ export class LinkedInImportService {
         educationCount: profile.education.length,
         skillsCount: profile.skills.length,
         languagesCount: profile.languages.length,
+        volunteeringCount: profile.volunteering?.length || 0,
         apiFormat: 'ScrapingDog LinkedIn API'
       });
 
@@ -801,8 +944,51 @@ export class LinkedInImportService {
       experienceCount: profile.experience.length,
       educationCount: profile.education.length,
       projectsCount: profile.projects?.length || 0,
-      certificationsCount: profile.awards?.length || 0
+      volunteeringCount: profile.volunteering?.length || 0
     });
+
+    // Transform volunteering from LinkedIn API format
+    console.log('🤝 DEBUG: Checking for volunteering data...');
+    console.log('profile.volunteering:', profile.volunteering);
+
+    const transformedVolunteering = Array.isArray(profile.volunteering) ? profile.volunteering.map((vol: any, index: number) => {
+      // Parse dates from starts_at and ends_at
+      let startDate = '';
+      let endDate = '';
+      let duration = '';
+
+      if (vol.starts_at) {
+        startDate = vol.starts_at.trim();
+      }
+
+      if (vol.ends_at) {
+        endDate = vol.ends_at.trim();
+      } else if (vol.company_duration === '' || !vol.company_duration) {
+        // If no end date and duration is empty, assume current
+        endDate = 'Present';
+      }
+
+      // Create duration string
+      if (startDate && endDate) {
+        duration = `${startDate} - ${endDate}`;
+      } else if (startDate) {
+        duration = startDate;
+      }
+
+      return {
+        id: `vol-${index}-${Date.now()}`,
+        organization: vol.company_name || '',
+        position: vol.company_position || '',
+        startDate: startDate,
+        endDate: endDate,
+        current: endDate === 'Present' || endDate === '',
+        description: vol.description || '',
+        duration: duration,
+        url: vol.company_url || ''
+      };
+    }) : [];
+
+    console.log('✅ Final volunteering result for CV:', transformedVolunteering);
 
     // Transform projects from ScrapingDog format
     const transformedProjects = Array.isArray(profile.projects) ? profile.projects.map((proj: any, index: number) => ({
@@ -814,73 +1000,6 @@ export class LinkedInImportService {
       skills: proj.skills || proj.technologies || '',
       url: proj.link || proj.url || ''
     })) : [];
-
-    // Transform certifications/awards from ScrapingDog format with proper date handling
-    const transformedCertifications = Array.isArray(profile.awards) ? profile.awards.map((cert: any, index: number) => {
-      let certDate = '';
-
-      // Try to extract date from various possible fields
-      if (cert.date) {
-        certDate = cert.date;
-      } else if (cert.duration) {
-        certDate = cert.duration;
-      } else if (cert.year) {
-        certDate = cert.year.toString();
-      } else if (cert.issued_date) {
-        certDate = cert.issued_date;
-      } else if (cert.completion_date) {
-        certDate = cert.completion_date;
-      } else if (cert.awarded_date) {
-        certDate = cert.awarded_date;
-      }
-
-      // If we have a date range, extract the end date (completion date)
-      if (certDate && certDate.includes(' - ')) {
-        certDate = certDate.split(' - ')[1]?.trim() || certDate;
-      }
-
-      return {
-        id: `cert-${index}-${Date.now()}`,
-        name: cert.name || cert.title || '',
-        issuer: cert.organization || cert.issuer || cert.institution || 'Unknown',
-        date: certDate || '',
-        description: cert.summary || cert.description || ''
-      };
-    }) : [];
-
-    // Transform volunteer experience from ScrapingDog format with enhanced date parsing
-    const transformedVolunteer = Array.isArray(profile.volunteering) ? profile.volunteering.map((vol: any, index: number) => {
-      let startDate = '';
-      let endDate = '';
-      let current = false;
-
-      // Parse volunteer experience dates similar to work experience
-      if (vol.duration && typeof vol.duration === 'string') {
-        const parsedDates = this.parseDurationToStartEnd(vol.duration);
-        startDate = parsedDates.startDate;
-        endDate = parsedDates.endDate;
-        current = endDate === 'Present';
-      } else if (vol.start_date || vol.end_date) {
-        startDate = vol.start_date || vol.starts_at || '';
-        endDate = vol.end_date || vol.ends_at || (vol.current ? 'Present' : '');
-        current = vol.current || endDate === 'Present';
-      } else if (vol.years || vol.months) {
-        const calculatedDates = this.calculateDatesFromDuration(vol.years, vol.months);
-        startDate = calculatedDates.startDate;
-        endDate = calculatedDates.endDate;
-      }
-
-      return {
-        id: `vol-${index}-${Date.now()}`,
-        organization: vol.organization || vol.company || vol.org_name || '',
-        role: vol.role || vol.position || vol.title || '',
-        cause: vol.cause || vol.field || vol.area || '',
-        startDate: startDate,
-        endDate: endDate,
-        current: current,
-        description: vol.description || vol.summary || vol.details || ''
-      };
-    }) : [];
 
     const cvData = {
       personalInfo: {
@@ -928,20 +1047,52 @@ export class LinkedInImportService {
         proficiency: typeof lang === 'string' ? 'Professional' : (lang.proficiency || 'Professional')
       })) : [],
       projects: transformedProjects,
-      certifications: transformedCertifications,
-      volunteerExperience: transformedVolunteer,
-      publications: [],
+      volunteerExperience: transformedVolunteering,
+      // Transform publications from real API
+      publications: Array.isArray(profile.publications) ? profile.publications.map((pub: any, index: number) => ({
+        id: `pub-${index}-${Date.now()}`,
+        title: pub.title || pub.name || '',
+        publisher: pub.publisher || pub.publication || pub.journal || '',
+        date: pub.date || pub.published_date || pub.year || '',
+        url: pub.url || pub.link || '',
+        description: pub.description || pub.summary || ''
+      })) : [],
+      // Transform courses from real API  
+      courses: Array.isArray(profile.courses) ? profile.courses.map((course: any, index: number) => ({
+        id: `course-${index}-${Date.now()}`,
+        name: course.name || course.title || '',
+        institution: course.institution || course.provider || course.school || '',
+        date: course.date || course.completion_date || course.year || '',
+        description: course.description || course.summary || ''
+      })) : [],
+      // Transform organizations from real API
+      organizations: Array.isArray(profile.organizations) ? profile.organizations.map((org: any, index: number) => ({
+        id: `org-${index}-${Date.now()}`,
+        name: org.name || org.title || '',
+        role: org.role || org.position || '',
+        startDate: org.start_date || org.starts_at || '',
+        endDate: org.end_date || org.ends_at || '',
+        current: org.current || !org.end_date,
+        description: org.description || org.summary || ''
+      })) : [],
       honorsAwards: [],
       testScores: [],
       recommendations: [],
-      courses: [],
       source: 'linkedin_import',
       importedAt: new Date().toISOString()
     };
 
-    console.log('💾 Saving CV data with skills:', {
+    console.log('💾 Saving CV data with complete structure:', {
       skillsCount: cvData.skills.length,
-      skillsData: cvData.skills
+      volunteerCount: cvData.volunteerExperience.length,
+      publicationsCount: cvData.publications.length,
+      coursesCount: cvData.courses.length,
+      organizationsCount: cvData.organizations.length,
+      skillsData: cvData.skills,
+      volunteerData: cvData.volunteerExperience,
+      publicationsData: cvData.publications,
+      coursesData: cvData.courses,
+      organizationsData: cvData.organizations
     });
 
     const cv = await prisma.cV.create({
@@ -1086,7 +1237,6 @@ export class LinkedInImportService {
       const education = cvData.education || [];
       const skills = cvData.skills || [];
       const projects = cvData.projects || [];
-      const awards = cvData.awards || [];
       const languages = cvData.languages || [];
 
       // ❌ Skills olmayan CV-lər üçün AI summary yaradılmamalıdır
@@ -1323,111 +1473,6 @@ Tələblər: 3-cü tərəf icraçı baxımından, vaxt əsaslı ifadələr yox, 
       console.error('Error generating AI summary:', error);
       return { success: false, error: 'AI xülasəsi yaratmaq mümkün olmadı. Zəhmət olmasa, yenidən cəhd edin.' };
     }
-  }
-
-  /**
-   * Parse volunteer experience data from ScrapingDog response with enhanced field mapping
-   */
-  private parseVolunteerExperience(data: any): LinkedInProfile['volunteering'] {
-    console.log('❤️ Parsing volunteer experience data:', data);
-
-    // Check multiple possible volunteer field names
-    const volunteerSources = [
-      data.volunteering,
-      data.volunteer_experience,
-      data.volunteer,
-      data.volunteers,
-      data.volunteer_work,
-      data.community_service,
-      data.social_work
-    ];
-
-    let volunteerData: any[] = [];
-
-    // Find volunteer data from available sources
-    for (const source of volunteerSources) {
-      if (Array.isArray(source) && source.length > 0) {
-        volunteerData = source;
-        console.log('✅ Found volunteer data in source:', source);
-        break;
-      }
-    }
-
-    // If no dedicated volunteer fields, check experience array for volunteer entries
-    if (volunteerData.length === 0 && Array.isArray(data.experience)) {
-      console.log('🔍 Searching for volunteer entries in experience array...');
-
-      volunteerData = data.experience.filter((exp: any) => {
-        const title = (exp.title || exp.position || '').toLowerCase();
-        const company = (exp.company || exp.company_name || '').toLowerCase();
-        const description = (exp.description || '').toLowerCase();
-
-        const volunteerKeywords = [
-          'volunteer', 'voluntary', 'könüllü', 'community', 'charity', 'non-profit',
-          'nonprofit', 'ngo', 'foundation', 'social', 'humanitarian', 'civic',
-          'community service', 'volunteer work', 'social work'
-        ];
-
-        return volunteerKeywords.some(keyword =>
-          title.includes(keyword) ||
-          company.includes(keyword) ||
-          description.includes(keyword)
-        );
-      });
-
-      if (volunteerData.length > 0) {
-        console.log(`🎯 Found ${volunteerData.length} volunteer entries in experience`);
-      }
-    }
-
-    if (volunteerData.length === 0) {
-      console.log('❌ No volunteer experience data found');
-      return [];
-    }
-
-    // Parse and transform volunteer data
-    return volunteerData.map((vol: any, index: number) => {
-      let duration = '';
-      let startDate = '';
-      let endDate = '';
-      let current = false;
-
-      // Parse dates using the same logic as work experience
-      if (vol.duration && typeof vol.duration === 'string') {
-        duration = vol.duration;
-        const parsedDates = this.parseDurationToStartEnd(duration);
-        startDate = parsedDates.startDate;
-        endDate = parsedDates.endDate;
-        current = endDate === 'Present';
-      } else if (vol.start_date || vol.end_date) {
-        startDate = vol.start_date || vol.starts_at || '';
-        endDate = vol.end_date || vol.ends_at || (vol.current ? 'Present' : '');
-        current = vol.current || endDate === 'Present';
-        duration = startDate && endDate ? `${startDate} - ${endDate}` : '';
-      } else if (vol.years || vol.months) {
-        const calculatedDates = this.calculateDatesFromDuration(vol.years, vol.months);
-        startDate = calculatedDates.startDate;
-        endDate = calculatedDates.endDate;
-        duration = `${startDate} - ${endDate}`;
-      }
-
-      const volunteerEntry = {
-        organization: vol.organization || vol.company || vol.company_name || vol.org_name ||
-                     vol.institution || vol.foundation || '',
-        role: vol.role || vol.position || vol.title || vol.job_title || 'Volunteer',
-        cause: vol.cause || vol.field || vol.area || vol.sector || vol.focus_area ||
-               vol.mission || vol.purpose || '',
-        duration: duration,
-        startDate: startDate,
-        endDate: endDate,
-        current: current,
-        description: vol.description || vol.summary || vol.details || vol.about ||
-                    vol.responsibilities || ''
-      };
-
-      console.log(`🔧 Transformed volunteer entry ${index + 1}:`, volunteerEntry);
-      return volunteerEntry;
-    }).filter((vol: any) => vol.organization.trim() !== '' || vol.role.trim() !== '');
   }
 
   /**

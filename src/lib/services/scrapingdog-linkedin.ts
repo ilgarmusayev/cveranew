@@ -67,6 +67,14 @@ export interface ScrapingDogLinkedInProfile {
     url?: string;
   }>;
   volunteering?: Array<{
+    company_name?: string;
+    company_position?: string;
+    company_url?: string;
+    company_duration?: string;
+    starts_at?: string;
+    ends_at?: string;
+    description?: string;
+    // Legacy fields for compatibility
     organization?: string;
     company?: string;
     role?: string;
@@ -74,9 +82,80 @@ export interface ScrapingDogLinkedInProfile {
     cause?: string;
     field?: string;
     duration?: string;
-    description?: string;
     summary?: string;
     current?: boolean;
+  }>;
+  publications?: Array<{
+    title?: string;
+    name?: string;
+    description?: string;
+    summary?: string;
+    date?: string;
+    published_date?: string;
+    publisher?: string;
+    journal?: string;
+    url?: string;
+    link?: string;
+    authors?: string[];
+  }>;
+  courses?: Array<{
+    name?: string;
+    title?: string;
+    institution?: string;
+    school?: string;
+    provider?: string;
+    description?: string;
+    summary?: string;
+    completion_date?: string;
+    end_date?: string;
+    certificate?: boolean;
+    has_certificate?: boolean;
+    url?: string;
+    certificate_url?: string;
+  }>;
+  test_scores?: Array<{
+    test_name?: string;
+    name?: string;
+    score?: string;
+    date?: string;
+    test_date?: string;
+    description?: string;
+    max_score?: string;
+    total_score?: string;
+  }>;
+  organizations?: Array<{
+    name?: string;
+    organization?: string;
+    role?: string;
+    position?: string;
+    title?: string;
+    start_date?: string;
+    startDate?: string;
+    end_date?: string;
+    endDate?: string;
+    current?: boolean;
+    is_current?: boolean;
+    description?: string;
+    summary?: string;
+    url?: string;
+    website?: string;
+  }>;
+  memberships?: Array<{
+    name?: string;
+    organization?: string;
+    role?: string;
+    position?: string;
+    title?: string;
+    start_date?: string;
+    startDate?: string;
+    end_date?: string;
+    endDate?: string;
+    current?: boolean;
+    is_current?: boolean;
+    description?: string;
+    summary?: string;
+    url?: string;
+    website?: string;
   }>;
 }
 
@@ -541,7 +620,7 @@ export class ScrapingDogLinkedInService {
   }
 
   /**
-   * Parse volunteering from ScrapingDog response
+   * Parse volunteering from ScrapingDog response with new API format support
    */
   private parseVolunteering(volunteeringData: any[]): ScrapingDogLinkedInProfile['volunteering'] {
     console.log('🤝 Raw volunteering data:', volunteeringData);
@@ -556,17 +635,54 @@ export class ScrapingDogLinkedInService {
     return volunteeringData.map((vol, index) => {
       console.log(`📊 Raw volunteer ${index + 1}:`, vol);
       
+      // Parse dates from new API format
+      let startDate = '';
+      let endDate = '';
+      let duration = '';
+      let current = false;
+
+      if (vol.starts_at) {
+        startDate = vol.starts_at.trim();
+      }
+
+      if (vol.ends_at) {
+        endDate = vol.ends_at.trim();
+      } else if (vol.company_duration === '' || !vol.company_duration) {
+        // If no end date and duration is empty, assume current
+        endDate = 'Present';
+        current = true;
+      }
+
+      // Create duration string
+      if (startDate && endDate) {
+        duration = `${startDate} - ${endDate}`;
+      } else if (startDate) {
+        duration = startDate;
+      } else {
+        // Fallback to legacy duration field
+        duration = vol.duration || vol.dateRange || vol.period || '';
+      }
+
       const parsed = {
-        organization: vol.organization || vol.company || vol.org || vol.institution || '',
-        company: vol.company || vol.organization || vol.org || vol.institution || '',
-        role: vol.role || vol.position || vol.title || vol.job_title || '',
-        position: vol.position || vol.role || vol.title || vol.job_title || '',
+        // New API format fields (priority)
+        company_name: vol.company_name || vol.organization || vol.company || vol.org || vol.institution || '',
+        company_position: vol.company_position || vol.role || vol.position || vol.title || vol.job_title || '',
+        company_url: vol.company_url || '',
+        company_duration: vol.company_duration || duration,
+        starts_at: vol.starts_at || startDate,
+        ends_at: vol.ends_at || endDate,
+        description: vol.description || vol.summary || vol.details || '',
+        
+        // Legacy fields for backward compatibility
+        organization: vol.company_name || vol.organization || vol.company || vol.org || vol.institution || '',
+        company: vol.company_name || vol.company || vol.organization || vol.org || vol.institution || '',
+        role: vol.company_position || vol.role || vol.position || vol.title || vol.job_title || '',
+        position: vol.company_position || vol.position || vol.role || vol.title || vol.job_title || '',
         cause: vol.cause || vol.field || vol.category || vol.type || '',
         field: vol.field || vol.cause || vol.category || vol.type || '',
-        duration: vol.duration || vol.dateRange || vol.period || '',
-        description: vol.description || vol.summary || vol.details || '',
-        summary: vol.summary || vol.description || vol.details || '',
-        current: vol.current || vol.is_current || false
+        duration: duration,
+        summary: vol.description || vol.summary || vol.details || '',
+        current: current || vol.current || vol.is_current || false
       };
       
       console.log(`✅ Parsed volunteer ${index + 1}:`, parsed);

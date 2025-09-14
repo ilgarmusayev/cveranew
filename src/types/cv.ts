@@ -114,6 +114,18 @@ export interface TestScore {
   score: string;
   date?: string;
   description?: string;
+  maxScore?: string;
+}
+
+export interface Organization {
+  id: string;
+  name: string;
+  role?: string;
+  startDate?: string;
+  endDate?: string;
+  current?: boolean;
+  description?: string;
+  url?: string;
 }
 
 export interface Recommendation {
@@ -186,6 +198,7 @@ export interface CVData {
   testScores?: TestScore[];
   recommendations?: Recommendation[];
   courses?: Course[];
+  organizations?: Organization[];
   customSections?: CustomSection[];
   cvLanguage?: 'azerbaijani' | 'english'; // CV display language
   translationMetadata?: TranslationMetadata;

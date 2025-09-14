@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { validateApiKeyForService } from '@/lib/api-key-validator';
 
 
 export interface ApiKeyInfo {
@@ -46,7 +47,25 @@ export async function getActiveApiKeys(service: string): Promise<ApiKeyInfo[]> {
  */
 export async function getBestApiKey(service: string): Promise<ApiKeyInfo | null> {
   const apiKeys = await getActiveApiKeys(service);
-  return apiKeys.length > 0 ? apiKeys[0] : null;
+  
+  // Filter and validate API keys for the service
+  const validApiKeys = apiKeys.filter(key => {
+    const isValid = validateApiKeyForService(key.apiKey, service);
+    if (!isValid) {
+      console.warn(`⚠️ Invalid API key format for ${service}: ${key.id} (${key.apiKey.substring(0, 10)}...)`);
+    }
+    return isValid;
+  });
+  
+  if (validApiKeys.length === 0) {
+    console.error(`❌ No valid API keys found for service: ${service}`);
+    return null;
+  }
+  
+  const selectedKey = validApiKeys[0];
+  console.log(`✅ Selected valid API key for ${service}: ${selectedKey.id} (${selectedKey.apiKey.substring(0, 10)}...)`);
+  
+  return selectedKey;
 }
 
 /**
