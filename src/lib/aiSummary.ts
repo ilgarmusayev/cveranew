@@ -165,7 +165,7 @@ function generateFallbackSummary(cvData: CVDataForSummary): string {
  */
 export function canUseAIFeatures(userTier: string): boolean {
   const tier = userTier.toLowerCase();
-  return tier === 'premium' || tier === 'medium';
+  return tier === 'premium' || tier === 'medium' || tier === 'pro' || tier === 'populyar';
 }
 
 /**
@@ -176,5 +176,5 @@ export function getAIFeatureMessage(userTier: string): string {
     return 'AI-powered professional summary mövcuddur!';
   }
   
-  return 'AI professional summary Premium istifadəçilər üçün mövcuddur. Planınızı yüksəldin!';
+  return 'AI professional summary Premium, Pro və Medium istifadəçilər üçün mövcuddur. Planınızı yüksəldin!';
 }

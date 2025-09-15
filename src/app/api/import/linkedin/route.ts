@@ -732,9 +732,18 @@ export async function POST(request: NextRequest) {
         ? (scrapingDogResponse.reason?.message || scrapingDogResponse.reason || 'Unknown error')
         : 'No data';
       console.error('❌ ScrapingDog xətası:', errorMessage);
+      
+      // Check if it's a rate limiting or 400 error
+      const isRateLimitError = errorMessage.includes('400') || errorMessage.includes('status code 400') || 
+                              errorMessage.includes('rate limit') || errorMessage.includes('too many requests');
+      
+      const userFriendlyMessage = isRateLimitError 
+        ? 'Zəhmət olmasa təkrar yoxlayın. Sorğu sıxlığı səbəbindən ləğv edildi'
+        : `ScrapingDog import uğursuz: ${errorMessage}`;
+      
       return NextResponse.json({
         success: false,
-        error: `ScrapingDog import uğursuz: ${errorMessage}`
+        error: userFriendlyMessage
       }, { status: 500 });
     }
 

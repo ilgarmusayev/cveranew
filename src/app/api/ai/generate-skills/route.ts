@@ -37,11 +37,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Only allow Medium and Premium users to generate AI skills
+    // Only allow Medium, Pro and Premium users to generate AI skills
     if (user.tier === 'Free') {
       return NextResponse.json({
         success: false,
-        error: 'AI skills yaratma yalnız premium abunəçilər üçün mövcuddur. Abunəliyi yüksəldin.'
+        error: 'AI skills yaratma yalnız Premium, Pro və Medium abunəçilər üçün mövcuddur. Abunəliyi yüksəldin.'
       }, { status: 403 });
     }
 

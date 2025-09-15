@@ -54,8 +54,8 @@ export async function POST(req: NextRequest) {
     if (!canUseAIFeatures(user.tier)) {
       return NextResponse.json(
         { 
-          error: "AI features are only available for Premium and Medium users",
-          message: "AI professional summary Premium və Medium istifadəçilər üçün mövcuddur. Planınızı yüksəldin!",
+          error: "AI features are only available for Premium, Pro and Medium users",
+          message: "AI professional summary Premium, Pro və Medium istifadəçilər üçün mövcuddur. Planınızı yüksəldin!",
           tier: user.tier,
           upgradeRequired: true
         },
