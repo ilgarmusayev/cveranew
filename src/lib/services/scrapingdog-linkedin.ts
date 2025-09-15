@@ -468,6 +468,12 @@ export class ScrapingDogLinkedInService {
         profileData.certifications || 
         profileData.certificates || 
         profileData.certification ||
+        profileData.certs ||
+        profileData.credentials ||
+        profileData.licenses ||
+        profileData.achievements ||
+        profileData.course_certificates ||
+        profileData.professional_certificates ||
         []
       ),
       volunteering: this.parseVolunteering(
@@ -477,8 +483,17 @@ export class ScrapingDogLinkedInService {
         profileData.volunteerExperience ||
         profileData.volunteer_work ||
         []
-      )
+      ),
+      organizations: this.parseOrganizations(profileData.organizations || [])
     };
+
+    // Merge course certificates into main certifications array if courses exist
+    if (profileData.courses && Array.isArray(profileData.courses)) {
+      const courseCertifications = this.extractCertificationsFromCourses(profileData.courses);
+      if (courseCertifications && courseCertifications.length > 0) {
+        profile.certifications = [...(profile.certifications || []), ...courseCertifications];
+      }
+    }
 
     console.log('🎯 Final transformed profile:');
     console.log('Certifications count:', profile.certifications?.length || 0);
@@ -588,14 +603,15 @@ export class ScrapingDogLinkedInService {
       console.log(`📜 Raw cert ${index + 1}:`, cert);
       
       const parsed = {
-        name: cert.name || cert.title || cert.certification || '',
-        title: cert.title || cert.name || '',
-        organization: cert.organization || cert.issuer || cert.authority || '',
-        issuer: cert.issuer || cert.organization || cert.authority || '',
-        issueDate: cert.issueDate || cert.date || cert.startDate || '',
-        expiryDate: cert.expiryDate || cert.expires || cert.endDate || '',
-        credentialId: cert.credentialId || cert.id || '',
-        url: cert.url || cert.link || cert.verificationUrl || ''
+        // ScrapingDog API format mapping
+        name: cert.certification || cert.name || cert.title || cert.certification_name || cert.certificate_name || '',
+        title: cert.certification || cert.title || cert.name || cert.certificate_title || '',
+        organization: cert.company_name || cert.organization || cert.issuer || cert.authority || cert.issuing_organization || cert.institution || cert.provider || '',
+        issuer: cert.company_name || cert.issuer || cert.organization || cert.authority || cert.issuing_organization || cert.institution || '',
+        issueDate: cert.issue_date || cert.issueDate || cert.date || cert.startDate || cert.start_date || cert.completion_date || '',
+        expiryDate: cert.expiry_date || cert.expiryDate || cert.expires || cert.endDate || cert.end_date || cert.expiration_date || '',
+        credentialId: cert.credential_id || cert.credentialId || cert.id || cert.certificate_id || cert.license_number || '',
+        url: cert.credential_url || cert.url || cert.link || cert.verificationUrl || cert.verification_url || cert.certificate_url || ''
       };
       
       console.log(`✅ Parsed cert ${index + 1}:`, parsed);
@@ -686,6 +702,103 @@ export class ScrapingDogLinkedInService {
       };
       
       console.log(`✅ Parsed volunteer ${index + 1}:`, parsed);
+      return parsed;
+    });
+  }
+
+  /**
+   * Extract certifications from courses data (courses that have certificates)
+   */
+  private extractCertificationsFromCourses(coursesData: any[]): Array<{
+    name: string;
+    title?: string;
+    organization?: string;
+    issuer?: string;
+    issueDate?: string;
+    expiryDate?: string;
+    credentialId?: string;
+    url?: string;
+  }> {
+    console.log('🎓 Extracting certifications from courses data:', coursesData);
+    
+    if (!Array.isArray(coursesData)) {
+      return [];
+    }
+
+    const certifications: Array<{
+      name: string;
+      title?: string;
+      organization?: string;
+      issuer?: string;
+      issueDate?: string;
+      expiryDate?: string;
+      credentialId?: string;
+      url?: string;
+    }> = [];
+    
+    coursesData.forEach((course, index) => {
+      // Only extract courses that have certificates
+      if (course.certificate || course.has_certificate || course.certificate_url || course.certification) {
+        console.log(`🏆 Found course with certificate ${index + 1}:`, course);
+        
+        const certification = {
+          name: course.name || course.title || course.course_name || '',
+          title: course.title || course.name || '',
+          organization: course.institution || course.school || course.provider || course.organization || '',
+          issuer: course.provider || course.institution || course.school || course.organization || '',
+          issueDate: course.completion_date || course.end_date || course.date || course.issue_date || '',
+          expiryDate: course.expiry_date || course.expiration_date || '',
+          credentialId: course.certificate_id || course.credential_id || '',
+          url: course.certificate_url || course.credential_url || course.url || ''
+        };
+        
+        // Only add if it has meaningful data
+        if (certification.name || certification.organization) {
+          certifications.push(certification);
+          console.log(`✅ Added course certification:`, certification);
+        }
+      }
+    });
+    
+    console.log(`🎓 Extracted ${certifications.length} certifications from courses`);
+    return certifications;
+  }
+
+  /**
+   * Parse organizations from ScrapingDog response
+   */
+  private parseOrganizations(organizationsData: any[]): ScrapingDogLinkedInProfile['organizations'] {
+    console.log('🏢 Raw organizations data:', organizationsData);
+    
+    if (!Array.isArray(organizationsData)) {
+      console.log('❌ Organizations data is not an array:', typeof organizationsData);
+      return [];
+    }
+
+    console.log('🔍 Found', organizationsData.length, 'organizations to parse');
+
+    return organizationsData.map((org, index) => {
+      console.log(`🏢 Raw organization ${index + 1}:`, org);
+      
+      const parsed = {
+        name: org.name || org.organization || '',
+        organization: org.name || org.organization || '',
+        role: org.position || org.role || org.title || '',
+        position: org.position || org.role || org.title || '',
+        title: org.position || org.role || org.title || '',
+        start_date: org.start_date || org.startDate || '',
+        startDate: org.start_date || org.startDate || '',
+        end_date: org.end_date || org.endDate || '',
+        endDate: org.end_date || org.endDate || '',
+        current: org.current || org.is_current || false,
+        is_current: org.current || org.is_current || false,
+        description: org.description || org.summary || '',
+        summary: org.description || org.summary || '',
+        url: org.url || org.website || '',
+        website: org.url || org.website || ''
+      };
+      
+      console.log(`✅ Parsed organization ${index + 1}:`, parsed);
       return parsed;
     });
   }

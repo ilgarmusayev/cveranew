@@ -32,7 +32,7 @@ const plans: PricingPlan[] = [
   {
     id: 'pro',
     name: 'Populyar',
-    price: 0.01, // TEST PRICE - was 2.99 AZN
+    price: 2.99, // Updated pricing
     features: [
       'Gündə 5 CV yaratma ',
       'Pulsuz və Populyar səviyyə şablonlar',
@@ -49,7 +49,7 @@ const plans: PricingPlan[] = [
   {
     id: 'premium',
     name: 'Premium',
-    price: 0.01, // TEST PRICE - was 4.99 AZN
+    price: 4.99, // Updated pricing
     features: [
       'Limitsiz CV yaratma',
       'Bütün şablonlar (Premium daxil)',
@@ -134,7 +134,7 @@ export default function PricingPage() {
       offers: {
         "@type": "AggregateOffer",
         lowPrice: "0",
-        highPrice: "0.01", // Updated for test pricing
+        highPrice: "4.99", // Updated pricing
         priceCurrency: "AZN",
         availability: "https://schema.org/InStock",
         offerCount: plans.length.toString()
@@ -402,13 +402,13 @@ export default function PricingPage() {
           </div>
 
           {/* Pricing Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 max-w-6xl mx-auto mt-8 sm:mt-6">
             {plans.map((plan, index) => {
                 const isCurrentPlan = plan.id === currentUserPlanId;
                 return (
                 <div
                     key={plan.id}
-                    className={`relative bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 ${
+                    className={`relative bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 mt-6 sm:mt-4 ${
                         isCurrentPlan
                             ? 'border-green-500 ring-4 ring-green-100 bg-green-50'
                             : plan.popular
@@ -418,8 +418,8 @@ export default function PricingPage() {
                 >
                   {/* Current Plan Badge */}
                   {isCurrentPlan && (
-                      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-green-600 text-white px-6 py-2 rounded-full text-sm font-medium">
+                      <div className="absolute -top-4 sm:-top-4 left-1/2 transform -translate-x-1/2 z-10">
+                  <span className="bg-green-600 text-white px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap">
                     Cari Paket
                   </span>
                       </div>
@@ -427,8 +427,8 @@ export default function PricingPage() {
 
                   {/* Popular Badge */}
                   {plan.popular && !isCurrentPlan && (
-                      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-sm font-medium">
+                      <div className="absolute -top-4 sm:-top-4 left-1/2 transform -translate-x-1/2 z-10">
+                  <span className="bg-blue-600 text-white px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap">
                     Ən Yaxşı Seçim
                   </span>
                       </div>

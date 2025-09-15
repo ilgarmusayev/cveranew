@@ -303,6 +303,46 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free', 
     });
   };
 
+  const addOrganizationsSection = () => {
+    console.log('🏢 Adding Organizations template section');
+    const organizationsSection: CustomSection = {
+      id: Date.now().toString(),
+      title: cvLanguage === 'english' ? 'Organizations' : 'Təşkilatlar',
+      elements: [
+        {
+          id: `org-${Date.now()}-1`,
+          type: 'heading',
+          content: cvLanguage === 'english' ? 'Organization Name' : 'Təşkilat Adı'
+        },
+        {
+          id: `org-${Date.now()}-2`,
+          type: 'text',
+          content: cvLanguage === 'english' ? 'Position/Role' : 'Vəzifə/Rol'
+        },
+        {
+          id: `org-${Date.now()}-3`,
+          type: 'dateRange',
+          content: cvLanguage === 'english' ? 'Duration' : 'Müddət',
+          subContent: cvLanguage === 'english' ? '2020 - Present' : '2020 - Hazırda'
+        },
+        {
+          id: `org-${Date.now()}-4`,
+          type: 'text',
+          content: cvLanguage === 'english' 
+            ? 'Brief description of your role and responsibilities in the organization' 
+            : 'Təşkilatdakı rolunuz və məsuliyyətlərinizin qısa təsviri'
+        }
+      ],
+      isExpanded: true
+    };
+    console.log('🏢 Organizations section created:', organizationsSection);
+    setSections(prev => {
+      const newSections = [...prev, organizationsSection];
+      console.log('🏢 Updated sections with organizations:', newSections);
+      return newSections;
+    });
+  };
+
   const removeSection = (sectionId: string) => {
     setSections(prev => prev.filter(section => section.id !== sectionId));
   };
@@ -661,20 +701,32 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free', 
           <h3 className="text-base sm:text-lg font-semibold text-gray-900">{getTranslation(cvLanguage, 'sectionTitle')}</h3>
           <p className="text-xs sm:text-sm text-gray-600 break-words">{getTranslation(cvLanguage, 'sectionDescription')}</p>
         </div>
-        <button
-          onClick={addSection}
-          className="flex items-center px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap flex-shrink-0"
-        >
-          <svg className="w-4 h-4 mr-2 sm:mr-2 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          <span className="hidden sm:inline text-sm">
-            {getTranslation(cvLanguage, 'addSection')}
-          </span>
-          <span className="sm:hidden text-sm">
-            {getTranslation(cvLanguage, 'addSectionMobile')}
-          </span>
-        </button>
+        <div className="flex items-center space-x-2 flex-shrink-0">
+          <button
+            onClick={addOrganizationsSection}
+            className="flex items-center px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors whitespace-nowrap text-sm"
+            title={cvLanguage === 'english' ? 'Add Organizations Template' : 'Təşkilatlar Şablonu Əlavə Et'}
+          >
+            <span className="mr-1 sm:mr-2">🏢</span>
+            <span className="hidden sm:inline">
+              {cvLanguage === 'english' ? 'Organizations' : 'Təşkilatlar'}
+            </span>
+          </button>
+          <button
+            onClick={addSection}
+            className="flex items-center px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+          >
+            <svg className="w-4 h-4 mr-2 sm:mr-2 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            <span className="hidden sm:inline text-sm">
+              {getTranslation(cvLanguage, 'addSection')}
+            </span>
+            <span className="sm:hidden text-sm">
+              {getTranslation(cvLanguage, 'addSectionMobile')}
+            </span>
+          </button>
+        </div>
       </div>
 
       {/* Sections */}
@@ -687,12 +739,21 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free', 
           </div>
           <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">{getTranslation(cvLanguage, 'noSectionsTitle')}</h3>
           <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4 px-4 break-words">{getTranslation(cvLanguage, 'noSectionsDescription')}</p>
-          <button
-            onClick={addSection}
-            className="inline-flex items-center px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
-          >
-            {getTranslation(cvLanguage, 'addFirstSection')}
-          </button>
+          <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-3">
+            <button
+              onClick={addOrganizationsSection}
+              className="inline-flex items-center px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base"
+            >
+              <span className="mr-2">🏢</span>
+              {cvLanguage === 'english' ? 'Add Organizations' : 'Təşkilatlar Əlavə Et'}
+            </button>
+            <button
+              onClick={addSection}
+              className="inline-flex items-center px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
+            >
+              {getTranslation(cvLanguage, 'addFirstSection')}
+            </button>
+          </div>
         </div>
       ) : (
         <div className="space-y-4">

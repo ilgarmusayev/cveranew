@@ -121,11 +121,13 @@ export interface Organization {
   id: string;
   name: string;
   role?: string;
+  position?: string; // Alternative field name for role
   startDate?: string;
   endDate?: string;
   current?: boolean;
   description?: string;
   url?: string;
+  website?: string; // Alternative field name for url
 }
 
 export interface Recommendation {

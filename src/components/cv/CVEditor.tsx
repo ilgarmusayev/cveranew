@@ -14,6 +14,7 @@ import LanguagesSection from './sections/LanguagesSection';
 import ProjectsSection from './sections/ProjectsSection';
 import CertificationsSection from './sections/CertificationsSection';
 import VolunteerExperienceSection from './sections/VolunteerExperienceSection';
+import OrganizationsSection from './sections/OrganizationsSection';
 import PublicationsSection from './sections/PublicationsSection';
 import ElaveSections from './sections/ElaveSections';
 
@@ -130,6 +131,7 @@ const getSections = (language: CVLanguage, translatedSectionNames?: Record<strin
             { id: 'projects', label: 'Projects', icon: '🚀' },
             { id: 'certifications', label: 'Certifications', icon: '🏆' },
             { id: 'volunteer', label: 'Volunteer Experience', icon: '❤️' },
+            { id: 'organizations', label: 'Organizations', icon: '🏢' },
             { id: 'customSections', label: 'Custom Sections', icon: '📝' },
             { id: 'template', label: 'Template Selection', icon: '🎨' }
         ],
@@ -142,6 +144,7 @@ const getSections = (language: CVLanguage, translatedSectionNames?: Record<strin
             { id: 'projects', label: 'Layihələr', icon: '🚀' },
             { id: 'certifications', label: 'Sertifikatlar', icon: '🏆' },
             { id: 'volunteer', label: 'Könüllü Təcrübə', icon: '❤️' },
+            { id: 'organizations', label: 'Təşkilatlar', icon: '🏢' },
             { id: 'customSections', label: 'Əlavə Bölmələr', icon: '📝' },
             { id: 'template', label: 'Şablon Seçimi', icon: '🎨' }
         ]
@@ -196,6 +199,7 @@ const getSectionDescription = (sectionId: string, language: CVLanguage) => {
             projects: 'Highlight significant projects you have worked on.',
             certifications: 'Add any relevant certifications you have earned.',
             volunteer: 'Describe your volunteer contributions.',
+            organizations: 'List organizations you are a member of or hold positions in.',
             customSections: 'Add custom sections to highlight unique aspects of your profile.',
             template: 'Choose a template that best fits your style.'
         },
@@ -208,6 +212,7 @@ const getSectionDescription = (sectionId: string, language: CVLanguage) => {
             projects: 'Üzərində işlədiyiniz əhəmiyyətli layihələri qeyd edin.',
             certifications: 'Qazandığınız müvafiq sertifikatları əlavə edin.',
             volunteer: 'Könüllü fəaliyyətinizi təsvir edin.',
+            organizations: 'Üzvü olduğunuz və ya vəzifə tutduğunuz təşkilatları sadalayın.',
             customSections: 'Profilinizin unikal tərəflərini vurğulamaq üçün xüsusi bölmələr əlavə edin.',
             template: 'Stilinizi ən yaxşı əks etdirən şablonu seçin.'
         }
@@ -1076,6 +1081,15 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     <VolunteerExperienceSection
                         data={cv.volunteerExperience}
                         onChange={(data: any) => updateCVData('volunteerExperience', data)}
+                        cvLanguage={cv.cvLanguage}
+                    />
+                );
+
+            case 'organizations':
+                return (
+                    <OrganizationsSection
+                        data={cv.organizations}
+                        onChange={(data: any) => updateCVData('organizations', data)}
                         cvLanguage={cv.cvLanguage}
                     />
                 );

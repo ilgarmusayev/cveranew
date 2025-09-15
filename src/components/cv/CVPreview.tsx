@@ -1666,8 +1666,8 @@ const BasicTemplate: React.FC<{
 
             case 'courses':
                 return courses.length > 0 ? (
-                    <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                        <h2 className="text-xl font-bold text-green-700 mb-3 flex items-center">
+                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <h2 className="text-xl font-bold text-blue-700 mb-3 flex items-center">
                             <span className="mr-2">🎓</span>
                             {getSectionName('courses', data.cvLanguage, data.sectionNames)}
                         </h2>
@@ -1677,21 +1677,21 @@ const BasicTemplate: React.FC<{
                                     <div className="flex justify-between items-start mb-1">
                                         <div className="flex-1">
                                             {course.url ? (
-                                                <a href={course.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-green-700 hover:text-green-900 underline">
+                                                <a href={course.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-blue-700 hover:text-blue-900 underline">
                                                     {course.name}
                                                 </a>
                                             ) : (
-                                                <h3 className="font-semibold text-green-700">{course.name}</h3>
+                                                <h3 className="font-semibold text-blue-700">{course.name}</h3>
                                             )}
-                                            <p className="text-green-600 text-sm">{course.institution}</p>
+                                            <p className="text-blue-600 text-sm">{course.institution}</p>
                                             {course.certificate && (
-                                                <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded mt-1">
+                                                <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-1">
                                                     {data.cvLanguage === 'azerbaijani' ? 'Sertifikat alınıb' : 
                                                      data.cvLanguage?.includes('tr') ? 'Sertifika alındı' : 'Certificate earned'}
                                                 </span>
                                             )}
                                         </div>
-                                        {course.completionDate && <span className="text-xs text-green-500">{formatDate(course.completionDate, data.cvLanguage)}</span>}
+                                        {course.completionDate && <span className="text-xs text-blue-500">{formatDate(course.completionDate, data.cvLanguage)}</span>}
                                     </div>
                                     {course.description && (
                                         <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(course.description)}</div>
@@ -1732,37 +1732,53 @@ const BasicTemplate: React.FC<{
 
             case 'organizations':
                 return organizations.length > 0 ? (
-                    <div className="bg-teal-50 p-4 rounded-lg border border-teal-200">
-                        <h2 className="text-xl font-bold text-teal-700 mb-3 flex items-center">
-                            <span className="mr-2">🏢</span>
+                    <div>
+                        <h2 style={{ 
+                            fontSize: 'var(--cv-subheading-size)', 
+                            fontWeight: 'var(--cv-subheading-weight)',
+                            color: '#2563eb',
+                            marginBottom: '12px',
+                            borderBottom: '1px solid #2563eb',
+                            paddingBottom: '8px'
+                        }}>
                             {getSectionName('organizations', data.cvLanguage, data.sectionNames)}
                         </h2>
-                        <div className="space-y-3">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing)' }}>
                             {organizations.map((org) => (
-                                <div key={org.id} className="bg-white p-3 rounded-lg shadow-sm">
+                                <div key={org.id} className="pl-3" style={{ borderLeft: '2px solid #2563eb' }}>
                                     <div className="flex justify-between items-start mb-1">
-                                        <div className="flex-1">
-                                            {org.url ? (
-                                                <a href={org.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-teal-700 hover:text-teal-900 underline">
-                                                    {org.name}
-                                                </a>
-                                            ) : (
-                                                <h3 className="font-semibold text-teal-700">{org.name}</h3>
-                                            )}
-                                            {org.role && <p className="text-teal-600 text-sm">{org.role}</p>}
-                                        </div>
-                                        {(org.startDate || org.endDate) && (
-                                            <span className="text-xs text-teal-500">
-                                                {org.startDate && org.endDate ? (
-                                                    org.current ? `${formatDate(org.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : `${formatDate(org.startDate, data.cvLanguage)} - ${formatDate(org.endDate, data.cvLanguage)}`
-                                                ) : (
-                                                    formatDate((org.startDate || org.endDate) || '', data.cvLanguage)
-                                                )}
-                                            </span>
-                                        )}
+                                        <h3 className="font-semibold text-gray-900 text-sm">{org.name}</h3>
+                                        <span className="text-xs font-medium whitespace-nowrap ml-2" style={{ color: '#6b7280' }}>
+                                            {org.startDate ? (
+                                                org.current ? `${formatDate(org.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
+                                                org.endDate ? `${formatDate(org.startDate, data.cvLanguage)} - ${formatDate(org.endDate, data.cvLanguage)}` :
+                                                formatDate(org.startDate, data.cvLanguage)
+                                            ) : org.current ? (
+                                                getCurrentText(data.cvLanguage)
+                                            ) : org.endDate ? (
+                                                formatDate(org.endDate, data.cvLanguage)
+                                            ) : ''}
+                                        </span>
                                     </div>
+                                    {(org.role || org.position) && (
+                                        <p className="text-blue-600 font-medium text-xs">{org.role || org.position}</p>
+                                    )}
+                                    {(org.url || org.website) && (
+                                        <div className="text-xs text-gray-600 mt-0.5">
+                                            <a
+                                                href={org.url || org.website}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-gray-900 hover:text-gray-700 underline hover:no-underline transition-colors cursor-pointer"
+                                            >
+                                                {org.url || org.website}
+                                            </a>
+                                        </div>
+                                    )}
                                     {org.description && (
-                                        <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(org.description)}</div>
+                                        <div className="text-gray-700 text-xs mt-1 leading-relaxed">
+                                            {renderHtmlContent(org.description)}
+                                        </div>
                                     )}
                                 </div>
                             ))}
@@ -2138,10 +2154,10 @@ const ModernTemplate: React.FC<{
                     >
                         <div style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
                             <h2 className="text-xl font-bold text-gray-900 flex items-center" style={{ marginBottom: 0 }}>
-                                <span className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">📝</span>
+                                <span className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">📝</span>
                                 {getSectionName('summary', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="bg-green-50 p-4 rounded-lg border-l-4 border-green-400">
+                            <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-600">
                                 <div className="text-gray-700 leading-relaxed">
                                     {renderHtmlContent(personalInfo.summary, false, data.cvLanguage)}
                                 </div>
@@ -2299,12 +2315,12 @@ const ModernTemplate: React.FC<{
                     >
                         <div style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
                             <h2 className="text-xl font-bold text-gray-900 flex items-center" style={{ marginBottom: 0 }}>
-                                <span className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">🎓</span>
+                                <span className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">🎓</span>
                                 {getSectionName('education', data.cvLanguage, data.sectionNames)}
                             </h2>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing)' }}>
                                 {education.map((edu) => (
-                                    <div key={edu.id} className="border-l-4 border-green-400 pl-4 bg-green-50 p-4 rounded-r-lg">
+                                    <div key={edu.id} className="border-l-4 border-blue-600 pl-4 bg-blue-50 p-4 rounded-r-lg">
                                         <div className="flex justify-between items-start mb-1">
                                             <div className="flex-1">
                                                 {edu.degree ? (
@@ -2313,7 +2329,7 @@ const ModernTemplate: React.FC<{
                                                     <h3 className="font-bold text-gray-900">{edu.institution}</h3>
                                                 )}
                                                 {edu.degree && (
-                                                    <p className="text-green-600 font-medium">{edu.institution}</p>
+                                                    <p className="text-blue-600 font-medium">{edu.institution}</p>
                                                 )}
                                                 {(edu.field || edu.gpa) && (
                                                     <p className="text-gray-600 text-sm">
@@ -2322,7 +2338,7 @@ const ModernTemplate: React.FC<{
                                                 )}
                                             </div>
                                             {(edu.startDate || edu.endDate) && (
-                                                <div className="bg-green-100 px-3 py-1 rounded-full text-sm text-green-700 font-medium ml-4">
+                                                <div className="bg-blue-100 px-3 py-1 rounded-full text-sm text-blue-700 font-medium ml-4">
                                                     {edu.startDate ? (
                                                         edu.current ? `${formatDate(edu.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
                                                         edu.endDate ? `${formatDate(edu.startDate, data.cvLanguage)} - ${formatDate(edu.endDate, data.cvLanguage)}` :
@@ -2726,31 +2742,31 @@ const ModernTemplate: React.FC<{
                     >
                         <div style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
                             <h2 className="text-xl font-bold text-gray-900 flex items-center" style={{ marginBottom: 0 }}>
-                                <span className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">🎓</span>
+                                <span className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">🎓</span>
                                 {getSectionName('courses', data.cvLanguage, data.sectionNames)}
                             </h2>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing)' }}>
                                 {courses.map((course) => (
-                                    <div key={course.id} className="border-l-4 border-green-400 pl-4 bg-green-50 p-4 rounded-r-lg">
+                                    <div key={course.id} className="border-l-4 border-blue-600 pl-4 bg-blue-50 p-4 rounded-r-lg">
                                         <div className="flex justify-between items-start mb-1">
                                             <div className="flex-1">
                                                 {course.url ? (
-                                                    <a href={course.url} target="_blank" rel="noopener noreferrer" className="font-bold text-gray-900 hover:text-green-600 underline">
+                                                    <a href={course.url} target="_blank" rel="noopener noreferrer" className="font-bold text-gray-900 hover:text-blue-600 underline">
                                                         {course.name}
                                                     </a>
                                                 ) : (
                                                     <h3 className="font-bold text-gray-900">{course.name}</h3>
                                                 )}
-                                                <p className="text-green-600 font-medium">{course.institution}</p>
+                                                <p className="text-blue-600 font-medium">{course.institution}</p>
                                                 {course.certificate && (
-                                                    <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded mt-1">
+                                                    <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-1">
                                                         {data.cvLanguage === 'azerbaijani' ? 'Sertifikat alınıb' : 
                                                          data.cvLanguage?.includes('tr') ? 'Sertifika alındı' : 'Certificate earned'}
                                                     </span>
                                                 )}
                                             </div>
                                             {course.completionDate && (
-                                                <div className="bg-green-100 px-3 py-1 rounded-full text-sm text-green-700 font-medium ml-4">
+                                                <div className="bg-blue-100 px-3 py-1 rounded-full text-sm text-blue-700 font-medium ml-4">
                                                     {formatDate(course.completionDate, data.cvLanguage)}
                                                 </div>
                                             )}
@@ -2826,14 +2842,14 @@ const ModernTemplate: React.FC<{
                                     <div key={org.id} className="border-l-4 border-teal-400 pl-4 bg-teal-50 p-4 rounded-r-lg">
                                         <div className="flex justify-between items-start mb-1">
                                             <div className="flex-1">
-                                                {org.url ? (
-                                                    <a href={org.url} target="_blank" rel="noopener noreferrer" className="font-bold text-gray-900 hover:text-teal-600 underline">
+                                                {(org.url || org.website) ? (
+                                                    <a href={org.url || org.website} target="_blank" rel="noopener noreferrer" className="font-bold text-gray-900 hover:text-teal-600 underline">
                                                         {org.name}
                                                     </a>
                                                 ) : (
                                                     <h3 className="font-bold text-gray-900">{org.name}</h3>
                                                 )}
-                                                {org.role && <p className="text-teal-600 font-medium">{org.role}</p>}
+                                                {(org.role || org.position) && <p className="text-teal-600 font-medium">{org.role || org.position}</p>}
                                             </div>
                                             {(org.startDate || org.endDate) && (
                                                 <div className="bg-teal-100 px-3 py-1 rounded-full text-sm text-teal-700 font-medium ml-4">
@@ -3460,39 +3476,46 @@ const AtlasTemplate: React.FC<{
                         isDropTarget={dropTargetId === 'volunteer'}
                     >
                         <div>
-                            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide border-b border-gray-200 pb-1">
+                            <h2 style={{ 
+                                fontSize: 'var(--cv-subheading-size)', 
+                                fontWeight: 'var(--cv-subheading-weight)',
+                                color: '#2563eb',
+                                marginBottom: '12px',
+                                borderBottom: '1px solid #2563eb',
+                                paddingBottom: '8px'
+                            }}>
                                 {getSectionName('volunteerExperience', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="">
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing)' }}>
                                 {volunteerExperience.map((vol) => (
-                                    <div key={vol.id}>
+                                    <div key={vol.id} className="pl-3" style={{ borderLeft: '2px solid #2563eb' }}>
                                         <div className="flex justify-between items-start mb-1">
-                                            <div>
-                                                <h3 className="text-sm font-bold text-gray-900">{vol.role}</h3>
-                                                <p className="text-xs font-medium text-gray-700">{vol.organization}</p>
+                                            <div className="flex-1">
+                                                <h3 className="font-semibold text-gray-900 text-sm">{vol.role}</h3>
+                                                <p className="text-blue-600 font-medium text-xs">{vol.organization}</p>
                                                 {vol.cause && (
-                                                    <p className="text-gray-600 text-xs mt-0.5 italic">
+                                                    <p className="text-gray-600 text-xs mt-1 italic">
                                                         {data.cvLanguage === 'azerbaijani' ? 'Sahə: ' : 
                                                          data.cvLanguage?.includes('tr') ? 'Alan: ' : 'Field: '}{vol.cause}
                                                     </p>
                                                 )}
                                             </div>
-                                            {(vol.startDate || vol.endDate) && (
-                                                <span className="text-xs text-gray-600 font-medium whitespace-nowrap ml-2">
-                                                    {vol.startDate ? (
-                                                        vol.current ? `${formatDate(vol.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
-                                                        vol.endDate ? `${formatDate(vol.startDate, data.cvLanguage)} - ${formatDate(vol.endDate, data.cvLanguage)}` :
-                                                        formatDate(vol.startDate, data.cvLanguage)
-                                                    ) : vol.current ? (
-                                                        getCurrentText(data.cvLanguage)
-                                                    ) : vol.endDate ? (
-                                                        formatDate(vol.endDate, data.cvLanguage)
-                                                    ) : ''}
-                                                </span>
-                                            )}
+                                            <span className="text-xs font-medium whitespace-nowrap ml-2" style={{ color: '#6b7280' }}>
+                                                {vol.startDate ? (
+                                                    vol.current ? `${formatDate(vol.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
+                                                    vol.endDate ? `${formatDate(vol.startDate, data.cvLanguage)} - ${formatDate(vol.endDate, data.cvLanguage)}` :
+                                                    formatDate(vol.startDate, data.cvLanguage)
+                                                ) : vol.current ? (
+                                                    getCurrentText(data.cvLanguage)
+                                                ) : vol.endDate ? (
+                                                    formatDate(vol.endDate, data.cvLanguage)
+                                                ) : ''}
+                                            </span>
                                         </div>
                                         {vol.description && (
-                                            <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(vol.description)}</div>
+                                            <div className="text-gray-700 text-xs mt-1 leading-relaxed">
+                                                {renderHtmlContent(vol.description)}
+                                            </div>
                                         )}
                                     </div>
                                 ))}
@@ -3690,35 +3713,46 @@ const AtlasTemplate: React.FC<{
                         onSetActiveSection={onSectionSelect}
                     >
                         <div>
-                            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide border-b border-gray-200 pb-1">
+                            <h2 style={{ 
+                                fontSize: 'var(--cv-subheading-size)', 
+                                fontWeight: 'var(--cv-subheading-weight)',
+                                color: '#2563eb',
+                                marginBottom: '12px',
+                                borderBottom: '1px solid #2563eb',
+                                paddingBottom: '8px'
+                            }}>
                                 {getSectionName('organizations', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="">
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cv-section-spacing)' }}>
                                 {organizations.map((org) => (
-                                    <div key={org.id}>
+                                    <div key={org.id} className="pl-3" style={{ borderLeft: '2px solid #2563eb' }}>
                                         <div className="flex justify-between items-start mb-1">
-                                            <div>
-                                                <h3 className="text-sm font-bold text-gray-900">{org.name}</h3>
-                                                {org.role && <p className="text-xs font-medium text-gray-700">{org.role}</p>}
-                                            </div>
-                                            {(org.startDate || org.endDate) && (
-                                                <span className="text-xs text-gray-600 font-medium whitespace-nowrap ml-2">
-                                                    {org.startDate && org.endDate ? (
-                                                        org.current ? `${formatDate(org.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : `${formatDate(org.startDate, data.cvLanguage)} - ${formatDate(org.endDate, data.cvLanguage)}`
-                                                    ) : (
-                                                        formatDate((org.startDate || org.endDate) || '', data.cvLanguage)
-                                                    )}
-                                                </span>
+                                            {(org.url || org.website) ? (
+                                                <a href={org.url || org.website} target="_blank" rel="noopener noreferrer" className="font-semibold text-gray-900 text-sm hover:text-blue-600 underline">
+                                                    {org.name}
+                                                </a>
+                                            ) : (
+                                                <h3 className="font-semibold text-gray-900 text-sm">{org.name}</h3>
                                             )}
+                                            <span className="text-xs font-medium whitespace-nowrap ml-2" style={{ color: '#6b7280' }}>
+                                                {org.startDate ? (
+                                                    org.current ? `${formatDate(org.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
+                                                    org.endDate ? `${formatDate(org.startDate, data.cvLanguage)} - ${formatDate(org.endDate, data.cvLanguage)}` :
+                                                    formatDate(org.startDate, data.cvLanguage)
+                                                ) : org.current ? (
+                                                    getCurrentText(data.cvLanguage)
+                                                ) : org.endDate ? (
+                                                    formatDate(org.endDate, data.cvLanguage)
+                                                ) : ''}
+                                            </span>
                                         </div>
-                                        {org.description && (
-                                            <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(org.description)}</div>
+                                        {(org.role || org.position) && (
+                                            <p className="text-blue-600 font-medium text-xs">{org.role || org.position}</p>
                                         )}
-                                        {org.url && (
-                                            <a href={org.url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline">
-                                                {data.cvLanguage === 'azerbaijani' ? 'Təşkilatı gör' : 
-                                                 data.cvLanguage?.includes('tr') ? 'Organizasyonu gör' : 'View organization'}
-                                            </a>
+                                        {org.description && (
+                                            <div className="text-gray-700 text-xs mt-1 leading-relaxed">
+                                                {renderHtmlContent(org.description)}
+                                            </div>
                                         )}
                                     </div>
                                 ))}
@@ -4991,7 +5025,7 @@ const LumenTemplate: React.FC<{
                                         <div className="flex justify-between items-start mb-1">
                                             <div>
                                                 <h3 className="text-sm font-bold text-gray-900">{org.name}</h3>
-                                                {org.role && <p className="text-xs font-medium text-gray-700">{org.role}</p>}
+                                                {(org.role || org.position) && <p className="text-xs font-medium text-gray-700">{org.role || org.position}</p>}
                                             </div>
                                             {(org.startDate || org.endDate) && (
                                                 <span className="text-xs text-gray-600 font-medium whitespace-nowrap ml-2">
@@ -5006,8 +5040,8 @@ const LumenTemplate: React.FC<{
                                         {org.description && (
                                             <div className="text-gray-700 text-xs mt-1">{renderHtmlContent(org.description)}</div>
                                         )}
-                                        {org.url && (
-                                            <a href={org.url} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-900 hover:text-gray-700 underline">
+                                        {(org.url || org.website) && (
+                                            <a href={org.url || org.website} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-900 hover:text-gray-700 underline">
                                                 {data.cvLanguage === 'azerbaijani' ? 'Təşkilatı gör' : 
                                                  data.cvLanguage?.includes('tr') ? 'Organizasyonu gör' : 'View organization'}
                                             </a>
@@ -5631,7 +5665,7 @@ const PrimeTemplate: React.FC<{
                             </div>
                             <div className="space-y-2" style={{ marginTop: '4px' }}>
                                 {experience.map((exp, index) => (
-                                    <div key={exp.id} className="border-b border-blue-200 pb-1 last:border-b-0">
+                                    <div key={exp.id} className={`${index < experience.length - 1 ? 'border-b border-green-200' : ''} pb-1`}>
                                         <div className="flex justify-between items-start mb-1 flex-wrap gap-1">
                                             <div className="flex-1 min-w-0">
                                                 <h3 className="text-base font-bold text-gray-900 leading-tight">{exp.position}</h3>
@@ -5682,7 +5716,7 @@ const PrimeTemplate: React.FC<{
                             </div>
                             <div className="space-y-2" style={{ marginTop: '4px' }}>
                                 {education.map((edu) => (
-                                    <div key={edu.id} className="border-b border-blue-200 pb-1 last:border-b-0">
+                                    <div key={edu.id} className="border-b border-green-200 pb-1 last:border-b-0">
                                         <div className="flex justify-between items-start mb-1 flex-wrap gap-1">
                                             <div className="flex-1 min-w-0">
                                                 {edu.degree ? (
@@ -5743,7 +5777,7 @@ const PrimeTemplate: React.FC<{
                             
                             {/* Technical Skills */}
                             {skills.filter(skill => skill.type === 'hard' && skill.name && skill.name.trim() !== '').length > 0 && (
-                                <div className="mb-1" style={{ marginTop: '4px' }}>
+                                <div className="mb-1" style={{ marginTop: '6px' }}>
                                     <h3 className="text-sm font-semibold text-gray-800 mb-0">
                                         {getSectionName('technicalSkills', data.cvLanguage, data.sectionNames)}
                                     </h3>
@@ -5799,12 +5833,12 @@ const PrimeTemplate: React.FC<{
                             </div>
                             <div className="space-y-3">
                                 {projects.map((project) => (
-                                    <div key={project.id} className="border-b border-blue-200 pb-3 last:border-b-0">
+                                    <div key={project.id} className="border-b border-green-200 pb-3 last:border-b-0">
                                         <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
                                             <div className="flex-1">
                                                 <h3 className="text-base font-bold text-gray-900">{project.name}</h3>
                                                 {project.description && (
-                                                    <div className="text-gray-700 text-sm mt-1">{renderHtmlContent(project.description)}</div>
+                                                    <div className="text-gray-700 text-sm mt-1" style={{ marginBottom: 0, paddingBottom: 0 }}>{renderHtmlContent(project.description)}</div>
                                                 )}
                                                 {project.technologies && project.technologies.length > 0 && (
                                                     <div className="text-xs text-gray-600 mt-2">
@@ -5906,13 +5940,13 @@ const PrimeTemplate: React.FC<{
                             </div>
                             <div className="space-y-2">
                                 {certifications.map((cert) => (
-                                    <div key={cert.id} className="border-b border-blue-200 pb-2 last:border-b-0">
+                                    <div key={cert.id} className="border-b border-green-200 pb-2 last:border-b-0">
                                         <div className="flex justify-between items-start">
                                             <div className="flex-1">
                                                 <h3 className="text-base font-bold text-gray-900">{cert.name}</h3>
                                                 <p className="text-sm font-semibold text-green-700">{cert.issuer}</p>
                                                 {cert.description && (
-                                                    <div className="text-gray-700 text-sm mt-1">{renderHtmlContent(cert.description)}</div>
+                                                    <div className="text-gray-700 text-sm mt-1" style={{ marginBottom: 0, paddingBottom: 0 }}>{renderHtmlContent(cert.description)}</div>
                                                 )}
                                                 {cert.url && (
                                                     <div className="text-xs text-gray-600 mt-1">
@@ -5959,8 +5993,8 @@ const PrimeTemplate: React.FC<{
                                 </h2>
                             </div>
                             <div className="space-y-2">
-                                {volunteerExperience.map((vol) => (
-                                    <div key={vol.id} className="border-b border-blue-200 pb-2 last:border-b-0">
+                                {volunteerExperience.map((vol, index) => (
+                                    <div key={vol.id} className={`${index < volunteerExperience.length - 1 ? 'border-b border-green-200' : ''} pb-2`}>
                                         <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
                                             <div className="flex-1 min-w-0">
                                                 <h3 className="text-base font-bold text-gray-900">{vol.role}</h3>
@@ -5987,7 +6021,7 @@ const PrimeTemplate: React.FC<{
                                             )}
                                         </div>
                                         {vol.description && (
-                                            <div className="text-gray-700 text-sm mt-2">{renderHtmlContent(vol.description)}</div>
+                                            <div className="text-gray-700 text-sm mt-2" style={{ marginBottom: 0, paddingBottom: 0 }}>{renderHtmlContent(vol.description)}</div>
                                         )}
                                     </div>
                                 ))}
@@ -6019,7 +6053,7 @@ const PrimeTemplate: React.FC<{
                                         </div>
                                         <div className="space-y-2">
                                             {section.items.map((item) => (
-                                                <div key={item.id} className="border-b border-blue-200 pb-2 last:border-b-0">
+                                                <div key={item.id} className="border-b border-green-200 pb-2 last:border-b-0">
                                                     <div className="flex justify-between items-start mb-2">
                                                         <div className="flex-1">
                                                             {item.title && (
@@ -6036,7 +6070,7 @@ const PrimeTemplate: React.FC<{
                                                         )}
                                                     </div>
                                                     {item.description && (
-                                                        <div className="text-gray-700 text-sm mt-2">
+                                                        <div className="text-gray-700 text-sm mt-2" style={{ marginBottom: 0, paddingBottom: 0 }}>
                                                             {renderHtmlContent(item.description)}
                                                         </div>
                                                     )}
@@ -6064,6 +6098,65 @@ const PrimeTemplate: React.FC<{
                                         </div>
                                     </div>
                                 ))}
+                        </div>
+                    </SortableItem>
+                ) : null;
+
+            case 'organizations':
+                return organizations && organizations.length > 0 ? (
+                    <SortableItem 
+                        key="organizations" 
+                        id="organizations"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'organizations'}
+                    >
+                        <div className="cv-section" style={{ marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}>
+                            <div className="border-b-2 border-green-600 mb-0">
+                                <h2 className="text-lg font-bold text-gray-900 mb-0" style={{ marginBottom: 0, paddingBottom: '4px' }}>
+                                    {getSectionName('organizations', data.cvLanguage, data.sectionNames)}
+                                </h2>
+                            </div>
+                            <div className="space-y-2" style={{ marginTop: '4px' }}>
+                                {organizations.map((org, index) => (
+                                    <div key={org.id} className={`${index < organizations.length - 1 ? 'border-b border-green-200' : ''} pb-2`}>
+                                        <div className="flex justify-between items-start mb-1 flex-wrap gap-1">
+                                            <div className="flex-1 min-w-0">
+                                                {(org.url || org.website) ? (
+                                                    <a href={org.url || org.website} target="_blank" rel="noopener noreferrer" className="text-base font-bold text-gray-900 leading-tight hover:text-green-700 underline">
+                                                        {org.name}
+                                                    </a>
+                                                ) : (
+                                                    <h3 className="text-base font-bold text-gray-900 leading-tight">{org.name}</h3>
+                                                )}
+                                                {(org.role || org.position) && (
+                                                    <p className="text-sm font-semibold text-green-700 mt-0">{org.role || org.position}</p>
+                                                )}
+                                            </div>
+                                            {(org.startDate || org.endDate) && (
+                                                <span className="text-xs text-gray-600 font-medium whitespace-nowrap flex-shrink-0">
+                                                    {org.startDate ? (
+                                                        org.current ? `${formatDate(org.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
+                                                        org.endDate ? `${formatDate(org.startDate, data.cvLanguage)} - ${formatDate(org.endDate, data.cvLanguage)}` :
+                                                        formatDate(org.startDate, data.cvLanguage)
+                                                    ) : org.current ? (
+                                                        getCurrentText(data.cvLanguage)
+                                                    ) : org.endDate ? (
+                                                        formatDate(org.endDate, data.cvLanguage)
+                                                    ) : ''}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {org.description && (
+                                            <div className="text-gray-700 text-xs leading-relaxed mt-1" style={{ marginBottom: 0, paddingBottom: 0 }}>
+                                                {renderHtmlContent(org.description, false, data.cvLanguage)}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </SortableItem>
                 ) : null;
@@ -6804,13 +6897,19 @@ const VertexTemplate: React.FC<{
                             <h2 className="text-2xl font-light text-gray-800 tracking-wide">
                                 {getSectionName('organizations', data.cvLanguage, data.sectionNames)}
                             </h2>
-                            <div className="w-16 h-px bg-teal-600 mx-auto mt-2"></div>
+                            <div className="w-16 h-px bg-blue-600 mx-auto mt-2"></div>
                         </div>
                         <div className="space-y-6">
                             {organizations.map((org) => (
-                                <div key={org.id} className="border-l-4 border-teal-300 pl-4">
-                                    <h3 className="text-xl font-medium text-gray-800 mb-2">{org.name}</h3>
-                                    {org.role && <div className="text-gray-600 font-medium mb-2">{org.role}</div>}
+                                <div key={org.id} className="border-l-4 border-blue-300 pl-4">
+                                    {(org.url || org.website) ? (
+                                        <a href={org.url || org.website} target="_blank" rel="noopener noreferrer" className="text-xl font-medium text-gray-800 mb-2 hover:text-blue-600 hover:underline block">
+                                            {org.name}
+                                        </a>
+                                    ) : (
+                                        <h3 className="text-xl font-medium text-gray-800 mb-2">{org.name}</h3>
+                                    )}
+                                    {(org.role || org.position) && <div className="text-blue-600 font-medium mb-2">{org.role || org.position}</div>}
                                     {(org.startDate || org.endDate) && (
                                         <div className="text-gray-500 text-sm mb-3">
                                             {org.startDate && org.endDate ? (
@@ -7590,7 +7689,13 @@ const HorizonTemplate: React.FC<{
                             {organizations.map((org) => (
                                 <div key={org.id}>
                                     <div className="flex justify-between items-start mb-1">
-                                        <h3 className="font-bold text-gray-800 text-base">{org.name}</h3>
+                                        {(org.url || org.website) ? (
+                                            <a href={org.url || org.website} target="_blank" rel="noopener noreferrer" className="font-bold text-gray-800 text-base hover:text-blue-600 hover:underline">
+                                                {org.name}
+                                            </a>
+                                        ) : (
+                                            <h3 className="font-bold text-gray-800 text-base">{org.name}</h3>
+                                        )}
                                         <div className="text-right text-sm text-gray-500 ml-4">
                                             {org.startDate && org.endDate ? (
                                                 org.current ? `${formatDate(org.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : `${formatDate(org.startDate, data.cvLanguage)} - ${formatDate(org.endDate, data.cvLanguage)}`
@@ -7599,7 +7704,7 @@ const HorizonTemplate: React.FC<{
                                             )}
                                         </div>
                                     </div>
-                                    {org.role && <div className="font-medium text-gray-700 text-sm">{org.role}</div>}
+                                    {(org.role || org.position) && <div className="font-medium text-gray-700 text-sm">{org.role || org.position}</div>}
                                     {org.description && (
                                         <div className="text-gray-600 text-sm leading-relaxed">
                                             {renderHtmlContent(org.description, false, data.cvLanguage)}
@@ -8414,22 +8519,38 @@ const AuroraTemplate: React.FC<{
             case 'organizations':
                 if (!organizations.length) return null;
                 return (
-                    <div key="organizations" style={{ display: 'flex', flexDirection: 'column', gap: 'calc(var(--cv-section-spacing) * 0.5)' }}>
+                    <div key="organizations">
                         <SectionHeader title={getSectionName('organizations', data.cvLanguage, data.sectionNames)} sectionId="organizations" />
-                        <div className="space-y-4">
-                            {organizations.map((org) => (
-                                <div key={org.id} className="p-4 rounded-lg bg-teal-50 border border-teal-200">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h3 className="font-semibold text-gray-900 text-sm">{org.name}</h3>
-                                        <div className="text-xs text-gray-600 font-medium text-right ml-4 flex-shrink-0">
-                                            {org.startDate && org.endDate ? (
-                                                org.current ? `${formatDate(org.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : `${formatDate(org.startDate, data.cvLanguage)} - ${formatDate(org.endDate, data.cvLanguage)}`
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'calc(var(--cv-section-spacing) * 0.6)' }}>
+                            {organizations.map((org, index) => (
+                                <div key={org.id || index} className="pb-2">
+                                    <div className="flex justify-between items-start mb-1">
+                                        <div className="flex-1">
+                                            {(org.url || org.website) ? (
+                                                <a href={org.url || org.website} target="_blank" rel="noopener noreferrer" className="font-semibold text-gray-900 text-sm hover:text-gray-700 underline">
+                                                    {org.name}
+                                                </a>
                                             ) : (
-                                                formatDate((org.startDate || org.endDate) || '', data.cvLanguage)
+                                                <h3 className="font-semibold text-gray-900 text-sm">{org.name}</h3>
+                                            )}
+                                            {(org.role || org.position) && (
+                                                <p className="font-medium text-gray-700 text-xs mt-0.5">{org.role || org.position}</p>
                                             )}
                                         </div>
+                                        {(org.startDate || org.endDate) && (
+                                            <div className="text-xs text-gray-600 font-medium text-right ml-4 flex-shrink-0">
+                                                {org.startDate ? (
+                                                    org.current ? `${formatDate(org.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
+                                                    org.endDate ? `${formatDate(org.startDate, data.cvLanguage)} - ${formatDate(org.endDate, data.cvLanguage)}` :
+                                                    formatDate(org.startDate, data.cvLanguage)
+                                                ) : org.current ? (
+                                                    getCurrentText(data.cvLanguage)
+                                                ) : org.endDate ? (
+                                                    formatDate(org.endDate, data.cvLanguage)
+                                                ) : ''}
+                                            </div>
+                                        )}
                                     </div>
-                                    {org.role && <div className="font-medium text-gray-700 text-xs">{org.role}</div>}
                                     {org.description && (
                                         <div className="text-gray-600 text-xs leading-relaxed text-left mt-2">
                                             {renderHtmlContent(org.description, false, data.cvLanguage)}
@@ -9172,7 +9293,13 @@ const ExclusiveTemplate: React.FC<{
                             {organizations.map((org) => (
                                 <div key={org.id} className="pb-2">
                                     <div className="flex flex-row items-start justify-between gap-3 mb-1">
-                                        <h3 className="font-semibold text-gray-900 text-sm">{org.name}</h3>
+                                        {(org.url || org.website) ? (
+                                            <a href={org.url || org.website} target="_blank" rel="noopener noreferrer" className="font-semibold text-gray-900 text-sm hover:text-blue-600 underline">
+                                                {org.name}
+                                            </a>
+                                        ) : (
+                                            <h3 className="font-semibold text-gray-900 text-sm">{org.name}</h3>
+                                        )}
                                         {(org.startDate || org.endDate) && (
                                             <div className="text-xs text-gray-600 font-medium text-right whitespace-nowrap">
                                                 {org.startDate && org.endDate ? (
@@ -9183,7 +9310,7 @@ const ExclusiveTemplate: React.FC<{
                                             </div>
                                         )}
                                     </div>
-                                    {org.role && <div className="text-gray-700 text-xs font-medium">{org.role}</div>}
+                                    {(org.role || org.position) && <div className="text-gray-700 text-xs font-medium">{org.role || org.position}</div>}
                                     {org.description && (
                                         <div className="text-gray-700 leading-relaxed text-xs text-left" style={{ marginLeft: 0, paddingLeft: 0 }}>
                                             {renderHtmlContent(org.description, false, data.cvLanguage)}
@@ -9810,6 +9937,63 @@ const EssenceTemplate: React.FC<{
                     </SortableItem>
                 ) : null;
 
+            case 'organizations':
+                return organizations && organizations.length > 0 ? (
+                    <SortableItem 
+                        key="organizations" 
+                        id="organizations"
+                        sectionOrder={sectionOrder}
+                        onSectionReorder={onSectionReorder}
+                        activeSection={activeSection}
+                        onSetActiveSection={onSectionSelect}
+                        isDropTarget={dropTargetId === 'organizations'}
+                    >
+                        <div className="bg-white p-5 rounded shadow-sm border border-gray-200 mb-4">
+                            <h2 className="text-base font-bold mb-4 uppercase tracking-wide" style={{ color: '#1F4B43' }}>
+                                {getSectionName('organizations', data.cvLanguage, data.sectionNames)}
+                            </h2>
+                            <div className="space-y-4">
+                                {organizations.map((org, index) => (
+                                    <div key={org.id || index} className="bg-gray-50 p-4 rounded border border-gray-100">
+                                        <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
+                                            <div className="flex-1 min-w-0">
+                                                {(org.url || org.website) ? (
+                                                    <a href={org.url || org.website} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-gray-900 hover:text-gray-700 underline">
+                                                        {org.name}
+                                                    </a>
+                                                ) : (
+                                                    <h3 className="text-sm font-bold text-gray-900">{org.name}</h3>
+                                                )}
+                                                {(org.role || org.position) && (
+                                                    <p className="text-xs font-medium text-gray-700 mt-0.5">{org.role || org.position}</p>
+                                                )}
+                                            </div>
+                                            {(org.startDate || org.endDate) && (
+                                                <span className="text-xs text-gray-600 font-medium whitespace-nowrap flex-shrink-0">
+                                                    {org.startDate ? (
+                                                        org.current ? `${formatDate(org.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
+                                                        org.endDate ? `${formatDate(org.startDate, data.cvLanguage)} - ${formatDate(org.endDate, data.cvLanguage)}` :
+                                                        formatDate(org.startDate, data.cvLanguage)
+                                                    ) : org.current ? (
+                                                        getCurrentText(data.cvLanguage)
+                                                    ) : org.endDate ? (
+                                                        formatDate(org.endDate, data.cvLanguage)
+                                                    ) : ''}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {org.description && (
+                                            <div className="text-gray-700 text-xs leading-relaxed mt-2">
+                                                {renderHtmlContent(org.description, false, data.cvLanguage)}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </SortableItem>
+                ) : null;
+
             default:
                 return null;
         }
@@ -10008,6 +10192,44 @@ const EssenceTemplate: React.FC<{
                                 </div>
                             </div>
                         )}
+
+                        {/* Organizations Section */}
+                        {organizations && organizations.length > 0 && (
+                            <div className="bg-gray-50 p-4 rounded shadow-sm border border-gray-200">
+                                <h2 className="text-sm font-bold mb-3 uppercase tracking-wide" style={{ color: '#1F4B43' }}>
+                                    {getSectionName('organizations', data.cvLanguage, data.sectionNames)}
+                                </h2>
+                                <div className="space-y-2">
+                                    {organizations.map((org) => (
+                                        <div key={org.id} className="bg-white p-3 rounded border border-gray-100">
+                                            {(org.url || org.website) ? (
+                                                <a href={org.url || org.website} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-black hover:text-gray-700 underline block">
+                                                    {org.name}
+                                                </a>
+                                            ) : (
+                                                <h3 className="text-xs font-bold text-black">{org.name}</h3>
+                                            )}
+                                            {(org.role || org.position) && (
+                                                <p className="text-xs text-gray-600">{org.role || org.position}</p>
+                                            )}
+                                            {(org.startDate || org.endDate) && (
+                                                <span className="text-xs text-gray-500">
+                                                    {org.startDate ? (
+                                                        org.current ? `${formatDate(org.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
+                                                        org.endDate ? `${formatDate(org.startDate, data.cvLanguage)} - ${formatDate(org.endDate, data.cvLanguage)}` :
+                                                        formatDate(org.startDate, data.cvLanguage)
+                                                    ) : org.current ? (
+                                                        getCurrentText(data.cvLanguage)
+                                                    ) : org.endDate ? (
+                                                        formatDate(org.endDate, data.cvLanguage)
+                                                    ) : ''}
+                                                </span>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Right Column - 55% Width - White Background */}
@@ -10016,7 +10238,7 @@ const EssenceTemplate: React.FC<{
                             <div className={`transition-all duration-300 ${isDragActive ? 'opacity-95' : ''}`}>
                                 {sectionOrder.map((sectionId) => {
                                     // Only render main sections in right column
-                                    if (['education', 'skills', 'languages', 'certifications'].includes(sectionId)) {
+                                    if (['education', 'skills', 'languages', 'certifications', 'organizations'].includes(sectionId)) {
                                         return null; // These are in left column
                                     }
                                     return renderEssenceSection(sectionId);
