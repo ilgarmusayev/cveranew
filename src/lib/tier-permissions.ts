@@ -31,6 +31,13 @@ export const TIER_PERMISSIONS: Record<string, TierPermissions> = {
     dailyLimit: 5,
     formats: ['pdf', 'docx']
   },
+  Populyar: {
+    aiAccess: true,
+    templateAccess: ['free', 'medium'],
+    previewAccess: true,
+    dailyLimit: 5,
+    formats: ['pdf', 'docx']
+  },
   Premium: {
     aiAccess: true,
     templateAccess: ['free', 'medium', 'premium'],
@@ -43,7 +50,9 @@ export const TIER_PERMISSIONS: Record<string, TierPermissions> = {
  * Check if user has AI access based on their tier
  */
 export function hasAIAccess(userTier: string): boolean {
-  const permissions = TIER_PERMISSIONS[userTier] || TIER_PERMISSIONS.Free;
+  // Handle both database and display tier names
+  const normalizedTier = userTier === 'Populyar' ? 'Populyar' : userTier;
+  const permissions = TIER_PERMISSIONS[normalizedTier] || TIER_PERMISSIONS.Free;
   return permissions.aiAccess;
 }
 
@@ -119,7 +128,8 @@ export function getTierDisplayName(tier: string): string {
   const tierNames: Record<string, string> = {
     Free: 'Pulsuz',
     Medium: 'Orta',
-    Pro: 'Orta',
+    Pro: 'Pro',
+    Populyar: 'Populyar',
     Premium: 'Premium'
   };
 

@@ -7,7 +7,7 @@ import { apiClient } from '@/lib/api-client';
 interface AISummaryGeneratorProps {
   cvId: string;
   currentSummary?: string;
-  userTier: 'Free' | 'Medium' | 'Premium';
+  userTier: 'Free' | 'Medium' | 'Premium' | 'Pro' | 'Populyar';
   onSummaryGenerated?: (summary: string) => void;
 }
 
@@ -21,11 +21,12 @@ export function AISummaryGenerator({
   const [generatedSummary, setGeneratedSummary] = useState<string>('');
   const { showSuccess, showError, showWarning } = useNotification();
 
-  const canUseAI = userTier === 'Medium' || userTier === 'Premium';
+  // ✅ Include Pro/Populyar tiers for AI access
+  const canUseAI = userTier === 'Medium' || userTier === 'Premium' || userTier === 'Pro' || userTier === 'Populyar';
 
   const handleGenerateAISummary = async () => {
     if (!canUseAI) {
-      showWarning('AI summary generation is only available for Medium and Premium subscribers');
+      showWarning('AI summary generation is only available for Medium, Pro and Premium subscribers');
       return;
     }
 
@@ -115,7 +116,7 @@ export function AISummaryGenerator({
         'Multi-cultural and international experience integration',
         'C-level positioning and decision-maker language'
       ];
-    } else if (userTier === 'Medium') {
+    } else if (userTier === 'Medium' || userTier === 'Pro' || userTier === 'Populyar') {
       return [
         'Professional summary optimized for ATS (80-120 words)',
         'Key technical skills integration',
@@ -125,7 +126,7 @@ export function AISummaryGenerator({
       ];
     } else {
       return [
-        'Upgrade to Medium or Premium to unlock AI summary generation',
+        'Upgrade to Medium, Pro or Premium to unlock AI summary generation',
         'Professional ATS-optimized summaries',
         'Industry-specific keyword optimization',
         'Personalized based on your experience and skills'
