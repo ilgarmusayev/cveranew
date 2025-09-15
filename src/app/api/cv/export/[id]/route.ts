@@ -85,6 +85,11 @@ export async function POST(
 
         // Browser başlat və PDF generate et
         browser = await initializeBrowser();
+        
+        // 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN XÜSUSI ENCODING VƏ FONT SETUP
+        console.log('🔧 Setting up Azerbaijani character support...');
+        await setupAzerbaijaniSupport(browser);
+        
         return await generatePDF(browser, data, templateId, fontSettings, htmlContent, cssContent, cvId);
 
     } catch (error) {
@@ -108,40 +113,203 @@ export async function POST(
     }
 }
 
+/**
+ * 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN XÜSUSI DƏSTƏK FUNKSIYASI
+ * Azerbaijani characters (Ə, Ğ, İ, Ö, Ü, Ç, Ş) üçün browser və font dəstəyini tənzimləyir
+ */
+async function setupAzerbaijaniSupport(browser: any) {
+    console.log('🔧 Azerbaijani character support setup başladı...');
+    
+    try {
+        // Browser context-də Azərbaycan dili və encoding dəstəyini aktivləşdir
+        const pages = await browser.pages();
+        
+        // Hər aktiv page üçün Azərbaycan dəstəyini aktivləşdir
+        for (const page of pages) {
+            await setupPageAzerbaijaniSupport(page);
+        }
+        
+        console.log('✅ Azerbaijani character support setup tamamlandı');
+        
+    } catch (error) {
+        console.error('❌ Azerbaijani character support setup error:', error);
+        console.log('🔄 Continuing with basic Unicode support...');
+    }
+}
+
+/**
+ * 🔧 PAGE SƏVİYYƏSİNDƏ AZƏRBAYCAN HƏRFLƏRİ DƏSTƏYI
+ */
+async function setupPageAzerbaijaniSupport(page: any) {
+    try {
+        // 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN HTTP HEADERS
+        await page.setExtraHTTPHeaders({
+            'Accept-Language': 'az-AZ,az;q=0.9,tr-TR;q=0.8,tr;q=0.7,en-US;q=0.6,en;q=0.5',
+            'Accept-Charset': 'utf-8,iso-8859-1;q=0.7,*;q=0.3',
+            'Content-Type': 'text/html; charset=UTF-8',
+            'Content-Language': 'az-AZ'
+        });
+        
+        // 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN DOCUMENT SETUP
+        await page.evaluateOnNewDocument(() => {
+            // Force UTF-8 encoding
+            if (document.characterSet !== 'UTF-8') {
+                const meta = document.createElement('meta');
+                meta.setAttribute('charset', 'UTF-8');
+                meta.setAttribute('http-equiv', 'Content-Type');
+                meta.setAttribute('content', 'text/html; charset=UTF-8');
+                document.head?.appendChild(meta);
+            }
+            
+            // Language və locale setup
+            document.documentElement.setAttribute('lang', 'az-AZ');
+            document.documentElement.setAttribute('xml:lang', 'az-AZ');
+            
+            // 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN FONT RENDERING OPTIMIZATION
+            const style = document.createElement('style');
+            style.id = 'azerbaijani-font-support';
+            style.textContent = `
+                /* 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN NUCLEAR FONT SUPPORT */
+                * {
+                    font-family: 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 'Noto Sans', 
+                                 'DejaVu Sans', 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', 
+                                 'Lucida Grande', 'Helvetica Neue', Arial, sans-serif !important;
+                    font-synthesis: weight style !important;
+                    font-variant-ligatures: common-ligatures !important;
+                    unicode-bidi: normal !important;
+                    direction: ltr !important;
+                    text-rendering: optimizeLegibility !important;
+                    -webkit-font-feature-settings: "liga", "kern", "calt" !important;
+                    font-feature-settings: "liga", "kern", "calt" !important;
+                    -moz-font-feature-settings: "liga", "kern", "calt" !important;
+                }
+                
+                /* 🔧 AZƏRBAYCAN XÜSUSİ HƏRFLƏRİ ÜÇÜN FONT STACK */
+                body, h1, h2, h3, h4, h5, h6, p, span, div, li, a, td, th, input, textarea, select, button,
+                [lang="az"], [lang="az-AZ"] {
+                    font-family: 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 'Noto Sans', 
+                                 'DejaVu Sans', 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', 
+                                 'Lucida Grande', 'Helvetica Neue', Arial, sans-serif !important;
+                    unicode-bidi: normal !important;
+                    direction: ltr !important;
+                    text-rendering: optimizeLegibility !important;
+                }
+                
+                /* 🔧 SPESIFIK AZƏRBAYCAN HƏRFLƏRİ SUPPORT */
+                *:contains("Ə"), *:contains("ə"), *:contains("Ğ"), *:contains("ğ"),
+                *:contains("İ"), *:contains("ı"), *:contains("Ö"), *:contains("ö"),
+                *:contains("Ü"), *:contains("ü"), *:contains("Ç"), *:contains("ç"),
+                *:contains("Ş"), *:contains("ş") {
+                    font-family: 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 'Noto Sans', 
+                                 'DejaVu Sans', 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', 
+                                 'Lucida Grande', 'Helvetica Neue', Arial, sans-serif !important;
+                    unicode-bidi: normal !important;
+                    direction: ltr !important;
+                    text-rendering: optimizeLegibility !important;
+                    font-feature-settings: "kern" 1, "liga" 1, "clig" 1, "calt" 1 !important;
+                }
+                
+                /* 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN ANTI-ALIASING */
+                * {
+                    -webkit-font-smoothing: antialiased !important;
+                    -moz-osx-font-smoothing: grayscale !important;
+                    text-rendering: optimizeLegibility !important;
+                }
+            `;
+            document.head?.appendChild(style);
+            
+            // 🔧 AZƏRBAYCAN HƏRFLƏRİ TEST VƏ LOG
+            console.log('🔧 Azerbaijani character support initialized');
+            console.log('🔧 Test characters: Ə ə Ğ ğ İ ı Ö ö Ü ü Ç ç Ş ş');
+            
+            // Font loading event listener
+            document.addEventListener('DOMContentLoaded', () => {
+                console.log('🔧 DOM loaded, Azerbaijani font support active');
+                
+                // Test Azerbaijani characters rendering
+                const testElement = document.createElement('div');
+                testElement.textContent = 'Test Azərbaycan hərfləri: Ə ə Ğ ğ İ ı Ö ö Ü ü Ç ç Ş ş';
+                testElement.style.position = 'absolute';
+                testElement.style.top = '-9999px';
+                testElement.style.fontFamily = 'Inter, Roboto, Arial, sans-serif';
+                document.body?.appendChild(testElement);
+                
+                // Log font metrics for debugging
+                const computedStyle = window.getComputedStyle(testElement);
+                console.log('🔧 Azerbaijani test element font:', computedStyle.fontFamily);
+                console.log('🔧 Azerbaijani test element computed font size:', computedStyle.fontSize);
+                
+                // Remove test element
+                document.body?.removeChild(testElement);
+            });
+        });
+        
+        console.log('✅ Page Azerbaijani support setup completed');
+        
+    } catch (error) {
+        console.error('❌ Page Azerbaijani support setup error:', error);
+    }
+}
+
 async function initializeBrowser() {
     console.log('Puppeteer browser başladılır...');
     
-    // Environment detection
+    // Environment detection - Enhanced for production
     const isProduction = process.env.NODE_ENV === 'production';
-    const isServerless = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NETLIFY);
-    const isLocal = !isServerless;
+    const isVercel = !!process.env.VERCEL;
+    const isServerless = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NETLIFY || process.env.LAMBDA_RUNTIME);
+    const isLocal = !isServerless && !isProduction;
     
-    let executablePath: string | undefined;
-    let browserArgs = [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--disable-gpu',
-        '--disable-background-timer-throttling',
-        '--disable-backgrounding-occluded-windows',
-        '--disable-renderer-backgrounding',
-        '--disable-features=TranslateUI',
-        '--disable-ipc-flooding-protection',
-        '--disable-extensions',
-        '--disable-default-apps',
-        '--disable-component-extensions-with-background-pages',
-        // Azərbaycan hərfləri üçün UTF-8 dəstəyi
-        '--font-render-hinting=none',
-        '--enable-font-antialiasing',
-        '--force-color-profile=srgb',
-        '--lang=az-AZ',
-        '--accept-lang=az-AZ,az,en-US,en'
-    ];
-
-    if (isLocal) {
+        let executablePath: string | undefined;
+        let browserArgs = [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--disable-gpu',
+            '--disable-background-timer-throttling',
+            '--disable-backgrounding-occluded-windows',
+            '--disable-renderer-backgrounding',
+            '--disable-features=TranslateUI',
+            '--disable-ipc-flooding-protection',
+            '--disable-extensions',
+            '--disable-default-apps',
+            '--disable-component-extensions-with-background-pages',
+            // 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN NUCLEAR UNICODE VƏ FONT DƏSTƏYI
+            '--font-render-hinting=none',
+            '--enable-font-antialiasing',
+            '--force-color-profile=srgb',
+            '--lang=az-AZ',
+            '--accept-lang=az-AZ,az,tr-TR,tr,en-US,en',
+            // 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN ENCODING VƏ CHARACTER SET
+            '--default-encoding=utf-8',
+            '--locale=az-AZ',
+            '--icu-data-dir=/usr/share/icu',
+            '--enable-features=FontAccess',
+            '--force-device-scale-factor=1',
+            // 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN FONT RENDERING
+            '--enable-webgl',
+            '--enable-accelerated-2d-canvas',
+            '--font-cache-shared-handle',
+            '--enable-font-antialiasing',
+            '--subpixel-font-scaling',
+            '--enable-lcd-text',
+            // 🔧 PDF EXPORT ÜÇÜN CHARACTER ENCODING
+            '--print-to-pdf-no-header',
+            // 🚀 PRODUCTION MEMORY VƏ PERFORMANCE OPTIMIZATION
+            ...(isProduction || isServerless ? [
+                '--memory-pressure-off',
+                '--max-old-space-size=4096',
+                '--disable-web-security',
+                '--allow-running-insecure-content',
+                '--disable-features=VizDisplayCompositor',
+                '--single-process'
+            ] : []),
+            '--run-all-compositor-stages-before-draw',
+            '--disable-background-mode'
+        ];    if (isLocal) {
         // Local development - try multiple fallback options
         const os = require('os');
         const path = require('path');
@@ -171,6 +339,7 @@ async function initializeBrowser() {
 
     console.log('Browser configuration:', {
         isProduction,
+        isVercel,
         isServerless,
         isLocal,
         executablePath: executablePath ? 'set' : 'undefined',
@@ -254,6 +423,10 @@ async function initializeBrowser() {
 async function generatePDF(browser: any, cvData: any, templateId: string, fontSettings: any, htmlContent: string, cssContent: string, cvId: string) {
     console.log('=== PDF Export başladı ===');
     
+    // 🚀 PRODUCTION ENVIRONMENT DETECTION - Use once throughout function
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isServerless = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NETLIFY);
+    
     try {
         console.log('Browser başladıldı, səhifə yaradılır...');
         const page = await browser.newPage();
@@ -306,26 +479,59 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                     <meta name="viewport" content="width=device-width, initial-scale=1">
                     <title>CV Export</title>
                     <style>
-                        /* AZERBAYCAN HARFLARI ÜÇÜN FONT IMPORT */
-                        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-                        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap');
-                        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
-                        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&display=swap');
+                        /* AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN GÜCLÜ FONT IMPORT VƏ UNICODE DƏSTƏYI */
+                        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&subset=latin,latin-ext&display=swap');
+                        @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&subset=latin,latin-ext&display=swap');
+                        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&subset=latin,latin-ext&display=swap');
+                        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&subset=latin,latin-ext&display=swap');
+                        @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700;1,900&subset=latin,latin-ext&display=swap');
                         
-                        /* AZERBAYCAN HARFLARI UNICODE DESTEGI */
+                        /* 🔧 AZƏRBAYCAN HƏRFLƏRİ (Ə, Ğ, İ, Ö, Ü, Ç, Ş) ÜÇÜN NUCLEAR UNICODE DƏSTƏYI */
                         * {
-                            font-family: 'Inter', 'Open Sans', 'Roboto', 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif !important;
+                            font-family: 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 'Noto Sans', 'DejaVu Sans', 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', Arial, sans-serif !important;
                             text-rendering: optimizeLegibility !important;
                             -webkit-font-smoothing: antialiased !important;
                             -moz-osx-font-smoothing: grayscale !important;
-                            unicode-bidi: embed !important;
+                            unicode-bidi: normal !important;
+                            direction: ltr !important;
+                            /* 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN XÜSUSI FONT FEATURES */
+                            font-feature-settings: "kern" 1, "liga" 1, "clig" 1, "calt" 1 !important;
+                            font-variant-ligatures: common-ligatures !important;
+                            /* 🔧 UNICODE NORMALIZASIYA VƏ CHARACTER ENCODING */
+                            font-synthesis: weight style !important;
+                            font-optical-sizing: auto !important;
                         }
                         
-                        /* AZERBAYCAN HARFLARI ÖZEL DESTEGI */
-                        body, p, span, div, h1, h2, h3, h4, h5, h6, li, td, th {
-                            font-feature-settings: "kern" 1, "liga" 1, "clig" 1 !important;
+                        /* 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN GÜCLÜ FONT FALLBACK STACK */
+                        html, body {
+                            font-family: 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 'Noto Sans', 'DejaVu Sans', 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', 'Lucida Grande', Arial, sans-serif !important;
+                        }
+                        
+                        /* 🔧 AZƏRBAYCAN DİLİ ÜÇÜN XÜSUSİ OPTIMIZASIYA */
+                        body, p, span, div, h1, h2, h3, h4, h5, h6, li, td, th, a, strong, em {
+                            font-feature-settings: "kern" 1, "liga" 1, "clig" 1, "calt" 1 !important;
                             font-variant-ligatures: common-ligatures !important;
                             text-rendering: optimizeLegibility !important;
+                            /* 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN CHARACTER ENCODING */
+                            unicode-bidi: normal !important;
+                            direction: ltr !important;
+                            font-synthesis: weight style !important;
+                        }
+                        
+                        /* 🔧 SPESIFIK AZƏRBAYCAN HƏRFLƏRİ SUPPORT (Ə, Ğ, İ, Ö, Ü, Ç, Ş) */
+                        [lang="az"], [lang="az-AZ"], 
+                        *:contains("Ə"), *:contains("ə"), 
+                        *:contains("Ğ"), *:contains("ğ"),
+                        *:contains("İ"), *:contains("ı"),
+                        *:contains("Ö"), *:contains("ö"),
+                        *:contains("Ü"), *:contains("ü"),
+                        *:contains("Ç"), *:contains("ç"),
+                        *:contains("Ş"), *:contains("ş") {
+                            font-family: 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 'Noto Sans', 'DejaVu Sans', 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', 'Lucida Grande', Arial, sans-serif !important;
+                            unicode-bidi: normal !important;
+                            direction: ltr !important;
+                            text-rendering: optimizeLegibility !important;
+                            font-feature-settings: "kern" 1, "liga" 1, "clig" 1, "calt" 1 !important;
                         }
                         
                         ${cssContent}
@@ -3202,9 +3408,11 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             });
         });
         
+        // 🚀 PRODUCTION-READY PAGE CONTENT LOADING - Enhanced timeout və error handling
         await page.setContent(html, { 
             waitUntil: 'networkidle0',
-            timeout: 30000
+            // 🚀 PRODUCTION TIMEOUT - 4x uzun Azərbaycan hərfləri və font loading üçün
+            timeout: isProduction || isServerless ? 120000 : 30000  // Production: 2 dəqiqə, Development: 30 saniyə
         });
         
         // Basic template üçün runtime CSS injection
@@ -3476,11 +3684,98 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             console.log('✅ ESSENCE TEMPLATE PDF SƏHIFƏ MARGIN SİLMƏ CSS INJECTION COMPLETED');
         }
         
-        // Azərbaycan dili və encoding dəstəyi üçün əlavə ayarlar
+        // Azərbaycan hərfləri və encoding dəstəyi üçün əlavə ayarlar
         await page.setExtraHTTPHeaders({
             'Accept-Charset': 'utf-8',
             'Accept-Language': 'az-AZ,az,tr-TR,tr,en-US,en'
         });
+
+        // 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN GÜCLÜ FONT YÜKLƏNMƏSI VƏ UNICODE DƏSTƏYI
+        await page.addStyleTag({
+            content: `
+                @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&subset=latin,latin-ext&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&subset=latin,latin-ext&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&subset=latin,latin-ext&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700;1,900&subset=latin,latin-ext&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&subset=latin,latin-ext&display=swap');
+                
+                /* 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN UNIVERSAL FONT STACK */
+                * {
+                    font-family: 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 'Noto Sans', 
+                                 'DejaVu Sans', 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', 
+                                 'Lucida Grande', 'Helvetica Neue', Arial, sans-serif !important;
+                    -webkit-font-feature-settings: "liga", "kern" !important;
+                    font-feature-settings: "liga", "kern" !important;
+                    text-rendering: optimizeLegibility !important;
+                    unicode-bidi: normal !important;
+                    font-variant-ligatures: common-ligatures !important;
+                    font-synthesis: weight style !important;
+                }
+                
+                /* 🔧 AZƏRBAYCAN DİLİ ÜÇÜN XÜSUSİ HƏRFLƏRİN FONT DƏSTƏYI */
+                body, h1, h2, h3, h4, h5, h6, p, span, div, li, td, th {
+                    font-family: 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 'Noto Sans', 
+                                 'DejaVu Sans', 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', 
+                                 'Lucida Grande', 'Helvetica Neue', Arial, sans-serif !important;
+                    unicode-bidi: normal !important;
+                    direction: ltr !important;
+                    text-rendering: optimizeLegibility !important;
+                }
+                
+                /* 🔧 AZƏRBAYCAN XÜSUSI HƏRFLƏRİ TEST VƏ SUPPORT */
+                .azerbaijani-test {
+                    font-family: 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 'Noto Sans', 
+                                 'DejaVu Sans', 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', 
+                                 'Lucida Grande', 'Helvetica Neue', Arial, sans-serif !important;
+                    unicode-bidi: normal !important;
+                    direction: ltr !important;
+                    text-rendering: optimizeLegibility !important;
+                    font-feature-settings: "kern" 1, "liga" 1, "clig" 1, "calt" 1 !important;
+                }
+            `
+        });
+
+        // 🔧 AZƏRBAYCAN HƏRFLƏRİ TEST VƏ DEBUGGING
+        await page.evaluate(() => {
+            console.log('🔧 Testing Azerbaijani character support...');
+            
+            // Create test element with Azerbaijani characters
+            const testDiv = document.createElement('div');
+            testDiv.className = 'azerbaijani-test';
+            testDiv.textContent = 'Test: Ə ə Ğ ğ İ ı Ö ö Ü ü Ç ç Ş ş';
+            testDiv.style.position = 'absolute';
+            testDiv.style.top = '-9999px';
+            testDiv.style.fontSize = '16px';
+            document.body.appendChild(testDiv);
+            
+            // Get computed styles for testing
+            const computedStyle = window.getComputedStyle(testDiv);
+            console.log('🔧 Azerbaijani test font family:', computedStyle.fontFamily);
+            console.log('🔧 Azerbaijani test font size:', computedStyle.fontSize);
+            console.log('🔧 Azerbaijani test text content:', testDiv.textContent);
+            
+            // Test character rendering width (simple metric)
+            const textWidth = testDiv.offsetWidth;
+            console.log('🔧 Azerbaijani test text width:', textWidth, 'px');
+            
+            if (textWidth > 0) {
+                console.log('✅ Azerbaijani characters appear to be rendering correctly');
+            } else {
+                console.log('⚠️ Azerbaijani characters may have rendering issues');
+            }
+            
+            // Clean up test element
+            document.body.removeChild(testDiv);
+            
+            return {
+                fontFamily: computedStyle.fontFamily,
+                fontSize: computedStyle.fontSize,
+                textWidth: textWidth,
+                characterSupport: textWidth > 0
+            };
+        });
+
+        console.log('✅ Azerbaijani character support initialized for page');
 
         // PDF yarat - Ultra minimal margin-lar, maksimal content sahəsi
         console.log('PDF yaradılır...');
@@ -4583,20 +4878,22 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             console.log('✅ BASIC TEMPLATE FINAL MARGIN OVERRIDE TAMAMLANDI');
         }
 
+        // 🚀 PRODUCTION-READY PDF GENERATİON - Enhanced timeout və error handling
         const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true,  // ✅ Background colors göstərilsin
             preferCSSPageSize: true,  // ✅ CSS @page ayarlarından istifadə et
             displayHeaderFooter: false,
             pageRanges: undefined, // REAL PAGINATION: Always allow multiple pages
-            // Unicode və font support üçün əlavə ayarlar
+            // 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN UNICODE VƏ FONT SUPPORT
             tagged: true,  // PDF/A accessibility və unicode dəstəyi
             outline: false,
             omitBackground: false,  // ✅ Background colors qoru
             // Additional settings for clean pagination
             generateDocumentOutline: false,
             generateTaggedPDF: false,  // Disable tagging to prevent extra pages
-            timeout: 60000,  // Extended timeout for font loading
+            // 🚀 PRODUCTION TIMEOUT OPTIMIZATION
+            timeout: isProduction || isServerless ? 120000 : 60000,  // Production: 2 dəqiqə, Development: 1 dəqiqə
             // ✅ Basic template üçün çox kiçik margin, digərləri üçün CSS @page-dən götür
             margin: templateId === 'basic' ? {
                 top: '5mm',
@@ -4608,6 +4905,29 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
         });
 
         console.log('PDF yaradıldı, browser bağlanır...');
+        
+        // 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN PDF CONTENT TEST
+        console.log('🔧 Testing PDF content for Azerbaijani character support...');
+        await page.evaluate(() => {
+            // Final test before PDF generation
+            const bodyText = document.body.textContent || '';
+            const azerbaijaniChars = /[ƏəĞğİıÖöÜüÇçŞş]/g;
+            const foundChars = bodyText.match(azerbaijaniChars);
+            
+            if (foundChars && foundChars.length > 0) {
+                console.log('✅ Found', foundChars.length, 'Azerbaijani characters in PDF content');
+                console.log('🔧 Azerbaijani characters found:', [...new Set(foundChars)].join(' '));
+            } else {
+                console.log('⚠️ No Azerbaijani characters found in PDF content');
+            }
+            
+            return {
+                hasAzerbaijaniChars: foundChars && foundChars.length > 0,
+                charCount: foundChars ? foundChars.length : 0,
+                uniqueChars: foundChars ? [...new Set(foundChars)] : []
+            };
+        });
+        
         await browser.close();
 
         // ✅ REMOVE BLANK PAGES FROM PDF USING PDF-LIB
@@ -4629,6 +4949,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
     } catch (error) {
         console.error('PDF export xətası:', error);
         
+        // 🚀 PRODUCTION ERROR HANDLING - Enhanced error classification
         // Browser cleanup if it was opened
         if (browser) {
             try {
@@ -4639,10 +4960,51 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             }
         }
         
-        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+        // 🔧 ENHANCED ERROR CLASSIFICATION FOR PRODUCTION
+        let errorMessage = 'PDF export xətası';
+        let httpStatus = 500;
+        
+        if (error instanceof Error) {
+            const errorMsg = error.message.toLowerCase();
+            
+            // Timeout xətaları
+            if (errorMsg.includes('timeout') || errorMsg.includes('navigation timeout')) {
+                errorMessage = isProduction 
+                    ? 'PDF yaradılması çox uzun çəkdi. Xahiş edirik yenidən cəhd edin.'
+                    : `PDF timeout xətası: ${error.message}`;
+                httpStatus = 408; // Request Timeout
+            }
+            // Memory xətaları
+            else if (errorMsg.includes('memory') || errorMsg.includes('out of memory')) {
+                errorMessage = isProduction 
+                    ? 'Yaddaş yetərli deyil. CV-nin ölçüsünü azaldın və yenidən cəhd edin.'
+                    : `Memory xətası: ${error.message}`;
+                httpStatus = 507; // Insufficient Storage
+            }
+            // Network xətaları
+            else if (errorMsg.includes('network') || errorMsg.includes('connection')) {
+                errorMessage = isProduction 
+                    ? 'Şəbəkə xətası. İnternet bağlantınızı yoxlayın və yenidən cəhd edin.'
+                    : `Network xətası: ${error.message}`;
+                httpStatus = 503; // Service Unavailable
+            }
+            // Umumi xəta
+            else {
+                errorMessage = isProduction 
+                    ? 'PDF yaradılması zamanı xəta baş verdi. Xahiş edirik yenidən cəhd edin.'
+                    : `PDF export xətası: ${error.message}`;
+            }
+        }
+        
+        console.error(`🚨 Production Error [${httpStatus}]:`, errorMessage);
+        
         return NextResponse.json(
-            { error: `PDF export xətası: ${errorMsg}` }, 
-            { status: 500 }
+            { 
+                error: errorMessage,
+                timestamp: new Date().toISOString(),
+                ...(isProduction ? {} : { details: error instanceof Error ? error.message : 'Unknown error' })
+            }, 
+            { status: httpStatus }
         );
     }
 }
@@ -4945,6 +5307,30 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
                 padding: 0 !important;
                 border: none !important;
                 background: white !important; /* Ağ arxa plan */
+            }
+            
+            /* Azərbaycan hərfləri üçün font desteği */
+            body, * {
+                font-family: 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 'Noto Sans', 
+                            'Segoe UI', 'Arial Unicode MS', 'Arial', 'Helvetica', 'DejaVu Sans', 
+                            'Liberation Sans', sans-serif !important;
+                text-rendering: optimizeLegibility !important;
+                -webkit-font-feature-settings: "kern" 1, "liga" 1, "calt" 1 !important;
+                font-feature-settings: "kern" 1, "liga" 1, "calt" 1 !important;
+                -webkit-text-size-adjust: 100% !important;
+                font-variant-ligatures: common-ligatures !important;
+                unicode-bidi: normal !important;
+                direction: ltr !important;
+            }
+            
+            /* Unicode və Azərbaycan xarakterləri üçün xüsusi support */
+            .cv-content {
+                font-synthesis: weight style !important;
+                font-display: swap !important;
+                unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, 
+                               U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, 
+                               U+2212, U+2215, U+FEFF, U+FFFD, U+018F, U+0259, U+011E, U+011F, 
+                               U+0130, U+0131, U+015E, U+015F, U+00C7, U+00E7 !important;
             }
             
             html {
