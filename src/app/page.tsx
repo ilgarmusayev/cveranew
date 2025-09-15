@@ -119,7 +119,7 @@ export default function Index2() {
                     AI ƏSASLI PEŞƏKAR CV YARATMA PLATFORMASI
                   </span>
                   </div>
-                  <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-6 sm:mb-8 leading-tight">
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 sm:mb-8 leading-tight">
                     <span className="block text-gray-900 mb-2">Peşəkar CV-nizi</span>
                     <span className="block relative inline-block">
                     <span className="absolute inset-0 bg-blue-500 transform -skew-y-2 rounded-lg opacity-100"></span>
@@ -129,14 +129,14 @@ export default function Index2() {
                         animate={{opacity: 1, scale: 1, rotateY: 0}}
                         transition={{duration: 0.8, delay: 0.4}}
                     >
-                 <span className="relative text-white px-4 py-2 transform -skew-y-2 block rounded-lg drop-shadow-lg font-bold text-2xl sm:text-3xl md:text-4xl lg:text-6xl xl:text-8xl" >
+                 <span className="relative text-white px-4 py-2 transform -skew-y-2 block rounded-lg drop-shadow-lg font-bold text-xl sm:text-2xl md:text-3xl lg:text-5xl xl:text-6xl" >
                         CVERA ilə yaradın!
                       </span>
 
                     </motion.span>
                   </span>
                   </h1>
-                  <p className="text-lg sm:text-2xl lg:text-2xl text-gray-600 max-w-5xl mx-auto leading-relaxed px-4">
+                  <p className="text-base sm:text-base lg:text-lg text-gray-600 max-w-5xl mx-auto leading-relaxed px-4">
                     Süni intellektlə sürətli və fərdi CV hazırlayaraq karyeranızı zirvəyə daşıyın! </p>
                 </motion.div>
 
@@ -179,10 +179,10 @@ export default function Index2() {
                         {/* Left Side - Features */}
                         <div className="space-y-8 sm:space-y-12">
                           <div className="text-center lg:text-left">
-                            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
+                            <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
                               Bizi Fərqləndirən Xüsusiyyətlər
                             </h3>
-                            <p className="text-gray-600 text-base sm:text-lg">
+                            <p className="text-gray-600 text-sm sm:text-base">
                               Beynəlxalq standartlara uyğun CV yaratma platforması
                             </p>
                           </div>
@@ -206,10 +206,10 @@ export default function Index2() {
                                     <div className="h-0.5 w-6 sm:w-8 bg-blue-600 mx-auto sm:mx-0"></div>
                                     <div className="h-0.5 w-8 sm:w-12 bg-blue-600 mt-1 mx-auto sm:mx-0"></div>
                                   </div>
-                                  <h4 className="font-bold text-gray-900 text-lg sm:text-xl order-1 sm:order-2">Süni
+                                  <h4 className="font-bold text-gray-900 text-base sm:text-lg order-1 sm:order-2">Süni
                                     İntellekt Dəstəyi</h4>
                                 </div>
-                                <p className="text-gray-600 leading-relaxed text-base sm:text-lg">
+                                <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
                                   Milyonlarla uğurlu CV-nin məlumatları ilə təkmilləşən süni intellekt, CV-nizi fərdi və
                                   ən optimal formada hazırlayır.
                                 </p>
@@ -234,10 +234,10 @@ export default function Index2() {
                                     <div className="h-0.5 w-6 sm:w-8 bg-blue-600 mx-auto sm:mx-0"></div>
                                     <div className="h-0.5 w-8 sm:w-12 bg-blue-600 mt-1 mx-auto sm:mx-0"></div>
                                   </div>
-                                  <h4 className="font-bold text-gray-900 text-lg sm:text-xl order-1 sm:order-2">Premium
+                                  <h4 className="font-bold text-gray-900 text-base sm:text-lg order-1 sm:order-2">Premium
                                     Şablon Kolleksiyası</h4>
                                 </div>
-                                <p className="text-gray-600 leading-relaxed text-base sm:text-lg">
+                                <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
                                   HR mütəxəssisləri və peşəkar dizaynerlər tərəfindən hazırlanmış, göz oxşayan və
                                   funksional şablonlar işə qəbul prosesində sizə üstünlük qazandırır.
                                 </p>
@@ -262,10 +262,10 @@ export default function Index2() {
                                     <div className="h-0.5 w-6 sm:w-8 bg-blue-600 mx-auto sm:mx-0"></div>
                                     <div className="h-0.5 w-8 sm:w-12 bg-blue-600 mt-1 mx-auto sm:mx-0"></div>
                                   </div>
-                                  <h4 className="font-bold text-gray-900 text-lg sm:text-xl order-1 sm:order-2">LinkedIn-dən
+                                  <h4 className="font-bold text-gray-900 text-base sm:text-lg order-1 sm:order-2">LinkedIn-dən
                                     İdxal Sistemi</h4>
                                 </div>
-                                <p className="text-gray-600 leading-relaxed text-base sm:text-lg">
+                                <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
                                   LinkedIn profil məlumatlarınız avtomatik əlavə edilərək CV-niz sürətlə hazırlanır.
                                 </p>
                               </div>
@@ -401,7 +401,7 @@ export default function Index2() {
                 >
                   <Link href="/auth/register">
                     <button
-                        className="group relative w-full sm:w-auto px-8 sm:px-10 lg:px-12 py-4 sm:py-5 lg:py-6 bg-blue-600 text-white font-bold rounded-xl sm:rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-3 hover:scale-105 transition-all duration-300 overflow-hidden text-lg sm:text-xl">
+                        className="group relative w-full sm:w-auto px-8 sm:px-10 lg:px-12 py-4 sm:py-5 lg:py-6 bg-blue-600 text-white font-bold rounded-xl sm:rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-3 hover:scale-105 transition-all duration-300 overflow-hidden text-base sm:text-lg">
                       <div
                           className="absolute inset-0 bg-blue-700 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
                       <span className="relative flex items-center justify-center gap-3 sm:gap-4">
@@ -416,7 +416,7 @@ export default function Index2() {
 
                   <Link href="/sablonlar">
                     <button
-                        className="group w-full sm:w-auto px-8 sm:px-10 lg:px-12 py-4 sm:py-5 lg:py-6 bg-white text-blue-600 font-bold rounded-xl sm:rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:bg-blue-50 transform hover:-translate-y-3 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl text-lg sm:text-xl">
+                        className="group w-full sm:w-auto px-8 sm:px-10 lg:px-12 py-4 sm:py-5 lg:py-6 bg-white text-blue-600 font-bold rounded-xl sm:rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:bg-blue-50 transform hover:-translate-y-3 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl text-base sm:text-lg">
                     <span className="flex items-center justify-center gap-2 sm:gap-3">
                       Şablonlar
                       <svg className="w-5 h-5 sm:w-6 sm:h-6 group-hover:rotate-12 transition-transform" fill="none"
@@ -484,10 +484,10 @@ export default function Index2() {
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center mb-16 sm:mb-20 lg:mb-24" data-aos="fade-up">
 
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 sm:mb-8">
+                <h2 className="text-2xl sm:text-3xl lg:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">
                   Sehrli <span className="text-blue-600">Toxunuşlar</span>
                 </h2>
-                <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed px-4">
+                <p className="text-base sm:text-lg lg:text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed px-4">
                   Müasir texnologiyalar və süni intellektin gücü ilə karyeranızda ən yaxşı nəticələri əldə edin.
                 </p>
               </div>
@@ -505,8 +505,8 @@ export default function Index2() {
                             d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                     </svg>
                   </div>
-                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">Süni İntellekt</h3>
-                  <p className="text-gray-600 leading-relaxed text-base sm:text-lg">
+                  <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Süni İntellekt</h3>
+                  <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
                     Daim inkişaf edən Sİ funksiyaları ilə daha ağıllı və fərdiləşdirilmiş təcrübə əldə edin.
                   </p>
                 </div>
@@ -523,9 +523,9 @@ export default function Index2() {
                             d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                     </svg>
                   </div>
-                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">Göz Oxşayan
+                  <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Göz Oxşayan
                     İnterfeys</h3>
-                  <p className="text-gray-600 leading-relaxed text-base sm:text-lg">
+                  <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
                     Müasir dizayn prinsipləri əsasında hazırlanmış interfeys, rahat istifadə təcrübəsi təqdim edir.
                   </p>
                 </div>
@@ -541,9 +541,9 @@ export default function Index2() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
                   </div>
-                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">Hiss Olunan
+                  <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Hiss Olunan
                     Sürət</h3>
-                  <p className="text-gray-600 leading-relaxed text-base sm:text-lg">
+                  <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
                     Cloud texnologiyası ilə saniyələr ərzində PDF formatında peşəkar CV əldə edin.
                   </p>
                 </div>
@@ -555,12 +555,12 @@ export default function Index2() {
           <div className="container mx-auto px-4 mb-20">
             <div id="how-it-works" className="scroll-mt-20">
               <div className="text-center mb-16" data-aos="fade-up">
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
                   <span className="bg-gradient-to-r from-blue-600 to-blue-600 bg-clip-text text-transparent">
                     Necə İşləyir?
                   </span>
                 </h2>
-                <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                <p className="text-base text-gray-600 max-w-3xl mx-auto">
                   CVERA ilə 3 addımda peşəkar CV yaradın:
                 </p>
               </div>
@@ -571,8 +571,8 @@ export default function Index2() {
                       className="bg-gradient-to-br from-blue-500 to-brown-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg relative z-10">
                     <span className="text-2xl font-bold text-white">1</span>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Qeydiyyat</h3>
-                  <p className="text-gray-600 mb-4">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Qeydiyyat</h3>
+                  <p className="text-gray-600 mb-4 text-sm sm:text-base">
                     E-poçt və ya LinkedIn hesabınızla qeydiyyatdan keçin
                   </p>
 
@@ -590,8 +590,8 @@ export default function Index2() {
                       className="bg-gradient-to-br from-blue-500 to-brown-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg relative z-10">
                     <span className="text-2xl font-bold text-white">2</span>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">LinkedIn Profil İdxalı</h3>
-                  <p className="text-gray-600 mb-4">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">LinkedIn Profil İdxalı</h3>
+                  <p className="text-gray-600 mb-4 text-sm sm:text-base">
                     LinkedIn profil linkinizi daxil edin və məlumatlarınızı cvnizə əlavə edin.
                   </p>
 
@@ -609,8 +609,8 @@ export default function Index2() {
                       className="bg-gradient-to-br from-blue-500 to-brown-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                     <span className="text-2xl font-bold text-white">3</span>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">CV-ni Yükləyin</h3>
-                  <p className="text-gray-600 mb-4">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">CV-ni Yükləyin</h3>
+                  <p className="text-gray-600 mb-4 text-sm sm:text-base">
                     Şablon seçin və peşəkar CV-nizi PDF və ya DOCX formatında yükləyin.
                   </p>
 
@@ -660,25 +660,25 @@ export default function Index2() {
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 text-center">
                 <div data-aos="fade-up" data-aos-delay="200"
                      className="bg-white/10 backdrop-blur-lg rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 hover:bg-white/20 transition-all duration-300 hover:scale-105 border border-white/20">
-                  <div className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 sm:mb-4">150+</div>
-                  <div className="text-blue-100 text-sm sm:text-lg lg:text-xl font-semibold">Bu il yaradılmış CV-lər</div>
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 sm:mb-4">150+</div>
+                  <div className="text-blue-100 text-sm sm:text-base font-semibold">Bu il yaradılmış CV-lər</div>
                 </div>
                 <div data-aos="fade-up" data-aos-delay="400"
                      className="bg-white/10 backdrop-blur-lg rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 hover:bg-white/20 transition-all duration-300 hover:scale-105 border border-white/20">
-                  <div className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 sm:mb-4">98%</div>
-                  <div className="text-blue-100 text-sm sm:text-lg lg:text-xl font-semibold">Uğurlu işə qəbul</div>
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 sm:mb-4">98%</div>
+                  <div className="text-blue-100 text-sm sm:text-base font-semibold">Uğurlu işə qəbul</div>
                 </div>
                 <div data-aos="fade-up" data-aos-delay="600"
                      className="bg-white/10 backdrop-blur-lg rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 hover:bg-white/20 transition-all duration-300 hover:scale-105 border border-white/20">
-                  <div className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 sm:mb-4">24/7</div>
-                  <div className="text-blue-100 text-sm sm:text-lg lg:text-xl font-semibold">
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 sm:mb-4">24/7</div>
+                  <div className="text-blue-100 text-sm sm:text-base font-semibold">
                     Canlı Dəstək Xidməti
                   </div>
                 </div>
                 <div data-aos="fade-up" data-aos-delay="800"
                      className="bg-white/10 backdrop-blur-lg rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 hover:bg-white/20 transition-all duration-300 hover:scale-105 border border-white/20">
-                  <div className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 sm:mb-4">10+</div>
-                  <div className="text-blue-100 text-sm sm:text-lg lg:text-xl font-semibold">Şablon seçimi</div>
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 sm:mb-4">10+</div>
+                  <div className="text-blue-100 text-sm sm:text-base font-semibold">Şablon seçimi</div>
                 </div>
               </div>
             </div>
