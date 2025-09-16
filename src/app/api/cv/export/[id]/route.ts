@@ -349,21 +349,21 @@ async function initializeBrowser() {
         
         console.log('Local environment detected, executablePath:', executablePath);
     } else {
-        // Production serverless - try puppeteer.executablePath first, then @sparticuz/chromium
+        // Production serverless - @sparticuz/chromium priority, puppeteer fallback
         try {
-            console.log('🔧 TRYING PUPPETEER EXECUTABLE PATH FIRST (recommended for newer versions)');
-            // Try puppeteer's built-in executable path first
+            console.log('🔧 TRYING @sparticuz/chromium FIRST (recommended for Vercel)');
+            // Try @sparticuz/chromium first for serverless
             try {
-                executablePath = puppeteer.executablePath();
-                console.log('✅ Puppeteer executable path obtained:', executablePath);
-            } catch (puppeteerError) {
-                console.log('⚠️ Puppeteer executablePath failed, falling back to @sparticuz/chromium');
                 executablePath = await chromium.executablePath();
                 browserArgs = [...browserArgs, ...chromium.args];
                 console.log('✅ Serverless Chromium path obtained:', executablePath);
+            } catch (chromiumError) {
+                console.log('⚠️ @sparticuz/chromium failed, falling back to puppeteer executablePath');
+                executablePath = puppeteer.executablePath();
+                console.log('✅ Puppeteer executable path obtained:', executablePath);
             }
         } catch (error) {
-            console.error('❌ Both Puppeteer and Chromium paths failed:', error);
+            console.error('❌ Both Chromium and Puppeteer paths failed:', error);
             throw new Error('Could not obtain executable path for serverless environment');
         }
     }
@@ -3723,165 +3723,21 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
             'Accept-Language': 'az-AZ,az,tr-TR,tr,en-US,en'
         });
 
-        // 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN GÜCLÜ FONT YÜKLƏNMƏSI VƏ UNICODE DƏSTƏYI
+        // Sadə font əlavəsi - sistem fontları ilə
         await page.addStyleTag({
             content: `
-                @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Azerbaijani:wght@400;700&display=swap');
-                @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Display:wght@400;700&display=swap');
-                @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&subset=latin,latin-ext&display=swap');
-                @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&subset=latin,latin-ext&display=swap');
-                @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&subset=latin,latin-ext&display=swap');
-                @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700;1,900&subset=latin,latin-ext&display=swap');
-                @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&subset=latin,latin-ext&display=swap');
-                
-                /* 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN PRIORITY FONT STACK */
+                /* Azərbaycan hərfləri üçün sistem fontları */
                 * {
-                    font-family: 'Noto Sans Azerbaijani', 'Noto Sans Display', 'Noto Sans', 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 
-                                 'DejaVu Sans', 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', 
-                                 'Lucida Grande', 'Helvetica Neue', Arial, sans-serif !important;
-                    -webkit-font-feature-settings: "liga", "kern" !important;
-                    font-feature-settings: "liga", "kern" !important;
+                    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 
+                                'Liberation Sans', 'DejaVu Sans', 'Arial Unicode MS', 
+                                Arial, sans-serif !important;
                     text-rendering: optimizeLegibility !important;
-                    unicode-bidi: normal !important;
-                    font-variant-ligatures: common-ligatures !important;
-                    font-synthesis: weight style !important;
-                }
-                
-                /* 🔧 AZƏRBAYCAN DİLİ ÜÇÜN XÜSUSİ HƏRFLƏRİN FONT DƏSTƏYI */
-                body, h1, h2, h3, h4, h5, h6, p, span, div, li, td, th {
-                    font-family: 'Noto Sans Azerbaijani', 'Noto Sans Display', 'Noto Sans', 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 
-                                 'DejaVu Sans', 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', 
-                                 'Lucida Grande', 'Helvetica Neue', Arial, sans-serif !important;
-                    unicode-bidi: normal !important;
-                    direction: ltr !important;
-                    text-rendering: optimizeLegibility !important;
-                }
-                
-                /* 🔧 AZƏRBAYCAN XÜSUSI HƏRFLƏRİ TEST VƏ SUPPORT */
-                .azerbaijani-test {
-                    font-family: 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 'Noto Sans', 
-                                 'DejaVu Sans', 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', 
-                                 'Lucida Grande', 'Helvetica Neue', Arial, sans-serif !important;
-                    unicode-bidi: normal !important;
-                    direction: ltr !important;
-                    text-rendering: optimizeLegibility !important;
-                    font-feature-settings: "kern" 1, "liga" 1, "clig" 1, "calt" 1 !important;
                 }
             `
         });
 
-        // 🔧 AZƏRBAYCAN HƏRFLƏRİ TEST VƏ DEBUGGING
-        await page.evaluate(() => {
-            console.log('🔧 Testing Azerbaijani character support...');
-            
-            // Create test element with Azerbaijani characters
-            const testDiv = document.createElement('div');
-            testDiv.className = 'azerbaijani-test';
-            testDiv.textContent = 'Test: Ə ə Ğ ğ İ ı Ö ö Ü ü Ç ç Ş ş';
-            testDiv.style.position = 'absolute';
-            testDiv.style.top = '-9999px';
-            testDiv.style.fontSize = '16px';
-            document.body.appendChild(testDiv);
-            
-            // Get computed styles for testing
-            const computedStyle = window.getComputedStyle(testDiv);
-            console.log('🔧 Azerbaijani test font family:', computedStyle.fontFamily);
-            console.log('🔧 Azerbaijani test font size:', computedStyle.fontSize);
-            console.log('🔧 Azerbaijani test text content:', testDiv.textContent);
-            
-            // Test character rendering width (simple metric)
-            const textWidth = testDiv.offsetWidth;
-            console.log('🔧 Azerbaijani test text width:', textWidth, 'px');
-            
-            if (textWidth > 0) {
-                console.log('✅ Azerbaijani characters appear to be rendering correctly');
-            } else {
-                console.log('⚠️ Azerbaijani characters may have rendering issues');
-            }
-            
-            // Clean up test element
-            document.body.removeChild(testDiv);
-            
-            return {
-                fontFamily: computedStyle.fontFamily,
-                fontSize: computedStyle.fontSize,
-                textWidth: textWidth,
-                characterSupport: textWidth > 0
-            };
-        });
-
-        console.log('✅ Azerbaijani character support initialized for page');
-
-        // PDF yarat - Ultra minimal margin-lar, maksimal content sahəsi
+        // PDF yarat - sadə və sürətli
         console.log('PDF yaradılır...');
-        
-        // Azərbaycan hərfləri üçün font-ları yüklə və unicode dəstəyini artır
-        await page.addStyleTag({
-            content: `
-                @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Azerbaijani:wght@400;700&display=swap');
-                @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Display:wght@400;700&display=swap');
-                @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
-                @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
-                
-                * {
-                    font-family: 'Noto Sans Azerbaijani', 'Noto Sans Display', 'Noto Sans', 'Roboto', 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif !important;
-                    -webkit-font-feature-settings: "liga", "kern" !important;
-                    font-feature-settings: "liga", "kern" !important;
-                    text-rendering: optimizeLegibility !important;
-                    unicode-bidi: normal !important;
-                    font-variant-ligatures: common-ligatures !important;
-                    font-synthesis: weight style !important;
-                }
-                
-                /* Azərbaycan dili xüsusi hərfləri üçün */
-                body, h1, h2, h3, h4, h5, h6, p, span, div, li, td, th {
-                    font-family: 'Noto Sans Azerbaijani', 'Noto Sans Display', 'Noto Sans', 'Roboto', 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif !important;
-                    unicode-bidi: normal !important;
-                    direction: ltr !important;
-                }
-            `
-        });
-        
-        // Unicode və font rendering üçün əlavə ayarlar
-        await page.evaluateOnNewDocument(() => {
-            // Force UTF-8 encoding və Azərbaycan dili dəstəyi
-            if (document.characterSet !== 'UTF-8') {
-                const meta = document.querySelector('meta[charset]') || document.createElement('meta');
-                meta.setAttribute('charset', 'UTF-8');
-                meta.setAttribute('http-equiv', 'Content-Type');
-                meta.setAttribute('content', 'text/html; charset=UTF-8');
-                if (!document.head.contains(meta)) {
-                    document.head.appendChild(meta);
-                }
-            }
-            
-            // Language və locale dəstəyi
-            document.documentElement.setAttribute('lang', 'az-AZ');
-            
-            // Font rendering optimizasyonu
-            const style = document.createElement('style');
-            style.textContent = `
-                * {
-                    font-synthesis: weight style !important;
-                    font-variant-ligatures: common-ligatures !important;
-                    unicode-bidi: normal !important;
-                    direction: ltr !important;
-                    text-rendering: optimizeLegibility !important;
-                    -webkit-font-feature-settings: "liga", "kern", "calt" !important;
-                    font-feature-settings: "liga", "kern", "calt" !important;
-                    -moz-font-feature-settings: "liga", "kern", "calt" !important;
-                }
-                
-                /* Azərbaycan hərfləri üçün xüsusi optimizasiya */
-                body, h1, h2, h3, h4, h5, h6, p, span, div, li, a, td, th, input, textarea, select, button {
-                    font-family: 'Noto Sans Azerbaijani', 'Noto Sans Display', 'Noto Sans', 'Roboto', 'Open Sans', 'DejaVu Sans', 'Liberation Sans', -apple-system, BlinkMacSystemFont, Arial, sans-serif !important;
-                    unicode-bidi: normal !important;
-                    direction: ltr !important;
-                    text-rendering: optimizeLegibility !important;
-                }
-            `;
-            document.head?.appendChild(style);
-        });
         
         // Multi-page PDF support üçün CSS əlavə et
         await page.addStyleTag({

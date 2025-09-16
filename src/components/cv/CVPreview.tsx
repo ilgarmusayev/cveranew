@@ -44,7 +44,6 @@ interface CVPreviewProps {
     leftColumnOrder?: string[];
     isExport?: boolean; // Export mode - forces desktop layout
     fontSettings?: {
-        fontFamily: string;
         nameSize: number;
         titleSize: number;
         headingSize: number;
@@ -1849,7 +1848,7 @@ const BasicTemplate: React.FC<{
             `}
             style={{
                 padding: '12mm 12mm', // Reduced side padding from 20mm to 12mm
-                '--cv-font-family': fontSettings.fontFamily,
+                '--cv-font-family': 'Noto Sans Azerbaijani, Noto Sans Display, Noto Sans, Arial, sans-serif',
                 '--cv-name-size': `${fontSettings.nameSize}px`,
                 '--cv-title-size': `${fontSettings.titleSize}px`,
                 '--cv-heading-size': `${fontSettings.headingSize}px`,
@@ -12235,7 +12234,7 @@ export default function CVPreview({
                     transform: `scale(${scale}) translateX(${isMobile ? currentTranslateX : 0}px)`,
                     boxSizing: 'border-box',
                     // Set CSS Variables for font management
-                ['--cv-font-family' as any]: fontSettings.fontFamily,
+                ['--cv-font-family' as any]: 'Noto Sans Azerbaijani, Noto Sans Display, Noto Sans, Arial, sans-serif',
                 ['--cv-name-size' as any]: `${fontSettings.nameSize}px`,
                 ['--cv-title-size' as any]: `${fontSettings.titleSize}px`,
                 ['--cv-heading-size' as any]: `${fontSettings.headingSize}px`,

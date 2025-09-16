@@ -37,9 +37,8 @@ export default function CVExportPage() {
     const [exporting, setExporting] = useState(false);
     const [showFontPanel, setShowFontPanel] = useState(false);
     
-    // Font settings state (default values matching CVEditor)
+    // Font settings state (default values matching CVEditor, excluding fontFamily)
     const [fontSettings, setFontSettings] = useState({
-        fontFamily: 'Arial, sans-serif',
         nameSize: 24,
         titleSize: 20,
         headingSize: 18,

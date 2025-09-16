@@ -300,11 +300,10 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
     const [showTranslationPanel, setShowTranslationPanel] = useState(false);
     const [showFontPanel, setShowFontPanel] = useState(false);
     const [fontSettings, setFontSettings] = useState(() => {
-        // Load font settings from initialData if available
+        // Load font settings from initialData if available (but exclude fontFamily - always use Azerbaijani fonts)
         if (initialData?.data?.fontSettings) {
-            console.log('🎨 Font CVEditor: Loading font settings from database:', initialData.data.fontSettings);
+            console.log('🎨 Font CVEditor: Loading font settings from database (enforcing Noto Sans Azerbaijani):', initialData.data.fontSettings);
             return {
-                fontFamily: initialData.data.fontSettings.fontFamily || 'Arial, sans-serif',
                 nameSize: initialData.data.fontSettings.nameSize || 24,
                 titleSize: initialData.data.fontSettings.titleSize || 16,
                 headingSize: initialData.data.fontSettings.headingSize || 18,
@@ -319,9 +318,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             };
         }
         
-        console.log('🎨 Font CVEditor: Using default font settings');
+        console.log('🎨 Font CVEditor: Using default font settings with Noto Sans Azerbaijani');
         return {
-            fontFamily: 'Arial, sans-serif',
             nameSize: 24,         // İsim üçün
             titleSize: 16,        // Başlıq üçün
             headingSize: 18,      // Başlıqlar üçün
@@ -332,7 +330,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             subheadingWeight: 600, // Alt başlıq qalınlığı
             bodyWeight: 400,      // Əsas mətn qalınlığı
             smallWeight: 400,     // Kiçik mətn qalınlığı
-            sectionSpacing: 8    // Bölmələr arası məsafə (px)
+            sectionSpacing: 8     // Bölmələr arası məsafə (px)
         };
     });
     
@@ -779,9 +777,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 }
             });
 
-            // 🎯 Font settings convert - useSimpleFontSettings → export format
+            // 🎯 Font settings convert - useSimpleFontSettings → export format (fontFamily enforced server-side)
             const exportFontSettings = {
-                fontFamily: fontSettings.fontFamily,
                 nameSize: fontSettings.titleSize,      // Şəxsi ad üçün (ən böyük)
                 titleSize: fontSettings.headingSize,    // İş vəzifəsi üçün
                 headingSize: fontSettings.headingSize,  // Bölmə başlıqları
@@ -1729,23 +1726,6 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                    /* Ensure scrollable area takes full available height */
                                    min-h-0
                                    ">
-                        {/* Font Family */}
-                        <div>
-                            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
-                                {cv.cvLanguage === 'english' ? 'Font Family' : 'Font Ailəsi'}
-                            </label>
-                            <select
-                                value={fontSettings.fontFamily}
-                                onChange={(e) => setFontSettings(prev => ({ ...prev, fontFamily: e.target.value }))}
-                                    className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                    <option value="Arial, sans-serif">Arial</option>
-                                    <option value="Georgia, serif">Georgia</option>
-                                    <option value="Verdana, sans-serif">Verdana</option>
-                                    <option value="Times New Roman, serif">Times New Roman</option>
-                                </select>
-                            </div>
-
                             {/* Heading Size */}
                             <div>
                                 <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-1.5 text-center">
@@ -1964,7 +1944,6 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                         <button
                             onClick={() => {
                                 setFontSettings({
-                                    fontFamily: 'Arial, sans-serif',
                                     nameSize: 24,
                                     titleSize: 16,
                                     headingSize: 18,
