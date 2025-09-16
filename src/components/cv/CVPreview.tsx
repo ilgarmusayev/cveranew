@@ -959,7 +959,6 @@ const BasicTemplate: React.FC<{
     activeSection?: string | null;
     onSectionSelect?: (sectionId: string | null) => void;
     fontSettings?: {
-        fontFamily: string;
         nameSize: number;
         titleSize: number;
         headingSize: number;
