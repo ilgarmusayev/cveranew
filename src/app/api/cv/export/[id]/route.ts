@@ -63,13 +63,30 @@ export async function POST(
             cssContent: cssContent ? 'mövcud' : 'yox'
         });
         
+        // 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN FONT SETTINGS OVERRIDE
+        // Əgər fontSettings-də başqa font tətbiq olunursa, onu ləğv edib Noto Sans Azerbaijani istifadə et
+        let optimizedFontSettings = { ...fontSettings };
+        
+        if (fontSettings?.fontFamily && fontSettings.fontFamily !== 'Noto Sans Azerbaijani') {
+            console.log('⚠️ FontSettings-də başqa font tapıldı:', fontSettings.fontFamily);
+            console.log('🔧 Azərbaycan hərfləri üçün Noto Sans Azerbaijani ilə əvəzləyir...');
+            
+            optimizedFontSettings = {
+                ...fontSettings,
+                fontFamily: 'Noto Sans Azerbaijani, Noto Sans Display, Noto Sans, Inter, system-ui, sans-serif'
+            };
+            
+            console.log('✅ Font override tamamlandı - Yeni font:', optimizedFontSettings.fontFamily);
+        }
+        
         // FONT SETTINGS DEBUG - TAM STRUCTURE
         console.log('=== FONT SETTINGS FULL DEBUG ===');
-        console.log('fontSettings raw:', JSON.stringify(fontSettings, null, 2));
-        if (fontSettings) {
-            console.log('fontSettings properties:');
-            Object.keys(fontSettings).forEach(key => {
-                console.log(`  ${key}:`, fontSettings[key]);
+        console.log('Original fontSettings:', JSON.stringify(fontSettings, null, 2));
+        console.log('Optimized fontSettings:', JSON.stringify(optimizedFontSettings, null, 2));
+        if (optimizedFontSettings) {
+            console.log('optimizedFontSettings properties:');
+            Object.keys(optimizedFontSettings).forEach(key => {
+                console.log(`  ${key}:`, optimizedFontSettings[key]);
             });
         } else {
             console.log('⚠️  fontSettings is NULL/UNDEFINED - using defaults');
@@ -90,7 +107,7 @@ export async function POST(
         console.log('🔧 Setting up Azerbaijani character support...');
         await setupAzerbaijaniSupport(browser);
         
-        return await generatePDF(browser, data, templateId, fontSettings, htmlContent, cssContent, cvId);
+        return await generatePDF(browser, data, templateId, optimizedFontSettings, htmlContent, cssContent, cvId);
 
     } catch (error) {
         console.error('Export xətası:', error);
@@ -169,10 +186,15 @@ async function setupPageAzerbaijaniSupport(page: any) {
             const style = document.createElement('style');
             style.id = 'azerbaijani-font-support';
             style.textContent = `
-                /* 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN NUCLEAR FONT SUPPORT */
+                /* 🔧 NOTO SANS AZERBAIJANI - SPECIFIC FONT FOR AZERBAIJANI CHARACTERS */
+                @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Azerbaijani:wght@400;700&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Display:wght@400;700&display=swap');
+                
+                /* 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN OPTIMIZED FONT SUPPORT */
                 * {
-                    font-family: 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 'Noto Sans', 
-                                 'DejaVu Sans', 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', 
+                    font-family: 'Noto Sans Azerbaijani', 'Noto Sans Display', 'Inter', 'Roboto', 
+                                 'Open Sans', 'Source Sans Pro', 'Noto Sans', 'DejaVu Sans', 
+                                 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', 
                                  'Lucida Grande', 'Helvetica Neue', Arial, sans-serif !important;
                     font-synthesis: weight style !important;
                     font-variant-ligatures: common-ligatures !important;
@@ -184,11 +206,12 @@ async function setupPageAzerbaijaniSupport(page: any) {
                     -moz-font-feature-settings: "liga", "kern", "calt" !important;
                 }
                 
-                /* 🔧 AZƏRBAYCAN XÜSUSİ HƏRFLƏRİ ÜÇÜN FONT STACK */
+                /* 🔧 AZERBAIJANI SPECIFIC CHARACTERS - PRIORITY FONT STACK */
                 body, h1, h2, h3, h4, h5, h6, p, span, div, li, a, td, th, input, textarea, select, button,
                 [lang="az"], [lang="az-AZ"] {
-                    font-family: 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 'Noto Sans', 
-                                 'DejaVu Sans', 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', 
+                    font-family: 'Noto Sans Azerbaijani', 'Noto Sans Display', 'Inter', 'Roboto', 
+                                 'Open Sans', 'Source Sans Pro', 'Noto Sans', 'DejaVu Sans', 
+                                 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', 
                                  'Lucida Grande', 'Helvetica Neue', Arial, sans-serif !important;
                     unicode-bidi: normal !important;
                     direction: ltr !important;
@@ -326,14 +349,22 @@ async function initializeBrowser() {
         
         console.log('Local environment detected, executablePath:', executablePath);
     } else {
-        // Production serverless - use @sparticuz/chromium
+        // Production serverless - try puppeteer.executablePath first, then @sparticuz/chromium
         try {
-            executablePath = await chromium.executablePath();
-            browserArgs = [...browserArgs, ...chromium.args];
-            console.log('Serverless Chromium path obtained:', executablePath);
+            console.log('🔧 TRYING PUPPETEER EXECUTABLE PATH FIRST (recommended for newer versions)');
+            // Try puppeteer's built-in executable path first
+            try {
+                executablePath = puppeteer.executablePath();
+                console.log('✅ Puppeteer executable path obtained:', executablePath);
+            } catch (puppeteerError) {
+                console.log('⚠️ Puppeteer executablePath failed, falling back to @sparticuz/chromium');
+                executablePath = await chromium.executablePath();
+                browserArgs = [...browserArgs, ...chromium.args];
+                console.log('✅ Serverless Chromium path obtained:', executablePath);
+            }
         } catch (error) {
-            console.error('Error getting serverless Chromium path:', error);
-            throw new Error('Serverless Chromium could not be loaded');
+            console.error('❌ Both Puppeteer and Chromium paths failed:', error);
+            throw new Error('Could not obtain executable path for serverless environment');
         }
     }
 
@@ -480,6 +511,8 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                     <title>CV Export</title>
                     <style>
                         /* AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN GÜCLÜ FONT IMPORT VƏ UNICODE DƏSTƏYI */
+                        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Azerbaijani:wght@400;700&display=swap');
+                        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Display:wght@400;700&display=swap');
                         @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&subset=latin,latin-ext&display=swap');
                         @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&subset=latin,latin-ext&display=swap');
                         @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&subset=latin,latin-ext&display=swap');
@@ -488,7 +521,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         
                         /* 🔧 AZƏRBAYCAN HƏRFLƏRİ (Ə, Ğ, İ, Ö, Ü, Ç, Ş) ÜÇÜN NUCLEAR UNICODE DƏSTƏYI */
                         * {
-                            font-family: 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 'Noto Sans', 'DejaVu Sans', 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', Arial, sans-serif !important;
+                            font-family: 'Noto Sans Azerbaijani', 'Noto Sans Display', 'Noto Sans', 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 'DejaVu Sans', 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', Arial, sans-serif !important;
                             text-rendering: optimizeLegibility !important;
                             -webkit-font-smoothing: antialiased !important;
                             -moz-osx-font-smoothing: grayscale !important;
@@ -504,7 +537,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         
                         /* 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN GÜCLÜ FONT FALLBACK STACK */
                         html, body {
-                            font-family: 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 'Noto Sans', 'DejaVu Sans', 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', 'Lucida Grande', Arial, sans-serif !important;
+                            font-family: 'Noto Sans Azerbaijani', 'Noto Sans Display', 'Noto Sans', 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 'DejaVu Sans', 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', 'Lucida Grande', Arial, sans-serif !important;
                         }
                         
                         /* 🔧 AZƏRBAYCAN DİLİ ÜÇÜN XÜSUSİ OPTIMIZASIYA */
@@ -527,7 +560,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                         *:contains("Ü"), *:contains("ü"),
                         *:contains("Ç"), *:contains("ç"),
                         *:contains("Ş"), *:contains("ş") {
-                            font-family: 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 'Noto Sans', 'DejaVu Sans', 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', 'Lucida Grande', Arial, sans-serif !important;
+                            font-family: 'Noto Sans Azerbaijani', 'Noto Sans Display', 'Noto Sans', 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 'DejaVu Sans', 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', 'Lucida Grande', Arial, sans-serif !important;
                             unicode-bidi: normal !important;
                             direction: ltr !important;
                             text-rendering: optimizeLegibility !important;
@@ -2203,9 +2236,9 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                             
                         /* TAMAMILƏ DİNAMİK SİSTEM - HEÇ BİR HARDCODED DƏYƏR YOX */
                         
-                        /* CSS Variables - FONT MANAGER İLƏ SINXRON */
+                        /* CSS Variables - FONT MANAGER İLƏ SINXRON - AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN OPTIMALLAŞDIRILMIŞ */
                         :root, html, body {
-                            --cv-font-family: ${fontSettings?.fontFamily || 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'};
+                            --cv-font-family: 'Noto Sans Azerbaijani', 'Noto Sans Display', 'Noto Sans', ${fontSettings?.fontFamily || 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'};
                             /* FONT MANAGER İLƏ TAM 1:1 UYĞUN ÖLÇÜLƏR */
                             --cv-name-size: ${fontSettings?.nameSize || 24}px;
                             --cv-heading-size: ${fontSettings?.headingSize || 18}px;
@@ -3693,15 +3726,17 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
         // 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN GÜCLÜ FONT YÜKLƏNMƏSI VƏ UNICODE DƏSTƏYI
         await page.addStyleTag({
             content: `
+                @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Azerbaijani:wght@400;700&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Display:wght@400;700&display=swap');
                 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&subset=latin,latin-ext&display=swap');
                 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&subset=latin,latin-ext&display=swap');
                 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&subset=latin,latin-ext&display=swap');
                 @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700;1,900&subset=latin,latin-ext&display=swap');
                 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&subset=latin,latin-ext&display=swap');
                 
-                /* 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN UNIVERSAL FONT STACK */
+                /* 🔧 AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN PRIORITY FONT STACK */
                 * {
-                    font-family: 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 'Noto Sans', 
+                    font-family: 'Noto Sans Azerbaijani', 'Noto Sans Display', 'Noto Sans', 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 
                                  'DejaVu Sans', 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', 
                                  'Lucida Grande', 'Helvetica Neue', Arial, sans-serif !important;
                     -webkit-font-feature-settings: "liga", "kern" !important;
@@ -3714,7 +3749,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                 
                 /* 🔧 AZƏRBAYCAN DİLİ ÜÇÜN XÜSUSİ HƏRFLƏRİN FONT DƏSTƏYI */
                 body, h1, h2, h3, h4, h5, h6, p, span, div, li, td, th {
-                    font-family: 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 'Noto Sans', 
+                    font-family: 'Noto Sans Azerbaijani', 'Noto Sans Display', 'Noto Sans', 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 
                                  'DejaVu Sans', 'Liberation Sans', 'Segoe UI', 'Arial Unicode MS', 
                                  'Lucida Grande', 'Helvetica Neue', Arial, sans-serif !important;
                     unicode-bidi: normal !important;
@@ -3783,11 +3818,13 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
         // Azərbaycan hərfləri üçün font-ları yüklə və unicode dəstəyini artır
         await page.addStyleTag({
             content: `
+                @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Azerbaijani:wght@400;700&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Display:wght@400;700&display=swap');
                 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
                 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
                 
                 * {
-                    font-family: 'Roboto', 'Noto Sans', 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif !important;
+                    font-family: 'Noto Sans Azerbaijani', 'Noto Sans Display', 'Noto Sans', 'Roboto', 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif !important;
                     -webkit-font-feature-settings: "liga", "kern" !important;
                     font-feature-settings: "liga", "kern" !important;
                     text-rendering: optimizeLegibility !important;
@@ -3798,7 +3835,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                 
                 /* Azərbaycan dili xüsusi hərfləri üçün */
                 body, h1, h2, h3, h4, h5, h6, p, span, div, li, td, th {
-                    font-family: 'Roboto', 'Noto Sans', 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif !important;
+                    font-family: 'Noto Sans Azerbaijani', 'Noto Sans Display', 'Noto Sans', 'Roboto', 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif !important;
                     unicode-bidi: normal !important;
                     direction: ltr !important;
                 }
@@ -3837,7 +3874,7 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
                 
                 /* Azərbaycan hərfləri üçün xüsusi optimizasiya */
                 body, h1, h2, h3, h4, h5, h6, p, span, div, li, a, td, th, input, textarea, select, button {
-                    font-family: 'Roboto', 'Open Sans', 'Noto Sans', 'DejaVu Sans', 'Liberation Sans', -apple-system, BlinkMacSystemFont, Arial, sans-serif !important;
+                    font-family: 'Noto Sans Azerbaijani', 'Noto Sans Display', 'Noto Sans', 'Roboto', 'Open Sans', 'DejaVu Sans', 'Liberation Sans', -apple-system, BlinkMacSystemFont, Arial, sans-serif !important;
                     unicode-bidi: normal !important;
                     direction: ltr !important;
                     text-rendering: optimizeLegibility !important;
@@ -3849,9 +3886,9 @@ async function generatePDF(browser: any, cvData: any, templateId: string, fontSe
         // Multi-page PDF support üçün CSS əlavə et
         await page.addStyleTag({
             content: `
-                /* PDF Export Font Variables - fontSettings-dən gələn dəyərlər */
+                /* PDF Export Font Variables - fontSettings-dən gələn dəyərlər - AZƏRBAYCAN HƏRFLƏRİ ÜÇÜN OVERRIDE */
                 :root {
-                    --cv-font-family: ${fontSettings.fontFamily};
+                    --cv-font-family: 'Noto Sans Azerbaijani', 'Noto Sans Display', 'Noto Sans', ${fontSettings.fontFamily};
                     --cv-heading-size: ${fontSettings.headingSize}px;
                     --cv-subheading-size: ${fontSettings.subheadingSize}px;
                     --cv-body-size: ${fontSettings.bodySize}px;
@@ -5309,9 +5346,9 @@ function generateCVHTML(cvData: any, templateId: string, fontSettings?: any): st
                 background: white !important; /* Ağ arxa plan */
             }
             
-            /* Azərbaycan hərfləri üçün font desteği */
+            /* Azərbaycan hərfləri üçün PRIORITY font desteği */
             body, * {
-                font-family: 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 'Noto Sans', 
+                font-family: 'Noto Sans Azerbaijani', 'Noto Sans Display', 'Noto Sans', 'Inter', 'Roboto', 'Open Sans', 'Source Sans Pro', 
                             'Segoe UI', 'Arial Unicode MS', 'Arial', 'Helvetica', 'DejaVu Sans', 
                             'Liberation Sans', sans-serif !important;
                 text-rendering: optimizeLegibility !important;
