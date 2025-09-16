@@ -702,16 +702,7 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free', 
           <p className="text-xs sm:text-sm text-gray-600 break-words">{getTranslation(cvLanguage, 'sectionDescription')}</p>
         </div>
         <div className="flex items-center space-x-2 flex-shrink-0">
-          <button
-            onClick={addOrganizationsSection}
-            className="flex items-center px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors whitespace-nowrap text-sm"
-            title={cvLanguage === 'english' ? 'Add Organizations Template' : 'Təşkilatlar Şablonu Əlavə Et'}
-          >
-            <span className="mr-1 sm:mr-2">🏢</span>
-            <span className="hidden sm:inline">
-              {cvLanguage === 'english' ? 'Organizations' : 'Təşkilatlar'}
-            </span>
-          </button>
+         
           <button
             onClick={addSection}
             className="flex items-center px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
@@ -740,13 +731,7 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free', 
           <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">{getTranslation(cvLanguage, 'noSectionsTitle')}</h3>
           <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4 px-4 break-words">{getTranslation(cvLanguage, 'noSectionsDescription')}</p>
           <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-3">
-            <button
-              onClick={addOrganizationsSection}
-              className="inline-flex items-center px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base"
-            >
-              <span className="mr-2">🏢</span>
-              {cvLanguage === 'english' ? 'Add Organizations' : 'Təşkilatlar Əlavə Et'}
-            </button>
+            
             <button
               onClick={addSection}
               className="inline-flex items-center px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
