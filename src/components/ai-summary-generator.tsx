@@ -7,7 +7,7 @@ import { apiClient } from '@/lib/api-client';
 interface AISummaryGeneratorProps {
   cvId: string;
   currentSummary?: string;
-  userTier: 'Free' | 'Medium' | 'Premium' | 'Pro' | 'Populyar';
+  userTier: 'Free' | 'Pulsuz' | 'Medium' | 'Premium' | 'Pro' | 'Populyar';
   onSummaryGenerated?: (summary: string) => void;
 }
 
@@ -21,12 +21,12 @@ export function AISummaryGenerator({
   const [generatedSummary, setGeneratedSummary] = useState<string>('');
   const { showSuccess, showError, showWarning } = useNotification();
 
-  // ✅ Include Pro/Populyar tiers for AI access
-  const canUseAI = userTier === 'Medium' || userTier === 'Premium' || userTier === 'Pro' || userTier === 'Populyar';
+  // ✅ Allow all paid tiers (block only Free users)
+  const canUseAI = userTier !== 'Free' && userTier !== 'Pulsuz';
 
   const handleGenerateAISummary = async () => {
     if (!canUseAI) {
-      showWarning('AI summary generation is only available for Medium, Pro and Premium subscribers');
+      showWarning('AI summary generation is only available for paid plan subscribers');
       return;
     }
 
@@ -126,7 +126,7 @@ export function AISummaryGenerator({
       ];
     } else {
       return [
-        'Upgrade to Medium, Pro or Premium to unlock AI summary generation',
+        'Upgrade to a paid plan to unlock AI summary generation',
         'Professional ATS-optimized summaries',
         'Industry-specific keyword optimization',
         'Personalized based on your experience and skills'
@@ -231,7 +231,7 @@ export function AISummaryGenerator({
         {!canUseAI && (
           <div className="text-center space-y-3 pt-4 border-t">
             <p className="text-sm text-gray-600">
-              Unlock AI-powered professional summaries with our Medium or Premium plans
+              Unlock AI-powered professional summaries with any paid plan
             </p>
             <div className="flex gap-2 justify-center">
               <a

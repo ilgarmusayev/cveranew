@@ -39,8 +39,8 @@ interface PersonalInfoSectionProps {
 export default function PersonalInfoSection({ data, onChange, userTier = 'Free', cvData, cvId, cvLanguage = 'azerbaijani' }: PersonalInfoSectionProps) {
   const [imageUploading, setImageUploading] = useState(false);
   const [aiGenerating, setAiGenerating] = useState(false);
-  const isPremium = userTier?.toLowerCase() === 'premium';
-  const canUseAI = ['premium', 'populyar', 'medium'].includes(userTier?.toLowerCase());
+  const isPremium = userTier?.toLowerCase() === 'premium' || userTier?.toLowerCase() === 'pro';
+  const canUseAI = ['premium', 'populyar', 'medium', 'pro'].includes(userTier?.toLowerCase());
   const { showSuccess, showError, showWarning, showInfo } = useNotification();
 
   // Form validasiya mesajlarını Azərbaycan dilinə çevirmək
@@ -276,7 +276,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
         {isPremium && (
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {cvLanguage === 'english' ? 'Profile Image' : 'Profil Şəkli'} <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full">Premium</span>
+              {cvLanguage === 'english' ? 'Profile Image' : 'Profil Şəkli'} <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full">{userTier === 'Pro' ? 'Pro' : 'Premium'}</span>
             </label>
             {data.profileImage ? (
               <div className="flex items-center space-x-4">
@@ -494,7 +494,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
             }`}
             title={canUseAI 
               ? (cvLanguage === 'english' ? 'Generate automatic professional summary with AI' : 'AI ilə avtomatik peşəkar xülasə yaradın')
-              : (cvLanguage === 'english' ? 'AI features available for Premium/Medium' : 'AI funksiyalar Premium/Medium üçün mövcuddur')
+              : (cvLanguage === 'english' ? 'AI features available for Premium/Pro/Popular' : 'AI funksiyalar Premium/Pro/Populyar üçün mövcuddur')
             }
           >
             {aiGenerating ? (
@@ -522,13 +522,13 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
                 </p>
                 <p className="text-xs text-purple-600">
                   {cvLanguage === 'english' 
-                    ? 'Generate automatic Professional Summary from your LinkedIn data! Available for '
-                    : 'LinkedIn məlumatlarınızdan avtomatik Peşəkar Xülasə yaradın! '
+                    ? 'Generate automatic Professional Summary from your data! Available for '
+                    : 'Məlumatlarınızdan avtomatik Peşəkar Xülasə yaradın! '
                   }
                   <span className="font-semibold">
-                    {cvLanguage === 'english' ? 'Premium and Medium' : 'Premium və Medium'}
+                    {cvLanguage === 'english' ? 'Premium, Pro and Popular' : 'Premium, Pro və Populyar'}
                   </span>
-                  {cvLanguage === 'english' ? ' users.' : ' istifadəçilər üçün mövcuddur.'}
+                  {cvLanguage === 'english' ? ' users.' : ' istifadəçilər üçün uyğundur.'}
                 </p>
               </div>
             </div>

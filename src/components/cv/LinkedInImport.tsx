@@ -12,7 +12,7 @@ interface LinkedInData {
     phone?: string;
     linkedin: string;
     summary?: string;
-    professionalSummary?: string; // AI-generated professional summary for Medium/Premium users
+    professionalSummary?: string; // AI-generated professional summary for paid users
     website?: string;
     headline?: string;
   };

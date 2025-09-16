@@ -2,6 +2,32 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { prisma } from '@/lib/prisma';
 import { getGeminiApiKey, recordApiUsage, markApiKeyFailed, getBestApiKey } from '@/lib/api-service';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || '';
+
+// Get user ID from JWT token
+function getUserIdFromRequest(req: NextRequest): string | null {
+  try {
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return null;
+    }
+    
+    const token = authHeader.substring(7);
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    return decoded.userId;
+  } catch (error) {
+    console.error('Token verification error:', error);
+    return null;
+  }
+}
+
+// Check if user can use AI features (not Free tier)
+function canUseAIFeatures(userTier: string): boolean {
+  const tier = userTier.toLowerCase();
+  return tier !== 'free' && tier !== 'pulsuz';
+}
 
 
 // Get Gemini AI instance using API keys from database
@@ -200,6 +226,59 @@ function getStyleInstructions(style: string, isEnglish: boolean): string {
 
 export async function POST(req: NextRequest) {
   try {
+    console.log('🤖 AI Generate Summary API çağırıldı');
+    
+    // Get user ID from token
+    const userId = getUserIdFromRequest(req);
+    if (!userId) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Giriş tələb olunur - Token lazımdır',
+          errorEn: 'Authentication required - Token needed'
+        },
+        { status: 401 }
+      );
+    }
+
+    // Get user and check subscription tier
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { 
+        id: true, 
+        email: true, 
+        tier: true,
+        name: true 
+      }
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'İstifadəçi tapılmadı',
+          errorEn: 'User not found'
+        },
+        { status: 404 }
+      );
+    }
+
+    console.log(`👤 User: ${user.email}, Tier: ${user.tier}`);
+
+    // Check if user has access to AI features (block free users)
+    if (!canUseAIFeatures(user.tier)) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: "AI summary yalnız ödənişli planlar üçün mövcuddur. Planınızı yüksəldin!",
+          errorEn: "AI summary is only available for paid plans. Please upgrade!",
+          tier: user.tier,
+          upgradeRequired: true
+        },
+        { status: 403 }
+      );
+    }
+
     const { cvId, profileData, cvLanguage, structurePattern, openingStyle, requestId } = await req.json();
 
     // Handle both scenarios: direct profileData or cvId to fetch data

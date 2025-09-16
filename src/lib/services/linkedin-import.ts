@@ -1198,7 +1198,7 @@ export class LinkedInImportService {
   }
 
   /**
-   * Generate AI-powered professional summary for Medium and Premium users
+   * Generate AI-powered professional summary for paid users
    * This is now a separate method that can be called manually
    */
   async generateAISummary(userId: string, cvId: string): Promise<{ success: boolean; summary?: string; error?: string; quotaExceeded?: boolean }> {
@@ -1213,11 +1213,11 @@ export class LinkedInImportService {
         return { success: false, error: 'İstifadəçi tapılmadı' };
       }
 
-      // Only allow Medium and Premium users to generate AI summaries
-      if (user.tier === 'Free') {
+      // Only allow paid users (non-Free tiers) to generate AI summaries
+      if (user.tier === 'Free' || user.tier === 'Pulsuz') {
         return {
           success: false,
-          error: 'AI xülasə yaratma yalnız Orta və Premium abunəçilər üçün mövcuddur. Bu xüsusiyyətə daxil olmaq üçün paketinizi yüksəldin.'
+          error: 'AI xülasə yaratma yalnız ödənişli planlar üçün mövcuddur. Bu xüsusiyyətə daxil olmaq üçün paketinizi yüksəldin.'
         };
       }
 
@@ -1577,7 +1577,7 @@ Tələblər: 3-cü tərəf icraçı baxımından, vaxt əsaslı ifadələr yox, 
   }
 
   /**
-   * Generate AI-powered skill description for Medium and Premium users
+   * Generate AI-powered skill description for paid users
    */
   async generateAISkillDescription(userId: string, cvId: string, skillId: string, skillName: string, skillType?: string): Promise<{ success: boolean; description?: string; error?: string }> {
     try {
@@ -1591,11 +1591,11 @@ Tələblər: 3-cü tərəf icraçı baxımından, vaxt əsaslı ifadələr yox, 
         return { success: false, error: 'İstifadəçi tapılmadı' };
       }
 
-      // Only allow Medium and Premium users to generate AI skill descriptions
-      if (user.tier === 'Free') {
+      // Only allow paid users (non-Free tiers) to generate AI skill descriptions
+      if (user.tier === 'Free' || user.tier === 'Pulsuz') {
         return {
           success: false,
-          error: 'AI bacarıq təsviri yaratma yalnız Orta və Premium abunəçilər üçün mövcuddur. Bu xüsusiyyətə daxil olmaq üçün paketinizi yüksəldin.'
+          error: 'AI bacarıq təsviri yaratma yalnız ödənişli planlar üçün mövcuddur. Bu xüsusiyyətə daxil olmaq üçün paketinizi yüksəldin.'
         };
       }
 
