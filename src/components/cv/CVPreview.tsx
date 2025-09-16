@@ -11711,7 +11711,6 @@ export default function CVPreview({
     leftColumnOrder: externalLeftColumnOrder,
     isExport = false, // Export mode prop
     fontSettings = {
-        fontFamily: 'var(--cv-font-family)',
         nameSize: 24,
         titleSize: 16,
         headingSize: 18,
