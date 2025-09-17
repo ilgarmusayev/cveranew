@@ -55,8 +55,6 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    // TEMPORARY: Skip email verification check
-    /*
     // Check if email is verified
     if (!user.emailVerified || user.status === "pending_verification") {
       // Verify password first before resending email
@@ -115,11 +113,9 @@ export async function POST(req: NextRequest) {
         }, { status: 403 });
       }
     }
-    */
 
-    // TEMPORARY: Skip status check for pending_verification users
-    // Check if account is active (allow pending_verification during temporary period)
-    if (user.status !== "active" && user.status !== "pending_verification") {
+    // Check if account is active
+    if (user.status !== "active") {
       return NextResponse.json({
         message: "Hesabınız aktiv deyil. Dəstək komandası ilə əlaqə saxlayın.",
         accountStatus: user.status
