@@ -80,6 +80,16 @@ export async function POST(req: NextRequest) {
     });
 
     // Send verification email
+    console.log('🔧 Email configuration check:', {
+      host: process.env.EMAIL_HOST,
+      port: process.env.EMAIL_PORT,
+      secure: process.env.EMAIL_SECURE,
+      user: process.env.EMAIL_USER ? process.env.EMAIL_USER.substring(0, 5) + '***' : 'undefined',
+      from_name: process.env.EMAIL_FROM_NAME,
+      from_address: process.env.EMAIL_FROM_ADDRESS,
+      base_url: process.env.NEXT_PUBLIC_BASE_URL
+    });
+
     const emailResult = await emailService.sendEmailVerification(
       user.email,
       user.name,
@@ -87,7 +97,7 @@ export async function POST(req: NextRequest) {
     );
 
     if (emailResult.success) {
-      console.log(`✅ Verification email sent to ${user.email}`);
+      console.log(`✅ Verification email sent successfully to ${user.email}`, emailResult);
 
       return NextResponse.json({
         message: "Qeydiyyat uğurludur! E-poçt ünvanınıza təsdiqləmə mesajı göndərildi. E-poçt təsdiqlədikdən sonra hesabınıza daxil ola bilərsiniz.",
@@ -101,6 +111,7 @@ export async function POST(req: NextRequest) {
         }
       }, { status: 201 });
     } else {
+      console.error(`❌ Email verification failed for ${user.email}:`, emailResult);
       // If email sending fails, delete the user and return error
       await prisma.user.delete({ where: { id: user.id } });
 
