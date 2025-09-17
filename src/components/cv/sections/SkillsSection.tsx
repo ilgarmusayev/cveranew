@@ -42,8 +42,9 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const { showSuccess, showError, showWarning, showInfo } = useNotification();
 
-  // AI is available for all users to see, but only works for premium users
-  const canUseAI = ['premium', 'populyar', 'medium'].includes(userTier?.toLowerCase());
+  // AI skills are available for all paid tiers (not Free tier)
+  // Free tier users need to upgrade to use AI features
+  const canUseAI = userTier && !['free', 'pulsuz'].includes(userTier.toLowerCase());
 
   const addSkill = () => {
     const newSkill: Skill = {

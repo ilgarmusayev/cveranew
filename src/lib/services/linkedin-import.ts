@@ -1591,7 +1591,8 @@ Tələblər: 3-cü tərəf icraçı baxımından, vaxt əsaslı ifadələr yox, 
         return { success: false, error: 'İstifadəçi tapılmadı' };
       }
 
-      // Only allow paid users (non-Free tiers) to generate AI skill descriptions
+      // Restrict AI skill descriptions only for Free tier users
+      // All paid tiers (Medium, Premium, etc.) can use this feature
       if (user.tier === 'Free' || user.tier === 'Pulsuz') {
         return {
           success: false,
