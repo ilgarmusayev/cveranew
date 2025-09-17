@@ -137,13 +137,18 @@ export async function POST(
 // PRODUCTION SAFE BROWSER INITIALIZATION
 async function initializeBrowser() {
     const isProduction = process.env.NODE_ENV === 'production';
-    const isVercel = process.env.VERCEL === '1';
+    const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV;
     
-    console.log('Browser initialization:', { isProduction, isVercel });
+    console.log('🔍 Browser initialization environment:', { 
+        isProduction, 
+        isVercel,
+        nodeEnv: process.env.NODE_ENV,
+        vercelEnv: process.env.VERCEL_ENV
+    });
 
     if (isProduction || isVercel) {
-        // Vercel production - use chromium package
-        console.log('Using @sparticuz/chromium for production');
+        // Vercel production - MUST use @sparticuz/chromium
+        console.log('✅ Using @sparticuz/chromium for Vercel production');
         return await puppeteer.launch({
             headless: true,
             args: [
@@ -152,9 +157,7 @@ async function initializeBrowser() {
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
                 '--disable-web-security',
-                '--font-render-hinting=none',
-                '--enable-font-antialiasing',
-                '--force-device-scale-factor=1',
+                '--disable-features=VizDisplayCompositor',
                 '--disable-extensions',
                 '--disable-plugins',
                 '--disable-background-timer-throttling',
@@ -162,17 +165,19 @@ async function initializeBrowser() {
                 '--disable-renderer-backgrounding',
                 '--disable-features=TranslateUI',
                 '--disable-ipc-flooding-protection',
+                '--font-render-hinting=none',
+                '--enable-font-antialiasing',
+                '--force-device-scale-factor=1',
                 '--lang=az-AZ',
                 '--force-color-profile=sRGB',
-                '--disable-features=VizDisplayCompositor',
                 '--enable-utf8-support',
                 '--font-display-fallback=system',
             ],
             executablePath: await chromium.executablePath()
         });
     } else {
-        // Local development
-        console.log('Using local Chrome for development');
+        // Local development - use system Chrome
+        console.log('🏠 Using local Chrome for development');
         return await puppeteer.launch({
             headless: true,
             args: [
