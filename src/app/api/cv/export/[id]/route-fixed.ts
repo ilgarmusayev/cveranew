@@ -63,14 +63,11 @@ export async function POST(
         browser = await initializeBrowser();
         const page = await browser.newPage();
         
-        // AZERBAIJANI UNICODE SUPPORT
-        await page.setExtraHTTPHeaders({
-            'Accept-Language': 'az-AZ,az;q=0.9,en;q=0.8',
-            'Accept-Charset': 'utf-8'
-        });
-        
         // Viewport və encoding
         await page.setViewport({ width: 794, height: 1123 }); // A4 viewport
+        await page.setExtraHTTPHeaders({
+            'Accept-Language': 'az-AZ,az;q=0.9,en;q=0.8'
+        });
 
         // HTML content yaradımı - PRODUCTION SAFE FONTS
         const htmlContent = generateProductionSafeCVHTML(data, templateId, fontSettings);
@@ -162,11 +159,7 @@ async function initializeBrowser() {
                 '--disable-renderer-backgrounding',
                 '--disable-features=TranslateUI',
                 '--disable-ipc-flooding-protection',
-                '--lang=az-AZ',
-                '--force-color-profile=sRGB',
-                '--disable-features=VizDisplayCompositor',
-                '--enable-utf8-support',
-                '--font-display-fallback=system',
+                '--lang=az-AZ'
             ],
             executablePath: await chromium.executablePath()
         });
@@ -181,10 +174,7 @@ async function initializeBrowser() {
                 '--disable-dev-shm-usage',
                 '--font-render-hinting=none',
                 '--enable-font-antialiasing',
-                '--lang=az-AZ',
-                '--force-color-profile=sRGB',
-                '--enable-utf8-support',
-                '--font-display-fallback=system',
+                '--lang=az-AZ'
             ]
         });
     }
@@ -246,7 +236,7 @@ function generateProductionSafeCVHTML(cvData: any, templateId: string, fontSetti
                 }
                 
                 body {
-                    font-family: ${safeFont}, 'Helvetica Neue', Helvetica, 'DejaVu Sans', 'Liberation Sans', 'Times New Roman', 'Noto Sans', Arial, sans-serif;
+                    font-family: ${safeFont}, 'Helvetica Neue', Helvetica, 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif;
                     font-size: ${bodySize}px;
                     line-height: 1.5;
                     color: #333;
@@ -264,7 +254,7 @@ function generateProductionSafeCVHTML(cvData: any, templateId: string, fontSetti
                 
                 /* Typography Hierarchy */
                 h1 {
-                    font-family: ${safeFont}, 'Helvetica Neue', Helvetica, 'DejaVu Sans', 'Liberation Sans', 'Times New Roman', 'Noto Sans', Arial, sans-serif;
+                    font-family: ${safeFont}, 'Helvetica Neue', Helvetica, Arial, sans-serif;
                     font-size: ${headingSize}px;
                     font-weight: bold;
                     color: #1a202c;
@@ -272,7 +262,7 @@ function generateProductionSafeCVHTML(cvData: any, templateId: string, fontSetti
                 }
                 
                 h2 {
-                    font-family: ${safeFont}, 'Helvetica Neue', Helvetica, 'DejaVu Sans', 'Liberation Sans', 'Times New Roman', 'Noto Sans', Arial, sans-serif;
+                    font-family: ${safeFont}, 'Helvetica Neue', Helvetica, Arial, sans-serif;
                     font-size: ${subheadingSize}px;
                     font-weight: bold;
                     color: #2d3748;
@@ -282,7 +272,7 @@ function generateProductionSafeCVHTML(cvData: any, templateId: string, fontSetti
                 }
                 
                 h3 {
-                    font-family: ${safeFont}, 'Helvetica Neue', Helvetica, 'DejaVu Sans', 'Liberation Sans', 'Times New Roman', 'Noto Sans', Arial, sans-serif;
+                    font-family: ${safeFont}, 'Helvetica Neue', Helvetica, Arial, sans-serif;
                     font-size: ${bodySize}px;
                     font-weight: bold;
                     color: #2d3748;
@@ -290,7 +280,7 @@ function generateProductionSafeCVHTML(cvData: any, templateId: string, fontSetti
                 }
                 
                 p {
-                    font-family: ${safeFont}, 'Helvetica Neue', Helvetica, 'DejaVu Sans', 'Liberation Sans', 'Times New Roman', 'Noto Sans', Arial, sans-serif;
+                    font-family: ${safeFont}, 'Helvetica Neue', Helvetica, Arial, sans-serif;
                     font-size: ${bodySize}px;
                     color: #4a5568;
                     margin-bottom: 6px;
