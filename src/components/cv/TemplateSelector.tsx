@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 interface Template {
   id: string;
   name: string;
-  tier: 'Free' | 'Medium' | 'Premium';
+  tier: 'Free' | 'Populyar' | 'Premium' | 'Pro';
   preview_url: string;
   hasAccess: boolean;
 }
@@ -78,14 +78,16 @@ export default function TemplateSelector({ selectedTemplateId, onTemplateSelect,
 
   const tierColors = {
     Free: 'bg-green-100 text-green-800 border-green-200',
-    Medium: 'bg-blue-100 text-blue-800 border-blue-200',
-    Premium: 'bg-purple-100 text-purple-800 border-purple-200'
+    Populyar: 'bg-blue-100 text-blue-800 border-blue-200',
+    Premium: 'bg-purple-100 text-purple-800 border-purple-200',
+    Pro: 'bg-orange-100 text-orange-800 border-orange-200'
   };
 
   const tierLabels = {
     Free: 'Pulsuz',
-    Medium: 'Orta',
-    Premium: 'Premium'
+    Populyar: 'Populyar',
+    Premium: 'Premium',
+    Pro: 'Pro'
   };
 
   if (loading) {

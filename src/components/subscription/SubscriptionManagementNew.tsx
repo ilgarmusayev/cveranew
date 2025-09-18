@@ -40,8 +40,8 @@ const TIER_FEATURES = {
     ],
     color: 'gray',
   },
-  Medium: {
-    name: 'Orta',
+  Populyar: {
+    name: 'Populyar',
     price: '9.99₼',
     features: [
       'Orta səviyyə şablonlar',
@@ -89,7 +89,7 @@ export default function SubscriptionManagement({ user, onUserUpdate }: Subscript
         '⚡ Prioritet dəstək',
         '💼 LinkedIn import'
       ],
-      'Medium': [
+      'Populyar': [
         '📄 Orta səviyyə şablonlar',
         '🎨 Şəkil yükləmə',
         '🎨 Rəng seçimi',
@@ -229,7 +229,7 @@ export default function SubscriptionManagement({ user, onUserUpdate }: Subscript
               <div className="flex items-center space-x-2">
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                   currentTier === 'Free' ? 'bg-gray-100 text-gray-800' :
-                  currentTier === 'Medium' ? 'bg-blue-100 text-blue-800' :
+                  currentTier === 'Populyar' ? 'bg-blue-100 text-blue-800' :
                   'bg-purple-100 text-purple-800'
                 }`}>
                   {TIER_FEATURES[currentTier as keyof typeof TIER_FEATURES].name}
@@ -323,7 +323,7 @@ export default function SubscriptionManagement({ user, onUserUpdate }: Subscript
                   disabled={loading}
                   className={`w-full px-4 py-2 rounded-md font-medium transition-colors disabled:opacity-50 ${
                     tier === 'Free' ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' :
-                    tier === 'Medium' ? 'bg-blue-600 text-white hover:bg-blue-700' :
+                    tier === 'Populyar' ? 'bg-blue-600 text-white hover:bg-blue-700' :
                     'bg-purple-600 text-white hover:bg-purple-700'
                   }`}
                 >

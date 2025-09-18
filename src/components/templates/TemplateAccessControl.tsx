@@ -7,7 +7,7 @@ import { useNotification } from '@/components/ui/Toast';
 interface Template {
   id: string;
   name: string;
-  tier: 'free' | 'medium' | 'premium';
+  tier: 'free' | 'populyar' | 'premium';
   previewUrl: string;
   description?: string;
 }
@@ -32,7 +32,7 @@ export default function TemplateAccessControl({
   const getTierColor = (tier: string) => {
     switch (tier) {
       case 'free': return 'bg-gray-100 text-gray-800';
-      case 'medium': return 'bg-blue-100 text-blue-800';
+      case 'populyar': return 'bg-blue-100 text-blue-800';
       case 'premium': return 'bg-purple-100 text-purple-800';
       default: return 'bg-gray-100 text-gray-800';
     }
@@ -41,7 +41,7 @@ export default function TemplateAccessControl({
   const getTierLabel = (tier: string) => {
     switch (tier) {
       case 'free': return 'Pulsuz';
-      case 'medium': return 'Orta';
+      case 'populyar': return 'Populyar';
       case 'premium': return 'Premium';
       default: return 'Pulsuz';
     }
@@ -54,7 +54,7 @@ export default function TemplateAccessControl({
       onSelectTemplate(template.id);
     } else {
       // Show upgrade suggestion via toast and modal
-      const suggestion = getUpgradeSuggestions(userTier, template.tier === 'premium' ? 'premium-templates' : 'medium-templates');
+      const suggestion = getUpgradeSuggestions(userTier, template.tier === 'premium' ? 'premium-templates' : 'populyar-templates');
 
       setSelectedTemplate(template);
       setShowUpgradeModal(true);

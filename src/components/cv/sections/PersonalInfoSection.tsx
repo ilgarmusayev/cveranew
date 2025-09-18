@@ -40,7 +40,8 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
   const [imageUploading, setImageUploading] = useState(false);
   const [aiGenerating, setAiGenerating] = useState(false);
   const isPremium = userTier?.toLowerCase() === 'premium' || userTier?.toLowerCase() === 'pro';
-  const canUseAI = ['premium', 'populyar', 'medium', 'pro'].includes(userTier?.toLowerCase());
+  // AI features are available for all paid tiers (not Free/Pulsuz tier)
+  const canUseAI = userTier && !['free', 'pulsuz'].includes(userTier?.toLowerCase());
   const { showSuccess, showError, showWarning, showInfo } = useNotification();
 
   // Form validasiya mesajlarını Azərbaycan dilinə çevirmək

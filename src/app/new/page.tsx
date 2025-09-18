@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import Link from 'next/link';
@@ -14,7 +14,7 @@ interface Template {
   hasAccess?: boolean;
 }
 
-export default function NewCVPage() {
+function NewCVContent() {
   const { user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -458,5 +458,13 @@ export default function NewCVPage() {
       </div>
       <Footer />
     </>
+  );
+}
+
+export default function NewCVPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <NewCVContent />
+    </Suspense>
   );
 }

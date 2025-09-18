@@ -82,8 +82,8 @@ export default function LinkedInImport({ onImport, onCancel, cvLanguage = 'azerb
   const [aiSummaryLoading, setAiSummaryLoading] = useState(false);
   const [showAiSummary, setShowAiSummary] = useState(false);
 
-  // Check if user can access AI features
-  const canUseAiFeatures = userTier === 'Populyar' || userTier === 'Medium' || userTier === 'Premium';
+  // Check if user can access AI features - all paid tiers except Free/Pulsuz
+  const canUseAiFeatures = userTier && !['Free', 'Pulsuz', 'free', 'pulsuz'].includes(userTier);
 
   const handleImport = async () => {
     if (!url.trim()) {

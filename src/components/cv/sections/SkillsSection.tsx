@@ -1020,7 +1020,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
 
               <p className="text-sm text-gray-700 mb-4">
                 AI Peşəkar Bacarıqlar Analizçisi funksiyasından istifadə etmək üçün
-                Premium və ya Medium planına yüksəltməyi düşünün. Bu, CV məlumatlarınıza
+                Premium və ya Populyar planına yüksəltməyi düşünün. Bu, CV məlumatlarınıza
                 əsaslanaraq sizə ən uyğun professional skills tövsiyələrini almanıza kömək edəcək.
               </p>
 
