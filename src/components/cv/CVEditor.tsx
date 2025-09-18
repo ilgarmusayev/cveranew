@@ -310,7 +310,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 subheadingSize: initialData.data.fontSettings.subheadingSize || 16,
                 bodySize: initialData.data.fontSettings.bodySize || 14,
                 smallSize: initialData.data.fontSettings.smallSize || 12,
-                headingWeight: initialData.data.fontSettings.headingWeight || 900,
+                headingWeight: initialData.data.fontSettings.headingWeight || 600,
                 subheadingWeight: initialData.data.fontSettings.subheadingWeight || 600,
                 bodyWeight: initialData.data.fontSettings.bodyWeight || 300,
                 smallWeight: initialData.data.fontSettings.smallWeight || 300,
@@ -326,8 +326,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             subheadingSize: 16,   // Alt başlıqlar üçün  
             bodySize: 14,         // Əsas mətn üçün
             smallSize: 12,        // Kiçik mətn üçün
-            headingWeight: 900,   // Başlıq qalınlığı - Ən qalın
-            subheadingWeight: 600, // Alt başlıq qalınlığı - Orta
+            headingWeight: 600,   // Başlıq qalınlığı - Qalın
+            subheadingWeight: 600, // Alt başlıq qalınlığı - Qalın
             bodyWeight: 300,      // Əsas mətn qalınlığı - Nazik
             smallWeight: 300,     // Kiçik mətn qalınlığı - Nazik
             sectionSpacing: 8     // Bölmələr arası məsafə (px)
@@ -785,8 +785,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 subheadingSize: fontSettings.bodySize,  // Alt başlıqlar
                 bodySize: fontSettings.bodySize,        // Əsas mətn
                 smallSize: fontSettings.smallSize,      // Kiçik mətn
-                headingWeight: 900,                     // Ən qalın
-                subheadingWeight: 600,                  // Orta
+                headingWeight: 600,                     // Qalın
+                subheadingWeight: 600,                  // Qalın
                 bodyWeight: 300,                        // Nazik
                 smallWeight: 300,                       // Nazik
                 sectionSpacing: 8                       // Bölmə arası məsafə
@@ -1838,11 +1838,10 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
                                         onClick={() => setFontSettings(prev => {
-                                            // Font weight intervals: 300 → 600 → 900 (3 seçim)
+                                            // Font weight intervals: 300 → 600 (2 seçim)
                                             const currentWeight = prev.headingWeight;
                                             if (currentWeight <= 300) return prev; // minimum
-                                            else if (currentWeight <= 600) return { ...prev, headingWeight: 300 };
-                                            else return { ...prev, headingWeight: 600 };
+                                            else return { ...prev, headingWeight: 300 };
                                         })}
                                         disabled={fontSettings.headingWeight <= 300}
                                         className="w-8 h-8 sm:w-9 sm:h-9 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base font-semibold"
@@ -1854,13 +1853,12 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                     </div>
                                     <button
                                         onClick={() => setFontSettings(prev => {
-                                            // Font weight intervals: 300 → 600 → 900 (3 seçim)
+                                            // Font weight intervals: 300 → 600 (2 seçim)
                                             const currentWeight = prev.headingWeight;
-                                            if (currentWeight >= 900) return prev; // maximum
-                                            else if (currentWeight >= 600) return { ...prev, headingWeight: 900 };
+                                            if (currentWeight >= 600) return prev; // maximum
                                             else return { ...prev, headingWeight: 600 };
                                         })}
-                                        disabled={fontSettings.headingWeight >= 900}
+                                        disabled={fontSettings.headingWeight >= 600}
                                         className="w-8 h-8 sm:w-9 sm:h-9 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base font-semibold"
                                     >
                                         +
@@ -1876,11 +1874,10 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
                                         onClick={() => setFontSettings(prev => {
-                                            // Font weight intervals: 300 → 400 → 500 → 600 → 700 → 800 → 900
+                                            // Font weight intervals: 300 → 600 (2 seçim)
                                             const currentWeight = prev.subheadingWeight;
                                             if (currentWeight <= 300) return prev; // minimum
-                                            else if (currentWeight <= 600) return { ...prev, subheadingWeight: 300 };
-                                            else return { ...prev, subheadingWeight: 600 };
+                                            else return { ...prev, subheadingWeight: 300 };
                                         })}
                                         disabled={fontSettings.subheadingWeight <= 300}
                                         className="w-8 h-8 sm:w-9 sm:h-9 bg-red-100 text-red-600 rounded-full flex items-center justify-center hover:bg-red-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base font-semibold"
@@ -1892,13 +1889,12 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                     </div>
                                     <button
                                         onClick={() => setFontSettings(prev => {
-                                            // Font weight intervals: 300 → 600 → 900 (3 seçim)
+                                            // Font weight intervals: 300 → 600 (2 seçim)
                                             const currentWeight = prev.subheadingWeight;
-                                            if (currentWeight >= 900) return prev; // maximum
-                                            else if (currentWeight >= 600) return { ...prev, subheadingWeight: 900 };
+                                            if (currentWeight >= 600) return prev; // maximum
                                             else return { ...prev, subheadingWeight: 600 };
                                         })}
-                                        disabled={fontSettings.subheadingWeight >= 900}
+                                        disabled={fontSettings.subheadingWeight >= 600}
                                         className="w-8 h-8 sm:w-9 sm:h-9 bg-red-100 text-red-600 rounded-full flex items-center justify-center hover:bg-red-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base font-semibold"
                                     >
                                         +
@@ -1914,13 +1910,10 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
                                         onClick={() => setFontSettings(prev => {
-                                            // Font weight intervals for small text: 300 → 400 → 500 → 600
+                                            // Font weight intervals: 300 → 600 (2 seçim)
                                             const currentWeight = prev.smallWeight;
-                                            let newWeight = currentWeight;
-                                            if (currentWeight > 500) newWeight = 500;
-                                            else if (currentWeight > 400) newWeight = 400;
-                                            else newWeight = 300;
-                                            return { ...prev, smallWeight: Math.max(300, newWeight) };
+                                            if (currentWeight <= 300) return prev; // minimum
+                                            else return { ...prev, smallWeight: 300 };
                                         })}
                                         disabled={fontSettings.smallWeight <= 300}
                                         className="w-8 h-8 sm:w-9 sm:h-9 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center hover:bg-pink-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base font-semibold"
@@ -1932,13 +1925,10 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                     </div>
                                     <button
                                         onClick={() => setFontSettings(prev => {
-                                            // Font weight intervals for small text: 300 → 400 → 500 → 600
+                                            // Font weight intervals: 300 → 600 (2 seçim)
                                             const currentWeight = prev.smallWeight;
-                                            let newWeight = currentWeight;
-                                            if (currentWeight < 400) newWeight = 400;
-                                            else if (currentWeight < 500) newWeight = 500;
-                                            else newWeight = 600;
-                                            return { ...prev, smallWeight: Math.min(600, newWeight) };
+                                            if (currentWeight >= 600) return prev; // maximum
+                                            else return { ...prev, smallWeight: 600 };
                                         })}
                                         disabled={fontSettings.smallWeight >= 600}
                                         className="w-8 h-8 sm:w-9 sm:h-9 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center hover:bg-pink-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base font-semibold"
@@ -1956,11 +1946,10 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
                                         onClick={() => setFontSettings(prev => {
-                                            // Font weight intervals: 300 → 600 → 900 (3 seçim)
+                                            // Font weight intervals: 300 → 600 (2 seçim)
                                             const currentWeight = prev.bodyWeight;
                                             if (currentWeight <= 300) return prev; // minimum
-                                            else if (currentWeight <= 600) return { ...prev, bodyWeight: 300 };
-                                            else return { ...prev, bodyWeight: 600 };
+                                            else return { ...prev, bodyWeight: 300 };
                                         })}
                                         disabled={fontSettings.bodyWeight <= 300}
                                         className="w-8 h-8 sm:w-9 sm:h-9 bg-green-100 text-green-600 rounded-full flex items-center justify-center hover:bg-green-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base font-semibold"
@@ -1972,13 +1961,12 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                     </div>
                                     <button
                                         onClick={() => setFontSettings(prev => {
-                                            // Font weight intervals: 300 → 600 → 900 (3 seçim)
+                                            // Font weight intervals: 300 → 600 (2 seçim)
                                             const currentWeight = prev.bodyWeight;
-                                            if (currentWeight >= 900) return prev; // maximum
-                                            else if (currentWeight >= 600) return { ...prev, bodyWeight: 900 };
+                                            if (currentWeight >= 600) return prev; // maximum
                                             else return { ...prev, bodyWeight: 600 };
                                         })}
-                                        disabled={fontSettings.bodyWeight >= 900}
+                                        disabled={fontSettings.bodyWeight >= 600}
                                         className="w-8 h-8 sm:w-9 sm:h-9 bg-green-100 text-green-600 rounded-full flex items-center justify-center hover:bg-green-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base font-semibold"
                                     >
                                         +
