@@ -1293,7 +1293,8 @@ export class LinkedInImportService {
       // Create different prompts based on user tier and CV language
       let prompt = '';
 
-      if (user.tier === 'Medium') {
+      // Universal prompt for all paid tiers (Medium, Premium, Pro, Popular, etc.)
+      if (user.tier !== 'Free' && user.tier !== 'Pulsuz') {
         if (isEnglish) {
           prompt = `Write a professional CV summary strictly based on the information provided. The text must be in third-person style (not first-person). Avoid phrases like "with X years of experience." Instead, emphasize the quality of experience, tangible outcomes, and unique strengths. Do not use clichés such as "responsible" or "results-driven." The summary should feel authentic, highlight practical application of skills and measurable impact, and clearly show the value the candidate can bring to an organization.
 
@@ -1319,30 +1320,34 @@ Bacarıqlar: ${skills.slice(0, 6).map((skill: any) => skill.name || skill).join(
 
 Tələblər: Yalnız 3-cü tərəf baxımından, vaxt əsaslı ifadələr yox, nailiyyətlər və praktik təsirə fokus, unikal dəyər təklifini vurğula, peşəkar və həqiqi ton, 60-80 söz, 4-5 cümlə. Xülasəni generasiya et:`;
         }
+      }
+
+      // Enhanced prompts for specific tiers (optional customization)
+      if (user.tier === 'Medium') {
+        // Medium tier already covered above
       } else if (user.tier === 'Premium') {
         if (isEnglish) {
-          prompt = `
-          Write a professional executive CV summary strictly based on the information provided. The text must be in third-person style (not first-person). Avoid phrases like "with X years of experience." Instead, emphasize the quality of experience, tangible outcomes, and unique strengths. Do not use clichés such as "responsible" or "results-driven." The summary should feel authentic, highlight practical application of skills and measurable impact, and clearly show the value the candidate can bring to an organization.
+          prompt = `Write a professional executive CV summary strictly based on the information provided. The text must be in third-person style (not first-person). Avoid phrases like "with X years of experience." Instead, emphasize the quality of experience, tangible outcomes, and unique strengths. Do not use clichés such as "responsible" or "results-driven." The summary should feel authentic, highlight practical application of skills and measurable impact, and clearly show the value the candidate can bring to an organization.
 
-          Executive CV Data:
-          Title: ${personalInfo.title || experience[0]?.position || 'Senior Professional'}
-          Location: ${personalInfo.location || ''}
-          
-          Experience: ${experience.slice(0, 2).map((exp: any) => 
-            `${exp.position} at ${exp.company}`
-          ).join(', ')}
+Executive CV Data:
+Title: ${personalInfo.title || experience[0]?.position || 'Senior Professional'}
+Location: ${personalInfo.location || ''}
 
-          Skills: ${skills.slice(0, 6).map((skill: any) => skill.name || skill).join(', ')}
+Experience: ${experience.slice(0, 2).map((exp: any) => 
+  `${exp.position} at ${exp.company}`
+).join(', ')}
 
-          Requirements:
-          - Third-person executive perspective only
-          - No time-based phrases or experience years
-          - Focus on leadership achievements and strategic impact
-          - Highlight unique executive value proposition
-          - Executive-level professional tone
-          - 60-80 words, 4-5 sentences
+Skills: ${skills.slice(0, 6).map((skill: any) => skill.name || skill).join(', ')}
 
-          Generate the executive summary:`;
+Requirements:
+- Third-person executive perspective only
+- No time-based phrases or experience years
+- Focus on leadership achievements and strategic impact
+- Highlight unique executive value proposition
+- Executive-level professional tone
+- 60-80 words, 4-5 sentences
+
+Generate the executive summary:`;
         } else {
           prompt = `CV üçün peşəkar icraçı xülasəsi yaz. Yalnız CV-dəki məlumatlara əsaslan. Mətn 3-cü tərəf üslubunda olsun, "mən" formasından istifadə etmə. "X il təcrübəyə malikdir" tipli ifadələr işlətmə. Onun əvəzinə namizədin təcrübəsinin keyfiyyətini, rəhbərlik nailiyyətlərini və strateji təsirini vurğula. İcraçı səviyyəli dil istifadə et və rəqəmlərlə dəstəklənən nəticələri göstər.
 
@@ -1355,6 +1360,15 @@ Təcrübə: ${experience.slice(0, 2).map((exp: any) => `${exp.position} - ${exp.
 Bacarıqlar: ${skills.slice(0, 6).map((skill: any) => skill.name || skill).join(', ')}
 
 Tələblər: 3-cü tərəf icraçı baxımından, vaxt əsaslı ifadələr yox, rəhbərlik nailiyyətləri və strateji təsirə fokus, unikal icraçı dəyər təklifini vurğula, icraçı səviyyəli peşəkar ton, 60-80 söz, 4-5 cümlə. İcraçı xülasəni generasiya et:`;
+        }
+      }
+
+      // Fallback prompt if none was set (should not happen with universal tier coverage above)
+      if (!prompt) {
+        if (isEnglish) {
+          prompt = `Write a professional CV summary in third-person perspective based on: ${personalInfo.title || 'Professional'} in ${personalInfo.location || 'various locations'}. Skills: ${skills.slice(0, 4).map((skill: any) => skill.name || skill).join(', ')}. Focus on achievements and impact. 60-80 words.`;
+        } else {
+          prompt = `Bu CV üçün peşəkar xülasə yaz: ${personalInfo.title || 'Peşəkar'}, ${personalInfo.location || 'müxtəlif yerlər'}. Bacarıqlar: ${skills.slice(0, 4).map((skill: any) => skill.name || skill).join(', ')}. Nailiyyətlərə fokus. 60-80 söz.`;
         }
       }
 

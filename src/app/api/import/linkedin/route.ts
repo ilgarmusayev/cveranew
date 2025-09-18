@@ -690,6 +690,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get user to check tier for AI features
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { tier: true }
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
     // Get LinkedIn URL from request
     const { linkedinUrl } = await request.json();
     if (!linkedinUrl?.trim()) {
@@ -775,12 +788,17 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Generate AI-suggested skills (3 hard + 3 soft)
-    console.log('🤖 AI skills yaradılır...');
-    const aiSkills = await generateLinkedInAISkills(transformedData, transformedData.skills);
-    if (aiSkills && aiSkills.length > 0) {
-      transformedData.skills = [...transformedData.skills, ...aiSkills];
-      console.log(`✅ ${aiSkills.length} AI skill əlavə edildi (3 hard + 3 soft)`);
+    // Generate AI-suggested skills (3 hard + 3 soft) - only for paid users
+    let aiSkills: any[] = [];
+    if (user.tier !== 'Free' && user.tier !== 'Pulsuz') {
+      console.log('🤖 AI skills yaradılır (ödənişli istifadəçi)...');
+      aiSkills = await generateLinkedInAISkills(transformedData, transformedData.skills);
+      if (aiSkills && aiSkills.length > 0) {
+        transformedData.skills = [...transformedData.skills, ...aiSkills];
+        console.log(`✅ ${aiSkills.length} AI skill əlavə edildi (3 hard + 3 soft)`);
+      }
+    } else {
+      console.log('🚫 AI skills - pulsuz istifadəçilər üçün mövcud deyil');
     }
 
     console.log('📋 Combined data preview:', {
