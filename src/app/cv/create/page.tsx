@@ -23,6 +23,14 @@ function CreateCVContent() {
       return;
     }
 
+    // Check if coming from template selection
+    const templateId = searchParams.get('template');
+    if (templateId) {
+      // Redirect to CV editor with selected template
+      router.push(`/new?template=${templateId}`);
+      return;
+    }
+
     // Check if coming from dashboard with imported data
     const importType = searchParams.get('import');
     const dataParam = searchParams.get('data');

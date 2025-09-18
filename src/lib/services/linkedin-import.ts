@@ -1293,7 +1293,7 @@ export class LinkedInImportService {
       // Create different prompts based on user tier and CV language
       let prompt = '';
 
-      // Universal prompt for all paid tiers (Medium, Premium, Pro, Popular, etc.)
+      // Universal prompt for all paid tiers (Populyar, Premium, Pro, Popular, etc.)
       if (user.tier !== 'Free' && user.tier !== 'Pulsuz') {
         if (isEnglish) {
           prompt = `Write a professional CV summary strictly based on the information provided. The text must be in third-person style (not first-person). Avoid phrases like "with X years of experience." Instead, emphasize the quality of experience, tangible outcomes, and unique strengths. Do not use clichés such as "responsible" or "results-driven." The summary should feel authentic, highlight practical application of skills and measurable impact, and clearly show the value the candidate can bring to an organization.
@@ -1323,8 +1323,8 @@ Tələblər: Yalnız 3-cü tərəf baxımından, vaxt əsaslı ifadələr yox, n
       }
 
       // Enhanced prompts for specific tiers (optional customization)
-      if (user.tier === 'Medium') {
-        // Medium tier already covered above
+      if (user.tier === 'Populyar' || user.tier === 'Medium') {
+        // Populyar tier already covered above
       } else if (user.tier === 'Premium') {
         if (isEnglish) {
           prompt = `Write a professional executive CV summary strictly based on the information provided. The text must be in third-person style (not first-person). Avoid phrases like "with X years of experience." Instead, emphasize the quality of experience, tangible outcomes, and unique strengths. Do not use clichés such as "responsible" or "results-driven." The summary should feel authentic, highlight practical application of skills and measurable impact, and clearly show the value the candidate can bring to an organization.
@@ -1606,7 +1606,7 @@ Tələblər: 3-cü tərəf icraçı baxımından, vaxt əsaslı ifadələr yox, 
       }
 
       // Restrict AI skill descriptions only for Free tier users
-      // All paid tiers (Medium, Premium, etc.) can use this feature
+      // All paid tiers (Populyar, Premium, etc.) can use this feature
       if (user.tier === 'Free' || user.tier === 'Pulsuz') {
         return {
           success: false,
@@ -1637,7 +1637,7 @@ Tələblər: 3-cü tərəf icraçı baxımından, vaxt əsaslı ifadələr yox, 
         `${exp.position || exp.title} - ${exp.company}: ${exp.description || ''}`
       ).join('\n');
 
-      if (user.tier === 'Medium') {
+      if (user.tier === 'Populyar' || user.tier === 'Medium') {
         prompt = `
           Create a professional description for the skill "${skillName}" (${skillTypeText}) based on this professional context:
 

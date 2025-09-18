@@ -7,7 +7,7 @@ import { apiClient } from '@/lib/api-client';
 interface AISummaryGeneratorProps {
   cvId: string;
   currentSummary?: string;
-  userTier: 'Free' | 'Pulsuz' | 'Medium' | 'Premium' | 'Pro' | 'Populyar';
+  userTier: 'Free' | 'Pulsuz' | 'Populyar' | 'Medium' | 'Premium' | 'Pro';
   onSummaryGenerated?: (summary: string) => void;
 }
 
@@ -116,7 +116,7 @@ export function AISummaryGenerator({
         'Multi-cultural and international experience integration',
         'C-level positioning and decision-maker language'
       ];
-    } else if (userTier === 'Medium' || userTier === 'Pro' || userTier === 'Populyar') {
+    } else if (userTier === 'Populyar' || userTier === 'Medium' || userTier === 'Pro') {
       return [
         'Professional summary optimized for ATS (80-120 words)',
         'Key technical skills integration',
@@ -146,9 +146,9 @@ export function AISummaryGenerator({
                 👑 Premium
               </span>
             )}
-            {userTier === 'Medium' && (
+            {(userTier === 'Populyar' || userTier === 'Medium') && (
               <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                Medium
+                Populyar
               </span>
             )}
           </div>

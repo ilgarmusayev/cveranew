@@ -151,7 +151,7 @@ export default function StandardHeader() {
       'Free': 'Pulsuz',
       'Pro': 'Populyar',
       'Premium': 'Premium',
-      'Medium': 'Populyar', // Legacy support
+      'Medium': 'Populyar', // Legacy support - old Medium tier becomes Populyar
       'Orta': 'Populyar'    // Legacy support
     };
     return tierNames[tier] || tier;

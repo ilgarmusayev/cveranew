@@ -748,8 +748,8 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                     : `${userTier} üzvü - Peşəkar bacarıqlar analizi və tövsiyələri`
                   ) :
                   (cvLanguage === 'english' 
-                    ? 'Available for Premium and Medium members'
-                    : 'Premium və Medium üzvlər üçün mövcuddur'
+                    ? 'Available for Premium and Populyar members'
+                    : 'Premium və Populyar üzvlər üçün mövcuddur'
                   )
                 }
               </p>
@@ -851,7 +851,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                   </p>
                   <p className="text-xs text-purple-700">
                     CV məlumatlarınızı dərin analiz edərək karyeranız üçün ən münasib
-                    professional skills tövsiyələri verir. Premium və Medium planlar üçün mövcuddur.
+                    professional skills tövsiyələri verir. Premium və Populyar planlar üçün mövcuddur.
                   </p>
                 </div>
               </div>

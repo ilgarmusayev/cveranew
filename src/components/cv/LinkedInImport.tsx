@@ -83,7 +83,7 @@ export default function LinkedInImport({ onImport, onCancel, cvLanguage = 'azerb
   const [showAiSummary, setShowAiSummary] = useState(false);
 
   // Check if user can access AI features
-  const canUseAiFeatures = userTier === 'Medium' || userTier === 'Premium';
+  const canUseAiFeatures = userTier === 'Populyar' || userTier === 'Medium' || userTier === 'Premium';
 
   const handleImport = async () => {
     if (!url.trim()) {
@@ -133,7 +133,7 @@ export default function LinkedInImport({ onImport, onCancel, cvLanguage = 'azerb
     }
   };
 
-  // AI Professional Summary Generation for Medium/Premium users
+  // AI Professional Summary Generation for Populyar/Premium users
   const generateAiSummary = async () => {
     if (!importedData || !canUseAiFeatures) return;
 
@@ -442,7 +442,7 @@ export default function LinkedInImport({ onImport, onCancel, cvLanguage = 'azerb
                 </div>
               </div>
 
-              {/* AI Professional Summary Section - Medium/Premium Feature */}
+              {/* AI Professional Summary Section - Populyar/Premium Feature */}
               {canUseAiFeatures && (
                 <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl border border-purple-200/50 p-4 sm:p-6 mt-4">
                   <div className="flex items-center justify-between mb-4">
@@ -534,7 +534,7 @@ export default function LinkedInImport({ onImport, onCancel, cvLanguage = 'azerb
                       </div>
                       <div>
                         <h5 className="font-semibold text-amber-800 text-sm sm:text-base">AI Professional Summary</h5>
-                        <p className="text-amber-700 text-xs sm:text-sm">Medium və ya Premium plan ilə AI-powered CV summary</p>
+                        <p className="text-amber-700 text-xs sm:text-sm">Populyar və ya Premium plan ilə AI-powered CV summary</p>
                       </div>
                     </div>
                     <a 
