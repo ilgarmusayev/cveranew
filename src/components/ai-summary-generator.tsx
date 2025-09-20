@@ -7,7 +7,7 @@ import { apiClient } from '@/lib/api-client';
 interface AISummaryGeneratorProps {
   cvId: string;
   currentSummary?: string;
-  userTier: 'Free' | 'Pulsuz' | 'Populyar' | 'Premium' | 'Pro';
+  userTier: 'Free' | 'Medium' | 'Premium' | 'Pro' | 'Populyar';
   onSummaryGenerated?: (summary: string) => void;
 }
 
@@ -21,12 +21,12 @@ export function AISummaryGenerator({
   const [generatedSummary, setGeneratedSummary] = useState<string>('');
   const { showSuccess, showError, showWarning } = useNotification();
 
-  // ✅ Allow all paid tiers (block only Free users)
-  const canUseAI = userTier !== 'Free' && userTier !== 'Pulsuz';
+  // ✅ Include Pro/Populyar tiers for AI access
+  const canUseAI = userTier === 'Medium' || userTier === 'Premium' || userTier === 'Pro' || userTier === 'Populyar';
 
   const handleGenerateAISummary = async () => {
     if (!canUseAI) {
-      showWarning('AI summary generation is only available for paid plan subscribers');
+      showWarning('AI summary generation is only available for Medium, Pro and Premium subscribers');
       return;
     }
 
@@ -116,7 +116,7 @@ export function AISummaryGenerator({
         'Multi-cultural and international experience integration',
         'C-level positioning and decision-maker language'
       ];
-    } else if (userTier === 'Populyar' || userTier === 'Pro') {
+    } else if (userTier === 'Medium' || userTier === 'Pro' || userTier === 'Populyar') {
       return [
         'Professional summary optimized for ATS (80-120 words)',
         'Key technical skills integration',
@@ -126,7 +126,7 @@ export function AISummaryGenerator({
       ];
     } else {
       return [
-        'Upgrade to a paid plan to unlock AI summary generation',
+        'Upgrade to Medium, Pro or Premium to unlock AI summary generation',
         'Professional ATS-optimized summaries',
         'Industry-specific keyword optimization',
         'Personalized based on your experience and skills'
@@ -146,9 +146,9 @@ export function AISummaryGenerator({
                 👑 Premium
               </span>
             )}
-            {userTier === 'Pro' && (
+            {userTier === 'Medium' && (
               <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                Populyar
+                Medium
               </span>
             )}
           </div>
@@ -231,7 +231,7 @@ export function AISummaryGenerator({
         {!canUseAI && (
           <div className="text-center space-y-3 pt-4 border-t">
             <p className="text-sm text-gray-600">
-              Unlock AI-powered professional summaries with any paid plan
+              Unlock AI-powered professional summaries with our Medium or Premium plans
             </p>
             <div className="flex gap-2 justify-center">
               <a

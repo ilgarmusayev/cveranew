@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import Link from 'next/link';
 import StandardHeader from '@/components/ui/StandardHeader';
@@ -14,10 +14,9 @@ interface Template {
   hasAccess?: boolean;
 }
 
-function NewCVContent() {
+export default function NewCVPage() {
   const { user } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [formData, setFormData] = useState({
     title: '',
@@ -64,21 +63,7 @@ function NewCVContent() {
         const data = await response.json();
         setTemplates(data.templates);
 
-        // Check if template ID provided in URL
-        const templateId = searchParams.get('template');
-        if (templateId) {
-          // Check if user has access to this template
-          const selectedTemplate = data.templates.find((t: Template) => t.id === templateId);
-          if (selectedTemplate && selectedTemplate.hasAccess !== false) {
-            setFormData(prev => ({
-              ...prev,
-              templateId: templateId
-            }));
-            return;
-          }
-        }
-
-        // Set default template to first accessible one if no template specified
+        // Set default template to first accessible one
         const accessibleTemplate = data.templates.find((t: Template) => t.hasAccess !== false);
         if (accessibleTemplate && !formData.templateId) {
           setFormData(prev => ({
@@ -458,13 +443,5 @@ function NewCVContent() {
       </div>
       <Footer />
     </>
-  );
-}
-
-export default function NewCVPage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <NewCVContent />
-    </Suspense>
   );
 }

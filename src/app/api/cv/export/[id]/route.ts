@@ -4931,12 +4931,6 @@ async function removeBlankPages(pdfBuffer: Uint8Array, templateId: string): Prom
         for (let i = 0; i < totalPages; i++) {
             console.log(`🔍 Analyzing page ${i + 1}/${totalPages}...`);
             
-            // 🔧 SƏHIFƏ LİMİTİ: Maksimum 3 səhifə saxla
-            if (keptPages >= 3) {
-                console.log(`🚫 Page limit reached (3 pages) - stopping analysis`);
-                break;
-            }
-            
             // Extract text content from the page
             const pageHasContent = await checkPageHasContent(originalPdf, i, templateId);
             

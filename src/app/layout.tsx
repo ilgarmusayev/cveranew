@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Montserrat } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AuthProvider } from "@/lib/auth";
 import { ToastProvider } from "@/components/ui/Toast";
+import { SiteLanguageProvider } from "@/contexts/SiteLanguageContext";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import TawkToWidget from "@/components/TawkToWidget";
 import CustomCursor from "@/components/CustomCursor";
@@ -101,13 +102,15 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} antialiased overflow-x-hidden`}
       >
         <ToastProvider>
-          <AuthProvider>
-            <AOSProvider>
-              <main className="page-content min-h-screen">
-                {children}
-              </main>
-            </AOSProvider>
-          </AuthProvider>
+          <SiteLanguageProvider>
+            <AuthProvider>
+              <AOSProvider>
+                <main className="page-content min-h-screen">
+                  {children}
+                </main>
+              </AOSProvider>
+            </AuthProvider>
+          </SiteLanguageProvider>
         </ToastProvider>
         <SpeedInsights />
         <GoogleAnalytics />

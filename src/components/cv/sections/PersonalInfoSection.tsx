@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getLabel } from '@/lib/cvLanguage';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 import { useNotification } from '@/components/ui/Toast';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 
@@ -37,6 +38,7 @@ interface PersonalInfoSectionProps {
 }
 
 export default function PersonalInfoSection({ data, onChange, userTier = 'Free', cvData, cvId, cvLanguage = 'azerbaijani' }: PersonalInfoSectionProps) {
+  const { siteLanguage } = useSiteLanguage();
   const [imageUploading, setImageUploading] = useState(false);
   const [aiGenerating, setAiGenerating] = useState(false);
   const isPremium = userTier?.toLowerCase() === 'premium' || userTier?.toLowerCase() === 'pro';
@@ -68,9 +70,9 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
         emailInput.oninvalid = function(e) {
           const target = e.target as HTMLInputElement;
           if (target.validity.valueMissing) {
-            target.setCustomValidity(cvLanguage === 'english' ? 'Please fill out this field' : 'Zəhmət olmasa bu sahəni doldurun');
+            target.setCustomValidity(siteLanguage === 'english' ? 'Please fill out this field' : 'Zəhmət olmasa bu sahəni doldurun');
           } else if (target.validity.typeMismatch) {
-            target.setCustomValidity(cvLanguage === 'english' ? 'Please enter a valid email address' : 'Zəhmət olmasa düzgün email ünvanı daxil edin');
+            target.setCustomValidity(siteLanguage === 'english' ? 'Please enter a valid email address' : 'Zəhmət olmasa düzgün email ünvanı daxil edin');
           }
         };
         emailInput.oninput = function(e) {
@@ -241,7 +243,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
     } catch (error) {
       console.error('💥 AI Summary error:', error);
-      showError('Süni intellekt ilə peşəkar xülasə yaratmaq üçün bacarıq əlavə edin', 'AI Xətası');
+      showError('AI peşəkar xülasə yaradarkən xəta baş verdi. Yenidən cəhd edin.', 'AI Xətası');
     } finally {
       setAiGenerating(false);
     }
@@ -268,7 +270,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">
-            {cvLanguage === 'english' ? 'Personal Information' : 'Şəxsi məlumatlar'}
+            {siteLanguage === 'english' ? 'Personal Information' : 'Şəxsi məlumatlar'}
           </h3>
         </div>
       </div>
@@ -277,7 +279,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
         {isPremium && (
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {cvLanguage === 'english' ? 'Profile Image' : 'Profil Şəkli'} <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full">{userTier === 'Pro' ? 'Pro' : 'Premium'}</span>
+              {siteLanguage === 'english' ? 'Profile Image' : 'Profil Şəkli'} <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full">{userTier === 'Pro' ? 'Pro' : 'Premium'}</span>
             </label>
             {data.profileImage ? (
               <div className="flex items-center space-x-4">
@@ -288,14 +290,14 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
                 />
                 <div className="flex flex-col space-y-2">
                   <p className="text-sm text-gray-600">
-                    {cvLanguage === 'english' ? 'Profile image uploaded' : 'Profil şəkli yükləndi'}
+                    {siteLanguage === 'english' ? 'Profile image uploaded' : 'Profil şəkli yükləndi'}
                   </p>
                   <button
                     type="button"
                     onClick={removeImage}
                     className="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                   >
-                    {cvLanguage === 'english' ? 'Remove Image' : 'Şəkli sil'}
+                    {siteLanguage === 'english' ? 'Remove Image' : 'Şəkli sil'}
                   </button>
                 </div>
               </div>
@@ -303,7 +305,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
               <div className="flex items-center space-x-4">
                 <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300">
                   <span className="text-gray-400 text-xs text-center">
-                    {cvLanguage === 'english' ? 'No\nImage' : 'Şəkil\nyox'}
+                    {siteLanguage === 'english' ? 'No\nImage' : 'Şəkil\nyox'}
                   </span>
                 </div>
                 <div className="flex-1">
@@ -325,8 +327,8 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
                       }`}
                     >
                       {imageUploading 
-                        ? (cvLanguage === 'english' ? 'Uploading...' : 'Yüklənir...') 
-                        : (cvLanguage === 'english' ? 'Choose Image' : 'Şəkil seçin')
+                        ? (siteLanguage === 'english' ? 'Uploading...' : 'Yüklənir...') 
+                        : (siteLanguage === 'english' ? 'Choose Image' : 'Şəkil seçin')
                       }
                     </label>
                   </div>
@@ -334,12 +336,12 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
                     <div className="mt-2 flex items-center space-x-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
                       <span className="text-sm text-gray-500">
-                        {cvLanguage === 'english' ? 'Uploading...' : 'Yüklənir...'}
+                        {siteLanguage === 'english' ? 'Uploading...' : 'Yüklənir...'}
                       </span>
                     </div>
                   )}
                   <p className="text-xs text-gray-500 mt-1">
-                    {cvLanguage === 'english' 
+                    {siteLanguage === 'english' 
                       ? 'JPG, PNG format, maximum 2MB' 
                       : 'JPG, PNG formatında, maksimum 2MB'
                     }
@@ -352,7 +354,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {cvLanguage === 'english' ? 'First Name' : 'Ad'} <span className="text-red-500">*</span>
+            {siteLanguage === 'english' ? 'First Name' : 'Ad'} <span className="text-red-500">*</span>
           </label>
           <input
             id="first_name"
@@ -360,10 +362,10 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
             value={safeData.firstName}
             onChange={(e) => handleChange('firstName', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder={cvLanguage === 'english' ? 'Your Name' : 'Adınız'}
+            placeholder={siteLanguage === 'english' ? 'Your Name' : 'Adınız'}
             required
             onInvalid={(e) => {
-              (e.target as HTMLInputElement).setCustomValidity(cvLanguage === 'english' ? 'Name field is required' : 'Ad sahəsi məcburidir');
+              (e.target as HTMLInputElement).setCustomValidity(siteLanguage === 'english' ? 'Name field is required' : 'Ad sahəsi məcburidir');
             }}
             onInput={(e) => {
               (e.target as HTMLInputElement).setCustomValidity('');
@@ -373,7 +375,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {cvLanguage === 'english' ? 'Last Name' : 'Soyad'} <span className="text-red-500">*</span>
+            {siteLanguage === 'english' ? 'Last Name' : 'Soyad'} <span className="text-red-500">*</span>
           </label>
           <input
             id="last_name"
@@ -381,10 +383,10 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
             value={safeData.lastName}
             onChange={(e) => handleChange('lastName', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder={cvLanguage === 'english' ? 'Your Surname' : 'Soyadınız'}
+            placeholder={siteLanguage === 'english' ? 'Your Surname' : 'Soyadınız'}
             required
             onInvalid={(e) => {
-              (e.target as HTMLInputElement).setCustomValidity(cvLanguage === 'english' ? 'Surname field is required' : 'Soyad sahəsi məcburidir');
+              (e.target as HTMLInputElement).setCustomValidity(siteLanguage === 'english' ? 'Surname field is required' : 'Soyad sahəsi məcburidir');
             }}
             onInput={(e) => {
               (e.target as HTMLInputElement).setCustomValidity('');
@@ -396,7 +398,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {cvLanguage === 'english' ? 'Email' : 'E-poçt'} <span className="text-gray-400 text-xs">({cvLanguage === 'english' ? 'optional' : 'ixtiyari'})</span>
+            {siteLanguage === 'english' ? 'Email' : 'E-poçt'} <span className="text-gray-400 text-xs">({siteLanguage === 'english' ? 'optional' : 'ixtiyari'})</span>
           </label>
           <input
             id="email"
@@ -410,20 +412,20 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {cvLanguage === 'english' ? 'Phone' : 'Telefon'} <span className="text-gray-400 text-xs">({cvLanguage === 'english' ? 'optional' : 'ixtiyari'})</span>
+            {siteLanguage === 'english' ? 'Phone' : 'Telefon'} <span className="text-gray-400 text-xs">({siteLanguage === 'english' ? 'optional' : 'ixtiyari'})</span>
           </label>
           <input
             type="tel"
             value={safeData.phone}
             onChange={(e) => handleChange('phone', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder={cvLanguage === 'english' ? '+1 XXX XXX XXXX' : '+994 XX XXX XX XX'}
+            placeholder={siteLanguage === 'english' ? '+1 XXX XXX XXXX' : '+994 XX XXX XX XX'}
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {cvLanguage === 'english' ? 'Website' : 'Veb sayt'}
+            {siteLanguage === 'english' ? 'Website' : 'Veb sayt'}
           </label>
           <input
             type="url"
@@ -436,14 +438,14 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {cvLanguage === 'english' ? 'LinkedIn' : 'LinkedIn'}
+            {siteLanguage === 'english' ? 'LinkedIn' : 'LinkedIn'}
           </label>
           <input
             type="url"
             value={safeData.linkedin}
             onChange={(e) => handleChange('linkedin', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder={cvLanguage === 'english' 
+            placeholder={siteLanguage === 'english' 
               ? "linkedin.com/in/username or www.linkedin.com/in/username" 
               : "linkedin.com/in/username və ya www.linkedin.com/in/username"
             }
@@ -452,27 +454,27 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {cvLanguage === 'english' ? 'Field/Profession' : 'Sahə'} <span className="text-gray-400 text-xs">({cvLanguage === 'english' ? 'optional' : 'ixtiyari'})</span>
+            {siteLanguage === 'english' ? 'Field/Profession' : 'Sahə'} <span className="text-gray-400 text-xs">({siteLanguage === 'english' ? 'optional' : 'ixtiyari'})</span>
           </label>
           <input
             type="text"
             value={safeData.field}
             onChange={(e) => handleChange('field', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder={cvLanguage === 'english' ? 'e.g., Software Engineer' : 'məsələn, Proqram Mühəndisi'}
+            placeholder={siteLanguage === 'english' ? 'e.g., Software Engineer' : 'məsələn, Proqram Mühəndisi'}
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {cvLanguage === 'english' ? 'Location (Country, city)' : 'Yer (Ölkə, şəhər)'} <span className="text-gray-400 text-xs">{cvLanguage === 'english' ? '(optional)' : '(ixtiyari)'}</span>
+            {siteLanguage === 'english' ? 'Location (Country, city)' : 'Yer (Ölkə, şəhər)'} <span className="text-gray-400 text-xs">{siteLanguage === 'english' ? '(optional)' : '(ixtiyari)'}</span>
           </label>
           <input
             type="text"
             value={safeData.location || ''}
             onChange={(e) => handleChange('location', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder={cvLanguage === 'english' ? 'United States, New York' : 'Azərbaycan, Bakı'}
+            placeholder={siteLanguage === 'english' ? 'United States, New York' : 'Azərbaycan, Bakı'}
           />
         </div>
       </div>
@@ -480,7 +482,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="block text-sm font-medium text-gray-700">
-            {cvLanguage === 'english' ? 'Professional Summary' : 'Peşəkar Xülasə'}
+            {siteLanguage === 'english' ? 'Professional Summary' : 'Peşəkar Xülasə'}
           </label>
           <button
             type="button"
@@ -494,19 +496,19 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
                 : 'bg-gray-200 text-gray-500 cursor-not-allowed'
             }`}
             title={canUseAI 
-              ? (cvLanguage === 'english' ? 'Generate automatic professional summary with AI' : 'AI ilə avtomatik peşəkar xülasə yaradın')
-              : (cvLanguage === 'english' ? 'AI features available for Premium/Pro/Popular' : 'AI funksiyalar Premium/Pro/Populyar üçün mövcuddur')
+              ? (siteLanguage === 'english' ? 'Generate automatic professional summary with AI' : 'AI ilə avtomatik peşəkar xülasə yaradın')
+              : (siteLanguage === 'english' ? 'AI features available for Premium/Pro/Popular' : 'AI funksiyalar Premium/Pro/Populyar üçün mövcuddur')
             }
           >
             {aiGenerating ? (
               <div className="flex items-center space-x-1">
                 <div className="animate-spin rounded-full h-3 w-3 border-b border-white"></div>
-                <span>{cvLanguage === 'english' ? 'AI generating...' : 'AI yaradır...'}</span>
+                <span>{siteLanguage === 'english' ? 'AI generating...' : 'AI yaradır...'}</span>
               </div>
             ) : (
               <div className="flex items-center space-x-1">
                 <span>🤖</span>
-                <span>{cvLanguage === 'english' ? 'AI Summary' : 'AI Xülasə'}</span>
+                <span>{siteLanguage === 'english' ? 'AI Summary' : 'AI Xülasə'}</span>
                 {!canUseAI && <span className="ml-1">🔒</span>}
               </div>
             )}
@@ -519,17 +521,17 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
               <span className="text-purple-600">🤖</span>
               <div>
                 <p className="text-sm font-medium text-purple-800">
-                  {cvLanguage === 'english' ? 'AI Professional Summary' : 'AI Peşəkar Xülasə'}
+                  {siteLanguage === 'english' ? 'AI Professional Summary' : 'AI Peşəkar Xülasə'}
                 </p>
                 <p className="text-xs text-purple-600">
-                  {cvLanguage === 'english' 
+                  {siteLanguage === 'english' 
                     ? 'Generate automatic Professional Summary from your data! Available for '
                     : 'Məlumatlarınızdan avtomatik Peşəkar Xülasə yaradın! '
                   }
                   <span className="font-semibold">
-                    {cvLanguage === 'english' ? 'Premium, Pro and Popular' : 'Premium, Pro və Populyar'}
+                    {siteLanguage === 'english' ? 'Premium, Pro and Popular' : 'Premium, Pro və Populyar'}
                   </span>
-                  {cvLanguage === 'english' ? ' users.' : ' istifadəçilər üçün uyğundur.'}
+                  {siteLanguage === 'english' ? ' users.' : ' istifadəçilər üçün uyğundur.'}
                 </p>
               </div>
             </div>
@@ -541,11 +543,11 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
           value={safeData.summary}
           onChange={(value) => handleChange('summary', value)}
           placeholder={canUseAI
-            ? (cvLanguage === 'english' 
+            ? (siteLanguage === 'english' 
               ? "Write your professional experience or generate automatically with the AI button above..."
               : "Peşəkar təcrübənizi yazın və ya yuxarıdakı AI butonundan avtomatik yaradın..."
             )
-            : (cvLanguage === 'english'
+            : (siteLanguage === 'english'
               ? "Briefly describe your professional experience and goals..."
               : "Peşəkar təcrübənizi və məqsədlərinizi qısaca təsvir edin..."
             )

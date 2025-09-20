@@ -275,34 +275,22 @@ export default function ProfileEditPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                    Ad və soyad
+                    Ad və Soyad
                   </label>
                   <input
                     id="name"
                     type="text"
                     required
-                    pattern="[a-zA-ZəÇĞIıÖŞÜçğıöşüĞĆĴḾṕźĄĺĹĳṡț\s]+"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                     placeholder="Adınız və soyadınız"
                     value={formData.name}
-                    onChange={(e) => {
-                      // Allow only letters, Azerbaijani characters, and spaces
-                      const value = e.target.value.replace(/[^a-zA-ZəÇĞIıÖŞÜçğıöşüĞĆĴḾṕźĄĺĹĳṡț\s]/g, '');
-                      setFormData({ ...formData, name: value });
-                    }}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     onInvalid={(e) => {
-                      const target = e.target as HTMLInputElement;
-                      if (target.validity.valueMissing) {
-                        target.setCustomValidity('Ad və soyad sahəsi məcburidir');
-                      } else if (target.validity.patternMismatch) {
-                        target.setCustomValidity('Ad və soyadda yalnız hərflərdən istifadə edin');
-                      }
+                      (e.target as HTMLInputElement).setCustomValidity('Ad və soyad sahəsi məcburidir');
                     }}
                     onInput={(e) => {
                       (e.target as HTMLInputElement).setCustomValidity('');
                     }}
-
-
                   />
                 </div>
 

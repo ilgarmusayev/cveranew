@@ -267,11 +267,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Check if user can use AI features - all paid tiers can use AI
-    const canUseAI = user.tier !== 'Free' && user.tier !== 'Pulsuz';
+    // Check if user can use AI features
+    const canUseAI = user.tier === 'Premium' || user.tier === 'Medium' || user.tier === 'Pro';
     if (!canUseAI) {
       return NextResponse.json({
-        error: 'AI skill suggestions are available for paid subscribers only'
+        error: 'AI skill suggestions are available for Premium, Medium, and Pro subscribers only'
       }, { status: 403 });
     }
 

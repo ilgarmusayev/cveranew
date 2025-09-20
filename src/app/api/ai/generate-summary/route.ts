@@ -2,32 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { prisma } from '@/lib/prisma';
 import { getGeminiApiKey, recordApiUsage, markApiKeyFailed, getBestApiKey } from '@/lib/api-service';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || '';
-
-// Get user ID from JWT token
-function getUserIdFromRequest(req: NextRequest): string | null {
-  try {
-    const authHeader = req.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return null;
-    }
-    
-    const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
-    return decoded.userId;
-  } catch (error) {
-    console.error('Token verification error:', error);
-    return null;
-  }
-}
-
-// Check if user can use AI features (not Free tier)
-function canUseAIFeatures(userTier: string): boolean {
-  const tier = userTier.toLowerCase();
-  return tier !== 'free' && tier !== 'pulsuz';
-}
 
 
 // Get Gemini AI instance using API keys from database
@@ -195,61 +169,37 @@ function prepareCVDataForAI(profileData: any): string {
   return cvText;
 }
 
+// Get style-specific instructions for variety in summary generation
+function getStyleInstructions(style: string, isEnglish: boolean): string {
+  const instructions = {
+    achievement_focused: {
+      en: `Focus on specific accomplishments and measurable results. Start with what the person achieved.`,
+      az: `Konkret nailiyyətlər və ölçülə bilən nəticələrə fokuslan. Şəxsin nə əldə etdiyi ilə başla.`
+    },
+    skill_technical: {
+      en: `Highlight technical expertise and practical application of skills. Show how they solve problems.`,
+      az: `Texniki ekspertiza və bacarıqların praktiki tətbiqini vurğula. Problemləri necə həll etdiklərini göstər.`
+    },
+    leadership_strategic: {
+      en: `Emphasize leadership impact and strategic thinking. Show how they guide and influence.`,
+      az: `Liderlik təsiri və strateji düşüncəni vurğula. Necə rəhbərlik etdiklərini və təsir göstərdiklərini göstər.`
+    },
+    innovation_problem_solving: {
+      en: `Focus on creative solutions and innovative approaches. Highlight unique problem-solving methods.`,
+      az: `Yaradıcı həllər və innovativ yanaşmalara fokuslan. Unikal problem həlli metodlarını vurğula.`
+    },
+    industry_expertise: {
+      en: `Emphasize deep domain knowledge and industry-specific achievements. Show specialized expertise.`,
+      az: `Dərin sahə bilik və sahə-spesifik nailiyyətləri vurğula. İxtisaslaşmış ekspertizanı göstər.`
+    }
+  };
+
+  const instruction = instructions[style as keyof typeof instructions];
+  return instruction ? (isEnglish ? instruction.en : instruction.az) : '';
+}
+
 export async function POST(req: NextRequest) {
   try {
-    console.log('🤖 AI Generate Summary API çağırıldı');
-    
-    // Get user ID from token
-    const userId = getUserIdFromRequest(req);
-    if (!userId) {
-      return NextResponse.json(
-        { 
-          success: false,
-          error: 'Giriş tələb olunur - Token lazımdır',
-          errorEn: 'Authentication required - Token needed'
-        },
-        { status: 401 }
-      );
-    }
-
-    // Get user and check subscription tier
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { 
-        id: true, 
-        email: true, 
-        tier: true,
-        name: true 
-      }
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { 
-          success: false,
-          error: 'İstifadəçi tapılmadı',
-          errorEn: 'User not found'
-        },
-        { status: 404 }
-      );
-    }
-
-    console.log(`👤 User: ${user.email}, Tier: ${user.tier}`);
-
-    // Check if user has access to AI features (block free users)
-    if (!canUseAIFeatures(user.tier)) {
-      return NextResponse.json(
-        { 
-          success: false,
-          error: "AI summary yalnız ödənişli planlar üçün mövcuddur. Planınızı yüksəldin!",
-          errorEn: "AI summary is only available for paid plans. Please upgrade!",
-          tier: user.tier,
-          upgradeRequired: true
-        },
-        { status: 403 }
-      );
-    }
-
     const { cvId, profileData, cvLanguage, structurePattern, openingStyle, requestId } = await req.json();
 
     // Handle both scenarios: direct profileData or cvId to fetch data
@@ -309,40 +259,64 @@ export async function POST(req: NextRequest) {
     // Create comprehensive CV text for AI analysis
     const cvText = prepareCVDataForAI(actualProfileData);
 
-    // Create enhanced prompt with clearer instructions
+    // Array of different summary approaches for variety
+    const summaryStyles = [
+      'achievement_focused', 
+      'skill_technical', 
+      'leadership_strategic', 
+      'innovation_problem_solving',
+      'industry_expertise'
+    ];
+    
+    // Randomly select a style to ensure variety
+    const selectedStyle = summaryStyles[Math.floor(Math.random() * summaryStyles.length)];
+    
+    console.log(`🎯 Selected summary style: ${selectedStyle}`);
+
+    // Create enhanced prompt with style variation
     const basePrompt = isEnglish ? 
-      `You are a professional CV writer. Create a professional summary based on the CV information below.
+      `Write a professional CV summary strictly based on the information provided in the CV. The text must be in third-person style (not first-person). Avoid phrases like "with X years of experience." Instead, emphasize the quality of experience, tangible outcomes, and unique strengths of the candidate. Do not use clichés such as "responsible" or "results-driven." The summary should feel authentic, highlight practical application of skills and measurable impact, and clearly show the value the candidate can bring to an organization.
 
-REQUIREMENTS:
-- Write in third-person (not "I", use "experienced professional", "skilled in", etc.)
-- 60-80 words, 3-4 sentences only
-- Focus on key skills and achievements
-- Professional tone
-- No generic phrases like "results-driven" or "team player"
-- Be specific about expertise areas
-
-CV INFORMATION:
+CV DATA:
 ${cvText}
 
-Write only the professional summary, nothing else:` :
-      
-      `Sən peşəkar CV yazıçısısan. Aşağıdakı CV məlumatlarına əsasən professional summary yaz.
+Requirements:
+- Third-person perspective only
+- No time-based phrases or experience years
+- Focus on achievements and practical impact
+- Highlight unique value proposition
+- Professional and authentic tone
+- 70-90 words, 4-5 sentences
 
-TƏLƏBLƏr:
-- 3-cü şəxs formasi ilə yaz ("mən" yox, "təcrübəli mütəxəssis", "bacarıqlıdır" kimi)
-- 60-80 söz, 3-4 cümlə
-- Əsas bacarıq və nailiyyətlərə fokus
-- Professional ton
-- "nəticəyönümlü", "komanda oyunçusu" kimi klişe ifadələr işlətmə
-- Ekspertlik sahələrini konkret göstər
+Generate the summary:` :
+      
+      `CV üçün peşəkar xülasə (Professional Summary) yaz. Yalnız CV-dəki məlumatlara əsaslan. Mətn 3-cü tərəf üslubunda olsun, "mən" formasından istifadə etmə. "X il təcrübəyə malikdir" tipli ifadələr işlətmə. Onun əvəzinə namizədin təcrübəsinin keyfiyyətini, nəticələrini və fərqləndirici tərəflərini vurğula. Klişe ifadələrdən ("məsuliyyətli", "nəticəyönümlü") uzaq dur. Mətn HR mütəxəssislərinin diqqətini çəkəcək, inandırıcı və unikallıq hissi verən üslubda yazılsın. Fokus – bacarıqların praktik tətbiqi, əldə olunan nəticələr və namizədin şirkətə əlavə edə biləcəyi dəyər üzərində olsun.
 
 CV MƏLUMATLARı:
 ${cvText}
 
-Yalnız professional summary-ni yaz, başqa heç nə əlavə etmə:`;
+Tələblər:
+- Yalnız 3-cü tərəf baxımından
+- Vaxt əsaslı ifadələr və təcrübə ili yox
+- Nailiyyətlər və praktik təsirə fokus
+- Unikal dəyər təklifini vurğula
+- Peşəkar və həqiqi ton
+- 70-90 söz, 4-5 cümlə
 
-    // Create simple, direct prompt
-    const prompt = basePrompt;
+Xülasəni generasiya et:`;
+
+    // Add style-specific instructions
+    const styleInstructions = getStyleInstructions(selectedStyle, isEnglish);
+    
+    // Add timestamp and randomness for uniqueness
+    const timestamp = Date.now();
+    const randomSeed = Math.floor(Math.random() * 10000);
+    
+    const uniquenessPrompt = isEnglish ? 
+      `\n\nUNIQUENESS REQUIREMENT: Generate a completely unique summary. Timestamp: ${timestamp}, Seed: ${randomSeed}. Vary sentence structure, word choice, and emphasis points to ensure each generation is distinctly different from previous versions.` :
+      `\n\nUNİKALLıQ TƏLƏBİ: Tamamilə unikal xülasə yarat. Timestamp: ${timestamp}, Seed: ${randomSeed}. Cümlə strukturunu, söz seçimini və vurğu nöqtələrini dəyiş ki, hər generasiya əvvəlki versiyalardan fərqli olsun.`;
+    
+    const prompt = basePrompt + '\n\n' + styleInstructions + uniquenessPrompt;
 
     let lastError: Error | null = null;
     let generatedSummary = '';
@@ -354,10 +328,10 @@ Yalnız professional summary-ni yaz, başqa heç nə əlavə etmə:`;
       const model = geminiAI.getGenerativeModel({ 
         model: 'gemini-1.5-flash',
         generationConfig: {
-          temperature: 0.3, // Lower temperature for more consistent results
-          topP: 0.8, // More focused sampling
-          topK: 20, // Reduced token variety for consistency
-          maxOutputTokens: 120, // Sufficient for summary
+          temperature: 0.9, // High creativity for variety
+          topP: 0.95, // Diverse token sampling
+          topK: 40, // Token variety
+          maxOutputTokens: 150, // Sufficient for summary
         }
       });
 
@@ -407,8 +381,9 @@ Yalnız professional summary-ni yaz, başqa heç nə əlavə etmə:`;
         summary: generatedSummary,
         professionalSummary: generatedSummary,
         language: targetLanguage,
+        style: selectedStyle,
         timestamp: new Date().toISOString(),
-        uniquenessId: `${Date.now()}_${Math.floor(Math.random() * 10000)}`
+        uniquenessId: `${timestamp}_${randomSeed}`
       },
       message: isEnglish ? 'Professional Summary generated successfully' : 'Peşəkar Xülasə uğurla generasiya edildi'
     });

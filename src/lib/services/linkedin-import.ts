@@ -1323,7 +1323,7 @@ Tələblər: Yalnız 3-cü tərəf baxımından, vaxt əsaslı ifadələr yox, n
       }
 
       // Enhanced prompts for specific tiers (optional customization)
-      if (user.tier === 'Populyar' || user.tier === 'Medium') {
+      if (user.tier === 'Populyar' || user.tier === 'Medium' || user.tier === 'Pro') {
         // Populyar tier already covered above
       } else if (user.tier === 'Premium') {
         if (isEnglish) {
@@ -1637,7 +1637,7 @@ Tələblər: 3-cü tərəf icraçı baxımından, vaxt əsaslı ifadələr yox, 
         `${exp.position || exp.title} - ${exp.company}: ${exp.description || ''}`
       ).join('\n');
 
-      if (user.tier === 'Populyar' || user.tier === 'Medium') {
+      if (user.tier === 'Populyar' || user.tier === 'Medium' || user.tier === 'Pro') {
         prompt = `
           Create a professional description for the skill "${skillName}" (${skillTypeText}) based on this professional context:
 
