@@ -14,6 +14,7 @@ interface CVTranslationPanelProps {
   onLanguageChange: (language: CVLanguage) => void;
   onClose?: () => void;
   userTier?: string;
+  uiLanguage?: 'english' | 'azerbaijani';
 }
 
 export function CVTranslationPanel({
@@ -22,7 +23,8 @@ export function CVTranslationPanel({
   onCVUpdate,
   onLanguageChange,
   onClose,
-  userTier = 'Free'
+  userTier = 'Free',
+  uiLanguage = 'azerbaijani'
 }: CVTranslationPanelProps) {
   const { translationState, translateFullCV, resetTranslationState } = useAITranslation();
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -81,6 +83,17 @@ export function CVTranslationPanel({
       advancedOptions: 'Ətraflı Seçimlər',
       currentLang: 'Hazırki dil: Azərbaycan',
       targetLang: 'Hədəf dil: İngilis',
+      current: 'Hazırki',
+      featuresTitle: 'Xüsusiyyətlər:',
+      translateTo: 'Tərcümə ediləcək:',
+      languageNames: {
+        azerbaijani: 'Azərbaycan dili',
+        english: 'English'
+      },
+      languageSubtitles: {
+        azerbaijani: 'Azerbaijani',
+        english: 'İngilis dili'
+      },
       features: [
         'Peşəkar terminologiya tərcüməsi',
         'Kontekst əsaslı tərcümə',
@@ -96,6 +109,17 @@ export function CVTranslationPanel({
       advancedOptions: 'Advanced Options',
       currentLang: 'Current language: English',
       targetLang: 'Target language: Azerbaijani',
+      current: 'Current',
+      featuresTitle: 'Features:',
+      translateTo: 'Translate to:',
+      languageNames: {
+        azerbaijani: 'Azərbaycan dili',
+        english: 'English'
+      },
+      languageSubtitles: {
+        azerbaijani: 'Azerbaijani',
+        english: 'İngilis dili'
+      },
       features: [
         'Professional terminology translation',
         'Context-aware translation',
@@ -106,7 +130,7 @@ export function CVTranslationPanel({
     }
   };
 
-  const content = labels[currentLanguage];
+  const content = labels[uiLanguage];
   const targetLanguage: CVLanguage = currentLanguage === 'azerbaijani' ? 'english' : 'azerbaijani';
 
   return (
@@ -150,7 +174,7 @@ export function CVTranslationPanel({
       {/* Language Selection Options - VERTICAL LAYOUT */}
       <div className="mb-6">
         <h4 className="text-sm font-semibold text-gray-900 mb-3">
-          {currentLanguage === 'azerbaijani' ? 'Tərcümə edil:' : 'Translate to:'}
+          {content.translateTo}
         </h4>
         <div className="grid grid-cols-1 gap-3">
           {/* Azerbaijani Option */}
@@ -172,15 +196,15 @@ export function CVTranslationPanel({
             <div className="flex items-center gap-3">
               <div className="text-2xl">🇦🇿</div>
               <div className="flex-1">
-                <div className="font-medium text-gray-900">Azərbaycan dili</div>
-                <div className="text-sm text-gray-500">Azerbaijani</div>
+                <div className="font-medium text-gray-900">{content.languageNames.azerbaijani}</div>
+                <div className="text-sm text-gray-500">{content.languageSubtitles.azerbaijani}</div>
               </div>
               {currentLanguage === 'azerbaijani' && (
                 <div className="flex items-center gap-1 text-green-600">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-xs font-medium">Hazırki</span>
+                  <span className="text-xs font-medium">{content.current}</span>
                 </div>
               )}
               {/* LOADING ONLY ON SELECTED TARGET LANGUAGE */}
@@ -213,15 +237,15 @@ export function CVTranslationPanel({
             <div className="flex items-center gap-3">
               <div className="text-2xl">🇺🇸</div>
               <div className="flex-1">
-                <div className="font-medium text-gray-900">English</div>
-                <div className="text-sm text-gray-500">İngilis dili</div>
+                <div className="font-medium text-gray-900">{content.languageNames.english}</div>
+                <div className="text-sm text-gray-500">{content.languageSubtitles.english}</div>
               </div>
               {currentLanguage === 'english' && (
                 <div className="flex items-center gap-1 text-green-600">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-xs font-medium">Current</span>
+                  <span className="text-xs font-medium">{content.current}</span>
                 </div>
               )}
               {/* LOADING ONLY ON SELECTED TARGET LANGUAGE */}
@@ -240,7 +264,7 @@ export function CVTranslationPanel({
       {/* Features List */}
       <div className="mb-6">
         <h4 className="text-sm font-semibold text-gray-900 mb-3">
-          {currentLanguage === 'azerbaijani' ? 'Xüsusiyyətlər:' : 'Features:'}
+          {content.featuresTitle}
         </h4>
         <ul className="space-y-2">
           {content.features.map((feature, index) => (

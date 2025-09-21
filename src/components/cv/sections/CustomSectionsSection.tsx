@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 import { CustomSection, CustomSectionItem } from '@/types/cv';
 
 interface CustomSectionsSectionProps {
@@ -11,6 +12,7 @@ interface CustomSectionsSectionProps {
 }
 
 function CustomSectionsSection({ data, onChange, userTier = 'Free', cvLanguage = 'azerbaijani' }: CustomSectionsSectionProps) {
+  const { siteLanguage } = useSiteLanguage();
   const [expandedSectionId, setExpandedSectionId] = useState<string | null>(null);
   const [expandedItemId, setExpandedItemId] = useState<string | null>(null);
 
@@ -18,7 +20,7 @@ function CustomSectionsSection({ data, onChange, userTier = 'Free', cvLanguage =
   const addSection = () => {
     const newSection: CustomSection = {
       id: crypto.randomUUID(),
-      title: cvLanguage === 'english' ? 'New Section' : 'Yeni Bölmə',
+      title: siteLanguage === 'english' ? 'New Section' : 'Yeni Bölmə',
       items: []
     };
     onChange([newSection, ...data]);
@@ -42,7 +44,7 @@ function CustomSectionsSection({ data, onChange, userTier = 'Free', cvLanguage =
   const addItem = (sectionId: string) => {
     const newItem: CustomSectionItem = {
       id: crypto.randomUUID(),
-      title: cvLanguage === 'english' ? 'New Item' : 'Yeni Element',
+      title: siteLanguage === 'english' ? 'New Item' : 'Yeni Element',
       description: ''
     };
     const updated = data.map(section =>
@@ -119,10 +121,10 @@ function CustomSectionsSection({ data, onChange, userTier = 'Free', cvLanguage =
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">
-            {cvLanguage === 'english' ? 'Additional Sections' : 'Əlavə Bölmələr'}
+            {siteLanguage === 'english' ? 'Additional Sections' : 'Əlavə Bölmələr'}
           </h3>
           <p className="text-sm text-gray-600">
-            {cvLanguage === 'english' ? 'Add custom sections to your CV' : 'CV-nizə xüsusi bölmələr əlavə edin'}
+            {siteLanguage === 'english' ? 'Add custom sections to your CV' : 'CV-nizə xüsusi bölmələr əlavə edin'}
           </p>
         </div>
         <button
@@ -133,10 +135,10 @@ function CustomSectionsSection({ data, onChange, userTier = 'Free', cvLanguage =
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
           <span className="hidden sm:inline">
-            {cvLanguage === 'english' ? 'New Section' : 'Yeni Bölmə'}
+            {siteLanguage === 'english' ? 'New Section' : 'Yeni Bölmə'}
           </span>
           <span className="sm:hidden">
-            {cvLanguage === 'english' ? '+' : '+'}
+            {siteLanguage === 'english' ? '+' : '+'}
           </span>
         </button>
       </div>
@@ -150,10 +152,10 @@ function CustomSectionsSection({ data, onChange, userTier = 'Free', cvLanguage =
             </svg>
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            {cvLanguage === 'english' ? 'No additional sections' : 'Əlavə bölmə yoxdur'}
+            {siteLanguage === 'english' ? 'No additional sections' : 'Əlavə bölmə yoxdur'}
           </h3>
           <p className="text-gray-600 mb-4">
-            {cvLanguage === 'english' 
+            {siteLanguage === 'english' 
               ? 'Click "New Section" button to add custom sections to your CV'
               : 'CV-nizə xüsusi bölmələr əlavə etmək üçün "Yeni Bölmə" düyməsini basın'
             }
@@ -162,7 +164,7 @@ function CustomSectionsSection({ data, onChange, userTier = 'Free', cvLanguage =
             onClick={addSection}
             className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            {cvLanguage === 'english' ? 'Add First Section' : 'İlk Bölməni Əlavə Et'}
+            {siteLanguage === 'english' ? 'Add First Section' : 'İlk Bölməni Əlavə Et'}
           </button>
         </div>
       ) : (

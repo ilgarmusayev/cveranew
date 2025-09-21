@@ -164,7 +164,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
             .filter((skill: any) => !existingSkillNames.includes(skill.name.toLowerCase()))
             .map((skill: any) => ({
               name: skill.name,
-              reason: skill.reason || skill.cvConnection || (cvLanguage === 'english' 
+              reason: skill.reason || skill.cvConnection || (siteLanguage === 'english' 
                 ? 'Recommended based on your CV profile'
                 : 'CV profilinizə əsasən tövsiyə edilən'
               ),
@@ -740,15 +740,15 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-900">
-                {cvLanguage === 'english' ? 'AI Professional Skills Analyzer' : 'AI Peşəkar Bacarıqlar Analizçisi'}
+                {siteLanguage === 'english' ? 'AI Professional Skills Analyzer' : 'AI Peşəkar Bacarıqlar Analizçisi'}
               </h3>
               <p className="text-sm text-gray-600">
                 {canUseAI ?
-                  (cvLanguage === 'english' 
+                  (siteLanguage === 'english' 
                     ? `${userTier} member - Professional skills analysis and recommendations`
                     : `${userTier} üzvü - Peşəkar bacarıqlar analizi və tövsiyələri`
                   ) :
-                  (cvLanguage === 'english' 
+                  (siteLanguage === 'english' 
                     ? 'Available for Premium and Medium members'
                     : 'Premium və Medium üzvlər üçün mövcuddur'
                   )
@@ -768,7 +768,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
           <div className="text-sm text-gray-700">
             <p className="mb-2">
               <strong>
-                {cvLanguage === 'english' 
+                {siteLanguage === 'english' 
                   ? 'AI will analyze your profile:' 
                   : 'AI sizin profilinizi analiz edəcək:'
                 }
@@ -776,31 +776,31 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
             </p>
             <ul className="list-disc list-inside space-y-1 text-xs text-gray-600 ml-2">
               <li>
-                {cvLanguage === 'english' 
+                {siteLanguage === 'english' 
                   ? 'Your work experience and career development'
                   : 'İş təcrübəniz və karyera inkişafınız'
                 }
               </li>
               <li>
-                {cvLanguage === 'english' 
+                {siteLanguage === 'english' 
                   ? 'Educational background and certifications'
                   : 'Təhsil fonu və sertifikatlarınız'
                 }
               </li>
               <li>
-                {cvLanguage === 'english' 
+                {siteLanguage === 'english' 
                   ? 'Current skills and expertise areas'
                   : 'Mövcud bacarıqlar və expertiza sahələri'
                 }
               </li>
               <li>
-                {cvLanguage === 'english' 
+                {siteLanguage === 'english' 
                   ? 'Industry trends and market demands'
                   : 'İndustiya trendləri və market tələbləri'
                 }
               </li>
               <li>
-                {cvLanguage === 'english' 
+                {siteLanguage === 'english' 
                   ? 'Strategic skills for your career goals'
                   : 'Karyera məqsədləriniz üçün strateji skills'
                 }
@@ -823,7 +823,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
               <div className="flex items-center justify-center gap-2">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600"></div>
                 <span>
-                  {cvLanguage === 'english' 
+                  {siteLanguage === 'english' 
                     ? 'AI analyzing your profile...' 
                     : 'AI profilinizi analiz edir...'
                   }
@@ -833,7 +833,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
               <div className="flex items-center justify-center gap-2">
                 <span>🎯</span>
                 <span>
-                  {cvLanguage === 'english' 
+                  {siteLanguage === 'english' 
                     ? 'Get Professional Skills Recommendations' 
                     : 'Peşəkar Bacarıqlar Tövsiyələri Al'
                   }

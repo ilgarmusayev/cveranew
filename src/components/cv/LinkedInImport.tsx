@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth, getUserTier } from '@/lib/auth';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 
 interface LinkedInData {
   sessionId?: string;
@@ -72,6 +73,7 @@ export default function LinkedInImport({ onImport, onCancel, cvLanguage = 'azerb
   // Puppeteer istifadə edərək HTML səhifəsindən məlumatları çəkirik
   // Bütün məlumatlar real-time olaraq LinkedIn səhifəsindən alınır
   
+  const { siteLanguage } = useSiteLanguage();
   const { user } = useAuth();
   const userTier = user ? getUserTier(user) : 'Free';
   
@@ -141,7 +143,7 @@ export default function LinkedInImport({ onImport, onCancel, cvLanguage = 'azerb
     const hasSkills = importedData.skills && Array.isArray(importedData.skills) && importedData.skills.length > 0;
     
     if (!hasSkills) {
-      setError(cvLanguage === 'english' ? 
+      setError(siteLanguage === 'english' ? 
         'Please add skills first' :
         'Bacarıq əlavə edin'
       );
@@ -192,12 +194,12 @@ export default function LinkedInImport({ onImport, onCancel, cvLanguage = 'azerb
       } else {
         // Skills yoxlaması və xüsusi mesaj
         if (data.requiresSkills) {
-          setError(cvLanguage === 'english' ? 
+          setError(siteLanguage === 'english' ? 
             'Please add skills first' :
             'Bacarıq əlavə edin'
           );
         } else {
-          setError(cvLanguage === 'english' ? 
+          setError(siteLanguage === 'english' ? 
             'AI Summary generation error: ' + (data.error || 'Unknown error') :
             'AI Summary generasiya xətası: ' + (data.error || 'Bilinməyən xəta')
           );
@@ -205,7 +207,7 @@ export default function LinkedInImport({ onImport, onCancel, cvLanguage = 'azerb
       }
     } catch (error: any) {
       console.error('💥 AI Summary xətası:', error);
-      setError(cvLanguage === 'english' ? 
+      setError(siteLanguage === 'english' ? 
         'AI Summary error: ' + (error.message || 'Network error') :
         'AI Summary xətası: ' + (error.message || 'Şəbəkə xətası')
       );

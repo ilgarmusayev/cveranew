@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import DateRangeInput from '@/components/cv/DateRangeInput';
 
@@ -24,6 +25,7 @@ interface OrganizationsSectionProps {
 }
 
 export default function OrganizationsSection({ data, onChange, cvLanguage = 'azerbaijani' }: OrganizationsSectionProps) {
+  const { siteLanguage } = useSiteLanguage();
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -74,7 +76,7 @@ export default function OrganizationsSection({ data, onChange, cvLanguage = 'aze
     setEditingIndex(editingIndex === index ? null : index);
   };
 
-  const labels = cvLanguage === 'english' ? {
+  const labels = siteLanguage === 'english' ? {
     title: 'Organizations',
     addButton: 'Add Organization',
     organizationName: 'Organization Name',
@@ -210,7 +212,7 @@ export default function OrganizationsSection({ data, onChange, cvLanguage = 'aze
                     <p className="text-blue-600 font-medium">{org.position}</p>
                     {org.startDate && (
                       <p className="text-sm text-gray-600">
-                        {org.startDate} - {org.current ? (cvLanguage === 'english' ? 'Present' : 'Hazırda') : org.endDate}
+                        {org.startDate} - {org.current ? (siteLanguage === 'english' ? 'Present' : 'Hazırda') : org.endDate}
                       </p>
                     )}
                     {org.website && (
@@ -249,9 +251,9 @@ export default function OrganizationsSection({ data, onChange, cvLanguage = 'aze
 
         {data.length === 0 && (
           <div className="text-center py-8 text-gray-500">
-            <p>{cvLanguage === 'english' ? 'No organizations added yet' : 'Hələ heç bir təşkilat əlavə edilməyib'}</p>
+            <p>{siteLanguage === 'english' ? 'No organizations added yet' : 'Hələ heç bir təşkilat əlavə edilməyib'}</p>
             <p className="text-sm mt-1">
-              {cvLanguage === 'english' 
+              {siteLanguage === 'english' 
                 ? 'Click "Add Organization" to get started' 
                 : '"Təşkilat Əlavə Et" düyməsinə basın'}
             </p>

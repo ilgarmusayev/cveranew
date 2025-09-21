@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 import { getLabel } from '@/lib/cvLanguage';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import DateRangeInput from '@/components/cv/DateRangeInput';
@@ -65,6 +66,7 @@ interface ProjectsSectionProps {
 }
 
 export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaijani' }: ProjectsSectionProps) {
+  const { siteLanguage } = useSiteLanguage();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   // Normalize data to ensure technologies is always an array
@@ -130,7 +132,7 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">
-            {cvLanguage === 'english' ? 'Projects' : 'Layihələr'}
+            {siteLanguage === 'english' ? 'Projects' : 'Layihələr'}
           </h3>
         </div>
         <button
@@ -138,10 +140,10 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
         >
           <span className="hidden sm:inline">
-            {cvLanguage === 'english' ? '+ Add' : '+ Əlavə edin'}
+            {siteLanguage === 'english' ? '+ Add' : '+ Əlavə edin'}
           </span>
           <span className="sm:hidden">
-            {cvLanguage === 'english' ? '+' : '+'}
+            {siteLanguage === 'english' ? '+' : '+'}
           </span>
         </button>
       </div>
@@ -154,13 +156,13 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
             </svg>
           </div>
           <p className="text-gray-500 mb-4">
-            {cvLanguage === 'english' ? 'No projects added yet' : 'Hələ heç bir layihə əlavə etməmisiniz'}
+            {siteLanguage === 'english' ? 'No projects added yet' : 'Hələ heç bir layihə əlavə etməmisiniz'}
           </p>
           <button
             onClick={addProject}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            {cvLanguage === 'english' ? 'Add your first project' : 'İlk layihənizi əlavə edin'}
+            {siteLanguage === 'english' ? 'Add your first project' : 'İlk layihənizi əlavə edin'}
           </button>
         </div>
       ) : (
@@ -171,11 +173,11 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-blue-500">🚀</span>
                   <h4 className="font-medium text-gray-900">
-                    {project.name || (cvLanguage === 'english' ? 'New project' : 'Yeni layihə')}
+                    {project.name || (siteLanguage === 'english' ? 'New project' : 'Yeni layihə')}
                   </h4>
                 </div>
                 <p className="text-sm text-gray-600 line-clamp-2 whitespace-pre-line">
-                  {stripHtmlTags(project.description) || (cvLanguage === 'english' ? 'Project description' : 'Layihə təsviri')}
+                  {stripHtmlTags(project.description) || (siteLanguage === 'english' ? 'Project description' : 'Layihə təsviri')}
                 </p>
                 {project.technologies && project.technologies.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
@@ -203,7 +205,7 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                     }`}
-                    title={cvLanguage === 'english' ? 'Move Up' : 'Yuxarı'}
+                    title={siteLanguage === 'english' ? 'Move Up' : 'Yuxarı'}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -217,7 +219,7 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                     }`}
-                    title={cvLanguage === 'english' ? 'Move Down' : 'Aşağı'}
+                    title={siteLanguage === 'english' ? 'Move Down' : 'Aşağı'}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -231,13 +233,13 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
                     onClick={() => setExpandedId(expandedId === project.id ? null : project.id)}
                     className="text-blue-600 hover:text-blue-800 transition-colors text-sm cursor-pointer"
                   >
-                    {expandedId === project.id ? (cvLanguage === 'english' ? 'Close' : 'Bağlayın') : (cvLanguage === 'english' ? 'Edit' : 'Redaktə edin')}
+                    {expandedId === project.id ? (siteLanguage === 'english' ? 'Close' : 'Bağlayın') : (siteLanguage === 'english' ? 'Edit' : 'Redaktə edin')}
                   </button>
                   <button
                     onClick={() => removeProject(project.id)}
                     className="text-red-600 hover:text-red-800 transition-colors text-sm cursor-pointer"
                   >
-                    {cvLanguage === 'english' ? 'Delete' : 'Silin'}
+                    {siteLanguage === 'english' ? 'Delete' : 'Silin'}
                   </button>
                 </div>
               </div>
@@ -247,20 +249,20 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {cvLanguage === 'english' ? 'Project Name' : 'Layihə adı'} <span className="text-red-500">*</span>
+                        {siteLanguage === 'english' ? 'Project Name' : 'Layihə adı'} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         value={project.name}
                         onChange={(e) => updateProject(project.id, 'name', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        placeholder={cvLanguage === 'english' ? 'Project Name' : 'Layihənin adı'}
+                        placeholder={siteLanguage === 'english' ? 'Project Name' : 'Layihənin adı'}
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {cvLanguage === 'english' ? 'Project URL' : 'Layihə URL-i'} <span className="text-gray-400 text-xs">{cvLanguage === 'english' ? '(optional)' : '(ixtiyari)'}</span>
+                        {siteLanguage === 'english' ? 'Project URL' : 'Layihə URL-i'} <span className="text-gray-400 text-xs">{siteLanguage === 'english' ? '(optional)' : '(ixtiyari)'}</span>
                       </label>
                       <input
                         type="url"
@@ -273,7 +275,7 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {cvLanguage === 'english' ? 'GitHub Repository' : 'GitHub URL-i'} <span className="text-gray-400 text-xs">{cvLanguage === 'english' ? '(optional)' : '(ixtiyari)'}</span>
+                        {siteLanguage === 'english' ? 'GitHub Repository' : 'GitHub URL-i'} <span className="text-gray-400 text-xs">{siteLanguage === 'english' ? '(optional)' : '(ixtiyari)'}</span>
                       </label>
                       <input
                         type="url"
@@ -286,7 +288,7 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {cvLanguage === 'english' ? 'Technologies' : 'Texnologiyalar'} <span className="text-gray-400 text-xs">{cvLanguage === 'english' ? '(comma separated)' : '(vergüllə ayırın)'}</span>
+                        {siteLanguage === 'english' ? 'Technologies' : 'Texnologiyalar'} <span className="text-gray-400 text-xs">{siteLanguage === 'english' ? '(comma separated)' : '(vergüllə ayırın)'}</span>
                       </label>
                       <input
                         type="text"
@@ -309,21 +311,21 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
                       current, 
                       endDate: current ? '' : project.endDate 
                     })}
-                    startLabel={cvLanguage === 'english' ? 'Start Date' : 'Başlama tarixi'}
-                    endLabel={cvLanguage === 'english' ? 'End Date' : 'Bitirmə tarixi'}
-                    currentLabel={cvLanguage === 'english' ? 'Currently ongoing' : 'Davam edir'}
+                    startLabel={siteLanguage === 'english' ? 'Start Date' : 'Başlama tarixi'}
+                    endLabel={siteLanguage === 'english' ? 'End Date' : 'Bitirmə tarixi'}
+                    currentLabel={siteLanguage === 'english' ? 'Currently ongoing' : 'Davam edir'}
                     cvLanguage={cvLanguage}
                   />
 
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {cvLanguage === 'english' ? 'Description' : 'Təsvir'} <span className="text-red-500">*</span>
+                      {siteLanguage === 'english' ? 'Description' : 'Təsvir'} <span className="text-red-500">*</span>
                     </label>
                     <RichTextEditor
                       value={project.description}
                       onChange={(value) => updateProject(project.id, 'description', value)}
-                      placeholder={cvLanguage === 'english' 
+                      placeholder={siteLanguage === 'english' 
                         ? 'Describe the project\'s purpose, technologies used, and results achieved...' 
                         : 'Layihənin məqsədini, istifadə olunan texnologiyaları və əldə olunan nəticələri təsvir edin...'
                       }
@@ -343,7 +345,7 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
             onClick={addProject}
             className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
           >
-            {cvLanguage === 'english' ? '+ Add another project' : '+ Başqa layihə əlavə edin'}
+            {siteLanguage === 'english' ? '+ Add another project' : '+ Başqa layihə əlavə edin'}
           </button>
         </div>
       )}

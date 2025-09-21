@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
 import { CVTranslationPanel } from '@/components/translation/CVTranslationPanel';
 import { CVLanguage } from '@/lib/cvLanguage';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 // Import section components
 import PersonalInfoSection from './sections/PersonalInfoSection';
 import ExperienceSection from './sections/ExperienceSection';
@@ -120,7 +121,7 @@ const getDefaultCVData = (): Omit<CVEditorState, 'id' | 'title' | 'templateId'> 
 });
 
 // Sections configuration
-const getSections = (language: CVLanguage, translatedSectionNames?: Record<string, string>) => {
+const getSections = (uiLanguage: 'english' | 'azerbaijani', translatedSectionNames?: Record<string, string>, useTranslatedNames: boolean = false) => {
     const defaultSections = {
         english: [
             { id: 'personal', label: 'Personal Information', icon: '👤' },
@@ -150,10 +151,10 @@ const getSections = (language: CVLanguage, translatedSectionNames?: Record<strin
         ]
     };
 
-    const sections = defaultSections[language] || defaultSections.azerbaijani;
+    const sections = defaultSections[uiLanguage] || defaultSections.azerbaijani;
     
-    // If we have translated section names, use them
-    if (translatedSectionNames) {
+    // Only use translated section names if explicitly requested (NOT for UI language changes)
+    if (useTranslatedNames && translatedSectionNames) {
         // Map section IDs to API section keys
         const sectionIdMapping: Record<string, string> = {
             'personal': 'personalInfo',
@@ -188,8 +189,8 @@ const getSections = (language: CVLanguage, translatedSectionNames?: Record<strin
     return sections;
 };
 
-const getSectionDescription = (sectionId: string, language: CVLanguage) => {
-    const descriptions: Record<CVLanguage, Record<string, string>> = {
+const getSectionDescription = (sectionId: string, uiLanguage: 'english' | 'azerbaijani') => {
+    const descriptions: Record<'english' | 'azerbaijani', Record<string, string>> = {
         english: {
             personal: 'Provide your basic contact and personal details.',
             experience: 'Detail your professional work history.',
@@ -217,10 +218,11 @@ const getSectionDescription = (sectionId: string, language: CVLanguage) => {
             template: 'Stilinizi ən yaxşı əks etdirən şablonu seçin.'
         }
     };
-    return descriptions[language][sectionId] || '';
+    return descriptions[uiLanguage][sectionId] || '';
 };
 
 export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier }: CVEditorProps) {
+    const { siteLanguage } = useSiteLanguage();
     // Default section order
     const defaultSectionOrder = [
         'summary',
@@ -902,8 +904,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
 
     // Get sections for current language with memoization
     const allSections = useMemo(() => {
-        return getSections(cv.cvLanguage, cv.sectionNames || {});
-    }, [cv.cvLanguage, cv.sectionNames]);
+        return getSections(siteLanguage, cv.sectionNames || {}, false);
+    }, [siteLanguage, cv.sectionNames]);
     
     const mainSections = useMemo(() => {
         return allSections.filter(s => s.id !== 'template');
@@ -1129,7 +1131,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 return (
                     <div>
                         <h3 className="text-lg font-semibold mb-4 text-gray-800">
-                            {cv.cvLanguage === 'english' ? 'Template Selection' : 'Şablon Seçimi'}
+                            {siteLanguage === 'english' ? 'Template Selection' : 'Şablon Seçimi'}
                         </h3>
                         <TemplateSelector
                             selectedTemplateId={cv.templateId}
@@ -1144,7 +1146,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 return (
                     <div className="text-center py-8">
                         <p className="text-gray-500">
-                            {cv.cvLanguage === 'english' ? 'Select a section' : 'Bölmə seçin'}
+                            {siteLanguage === 'english' ? 'Select a section' : 'Bölmə seçin'}
                         </p>
                     </div>
                 );
@@ -1167,7 +1169,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                     type="text"
                                     value={cv.title}
                                     onChange={(e) => setCv(prev => ({ ...prev, title: e.target.value }))}
-                                    placeholder={cv.cvLanguage === 'english' ? 'CV Title' : 'CV başlığı'}
+                                    placeholder={siteLanguage === 'english' ? 'CV Title' : 'CV başlığı'}
                                     className="text-base sm:text-lg font-bold text-gray-800 bg-transparent border-none p-0 focus:ring-0 w-28 sm:w-48 md:w-auto truncate"
                                 />
                             </div>
@@ -1181,24 +1183,24 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                         setShowTranslationPanel(true);
                                     }}
                                     className="ml-3 flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-lg transition-all duration-200 border border-white/20"
-                                    title={cv.cvLanguage === 'english' ? 'Translate with AI' : 'AI ilə tərcümə et'}
+                                    title={siteLanguage === 'english' ? 'Translate with AI' : 'AI ilə tərcümə et'}
                                 >
                                     <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
                                     </svg>
-                                    {cv.cvLanguage === 'english' ? 'AI Translate' : 'AI Tərcümə'}
+                                    {siteLanguage === 'english' ? 'AI Translate' : 'AI Tərcümə'}
                                 </button>
 
                                 {/* Simple Font Button */}
                                 <button
                                     onClick={() => setShowFontPanel(true)}
                                     className="ml-2 flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 rounded-lg transition-all duration-200 border border-white/20"
-                                    title={cv.cvLanguage === 'english' ? 'Font settings' : 'Font tənzimləmələri'}
+                                    title={siteLanguage === 'english' ? 'Font settings' : 'Font tənzimləmələri'}
                                 >
                                     <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.5 12.75l6 6 9-13.5" />
                                     </svg>
-                                    {cv.cvLanguage === 'english' ? 'Font Manager' : 'Font İdarə'}
+                                    {siteLanguage === 'english' ? 'Font Manager' : 'Font İdarə'}
                                 </button>
                             </div>
                         </div>
@@ -1209,12 +1211,12 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             <div className="hidden md:flex items-center space-x-3">
                                 {saving && (
                                     <span className="text-xs text-blue-600 animate-pulse">
-                                        {cv.cvLanguage === 'english' ? 'Saving...' : 'Yadda saxlanılır...'}
+                                        {siteLanguage === 'english' ? 'Saving...' : 'Yadda saxlanılır...'}
                                     </span>
                                 )}
                                 {success && (
                                     <span className="text-xs text-green-600">
-                                        ✓ {cv.cvLanguage === 'english' ? 'Saved' : 'Yadda saxlanıldı'}
+                                        ✓ {siteLanguage === 'english' ? 'Saved' : 'Yadda saxlanıldı'}
                                     </span>
                                 )}
                             </div>
@@ -1227,7 +1229,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                         onClick={handleDirectPDFExport}
                                         disabled={saving}
                                         className="flex items-center justify-center h-10 w-10 sm:h-auto sm:w-auto sm:px-3 sm:py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                        aria-label={cv.cvLanguage === 'english' ? 'Download PDF' : 'PDF Yüklə'}
+                                        aria-label={siteLanguage === 'english' ? 'Download PDF' : 'PDF Yüklə'}
                                     >
                                         {saving ? (
                                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -1237,7 +1239,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                             </svg>
                                         )}
                                         <span className="hidden sm:inline ml-2">
-                                            {cv.cvLanguage === 'english' ? 'PDF' : 'PDF'}
+                                            {siteLanguage === 'english' ? 'PDF' : 'PDF'}
                                         </span>
                                     </button>
 
@@ -1248,11 +1250,11 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             <button
                                 onClick={onCancel}
                                 className="flex items-center justify-center h-10 w-10 sm:h-auto sm:w-auto sm:px-3 sm:py-2 text-sm font-medium text-gray-700 bg-transparent border border-transparent rounded-lg hover:bg-gray-100 transition-colors"
-                                aria-label={cv.cvLanguage === 'english' ? 'Go Back' : 'Geri qayıdın'}
+                                aria-label={siteLanguage === 'english' ? 'Go Back' : 'Geri qayıdın'}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
                                 <span className="hidden sm:inline ml-2">
-                                    {cv.cvLanguage === 'english' ? 'Go Back' : 'Geri qayıdın'}
+                                    {siteLanguage === 'english' ? 'Go Back' : 'Geri qayıdın'}
                                 </span>
                             </button>
                             
@@ -1263,10 +1265,10 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             >
                                 {saving ? '...' : <>
                                     <span className="hidden sm:inline">
-                                        {cv.cvLanguage === 'english' ? 'Save' : 'Yadda Saxlayın'}
+                                        {siteLanguage === 'english' ? 'Save' : 'Yadda Saxlayın'}
                                     </span>
                                     <span className="sm:hidden">
-                                        {cv.cvLanguage === 'english' ? 'Save' : 'Saxla'}
+                                        {siteLanguage === 'english' ? 'Save' : 'Saxla'}
                                     </span>
                                 </>}
                             </button>
@@ -1283,24 +1285,24 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                     setShowTranslationPanel(true);
                                 }}
                                 className="flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-lg transition-all duration-200 shadow-md"
-                                title={cv.cvLanguage === 'english' ? 'Translate with AI' : 'AI ilə tərcümə et'}
+                                title={siteLanguage === 'english' ? 'Translate with AI' : 'AI ilə tərcümə et'}
                             >
                                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
                                 </svg>
-                                {cv.cvLanguage === 'english' ? 'AI Translate' : 'AI Tərcümə'}
+                                {siteLanguage === 'english' ? 'AI Translate' : 'AI Tərcümə'}
                             </button>
 
                             {/* Font Manager Button */}
                             <button
                                 onClick={() => setShowFontPanel(true)}
                                 className="flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 rounded-lg transition-all duration-200 shadow-md"
-                                title={cv.cvLanguage === 'english' ? 'Font settings' : 'Font tənzimləmələri'}
+                                title={siteLanguage === 'english' ? 'Font settings' : 'Font tənzimləmələri'}
                             >
                                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
                                 </svg>
-                                {cv.cvLanguage === 'english' ? 'Font Manager' : 'Font İdarə'}
+                                {siteLanguage === 'english' ? 'Font Manager' : 'Font İdarə'}
                             </button>
 
                             {/* Mobile Status Indicator */}
@@ -1308,7 +1310,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                 {saving && (
                                     <div className="flex items-center text-xs text-blue-600">
                                         <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600 mr-1"></div>
-                                        {cv.cvLanguage === 'english' ? 'Saving...' : 'Saxlanır...'}
+                                        {siteLanguage === 'english' ? 'Saving...' : 'Saxlanır...'}
                                     </div>
                                 )}
                                 {success && (
@@ -1316,7 +1318,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                         </svg>
-                                        {cv.cvLanguage === 'english' ? 'Saved' : 'Saxlanıldı'}
+                                        {siteLanguage === 'english' ? 'Saved' : 'Saxlanıldı'}
                                     </span>
                                 )}
                             </div>
@@ -1333,7 +1335,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                         <div className="mb-8">
                             <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
                                 <h3 className="text-sm font-semibold text-gray-800 mb-4 px-2">
-                                    {cv.cvLanguage === 'english' ? 'CV Sections' : 'CV Bölmələri'}
+                                    {siteLanguage === 'english' ? 'CV Sections' : 'CV Bölmələri'}
                                 </h3>
                                 
                                 {/* Scrollable Main Sections */}
@@ -1398,7 +1400,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     {allSections.find(s => s.id === activeSection)?.label}
                 </h2>
                 <p className="text-sm text-gray-500 mt-1">
-                    {getSectionDescription(activeSection, cv.cvLanguage)}
+                    {getSectionDescription(activeSection, siteLanguage)}
                 </p>
             </div>
         </div>
@@ -1435,7 +1437,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                         <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                                         <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
                                     </svg>
-                                    <span>{cv.cvLanguage === 'english' ? 'Preview' : 'Önizləmə'}</span>
+                                    <span>{siteLanguage === 'english' ? 'Preview' : 'Önizləmə'}</span>
                                 </h3>
                                 <div className="flex items-center space-x-3">
                                     <span className="text-xs font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
@@ -1489,7 +1491,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     <div className="text-center mb-4">
                         <div className="text-sm text-gray-600 mb-1">Seçilmiş Bölmə:</div>
                         <div className="text-lg font-semibold text-gray-800 bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
-                            {getSectionName(activeMobileSection, cv.cvLanguage, cv.sectionNames, cv)}
+                            {getSectionName(activeMobileSection, siteLanguage, cv.sectionNames, cv)}
                         </div>
                         <div className="text-xs text-gray-500 mt-1">
                             Cari sıra: {getVisibleSections().indexOf(activeMobileSection) + 1} / {getVisibleSectionsCount()}
@@ -1608,7 +1610,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     <div className="p-3 sm:p-4 lg:p-6">
                         <div className="flex justify-between items-center mb-3 sm:mb-4">
                             <h2 className="text-lg sm:text-xl font-bold text-gray-900">
-                                {cv.cvLanguage === 'english' ? 'AI Translation Panel' : 'AI Tərcümə Paneli'}
+                                {siteLanguage === 'english' ? 'AI Translation Panel' : 'AI Tərcümə Paneli'}
                             </h2>
                               <button
               onClick={() => setShowTranslationPanel(false)}
@@ -1626,6 +1628,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                         <CVTranslationPanel
                             cvData={cv}
                             currentLanguage={cv.cvLanguage as CVLanguage}
+                            uiLanguage={siteLanguage}
                             onCVUpdate={(updatedCV) => {
                                 console.log('🔄 CVEditor: Receiving translated CV:', updatedCV);
                                 console.log('📝 CVEditor: New language:', updatedCV.cvLanguage);
@@ -1642,10 +1645,9 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                 
                                 // Force re-render by updating active section
                                 setActiveSection(prev => {
-                                    // If current section exists in new section names, keep it
-                                    // Otherwise switch to first available section
-                                    const sections = getSections(updatedCV.cvLanguage as CVLanguage, updatedCV.sectionNames || {});
-                                    console.log('📋 CVEditor: Generated sections with new names:', sections);
+                                    // Don't use translated section names for UI - use site language
+                                    const sections = getSections(siteLanguage, {}, false);
+                                    console.log('📋 CVEditor: Generated sections with site language:', sections);
                                     return sections.find(s => s.id === prev)?.id || sections[0]?.id || prev;
                                 });
                                 
@@ -1692,7 +1694,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                 <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
                                 </svg>
-                                {cv.cvLanguage === 'english' ? 'Font Manager' : 'Font İdarə'}
+                                {siteLanguage === 'english' ? 'Font Manager' : 'Font İdarə'}
                             </h2>
                             <button
                                 onClick={() => setShowFontPanel(false)}
@@ -1700,7 +1702,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                          bg-white hover:bg-gray-100 rounded-full shadow-sm border border-gray-200
                                          text-gray-500 hover:text-gray-700 transition-all duration-200
                                          hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                aria-label={cv.cvLanguage === 'english' ? 'Close' : 'Bağla'}
+                                aria-label={siteLanguage === 'english' ? 'Close' : 'Bağla'}
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
@@ -1729,7 +1731,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Heading Size */}
                             <div>
                                 <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-1.5 text-center">
-                                    {cv.cvLanguage === 'english' ? 'Heading Size' : 'Başlıq Ölçüsü'}
+                                    {siteLanguage === 'english' ? 'Heading Size' : 'Başlıq Ölçüsü'}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1755,7 +1757,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Subheading Size */}
                             <div>
                                 <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-1.5 text-center">
-                                    {cv.cvLanguage === 'english' ? 'Subheading Size' : 'Alt Başlıq Ölçüsü'}
+                                    {siteLanguage === 'english' ? 'Subheading Size' : 'Alt Başlıq Ölçüsü'}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1781,7 +1783,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Body Size */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
-                                    {cv.cvLanguage === 'english' ? 'Body Text Size' : 'Əsas Mətn Ölçüsü'}
+                                    {siteLanguage === 'english' ? 'Body Text Size' : 'Əsas Mətn Ölçüsü'}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1807,7 +1809,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Small Size */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
-                                    {cv.cvLanguage === 'english' ? 'Small Text Size' : 'Kiçik Mətn Ölçüsü'}
+                                    {siteLanguage === 'english' ? 'Small Text Size' : 'Kiçik Mətn Ölçüsü'}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1833,7 +1835,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Heading Weight */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
-                                    {cv.cvLanguage === 'english' ? 'Heading Weight' : 'Başlıq Qalınlığı'}
+                                    {siteLanguage === 'english' ? 'Heading Weight' : 'Başlıq Qalınlığı'}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1859,7 +1861,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Subheading Weight */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
-                                    {cv.cvLanguage === 'english' ? 'Subheading Weight' : 'Alt Başlıq Qalınlığı'}
+                                    {siteLanguage === 'english' ? 'Subheading Weight' : 'Alt Başlıq Qalınlığı'}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1885,7 +1887,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Small Weight */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
-                                    {cv.cvLanguage === 'english' ? 'Small Text Weight' : 'Kiçik Mətn Qalınlığı'}
+                                    {siteLanguage === 'english' ? 'Small Text Weight' : 'Kiçik Mətn Qalınlığı'}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1911,7 +1913,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Section Spacing Control */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
-                                    {cv.cvLanguage === 'english' ? 'Section Spacing' : 'Bölmələr Arası Məsafə'}
+                                    {siteLanguage === 'english' ? 'Section Spacing' : 'Bölmələr Arası Məsafə'}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1963,7 +1965,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                                      transition-all duration-200 shadow-sm"
                         >
-                            {cv.cvLanguage === 'english' ? 'Reset' : 'Sıfırla'}
+                            {siteLanguage === 'english' ? 'Reset' : 'Sıfırla'}
                         </button>
                     </div>
                 </div>

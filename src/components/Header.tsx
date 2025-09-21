@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 import { CVTranslationPanel } from '@/components/translation/CVTranslationPanel';
 import { CVLanguage } from '@/lib/cvLanguage';
 
@@ -32,6 +33,31 @@ export default function Header({
   const [showTranslationPanel, setShowTranslationPanel] = useState(false);
   const router = useRouter();
   const { user, logout } = useAuth();
+  const { siteLanguage, toggleSiteLanguage } = useSiteLanguage();
+
+  // Header mətnləri
+  const labels = {
+    azerbaijani: {
+      dashboard: 'İdarəetmə Paneli',
+      welcome: 'Xoş gəlmisiniz',
+      logout: 'Çıxış',
+      login: 'Giriş',
+      register: 'Qeydiyyat',
+      aiTranslate: 'AI Tərcümə',
+      aiTranslatePanel: 'AI Tərcümə Paneli'
+    },
+    english: {
+      dashboard: 'Dashboard',
+      welcome: 'Welcome',
+      logout: 'Logout',
+      login: 'Login',
+      register: 'Register',
+      aiTranslate: 'AI Translate',
+      aiTranslatePanel: 'AI Translation Panel'
+    }
+  };
+
+  const content = labels[siteLanguage];
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -91,6 +117,18 @@ export default function Header({
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-3 lg:space-x-4 xl:space-x-6 flex-shrink-0">
+            {/* Language Switcher */}
+            <button
+              onClick={toggleSiteLanguage}
+              className="flex items-center px-3 lg:px-4 py-2 text-xs lg:text-sm font-medium text-white bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg hover:bg-white/20 transition-all duration-200"
+              title={siteLanguage === 'azerbaijani' ? 'Switch to English' : 'Azərbaycana keç'}
+            >
+              <svg className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+              </svg>
+              {siteLanguage === 'azerbaijani' ? 'EN' : 'AZ'}
+            </button>
+
             {/* AI Translate Button */}
             {showAITranslate && cvData && onCVUpdate && onLanguageChange && (
               <button
@@ -100,7 +138,7 @@ export default function Header({
                 <svg className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
                 </svg>
-                AI Tərcümə
+                {content.aiTranslate}
               </button>
             )}
             
@@ -111,10 +149,10 @@ export default function Header({
                   href="/dashboard"
                   className="text-white hover:text-blue-200 transition-colors duration-200 px-3 lg:px-4 py-2 text-sm lg:text-base font-medium"
                 >
-                  İdarəetmə Paneli
+                  {content.dashboard}
                 </Link>
                 <span className="text-blue-100 text-sm">
-                  Xoş gəlmisiniz, {user.name}
+                  {content.welcome}, {user.name}
                 </span>
                 <button
                     onClick={() => {
@@ -126,7 +164,7 @@ export default function Header({
                   <svg className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
-                  Çıxış
+                  {content.logout}
                 </button>
 
               </>
@@ -139,7 +177,7 @@ export default function Header({
                       href="/auth/login"
                       className="text-white hover:text-blue-900 hover:bg-white rounded-lg transition-colors duration-200 px-3 lg:px-4 py-2 text-sm lg:text-base font-medium"
                     >
-                      Giriş
+                      {content.login}
                     </Link>
                   )}
                   {currentPage !== 'register' && (
@@ -147,7 +185,7 @@ export default function Header({
                       href="/auth/register"
                       className="bg-white text-blue-600 hover:bg-blue-500 hover:text-white px-4 lg:px-6 py-2 lg:py-2.5 rounded-lg font-semibold transition-colors duration-200 text-sm lg:text-base"
                     >
-                      Qeydiyyat
+                      {content.register}
                     </Link>
                   )}
                 </>
@@ -195,6 +233,20 @@ export default function Header({
             <div className="absolute top-full left-0 right-0 bg-gradient-to-r from-blue-600 to-blue-700 border-t border-blue-500 shadow-lg z-50 md:hidden w-full">
               <div className="px-4 py-4 w-full">
                 <div className="flex flex-col space-y-3 w-full max-w-none">
+                  {/* Language Switcher for Mobile */}
+                  <button
+                    onClick={() => {
+                      toggleSiteLanguage();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full bg-white/10 hover:bg-white/20 text-white px-4 py-3 rounded-lg font-medium transition-all duration-200 text-center flex items-center justify-center border border-white/20"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
+                    {siteLanguage === 'azerbaijani' ? 'Switch to English' : 'Azərbaycana keç'}
+                  </button>
+
                   {/* AI Translate Button for Mobile */}
                   {showAITranslate && cvData && onCVUpdate && onLanguageChange && (
                     <button
@@ -207,7 +259,7 @@ export default function Header({
                       <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
                       </svg>
-                      AI Tərcümə
+                      {content.aiTranslate}
                     </button>
                   )}
                   
@@ -215,14 +267,14 @@ export default function Header({
                     // Authenticated user mobile menu
                     <div className="space-y-3">
                       <div className="px-4 py-2 text-blue-100 text-sm border-b border-blue-500">
-                        Xoş gəlmisiniz, {user.name}
+                        {content.welcome}, {user.name}
                       </div>
                       <Link
                         href="/dashboard"
                         className="block bg-white/10 hover:bg-white/20 text-white font-medium px-4 py-3 rounded-lg transition-colors duration-200 text-center border border-white/20"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        İdarəetmə Paneli
+                        {content.dashboard}
                       </Link>
                       <button
                         onClick={() => {
@@ -234,7 +286,7 @@ export default function Header({
                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
-                        Çıxış
+                        {content.logout}
                       </button>
                     </div>
                   ) : (
@@ -247,7 +299,7 @@ export default function Header({
                             className="block bg-white/10 hover:bg-white/20 text-white px-4 py-3 rounded-lg font-medium transition-colors duration-200 text-center border border-white/20"
                             onClick={() => setIsMobileMenuOpen(false)}
                           >
-                            Giriş
+                            {content.login}
                           </Link>
                         )}
                         {currentPage !== 'register' && (
@@ -256,7 +308,7 @@ export default function Header({
                             className="block bg-white text-blue-600 hover:bg-blue-50 px-4 py-3 rounded-lg font-semibold transition-colors duration-200 text-center"
                             onClick={() => setIsMobileMenuOpen(false)}
                           >
-                            Qeydiyyat
+                            {content.register}
                           </Link>
                         )}
                       </div>
@@ -275,7 +327,7 @@ export default function Header({
           <div className="bg-white rounded-lg shadow-xl w-full max-w-full sm:max-w-2xl lg:max-w-4xl xl:max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
             <div className="p-3 sm:p-4 lg:p-6">
               <div className="flex justify-between items-center mb-3 sm:mb-4">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900">AI Tərcümə Paneli</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900">{content.aiTranslatePanel}</h2>
                 <button
                   onClick={() => setShowTranslationPanel(false)}
                   className="text-gray-400 hover:text-gray-600 transition-colors p-1"
@@ -288,6 +340,7 @@ export default function Header({
               <CVTranslationPanel
                 cvData={cvData}
                 currentLanguage={currentLanguage}
+                uiLanguage={siteLanguage}
                 onCVUpdate={onCVUpdate}
                 onLanguageChange={onLanguageChange}
                 onClose={() => setShowTranslationPanel(false)}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import DateRangeInput from '@/components/cv/DateRangeInput';
 
@@ -22,6 +23,7 @@ interface VolunteerExperienceSectionProps {
 }
 
 export default function VolunteerExperienceSection({ data, onChange, cvLanguage = 'azerbaijani' }: VolunteerExperienceSectionProps) {
+  const { siteLanguage } = useSiteLanguage();
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -69,7 +71,7 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">
-            {cvLanguage === 'english' ? 'Volunteer Experience' : 'Könüllü təcrübə'}
+            {siteLanguage === 'english' ? 'Volunteer Experience' : 'Könüllü təcrübə'}
           </h3>
         </div>
         <button
@@ -77,10 +79,10 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
         >
           <span className="hidden sm:inline">
-            {cvLanguage === 'english' ? '+ Add' : '+ Əlavə edin'}
+            {siteLanguage === 'english' ? '+ Add' : '+ Əlavə edin'}
           </span>
           <span className="sm:hidden">
-            {cvLanguage === 'english' ? '+' : '+'}
+            {siteLanguage === 'english' ? '+' : '+'}
           </span>
         </button>
       </div>
@@ -93,7 +95,7 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
             </svg>
           </div>
           <p className="text-gray-500 mb-4">
-            {cvLanguage === 'english' 
+            {siteLanguage === 'english' 
               ? 'No volunteer experience added yet' 
               : 'Hələ heç bir könüllü təcrübə əlavə etməmisiniz'
             }
@@ -102,7 +104,7 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
             onClick={addVolunteerExperience}
             className="px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
           >
-            {cvLanguage === 'english' 
+            {siteLanguage === 'english' 
               ? 'Add your first volunteer experience' 
               : 'İlk könüllü təcrübəni əlavə edin'
             }
@@ -116,11 +118,11 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-red-500">❤️</span>
                   <h4 className="font-medium text-gray-900">
-                    {volunteer.role || (cvLanguage === 'english' ? 'New volunteer experience' : 'Yeni könüllü təcrübə')}
+                    {volunteer.role || (siteLanguage === 'english' ? 'New volunteer experience' : 'Yeni könüllü təcrübə')}
                   </h4>
                 </div>
                 <p className="text-sm text-gray-600">
-                  {volunteer.organization || (cvLanguage === 'english' ? 'Organization name' : 'Təşkilat adı')}
+                  {volunteer.organization || (siteLanguage === 'english' ? 'Organization name' : 'Təşkilat adı')}
                 </p>
                 {volunteer.cause && (
                   <p className="text-xs text-gray-500 mt-1">
@@ -140,7 +142,7 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                     }`}
-                    title={cvLanguage === 'english' ? 'Move up' : 'Yuxarı'}
+                    title={siteLanguage === 'english' ? 'Move up' : 'Yuxarı'}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -154,7 +156,7 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                     }`}
-                    title={cvLanguage === 'english' ? 'Move down' : 'Aşağı'}
+                    title={siteLanguage === 'english' ? 'Move down' : 'Aşağı'}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -169,15 +171,15 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
                     className="text-blue-600 hover:text-blue-800 transition-colors text-sm cursor-pointer"
                   >
                     {editingIndex === index 
-                      ? (cvLanguage === 'english' ? 'Close' : 'Bağlayın')
-                      : (cvLanguage === 'english' ? 'Edit' : 'Redaktə edin')
+                      ? (siteLanguage === 'english' ? 'Close' : 'Bağlayın')
+                      : (siteLanguage === 'english' ? 'Edit' : 'Redaktə edin')
                     }
                   </button>
                   <button
                     onClick={() => removeVolunteerExperience(index)}
                     className="text-red-600 hover:text-red-800 transition-colors text-sm cursor-pointer"
                   >
-                    {cvLanguage === 'english' ? 'Delete' : 'Silin'}
+                    {siteLanguage === 'english' ? 'Delete' : 'Silin'}
                   </button>
                 </div>
               </div>
@@ -187,25 +189,25 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {cvLanguage === 'english' ? 'Position/Role' : 'Vəzifə/Rol'}
+                        {siteLanguage === 'english' ? 'Position/Role' : 'Vəzifə/Rol'}
                       </label>
                       <input
                         type="text"
                         value={volunteer.role}
                         onChange={(e) => updateVolunteerExperience(index, { role: e.target.value })}
-                        placeholder={cvLanguage === 'english' ? 'Volunteer Coordinator' : 'Könüllü koordinator'}
+                        placeholder={siteLanguage === 'english' ? 'Volunteer Coordinator' : 'Könüllü koordinator'}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {cvLanguage === 'english' ? 'Organization' : 'Təşkilat'}
+                        {siteLanguage === 'english' ? 'Organization' : 'Təşkilat'}
                       </label>
                       <input
                         type="text"
                         value={volunteer.organization}
                         onChange={(e) => updateVolunteerExperience(index, { organization: e.target.value })}
-                        placeholder={cvLanguage === 'english' ? 'Non-profit Organization' : 'Kinder MTM'}
+                        placeholder={siteLanguage === 'english' ? 'Non-profit Organization' : 'Kinder MTM'}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       />
                     </div>
@@ -213,13 +215,13 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {cvLanguage === 'english' ? 'Cause/Purpose (optional)' : 'Sahə/Məqsəd (ixtiyari)'}
+                      {siteLanguage === 'english' ? 'Cause/Purpose (optional)' : 'Sahə/Məqsəd (ixtiyari)'}
                     </label>
                     <input
                       type="text"
                       value={volunteer.cause || ''}
                       onChange={(e) => updateVolunteerExperience(index, { cause: e.target.value })}
-                      placeholder={cvLanguage === 'english' 
+                      placeholder={siteLanguage === 'english' 
                         ? 'Child education, environmental protection, social aid'
                         : 'Uşaq təhsili, ekoloji mühafizə, sosial yardım'
                       }
@@ -238,20 +240,20 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
                       current, 
                       endDate: current ? '' : volunteer.endDate 
                     })}
-                    startLabel={cvLanguage === 'english' ? 'Start Date' : 'Başlama tarixi'}
-                    endLabel={cvLanguage === 'english' ? 'End Date' : 'Bitirmə tarixi'}
-                    currentLabel={cvLanguage === 'english' ? 'Currently volunteering' : 'Davam edir'}
+                    startLabel={siteLanguage === 'english' ? 'Start Date' : 'Başlama tarixi'}
+                    endLabel={siteLanguage === 'english' ? 'End Date' : 'Bitirmə tarixi'}
+                    currentLabel={siteLanguage === 'english' ? 'Currently volunteering' : 'Davam edir'}
                     cvLanguage={cvLanguage}
                   />
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {cvLanguage === 'english' ? 'Description (optional)' : 'Təsvir (ixtiyari)'}
+                      {siteLanguage === 'english' ? 'Description (optional)' : 'Təsvir (ixtiyari)'}
                     </label>
                     <RichTextEditor
                       value={volunteer.description || ''}
                       onChange={(value) => updateVolunteerExperience(index, { description: value })}
-                      placeholder={cvLanguage === 'english' 
+                      placeholder={siteLanguage === 'english' 
                         ? 'Provide brief information about your volunteer work...'
                         : 'Könüllü fəaliyyətiniz haqqında qısa məlumat verin...'
                       }
@@ -272,13 +274,13 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
             className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors whitespace-nowrap"
           >
             <span className="hidden sm:inline">
-              {cvLanguage === 'english' 
+              {siteLanguage === 'english' 
                 ? '+ Add another volunteer experience' 
                 : '+ Başqa könüllü təcrübə əlavə edin'
               }
             </span>
             <span className="sm:hidden">
-              {cvLanguage === 'english' ? '+ Add' : '+ Əlavə'}
+              {siteLanguage === 'english' ? '+ Add' : '+ Əlavə'}
             </span>
           </button>
         </div>

@@ -46,7 +46,7 @@ interface ElaveSectionsProps {
 }
 
 // Translation helper function
-const getTranslation = (siteLanguage: 'english' | 'azerbaijani', key: string): any => {
+const getTranslation = (cvLanguage: 'english' | 'azerbaijani', key: string): any => {
   const translations = {
     english: {
       sectionTitle: 'Additional Sections',
@@ -120,41 +120,11 @@ const getTranslation = (siteLanguage: 'english' | 'azerbaijani', key: string): a
     }
   } as const;
   
-  return (translations[siteLanguage] as any)[key] || (translations['azerbaijani'] as any)[key];
+  return (translations[cvLanguage] as any)[key] || (translations['azerbaijani'] as any)[key];
 };
 
-const getElementTypes = (cvLanguage: 'english' | 'azerbaijani', siteLanguage: 'english' | 'azerbaijani') => [
-  { 
-    type: 'text' as ElementType, 
-    label: getTranslation(siteLanguage, 'text'), 
-    icon: '📝', 
-    description: siteLanguage === 'english' ? 'Plain text block' : 'Adi mətn bloku' 
-  },
-  { 
-    type: 'list' as ElementType, 
-    label: getTranslation(siteLanguage, 'list'), 
-    icon: '📋', 
-    description: siteLanguage === 'english' ? 'Bullet point list' : 'Nöqtəli siyahı' 
-  },
-  { 
-    type: 'heading' as ElementType, 
-    label: getTranslation(siteLanguage, 'heading'), 
-    icon: '📢', 
-    description: siteLanguage === 'english' ? 'Section heading' : 'Bölmə daxili başlıq' 
-  },
-  { 
-    type: 'achievement' as ElementType, 
-    label: getTranslation(siteLanguage, 'achievement'), 
-    icon: '🏆', 
-    description: siteLanguage === 'english' ? 'Special achievement or milestone' : 'Xüsusi nailiyyət və ya məqam' 
-  },
-  { 
-    type: 'link' as ElementType, 
-    label: getTranslation(siteLanguage, 'link'), 
-    icon: '🔗', 
-    description: siteLanguage === 'english' ? 'External link or URL' : 'Xarici keçid və ya URL' 
-  }
-];
+export default function ElaveSections({ data = [], onChange, userTier = 'Free', cvLanguage = 'azerbaijani' }: ElaveSectionsProps) {
+  const { siteLanguage } = useSiteLanguage();
 
 // Convert internal format to CVPreview compatible format
 const convertToCVPreviewFormat = (sections: CustomSection[]): CVPreviewCustomSection[] => {
@@ -273,6 +243,39 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free', 
     }));
   };
 
+  const getElementTypes = (cvLanguage: 'english' | 'azerbaijani', siteLanguage: 'english' | 'azerbaijani') => [
+    { 
+      type: 'text' as ElementType, 
+      label: getTranslation(siteLanguage, 'text'), 
+      icon: '📝', 
+      description: cvLanguage === 'english' ? 'Plain text block' : 'Adi mətn bloku' 
+    },
+    { 
+      type: 'list' as ElementType, 
+      label: getTranslation(siteLanguage, 'list'), 
+      icon: '📋', 
+      description: cvLanguage === 'english' ? 'Bullet point list' : 'Nöqtəli siyahı' 
+    },
+    { 
+      type: 'heading' as ElementType, 
+      label: getTranslation(siteLanguage, 'heading'), 
+      icon: '🏷️', 
+      description: cvLanguage === 'english' ? 'Section heading' : 'Bölmə daxili başlıq' 
+    },
+    { 
+      type: 'achievement' as ElementType, 
+      label: getTranslation(siteLanguage, 'achievement'), 
+      icon: '🏆', 
+      description: cvLanguage === 'english' ? 'Special achievement or milestone' : 'Xüsusi nailiyyət və ya məqam' 
+    },
+    { 
+      type: 'link' as ElementType, 
+      label: getTranslation(siteLanguage, 'link'), 
+      icon: '🔗', 
+      description: cvLanguage === 'english' ? 'External link or URL' : 'Xarici keçid və ya URL' 
+    }
+  ];
+
   const [sections, setSections] = useState<CustomSection[]>(() => {
     return convertFromCVPreviewFormat(data);
   });
@@ -309,28 +312,28 @@ export default function ElaveSections({ data = [], onChange, userTier = 'Free', 
     console.log('🏢 Adding Organizations template section');
     const organizationsSection: CustomSection = {
       id: Date.now().toString(),
-      title: siteLanguage === 'english' ? 'Organizations' : 'Təşkilatlar',
+      title: cvLanguage === 'english' ? 'Organizations' : 'Təşkilatlar',
       elements: [
         {
           id: `org-${Date.now()}-1`,
           type: 'heading',
-          content: siteLanguage === 'english' ? 'Organization Name' : 'Təşkilat Adı'
+          content: cvLanguage === 'english' ? 'Organization Name' : 'Təşkilat Adı'
         },
         {
           id: `org-${Date.now()}-2`,
           type: 'text',
-          content: siteLanguage === 'english' ? 'Position/Role' : 'Vəzifə/Rol'
+          content: cvLanguage === 'english' ? 'Position/Role' : 'Vəzifə/Rol'
         },
         {
           id: `org-${Date.now()}-3`,
           type: 'dateRange',
-          content: siteLanguage === 'english' ? 'Duration' : 'Müddət',
-          subContent: siteLanguage === 'english' ? '2020 - Present' : '2020 - Hazırda'
+          content: cvLanguage === 'english' ? 'Duration' : 'Müddət',
+          subContent: cvLanguage === 'english' ? '2020 - Present' : '2020 - Hazırda'
         },
         {
           id: `org-${Date.now()}-4`,
           type: 'text',
-          content: siteLanguage === 'english' 
+          content: cvLanguage === 'english' 
             ? 'Brief description of your role and responsibilities in the organization' 
             : 'Təşkilatdakı rolunuz və məsuliyyətlərinizin qısa təsviri'
         }

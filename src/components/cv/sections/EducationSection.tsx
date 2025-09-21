@@ -229,22 +229,22 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                         <option value="">
                           {siteLanguage === 'english' ? '🎓 Select degree' : '🎓 Dərəcə seçin'}
                         </option>
-                        <option value={cvLanguage === 'english' ? 'Bachelor' : 'Bakalavr'}>
+                        <option value={siteLanguage === 'english' ? 'Bachelor' : 'Bakalavr'}>
                           🎓 {siteLanguage === 'english' ? 'Bachelor' : 'Bakalavr'}
                         </option>
-                        <option value={cvLanguage === 'english' ? 'Master' : 'Magistr'}>
+                        <option value={siteLanguage === 'english' ? 'Master' : 'Magistr'}>
                           🎓 {siteLanguage === 'english' ? 'Master' : 'Magistr'}
                         </option>
-                        <option value={cvLanguage === 'english' ? 'PhD' : 'Doktorantura'}>
+                        <option value={siteLanguage === 'english' ? 'PhD' : 'Doktorantura'}>
                           🎓 {siteLanguage === 'english' ? 'PhD' : 'Doktorantura'}
                         </option>
-                        <option value={cvLanguage === 'english' ? 'Diploma' : 'Diploma'}>
+                        <option value={siteLanguage === 'english' ? 'Diploma' : 'Diploma'}>
                           📜 {siteLanguage === 'english' ? 'Diploma' : 'Diploma'}
                         </option>
-                        <option value={cvLanguage === 'english' ? 'Certificate' : 'Sertifikat'}>
+                        <option value={siteLanguage === 'english' ? 'Certificate' : 'Sertifikat'}>
                           📋 {siteLanguage === 'english' ? 'Certificate' : 'Sertifikat'}
                         </option>
-                        <option value={cvLanguage === 'english' ? 'Other' : 'Digər'}>
+                        <option value={siteLanguage === 'english' ? 'Other' : 'Digər'}>
                           📚 {siteLanguage === 'english' ? 'Other' : 'Digər'}
                         </option>
                       </select>

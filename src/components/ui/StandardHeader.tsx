@@ -3,10 +3,12 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 import { useState, useEffect, useCallback } from 'react';
 
 export default function StandardHeader() {
   const { user, logout, fetchCurrentUser } = useAuth();
+  const { siteLanguage, toggleSiteLanguage } = useSiteLanguage();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -82,6 +84,38 @@ export default function StandardHeader() {
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [refreshUserTier]);
+
+  // Header mətnləri
+  const labels = {
+    azerbaijani: {
+      dashboard: 'İdarəetmə Paneli',
+      newCV: 'Yeni CV',
+      templates: 'Şablonlar',
+      pricing: 'Qiymətlər',
+      profile: 'Profil',
+      profileEdit: 'Profil Redaktəsi',
+      profileEditDesc: 'Şəxsi məlumatlarınızı dəyişin',
+      welcome: 'Xoş gəlmisiniz',
+      logout: 'Çıxış',
+      login: 'Giriş',
+      register: 'Qeydiyyat'
+    },
+    english: {
+      dashboard: 'Dashboard',
+      newCV: 'New CV',
+      templates: 'Templates',
+      pricing: 'Pricing',
+      profile: 'Profile',
+      profileEdit: 'Edit Profile',
+      profileEditDesc: 'Change your personal information',
+      welcome: 'Welcome',
+      logout: 'Logout',
+      login: 'Login',
+      register: 'Register'
+    }
+  };
+
+  const content = labels[siteLanguage];
 
   const handleLogout = async () => {
     try {
@@ -242,24 +276,36 @@ export default function StandardHeader() {
           {/* Navigation Menu - Better responsive spacing */}
           <nav className="hidden md:flex items-center space-x-4 lg:space-x-6 xl:space-x-8">
             <Link href="/dashboard" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
-              İdarəetmə Paneli
+              {content.dashboard}
             </Link>
             <Link href="/cv-list" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
-              CV-lərim
+              {siteLanguage === 'azerbaijani' ? 'CV-lərim' : 'My CVs'}
             </Link>
             <Link href="/linkedin-import" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
-              LinkedIn İdxal
+              {siteLanguage === 'azerbaijani' ? 'LinkedIn İdxal' : 'LinkedIn Import'}
             </Link>
             <Link href="/sablonlar" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
-              Şablonlar
+              {content.templates}
             </Link>
             <Link href="/pricing" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
-              Qiymətlər
+              {content.pricing}
             </Link>
           </nav>
 
           {/* User Info & Profile Dropdown - Enhanced responsive design */}
           <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
+            {/* Language Switcher - positioned before profile */}
+            <button
+              onClick={toggleSiteLanguage}
+              className="flex items-center px-3 py-2 text-xs lg:text-sm font-medium text-white bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg hover:bg-white/20 transition-all duration-200"
+              title={siteLanguage === 'azerbaijani' ? 'Switch to English' : 'Azərbaycana keç'}
+            >
+              <svg className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+              </svg>
+              {siteLanguage === 'azerbaijani' ? 'EN' : 'AZ'}
+            </button>
+
             {/* Profile Dropdown - Desktop */}
             <div className="hidden lg:block relative" data-profile-menu>
               <button
@@ -272,8 +318,8 @@ export default function StandardHeader() {
                   </span>
                 </div>
                 <div className="text-sm xl:text-base">
-                  <p className="font-medium text-white">Xoş gəlmisiniz!</p>
-                  <p className="text-blue-100 -mt-1 text-xs xl:text-sm">{user?.name || user?.email || 'İstifadəçi'}</p>
+                  <p className="font-medium text-white">{content.welcome}!</p>
+                  <p className="text-blue-100 -mt-1 text-xs xl:text-sm">{user?.name || user?.email || (siteLanguage === 'azerbaijani' ? 'İstifadəçi' : 'User')}</p>
                 </div>
                 <svg
                   className={`w-3 h-3 xl:w-4 xl:h-4 text-white/70 transition-transform duration-200 ${isProfileMenuOpen ? 'rotate-180' : ''}`}
@@ -297,7 +343,7 @@ export default function StandardHeader() {
                         </span>
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-900 text-sm">{user?.name || 'İstifadəçi'}</p>
+                        <p className="font-semibold text-gray-900 text-sm">{user?.name || (siteLanguage === 'azerbaijani' ? 'İstifadəçi' : 'User')}</p>
                         <p className="text-gray-500 text-xs">{user?.email}</p>
                         <div className="flex items-center mt-1">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getTierBadgeColor(userTier)}`}>
@@ -323,8 +369,8 @@ export default function StandardHeader() {
                         </svg>
                       </div>
                       <div>
-                        <p className="font-medium">Profil Redaktəsi</p>
-                        <p className="text-xs text-gray-500">Şəxsi məlumatlarınızı dəyişin</p>
+                        <p className="font-medium">{content.profileEdit}</p>
+                        <p className="text-xs text-gray-500">{content.profileEditDesc}</p>
                       </div>
                     </Link>
 
@@ -346,8 +392,8 @@ export default function StandardHeader() {
                         </svg>
                       </div>
                       <div>
-                        <p className="font-medium text-black text-left">Çıxış</p>
-                        <p className="text-xs text-gray-500">Hesabdan çıxış edin</p>
+                        <p className="font-medium text-black text-left">{content.logout}</p>
+                        <p className="text-xs text-gray-500">{siteLanguage === 'azerbaijani' ? 'Hesabdan çıxış edin' : 'Sign out of your account'}</p>
                       </div>
                     </button>
                   </div>
@@ -386,40 +432,54 @@ export default function StandardHeader() {
           <div className="md:hidden w-full bg-gradient-to-r from-blue-600 to-blue-700 border-t border-blue-500/50 shadow-xl">
             <div className="px-4 py-4 space-y-3">
               {/* Mobile Navigation Links */}
+              {/* Language Switcher for Mobile */}
+              <button
+                onClick={() => {
+                  toggleSiteLanguage();
+                  closeMobileMenu();
+                }}
+                className="w-full bg-white/10 hover:bg-white/20 text-white px-4 py-3 rounded-lg font-medium transition-all duration-200 text-left flex items-center border border-white/20"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                </svg>
+                {siteLanguage === 'azerbaijani' ? 'Switch to English' : 'Azərbaycana keç'}
+              </button>
+
               <Link
                 href="/dashboard"
                 onClick={closeMobileMenu}
                 className="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all"
               >
-                İdarə Paneli
+                {content.dashboard}
               </Link>
               <Link
                 href="/cv-list"
                 onClick={closeMobileMenu}
                 className="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all"
               >
-                CV-lərim
+                {siteLanguage === 'azerbaijani' ? 'CV-lərim' : 'My CVs'}
               </Link>
               <Link
                 href="/linkedin-import"
                 onClick={closeMobileMenu}
                 className="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all"
               >
-                LinkedIn İdxal
+                {siteLanguage === 'azerbaijani' ? 'LinkedIn İdxal' : 'LinkedIn Import'}
               </Link>
               <Link
                 href="/sablonlar"
                 onClick={closeMobileMenu}
                 className="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all"
               >
-                Şablonlar
+                {content.templates}
               </Link>
               <Link
                 href="/pricing"
                 onClick={closeMobileMenu}
                 className="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all"
               >
-                Qiymətlər
+                {content.pricing}
               </Link>
 
               {/* Mobile User Profile */}
@@ -435,7 +495,7 @@ export default function StandardHeader() {
                     </span>
                   </div>
                   <div>
-                    <p className="font-medium text-white text-sm">Profil</p>
+                    <p className="font-medium text-white text-sm">{content.profile}</p>
                     <p className="text-blue-100 text-xs">{user?.name || user?.email || 'İstifadəçi'}</p>
                   </div>
                 </Link>
@@ -455,8 +515,8 @@ export default function StandardHeader() {
                     </svg>
                   </div>
                   <div>
-                    <p className="font-medium text-left text-white text-sm">Çıxış</p>
-                    <p className="text-gray-300 text-xs">Hesabdan çıx</p>
+                    <p className="font-medium text-left text-white text-sm">{content.logout}</p>
+                    <p className="text-gray-300 text-xs">{siteLanguage === 'azerbaijani' ? 'Hesabdan çıx' : 'Sign out'}</p>
                   </div>
                 </button>
               </div>

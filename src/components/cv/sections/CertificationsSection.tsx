@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 import DateRangeInput from '@/components/cv/DateRangeInput';
 
 interface Certification {
@@ -19,7 +20,7 @@ interface CertificationsSectionProps {
 }
 
 // Translation helper function
-const getTranslation = (cvLanguage: 'english' | 'azerbaijani', key: string): any => {
+const getTranslation = (siteLanguage: 'english' | 'azerbaijani', key: string): any => {
   const translations = {
     english: {
       sectionTitle: 'Certifications',
@@ -80,22 +81,23 @@ const getTranslation = (cvLanguage: 'english' | 'azerbaijani', key: string): any
   } as const;
   
   // Debug logging
-  console.log('🔍 Translation request:', { cvLanguage, key });
-  const result = (translations[cvLanguage] as any)[key] || (translations['azerbaijani'] as any)[key];
+  console.log('🔍 Translation request:', { siteLanguage, key });
+  console.log('🔍 Available translations:', Object.keys(translations));
+  console.log('🔍 Selected language exists?', siteLanguage in translations);
+  const result = (translations[siteLanguage] as any)[key] || (translations['azerbaijani'] as any)[key];
   console.log('🔍 Translation result:', result);
   
   return result;
 };
-interface CertificationsSectionProps {
-  data: Certification[];
-  onChange: (data: Certification[]) => void;
-  cvLanguage?: 'english' | 'azerbaijani';
-}
+
 export default function CertificationsSection({ data, onChange, cvLanguage = 'azerbaijani' }: CertificationsSectionProps) {
+  const { siteLanguage } = useSiteLanguage();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   // Debug: Check what language is being used
   console.log('🔍 CertificationsSection language:', cvLanguage);
+  console.log('🔍 CertificationsSection siteLanguage:', siteLanguage);
+  console.log('🔍 Are they different?', cvLanguage !== siteLanguage);
 
   // Create a more robust unique ID generator
   const generateUniqueId = () => {
@@ -167,7 +169,7 @@ export default function CertificationsSection({ data, onChange, cvLanguage = 'az
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="min-w-0 flex-1">
           <h3 className="text-lg font-semibold text-gray-900">
-            {getTranslation(cvLanguage, 'sectionTitle')}
+            {getTranslation(siteLanguage, 'sectionTitle')}
           </h3>
         </div>
         <button
@@ -175,10 +177,10 @@ export default function CertificationsSection({ data, onChange, cvLanguage = 'az
           className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap flex-shrink-0"
         >
           <span className="hidden sm:inline">
-            {getTranslation(cvLanguage, 'addButton')}
+            {getTranslation(siteLanguage, 'addButton')}
           </span>
           <span className="sm:hidden">
-            {getTranslation(cvLanguage, 'addButtonMobile')}
+            {getTranslation(siteLanguage, 'addButtonMobile')}
           </span>
         </button>
       </div>
@@ -191,13 +193,13 @@ export default function CertificationsSection({ data, onChange, cvLanguage = 'az
             </svg>
           </div>
           <p className="text-gray-500 mb-4 px-4">
-            {getTranslation(cvLanguage, 'emptyStateDescription')}
+            {getTranslation(siteLanguage, 'emptyStateDescription')}
           </p>
           <button
             onClick={addCertification}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            {getTranslation(cvLanguage, 'addFirstButton')}
+            {getTranslation(siteLanguage, 'addFirstButton')}
           </button>
         </div>
       ) : (
@@ -208,11 +210,11 @@ export default function CertificationsSection({ data, onChange, cvLanguage = 'az
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-blue-500 flex-shrink-0">🏆</span>
                   <h4 className="font-medium text-gray-900 truncate">
-                    {certification.name || getTranslation(cvLanguage, 'newCertification')}
+                    {certification.name || getTranslation(siteLanguage, 'newCertification')}
                   </h4>
                 </div>
                 <p className="text-sm text-gray-600 truncate">
-                  {certification.issuer || getTranslation(cvLanguage, 'issuingOrganization')}
+                  {certification.issuer || getTranslation(siteLanguage, 'issuingOrganization')}
                 </p>
               </div>
 
@@ -228,7 +230,7 @@ export default function CertificationsSection({ data, onChange, cvLanguage = 'az
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                     }`}
-                    title={getTranslation(cvLanguage, 'moveUp')}
+                    title={getTranslation(siteLanguage, 'moveUp')}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -242,7 +244,7 @@ export default function CertificationsSection({ data, onChange, cvLanguage = 'az
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                     }`}
-                    title={getTranslation(cvLanguage, 'moveDown')}
+                    title={getTranslation(siteLanguage, 'moveDown')}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -257,15 +259,15 @@ export default function CertificationsSection({ data, onChange, cvLanguage = 'az
                     className="text-blue-600 hover:text-blue-800 transition-colors text-sm cursor-pointer"
                   >
                     {expandedId === certification.id 
-                      ? getTranslation(cvLanguage, 'close')
-                      : getTranslation(cvLanguage, 'edit')
+                      ? getTranslation(siteLanguage, 'close')
+                      : getTranslation(siteLanguage, 'edit')
                     }
                   </button>
                   <button
                     onClick={() => removeCertification(certification.id)}
                     className="text-red-600 hover:text-red-800 transition-colors text-sm cursor-pointer"
                   >
-                    {getTranslation(cvLanguage, 'delete')}
+                    {getTranslation(siteLanguage, 'delete')}
                   </button>
                 </div>
               </div>
@@ -275,40 +277,40 @@ export default function CertificationsSection({ data, onChange, cvLanguage = 'az
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {getTranslation(cvLanguage, 'certificationName')} <span className="text-red-500">*</span>
+                        {getTranslation(siteLanguage, 'certificationName')} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         value={certification.name}
                         onChange={(e) => updateCertification(certification.id, 'name', e.target.value)}
-                        placeholder={getTranslation(cvLanguage, 'placeholders').certName}
+                        placeholder={getTranslation(siteLanguage, 'placeholders').certName}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {getTranslation(cvLanguage, 'issuingOrg')} <span className="text-red-500">*</span>
+                        {getTranslation(siteLanguage, 'issuingOrg')} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         value={certification.issuer}
                         onChange={(e) => updateCertification(certification.id, 'issuer', e.target.value)}
-                        placeholder={getTranslation(cvLanguage, 'placeholders').orgName}
+                        placeholder={getTranslation(siteLanguage, 'placeholders').orgName}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {getTranslation(cvLanguage, 'certificateUrl')}
+                        {getTranslation(siteLanguage, 'certificateUrl')}
                       </label>
                       <input
                         type="url"
                         value={certification.url || ''}
                         onChange={(e) => updateCertification(certification.id, 'url', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        placeholder={getTranslation(cvLanguage, 'placeholders').url}
+                        placeholder={getTranslation(siteLanguage, 'placeholders').url}
                       />
                     </div>
 
@@ -320,7 +322,7 @@ export default function CertificationsSection({ data, onChange, cvLanguage = 'az
                       onStartDateChange={(date) => updateCertification(certification.id, 'date', date)}
                       onEndDateChange={() => {}}
                       onCurrentChange={() => {}}
-                      startLabel={getTranslation(cvLanguage, 'issueDate')}
+                      startLabel={getTranslation(siteLanguage, 'issueDate')}
                       cvLanguage={cvLanguage}
                       singleDate={true}
                     />
@@ -328,12 +330,12 @@ export default function CertificationsSection({ data, onChange, cvLanguage = 'az
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {getTranslation(cvLanguage, 'description')}
+                      {getTranslation(siteLanguage, 'description')}
                     </label>
                     <textarea
                       value={certification.description || ''}
                       onChange={(e) => updateCertification(certification.id, 'description', e.target.value)}
-                      placeholder={getTranslation(cvLanguage, 'placeholders').description}
+                      placeholder={getTranslation(siteLanguage, 'placeholders').description}
                       rows={3}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                     />
@@ -349,7 +351,7 @@ export default function CertificationsSection({ data, onChange, cvLanguage = 'az
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:text-blue-800 underline"
                           >
-                            {getTranslation(cvLanguage, 'viewCertificate')}
+                            {getTranslation(siteLanguage, 'viewCertificate')}
                           </a>
                         </div>
                       )}
@@ -367,7 +369,7 @@ export default function CertificationsSection({ data, onChange, cvLanguage = 'az
             onClick={addCertification}
             className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
           >
-            {getTranslation(cvLanguage, 'addAnother')}
+            {getTranslation(siteLanguage, 'addAnother')}
           </button>
         </div>
       )}
