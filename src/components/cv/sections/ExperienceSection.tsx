@@ -18,12 +18,90 @@ interface Experience {
 interface ExperienceSectionProps {
   data: Experience[];
   onChange: (data: Experience[]) => void;
-  cvLanguage?: 'english' | 'azerbaijani';
+  cvLanguage?: 'english' | 'azerbaijani' | 'russian';
 }
 
 export default function ExperienceSection({ data, onChange, cvLanguage = 'azerbaijani' }: ExperienceSectionProps) {
   const { siteLanguage } = useSiteLanguage();
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  // Experience labels
+  const labels = {
+    azerbaijani: {
+      title: 'İş təcrübəsi',
+      add: '+ Əlavə edin',
+      addShort: '+',
+      newExperience: 'Yeni iş təcrübəsi',
+      companyName: 'Şirkət adı',
+      moveUp: 'Yuxarı',
+      moveDown: 'Aşağı',
+      close: 'Bağlayın',
+      edit: 'Redaktə edin',
+      delete: 'Silin',
+      position: 'Vəzifə',
+      positionPlaceholder: 'Məsələn, Proqram təminatı mühəndisi',
+      company: 'Şirkət',
+      companyPlaceholder: 'Məsələn, Tech Solutions Inc.',
+      startDate: 'Başlama tarixi',
+      endDate: 'Bitirmə tarixi',
+      currentWorking: 'Davam edir',
+      description: 'Təsvir (ixtiyari)',
+      descriptionPlaceholder: 'Vəzifə öhdəlikləriniz və nailiyyətləriniz haqqında məlumat verin...',
+      noExperience: 'Hələ heç bir iş təcrübəsi əlavə etməmisiniz',
+      addFirst: 'İlk iş təcrübənizi əlavə edin',
+      addAnother: '+ Digər iş təcrübəsi əlavə edin'
+    },
+    english: {
+      title: 'Work Experience',
+      add: '+ Add',
+      addShort: '+',
+      newExperience: 'New work experience',
+      companyName: 'Company name',
+      moveUp: 'Move up',
+      moveDown: 'Move down',
+      close: 'Close',
+      edit: 'Edit',
+      delete: 'Delete',
+      position: 'Position',
+      positionPlaceholder: 'e.g., Software Engineer',
+      company: 'Company',
+      companyPlaceholder: 'e.g., Tech Solutions Inc.',
+      startDate: 'Start Date',
+      endDate: 'End Date',
+      currentWorking: 'Currently working',
+      description: 'Description (optional)',
+      descriptionPlaceholder: 'Provide information about your job responsibilities and achievements...',
+      noExperience: 'No work experience added yet',
+      addFirst: 'Add your first work experience',
+      addAnother: '+ Add another work experience'
+    },
+    russian: {
+      title: 'Опыт работы',
+      add: '+ Добавить',
+      addShort: '+',
+      newExperience: 'Новый опыт работы',
+      companyName: 'Название компании',
+      moveUp: 'Переместить вверх',
+      moveDown: 'Переместить вниз',
+      close: 'Закрыть',
+      edit: 'Редактировать',
+      delete: 'Удалить',
+      position: 'Должность',
+      positionPlaceholder: 'например, Программист',
+      company: 'Компания',
+      companyPlaceholder: 'например, Tech Solutions Inc.',
+      startDate: 'Дата начала',
+      endDate: 'Дата окончания',
+      currentWorking: 'В настоящее время работаю',
+      description: 'Описание (необязательно)',
+      descriptionPlaceholder: 'Предоставьте информацию о ваших рабочих обязанностях и достижениях...',
+      noExperience: 'Опыт работы еще не добавлен',
+      addFirst: 'Добавьте ваш первый опыт работы',
+      addAnother: '+ Добавить еще один опыт работы'
+    }
+  };
+
+  const content = labels[siteLanguage];
 
   const addExperience = () => {
     const newExperience: Experience = {
@@ -68,7 +146,7 @@ export default function ExperienceSection({ data, onChange, cvLanguage = 'azerba
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">
-            {siteLanguage === 'english' ? 'Work Experience' : 'İş təcrübəsi'}
+            {content.title}
           </h3>
         </div>
         <button
@@ -76,10 +154,10 @@ export default function ExperienceSection({ data, onChange, cvLanguage = 'azerba
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
         >
           <span className="hidden sm:inline">
-            {siteLanguage === 'english' ? '+ Add' : '+ Əlavə edin'}
+            {content.add}
           </span>
           <span className="sm:hidden">
-            {siteLanguage === 'english' ? '+' : '+'}
+            {content.addShort}
           </span>
         </button>
       </div>
@@ -92,19 +170,13 @@ export default function ExperienceSection({ data, onChange, cvLanguage = 'azerba
             </svg>
           </div>
           <p className="text-gray-500 mb-4">
-            {siteLanguage === 'english' 
-              ? 'No work experience added yet' 
-              : 'Hələ heç bir iş təcrübəsi əlavə etməmisiniz'
-            }
+            {content.noExperience}
           </p>
           <button
             onClick={addExperience}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            {siteLanguage === 'english' 
-              ? 'Add your first work experience' 
-              : 'İlk iş təcrübənizi əlavə edin'
-            }
+            {content.addFirst}
           </button>
         </div>
       ) : (
@@ -115,11 +187,11 @@ export default function ExperienceSection({ data, onChange, cvLanguage = 'azerba
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-blue-500">💼</span>
                   <h4 className="font-medium text-gray-900">
-                    {experience.position || (siteLanguage === 'english' ? 'New work experience' : 'Yeni iş təcrübəsi')}
+                    {experience.position || content.newExperience}
                   </h4>
                 </div>
                 <p className="text-sm text-gray-600">
-                  {experience.company || (siteLanguage === 'english' ? 'Company name' : 'Şirkət adı')}
+                  {experience.company || content.companyName}
                 </p>
               </div>
 
@@ -135,7 +207,7 @@ export default function ExperienceSection({ data, onChange, cvLanguage = 'azerba
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                     }`}
-                    title={siteLanguage === 'english' ? 'Move up' : 'Yuxarı'}
+                    title={content.moveUp}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -149,7 +221,7 @@ export default function ExperienceSection({ data, onChange, cvLanguage = 'azerba
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                     }`}
-                    title={siteLanguage === 'english' ? 'Move down' : 'Aşağı'}
+                    title={content.moveDown}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -164,15 +236,15 @@ export default function ExperienceSection({ data, onChange, cvLanguage = 'azerba
                     className="text-blue-600 hover:text-blue-800 transition-colors text-sm cursor-pointer"
                   >
                     {expandedId === experience.id 
-                      ? (siteLanguage === 'english' ? 'Close' : 'Bağlayın')
-                      : (siteLanguage === 'english' ? 'Edit' : 'Redaktə edin')
+                      ? content.close
+                      : content.edit
                     }
                   </button>
                   <button
                     onClick={() => removeExperience(experience.id)}
                     className="text-red-600 hover:text-red-800 transition-colors text-sm cursor-pointer"
                   >
-                    {siteLanguage === 'english' ? 'Delete' : 'Silin'}
+                    {content.delete}
                   </button>
                 </div>
               </div>
@@ -182,25 +254,25 @@ export default function ExperienceSection({ data, onChange, cvLanguage = 'azerba
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {siteLanguage === 'english' ? 'Position' : 'Vəzifə'}
+                        {content.position}
                       </label>
                       <input
                         type="text"
                         value={experience.position}
                         onChange={(e) => updateExperience(experience.id, { position: e.target.value })}
-                        placeholder={siteLanguage === 'english' ? 'e.g., Software Engineer' : 'Məsələn, Proqram təminatı mühəndisi'}
+                        placeholder={content.positionPlaceholder}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {siteLanguage === 'english' ? 'Company' : 'Şirkət'}
+                        {content.company}
                       </label>
                       <input
                         type="text"
                         value={experience.company}
                         onChange={(e) => updateExperience(experience.id, { company: e.target.value })}
-                        placeholder={siteLanguage === 'english' ? 'e.g., Tech Solutions Inc.' : 'Məsələn, Tech Solutions Inc.'}
+                        placeholder={content.companyPlaceholder}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       />
                     </div>
@@ -217,23 +289,20 @@ export default function ExperienceSection({ data, onChange, cvLanguage = 'azerba
                       current, 
                       endDate: current ? '' : experience.endDate 
                     })}
-                    startLabel={siteLanguage === 'english' ? 'Start Date' : 'Başlama tarixi'}
-                    endLabel={siteLanguage === 'english' ? 'End Date' : 'Bitirmə tarixi'}
-                    currentLabel={siteLanguage === 'english' ? 'Currently working' : 'Davam edir'}
-                    cvLanguage={cvLanguage}
+                    startLabel={content.startDate}
+                    endLabel={content.endDate}
+                    currentLabel={content.currentWorking}
+                    cvLanguage={cvLanguage as 'english' | 'azerbaijani'}
                   />
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {siteLanguage === 'english' ? 'Description (optional)' : 'Təsvir (ixtiyari)'}
+                      {content.description}
                     </label>
                     <RichTextEditor
                       value={experience.description}
                       onChange={(value) => updateExperience(experience.id, { description: value })}
-                      placeholder={siteLanguage === 'english' 
-                        ? 'Provide information about your job responsibilities and achievements...' 
-                        : 'Vəzifə öhdəlikləriniz və nailiyyətləriniz haqqında məlumat verin...'
-                      }
+                      placeholder={content.descriptionPlaceholder}
                       minHeight="120px"
                     />
                   </div>
@@ -250,10 +319,7 @@ export default function ExperienceSection({ data, onChange, cvLanguage = 'azerba
             onClick={addExperience}
             className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
           >
-            {siteLanguage === 'english' 
-              ? '+ Add another work experience' 
-              : '+ Başqa iş təcrübəsi əlavə edin'
-            }
+            {content.addAnother}
           </button>
         </div>
       )}

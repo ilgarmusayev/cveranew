@@ -14,7 +14,7 @@ interface CVTranslationPanelProps {
   onLanguageChange: (language: CVLanguage) => void;
   onClose?: () => void;
   userTier?: string;
-  uiLanguage?: 'english' | 'azerbaijani';
+  uiLanguage?: 'english' | 'azerbaijani' | 'russian';
 }
 
 export function CVTranslationPanel({
@@ -127,6 +127,32 @@ export function CVTranslationPanel({
         'Technical terms preservation'
       ],
       warning: 'Note: Translation process may take a few minutes'
+    },
+    russian: {
+      title: 'ИИ Перевод',
+      description: 'Переведите все содержимое вашего резюме с помощью ИИ',
+      fullTranslation: 'Полный перевод резюме',
+      advancedOptions: 'Дополнительные опции',
+      currentLang: 'Текущий язык: Русский',
+      targetLang: 'Целевой язык: Азербайджанский',
+      current: 'Текущий',
+      featuresTitle: 'Особенности:',
+      translateTo: 'Перевести на:',
+      languageNames: {
+        azerbaijani: 'Azərbaycan dili',
+        english: 'English'
+      },
+      languageSubtitles: {
+        azerbaijani: 'Азербайджанский',
+        english: 'Английский язык'
+      },
+      features: [
+        'Перевод профессиональной терминологии',
+        'Контекстный перевод',
+        'Точный перевод должностей и навыков',
+        'Сохранение технических терминов'
+      ],
+      warning: 'Примечание: Процесс перевода может занять несколько минут'
     }
   };
 

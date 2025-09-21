@@ -10,6 +10,7 @@ import Footer from '@/components/Footer';
 import OptimizedImage from '@/components/ui/OptimizedImage';
 import { generateStructuredData, organizationData, templateProductData, generateBreadcrumbData } from '@/lib/structured-data';
 import { useAuth } from '@/lib/auth'; // Import useAuth hook
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 
 interface Template {
   id: string;
@@ -28,6 +29,7 @@ interface TemplateApiResponse {
 }
 
 export default function TemplatesPage() {
+  const { siteLanguage } = useSiteLanguage();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [hoveredTemplate, setHoveredTemplate] = useState<string | null>(null);
   const [templates, setTemplates] = useState<Template[]>([]);

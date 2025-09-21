@@ -42,11 +42,11 @@ interface ElaveSectionsProps {
   data?: CustomSection[];
   onChange?: (data: CVPreviewCustomSection[]) => void;
   userTier?: string;
-  cvLanguage?: 'english' | 'azerbaijani';
+  cvLanguage?: 'english' | 'azerbaijani' | 'russian';
 }
 
 // Translation helper function
-const getTranslation = (siteLanguage: 'english' | 'azerbaijani', key: string): any => {
+const getTranslation = (siteLanguage: 'english' | 'azerbaijani' | 'russian', key: string): any => {
   const translations = {
     english: {
       sectionTitle: 'Additional Sections',
@@ -81,6 +81,13 @@ const getTranslation = (siteLanguage: 'english' | 'azerbaijani', key: string): a
         intermediate: 'Intermediate',
         advanced: 'Advanced',
         expert: 'Expert'
+      },
+      descriptions: {
+        text: 'Plain text block',
+        list: 'Bullet point list',
+        heading: 'Section heading',
+        achievement: 'Special achievement or milestone',
+        link: 'External link or URL'
       }
     },
     azerbaijani: {
@@ -116,6 +123,55 @@ const getTranslation = (siteLanguage: 'english' | 'azerbaijani', key: string): a
         intermediate: 'Orta',
         advanced: 'Yüksək',
         expert: 'Expert'
+      },
+      descriptions: {
+        text: 'Adi mətn bloku',
+        list: 'Nöqtəli siyahı',
+        heading: 'Bölmə daxili başlıq',
+        achievement: 'Xüsusi nailiyyət və ya məqam',
+        link: 'Xarici keçid və ya URL'
+      }
+    },
+    russian: {
+      sectionTitle: 'Дополнительные разделы',
+      sectionDescription: 'Добавьте пользовательские разделы и элементы в ваше резюме',
+      addSection: 'Добавить раздел',
+      addSectionMobile: '+',
+      noSectionsTitle: 'Пока нет дополнительных разделов',
+      noSectionsDescription: 'Нажмите "Добавить раздел", чтобы добавить пользовательские разделы в ваше резюме',
+      addFirstSection: 'Добавить первый раздел',
+      newSectionPlaceholder: 'Введите название нового раздела...',
+      addElement: 'Добавить элемент:',
+      listItemAdd: '+ Добавить элемент',
+      text: 'Текст',
+      list: 'Список',
+      heading: 'Подзаголовок',
+      achievement: 'Достижение',
+      link: 'Ссылка',
+      dateRange: 'Диапазон дат',
+      skill: 'Навык',
+      textPlaceholder: 'Введите текст...',
+      listItemPlaceholder: 'Элемент списка',
+      headingPlaceholder: 'Текст заголовка',
+      startDatePlaceholder: 'Дата начала',
+      endDatePlaceholder: 'Дата окончания',
+      achievementTitlePlaceholder: 'Название достижения',
+      achievementDetailsPlaceholder: 'Детали достижения',
+      skillNamePlaceholder: 'Название навыка',
+      linkTitlePlaceholder: 'Название ссылки',
+      linkUrlPlaceholder: 'https://example.com',
+      skillLevels: {
+        beginner: 'Начинающий',
+        intermediate: 'Средний',
+        advanced: 'Продвинутый',
+        expert: 'Эксперт'
+      },
+      descriptions: {
+        text: 'Блок простого текста',
+        list: 'Маркированный список',
+        heading: 'Заголовок раздела',
+        achievement: 'Особое достижение или веха',
+        link: 'Внешняя ссылка или URL'
       }
     }
   } as const;
@@ -123,36 +179,36 @@ const getTranslation = (siteLanguage: 'english' | 'azerbaijani', key: string): a
   return (translations[siteLanguage] as any)[key] || (translations['azerbaijani'] as any)[key];
 };
 
-const getElementTypes = (cvLanguage: 'english' | 'azerbaijani', siteLanguage: 'english' | 'azerbaijani') => [
+const getElementTypes = (cvLanguage: 'english' | 'azerbaijani' | 'russian', siteLanguage: 'english' | 'azerbaijani' | 'russian') => [
   { 
     type: 'text' as ElementType, 
     label: getTranslation(siteLanguage, 'text'), 
     icon: '📝', 
-    description: siteLanguage === 'english' ? 'Plain text block' : 'Adi mətn bloku' 
+    description: getTranslation(siteLanguage, 'descriptions').text 
   },
   { 
     type: 'list' as ElementType, 
     label: getTranslation(siteLanguage, 'list'), 
     icon: '📋', 
-    description: siteLanguage === 'english' ? 'Bullet point list' : 'Nöqtəli siyahı' 
+    description: getTranslation(siteLanguage, 'descriptions').list 
   },
   { 
     type: 'heading' as ElementType, 
     label: getTranslation(siteLanguage, 'heading'), 
     icon: '📢', 
-    description: siteLanguage === 'english' ? 'Section heading' : 'Bölmə daxili başlıq' 
+    description: getTranslation(siteLanguage, 'descriptions').heading 
   },
   { 
     type: 'achievement' as ElementType, 
     label: getTranslation(siteLanguage, 'achievement'), 
     icon: '🏆', 
-    description: siteLanguage === 'english' ? 'Special achievement or milestone' : 'Xüsusi nailiyyət və ya məqam' 
+    description: getTranslation(siteLanguage, 'descriptions').achievement 
   },
   { 
     type: 'link' as ElementType, 
     label: getTranslation(siteLanguage, 'link'), 
     icon: '🔗', 
-    description: siteLanguage === 'english' ? 'External link or URL' : 'Xarici keçid və ya URL' 
+    description: getTranslation(siteLanguage, 'descriptions').link 
   }
 ];
 

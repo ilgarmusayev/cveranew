@@ -3,16 +3,162 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 import StandardHeader from '@/components/ui/StandardHeader';
 import Footer from '@/components/Footer';
 
 export default function LinkedInImportPage() {
   // All hooks must be at the top level - before any conditional returns
+  const { siteLanguage } = useSiteLanguage();
   const { user } = useAuth();
   const router = useRouter();
   const [linkedinUrl, setLinkedinUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Site language mətnləri
+  const labels = {
+    azerbaijani: {
+      pageTitle: 'LinkedIn-dən İdxal',
+      pageSubtitle: 'LinkedIn profilinizi avtomatik olaraq idxal edin və bir neçə saniyədə peşəkar CV yaradın',
+      loginRequired: 'Giriş tələb olunur...',
+      redirecting: 'Giriş səhifəsinə yönləndirilirsiz...',
+      features: 'Xüsusiyyətlər',
+      automaticImport: 'Avtomatik İdxal',
+      automaticImportDesc: 'Profil məlumatlarınız avtomatik olaraq çıxarılır',
+      professionalCV: 'Peşəkar CV',
+      professionalCVDesc: 'Müasir dizayn və formatlarda CV yaradın',
+      secureData: 'Təhlükəsiz Məlumatlar',
+      secureDataDesc: 'Məlumatlarınız təhlükəsiz şəkildə işlənir',
+      howItWorks: 'Necə İşləyir?',
+      step1: 'LinkedIn Linkinizi Daxil Edin',
+      step1Desc: 'Profil linkinizi aşağıdakı sahəyə daxil edin',
+      step2: 'Avtomatik İdxal',
+      step2Desc: 'Sistem məlumatlarınızı avtomatik olaraq çıxarır',
+      step3: 'CV Yaradın',
+      step3Desc: 'Hazır məlumatlarınızla CV-nizi tənzimləyin',
+      enterLinkedInURL: 'LinkedIn profil linkinizi daxil edin',
+      placeholder: 'https://www.linkedin.com/in/sizin-profiliniz',
+      importButton: 'LinkedIn-dən İdxal Edin',
+      importing: 'İdxal olunur...',
+      exampleFormats: 'Düzgün formatlar:',
+      errorEmptyURL: 'LinkedIn linkinizi daxil edin',
+      errorInvalidFormat: 'Düzgün LinkedIn URL formatı daxil edin. Məsələn: https://www.linkedin.com/in/ilgarmusayev/',
+      errorLoginRequired: 'Giriş tələb olunur',
+      errorImport: 'LinkedIn import xətası',
+      successMessage: 'LinkedIn CV uğurla yaradıldı',
+      linkedinURLLabel: 'LinkedIn URL',
+      helpInstruction: 'Tam LinkedIn URL-ni daxil edin. Məsələn:',
+      howItWorksTitle: 'Necə işləyir?',
+      step1Instruction: 'LinkedIn profilinizin URL-ni daxil edin',
+      step2Instruction: 'Sistemimiz LinkedIn profilinizi təhlükəsiz şəkildə oxuyacaq',
+      step3Instruction: 'Bütün məlumatlar avtomatik olaraq CV formatında tərtib ediləcək',
+      step4Instruction: 'Yaradılan CV-ni redaktə edə və fərdiləşdirə bilərsiniz',
+      errorCVNotCreated: 'CV yaradılmadı',
+      errorLinkedInImport: 'LinkedIn idxal xətası',
+      errorUnknown: 'Naməlum xəta',
+      fastImport: 'Sürətli İdxal',
+      fastImportDesc: 'Bir neçə saniyədə bütün məlumatlarınız idxal edilir',
+      accurateData: 'Dəqiq Məlumat',
+      accurateDataDesc: 'Bütün iş təcrübəsi və təhsil məlumatları dəqiq şəkildə idxal edilir',
+      secure: 'Təhlükəsiz',
+      secureDesc: 'Məlumatlarınız təhlükəsiz şəkildə işlənir və qorunur'
+    },
+    english: {
+      pageTitle: 'LinkedIn Import',
+      pageSubtitle: 'Automatically import your LinkedIn profile and create a professional CV in seconds',
+      loginRequired: 'Login required...',
+      redirecting: 'Redirecting to login page...',
+      features: 'Features',
+      automaticImport: 'Automatic Import',
+      automaticImportDesc: 'Your profile data is automatically extracted',
+      professionalCV: 'Professional CV',
+      professionalCVDesc: 'Create CV with modern design and formats',
+      secureData: 'Secure Data',
+      secureDataDesc: 'Your data is processed securely',
+      howItWorks: 'How It Works?',
+      step1: 'Enter Your LinkedIn Link',
+      step1Desc: 'Paste your profile link in the field below',
+      step2: 'Automatic Import',
+      step2Desc: 'System automatically extracts your information',
+      step3: 'Create CV',
+      step3Desc: 'Customize your CV with the imported data',
+      enterLinkedInURL: 'Enter your LinkedIn profile URL',
+      placeholder: 'https://www.linkedin.com/in/your-profile',
+      importButton: 'Import from LinkedIn',
+      importing: 'Importing...',
+      exampleFormats: 'Valid formats:',
+      errorEmptyURL: 'Please enter your LinkedIn URL',
+      errorInvalidFormat: 'Please enter a valid LinkedIn URL format. Example: https://www.linkedin.com/in/mikayilzeynalabdinov/',
+      errorLoginRequired: 'Login required',
+      errorImport: 'LinkedIn import error',
+      successMessage: 'LinkedIn CV successfully created',
+      linkedinURLLabel: 'LinkedIn URL',
+      helpInstruction: 'Enter the complete LinkedIn URL. For example:',
+      howItWorksTitle: 'How does it work?',
+      step1Instruction: 'Enter your LinkedIn profile URL',
+      step2Instruction: 'Our system will securely read your LinkedIn profile',
+      step3Instruction: 'All information will be automatically organized in CV format',
+      step4Instruction: 'You can edit and customize the created CV',
+      errorCVNotCreated: 'CV was not created',
+      errorLinkedInImport: 'LinkedIn import error',
+      errorUnknown: 'Unknown error',
+      fastImport: 'Fast Import',
+      fastImportDesc: 'All your information is imported in seconds',
+      accurateData: 'Accurate Data',
+      accurateDataDesc: 'All work experience and education information is imported accurately',
+      secure: 'Secure',
+      secureDesc: 'Your data is processed and protected securely'
+    },
+    russian: {
+      pageTitle: 'Импорт LinkedIn',
+      pageSubtitle: 'Автоматически импортируйте свой профиль LinkedIn и создайте профессиональное резюме за секунды',
+      loginRequired: 'Требуется вход...',
+      redirecting: 'Перенаправление на страницу входа...',
+      features: 'Особенности',
+      automaticImport: 'Автоматический импорт',
+      automaticImportDesc: 'Данные вашего профиля извлекаются автоматически',
+      professionalCV: 'Профессиональное резюме',
+      professionalCVDesc: 'Создавайте резюме с современным дизайном и форматами',
+      secureData: 'Безопасные данные',
+      secureDataDesc: 'Ваши данные обрабатываются безопасно',
+      howItWorks: 'Как это работает?',
+      step1: 'Введите ссылку на LinkedIn',
+      step1Desc: 'Вставьте ссылку на ваш профиль в поле ниже',
+      step2: 'Автоматический импорт',
+      step2Desc: 'Система автоматически извлекает вашу информацию',
+      step3: 'Создать резюме',
+      step3Desc: 'Настройте ваше резюме с импортированными данными',
+      enterLinkedInURL: 'Введите URL вашего профиля LinkedIn',
+      placeholder: 'https://www.linkedin.com/in/ваш-профиль',
+      importButton: 'Импортировать из LinkedIn',
+      importing: 'Импорт...',
+      exampleFormats: 'Правильные форматы:',
+      errorEmptyURL: 'Пожалуйста, введите URL LinkedIn',
+      errorInvalidFormat: 'Пожалуйста, введите правильный формат URL LinkedIn. Пример: https://www.linkedin.com/in/ilgarmusayev/',
+      errorLoginRequired: 'Требуется вход',
+      errorImport: 'Ошибка импорта LinkedIn',
+      successMessage: 'Резюме LinkedIn успешно создано',
+      linkedinURLLabel: 'URL LinkedIn',
+      helpInstruction: 'Введите полный URL LinkedIn. Например:',
+      howItWorksTitle: 'Как это работает?',
+      step1Instruction: 'Введите URL вашего профиля LinkedIn',
+      step2Instruction: 'Наша система безопасно прочитает ваш профиль LinkedIn',
+      step3Instruction: 'Вся информация будет автоматически организована в формате резюме',
+      step4Instruction: 'Вы можете редактировать и настраивать созданное резюме',
+      errorCVNotCreated: 'Резюме не было создано',
+      errorLinkedInImport: 'Ошибка импорта LinkedIn',
+      errorUnknown: 'Неизвестная ошибка',
+      fastImport: 'Быстрый импорт',
+      fastImportDesc: 'Вся ваша информация импортируется за секунды',
+      accurateData: 'Точные данные',
+      accurateDataDesc: 'Вся информация об опыте работы и образовании импортируется точно',
+      secure: 'Безопасно',
+      secureDesc: 'Ваши данные обрабатываются и защищаются безопасно'
+    }
+  };
+
+  const content = labels[siteLanguage];
 
   // Handle redirect for non-authenticated users
   useEffect(() => {
@@ -53,13 +199,13 @@ export default function LinkedInImportPage() {
 
   const handleImport = async () => {
     if (!linkedinUrl.trim()) {
-      setError('LinkedIn linkinizi daxil edin');
+      setError(content.errorEmptyURL);
       return;
     }
 
     const username = extractUsernameFromUrl(linkedinUrl);
     if (!username) {
-      setError('Düzgün LinkedIn URL formatı daxil edin. Məsələn: https://www.linkedin.com/in/mikayilzeynalabdinov/');
+      setError(content.errorInvalidFormat);
       return;
     }
 
@@ -69,7 +215,7 @@ export default function LinkedInImportPage() {
     try {
       const token = localStorage.getItem('accessToken');
       if (!token) {
-        setError('Giriş tələb olunur');
+        setError(content.errorLoginRequired);
         setLoading(false);
         return;
       }
@@ -90,23 +236,23 @@ export default function LinkedInImportPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        setError(result.error || 'LinkedIn import xətası');
+        setError(result.error || content.errorImport);
         setLoading(false);
         return;
       }
 
       if (result.success && result.cvId) {
-        console.log('✅ LinkedIn CV uğurla yaradıldı:', result.cvId);
+        console.log('✅ LinkedIn CV successfully created:', result.cvId);
         
         // Redirect to edit the created CV
         router.push(`/cv/edit/${result.cvId}`);
       } else {
-        setError(result.error || 'CV yaradılmadı');
+        setError(result.error || content.errorCVNotCreated);
       }
 
     } catch (error) {
-      console.error('❌ LinkedIn import xətası:', error);
-      setError(`LinkedIn idxal xətası: ${error instanceof Error ? error.message : 'Naməlum xəta'}`);
+      console.error('❌ LinkedIn import error:', error);
+      setError(`${content.errorLinkedInImport}: ${error instanceof Error ? error.message : content.errorUnknown}`);
     } finally {
       setLoading(false);
     }
@@ -118,8 +264,8 @@ export default function LinkedInImportPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Giriş tələb olunur...</p>
-          <p className="text-sm text-gray-500 mt-2">Giriş səhifəsinə yönləndirilirsiz...</p>
+          <p className="text-gray-600">{content.loginRequired}</p>
+          <p className="text-sm text-gray-500 mt-2">{content.redirecting}</p>
         </div>
       </div>
     );
@@ -139,9 +285,9 @@ export default function LinkedInImportPage() {
                   <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
                 </svg>
               </div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">LinkedIn-dən İdxal</h1>
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">{content.pageTitle}</h1>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                LinkedIn profilinizi avtomatik olaraq idxal edin və bir neçə saniyədə peşəkar CV yaradın
+                {content.pageSubtitle}
               </p>
             </div>
 
@@ -153,8 +299,8 @@ export default function LinkedInImportPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Sürətli İdxal</h3>
-                <p className="text-sm text-gray-600">Bir neçə saniyədə bütün məlumatlarınız idxal edilir</p>
+                <h3 className="font-semibold text-gray-900 mb-2">{content.fastImport}</h3>
+                <p className="text-sm text-gray-600">{content.fastImportDesc}</p>
               </div>
 
               <div className="text-center p-6 bg-blue-50 rounded-2xl">
@@ -163,8 +309,8 @@ export default function LinkedInImportPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Dəqiq Məlumat</h3>
-                <p className="text-sm text-gray-600">Bütün iş təcrübəsi və təhsil məlumatları dəqiq şəkildə idxal edilir</p>
+                <h3 className="font-semibold text-gray-900 mb-2">{content.accurateData}</h3>
+                <p className="text-sm text-gray-600">{content.accurateDataDesc}</p>
               </div>
 
               <div className="text-center p-6 bg-blue-50 rounded-2xl">
@@ -173,32 +319,32 @@ export default function LinkedInImportPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Təhlükəsiz</h3>
-                <p className="text-sm text-gray-600">Məlumatlarınız təhlükəsiz şəkildə işlənir və qorunur</p>
+                <h3 className="font-semibold text-gray-900 mb-2">{content.secure}</h3>
+                <p className="text-sm text-gray-600">{content.secureDesc}</p>
               </div>
             </div>
 
             {/* Import Form */}
             <div className="max-w-2xl mx-auto">
               <div className="bg-gray-50 rounded-2xl p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">LinkedIn Profilinizi İdxal Edin</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">{content.enterLinkedInURL}</h2>
 
                 <div className="space-y-6">
                   <div>
                     <label htmlFor="linkedinUrl" className="block text-sm font-medium text-gray-700 mb-2">
-                      LinkedIn URL
+                      {content.linkedinURLLabel}
                     </label>
                     <input
                       type="text"
                       id="linkedinUrl"
                       value={linkedinUrl}
                       onChange={(e) => setLinkedinUrl(e.target.value)}
-                      placeholder="https://www.linkedin.com/in/musayevcreate/"
+                      placeholder={content.placeholder}
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all duration-200"
                       disabled={loading}
                     />
                     <p className="mt-2 text-sm text-gray-500">
-                      Tam LinkedIn URL-ni daxil edin. Məsələn: <code>https://www.linkedin.com/in/musayevcreate/</code>  .
+                      {content.helpInstruction} <code>https://www.linkedin.com/in/ilgarmusayev/</code>  .
                     </p>
                   </div>
 
@@ -224,11 +370,11 @@ export default function LinkedInImportPage() {
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        İdxal edilir...
+                        {content.importing}
                       </div>
                     ) : (
                       <div className="flex items-center justify-center">
-                        <span>LinkedIn profilimi idxal et</span>
+                        <span>{content.importButton}</span>
                         <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
@@ -240,12 +386,12 @@ export default function LinkedInImportPage() {
 
               {/* Help Section */}
               <div className="mt-8 bg-blue-50 rounded-2xl p-6">
-                <h3 className="font-semibold text-gray-900 mb-3">Necə işləyir?</h3>
+                <h3 className="font-semibold text-gray-900 mb-3">{content.howItWorksTitle}</h3>
                 <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
-                  <li>LinkedIn profilinizin URL-ni daxil edin</li>
-                  <li>Sistemimiz LinkedIn profilinizi təhlükəsiz şəkildə oxuyacaq</li>
-                  <li>Bütün məlumatlar avtomatik olaraq CV formatında tərtib ediləcək</li>
-                  <li>Yaradılan CV-ni redaktə edə və fərdiləşdirə bilərsiniz</li>
+                  <li>{content.step1Instruction}</li>
+                  <li>{content.step2Instruction}</li>
+                  <li>{content.step3Instruction}</li>
+                  <li>{content.step4Instruction}</li>
                 </ol>
               </div>
             </div>

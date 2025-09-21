@@ -16,11 +16,11 @@ interface Certification {
 interface CertificationsSectionProps {
   data: Certification[];
   onChange: (data: Certification[]) => void;
-  cvLanguage?: 'english' | 'azerbaijani';
+  cvLanguage?: 'english' | 'azerbaijani' | 'russian';
 }
 
 // Translation helper function
-const getTranslation = (siteLanguage: 'english' | 'azerbaijani', key: string): any => {
+const getTranslation = (siteLanguage: 'english' | 'azerbaijani' | 'russian', key: string): any => {
   const translations = {
     english: {
       sectionTitle: 'Certifications',
@@ -76,6 +76,34 @@ const getTranslation = (siteLanguage: 'english' | 'azerbaijani', key: string): a
         orgName: 'Amazon Web Services',
         url: 'https://www.credly.com/badges/...',
         description: 'Sertifikatın təsviri və əldə edilən bacarıqlar...'
+      }
+    },
+    russian: {
+      sectionTitle: 'Сертификаты',
+      addButton: '+ Добавить',
+      addButtonMobile: '+',
+      emptyStateTitle: 'Сертификаты еще не добавлены',
+      emptyStateDescription: 'Добавьте свои профессиональные сертификаты, чтобы продемонстрировать экспертизу',
+      addFirstButton: 'Добавить первый сертификат',
+      newCertification: 'Новый сертификат',
+      issuingOrganization: 'Выдающая организация',
+      moveUp: 'Переместить вверх',
+      moveDown: 'Переместить вниз',
+      edit: 'Редактировать',
+      close: 'Закрыть',
+      delete: 'Удалить',
+      certificationName: 'Название сертификата',
+      issuingOrg: 'Выдающая организация',
+      certificateUrl: 'URL сертификата',
+      issueDate: 'Дата выдачи',
+      description: 'Описание',
+      viewCertificate: 'Посмотреть сертификат',
+      addAnother: '+ Добавить еще сертификат',
+      placeholders: {
+        certName: 'AWS Cloud Practitioner',
+        orgName: 'Amazon Web Services',
+        url: 'https://www.credly.com/badges/...',
+        description: 'Описание сертификата и полученных навыков...'
       }
     }
   } as const;
@@ -323,7 +351,7 @@ export default function CertificationsSection({ data, onChange, cvLanguage = 'az
                       onEndDateChange={() => {}}
                       onCurrentChange={() => {}}
                       startLabel={getTranslation(siteLanguage, 'issueDate')}
-                      cvLanguage={cvLanguage}
+                      cvLanguage={cvLanguage === 'russian' ? 'english' : cvLanguage}
                       singleDate={true}
                     />
                   </div>

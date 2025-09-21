@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { User, useAuth } from '@/lib/auth';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 import Link from 'next/link';
 import StandardHeader from '@/components/ui/StandardHeader';
 import Footer from '@/components/Footer';
@@ -39,6 +40,7 @@ interface DashboardV2Props {
 }
 
 export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
+  const { siteLanguage } = useSiteLanguage();
   const [cvs, setCvs] = useState<CV[]>([]);
   const [userLimits, setUserLimits] = useState<UserLimits | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,6 +48,147 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
   const { logout, fetchCurrentUser } = useAuth();
+
+  // Dashboard mətnləri
+  const labels = {
+    azerbaijani: {
+      dashboardTitle: 'İdarəetmə Paneli',
+      manageCVs: 'Peşəkar CV-lərinizi idarə edin',
+      refresh: 'Yeniləyin',
+      refreshing: 'Yenilənir...',
+      refreshData: 'Məlumatları yeniləyin',
+      subscription: 'Abunəlik',
+      free: 'Pulsuz',
+      pro: 'Populyar',
+      premium: 'Premium',
+      upgrade: 'Yeniləyin',
+      limit: 'Limit',
+      totalLimit: 'Ümumi Limit',
+      dailyLimit: 'Günlük Limit',
+      totalRemaining: 'Ümumi qalan',
+      dailyRemaining: 'Bu gün qalan',
+      unlimitedUsage: 'Limitsiz istifadə',
+      linkedinImport: 'LinkedIn İdxal',
+      autoProfileImport: 'Avtomatik profil İdxalı',
+      linkedinImportButton: 'LinkedIn profilinizi idxal edin',
+      linkedinDescription: 'LinkedIn profilinizi bir kliklə idxal edin və avtomatik olaraq CV yaradın. Sürətli və təhlükəsiz!',
+      autoDataFill: 'Avtomatik məlumat doldurma',
+      workExperience: 'İş təcrübəsi və təhsil',
+      skillsCompetencies: 'Bacarıqlar və kompetensiyalar',
+      manualCV: 'Yeni CV',
+      createFromScratch: 'Sıfırdan CV yaradın',
+      manualDescription: 'Bütün məlumatları əl ilə daxil edərək peşəkar CV yaradın. Tam nəzarət sizin əlinizdədir!',
+      fullControl: 'Tam nəzarət',
+      professionalDesign: 'Peşəkar dizayn',
+      customizable: 'Özəlləşdirə bilən',
+      startCreating: 'Yeni CV yaratmağa başlayın',
+      myCVs: 'CV-lər',
+      created: 'Yaradılıb',
+      lastUpdated: 'Son yenilənmə',
+      edit: 'Redaktə edin',
+      viewAll: 'Bütün CV-ləri görün',
+      dateError: 'Tarix xətası',
+      noPremiumSubscription: 'Premium abunəlik yoxdur',
+      daysRemaining: 'gün qalıb',
+      noCVs: 'Hələ CV yaratmamısınız',
+      createFirstCV: 'İlk CV-nizi yaratmaq üçün yuxarıdakı seçimlərdən birini seçin.',
+      viewMore: 'Daha çox CV görün',
+      subscriptionExpired: '⏰ Abunəlik bitib',
+      expiresOnDay: '⚠️ Bu gün bitir'
+    },
+    english: {
+      dashboardTitle: 'Dashboard',
+      manageCVs: 'Manage your professional CVs',
+      refresh: 'Refresh',
+      refreshing: 'Refreshing...',
+      refreshData: 'Refresh data',
+      subscription: 'Subscription',
+      free: 'Free',
+      pro: 'Pro',
+      premium: 'Premium',
+      upgrade: 'Upgrade',
+      limit: 'Limit',
+      totalLimit: 'Total Limit',
+      dailyLimit: 'Daily Limit',
+      totalRemaining: 'Total remaining',
+      dailyRemaining: 'Remaining today',
+      unlimitedUsage: 'Unlimited usage',
+      linkedinImport: 'LinkedIn Import',
+      autoProfileImport: 'Automatic profile import',
+      linkedinImportButton: 'Import your LinkedIn profile',
+      linkedinDescription: 'Import your LinkedIn profile with one click and automatically create a CV. Fast and secure!',
+      autoDataFill: 'Automatic data filling',
+      workExperience: 'Work experience and education',
+      skillsCompetencies: 'Skills and competencies',
+      manualCV: 'New CV',
+      createFromScratch: 'Create CV from scratch',
+      manualDescription: 'Create a professional CV by manually entering all data. Full control is in your hands!',
+      fullControl: 'Full control',
+      professionalDesign: 'Professional design',
+      customizable: 'Customizable',
+      startCreating: 'Start creating new CV',
+      myCVs: 'My CVs',
+      created: 'Created',
+      lastUpdated: 'Last updated',
+      edit: 'Edit',
+      viewAll: 'View all CVs',
+      dateError: 'Date error',
+      noPremiumSubscription: 'No premium subscription',
+      daysRemaining: 'days remaining',
+      noCVs: 'You haven\'t created any CVs yet',
+      createFirstCV: 'Choose one of the options above to create your first CV.',
+      viewMore: 'View more CVs',
+      subscriptionExpired: '⏰ Subscription expired',
+      expiresOnDay: '⚠️ Expires today'
+    },
+    russian: {
+      dashboardTitle: 'Панель управления',
+      manageCVs: 'Управляйте своими профессиональными резюме',
+      refresh: 'Обновить',
+      refreshing: 'Обновление...',
+      refreshData: 'Обновить данные',
+      subscription: 'Подписка',
+      free: 'Бесплатно',
+      pro: 'Про',
+      premium: 'Премиум',
+      upgrade: 'Улучшить',
+      limit: 'Лимит',
+      totalLimit: 'Общий лимит',
+      dailyLimit: 'Дневной лимит',
+      totalRemaining: 'Всего осталось',
+      dailyRemaining: 'Осталось сегодня',
+      unlimitedUsage: 'Безлимитное использование',
+      linkedinImport: 'Импорт LinkedIn',
+      autoProfileImport: 'Автоматический импорт профиля',
+      linkedinImportButton: 'Импортировать ваш профиль LinkedIn',
+      linkedinDescription: 'Импортируйте свой профиль LinkedIn одним кликом и автоматически создайте резюме. Быстро и безопасно!',
+      autoDataFill: 'Автоматическое заполнение данных',
+      workExperience: 'Опыт работы и образование',
+      skillsCompetencies: 'Навыки и компетенции',
+      manualCV: 'Новое резюме',
+      createFromScratch: 'Создать резюме с нуля',
+      manualDescription: 'Создайте профессиональное резюме, вручную введя все данные. Полный контроль в ваших руках!',
+      fullControl: 'Полный контроль',
+      professionalDesign: 'Профессиональный дизайн',
+      customizable: 'Настраиваемый',
+      startCreating: 'Начать создание нового резюме',
+      myCVs: 'Мои резюме',
+      created: 'Создано',
+      lastUpdated: 'Последнее обновление',
+      edit: 'Редактировать',
+      viewAll: 'Посмотреть все резюме',
+      dateError: 'Ошибка даты',
+      noPremiumSubscription: 'Нет премиум подписки',
+      daysRemaining: 'дней осталось',
+      noCVs: 'Вы еще не создали ни одного резюме',
+      createFirstCV: 'Выберите один из вариантов выше, чтобы создать свое первое резюме.',
+      viewMore: 'Посмотреть больше резюме',
+      subscriptionExpired: '⏰ Подписка истекла',
+      expiresOnDay: '⚠️ Истекает сегодня'
+    }
+  };
+
+  const content = labels[siteLanguage];
 
   // Use user prop to display user info if needed
   console.log('Dashboard user:', user?.email, 'tier:', user?.tier);
@@ -211,28 +354,11 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-4 mb-4">
             <h1 className="text-4xl font-bold text-gray-900">
-              İdarəetmə Paneli
+              {content.dashboardTitle}
             </h1>
-            <button
-              onClick={handleRefreshUserData}
-              disabled={refreshing}
-              className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center gap-2"
-              title="Məlumatları yenilə"
-            >
-              {refreshing ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Yenilənir...
-                </>
-              ) : (
-                <>
-                  🔄
-                  Yenilə
-                </>
-              )}
-            </button>
+           
           </div>
-          <span className="block text-2xl font-normal text-gray-600 mt-2">Peşəkar CV-lərinizi idarə edin</span>
+          <span className="block text-2xl font-normal text-gray-600 mt-2">{content.manageCVs}</span>
           <div className="w-24 h-1 bg-blue-600 mx-auto rounded-full mt-4"></div>
         </div>
 
@@ -241,14 +367,14 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
           <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-blue-600">
             <div className="flex items-center justify-between min-h-[100px]">
               <div className="flex-1">
-                <p className="text-sm font-medium text-blue-700 mb-2">Abunəlik</p>
+                <p className="text-sm font-medium text-blue-700 mb-2">{content.subscription}</p>
                 <p className="text-2xl font-bold text-blue-900">
                   {loading || !userLimits ? '...' : (() => {
                     const tier = userLimits?.tier;
-                    if (tier === 'Free') return 'Pulsuz';
-                    if (tier === 'Medium' || tier === 'Pro') return 'Populyar';
-                    if (tier === 'Premium' || tier === 'Business') return 'Premium';
-                    return 'Pulsuz';
+                    if (tier === 'Free') return content.free;
+                    if (tier === 'Medium' || tier === 'Pro') return content.pro;
+                    if (tier === 'Premium' || tier === 'Business') return content.premium;
+                    return content.free;
                   })()}
                 </p>
                 {/* Subscription Expiration Info - Enhanced Display */}
@@ -273,19 +399,19 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
                         console.log('🗓️ Days difference:', diffDays);
 
                         if (diffDays < 0) {
-                          return '⏰ Abunəlik bitib';
+                          return content.subscriptionExpired;
                         } else if (diffDays === 0) {
-                          return '⚠️ Bu gün bitir';
+                          return content.expiresOnDay;
                         } else if (diffDays === 1) {
-                          return '📅 1 gün qalıb';
+                          return `📅 1 ${content.daysRemaining}`;
                         } else if (diffDays <= 30) {
-                          return `📅 ${diffDays} gün qalıb`;
+                          return `📅 ${diffDays} ${content.daysRemaining}`;
                         } else {
-                          return `📅 ${diffDays} gün qalıb`;
+                          return `📅 ${diffDays} ${content.daysRemaining}`;
                         }
                       } catch (error) {
                         console.error('🗓️ Date calculation error:', error);
-                        return '❌ Tarix xətası';
+                        return `❌ ${content.dateError}`;
                       }
                     })()}
                   </p>
@@ -293,7 +419,7 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
                 {/* Show message for free users or users without subscription */}
                 {!loading && (!userLimits?.subscription?.expiresAt || userLimits?.tier === 'Free') && (
                   <p className="text-sm text-gray-500 mt-2">
-                    💡 Premium abunəlik yoxdur
+                    💡 {content.noPremiumSubscription}
                   </p>
                 )}
               </div>
@@ -303,7 +429,7 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
                   disabled={loading}
                   className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-white hover:text-blue-600 hover:border-2 hover:border-blue-600 border-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 >
-                  Yenilə
+                  {content.upgrade}
                 </button>
               </div>
             </div>
@@ -313,10 +439,10 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
             <div className="flex items-center justify-between min-h-[100px]">
               <div className="flex-1">
                 <p className="text-sm font-medium text-blue-700 mb-2">
-                  {loading || !userLimits ? 'Limit' : (
-                    userLimits?.limits.limitType === 'total' ? 'Ümumi Limit' :
-                    userLimits?.limits.limitType === 'daily' ? 'Günlük Limit' :
-                    'Limit'
+                  {loading || !userLimits ? content.limit : (
+                    userLimits?.limits.limitType === 'total' ? content.totalLimit :
+                    userLimits?.limits.limitType === 'daily' ? content.dailyLimit :
+                    content.limit
                   )}
                 </p>
                 <p className="text-2xl font-bold text-blue-900 mb-2">
@@ -337,9 +463,9 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
                 </p>
                 <p className="text-xs text-gray-600">
                   {loading || !userLimits ? '...' : (
-                    userLimits?.limits.limitType === 'total' ? 'Ümumi qalan' :
-                    userLimits?.limits.limitType === 'daily' ? 'Bu gün qalan' :
-                    'Limitsiz istifadə'
+                    userLimits?.limits.limitType === 'total' ? content.totalRemaining :
+                    userLimits?.limits.limitType === 'daily' ? content.dailyRemaining :
+                    content.unlimitedUsage
                   )}
                 </p>
               </div>
@@ -365,13 +491,13 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
                 </svg>
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-gray-900">LinkedIn İdxal</h3>
-                <p className="text-gray-600 mt-1">Avtomatik profil İdxalı</p>
+                <h3 className="text-2xl font-bold text-gray-900">{content.linkedinImport}</h3>
+                <p className="text-gray-600 mt-1">{content.autoProfileImport}</p>
               </div>
             </div>
 
             <p className="text-gray-700 mb-6 leading-relaxed">
-              LinkedIn profilinizi bir kliklə idxal edin və avtomatik olaraq CV yaradın. Sürətli və təhlükəsiz!
+              {content.linkedinDescription}
             </p>
 
             <div className="space-y-3 mb-8">
@@ -379,19 +505,19 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
                 <svg className="w-5 h-5 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                Avtomatik məlumat doldurma
+                {content.autoDataFill}
               </div>
               <div className="flex items-center text-gray-700">
                 <svg className="w-5 h-5 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                İş təcrübəsi və təhsil
+                {content.workExperience}
               </div>
               <div className="flex items-center text-gray-700">
                 <svg className="w-5 h-5 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                Bacarıqlar və kompetensiyalar
+                {content.skillsCompetencies}
               </div>
             </div>
 
@@ -401,7 +527,7 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
               className="w-full bg-blue-600 text-white rounded-xl px-6 py-4 font-medium hover:bg-white hover:text-blue-600 hover:border-2 hover:border-blue-600 border-2 transition-all duration-200"
             >
               <div className="flex items-center justify-center">
-                <span className="text-lg">LinkedIn profilinizi idxal edin</span>
+                <span className="text-lg">{content.linkedinImportButton}</span>
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -418,13 +544,13 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
                 </svg>
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-gray-900">Əl ilə Yaratma</h3>
-                <p className="text-gray-600 mt-1">Sıfırdan CV yaradın</p>
+                <h3 className="text-2xl font-bold text-gray-900">{content.manualCV}</h3>
+                <p className="text-gray-600 mt-1">{content.createFromScratch}</p>
               </div>
             </div>
 
             <p className="text-gray-700 mb-6 leading-relaxed">
-              Bütün məlumatları əl ilə daxil edərək peşəkar CV yaradın. Tam nəzarət sizin əlinizdədir!
+              {content.manualDescription}
             </p>
 
             <div className="space-y-3 mb-8">
@@ -432,19 +558,19 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
                 <svg className="w-5 h-5 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                Tam fərdiləşdirmə imkanı
+                {content.fullControl}
               </div>
               <div className="flex items-center text-gray-700">
                 <svg className="w-5 h-5 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                Detallı məlumat əlavə etmə
+                {content.professionalDesign}
               </div>
               <div className="flex items-center text-gray-700">
                 <svg className="w-5 h-5 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                AI köməkliyi ilə
+                {content.customizable}
               </div>
             </div>
 
@@ -453,7 +579,7 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
               className="w-full bg-blue-600 text-white border-2 rounded-xl px-6 py-4 font-medium hover:bg-white hover:text-blue-600 hover:border-2 hover:border-blue-600 transition-all duration-200"
             >
               <div className="flex items-center justify-center">
-                <span className="text-lg">Yeni CV yaratmağa başla</span>
+                <span className="text-lg">{content.startCreating}</span>
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -466,7 +592,7 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
         {cvs.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold text-gray-900">Mövcud CV-lər</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{content.myCVs}</h2>
               <div className="flex items-center space-x-4">
                 <div className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
                   {cvs.length} CV
@@ -475,7 +601,7 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
                   href="/cv-list"
                   className="text-blue-600 font-medium text-sm flex items-center"
                 >
-                  Hamısını gör
+                  {content.viewAll}
                   <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
@@ -520,7 +646,7 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
                   <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                     <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">CV</span>
                     <span className="text-xs text-blue-600 font-medium group-hover:text-blue-700 transition-colors">
-                      Redaktə et →
+                      {content.edit} →
                     </span>
                   </div>
                 </div>
@@ -533,7 +659,7 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
                   href="/cv-list"
                   className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-medium"
                 >
-                  Bütün CV-ləri gör ({cvs.length})
+                  {content.viewAll} ({cvs.length})
                   <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>

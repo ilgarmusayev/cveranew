@@ -6,8 +6,10 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 
 function ResetPasswordContent() {
+  const { siteLanguage } = useSiteLanguage();
   const [formData, setFormData] = useState({
     password: '',
     confirmPassword: ''
@@ -21,29 +23,111 @@ function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Site language mətnləri
+  const content = {
+    azerbaijani: {
+      tokenNotFound: 'Sıfırlama tokeni tapılmadı',
+      passwordMinLength: 'Şifrə ən azı 8 simvoldan ibarət olmalıdır',
+      passwordUppercase: 'Şifrə ən azı bir böyük hərf ehtiva etməlidir',
+      passwordLowercase: 'Şifrə ən azı bir kiçik hərf ehtiva etməlidir',
+      fillField: 'Zəhmət olmasa bu sahəni doldurun',
+      fillCorrectly: 'Zəhmət olmasa bu sahəni düzgün doldurun',
+      passwordsMismatch: 'Parollar uyğun gəlmir',
+      resetFailed: 'Parol sıfırlanması uğursuz oldu',
+      systemError: 'Sistem xətası baş verdi',
+      strengthWeak: 'Zəif',
+      strengthMedium: 'Orta',
+      strengthGood: 'Yaxşı',
+      strengthStrong: 'Güclü',
+      successTitle: 'Parol Uğurla Yeniləndi',
+      successMessage: 'Şifrəniz uğurla yeniləndi. İndi yeni şifrənizlə daxil ola bilərsiniz.',
+      redirectMessage: '3 saniyə ərzində giriş səhifəsinə yönləndiriləcəksiniz...',
+      loginNow: 'İndi Daxil Olun →',
+      newPassword: 'Yeni Şifrə',
+      confirmNewPassword: 'Yeni Şifrəni Təsdiq Et',
+      passwordPlaceholder: 'Yeni şifrənizi daxil edin',
+      confirmPasswordPlaceholder: 'Şifrənizi yenidən daxil edin',
+      updating: 'Yenilənir...',
+      updatePassword: 'Şifrəni Yenilə',
+      backToLogin: '← Girişə qayıt',
+    },
+    english: {
+      tokenNotFound: 'Reset token not found',
+      passwordMinLength: 'Password must be at least 8 characters long',
+      passwordUppercase: 'Password must contain at least one uppercase letter',
+      passwordLowercase: 'Password must contain at least one lowercase letter',
+      fillField: 'Please fill out this field',
+      fillCorrectly: 'Please fill out this field correctly',
+      passwordsMismatch: 'Passwords do not match',
+      resetFailed: 'Password reset failed',
+      systemError: 'System error occurred',
+      strengthWeak: 'Weak',
+      strengthMedium: 'Medium',
+      strengthGood: 'Good',
+      strengthStrong: 'Strong',
+      successTitle: 'Password Successfully Updated',
+      successMessage: 'Your password has been successfully updated. You can now log in with your new password.',
+      redirectMessage: 'You will be redirected to the login page in 3 seconds...',
+      loginNow: 'Login Now →',
+      newPassword: 'New Password',
+      confirmNewPassword: 'Confirm New Password',
+      passwordPlaceholder: 'Enter your new password',
+      confirmPasswordPlaceholder: 'Re-enter your password',
+      updating: 'Updating...',
+      updatePassword: 'Update Password',
+      backToLogin: '← Back to login',
+    },
+    russian: {
+      tokenNotFound: 'Токен сброса не найден',
+      passwordMinLength: 'Пароль должен содержать не менее 8 символов',
+      passwordUppercase: 'Пароль должен содержать как минимум одну заглавную букву',
+      passwordLowercase: 'Пароль должен содержать как минимум одну строчную букву',
+      fillField: 'Пожалуйста, заполните это поле',
+      fillCorrectly: 'Пожалуйста, заполните это поле правильно',
+      passwordsMismatch: 'Пароли не совпадают',
+      resetFailed: 'Не удалось сбросить пароль',
+      systemError: 'Произошла системная ошибка',
+      strengthWeak: 'Слабый',
+      strengthMedium: 'Средний',
+      strengthGood: 'Хороший',
+      strengthStrong: 'Сильный',
+      successTitle: 'Пароль успешно обновлен',
+      successMessage: 'Ваш пароль был успешно обновлен. Теперь вы можете войти в систему с новым паролем.',
+      redirectMessage: 'Через 3 секунды вы будете перенаправлены на страницу входа...',
+      loginNow: 'Войти сейчас →',
+      newPassword: 'Новый пароль',
+      confirmNewPassword: 'Подтвердите новый пароль',
+      passwordPlaceholder: 'Введите ваш новый пароль',
+      confirmPasswordPlaceholder: 'Повторите ваш пароль',
+      updating: 'Обновление...',
+      updatePassword: 'Обновить пароль',
+      backToLogin: '← Вернуться к входу',
+    }
+  }[siteLanguage];
+
   useEffect(() => {
     const urlToken = searchParams.get('token');
     if (!urlToken) {
-      setError('Sıfırlama tokeni tapılmadı');
+      setError(content.tokenNotFound);
       return;
     }
     setToken(urlToken);
-  }, [searchParams]);
+  }, [searchParams, content.tokenNotFound]);
 
   // Password validation function
   const validatePassword = (password: string) => {
     const errors: string[] = [];
 
     if (password.length < 8) {
-      errors.push('Şifrə ən azı 8 simvoldan ibarət olmalıdır');
+      errors.push(content.passwordMinLength);
     }
 
     if (!/[A-Z]/.test(password)) {
-      errors.push('Şifrə ən azı bir böyük hərf ehtiva etməlidir');
+      errors.push(content.passwordUppercase);
     }
 
     if (!/[a-z]/.test(password)) {
-      errors.push('Şifrə ən azı bir kiçik hərf ehtiva etməlidir');
+      errors.push(content.passwordLowercase);
     }
 
 

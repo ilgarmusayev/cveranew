@@ -19,12 +19,105 @@ interface VolunteerExperience {
 interface VolunteerExperienceSectionProps {
   data: VolunteerExperience[];
   onChange: (data: VolunteerExperience[]) => void;
-  cvLanguage?: 'english' | 'azerbaijani';
+  cvLanguage?: 'english' | 'azerbaijani' | 'russian';
 }
 
 export default function VolunteerExperienceSection({ data, onChange, cvLanguage = 'azerbaijani' }: VolunteerExperienceSectionProps) {
   const { siteLanguage } = useSiteLanguage();
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  // Translation labels
+  const labels = {
+    azerbaijani: {
+      sectionTitle: 'Könüllü təcrübə',
+      addButton: '+ Əlavə edin',
+      addButtonMobile: '+',
+      emptyStateTitle: 'Hələ heç bir könüllü təcrübə əlavə etməmisiniz',
+      emptyStateDescription: 'Sosial məsuliyyət və dəyərlərinizi nümayiş etdirmək üçün könüllü təcrübənizi əlavə edin',
+      addFirstButton: 'İlk könüllü təcrübənizi əlavə edin',
+      newVolunteerExperience: 'Yeni könüllü təcrübə',
+      organizationName: 'Təşkilat adı',
+      moveUp: 'Yuxarı',
+      moveDown: 'Aşağı',
+      edit: 'Redaktə edin',
+      close: 'Bağlayın',
+      delete: 'Silin',
+      positionRole: 'Vəzifə/Rol',
+      organization: 'Təşkilat',
+      causePurpose: 'Sahə/Məqsəd (ixtiyari)',
+      description: 'Təsvir',
+      startDate: 'Başlama tarixi',
+      endDate: 'Bitirmə tarixi',
+      currentlyVolunteering: 'Davam edir',
+      addAnother: '+ Başqa könüllü təcrübə əlavə edin',
+      placeholders: {
+        role: 'Könüllü koordinator',
+        organization: 'Kinder MTM',
+        cause: 'Təhsil, Uşaqlar, Tibb yardımı',
+        description: 'Könüllü təcrübənizin təsvirini yazın...'
+      }
+    },
+    english: {
+      sectionTitle: 'Volunteer Experience',
+      addButton: '+ Add',
+      addButtonMobile: '+',
+      emptyStateTitle: 'No volunteer experience added yet',
+      emptyStateDescription: 'Add your volunteer experience to showcase your social responsibility and values',
+      addFirstButton: 'Add your first volunteer experience',
+      newVolunteerExperience: 'New volunteer experience',
+      organizationName: 'Organization name',
+      moveUp: 'Move up',
+      moveDown: 'Move down',
+      edit: 'Edit',
+      close: 'Close',
+      delete: 'Delete',
+      positionRole: 'Position/Role',
+      organization: 'Organization',
+      causePurpose: 'Cause/Purpose (optional)',
+      description: 'Description',
+      startDate: 'Start Date',
+      endDate: 'End Date',
+      currentlyVolunteering: 'Currently volunteering',
+      addAnother: '+ Add another volunteer experience',
+      placeholders: {
+        role: 'Volunteer Coordinator',
+        organization: 'Non-profit Organization',
+        cause: 'Education, Children, Medical Aid',
+        description: 'Describe your volunteer experience...'
+      }
+    },
+    russian: {
+      sectionTitle: 'Волонтёрский опыт',
+      addButton: '+ Добавить',
+      addButtonMobile: '+',
+      emptyStateTitle: 'Волонтёрский опыт еще не добавлен',
+      emptyStateDescription: 'Добавьте свой волонтёрский опыт, чтобы продемонстрировать социальную ответственность и ценности',
+      addFirstButton: 'Добавить первый волонтёрский опыт',
+      newVolunteerExperience: 'Новый волонтёрский опыт',
+      organizationName: 'Название организации',
+      moveUp: 'Переместить вверх',
+      moveDown: 'Переместить вниз',
+      edit: 'Редактировать',
+      close: 'Закрыть',
+      delete: 'Удалить',
+      positionRole: 'Должность/Роль',
+      organization: 'Организация',
+      causePurpose: 'Направление/Цель (необязательно)',
+      description: 'Описание',
+      startDate: 'Дата начала',
+      endDate: 'Дата окончания',
+      currentlyVolunteering: 'В настоящее время',
+      addAnother: '+ Добавить еще волонтёрский опыт',
+      placeholders: {
+        role: 'Координатор волонтёров',
+        organization: 'Некоммерческая организация',
+        cause: 'Образование, Дети, Медицинская помощь',
+        description: 'Опишите свой волонтёрский опыт...'
+      }
+    }
+  };
+
+  const content = labels[siteLanguage] || labels.azerbaijani;
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -71,7 +164,7 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">
-            {siteLanguage === 'english' ? 'Volunteer Experience' : 'Könüllü təcrübə'}
+            {content.sectionTitle}
           </h3>
         </div>
         <button
@@ -79,10 +172,10 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
         >
           <span className="hidden sm:inline">
-            {siteLanguage === 'english' ? '+ Add' : '+ Əlavə edin'}
+            {content.addButton}
           </span>
           <span className="sm:hidden">
-            {siteLanguage === 'english' ? '+' : '+'}
+            {content.addButtonMobile}
           </span>
         </button>
       </div>
@@ -95,19 +188,13 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
             </svg>
           </div>
           <p className="text-gray-500 mb-4">
-            {siteLanguage === 'english' 
-              ? 'No volunteer experience added yet' 
-              : 'Hələ heç bir könüllü təcrübə əlavə etməmisiniz'
-            }
+            {content.emptyStateDescription}
           </p>
           <button
             onClick={addVolunteerExperience}
             className="px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
           >
-            {siteLanguage === 'english' 
-              ? 'Add your first volunteer experience' 
-              : 'İlk könüllü təcrübəni əlavə edin'
-            }
+            {content.addFirstButton}
           </button>
         </div>
       ) : (
@@ -118,11 +205,11 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-red-500">❤️</span>
                   <h4 className="font-medium text-gray-900">
-                    {volunteer.role || (siteLanguage === 'english' ? 'New volunteer experience' : 'Yeni könüllü təcrübə')}
+                    {volunteer.role || content.newVolunteerExperience}
                   </h4>
                 </div>
                 <p className="text-sm text-gray-600">
-                  {volunteer.organization || (siteLanguage === 'english' ? 'Organization name' : 'Təşkilat adı')}
+                  {volunteer.organization || content.organizationName}
                 </p>
                 {volunteer.cause && (
                   <p className="text-xs text-gray-500 mt-1">
@@ -142,7 +229,7 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                     }`}
-                    title={siteLanguage === 'english' ? 'Move up' : 'Yuxarı'}
+                    title={content.moveUp}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -156,7 +243,7 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                     }`}
-                    title={siteLanguage === 'english' ? 'Move down' : 'Aşağı'}
+                    title={content.moveDown}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -171,15 +258,15 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
                     className="text-blue-600 hover:text-blue-800 transition-colors text-sm cursor-pointer"
                   >
                     {editingIndex === index 
-                      ? (siteLanguage === 'english' ? 'Close' : 'Bağlayın')
-                      : (siteLanguage === 'english' ? 'Edit' : 'Redaktə edin')
+                      ? content.close
+                      : content.edit
                     }
                   </button>
                   <button
                     onClick={() => removeVolunteerExperience(index)}
                     className="text-red-600 hover:text-red-800 transition-colors text-sm cursor-pointer"
                   >
-                    {siteLanguage === 'english' ? 'Delete' : 'Silin'}
+                    {content.delete}
                   </button>
                 </div>
               </div>
@@ -189,25 +276,25 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {siteLanguage === 'english' ? 'Position/Role' : 'Vəzifə/Rol'}
+                        {content.positionRole}
                       </label>
                       <input
                         type="text"
                         value={volunteer.role}
                         onChange={(e) => updateVolunteerExperience(index, { role: e.target.value })}
-                        placeholder={siteLanguage === 'english' ? 'Volunteer Coordinator' : 'Könüllü koordinator'}
+                        placeholder={content.placeholders.role}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {siteLanguage === 'english' ? 'Organization' : 'Təşkilat'}
+                        {content.organization}
                       </label>
                       <input
                         type="text"
                         value={volunteer.organization}
                         onChange={(e) => updateVolunteerExperience(index, { organization: e.target.value })}
-                        placeholder={siteLanguage === 'english' ? 'Non-profit Organization' : 'Kinder MTM'}
+                        placeholder={content.placeholders.organization}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       />
                     </div>
@@ -215,16 +302,13 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {siteLanguage === 'english' ? 'Cause/Purpose (optional)' : 'Sahə/Məqsəd (ixtiyari)'}
+                      {content.causePurpose}
                     </label>
                     <input
                       type="text"
                       value={volunteer.cause || ''}
                       onChange={(e) => updateVolunteerExperience(index, { cause: e.target.value })}
-                      placeholder={siteLanguage === 'english' 
-                        ? 'Child education, environmental protection, social aid'
-                        : 'Uşaq təhsili, ekoloji mühafizə, sosial yardım'
-                      }
+                      placeholder={content.placeholders.cause}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                     />
                   </div>
@@ -240,23 +324,19 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
                       current, 
                       endDate: current ? '' : volunteer.endDate 
                     })}
-                    startLabel={siteLanguage === 'english' ? 'Start Date' : 'Başlama tarixi'}
-                    endLabel={siteLanguage === 'english' ? 'End Date' : 'Bitirmə tarixi'}
-                    currentLabel={siteLanguage === 'english' ? 'Currently volunteering' : 'Davam edir'}
-                    cvLanguage={cvLanguage}
+                    startLabel={content.startDate}
+                    endLabel={content.endDate}
+                    currentLabel={content.currentlyVolunteering}
                   />
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {siteLanguage === 'english' ? 'Description (optional)' : 'Təsvir (ixtiyari)'}
+                      {content.description}
                     </label>
                     <RichTextEditor
                       value={volunteer.description || ''}
                       onChange={(value) => updateVolunteerExperience(index, { description: value })}
-                      placeholder={siteLanguage === 'english' 
-                        ? 'Provide brief information about your volunteer work...'
-                        : 'Könüllü fəaliyyətiniz haqqında qısa məlumat verin...'
-                      }
+                      placeholder={content.placeholders.description}
                       minHeight="100px"
                     />
                   </div>

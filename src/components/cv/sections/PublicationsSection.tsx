@@ -16,11 +16,11 @@ interface Publication {
 interface PublicationsSectionProps {
   data: Publication[];
   onChange: (data: Publication[]) => void;
-  cvLanguage?: 'english' | 'azerbaijani';
+  cvLanguage?: 'english' | 'azerbaijani' | 'russian';
 }
 
 // Translation helper function
-const getTranslation = (cvLanguage: 'english' | 'azerbaijani', key: string): any => {
+const getTranslation = (cvLanguage: 'english' | 'azerbaijani' | 'russian', key: string): any => {
   const translations: Record<string, Record<string, any>> = {
     english: {
       sectionTitle: 'Publications',
@@ -80,6 +80,36 @@ const getTranslation = (cvLanguage: 'english' | 'azerbaijani', key: string): any
         url: 'https://doi.org/10.1109/...',
         authors: 'Cəmil Əliyev, Ayşə Həsənova və s.',
         description: 'Nəşrin təsviri və əsas tapıntılar...'
+      }
+    },
+    russian: {
+      sectionTitle: 'Публикации',
+      addButton: '+ Добавить',
+      addButtonMobile: '+',
+      emptyStateTitle: 'Публикации еще не добавлены',
+      emptyStateDescription: 'Добавьте свои исследовательские работы, статьи или опубликованные труды',
+      addFirstButton: 'Добавить первую публикацию',
+      newPublication: 'Новая публикация',
+      publisher: 'Издательство',
+      moveUp: 'Переместить вверх',
+      moveDown: 'Переместить вниз',
+      edit: 'Редактировать',
+      close: 'Закрыть',
+      delete: 'Удалить',
+      publicationTitle: 'Название публикации',
+      publisherName: 'Издательство/Журнал',
+      publicationUrl: 'URL публикации',
+      publicationDate: 'Дата публикации',
+      authors: 'Авторы',
+      description: 'Описание',
+      viewPublication: 'Посмотреть публикацию',
+      addAnother: '+ Добавить еще публикацию',
+      placeholders: {
+        title: 'Машинное обучение в медицинских приложениях',
+        publisher: 'IEEE Transactions on Biomedical Engineering',
+        url: 'https://doi.org/10.1109/...',
+        authors: 'Иван Иванов, Анна Петрова и др.',
+        description: 'Описание публикации и ключевые выводы...'
       }
     }
   };
@@ -278,7 +308,7 @@ export default function PublicationsSection({ data, onChange, cvLanguage = 'azer
                       current={false}
                       onCurrentChange={() => {}}
                       singleDate={true}
-                      cvLanguage={cvLanguage}
+                      cvLanguage={cvLanguage as 'english' | 'azerbaijani'}
                     />
                   </div>
 

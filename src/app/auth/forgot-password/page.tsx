@@ -5,12 +5,60 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 
 export default function ForgotPasswordPage() {
+  const { siteLanguage } = useSiteLanguage();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+
+  // Site language mətnləri
+  const content = {
+    azerbaijani: {
+      title: 'Şifrəni Unutmusunuz?',
+      subtitle: 'E-poçt ünvanınızı daxil edin, şifrə yeniləmə linki göndərək',
+      emailLabel: 'E-poçt ünvanı',
+      emailPlaceholder: 'numune@cvera.net',
+      sendingText: 'Göndərilir...',
+      sendButton: 'Şifrə Yeniləmə Linki Göndər',
+      backToLogin: '← Girişə qayıt',
+      emailSentTitle: 'E-poçt Göndərildi!',
+      checkSpam: 'E-poçt almadınızsa spam qovluğunu yoxlayın',
+      tryAgain: 'Başqa e-poçt ilə yenidən cəhd et',
+      backToLoginButton: 'Girişə qayıt',
+      errorMessage: 'Bir xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.',
+    },
+    english: {
+      title: 'Forgot Your Password?',
+      subtitle: 'Enter your email address and we will send you a password reset link',
+      emailLabel: 'Email address',
+      emailPlaceholder: 'example@cvera.net',
+      sendingText: 'Sending...',
+      sendButton: 'Send Password Reset Link',
+      backToLogin: '← Back to login',
+      emailSentTitle: 'Email Sent!',
+      checkSpam: 'If you did not receive the email, check your spam folder',
+      tryAgain: 'Try again with another email',
+      backToLoginButton: 'Back to login',
+      errorMessage: 'An error occurred. Please try again.',
+    },
+    russian: {
+      title: 'Забыли пароль?',
+      subtitle: 'Введите ваш адрес электронной почты, и мы отправим вам ссылку для сброса пароля',
+      emailLabel: 'Адрес электронной почты',
+      emailPlaceholder: 'example@cvera.net',
+      sendingText: 'Отправка...',
+      sendButton: 'Отправить ссылку для сброса пароля',
+      backToLogin: '← Вернуться к входу',
+      emailSentTitle: 'Письмо отправлено!',
+      checkSpam: 'Если вы не получили письмо, проверьте папку спам',
+      tryAgain: 'Попробовать снова с другой почтой',
+      backToLoginButton: 'Вернуться к входу',
+      errorMessage: 'Произошла ошибка. Пожалуйста, попробуйте снова.',
+    }
+  }[siteLanguage];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +85,7 @@ export default function ForgotPasswordPage() {
       }
     } catch (error) {
       setIsSuccess(false);
-      setMessage('Bir xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.');
+      setMessage(content.errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -60,10 +108,10 @@ export default function ForgotPasswordPage() {
               CVERA
             </Link>
             <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-              Şifrəni Unutmusunuz?
+              {content.title}
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              E-poçt ünvanınızı daxil edin, şifrə yeniləmə linki göndərək
+              {content.subtitle}
             </p>
           </div>
 
@@ -71,7 +119,7 @@ export default function ForgotPasswordPage() {
             <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                  E-poçt ünvanı
+                  {content.emailLabel}
                 </label>
                 <input
                   id="email"
@@ -82,7 +130,7 @@ export default function ForgotPasswordPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="numune@cvera.net"
+                  placeholder={content.emailPlaceholder}
                 />
               </div>
 
@@ -112,10 +160,10 @@ export default function ForgotPasswordPage() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Göndərilir...
+                      {content.sendingText}
                     </div>
                   ) : (
-                    'Şifrə Yeniləmə Linki Göndər'
+                    content.sendButton
                   )}
                 </button>
               </div>
@@ -125,7 +173,7 @@ export default function ForgotPasswordPage() {
                   href="/auth/login"
                   className="text-blue-600 hover:text-blue-700 text-sm font-medium"
                 >
-                  ← Girişə qayıt
+                  {content.backToLogin}
                 </Link>
               </div>
             </form>
@@ -142,10 +190,10 @@ export default function ForgotPasswordPage() {
               </div>
 
               <div className="space-y-2">
-                <h3 className="text-lg font-medium text-gray-900">E-poçt Göndərildi!</h3>
+                <h3 className="text-lg font-medium text-gray-900">{content.emailSentTitle}</h3>
                 <p className="text-sm text-gray-600">{message}</p>
                 <p className="text-xs text-gray-500">
-                  E-poçt almadınızsa spam qovluğunu yoxlayın
+                  {content.checkSpam}
                 </p>
               </div>
 
@@ -158,14 +206,14 @@ export default function ForgotPasswordPage() {
                   }}
                   className="w-full text-blue-600 hover:text-blue-700 text-sm font-medium"
                 >
-                  Başqa e-poçt ilə yenidən cəhd et
+                  {content.tryAgain}
                 </button>
 
                 <Link
                   href="/auth/login"
                   className="block w-full text-center py-2 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
                 >
-                  Girişə qayıt
+                  {content.backToLoginButton}
                 </Link>
               </div>
             </motion.div>

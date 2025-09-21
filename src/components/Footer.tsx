@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import SocialShare from './SocialShare';
+import SocialShare from '@/components/SocialShare';
 import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 
 export default function Footer() {
@@ -39,6 +39,21 @@ export default function Footer() {
       contact: 'Contact',
       copyright: 'All rights reserved.',
       platform: 'CV creation platform with LinkedIn and AI integration.'
+    },
+    russian: {
+      description: 'Создавайте профессиональные резюме с интеграцией LinkedIn и поддержкой ИИ.',
+      followUs: 'Подписывайтесь:',
+      services: 'Услуги',
+      createCV: 'Создать резюме',
+      templates: 'Шаблоны резюме',
+      pricing: 'Тарифы',
+      general: 'Общее',
+      faq: 'Часто задаваемые вопросы',
+      terms: 'Условия обслуживания',
+      privacy: 'Политика конфиденциальности',
+      contact: 'Контакты',
+      copyright: 'Все права защищены.',
+      platform: 'Платформа создания резюме с интеграцией LinkedIn и ИИ.'
     }
   };
 

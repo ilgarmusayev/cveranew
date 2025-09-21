@@ -31,9 +31,10 @@ export default function Header({
 }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showTranslationPanel, setShowTranslationPanel] = useState(false);
+  const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
   const router = useRouter();
   const { user, logout } = useAuth();
-  const { siteLanguage, toggleSiteLanguage } = useSiteLanguage();
+  const { siteLanguage, setSiteLanguage } = useSiteLanguage();
 
   // Header mətnləri
   const labels = {
@@ -54,10 +55,45 @@ export default function Header({
       register: 'Register',
       aiTranslate: 'AI Translate',
       aiTranslatePanel: 'AI Translation Panel'
+    },
+    russian: {
+      dashboard: 'Панель',
+      welcome: 'Добро пожаловать',
+      logout: 'Выход',
+      login: 'Вход',
+      register: 'Регистрация',
+      aiTranslate: 'ИИ Перевод',
+      aiTranslatePanel: 'Панель ИИ перевода'
     }
   };
 
   const content = labels[siteLanguage];
+
+  // Language helper function
+  const getLanguageDisplay = (lang: 'azerbaijani' | 'english' | 'russian') => {
+    const displays = {
+      azerbaijani: { flag: '🇦🇿', code: 'AZ', name: 'Azərbaycan' },
+      english: { flag: '🇺🇸', code: 'EN', name: 'English' },
+      russian: { flag: '🇷🇺', code: 'RU', name: 'Русский' }
+    };
+    return displays[lang];
+  };
+
+  // Language menu functions
+  const toggleLanguageMenu = () => {
+    console.log('🌐 Language menu toggled. Current state:', isLanguageMenuOpen);
+    setIsLanguageMenuOpen(!isLanguageMenuOpen);
+  };
+
+  const closeLanguageMenu = () => {
+    setIsLanguageMenuOpen(false);
+  };
+
+  const handleLanguageChange = (language: 'azerbaijani' | 'english' | 'russian') => {
+    console.log('🌐 Language changed to:', language);
+    setSiteLanguage(language);
+    setIsLanguageMenuOpen(false);
+  };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -66,6 +102,26 @@ export default function Header({
   const handleLogout = () => {
     logout();
   };
+
+  // Handle clicks outside language dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      const languageMenu = document.querySelector('[data-language-menu]');
+      
+      if (languageMenu && !languageMenu.contains(target)) {
+        setIsLanguageMenuOpen(false);
+      }
+    };
+
+    if (isLanguageMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isLanguageMenuOpen]);
 
   // Handle mobile menu interactions
   useEffect(() => {
@@ -117,17 +173,73 @@ export default function Header({
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-3 lg:space-x-4 xl:space-x-6 flex-shrink-0">
-            {/* Language Switcher */}
-            <button
-              onClick={toggleSiteLanguage}
-              className="flex items-center px-3 lg:px-4 py-2 text-xs lg:text-sm font-medium text-white bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg hover:bg-white/20 transition-all duration-200"
-              title={siteLanguage === 'azerbaijani' ? 'Switch to English' : 'Azərbaycana keç'}
-            >
-              <svg className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-              </svg>
-              {siteLanguage === 'azerbaijani' ? 'EN' : 'AZ'}
-            </button>
+            {/* Language Dropdown */}
+            <div className="relative" data-language-menu>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('🔍 Language button clicked');
+                  toggleLanguageMenu();
+                }}
+                className="flex items-center px-3 lg:px-4 py-2 text-xs lg:text-sm font-medium text-white bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg hover:bg-white/20 transition-all duration-200"
+                title="Dili dəyişdir / Change language / Изменить язык"
+              >
+                <span className="mr-1 lg:mr-2 text-sm">
+                  {getLanguageDisplay(siteLanguage).flag}
+                </span>
+                <span className="hidden sm:inline">
+                  {getLanguageDisplay(siteLanguage).code}
+                </span>
+            
+                <svg 
+                  className={`w-3 h-3 ml-1 transition-transform duration-200 ${isLanguageMenuOpen ? 'rotate-180' : ''}`} 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {/* Language Dropdown Menu */}
+              {isLanguageMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-2xl border border-gray-200 py-1 z-[9999]">
+                  <div className="px-3 py-2 text-xs text-gray-600 font-bold border-b border-gray-100">
+                   {siteLanguage === 'azerbaijani' ? 'Dil seçin' : siteLanguage === 'english' ? 'Select Language' : 'Выберите язык'}
+                  </div>
+                  
+                  {(['azerbaijani', 'english', 'russian'] as const).map((lang) => {
+                    const langData = getLanguageDisplay(lang);
+                    return (
+                      <button
+                        key={lang}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log('🌐 Language option clicked:', lang);
+                          handleLanguageChange(lang);
+                        }}
+                        className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors flex items-center space-x-3 ${
+                          siteLanguage === lang ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                        }`}
+                      >
+                        <span className="text-lg">{langData.flag}</span>
+                        <div className="flex-1">
+                          <div className="font-medium">{langData.name}</div>
+                          <div className="text-xs text-gray-500">{langData.code}</div>
+                        </div>
+                        {siteLanguage === lang && (
+                          <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
             {/* AI Translate Button */}
             {showAITranslate && cvData && onCVUpdate && onLanguageChange && (
@@ -233,19 +345,70 @@ export default function Header({
             <div className="absolute top-full left-0 right-0 bg-gradient-to-r from-blue-600 to-blue-700 border-t border-blue-500 shadow-lg z-50 md:hidden w-full">
               <div className="px-4 py-4 w-full">
                 <div className="flex flex-col space-y-3 w-full max-w-none">
-                  {/* Language Switcher for Mobile */}
-                  <button
-                    onClick={() => {
-                      toggleSiteLanguage();
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="w-full bg-white/10 hover:bg-white/20 text-white px-4 py-3 rounded-lg font-medium transition-all duration-200 text-center flex items-center justify-center border border-white/20"
-                  >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-                    </svg>
-                    {siteLanguage === 'azerbaijani' ? 'Switch to English' : 'Azərbaycana keç'}
-                  </button>
+                  {/* Language Dropdown for Mobile */}
+                  <div className="relative" data-language-menu-mobile>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleLanguageMenu();
+                      }}
+                      className="w-full bg-white/10 hover:bg-white/20 text-white px-4 py-3 rounded-lg font-medium transition-all duration-200 text-center flex items-center justify-center border border-white/20"
+                    >
+                      <span className="mr-2 text-lg">
+                        {getLanguageDisplay(siteLanguage).flag}
+                      </span>
+                      <span className="mr-2">
+                        {getLanguageDisplay(siteLanguage).name}
+                      </span>
+                      <svg 
+                        className={`w-4 h-4 transition-transform duration-200 ${isLanguageMenuOpen ? 'rotate-180' : ''}`} 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+
+                    {/* Mobile Language Dropdown Menu */}
+                    {isLanguageMenuOpen && (
+                      <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-lg shadow-2xl border border-gray-200 py-1 z-[9999]">
+                        <div className="px-3 py-2 text-xs text-gray-600 font-bold border-b border-gray-100">
+                         {siteLanguage === 'azerbaijani' ? 'Dil seçin' : siteLanguage === 'english' ? 'Select Language' : 'Выберите язык'}
+                        </div>
+                        
+                        {(['azerbaijani', 'english', 'russian'] as const).map((lang) => {
+                          const langData = getLanguageDisplay(lang);
+                          return (
+                            <button
+                              key={lang}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleLanguageChange(lang);
+                                setIsMobileMenuOpen(false);
+                              }}
+                              className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors flex items-center space-x-3 ${
+                                siteLanguage === lang ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                              }`}
+                            >
+                              <span className="text-lg">{langData.flag}</span>
+                              <div className="flex-1">
+                                <div className="font-medium">{langData.name}</div>
+                                <div className="text-xs text-gray-500">{langData.code}</div>
+                              </div>
+                              {siteLanguage === lang && (
+                                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
 
                   {/* AI Translate Button for Mobile */}
                   {showAITranslate && cvData && onCVUpdate && onLanguageChange && (
@@ -340,7 +503,6 @@ export default function Header({
               <CVTranslationPanel
                 cvData={cvData}
                 currentLanguage={currentLanguage}
-                uiLanguage={siteLanguage}
                 onCVUpdate={onCVUpdate}
                 onLanguageChange={onLanguageChange}
                 onClose={() => setShowTranslationPanel(false)}

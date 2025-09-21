@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { apiClient } from '@/lib/api';
 import { useNotification } from '@/components/ui/Toast';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 import Link from 'next/link';
 import StandardHeader from '@/components/ui/StandardHeader';
 import Footer from '@/components/Footer';
@@ -18,6 +19,7 @@ interface CV {
 }
 
 export default function CVListPage() {
+  const { siteLanguage } = useSiteLanguage();
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [cvs, setCvs] = useState<CV[]>([]);
@@ -29,6 +31,84 @@ export default function CVListPage() {
     title: ''
   });
   const { showSuccess, showError, showWarning } = useNotification();
+
+  // Site language mətnləri
+  const labels = {
+    azerbaijani: {
+      title: 'Mənim CV-lərim',
+      subtitle: 'Bütün CV-lərinizi görün və idarə edin',
+      created: 'Yaradılıb',
+      lastUpdated: 'Son yenilənmə',
+      edit: 'Redaktə',
+      delete: 'Silin',
+      deleteConfirm: 'Əminsiniz?',
+      deleteConfirmText: 'silmək istədiyinizə əminsiniz?',
+      irreversibleAction: 'Bu əməliyyatı geri qaytarmaq mümkün olmayacaq.',
+      cancel: 'Ləğv edin',
+      confirmDelete: 'Silin',
+      deleteSuccess: 'CV uğurla silindi',
+      deleteError: 'CV silinərkən xəta baş verdi',
+      loading: 'Yüklənir...',
+      loadingError: 'CV-lər yüklənərkən xəta baş verdi',
+      deleteButton: 'CV-ni silin',
+      noPermission: 'CV silmək üçün Premium abunəlik lazımdır',
+      totalCVs: 'Cəmi CV-lər',
+      refreshCVs: 'CV-ləri yeniləyin',
+      refreshing: 'Yenilənir...',
+      createNewCV: 'Yeni CV yaradın',
+      backToDashboard: 'Dashboard-a qayıt'
+    },
+    english: {
+      title: 'My CVs',
+      subtitle: 'View and manage all your CVs',
+      created: 'Created',
+      lastUpdated: 'Last updated',
+      edit: 'Edit',
+      delete: 'Delete',
+      deleteConfirm: 'Are you sure?',
+      deleteConfirmText: 'you want to delete?',
+      irreversibleAction: 'This action cannot be undone.',
+      cancel: 'Cancel',
+      confirmDelete: 'Delete',
+      deleteSuccess: 'CV successfully deleted',
+      deleteError: 'Error occurred while deleting CV',
+      loading: 'Loading...',
+      loadingError: 'Error occurred while loading CVs',
+      deleteButton: 'Delete CV',
+      noPermission: 'Premium subscription required to delete CVs',
+      totalCVs: 'Total CVs',
+      refreshCVs: 'Refresh CVs',
+      refreshing: 'Refreshing...',
+      createNewCV: 'Create new CV',
+      backToDashboard: 'Back to Dashboard'
+    },
+    russian: {
+      title: 'Мои резюме',
+      subtitle: 'Просмотр и управление всеми вашими резюме',
+      created: 'Создано',
+      lastUpdated: 'Последнее обновление',
+      edit: 'Редактировать',
+      delete: 'Удалить',
+      deleteConfirm: 'Вы уверены?',
+      deleteConfirmText: 'вы хотите удалить?',
+      irreversibleAction: 'Это действие нельзя отменить.',
+      cancel: 'Отмена',
+      confirmDelete: 'Удалить',
+      deleteSuccess: 'Резюме успешно удалено',
+      deleteError: 'Произошла ошибка при удалении резюме',
+      loading: 'Загрузка...',
+      loadingError: 'Произошла ошибка при загрузке резюме',
+      deleteButton: 'Удалить резюме',
+      noPermission: 'Для удаления резюме требуется премиум подписка',
+      totalCVs: 'Всего резюме',
+      refreshCVs: 'Обновить резюме',
+      refreshing: 'Обновление...',
+      createNewCV: 'Создать новое резюме',
+      backToDashboard: 'Вернуться к панели управления'
+    }
+  };
+
+  const content = labels[siteLanguage];
 
   // Check if user can delete CVs based on tier
   const canDeleteCV = () => {
@@ -70,7 +150,7 @@ export default function CVListPage() {
         localStorage.removeItem('accessToken');
         router.push('/auth/login');
       } else {
-        setError('CV-lər yüklənərkən xəta baş verdi');
+        setError(content.loadingError);
       }
     } finally {
       setLoading(false);
@@ -96,7 +176,7 @@ export default function CVListPage() {
     // Check if user has permission to delete CVs
     if (!canDeleteCV()) {
       showWarning(
-        'CV silmə funksiyası yalnız Premium istifadəçilər üçün mövcuddur. Premium plana keçmək üçün profil səhifənizə daxil olun.',
+        content.noPermission,
         'Premium Funksiya'
       );
       return;
@@ -114,18 +194,18 @@ export default function CVListPage() {
       await apiClient.delete(`/api/cv/${deleteModal.cvId}`);
       setDeleteModal({ show: false, cvId: '', title: '' });
       await fetchCVs(); // Reload the list
-      showSuccess('CV uğurla silindi');
+      showSuccess(content.deleteSuccess);
     } catch (error: any) {
       console.error('❌ CV silmə xətası:', error);
       
       // Handle specific error codes
       if (error?.response?.status === 403) {
         showWarning(
-          'CV silmə funksiyası yalnız Premium istifadəçilər üçün mövcuddur. Premium plana keçmək üçün profil səhifənizə daxil olun.',
+          content.noPermission,
           'Premium Funksiya'
         );
       } else {
-        showError('CV silinərkən xəta baş verdi');
+        showError(content.deleteError);
       }
       
       setDeleteModal({ show: false, cvId: '', title: '' });
@@ -137,7 +217,7 @@ export default function CVListPage() {
       <div className="app-background flex items-center justify-center">
         <div className="bg-white rounded-3xl p-8 backdrop-blur-sm border border-white/20">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600 text-center">Yüklənir...</p>
+          <p className="mt-4 text-gray-600 text-center">{content.loading}</p>
         </div>
       </div>
     );
@@ -156,8 +236,8 @@ export default function CVListPage() {
           <div className=" rounded-3xl p-8 lg:p-12">
             {/* Title */}
             <div className="text-center mb-12">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">CV-lərim</h1>
-              <p className="text-xl text-gray-600">Bütün CV-lərinizi görün və idarə edin</p>
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">{content.title}</h1>
+              <p className="text-xl text-gray-600">{content.subtitle}</p>
             </div>
 
             {/* Error State */}
@@ -176,7 +256,7 @@ export default function CVListPage() {
             <div className="bg-blue-50 rounded-2xl  shadow-lg  p-6 mb-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Cəmi CV-lər</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">{content.totalCVs}</h3>
                   <p className="text-3xl font-bold text-blue-600">{cvs.length}</p>
                 </div>
                 <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center">
@@ -205,13 +285,13 @@ export default function CVListPage() {
                             <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-4 8v2m0-2v2m0-2h8a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h8z" />
                             </svg>
-                            <span className="truncate">Yaradılıb: {new Date(cv.createdAt).toLocaleDateString('az-AZ')}</span>
+                            <span className="truncate">{content.created}: {new Date(cv.createdAt).toLocaleDateString('az-AZ')}</span>
                           </p>
                           <p className="flex items-center">
                             <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                             </svg>
-                            <span className="truncate">Yenilənib: {new Date(cv.updatedAt).toLocaleDateString('az-AZ')}</span>
+                            <span className="truncate">{content.lastUpdated}: {new Date(cv.updatedAt).toLocaleDateString('az-AZ')}</span>
                           </p>
                         </div>
                       </div>
@@ -226,7 +306,7 @@ export default function CVListPage() {
                           <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
-                          Redaktə et
+                          {content.edit}
                         </div>
                       </button>
 
@@ -238,8 +318,8 @@ export default function CVListPage() {
                             : 'text-gray-400 cursor-not-allowed'
                         }`}
                         title={canDeleteCV() 
-                          ? "CV-ni sil" 
-                          : "CV silmə Premium istifadəçilər üçün mövcuddur"
+                          ? content.deleteButton 
+                          : content.noPermission
                         }
                         disabled={!canDeleteCV()}
                       >
@@ -306,14 +386,14 @@ export default function CVListPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Yenilənir...
+                    {content.refreshing}
                   </div>
                 ) : (
                   <div className="flex  items-center ">
                     <svg className="w-4 h-4 mr-2 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                    CV-ləri yenilə
+                    {content.refreshCVs}
                   </div>
                 )}
               </button>
@@ -327,22 +407,22 @@ export default function CVListPage() {
       {deleteModal.show && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Silmək üçün təsdiq edin</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">{content.deleteConfirm}</h3>
             <p className="text-sm text-gray-600 mb-4">
-              "{deleteModal.title}" CV-ni silmək istədiyinizə əminsiniz? Bu əməliyyatı geri qaytarmaq mümkün olmayacaq.
+              "{deleteModal.title}" CV-ni {content.deleteConfirmText} {content.irreversibleAction}
             </p>
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => setDeleteModal({ show: false, cvId: '', title: '' })}
                 className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-200"
               >
-                İmtina et
+                {content.cancel}
               </button>
               <button
                 onClick={confirmDelete}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200"
               >
-                Bəli, sil
+                {content.confirmDelete}
               </button>
             </div>
           </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 import StandardHeader from '@/components/ui/StandardHeader';
 import Footer from '@/components/Footer';
 import PromoCodeSection from '@/components/PromoCodeSection'; // Import the PromoCodeSection component
@@ -15,57 +16,204 @@ interface PricingPlan {
   popular?: boolean;
 }
 
-const plans: PricingPlan[] = [
-  {
-    id: 'free',
-    name: 'Pulsuz',
-    price: 0.00,
-    features: [
-      'Ümumi 2 CV yaratma ',
-      'Pulsuz şablonlar (Basic və Resumonk Bold)',
-      'Yalnız PDF formatında yükləmə',
-      'LinkedIn profilindən idxal',
-      'E-poçt dəstəyi',
-
-    ]
-  },
-  {
-    id: 'pro',
-    name: 'Populyar',
-    price: 2.99, // Updated pricing
-    features: [
-      'Gündə 5 CV yaratma ',
-      'Pulsuz və Populyar səviyyə şablonlar',
-      'PDF və DOCX formatında yükləmə',
-      'Saytda texniki dəstək',
-      'LinkedIn profilindən idxal',
-      'AI ilə CV təkmilləşdirmə',
-      'Professional şablon kolleksiyası',
-
-      'Prioritet dəstək xidməti'
-    ],
-    popular: true
-  },
-  {
-    id: 'premium',
-    name: 'Premium',
-    price: 4.99, // Updated pricing
-    features: [
-      'Limitsiz CV yaratma',
-      'Bütün şablonlar (Premium daxil)',
-      'PDF və DOCX formatında yükləmə',
-      'Saytda texniki dəstək',
-      'LinkedIn profilindən idxal',
-      'AI ilə CV təkmilləşdirmə',
-      'Professional şablon kolleksiyası',
-
-      'Prioritet dəstək xidməti'
-    ]
-  }
-];
-
 export default function PricingPage() {
+  const { siteLanguage } = useSiteLanguage();
   const router = useRouter();
+  
+  // Site language mətnləri
+  const labels = {
+    azerbaijani: {
+      pageTitle: 'Qiymətlər',
+      pageSubtitle: 'CV yaratmaq üçün ən uyğun planınızı seçin',
+      planFree: 'Pulsuz',
+      planPopular: 'Populyar',
+      planPremium: 'Premium',
+      popularBadge: 'Populyar',
+      pricePerMonth: '/ay',
+      startNow: 'İndi başlayın',
+      currentPlan: 'Hazırki plan',
+      choosePlan: 'Planı seçin',
+      // Free plan features
+      freeCVLimit: 'Ümumi 2 CV yaratma',
+      freeTemplates: 'Pulsuz şablonlar (Basic və Resumonk Bold)',
+      freePDFOnly: 'Yalnız PDF formatında yükləmə',
+      linkedinImport: 'LinkedIn profilindən idxal',
+      emailSupport: 'E-poçt dəstəyi',
+      // Popular plan features
+      popularCVLimit: 'Gündə 5 CV yaratma',
+      popularTemplates: 'Pulsuz və Populyar səviyyə şablonlar',
+      pdfDocxFormats: 'PDF və DOCX formatında yükləmə',
+      onlineSupport: 'Saytda texniki dəstək',
+      aiCVImprovement: 'AI ilə CV təkmilləşdirmə',
+      professionalCollection: 'Professional şablon kolleksiyası',
+      prioritySupport: 'Prioritet dəstək xidməti',
+      // Premium plan features
+      unlimitedCV: 'Limitsiz CV yaratma',
+      allTemplates: 'Bütün şablonlar (Premium daxil)',
+      // Error messages
+      errorTitle: 'Xəta',
+      loadingMessage: 'Yüklənir...',
+      // Cancel subscription
+      cancelSubscription: 'Abunəliyi ləğv et',
+      cancelLoading: 'Ləğv edilir...',
+      cancelConfirmMessage: 'Abunəliyi ləğv etmək istədiyinizə əminsiniz?',
+      cancelSuccess: 'Abunəlik uğurla ləğv edildi',
+      cancelError: 'Abunəlik ləğv edilərkən xəta baş verdi',
+      // SEO mətnləri
+      pageDescription: 'CVERA-da ən uyğun planı seçin. Pulsuz, Populyar və Premium planlar ilə professional CV yaradın. AI dəstəyi, premium şablonlar və daha çox imkanlar.',
+      bestChoice: 'Ən Yaxşı Seçim',
+      // Promo code mətnləri
+      promoTitle: 'Promokod istifadə edin',
+      promoDescription: 'Keçərli promokodunuz varsa, aşağıdakı sahəyə daxil edərək premium paketləri pulsuz əldə edə bilərsiniz',
+      // Subscription məlumatları
+      currentSubscription: 'Cari Abunəlik:',
+      subscriptionCanceled: '⚠️ Abunəlik ləğv edilib və yuxarıdakı tarixdə bitəcək'
+    },
+    english: {
+      pageTitle: 'Pricing',
+      pageSubtitle: 'Choose the most suitable plan to create your CV',
+      planFree: 'Free',
+      planPopular: 'Popular',
+      planPremium: 'Premium',
+      popularBadge: 'Popular',
+      pricePerMonth: '/month',
+      startNow: 'Get Started',
+      currentPlan: 'Current Plan',
+      choosePlan: 'Choose Plan',
+      // Free plan features
+      freeCVLimit: 'Create up to 2 CVs total',
+      freeTemplates: 'Free templates (Basic and Resumonk Bold)',
+      freePDFOnly: 'PDF format download only',
+      linkedinImport: 'LinkedIn profile import',
+      emailSupport: 'Email support',
+      // Popular plan features
+      popularCVLimit: 'Create 5 CVs per day',
+      popularTemplates: 'Free and Popular tier templates',
+      pdfDocxFormats: 'PDF and DOCX format downloads',
+      onlineSupport: 'Online technical support',
+      aiCVImprovement: 'AI CV enhancement',
+      professionalCollection: 'Professional template collection',
+      prioritySupport: 'Priority support service',
+      // Premium plan features
+      unlimitedCV: 'Unlimited CV creation',
+      allTemplates: 'All templates (including Premium)',
+      // Error messages
+      errorTitle: 'Error',
+      loadingMessage: 'Loading...',
+      // Cancel subscription
+      cancelSubscription: 'Cancel subscription',
+      cancelLoading: 'Canceling...',
+      cancelConfirmMessage: 'Are you sure you want to cancel your subscription?',
+      cancelSuccess: 'Subscription successfully canceled',
+      cancelError: 'Error occurred while canceling subscription',
+      // SEO texts
+      pageDescription: 'Choose the most suitable plan at CVERA. Create professional CVs with Free, Popular and Premium plans. AI support, premium templates and more features.',
+      bestChoice: 'Best Choice',
+      // Promo code texts
+      promoTitle: 'Use promo code',
+      promoDescription: 'If you have a valid promo code, enter it below to get premium packages for free',
+      // Subscription information
+      currentSubscription: 'Current Subscription:',
+      subscriptionCanceled: '⚠️ Subscription has been canceled and will end on the above date'
+    },
+    russian: {
+      pageTitle: 'Тарифы',
+      pageSubtitle: 'Выберите наиболее подходящий план для создания резюме',
+      planFree: 'Бесплатный',
+      planPopular: 'Популярный',
+      planPremium: 'Премиум',
+      popularBadge: 'Популярный',
+      pricePerMonth: '/месяц',
+      startNow: 'Начать',
+      currentPlan: 'Текущий план',
+      choosePlan: 'Выбрать план',
+      // Free plan features
+      freeCVLimit: 'Создать до 2 резюме всего',
+      freeTemplates: 'Бесплатные шаблоны (Basic и Resumonk Bold)',
+      freePDFOnly: 'Только скачивание в формате PDF',
+      linkedinImport: 'Импорт профиля LinkedIn',
+      emailSupport: 'Поддержка по электронной почте',
+      // Popular plan features
+      popularCVLimit: 'Создавать 5 резюме в день',
+      popularTemplates: 'Шаблоны бесплатного и популярного уровня',
+      pdfDocxFormats: 'Скачивание в форматах PDF и DOCX',
+      onlineSupport: 'Онлайн техническая поддержка',
+      aiCVImprovement: 'Улучшение резюме с помощью ИИ',
+      professionalCollection: 'Коллекция профессиональных шаблонов',
+      prioritySupport: 'Приоритетная служба поддержки',
+      // Premium plan features
+      unlimitedCV: 'Неограниченное создание резюме',
+      allTemplates: 'Все шаблоны (включая Премиум)',
+      // Error messages
+      errorTitle: 'Ошибка',
+      loadingMessage: 'Загрузка...',
+      // Cancel subscription
+      cancelSubscription: 'Отменить подписку',
+      cancelLoading: 'Отмена...',
+      cancelConfirmMessage: 'Вы уверены, что хотите отменить подписку?',
+      cancelSuccess: 'Подписка успешно отменена',
+      cancelError: 'Произошла ошибка при отмене подписки',
+      // SEO texts
+      pageDescription: 'Выберите наиболее подходящий план в CVERA. Создавайте профессиональные резюме с планами Бесплатный, Популярный и Премиум. Поддержка ИИ, премиум шаблоны и больше возможностей.',
+      bestChoice: 'Лучший выбор',
+      // Promo code texts
+      promoTitle: 'Использовать промокод',
+      promoDescription: 'Если у вас есть действительный промокод, введите его ниже, чтобы получить премиум пакеты бесплатно',
+      // Subscription information
+      currentSubscription: 'Текущая подписка:',
+      subscriptionCanceled: '⚠️ Подписка была отменена и закончится в указанную дату'
+    }
+  };
+
+  const content = labels[siteLanguage];
+
+  // Site language-ə görə pricing planları
+  const plans: PricingPlan[] = [
+    {
+      id: 'free',
+      name: content.planFree,
+      price: 0.00,
+      features: [
+        content.freeCVLimit,
+        content.freeTemplates,
+        content.freePDFOnly,
+        content.linkedinImport,
+        content.emailSupport,
+      ]
+    },
+    {
+      id: 'pro',
+      name: content.planPopular,
+      price: 2.99,
+      features: [
+        content.popularCVLimit,
+        content.popularTemplates,
+        content.pdfDocxFormats,
+        content.onlineSupport,
+        content.linkedinImport,
+        content.aiCVImprovement,
+        content.professionalCollection,
+        content.prioritySupport
+      ],
+      popular: true
+    },
+    {
+      id: 'premium',
+      name: content.planPremium,
+      price: 4.99,
+      features: [
+        content.unlimitedCV,
+        content.allTemplates,
+        content.pdfDocxFormats,
+        content.onlineSupport,
+        content.linkedinImport,
+        content.aiCVImprovement,
+        content.professionalCollection,
+        content.prioritySupport
+      ]
+    }
+  ];
+
   const [loading, setLoading] = useState<string | null>(null);
   const [userTier, setUserTier] = useState<string>('Free');
   const [error, setError] = useState('');
@@ -96,15 +244,17 @@ export default function PricingPage() {
 
     // Add breadcrumb data
     const breadcrumbData = generateBreadcrumbData([
-      { name: 'Ana Səhifə', url: 'https://cvera.net' },
-      { name: 'Qiymətlər', url: 'https://cvera.net/pricing' }
+      { name: siteLanguage === 'azerbaijani' ? 'Ana Səhifə' : 'Home', url: 'https://cvera.net' },
+      { name: content.pageTitle, url: 'https://cvera.net/pricing' }
     ]);
     addStructuredData(breadcrumbData, 'BreadcrumbList', 'structured-data-breadcrumb');
 
     // Add service offers structured data
     const serviceOffersData = {
-      name: "CVERA CV Yaratma Xidmətləri",
-      description: "AI əsaslı peşəkar CV yaratma xidmətləri - Pulsuz, Populyar və Premium planlar",
+      name: siteLanguage === 'azerbaijani' ? "CVERA CV Yaratma Xidmətləri" : "CVERA CV Creation Services",
+      description: siteLanguage === 'azerbaijani' 
+        ? "AI əsaslı peşəkar CV yaratma xidmətləri - Pulsuz, Populyar və Premium planlar"
+        : "AI-powered professional CV creation services - Free, Popular and Premium plans",
       provider: {
         "@type": "Organization",
         name: "CVERA",
@@ -112,10 +262,10 @@ export default function PricingPage() {
       },
       hasOfferCatalog: {
         "@type": "OfferCatalog",
-        name: "CV Yaratma Planları",
+        name: siteLanguage === 'azerbaijani' ? "CV Yaratma Planları" : "CV Creation Plans",
         itemListElement: plans.map(plan => ({
           "@type": "Offer",
-          name: `${plan.name} Plan`,
+          name: `${plan.name} ${siteLanguage === 'azerbaijani' ? 'Plan' : 'Plan'}`,
           description: `${plan.name} plan - ${plan.features.join(', ')}`,
           price: plan.price.toString(),
           priceCurrency: "AZN",
@@ -126,7 +276,7 @@ export default function PricingPage() {
           },
           itemOffered: {
             "@type": "Service",
-            name: `CV Yaratma - ${plan.name} Plan`,
+            name: `${siteLanguage === 'azerbaijani' ? 'CV Yaratma' : 'CV Creation'} - ${plan.name} Plan`,
             description: plan.features.join(', ')
           }
         }))
@@ -149,7 +299,7 @@ export default function PricingPage() {
         if (script) script.remove();
       });
     };
-  }, []);
+  }, [siteLanguage, plans]); // siteLanguage dəyişəndə structured data yenilənsin
 
   const loadUserInfo = useCallback(async (force = false) => {
     if (!force) setUserLoading(true);
@@ -362,14 +512,31 @@ export default function PricingPage() {
 
   // Function to get tier display name
   const getTierDisplayName = (tier: string) => {
-    const tierNames: { [key: string]: string } = {
-      'Free': 'Pulsuz',
-      'Pro': 'Populyar',
-      'Premium': 'Premium',
-      'Medium': 'Populyar', // Legacy support
-      'Orta': 'Populyar'    // Legacy support
+    const tierNames = {
+      azerbaijani: {
+        'Free': 'Pulsuz',
+        'Pro': 'Populyar',
+        'Premium': 'Premium',
+        'Medium': 'Populyar', // Legacy support
+        'Orta': 'Populyar'    // Legacy support
+      },
+      english: {
+        'Free': 'Free',
+        'Pro': 'Popular',
+        'Premium': 'Premium',
+        'Medium': 'Popular', // Legacy support
+        'Orta': 'Popular'    // Legacy support
+      },
+      russian: {
+        'Free': 'Бесплатный',
+        'Pro': 'Популярный',
+        'Premium': 'Премиум',
+        'Medium': 'Популярный', // Legacy support
+        'Orta': 'Популярный'    // Legacy support
+      }
     };
-    return tierNames[tier] || tier;
+    
+    return tierNames[siteLanguage][tier as keyof typeof tierNames.azerbaijani] || tier;
   };
 
   const currentUserPlanId = getCurrentPlanId(userTier);
@@ -394,10 +561,10 @@ export default function PricingPage() {
           {/* Hero Section */}
           <div className="text-center mb-12 sm:mb-16">
             <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-              Sizə Uyğun <span className="text-blue-600">Planı</span> Seçin
+              {content.pageTitle}
             </h1>
             <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Ehtiyaclarınıza uyğun planı seçin və peşəkar CV yaratmağa başlayın
+              {content.pageSubtitle}
             </p>
           </div>
 
@@ -420,7 +587,7 @@ export default function PricingPage() {
                   {isCurrentPlan && (
                       <div className="absolute -top-4 sm:-top-4 left-1/2 transform -translate-x-1/2 z-10">
                   <span className="bg-green-600 text-white px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap">
-                    Cari Paket
+                    {content.currentPlan}
                   </span>
                       </div>
                   )}
@@ -429,7 +596,7 @@ export default function PricingPage() {
                   {plan.popular && !isCurrentPlan && (
                       <div className="absolute -top-4 sm:-top-4 left-1/2 transform -translate-x-1/2 z-10">
                   <span className="bg-blue-600 text-white px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap">
-                    Ən Yaxşı Seçim
+                    {content.bestChoice}
                   </span>
                       </div>
                   )}
@@ -443,7 +610,7 @@ export default function PricingPage() {
         {plan.price === 0 ? `₼${plan.price}.00` : `₼${plan.price}`}
       </span>
                         {plan.price > 0 && (
-                            <span className="text-gray-600 ml-2">/ay</span>
+                            <span className="text-gray-600 ml-2">{content.pricePerMonth}</span>
                         )}
                       </div>
                     </div>
@@ -472,7 +639,7 @@ export default function PricingPage() {
                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
-                            Aktiv Paket
+                            {content.currentPlan}
                           </div>
                         </div>
                       ) : (
@@ -484,14 +651,14 @@ export default function PricingPage() {
                           {cancelLoading ? (
                             <div className="flex items-center justify-center">
                               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                              Ləğv edilir...
+                              {content.cancelLoading}
                             </div>
                           ) : (
                             <div className="flex items-center justify-center">
                               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                               </svg>
-                              Abunəliyi ləğv et
+                              {content.cancelSubscription}
                             </div>
                           )}
                         </button>
@@ -509,12 +676,12 @@ export default function PricingPage() {
                         {loading === plan.id ? (
                             <div className="flex items-center justify-center ">
                               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
-                              <span className="ml-2">Yüklənir...</span>
+                              <span className="ml-2">{content.loadingMessage}</span>
                             </div>
                         ) : plan.price === 0 ? (
-                            'Başla'
+                            content.startNow
                         ) : (
-                            'Seç'
+                            content.choosePlan
                         )}
                       </button>
                     )}
@@ -537,7 +704,7 @@ export default function PricingPage() {
                 </div>
                 <div>
                   <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
-                    Cari Abunəlik: {getTierDisplayName(userTier)}
+                    {content.currentSubscription} {getTierDisplayName(userTier)}
                   </h3>
                   <p className="text-lg text-blue-700 font-semibold">
                     📅 {getSubscriptionExpiration()}
@@ -548,7 +715,7 @@ export default function PricingPage() {
               {subscriptionDetails?.cancelAtPeriodEnd && (
                 <div className="mt-4 p-3 bg-yellow-100 rounded-lg border border-yellow-300">
                   <p className="text-yellow-800 text-sm font-medium">
-                    ⚠️ Abunəlik ləğv edilib və yuxarıdakı tarixdə bitəcək
+                    {content.subscriptionCanceled}
                   </p>
                 </div>
               )}
@@ -560,10 +727,10 @@ export default function PricingPage() {
         <div className="max-w-2xl mx-auto mt-16 bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Promokod istifadə edin
+              {content.promoTitle}
             </h2>
             <p className="text-gray-600">
-              Keçərli promokodunuz varsa, aşağıdakı sahəyə daxil edərək premium paketləri pulsuz əldə edə bilərsiniz
+              {content.promoDescription}
             </p>
           </div>
 

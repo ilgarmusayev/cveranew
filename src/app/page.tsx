@@ -8,9 +8,11 @@ import Link from 'next/link'
 import Footer from "@/components/Footer"
 import Header from "@/components/Header"
 import { generateStructuredData, organizationData, websiteData, serviceData, faqData } from '@/lib/structured-data'
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext'
 
 
 export default function Index2() {
+  const { siteLanguage } = useSiteLanguage();
   useEffect(() => {
     AOS.init({
       duration: 1000,
@@ -51,6 +53,229 @@ export default function Index2() {
       });
     };
   }, [])
+
+  // Site language mətnləri
+  const content = {
+    azerbaijani: {
+      // Hero section
+      title: 'Peşəkar CV-nizi',
+      subtitle: 'Süni intellektlə sürətli və fərdi CV hazırlayaraq karyeranızı zirvəyə daşıyın!',
+      createCVButton: 'İndi CV yaradın',
+      heroBadge: 'AI ƏSASLI PEŞƏKAR CV YARATMA PLATFORMASI',
+      heroAction: 'CVERA ilə yaradın!',
+      
+      // Features
+      featuresTitle: 'Niyə CVERA?',
+      linkedinImport: 'LinkedIn İdxal',
+      linkedinDesc: 'LinkedIn profilinizi bir kliklə idxal edin',
+      professionalTemplates: 'Peşəkar Şablonlar',
+      templatesDesc: '15+ müasir və professional CV şablonu',
+      quickDownload: 'Sürətli Yükləmə',
+      downloadDesc: 'PDF formatında yüksək keyfiyyətlə yükləyin',
+      
+      // Steps
+      stepsTitle: 'CVERA ilə 3 addımda peşəkar CV yaradın:',
+      step1: 'Məlumatlarınızı daxil edin',
+      step1Desc: 'LinkedIn idxal edin və ya əl ilə yazın',
+      step2: 'Şablon seçin',
+      step2Desc: 'Ən çox bəyənilən dizaynlardan birini seçin',
+      step3: 'CV-ni yükləyin',
+      step3Desc: 'PDF formatında peşəkar CV-nizi alın',
+      
+      // CTA
+      ctaTitle: 'Peşəkar CV-nizə bu gün başlayın!',
+      ctaButton: 'Pulsuz CV Yaradın',
+      templatesButton: 'Şablonlar',
+      trustIndicator1: '100-lərlə məmnun müştəri',
+      trustIndicator2: 'Təhlükəsiz və qorunan',
+      trustIndicator3: '2 milyondan çox yaradılmış CV',
+      
+      // Features section
+      featuresMainTitle: 'Sehrli Toxunuşlar',
+      featuresMainSubtitle: 'Müasir texnologiyalar və süni intellektin gücü ilə karyeranızda ən yaxşı nəticələri əldə edin.',
+      
+      // Interface section
+      interfaceTitle: 'Bizi Fərqləndirən Xüsusiyyətlər',
+      interfaceSubtitle: 'Beynəlxalq standartlara uyğun CV yaratma platforması',
+      
+      // Features details
+      aiTitle: 'Süni İntellekt Dəstəyi',
+      aiDescription: 'Milyonlarla uğurlu CV-nin məlumatları ilə təkmilləşən süni intellekt, CV-nizi fərdi və ən optimal formada hazırlayır.',
+      premiumTitle: 'Premium Şablon Kolleksiyası',
+      premiumDescription: 'HR mütəxəssisləri və peşəkar dizaynerlər tərəfindən hazırlanmış, göz oxşayan və funksional şablonlar işə qəbul prosesində sizə üstünlük qazandırır.',
+      linkedinTitle: 'LinkedIn-dən İdxal Sistemi',
+      linkedinDescription: 'LinkedIn profil məlumatlarınız avtomatik əlavə edilərək CV-niz sürətlə hazırlanır.',
+      
+      // Features section cards
+      feature1Title: 'Süni İntellekt',
+      feature1Description: 'Daim inkişaf edən Sİ funksiyaları ilə daha ağıllı və fərdiləşdirilmiş təcrübə əldə edin.',
+      feature2Title: 'Göz Oxşayan İnterfeys',
+      feature2Description: 'Müasir dizayn prinsipləri əsasında hazırlanmış interfeys, rahat istifadə təcrübəsi təqdim edir.',
+      feature3Title: 'Hiss Olunan Sürət',
+      feature3Description: 'Cloud texnologiyası ilə saniyələr ərzində PDF formatında peşəkar CV əldə edin.',
+      
+      // Steps section
+      howItWorksTitle: 'Necə İşləyir?',
+      registrationTitle: 'Qeydiyyat',
+      registrationDescription: 'E-poçt və ya LinkedIn hesabınızla qeydiyyatdan keçin',
+      linkedinImportTitle: 'LinkedIn Profil İdxalı',
+      linkedinImportDescription: 'LinkedIn profil linkinizi daxil edin və məlumatlarınızı cvnizə əlavə edin.',
+      downloadTitle: 'CV-ni Yükləyin',
+      downloadDescription: 'Şablon seçin və peşəkar CV-nizi PDF formatında yükləyin.',
+      
+      // Stats section
+      thisYearCVs: 'Bu il yaradılmış CV-lər',
+      successfulHiring: 'Uğurlu işə qəbul',
+      liveSupportService: 'Canlı Dəstək Xidməti',
+      templateSelection: 'Şablon seçimi',
+    },
+    english: {
+      // Hero section
+      title: 'Boost Your Career',
+      subtitle: 'Create a fast, personalized AI CV and take your career to the top!',
+      createCVButton: 'Create CV Now',
+      heroBadge: 'AI-POWERED PROFESSIONAL CV CREATION PLATFORM',
+      heroAction: 'with CVERA CVs!',
+      
+      // Features
+      featuresTitle: 'Why CVERA?',
+      linkedinImport: 'LinkedIn Import',
+      linkedinDesc: 'Import your LinkedIn profile with one click',
+      professionalTemplates: 'Professional Templates',
+      templatesDesc: '15+ modern and professional CV templates',
+      quickDownload: 'Quick Download',
+      downloadDesc: 'Download in high quality PDF format',
+      
+      // Steps
+      stepsTitle: 'Create professional CV with CVERA in 3 steps:',
+      step1: 'Enter your information',
+      step1Desc: 'Import from LinkedIn or write manually',
+      step2: 'Choose template',
+      step2Desc: 'Select one of the most liked designs',
+      step3: 'Download CV',
+      step3Desc: 'Get your professional CV in PDF format',
+      
+      // CTA
+      ctaTitle: 'Start your professional CV today!',
+      ctaButton: 'Create Free CV',
+      templatesButton: 'Templates',
+      trustIndicator1: 'Hundreds of satisfied customers',
+      trustIndicator2: 'Safe and secure',
+      trustIndicator3: 'Over 2 million CVs created',
+      
+      // Features section
+      featuresMainTitle: 'Magic Touches',
+      featuresMainSubtitle: 'Get the best results in your career with modern technologies and the power of artificial intelligence.',
+      
+      // Interface section
+      interfaceTitle: 'Features That Set Us Apart',
+      interfaceSubtitle: 'CV creation platform according to international standards',
+      
+      // Features details
+      aiTitle: 'Artificial Intelligence Support',
+      aiDescription: 'Artificial intelligence, improved with data from millions of successful CVs, prepares your CV in a personalized and optimal way.',
+      premiumTitle: 'Premium Template Collection',
+      premiumDescription: 'Eye-catching and functional templates prepared by HR specialists and professional designers give you an advantage in the recruitment process.',
+      linkedinTitle: 'LinkedIn Import System',
+      linkedinDescription: 'Your LinkedIn profile information is automatically added and your CV is prepared quickly.',
+      
+      // Features section cards
+      feature1Title: 'Artificial Intelligence',
+      feature1Description: 'Get a smarter and more personalized experience with constantly evolving AI functions.',
+      feature2Title: 'Eye-catching Interface',
+      feature2Description: 'Interface based on modern design principles provides a comfortable user experience.',
+      feature3Title: 'Felt Speed',
+      feature3Description: 'Get a professional CV in PDF format in seconds with cloud technology.',
+      
+      // Steps section
+      howItWorksTitle: 'How Does It Work?',
+      registrationTitle: 'Registration',
+      registrationDescription: 'Register with your email or LinkedIn account',
+      linkedinImportTitle: 'LinkedIn Profile Import',
+      linkedinImportDescription: 'Enter your LinkedIn profile link and add your information to your CV.',
+      downloadTitle: 'Download CV',
+      downloadDescription: 'Choose a template and download your professional CV in PDF format.',
+      
+      // Stats section
+      thisYearCVs: 'CVs created this year',
+      successfulHiring: 'Successful hiring',
+      liveSupportService: 'Live Support Service',
+      templateSelection: 'Template selection',
+    },
+    russian: {
+      // Hero section
+      title: 'Карьерный старт',
+      subtitle: 'Импортируйте данные из профиля LinkedIn напрямую или начните с нуля. Полностью бесплатно!',
+      createCVButton: 'Создать резюме сейчас',
+      heroBadge: 'ПЛАТФОРМА СОЗДАНИЯ ПРОФЕССИОНАЛЬНЫХ РЕЗЮМЕ НА ОСНОВЕ ИИ',
+      heroAction: 'с резюме от CVERA!',
+      
+      // Features
+      featuresTitle: 'Почему CVERA?',
+      linkedinImport: 'Импорт LinkedIn',
+      linkedinDesc: 'Импортируйте ваш профиль LinkedIn одним кликом',
+      professionalTemplates: 'Профессиональные шаблоны',
+      templatesDesc: '15+ современных и профессиональных шаблонов резюме',
+      quickDownload: 'Быстрая загрузка',
+      downloadDesc: 'Скачивайте в высоком качестве PDF формата',
+      
+      // Steps
+      stepsTitle: 'Создайте профессиональное резюме с CVERA в 3 шага:',
+      step1: 'Введите вашу информацию',
+      step1Desc: 'Импортируйте из LinkedIn или напишите вручную',
+      step2: 'Выберите шаблон',
+      step2Desc: 'Выберите один из самых популярных дизайнов',
+      step3: 'Скачайте резюме',
+      step3Desc: 'Получите ваше профессиональное резюме в PDF формате',
+      
+      // CTA
+      ctaTitle: 'Начните создавать профессиональное резюме сегодня!',
+      ctaButton: 'Создать бесплатное резюме',
+      templatesButton: 'Шаблоны',
+      trustIndicator1: 'Сотни довольных клиентов',
+      trustIndicator2: 'Безопасно и надежно',
+      trustIndicator3: 'Создано более 2 миллионов резюме',
+      
+      // Features section
+      featuresMainTitle: 'Волшебные прикосновения',
+      featuresMainSubtitle: 'Достигайте лучших результатов в карьере с помощью современных технологий и силы искусственного интеллекта.',
+      
+      // Interface section
+      interfaceTitle: 'Особенности, которые нас выделяют',
+      interfaceSubtitle: 'Платформа создания резюме в соответствии с международными стандартами',
+      
+      // Features details
+      aiTitle: 'Поддержка искусственного интеллекта',
+      aiDescription: 'Искусственный интеллект, усовершенствованный данными миллионов успешных резюме, готовит ваше резюме в персонализированном и оптимальном виде.',
+      premiumTitle: 'Коллекция премиум шаблонов',
+      premiumDescription: 'Привлекательные и функциональные шаблоны, подготовленные HR-специалистами и профессиональными дизайнерами, дают вам преимущество в процессе найма.',
+      linkedinTitle: 'Система импорта LinkedIn',
+      linkedinDescription: 'Информация из вашего профиля LinkedIn автоматически добавляется, и ваше резюме быстро готовится.',
+      
+      // Features section cards
+      feature1Title: 'Искусственный интеллект',
+      feature1Description: 'Получите более умный и персонализированный опыт с постоянно развивающимися функциями ИИ.',
+      feature2Title: 'Привлекательный интерфейс',
+      feature2Description: 'Интерфейс, основанный на современных принципах дизайна, обеспечивает комфортный пользовательский опыт.',
+      feature3Title: 'Ощутимая скорость',
+      feature3Description: 'Получите профессиональное резюме в формате PDF за секунды с помощью облачных технологий.',
+      
+      // Steps section
+      howItWorksTitle: 'Как это работает?',
+      registrationTitle: 'Регистрация',
+      registrationDescription: 'Зарегистрируйтесь с помощью электронной почты или учетной записи LinkedIn',
+      linkedinImportTitle: 'Импорт профиля LinkedIn',
+      linkedinImportDescription: 'Введите ссылку на ваш профиль LinkedIn и добавьте вашу информацию в резюме.',
+      downloadTitle: 'Скачать резюме',
+      downloadDescription: 'Выберите шаблон и скачайте ваше профессиональное резюме в формате PDF.',
+      
+      // Stats section
+      thisYearCVs: 'Резюме, созданных в этом году',
+      successfulHiring: 'Успешное трудоустройство',
+      liveSupportService: 'Служба поддержки в реальном времени',
+      templateSelection: 'Выбор шаблона',
+    }
+  }[siteLanguage];
 
   const containerVariants = {
     hidden: {opacity: 0},
@@ -116,11 +341,11 @@ export default function Index2() {
                   <div className="inline-block mb-4 sm:mb-6">
                   <span
                       className="px-4 sm:px-6 py-2 bg-blue-100 text-blue-800 font-semibold rounded-full text-xs sm:text-sm tracking-wide uppercase">
-                    AI ƏSASLI PEŞƏKAR CV YARATMA PLATFORMASI
+                    {content.heroBadge}
                   </span>
                   </div>
                   <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 sm:mb-8 leading-tight">
-                    <span className="block text-gray-900 mb-2">Peşəkar CV-nizi</span>
+                    <span className="block text-gray-900 mb-2">{content.title}</span>
                     <span className="block relative inline-block">
                     <span className="absolute inset-0 bg-blue-500 transform -skew-y-2 rounded-lg opacity-100"></span>
                     <motion.span
@@ -130,14 +355,15 @@ export default function Index2() {
                         transition={{duration: 0.8, delay: 0.4}}
                     >
                  <span className="relative text-white px-4 py-2 transform -skew-y-2 block rounded-lg drop-shadow-lg font-bold text-xl sm:text-2xl md:text-3xl lg:text-5xl xl:text-6xl" >
-                        CVERA ilə yaradın!
+                        {content.heroAction}
                       </span>
 
                     </motion.span>
                   </span>
                   </h1>
                   <p className="text-base sm:text-base lg:text-lg text-gray-600 max-w-5xl mx-auto leading-relaxed px-4">
-                    Süni intellektlə sürətli və fərdi CV hazırlayaraq karyeranızı zirvəyə daşıyın! </p>
+                    {content.subtitle}
+                  </p>
                 </motion.div>
 
                 {/* Professional Window Interface */}
@@ -180,10 +406,10 @@ export default function Index2() {
                         <div className="space-y-8 sm:space-y-12">
                           <div className="text-center lg:text-left">
                             <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
-                              Bizi Fərqləndirən Xüsusiyyətlər
+                              {content.interfaceTitle}
                             </h3>
                             <p className="text-gray-600 text-sm sm:text-base">
-                              Beynəlxalq standartlara uyğun CV yaratma platforması
+                              {content.interfaceSubtitle}
                             </p>
                           </div>
 
@@ -206,12 +432,10 @@ export default function Index2() {
                                     <div className="h-0.5 w-6 sm:w-8 bg-blue-600 mx-auto sm:mx-0"></div>
                                     <div className="h-0.5 w-8 sm:w-12 bg-blue-600 mt-1 mx-auto sm:mx-0"></div>
                                   </div>
-                                  <h4 className="font-bold text-gray-900 text-base sm:text-lg order-1 sm:order-2">Süni
-                                    İntellekt Dəstəyi</h4>
+                                  <h4 className="font-bold text-gray-900 text-base sm:text-lg order-1 sm:order-2">{content.aiTitle}</h4>
                                 </div>
                                 <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
-                                  Milyonlarla uğurlu CV-nin məlumatları ilə təkmilləşən süni intellekt, CV-nizi fərdi və
-                                  ən optimal formada hazırlayır.
+                                  {content.aiDescription}
                                 </p>
                               </div>
                             </div>
@@ -234,12 +458,10 @@ export default function Index2() {
                                     <div className="h-0.5 w-6 sm:w-8 bg-blue-600 mx-auto sm:mx-0"></div>
                                     <div className="h-0.5 w-8 sm:w-12 bg-blue-600 mt-1 mx-auto sm:mx-0"></div>
                                   </div>
-                                  <h4 className="font-bold text-gray-900 text-base sm:text-lg order-1 sm:order-2">Premium
-                                    Şablon Kolleksiyası</h4>
+                                  <h4 className="font-bold text-gray-900 text-base sm:text-lg order-1 sm:order-2">{content.premiumTitle}</h4>
                                 </div>
                                 <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
-                                  HR mütəxəssisləri və peşəkar dizaynerlər tərəfindən hazırlanmış, göz oxşayan və
-                                  funksional şablonlar işə qəbul prosesində sizə üstünlük qazandırır.
+                                  {content.premiumDescription}
                                 </p>
                               </div>
                             </div>
@@ -262,11 +484,10 @@ export default function Index2() {
                                     <div className="h-0.5 w-6 sm:w-8 bg-blue-600 mx-auto sm:mx-0"></div>
                                     <div className="h-0.5 w-8 sm:w-12 bg-blue-600 mt-1 mx-auto sm:mx-0"></div>
                                   </div>
-                                  <h4 className="font-bold text-gray-900 text-base sm:text-lg order-1 sm:order-2">LinkedIn-dən
-                                    İdxal Sistemi</h4>
+                                  <h4 className="font-bold text-gray-900 text-base sm:text-lg order-1 sm:order-2">{content.linkedinTitle}</h4>
                                 </div>
                                 <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
-                                  LinkedIn profil məlumatlarınız avtomatik əlavə edilərək CV-niz sürətlə hazırlanır.
+                                  {content.linkedinDescription}
                                 </p>
                               </div>
                             </div>
@@ -405,7 +626,7 @@ export default function Index2() {
                       <div
                           className="absolute inset-0 bg-blue-700 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
                       <span className="relative flex items-center justify-center gap-3 sm:gap-4">
-                      CV yaradın
+                      {content.createCVButton}
                       <svg className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-3 transition-transform" fill="none"
                            stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3"/>
@@ -418,7 +639,7 @@ export default function Index2() {
                     <button
                         className="group w-full sm:w-auto px-8 sm:px-10 lg:px-12 py-4 sm:py-5 lg:py-6 bg-white text-blue-600 font-bold rounded-xl sm:rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:bg-blue-50 transform hover:-translate-y-3 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl text-base sm:text-lg">
                     <span className="flex items-center justify-center gap-2 sm:gap-3">
-                      Şablonlar
+                      {content.templatesButton}
                       <svg className="w-5 h-5 sm:w-6 sm:h-6 group-hover:rotate-12 transition-transform" fill="none"
                            stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -448,7 +669,7 @@ export default function Index2() {
                               clipRule="evenodd"/>
                     </svg>
                     </div>
-                    <span className="font-semibold text-sm sm:text-base">100-lərlə məmnun müştəri</span>
+                    <span className="font-semibold text-sm sm:text-base">{content.trustIndicator1}</span>
                   </div>
                   <div
                       className="flex items-center gap-2 sm:gap-3 bg-white rounded-lg sm:rounded-xl px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 shadow-lg border border-blue-100">
@@ -460,7 +681,7 @@ export default function Index2() {
                               clipRule="evenodd"/>
                     </svg>
                     </div>
-                    <span className="font-semibold text-sm sm:text-base">Yüksək təhlükəsizlik</span>
+                    <span className="font-semibold text-sm sm:text-base">{content.trustIndicator2}</span>
                   </div>
                   <div
                       className="flex items-center gap-2 sm:gap-3 bg-white rounded-lg sm:rounded-xl px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 shadow-lg border border-blue-100">
@@ -472,7 +693,7 @@ export default function Index2() {
                               clipRule="evenodd"/>
                     </svg>
                     </div>
-                    <span className="font-semibold text-sm sm:text-base">"İşıq" sürəti ilə hazırlama</span>
+                    <span className="font-semibold text-sm sm:text-base">{content.trustIndicator3}</span>
                   </div>
                 </motion.div>
               </motion.div>
@@ -485,10 +706,10 @@ export default function Index2() {
               <div className="text-center mb-16 sm:mb-20 lg:mb-24" data-aos="fade-up">
 
                 <h2 className="text-2xl sm:text-3xl lg:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">
-                  Sehrli <span className="text-blue-600">Toxunuşlar</span>
+                  {content.featuresMainTitle.split(' ')[0]} <span className="text-blue-600">{content.featuresMainTitle.split(' ')[1]}</span>
                 </h2>
                 <p className="text-base sm:text-lg lg:text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed px-4">
-                  Müasir texnologiyalar və süni intellektin gücü ilə karyeranızda ən yaxşı nəticələri əldə edin.
+                  {content.featuresMainSubtitle}
                 </p>
               </div>
 
@@ -505,9 +726,9 @@ export default function Index2() {
                             d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                     </svg>
                   </div>
-                  <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Süni İntellekt</h3>
+                  <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">{content.feature1Title}</h3>
                   <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
-                    Daim inkişaf edən Sİ funksiyaları ilə daha ağıllı və fərdiləşdirilmiş təcrübə əldə edin.
+                    {content.feature1Description}
                   </p>
                 </div>
 
@@ -523,10 +744,9 @@ export default function Index2() {
                             d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                     </svg>
                   </div>
-                  <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Göz Oxşayan
-                    İnterfeys</h3>
+                  <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">{content.feature2Title}</h3>
                   <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
-                    Müasir dizayn prinsipləri əsasında hazırlanmış interfeys, rahat istifadə təcrübəsi təqdim edir.
+                    {content.feature2Description}
                   </p>
                 </div>
 
@@ -541,10 +761,9 @@ export default function Index2() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
                   </div>
-                  <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Hiss Olunan
-                    Sürət</h3>
+                  <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">{content.feature3Title}</h3>
                   <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
-                    Cloud texnologiyası ilə saniyələr ərzində PDF formatında peşəkar CV əldə edin.
+                    {content.feature3Description}
                   </p>
                 </div>
               </div>
@@ -557,11 +776,11 @@ export default function Index2() {
               <div className="text-center mb-16" data-aos="fade-up">
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
                   <span className="bg-gradient-to-r from-blue-600 to-blue-600 bg-clip-text text-transparent">
-                    Necə İşləyir?
+                    {content.howItWorksTitle}
                   </span>
                 </h2>
                 <p className="text-base text-gray-600 max-w-3xl mx-auto">
-                  CVERA ilə 3 addımda peşəkar CV yaradın:
+                  {content.stepsTitle}
                 </p>
               </div>
 
@@ -571,9 +790,9 @@ export default function Index2() {
                       className="bg-gradient-to-br from-blue-500 to-brown-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg relative z-10">
                     <span className="text-2xl font-bold text-white">1</span>
                   </div>
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Qeydiyyat</h3>
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">{content.registrationTitle}</h3>
                   <p className="text-gray-600 mb-4 text-sm sm:text-base">
-                    E-poçt və ya LinkedIn hesabınızla qeydiyyatdan keçin
+                    {content.registrationDescription}
                   </p>
 
                   {/* Arrow to next step */}
@@ -590,9 +809,9 @@ export default function Index2() {
                       className="bg-gradient-to-br from-blue-500 to-brown-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg relative z-10">
                     <span className="text-2xl font-bold text-white">2</span>
                   </div>
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">LinkedIn Profil İdxalı</h3>
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">{content.linkedinImportTitle}</h3>
                   <p className="text-gray-600 mb-4 text-sm sm:text-base">
-                    LinkedIn profil linkinizi daxil edin və məlumatlarınızı cvnizə əlavə edin.
+                    {content.linkedinImportDescription}
                   </p>
 
                   {/* Arrow to next step */}
@@ -609,9 +828,9 @@ export default function Index2() {
                       className="bg-gradient-to-br from-blue-500 to-brown-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                     <span className="text-2xl font-bold text-white">3</span>
                   </div>
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">CV-ni Yükləyin</h3>
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">{content.downloadTitle}</h3>
                   <p className="text-gray-600 mb-4 text-sm sm:text-base">
-                    Şablon seçin və peşəkar CV-nizi PDF və ya DOCX formatında yükləyin.
+                    {content.downloadDescription}
                   </p>
 
                 </div>
@@ -661,24 +880,24 @@ export default function Index2() {
                 <div data-aos="fade-up" data-aos-delay="200"
                      className="bg-white/10 backdrop-blur-lg rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 hover:bg-white/20 transition-all duration-300 hover:scale-105 border border-white/20">
                   <div className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 sm:mb-4">150+</div>
-                  <div className="text-blue-100 text-sm sm:text-base font-semibold">Bu il yaradılmış CV-lər</div>
+                  <div className="text-blue-100 text-sm sm:text-base font-semibold">{content.thisYearCVs}</div>
                 </div>
                 <div data-aos="fade-up" data-aos-delay="400"
                      className="bg-white/10 backdrop-blur-lg rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 hover:bg-white/20 transition-all duration-300 hover:scale-105 border border-white/20">
                   <div className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 sm:mb-4">98%</div>
-                  <div className="text-blue-100 text-sm sm:text-base font-semibold">Uğurlu işə qəbul</div>
+                  <div className="text-blue-100 text-sm sm:text-base font-semibold">{content.successfulHiring}</div>
                 </div>
                 <div data-aos="fade-up" data-aos-delay="600"
                      className="bg-white/10 backdrop-blur-lg rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 hover:bg-white/20 transition-all duration-300 hover:scale-105 border border-white/20">
                   <div className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 sm:mb-4">24/7</div>
                   <div className="text-blue-100 text-sm sm:text-base font-semibold">
-                    Canlı Dəstək Xidməti
+                    {content.liveSupportService}
                   </div>
                 </div>
                 <div data-aos="fade-up" data-aos-delay="800"
                      className="bg-white/10 backdrop-blur-lg rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 hover:bg-white/20 transition-all duration-300 hover:scale-105 border border-white/20">
                   <div className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 sm:mb-4">10+</div>
-                  <div className="text-blue-100 text-sm sm:text-base font-semibold">Şablon seçimi</div>
+                  <div className="text-blue-100 text-sm sm:text-base font-semibold">{content.templateSelection}</div>
                 </div>
               </div>
             </div>

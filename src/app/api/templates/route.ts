@@ -27,10 +27,28 @@ export async function GET(req: NextRequest) {
       ? await getUserTierAndLimits(userId)
       : { tier: 'Free' as const, limits: { allowedTemplates: ['Free'] } };
 
-    // Get all templates
-    const templates = await prisma.template.findMany({
-      orderBy: { createdAt: "desc" },
-    });
+    // Site language header-dən dili təyin edək
+    const siteLanguage = req.headers.get('x-site-language') || 'english';
+    console.log('API Templates - Site Language:', siteLanguage);
+
+    // Get all templates with both descriptions using raw query
+    const templates = await prisma.$queryRaw`
+      SELECT 
+        id, name, tier, "previewUrl", description, description_en, "createdAt", "updatedAt"
+      FROM "Template" 
+      ORDER BY "createdAt" DESC
+    ` as Array<{
+      id: string;
+      name: string;
+      tier: string;
+      previewUrl: string;
+      description: string | null;
+      description_en: string | null;
+      createdAt: Date;
+      updatedAt: Date;
+    }>;
+
+    console.log('Raw templates from DB (first template):', templates[0]);
 
     // Helper function to check template access
     const hasTemplateAccess = (templateTier: string) => {
@@ -38,14 +56,34 @@ export async function GET(req: NextRequest) {
       return limits.allowedTemplates.includes(templateTier);
     };
 
-    // Add access information to each template
-    const templatesWithAccess = templates.map(template => ({
-      ...template,
-      preview_url: template.previewUrl, // Add preview_url for backward compatibility
-      hasAccess: hasTemplateAccess(template.tier),
-      requiresUpgrade: !hasTemplateAccess(template.tier),
-      accessTier: template.tier,
-    }));
+    // Add access information to each template and select appropriate description
+    const templatesWithAccess = templates.map(template => {
+      // Site language-ə görə description seçək
+      let finalDescription: string;
+      
+      if (siteLanguage === 'azerbaijani') {
+        // Azərbaycan dili üçün description (əsas) və ya description_en (fallback)
+        finalDescription = template.description || template.description_en || 'Professional CV şablonu';
+      } else {
+        // İngilis dili üçün description_en (əsas) və ya description (fallback)
+        finalDescription = template.description_en || template.description || 'Professional CV template';
+      }
+
+      return {
+        id: template.id,
+        name: template.name,
+        tier: template.tier,
+        previewUrl: template.previewUrl,
+        description: finalDescription, // Site language-ə uyğun description
+        description_en: template.description_en, // Frontend üçün əlavə məlumat
+        createdAt: template.createdAt,
+        updatedAt: template.updatedAt,
+        preview_url: template.previewUrl, // Add preview_url for backward compatibility
+        hasAccess: hasTemplateAccess(template.tier),
+        requiresUpgrade: !hasTemplateAccess(template.tier),
+        accessTier: template.tier,
+      };
+    });
 
     return NextResponse.json({
       templates: templatesWithAccess,

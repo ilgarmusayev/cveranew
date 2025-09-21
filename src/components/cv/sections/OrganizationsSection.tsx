@@ -21,7 +21,7 @@ interface Organization {
 interface OrganizationsSectionProps {
   data: Organization[];
   onChange: (data: Organization[]) => void;
-  cvLanguage?: 'english' | 'azerbaijani';
+  cvLanguage?: 'english' | 'azerbaijani' | 'russian';
 }
 
 export default function OrganizationsSection({ data, onChange, cvLanguage = 'azerbaijani' }: OrganizationsSectionProps) {
@@ -76,43 +76,90 @@ export default function OrganizationsSection({ data, onChange, cvLanguage = 'aze
     setEditingIndex(editingIndex === index ? null : index);
   };
 
-  const labels = siteLanguage === 'english' ? {
-    title: 'Organizations',
-    addButton: 'Add Organization',
-    organizationName: 'Organization Name',
-    position: 'Position/Role',
-    description: 'Description',
-    website: 'Website',
-    dates: 'Duration',
-    current: 'Currently active',
-    edit: 'Edit',
-    delete: 'Delete',
-    save: 'Save',
-    cancel: 'Cancel'
-  } : {
-    title: 'Təşkilatlar',
-    addButton: 'Təşkilat Əlavə Et',
-    organizationName: 'Təşkilat Adı',
-    position: 'Vəzifə/Rol',
-    description: 'Təsvir',
-    website: 'Veb Sayt',
-    dates: 'Müddət',
-    current: 'Hazırda aktiv',
-    edit: 'Düzəliş Et',
-    delete: 'Sil',
-    save: 'Yadda Saxla',
-    cancel: 'Ləğv Et'
+  // Translation labels
+  const labels = {
+    azerbaijani: {
+      title: 'Təşkilatlar',
+      addButton: 'Təşkilat Əlavə Et',
+      organizationName: 'Təşkilat Adı',
+      position: 'Vəzifə/Rol',
+      description: 'Təsvir',
+      website: 'Veb Sayt',
+      dates: 'Müddət',
+      current: 'Hazırda aktiv',
+      edit: 'Düzəliş Et',
+      delete: 'Sil',
+      save: 'Yadda Saxla',
+      cancel: 'Ləğv Et',
+      present: 'Hazırda',
+      emptyState: 'Hələ heç bir təşkilat əlavə edilməyib',
+      addFirst: 'İlk təşkilatınızı əlavə edin',
+      placeholders: {
+        name: 'IEEE, ACM, Rotary Club',
+        position: 'Üzv, Sədr, Vitse-sədr',
+        website: 'https://www.təşkilat.com',
+        description: 'Təşkilatdakı rolunuz və fəaliyyətiniz...'
+      }
+    },
+    english: {
+      title: 'Organizations',
+      addButton: 'Add Organization',
+      organizationName: 'Organization Name',
+      position: 'Position/Role',
+      description: 'Description',
+      website: 'Website',
+      dates: 'Duration',
+      current: 'Currently active',
+      edit: 'Edit',
+      delete: 'Delete',
+      save: 'Save',
+      cancel: 'Cancel',
+      present: 'Present',
+      emptyState: 'No organizations added yet',
+      addFirst: 'Add your first organization',
+      placeholders: {
+        name: 'IEEE, ACM, Rotary Club',
+        position: 'Member, President, Vice President',
+        website: 'https://www.organization.com',
+        description: 'Your role and activities in the organization...'
+      }
+    },
+    russian: {
+      title: 'Организации',
+      addButton: 'Добавить организацию',
+      organizationName: 'Название организации',
+      position: 'Должность/Роль',
+      description: 'Описание',
+      website: 'Веб-сайт',
+      dates: 'Продолжительность',
+      current: 'В настоящее время активен',
+      edit: 'Редактировать',
+      delete: 'Удалить',
+      save: 'Сохранить',
+      cancel: 'Отмена',
+      present: 'Настоящее время',
+      emptyState: 'Организации еще не добавлены',
+      addFirst: 'Добавить первую организацию',
+      placeholders: {
+        name: 'IEEE, ACM, Ротари клуб',
+        position: 'Член, Президент, Вице-президент',
+        website: 'https://www.organization.com',
+        description: 'Ваша роль и деятельность в организации...'
+      }
+    }
   };
+
+  const content = labels[siteLanguage] || labels.azerbaijani;
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-gray-900">{labels.title}</h3>
+        <h3 className="text-lg font-semibold text-gray-900">{content.title}</h3>
         <button
           onClick={addOrganization}
           className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
         >
-          {labels.addButton}
+          {content.addButton}
         </button>
       </div>
 
@@ -124,47 +171,47 @@ export default function OrganizationsSection({ data, onChange, cvLanguage = 'aze
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {labels.organizationName}
+                      {content.organizationName}
                     </label>
                     <input
                       type="text"
                       value={org.name}
                       onChange={(e) => updateOrganization(index, { name: e.target.value })}
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder={labels.organizationName}
+                      placeholder={content.placeholders.name}
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {labels.position}
+                      {content.position}
                     </label>
                     <input
                       type="text"
                       value={org.position}
                       onChange={(e) => updateOrganization(index, { position: e.target.value })}
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder={labels.position}
+                      placeholder={content.placeholders.position}
                     />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {labels.website}
+                    {content.website}
                   </label>
                   <input
                     type="url"
                     value={org.website || ''}
                     onChange={(e) => updateOrganization(index, { website: e.target.value })}
                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="https://..."
+                    placeholder={content.placeholders.website}
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {labels.dates}
+                    {content.dates}
                   </label>
                   <DateRangeInput
                     startDate={org.startDate || ''}
@@ -173,19 +220,18 @@ export default function OrganizationsSection({ data, onChange, cvLanguage = 'aze
                     onStartDateChange={(date) => updateOrganization(index, { startDate: date })}
                     onEndDateChange={(date) => updateOrganization(index, { endDate: date })}
                     onCurrentChange={(current) => updateOrganization(index, { current })}
-                    currentLabel={labels.current}
-                    cvLanguage={cvLanguage}
+                    currentLabel={content.current}
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {labels.description}
+                    {content.description}
                   </label>
                   <RichTextEditor
                     value={org.description || ''}
                     onChange={(value) => updateOrganization(index, { description: value })}
-                    placeholder={labels.description}
+                    placeholder={content.placeholders.description}
                   />
                 </div>
 
@@ -194,13 +240,13 @@ export default function OrganizationsSection({ data, onChange, cvLanguage = 'aze
                     onClick={() => setEditingIndex(null)}
                     className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
                   >
-                    {labels.save}
+                    {content.save}
                   </button>
                   <button
                     onClick={() => setEditingIndex(null)}
                     className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors"
                   >
-                    {labels.cancel}
+                    {content.cancel}
                   </button>
                 </div>
               </div>
@@ -212,7 +258,7 @@ export default function OrganizationsSection({ data, onChange, cvLanguage = 'aze
                     <p className="text-blue-600 font-medium">{org.position}</p>
                     {org.startDate && (
                       <p className="text-sm text-gray-600">
-                        {org.startDate} - {org.current ? (siteLanguage === 'english' ? 'Present' : 'Hazırda') : org.endDate}
+                        {org.startDate} - {org.current ? content.present : org.endDate}
                       </p>
                     )}
                     {org.website && (
@@ -234,13 +280,13 @@ export default function OrganizationsSection({ data, onChange, cvLanguage = 'aze
                       onClick={() => toggleEdit(index)}
                       className="text-blue-600 hover:text-blue-800 text-sm"
                     >
-                      {labels.edit}
+                      {content.edit}
                     </button>
                     <button
                       onClick={() => removeOrganization(index)}
                       className="text-red-600 hover:text-red-800 text-sm"
                     >
-                      {labels.delete}
+                      {content.delete}
                     </button>
                   </div>
                 </div>
@@ -251,11 +297,9 @@ export default function OrganizationsSection({ data, onChange, cvLanguage = 'aze
 
         {data.length === 0 && (
           <div className="text-center py-8 text-gray-500">
-            <p>{siteLanguage === 'english' ? 'No organizations added yet' : 'Hələ heç bir təşkilat əlavə edilməyib'}</p>
+            <p>{content.emptyState}</p>
             <p className="text-sm mt-1">
-              {siteLanguage === 'english' 
-                ? 'Click "Add Organization" to get started' 
-                : '"Təşkilat Əlavə Et" düyməsinə basın'}
+              {content.addFirst}
             </p>
           </div>
         )}

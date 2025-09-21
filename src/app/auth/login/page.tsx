@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer'; // Footer əlavə edirik
@@ -10,6 +11,7 @@ import Footer from '@/components/Footer'; // Footer əlavə edirik
 function LoginPageContent() {
   // All hooks must be called at the top level, before any early returns
   const { user, loading: authLoading, isInitialized, login } = useAuth(); // login funksiyasını əlavə et
+  const { siteLanguage } = useSiteLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -22,6 +24,87 @@ function LoginPageContent() {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [verificationMessage, setVerificationMessage] = useState('');
+
+  // Login səhifəsi mətnləri
+  const labels = {
+    azerbaijani: {
+      title: 'Hesaba Giriş',
+      subtitle: 'CV yaratmaq üçün hesabınıza giriş edin',
+      emailLabel: 'E-poçt',
+      emailPlaceholder: 'E-poçt ünvanınızı daxil edin',
+      passwordLabel: 'Şifrə',
+      passwordPlaceholder: 'Şifrənizi daxil edin',
+      showPassword: 'Şifrəni göstər',
+      hidePassword: 'Şifrəni gizlət',
+      loginButton: 'Giriş',
+      loggingIn: 'Giriş edilir...',
+      noAccount: 'Hesabınız yoxdur?',
+      registerLink: 'Qeydiyyatdan keçin',
+      forgotPassword: 'Şifrəni unutmusunuz?',
+      resetPasswordLink: 'Şifrəni sıfırlayın',
+      orContinueWith: 'və ya',
+      continueWithLinkedIn: 'LinkedIn ilə daxil olun',
+      invalidCredentials: 'E-poçt və ya şifrə yanlışdır',
+      emailNotVerified: 'E-poçt təsdiqlənməyib',
+      accountNotFound: 'Hesab tapılmadı',
+      genericError: 'Giriş zamanı xəta baş verdi',
+      emailRequired: 'E-poçt tələb olunur',
+      passwordRequired: 'Şifrə tələb olunur',
+      invalidEmail: 'Düzgün e-poçt ünvanı daxil edin'
+    },
+    english: {
+      title: 'Sign In',
+      subtitle: 'Sign in to your account to create CVs',
+      emailLabel: 'Email',
+      emailPlaceholder: 'Enter your email address',
+      passwordLabel: 'Password',
+      passwordPlaceholder: 'Enter your password',
+      showPassword: 'Show password',
+      hidePassword: 'Hide password',
+      loginButton: 'Sign In',
+      loggingIn: 'Signing in...',
+      noAccount: 'Don\'t have an account?',
+      registerLink: 'Sign up',
+      forgotPassword: 'Forgot your password?',
+      resetPasswordLink: 'Reset password',
+      orContinueWith: 'or',
+      continueWithLinkedIn: 'Continue with LinkedIn',
+      invalidCredentials: 'Invalid email or password',
+      emailNotVerified: 'Email not verified',
+      accountNotFound: 'Account not found',
+      genericError: 'Error occurred during sign in',
+      emailRequired: 'Email is required',
+      passwordRequired: 'Password is required',
+      invalidEmail: 'Please enter a valid email address'
+    },
+    russian: {
+      title: 'Вход в систему',
+      subtitle: 'Войдите в свой аккаунт для создания резюме',
+      emailLabel: 'Электронная почта',
+      emailPlaceholder: 'Введите адрес электронной почты',
+      passwordLabel: 'Пароль',
+      passwordPlaceholder: 'Введите пароль',
+      showPassword: 'Показать пароль',
+      hidePassword: 'Скрыть пароль',
+      loginButton: 'Войти',
+      loggingIn: 'Вход...',
+      noAccount: 'Нет аккаунта?',
+      registerLink: 'Зарегистрироваться',
+      forgotPassword: 'Забыли пароль?',
+      resetPasswordLink: 'Сбросить пароль',
+      orContinueWith: 'или',
+      continueWithLinkedIn: 'Продолжить с LinkedIn',
+      invalidCredentials: 'Неверная почта или пароль',
+      emailNotVerified: 'Электронная почта не подтверждена',
+      accountNotFound: 'Аккаунт не найден',
+      genericError: 'Ошибка при входе в систему',
+      emailRequired: 'Требуется электронная почта',
+      passwordRequired: 'Требуется пароль',
+      invalidEmail: 'Введите корректный адрес электронной почты'
+    }
+  };
+
+  const content = labels[siteLanguage];
 
   // All useEffect hooks must also be at the top level
   // Redirect if already authenticated
@@ -204,8 +287,8 @@ function LoginPageContent() {
           <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100" style={{ borderWidth: '2px', borderColor: '#3b82f6' }}>
             {/* Login Form Header */}
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Xoş gəlmisiniz!</h1>
-              <p className="text-gray-600">Hesabınıza daxil olun</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">{content.title}</h1>
+              <p className="text-gray-600">{content.subtitle}</p>
             </div>
 
             {/* Error Message */}
@@ -235,7 +318,7 @@ function LoginPageContent() {
               {/* Email Field */}
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  E-poçt ünvanı
+                  {content.emailLabel}
                 </label>
                 <input
                   id="email"
@@ -245,14 +328,14 @@ function LoginPageContent() {
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  placeholder="numune@cvera.net"
+                  placeholder={content.emailPlaceholder}
                 />
               </div>
 
               {/* Password Field */}
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                  Şifrə
+                  {content.passwordLabel}
                 </label>
                 <div className="relative">
                   <input
@@ -263,7 +346,7 @@ function LoginPageContent() {
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors pr-12"
-                    placeholder="Şifrənizi daxil edin"
+                    placeholder={content.passwordPlaceholder}
                   />
                   <button
                     type="button"
@@ -293,10 +376,10 @@ function LoginPageContent() {
                 {loading ? (
                   <div className="flex items-center justify-center">
                     <div className="animate-spin rounded-full h-5 w-5  border-b-2 border-white hover:bg-white hover:text-blue-600 hover:border-2 hover:border-blue-600 "></div>
-                    <span className="ml-2">Daxil olunur...</span>
+                    <span className="ml-2">{content.loggingIn}</span>
                   </div>
                 ) : (
-                  'Daxil olun'
+                  content.loginButton
                 )}
               </button>
             </form>
@@ -304,7 +387,7 @@ function LoginPageContent() {
             {/* Social Login Divider */}
             <div className="my-6 flex items-center">
               <div className="flex-1 border-t border-gray-300"></div>
-              <span className="px-4 text-sm text-gray-500">və ya</span>
+              <span className="px-4 text-sm text-gray-500">{content.orContinueWith}</span>
               <div className="flex-1 border-t border-gray-300"></div>
             </div>
 
@@ -317,7 +400,7 @@ function LoginPageContent() {
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
               </svg>
-              <span>LinkedIn ilə daxil olun</span>
+              <span>{content.continueWithLinkedIn}</span>
             </button>
 
             {/* Links */}
@@ -326,13 +409,13 @@ function LoginPageContent() {
                 href="/auth/forgot-password"
                 className="text-blue-600 hover:text-blue-700 text-sm font-medium"
               >
-                Şifrəni unutmusunuz?
+                {content.forgotPassword}
               </Link>
 
               <div className="text-sm text-gray-600">
-                Hesabınız yoxdur?{' '}
+                {content.noAccount}{' '}
                 <Link href="/auth/register" className="text-blue-600 hover:text-blue-700 font-medium">
-                  Qeydiyyat
+                  {content.registerLink}
                 </Link>
               </div>
             </div>

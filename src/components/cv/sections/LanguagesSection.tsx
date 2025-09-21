@@ -7,11 +7,81 @@ import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 interface LanguagesSectionProps {
   data: (Language | string | any)[];
   onChange: (data: Language[]) => void;
-  cvLanguage?: 'english' | 'azerbaijani';
+  cvLanguage?: 'english' | 'azerbaijani' | 'russian';
 }
 
 export default function LanguagesSection({ data, onChange, cvLanguage = 'azerbaijani' }: LanguagesSectionProps) {
   const { siteLanguage } = useSiteLanguage();
+  
+  // Languages labels
+  const labels = {
+    azerbaijani: {
+      title: 'Dillər',
+      add: '+ Əlavə edin',
+      addShort: '+',
+      newLanguage: 'Yeni dil',
+      languageName: 'Dil adı',
+      moveUp: 'Yuxarı',
+      moveDown: 'Aşağı',
+      close: 'Bağlayın',
+      edit: 'Redaktə edin',
+      delete: 'Silin',
+      level: 'Səviyyə',
+      native: 'Ana dil',
+      fluent: 'Sərbəst',
+      professional: 'Peşəkar',
+      conversational: 'Danışıq səviyyəsi',
+      basic: 'Əsas',
+      noLanguages: 'Hələ heç bir dil əlavə etməmisiniz',
+      addFirst: 'İlk dilinizi əlavə edin',
+      addAnother: '+ Başqa dil əlavə edin'
+    },
+    english: {
+      title: 'Languages',
+      add: '+ Add',
+      addShort: '+',
+      newLanguage: 'New language',
+      languageName: 'Language name',
+      moveUp: 'Move up',
+      moveDown: 'Move down',
+      close: 'Close',
+      edit: 'Edit',
+      delete: 'Delete',
+      level: 'Level',
+      native: 'Native',
+      fluent: 'Fluent',
+      professional: 'Professional',
+      conversational: 'Conversational',
+      basic: 'Basic',
+      noLanguages: 'No languages added yet',
+      addFirst: 'Add your first language',
+      addAnother: '+ Add another language'
+    },
+    russian: {
+      title: 'Языки',
+      add: '+ Добавить',
+      addShort: '+',
+      newLanguage: 'Новый язык',
+      languageName: 'Название языка',
+      moveUp: 'Переместить вверх',
+      moveDown: 'Переместить вниз',
+      close: 'Закрыть',
+      edit: 'Редактировать',
+      delete: 'Удалить',
+      level: 'Уровень',
+      native: 'Родной',
+      fluent: 'Свободно',
+      professional: 'Профессиональный',
+      conversational: 'Разговорный',
+      basic: 'Базовый',
+      noLanguages: 'Языки еще не добавлены',
+      addFirst: 'Добавьте ваш первый язык',
+      addAnother: '+ Добавить еще один язык'
+    }
+  };
+
+  const content = labels[siteLanguage];
+  
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [languages, setLanguages] = useState<Language[]>([]);
   const [saving, setSaving] = useState(false);
@@ -144,7 +214,7 @@ export default function LanguagesSection({ data, onChange, cvLanguage = 'azerbai
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h3 className="text-lg font-semibold text-gray-900">
-            {siteLanguage === 'english' ? 'Languages' : 'Dillər'}
+            {content.title}
           </h3>
          
           
@@ -154,10 +224,10 @@ export default function LanguagesSection({ data, onChange, cvLanguage = 'azerbai
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
         >
           <span className="hidden sm:inline">
-            {siteLanguage === 'english' ? '+ Add' : '+ Əlavə edin'}
+            {content.add}
           </span>
           <span className="sm:hidden">
-            {siteLanguage === 'english' ? '+' : '+'}
+            {content.addShort}
           </span>
         </button>
       </div>
@@ -170,13 +240,13 @@ export default function LanguagesSection({ data, onChange, cvLanguage = 'azerbai
             </svg>
           </div>
           <p className="text-gray-500 mb-4">
-            {siteLanguage === 'english' ? 'No languages added yet' : 'Hələ heç bir dil əlavə etməmisiniz'}
+            {content.noLanguages}
           </p>
           <button
             onClick={addLanguage}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            {siteLanguage === 'english' ? 'Add your first language' : 'İlk dilinizi əlavə edin'}
+            {content.addFirst}
           </button>
         </div>
       ) : (
@@ -187,7 +257,7 @@ export default function LanguagesSection({ data, onChange, cvLanguage = 'azerbai
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-blue-500">🌐</span>
                   <h4 className="font-medium text-gray-900">
-                    {language.language || (siteLanguage === 'english' ? 'New language' : 'Yeni dil')}
+                    {language.language || content.newLanguage}
                   </h4>
                 </div>
                 {language.level && (

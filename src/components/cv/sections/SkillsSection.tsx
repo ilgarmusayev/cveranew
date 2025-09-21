@@ -20,7 +20,7 @@ interface SkillsSectionProps {
   userTier?: string; // User tier for AI features
   cvData?: any; // Full CV data for AI analysis
   cvId?: string; // CV ID for AI suggestions
-  cvLanguage?: 'english' | 'azerbaijani'; // Add CV language prop
+  cvLanguage?: 'english' | 'azerbaijani' | 'russian';
 }
 
 interface SkillSuggestion {
@@ -36,6 +36,103 @@ interface SkillSuggestion {
 
 export default function SkillsSection({ data, onChange, userTier = 'Free', cvData, cvId, cvLanguage = 'azerbaijani' }: SkillsSectionProps) {
   const { siteLanguage } = useSiteLanguage();
+  
+  // Skills labels
+  const labels = {
+    azerbaijani: {
+      title: 'Bacarıqlar',
+      add: '+ Əlavə edin',
+      addShort: '+',
+      newSkill: 'Yeni bacarıq',
+      skillName: 'Bacarıq adı',
+      moveUp: 'Yuxarı',
+      moveDown: 'Aşağı',
+      close: 'Bağlayın',
+      edit: 'Redaktə edin',
+      delete: 'Silin',
+      aiSuggest: 'AI Tövsiyələri',
+      level: 'Səviyyə',
+      beginner: 'Başlanğıc',
+      intermediate: 'Orta',
+      advanced: 'İrəliləmiş',
+      expert: 'Mütəxəssis',
+      type: 'Növ',
+      hardSkill: 'Texniki bacarıq',
+      softSkill: 'Şəxsi bacarıq',
+      generateDescription: 'AI təsvir yaradın',
+      noSkills: 'Hələ heç bir bacarıq əlavə etməmisiniz',
+      addFirst: 'İlk bacarığınızı əlavə edin',
+      addAnother: '+ Başqa bacarıq əlavə edin',
+      cvIdRequired: 'AI tövsiyələri almaq üçün CV ID lazımdır',
+      accessDenied: 'Giriş icazəsi yoxdur. Yenidən giriş edin.',
+      aiError: 'AI tövsiyələri alınarkən xəta baş verdi',
+      upgradeRequired: 'AI xüsusiyyətlərindən istifadə etmək üçün abunəliyi yükseldin',
+      noSuggestions: 'Heç bir tövsiyə tapılmadı'
+    },
+    english: {
+      title: 'Skills',
+      add: '+ Add',
+      addShort: '+',
+      newSkill: 'New skill',
+      skillName: 'Skill name',
+      moveUp: 'Move up',
+      moveDown: 'Move down',
+      close: 'Close',
+      edit: 'Edit',
+      delete: 'Delete',
+      aiSuggest: 'AI Suggestions',
+      level: 'Level',
+      beginner: 'Beginner',
+      intermediate: 'Intermediate',
+      advanced: 'Advanced',
+      expert: 'Expert',
+      type: 'Type',
+      hardSkill: 'Hard Skill',
+      softSkill: 'Soft Skill',
+      generateDescription: 'Generate AI Description',
+      noSkills: 'No skills added yet',
+      addFirst: 'Add your first skill',
+      addAnother: '+ Add another skill',
+      cvIdRequired: 'CV ID is required for AI suggestions',
+      accessDenied: 'Access denied. Please log in again.',
+      aiError: 'Error occurred while getting AI suggestions',
+      upgradeRequired: 'Upgrade subscription to use AI features',
+      noSuggestions: 'No suggestions found'
+    },
+    russian: {
+      title: 'Навыки',
+      add: '+ Добавить',
+      addShort: '+',
+      newSkill: 'Новый навык',
+      skillName: 'Название навыка',
+      moveUp: 'Переместить вверх',
+      moveDown: 'Переместить вниз',
+      close: 'Закрыть',
+      edit: 'Редактировать',
+      delete: 'Удалить',
+      aiSuggest: 'ИИ рекомендации',
+      level: 'Уровень',
+      beginner: 'Начальный',
+      intermediate: 'Средний',
+      advanced: 'Продвинутый',
+      expert: 'Эксперт',
+      type: 'Тип',
+      hardSkill: 'Технический навык',
+      softSkill: 'Личный навык',
+      generateDescription: 'Создать ИИ описание',
+      noSkills: 'Навыки еще не добавлены',
+      addFirst: 'Добавьте ваш первый навык',
+      addAnother: '+ Добавить еще один навык',
+      cvIdRequired: 'Для ИИ рекомендаций требуется ID резюме',
+      accessDenied: 'Доступ запрещен. Войдите снова.',
+      aiError: 'Ошибка при получении ИИ рекомендаций',
+      upgradeRequired: 'Обновите подписку для использования ИИ функций',
+      noSuggestions: 'Рекомендации не найдены'
+    }
+  };
+
+  const content = labels[siteLanguage];
+  
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [aiSuggesting, setAiSuggesting] = useState(false);
   const [aiGeneratingSkill, setAiGeneratingSkill] = useState<string | null>(null); // Track which skill is generating AI description
@@ -89,7 +186,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
     }
 
     if (!cvId) {
-      showWarning(siteLanguage === 'english' ? 'CV ID is required for AI suggestions' : 'AI tövsiyələri almaq üçün CV ID lazımdır');
+      showWarning(content.cvIdRequired);
       return;
     }
 
@@ -116,7 +213,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
       const token = localStorage.getItem('accessToken') || localStorage.getItem('token') || localStorage.getItem('auth-token');
 
       if (!token) {
-        showError(siteLanguage === 'english' ? 'Access denied. Please log in again.' : 'Giriş icazəsi yoxdur. Yenidən giriş edin.');
+        showError(content.accessDenied);
         setAiSuggesting(false);
         return;
       }
@@ -203,10 +300,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
       });
       
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      showError(siteLanguage === 'english' 
-        ? `Error occurred during AI skill suggestion: ${errorMessage}` 
-        : `AI bacarıq təklifi zamanı xəta baş verdi: ${errorMessage}`
-      );
+      showError(`${content.aiError}: ${errorMessage}`);
     } finally {
       setAiSuggesting(false);
     }
@@ -406,7 +500,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">
-            {siteLanguage === 'english' ? 'Skills' : 'Bacarıqlar'}
+            {content.title}
           </h3>
         </div>
         <div className="flex items-center gap-2">
@@ -430,7 +524,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
             ) : (
               <div className="flex items-center space-x-1">
                 <span>🤖</span>
-                <span className="hidden sm:inline">{siteLanguage === 'english' ? 'AI Suggestions' : 'AI Təklifi'}</span>
+                <span className="hidden sm:inline">{content.aiSuggest}</span>
                 <span className="sm:hidden">AI</span>
                 {!canUseAI && <span className="ml-1">🔒</span>}
               </div>
@@ -441,10 +535,10 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
           >
             <span className="hidden sm:inline">
-              {siteLanguage === 'english' ? '+ Add' : '+ Əlavə edin'}
+              {content.add}
             </span>
             <span className="sm:hidden">
-              {siteLanguage === 'english' ? '+' : '+'}
+              {content.addShort}
             </span>
           </button>
         </div>
@@ -458,19 +552,13 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
             </svg>
           </div>
           <p className="text-gray-500 mb-4">
-            {siteLanguage === 'english' 
-              ? 'No skills added yet' 
-              : 'Hələ heç bir bacarıq əlavə etməmisiniz'
-            }
+            {content.noSkills}
           </p>
           <button
             onClick={addSkill}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            {siteLanguage === 'english' 
-              ? 'Add your first skill' 
-              : 'İlk bacarığınızı əlavə edin'
-            }
+            {content.addFirst}
           </button>
         </div>
       ) : (
@@ -481,7 +569,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-2xl">⚙️</span>
                 <h4 className="text-lg font-semibold text-gray-900">
-                  {siteLanguage === 'english' ? 'Technical Skills' : 'Texniki Bacarıqlar'}
+                  {siteLanguage === 'english' ? 'Technical Skills' : siteLanguage === 'russian' ? 'Технические навыки' : 'Texniki Bacarıqlar'}
                 </h4>
                 <span className="text-sm text-gray-500">
                   ({data.filter(skill => skill.type === 'hard' || !skill.type).length})
@@ -601,7 +689,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-2xl">🤝</span>
                 <h4 className="text-lg font-semibold text-gray-900">
-                  {siteLanguage === 'english' ? 'Soft Skills' : 'Şəxsi Bacarıqlar'}
+                  {siteLanguage === 'english' ? 'Soft Skills' : siteLanguage === 'russian' ? 'Личные навыки' : 'Şəxsi Bacarıqlar'}
                 </h4>
                 <span className="text-sm text-gray-500">
                   ({data.filter(skill => skill.type === 'soft').length})

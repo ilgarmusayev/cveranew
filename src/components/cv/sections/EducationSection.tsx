@@ -20,12 +20,126 @@ interface Education {
 interface EducationSectionProps {
   data: Education[];
   onChange: (data: Education[]) => void;
-  cvLanguage?: 'english' | 'azerbaijani'; // Updated CV language prop
+  cvLanguage?: 'english' | 'azerbaijani' | 'russian';
 }
 
 export default function EducationSection({ data, onChange, cvLanguage = 'azerbaijani' }: EducationSectionProps) {
   const { siteLanguage } = useSiteLanguage();
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  // Education labels
+  const labels = {
+    azerbaijani: {
+      title: 'Təhsil',
+      add: '+ Əlavə edin',
+      addShort: '+',
+      newEducation: 'Yeni təhsil məlumatı',
+      institutionName: 'Təhsil müəssisəsi adı',
+      moveUp: 'Yuxarı',
+      moveDown: 'Aşağı',
+      close: 'Bağlayın',
+      edit: 'Redaktə edin',
+      delete: 'Silin',
+      institution: 'Təhsil müəssisəsi',
+      institutionPlaceholder: 'Məsələn, Bakı Dövlət Universiteti',
+      degree: 'Dərəcə',
+      degreePlaceholder: 'Məsələn, Bakalavr',
+      field: 'İxtisas sahəsi',
+      fieldPlaceholder: 'Məsələn, Kompüter elmləri',
+      gpa: 'GPA/Orta bal',
+      gpaPlaceholder: 'Məsələn, 3.8 və ya 85%',
+      startDate: 'Başlama tarixi',
+      endDate: 'Bitirmə tarixi',
+      currentStudying: 'Davam edir',
+      description: 'Təsvir (ixtiyari)',
+      descriptionPlaceholder: 'Əldə etdiyiniz nailiyyətlər, kurslar və ya fəaliyyətlər haqqında məlumat verin...',
+      optional: 'ixtiyari',
+      selectDegree: '🎓 Dərəcə seçin',
+      bachelor: 'Bakalavr',
+      master: 'Magistr',
+      phd: 'Doktorantura',
+      diploma: 'Diploma',
+      certificate: 'Sertifikat',
+      other: 'Digər',
+      noEducation: 'Hələ heç bir təhsil məlumatı əlavə etməmisiniz',
+      addFirst: 'İlk təhsil məlumatınızı əlavə edin',
+      addAnother: '+ Başqa təhsil məlumatı əlavə edin'
+    },
+    english: {
+      title: 'Education',
+      add: '+ Add',
+      addShort: '+',
+      newEducation: 'New education entry',
+      institutionName: 'Institution name',
+      moveUp: 'Move up',
+      moveDown: 'Move down',
+      close: 'Close',
+      edit: 'Edit',
+      delete: 'Delete',
+      institution: 'Institution',
+      institutionPlaceholder: 'e.g., Harvard University',
+      degree: 'Degree',
+      degreePlaceholder: 'e.g., Bachelor of Science',
+      field: 'Field of Study',
+      fieldPlaceholder: 'e.g., Computer Science',
+      gpa: 'GPA/Grade',
+      gpaPlaceholder: 'e.g., 3.8 or 85%',
+      startDate: 'Start Date',
+      endDate: 'End Date',
+      currentStudying: 'Currently studying',
+      description: 'Description (optional)',
+      descriptionPlaceholder: 'Provide information about achievements, courses, or activities...',
+      optional: 'optional',
+      selectDegree: '🎓 Select degree',
+      bachelor: 'Bachelor',
+      master: 'Master',
+      phd: 'PhD',
+      diploma: 'Diploma',
+      certificate: 'Certificate',
+      other: 'Other',
+      noEducation: 'No education information added yet',
+      addFirst: 'Add your first education entry',
+      addAnother: '+ Add another education entry'
+    },
+    russian: {
+      title: 'Образование',
+      add: '+ Добавить',
+      addShort: '+',
+      newEducation: 'Новая запись об образовании',
+      institutionName: 'Название учебного заведения',
+      moveUp: 'Переместить вверх',
+      moveDown: 'Переместить вниз',
+      close: 'Закрыть',
+      edit: 'Редактировать',
+      delete: 'Удалить',
+      institution: 'Учебное заведение',
+      institutionPlaceholder: 'например, МГУ им. Ломоносова',
+      degree: 'Степень',
+      degreePlaceholder: 'например, Бакалавр',
+      field: 'Область обучения',
+      fieldPlaceholder: 'например, Компьютерные науки',
+      gpa: 'Средний балл',
+      gpaPlaceholder: 'например, 4.5 или 85%',
+      startDate: 'Дата начала',
+      endDate: 'Дата окончания',
+      currentStudying: 'В настоящее время учусь',
+      description: 'Описание (необязательно)',
+      descriptionPlaceholder: 'Предоставьте информацию о достижениях, курсах или деятельности...',
+      optional: 'необязательно',
+      selectDegree: '🎓 Выберите степень',
+      bachelor: 'Бакалавр',
+      master: 'Магистр',
+      phd: 'Кандидат наук',
+      diploma: 'Диплом',
+      certificate: 'Сертификат',
+      other: 'Другое',
+      noEducation: 'Информация об образовании еще не добавлена',
+      addFirst: 'Добавьте вашу первую запись об образовании',
+      addAnother: '+ Добавить еще одну запись об образовании'
+    }
+  };
+
+  const content = labels[siteLanguage];
 
   const addEducation = () => {
     const newEducation: Education = {
@@ -72,7 +186,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">
-            {siteLanguage === 'english' ? 'Education' : 'Təhsil'}
+            {content.title}
           </h3>
         </div>
         <button
@@ -80,10 +194,10 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
         >
           <span className="hidden sm:inline">
-            {siteLanguage === 'english' ? '+ Add' : '+ Əlavə edin'}
+            {content.add}
           </span>
           <span className="sm:hidden">
-            {siteLanguage === 'english' ? '+' : '+'}
+            {content.addShort}
           </span>
         </button>
       </div>
@@ -97,19 +211,13 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
             </svg>
           </div>
           <p className="text-gray-500 mb-4">
-            {siteLanguage === 'english' 
-              ? 'No education information added yet' 
-              : 'Hələ heç bir təhsil məlumatı əlavə etməmisiniz'
-            }
+            {content.noEducation}
           </p>
           <button
             onClick={addEducation}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            {siteLanguage === 'english' 
-              ? 'Add your first education' 
-              : 'İlk təhsilinizi əlavə edin'
-            }
+            {content.addFirst}
           </button>
         </div>
       ) : (
@@ -120,11 +228,11 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-blue-500">🎓</span>
                   <h4 className="font-medium text-gray-900">
-                    {education.degree || (siteLanguage === 'english' ? 'New education' : 'Yeni təhsil')}
+                    {education.degree || content.newEducation}
                   </h4>
                 </div>
                 <p className="text-sm text-gray-600">
-                  {education.institution || (siteLanguage === 'english' ? 'Educational institution' : 'Təhsil müəssisəsi')}
+                  {education.institution || content.institutionName}
                 </p>
                 {(education.field || education.gpa) && (
                   <p className="text-xs text-gray-500 mt-1">
@@ -145,7 +253,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                     }`}
-                    title={siteLanguage === 'english' ? 'Move up' : 'Yuxarı'}
+                    title={content.moveUp}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -159,7 +267,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                     }`}
-                    title={siteLanguage === 'english' ? 'Move down' : 'Aşağı'}
+                    title={content.moveDown}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -174,15 +282,15 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                     className="text-blue-600 hover:text-blue-800 transition-colors text-sm cursor-pointer"
                   >
                     {expandedId === education.id 
-                      ? (siteLanguage === 'english' ? 'Close' : 'Bağlayın')
-                      : (siteLanguage === 'english' ? 'Edit' : 'Redaktə edin')
+                      ? content.close
+                      : content.edit
                     }
                   </button>
                   <button
                     onClick={() => removeEducation(education.id)}
                     className="text-red-600 hover:text-red-800 transition-colors text-sm cursor-pointer"
                   >
-                    {siteLanguage === 'english' ? 'Delete' : 'Silin'}
+                    {content.delete}
                   </button>
                 </div>
               </div>
@@ -192,14 +300,14 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {siteLanguage === 'english' ? 'Educational Institution' : 'Təhsil müəssisəsi'} <span className="text-red-500">*</span>
+                        {content.institution} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         value={education.institution || ''}
                         onChange={(e) => updateEducation(education.id, { institution: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        placeholder={siteLanguage === 'english' ? 'University name' : 'Universitet adı'}
+                        placeholder={content.institutionPlaceholder}
                       />
                     </div>
 
@@ -211,7 +319,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                           </svg>
                           <span>
-                            {siteLanguage === 'english' ? 'Degree' : 'Dərəcə'} <span className="text-gray-400 text-xs">({siteLanguage === 'english' ? 'optional' : 'ixtiyari'})</span>
+                            {content.degree} <span className="text-gray-400 text-xs">({content.optional})</span>
                           </span>
                         </span>
                       </label>
@@ -227,25 +335,25 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                         }}
                       >
                         <option value="">
-                          {siteLanguage === 'english' ? '🎓 Select degree' : '🎓 Dərəcə seçin'}
+                          {content.selectDegree}
                         </option>
-                        <option value={siteLanguage === 'english' ? 'Bachelor' : 'Bakalavr'}>
-                          🎓 {siteLanguage === 'english' ? 'Bachelor' : 'Bakalavr'}
+                        <option value={content.bachelor}>
+                          🎓 {content.bachelor}
                         </option>
-                        <option value={siteLanguage === 'english' ? 'Master' : 'Magistr'}>
-                          🎓 {siteLanguage === 'english' ? 'Master' : 'Magistr'}
+                        <option value={content.master}>
+                          🎓 {content.master}
                         </option>
-                        <option value={siteLanguage === 'english' ? 'PhD' : 'Doktorantura'}>
-                          🎓 {siteLanguage === 'english' ? 'PhD' : 'Doktorantura'}
+                        <option value={content.phd}>
+                          🎓 {content.phd}
                         </option>
-                        <option value={siteLanguage === 'english' ? 'Diploma' : 'Diploma'}>
-                          📜 {siteLanguage === 'english' ? 'Diploma' : 'Diploma'}
+                        <option value={content.diploma}>
+                          📜 {content.diploma}
                         </option>
-                        <option value={siteLanguage === 'english' ? 'Certificate' : 'Sertifikat'}>
-                          📋 {siteLanguage === 'english' ? 'Certificate' : 'Sertifikat'}
+                        <option value={content.certificate}>
+                          📋 {content.certificate}
                         </option>
-                        <option value={siteLanguage === 'english' ? 'Other' : 'Digər'}>
-                          📚 {siteLanguage === 'english' ? 'Other' : 'Digər'}
+                        <option value={content.other}>
+                          📚 {content.other}
                         </option>
                       </select>
                     </div>
@@ -254,30 +362,27 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {siteLanguage === 'english' ? 'Field of Study' : 'Sahə'} <span className="text-gray-400 text-xs">({siteLanguage === 'english' ? 'optional' : 'ixtiyari'})</span>
+                        {content.field} <span className="text-gray-400 text-xs">({content.optional})</span>
                       </label>
                       <input
                         type="text"
                         value={education.field || ''}
                         onChange={(e) => updateEducation(education.id, { field: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        placeholder={siteLanguage === 'english' 
-                          ? 'Computer Science, Business Administration, etc.'
-                          : 'Kompüter Elmi, Biznes İdarəetməsi, və s.'
-                        }
+                        placeholder={content.fieldPlaceholder}
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {siteLanguage === 'english' ? 'GPA / Grade' : 'ÜOMG / Qiymət'} <span className="text-gray-400 text-xs">(ixtiyari)</span>
+                        {content.gpa} <span className="text-gray-400 text-xs">({content.optional})</span>
                       </label>
                       <input
                         type="text"
                         value={education.gpa || ''}
                         onChange={(e) => updateEducation(education.id, { gpa: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        placeholder={siteLanguage === 'english' ? '3.8/4.0, High, etc.' : '3.8/4.0, Yüksək, və s.'}
+                        placeholder={content.gpaPlaceholder}
                       />
                     </div>
                   </div>
@@ -293,25 +398,22 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                       current, 
                       endDate: current ? '' : education.endDate 
                     })}
-                    startLabel={siteLanguage === 'english' ? 'Start Date' : 'Başlama tarixi'}
-                    endLabel={siteLanguage === 'english' ? 'End Date' : 'Bitirmə tarixi'}
-                    currentLabel={siteLanguage === 'english' ? 'Currently studying' : 'Davam edir'}
-                    cvLanguage={cvLanguage}
+                    startLabel={content.startDate}
+                    endLabel={content.endDate}
+                    currentLabel={content.currentStudying}
+                    cvLanguage={cvLanguage as 'english' | 'azerbaijani'}
                   />
 
                
 
                <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {siteLanguage === 'english' ? 'Description (optional)' : 'Təsvir (ixtiyari)'}
+                      {content.description}
                     </label>
                     <RichTextEditor
                       value={education.description ?? ''}
                       onChange={(value) => updateEducation(education.id, { description: value })}
-                      placeholder={siteLanguage === 'english' 
-                        ? 'Provide information about your education...'
-                        : 'Təhsiliniz haqqında məlumat verin...'
-                      }
+                      placeholder={content.descriptionPlaceholder}
                       minHeight="120px"
                     />
                   </div>
@@ -328,10 +430,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
             onClick={addEducation}
             className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
           >
-            {siteLanguage === 'english' 
-              ? '+ Add another education' 
-              : '+ Başqa təhsil əlavə edin'
-            }
+            {content.addAnother}
           </button>
         </div>
       )}

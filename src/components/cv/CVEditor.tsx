@@ -121,7 +121,7 @@ const getDefaultCVData = (): Omit<CVEditorState, 'id' | 'title' | 'templateId'> 
 });
 
 // Sections configuration
-const getSections = (uiLanguage: 'english' | 'azerbaijani', translatedSectionNames?: Record<string, string>, useTranslatedNames: boolean = false) => {
+const getSections = (uiLanguage: 'english' | 'azerbaijani' | 'russian', translatedSectionNames?: Record<string, string>, useTranslatedNames: boolean = false) => {
     const defaultSections = {
         english: [
             { id: 'personal', label: 'Personal Information', icon: '👤' },
@@ -148,6 +148,19 @@ const getSections = (uiLanguage: 'english' | 'azerbaijani', translatedSectionNam
             { id: 'organizations', label: 'Təşkilatlar', icon: '🏢' },
             { id: 'customSections', label: 'Əlavə Bölmələr', icon: '📝' },
             { id: 'template', label: 'Şablon Seçimi', icon: '🎨' }
+        ],
+        russian: [
+            { id: 'personal', label: 'Личная информация', icon: '👤' },
+            { id: 'experience', label: 'Опыт работы', icon: '💼' },
+            { id: 'education', label: 'Образование', icon: '🎓' },
+            { id: 'skills', label: 'Навыки', icon: '🛠️' },
+            { id: 'languages', label: 'Языки', icon: '🌍' },
+            { id: 'projects', label: 'Проекты', icon: '🚀' },
+            { id: 'certifications', label: 'Сертификаты', icon: '🏆' },
+            { id: 'volunteer', label: 'Волонтерский опыт', icon: '❤️' },
+            { id: 'organizations', label: 'Организации', icon: '🏢' },
+            { id: 'customSections', label: 'Дополнительные разделы', icon: '📝' },
+            { id: 'template', label: 'Выбор шаблона', icon: '🎨' }
         ]
     };
 
@@ -189,8 +202,8 @@ const getSections = (uiLanguage: 'english' | 'azerbaijani', translatedSectionNam
     return sections;
 };
 
-const getSectionDescription = (sectionId: string, uiLanguage: 'english' | 'azerbaijani') => {
-    const descriptions: Record<'english' | 'azerbaijani', Record<string, string>> = {
+const getSectionDescription = (sectionId: string, uiLanguage: 'english' | 'azerbaijani' | 'russian') => {
+    const descriptions: Record<'english' | 'azerbaijani' | 'russian', Record<string, string>> = {
         english: {
             personal: 'Provide your basic contact and personal details.',
             experience: 'Detail your professional work history.',
@@ -216,6 +229,19 @@ const getSectionDescription = (sectionId: string, uiLanguage: 'english' | 'azerb
             organizations: 'Üzvü olduğunuz və ya vəzifə tutduğunuz təşkilatları sadalayın.',
             customSections: 'Profilinizin unikal tərəflərini vurğulamaq üçün xüsusi bölmələr əlavə edin.',
             template: 'Stilinizi ən yaxşı əks etdirən şablonu seçin.'
+        },
+        russian: {
+            personal: 'Укажите основную контактную и личную информацию.',
+            experience: 'Детально опишите свою профессиональную трудовую историю.',
+            education: 'Перечислите ваши академические квалификации и степени.',
+            skills: 'Покажите ваши технические и мягкие навыки.',
+            languages: 'Укажите ваш уровень владения различными языками.',
+            projects: 'Выделите значимые проекты, над которыми вы работали.',
+            certifications: 'Добавьте соответствующие сертификаты, которые вы получили.',
+            volunteer: 'Опишите ваш волонтерский вклад.',
+            organizations: 'Перечислите организации, членом которых вы являетесь или занимаете должности.',
+            customSections: 'Добавьте пользовательские разделы, чтобы выделить уникальные аспекты вашего профиля.',
+            template: 'Выберите шаблон, который лучше всего подходит вашему стилю.'
         }
     };
     return descriptions[uiLanguage][sectionId] || '';
@@ -223,6 +249,105 @@ const getSectionDescription = (sectionId: string, uiLanguage: 'english' | 'azerb
 
 export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier }: CVEditorProps) {
     const { siteLanguage } = useSiteLanguage();
+    
+    // CVEditor labels
+    const labels = {
+        azerbaijani: {
+            templateSelection: 'Şablon Seçimi',
+            selectSection: 'Bölmə seçin',
+            cvTitle: 'CV başlığı',
+            translateWithAI: 'AI ilə tərcümə et',
+            aiTranslate: 'AI Tərcümə',
+            fontSettings: 'Font tənzimləmələri',
+            fontManager: 'Font İdarə',
+            saving: 'Yadda saxlanılır...',
+            saved: 'Yadda saxlanıldı',
+            downloadPDF: 'PDF Yüklə',
+            pdf: 'PDF',
+            goBack: 'Geri qayıdın',
+            save: 'Yadda Saxlayın',
+            saveShort: 'Saxla',
+            cvSections: 'CV Bölmələri',
+            preview: 'Önizləmə',
+            aiTranslationPanel: 'AI Tərcümə Paneli',
+            close: 'Bağla',
+            headingSize: 'Başlıq Ölçüsü',
+            savingShort: 'Saxlanır...',
+            savedShort: 'Saxlanıldı',
+            subheadingSize: 'Alt Başlıq Ölçüsü',
+            bodyTextSize: 'Əsas Mətn Ölçüsü',
+            smallTextSize: 'Kiçik Mətn Ölçüsü',
+            headingWeight: 'Başlıq Qalınlığı',
+            subheadingWeight: 'Alt Başlıq Qalınlığı',
+            smallTextWeight: 'Kiçik Mətn Qalınlığı',
+            sectionSpacing: 'Bölmələr Arası Məsafə',
+            reset: 'Sıfırla'
+        },
+        english: {
+            templateSelection: 'Template Selection',
+            selectSection: 'Select a section',
+            cvTitle: 'CV Title',
+            translateWithAI: 'Translate with AI',
+            aiTranslate: 'AI Translate',
+            fontSettings: 'Font settings',
+            fontManager: 'Font Manager',
+            saving: 'Saving...',
+            saved: 'Saved',
+            downloadPDF: 'Download PDF',
+            pdf: 'PDF',
+            goBack: 'Go Back',
+            save: 'Save',
+            saveShort: 'Save',
+            cvSections: 'CV Sections',
+            preview: 'Preview',
+            aiTranslationPanel: 'AI Translation Panel',
+            close: 'Close',
+            headingSize: 'Heading Size',
+            savingShort: 'Saving...',
+            savedShort: 'Saved',
+            subheadingSize: 'Subheading Size',
+            bodyTextSize: 'Body Text Size',
+            smallTextSize: 'Small Text Size',
+            headingWeight: 'Heading Weight',
+            subheadingWeight: 'Subheading Weight',
+            smallTextWeight: 'Small Text Weight',
+            sectionSpacing: 'Section Spacing',
+            reset: 'Reset'
+        },
+        russian: {
+            templateSelection: 'Выбор шаблона',
+            selectSection: 'Выберите раздел',
+            cvTitle: 'Название резюме',
+            translateWithAI: 'Перевести с помощью ИИ',
+            aiTranslate: 'ИИ Перевод',
+            fontSettings: 'Настройки шрифта',
+            fontManager: 'Менеджер шрифтов',
+            saving: 'Сохранение...',
+            saved: 'Сохранено',
+            downloadPDF: 'Скачать PDF',
+            pdf: 'PDF',
+            goBack: 'Назад',
+            save: 'Сохранить',
+            saveShort: 'Сохранить',
+            cvSections: 'Разделы резюме',
+            preview: 'Предварительный просмотр',
+            aiTranslationPanel: 'Панель перевода ИИ',
+            close: 'Закрыть',
+            headingSize: 'Размер заголовка',
+            savingShort: 'Сохранение...',
+            savedShort: 'Сохранено',
+            subheadingSize: 'Размер подзаголовка',
+            bodyTextSize: 'Размер основного текста',
+            smallTextSize: 'Размер мелкого текста',
+            headingWeight: 'Толщина заголовка',
+            subheadingWeight: 'Толщина подзаголовка',
+            smallTextWeight: 'Толщина мелкого текста',
+            sectionSpacing: 'Расстояние между разделами',
+            reset: 'Сбросить'
+        }
+    };
+
+    const content = labels[siteLanguage];
     // Default section order
     const defaultSectionOrder = [
         'summary',
@@ -1131,7 +1256,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 return (
                     <div>
                         <h3 className="text-lg font-semibold mb-4 text-gray-800">
-                            {siteLanguage === 'english' ? 'Template Selection' : 'Şablon Seçimi'}
+                            {content.templateSelection}
                         </h3>
                         <TemplateSelector
                             selectedTemplateId={cv.templateId}
@@ -1146,7 +1271,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 return (
                     <div className="text-center py-8">
                         <p className="text-gray-500">
-                            {siteLanguage === 'english' ? 'Select a section' : 'Bölmə seçin'}
+                            {content.selectSection}
                         </p>
                     </div>
                 );
@@ -1169,7 +1294,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                     type="text"
                                     value={cv.title}
                                     onChange={(e) => setCv(prev => ({ ...prev, title: e.target.value }))}
-                                    placeholder={siteLanguage === 'english' ? 'CV Title' : 'CV başlığı'}
+                                    placeholder={content.cvTitle}
                                     className="text-base sm:text-lg font-bold text-gray-800 bg-transparent border-none p-0 focus:ring-0 w-28 sm:w-48 md:w-auto truncate"
                                 />
                             </div>
@@ -1183,24 +1308,24 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                         setShowTranslationPanel(true);
                                     }}
                                     className="ml-3 flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-lg transition-all duration-200 border border-white/20"
-                                    title={siteLanguage === 'english' ? 'Translate with AI' : 'AI ilə tərcümə et'}
+                                    title={content.translateWithAI}
                                 >
                                     <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
                                     </svg>
-                                    {siteLanguage === 'english' ? 'AI Translate' : 'AI Tərcümə'}
+                                    {content.aiTranslate}
                                 </button>
 
                                 {/* Simple Font Button */}
                                 <button
                                     onClick={() => setShowFontPanel(true)}
                                     className="ml-2 flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 rounded-lg transition-all duration-200 border border-white/20"
-                                    title={siteLanguage === 'english' ? 'Font settings' : 'Font tənzimləmələri'}
+                                    title={content.fontSettings}
                                 >
                                     <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.5 12.75l6 6 9-13.5" />
                                     </svg>
-                                    {siteLanguage === 'english' ? 'Font Manager' : 'Font İdarə'}
+                                    {content.fontManager}
                                 </button>
                             </div>
                         </div>
@@ -1211,12 +1336,12 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             <div className="hidden md:flex items-center space-x-3">
                                 {saving && (
                                     <span className="text-xs text-blue-600 animate-pulse">
-                                        {siteLanguage === 'english' ? 'Saving...' : 'Yadda saxlanılır...'}
+                                        {content.saving}
                                     </span>
                                 )}
                                 {success && (
                                     <span className="text-xs text-green-600">
-                                        ✓ {siteLanguage === 'english' ? 'Saved' : 'Yadda saxlanıldı'}
+                                        ✓ {content.saved}
                                     </span>
                                 )}
                             </div>
@@ -1229,7 +1354,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                         onClick={handleDirectPDFExport}
                                         disabled={saving}
                                         className="flex items-center justify-center h-10 w-10 sm:h-auto sm:w-auto sm:px-3 sm:py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                        aria-label={siteLanguage === 'english' ? 'Download PDF' : 'PDF Yüklə'}
+                                        aria-label={content.downloadPDF}
                                     >
                                         {saving ? (
                                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -1239,7 +1364,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                             </svg>
                                         )}
                                         <span className="hidden sm:inline ml-2">
-                                            {siteLanguage === 'english' ? 'PDF' : 'PDF'}
+                                            {content.pdf}
                                         </span>
                                     </button>
 
@@ -1250,11 +1375,11 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             <button
                                 onClick={onCancel}
                                 className="flex items-center justify-center h-10 w-10 sm:h-auto sm:w-auto sm:px-3 sm:py-2 text-sm font-medium text-gray-700 bg-transparent border border-transparent rounded-lg hover:bg-gray-100 transition-colors"
-                                aria-label={siteLanguage === 'english' ? 'Go Back' : 'Geri qayıdın'}
+                                aria-label={content.goBack}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
                                 <span className="hidden sm:inline ml-2">
-                                    {siteLanguage === 'english' ? 'Go Back' : 'Geri qayıdın'}
+                                    {content.goBack}
                                 </span>
                             </button>
                             
@@ -1265,10 +1390,10 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             >
                                 {saving ? '...' : <>
                                     <span className="hidden sm:inline">
-                                        {siteLanguage === 'english' ? 'Save' : 'Yadda Saxlayın'}
+                                        {content.save}
                                     </span>
                                     <span className="sm:hidden">
-                                        {siteLanguage === 'english' ? 'Save' : 'Saxla'}
+                                        {content.saveShort}
                                     </span>
                                 </>}
                             </button>
@@ -1285,24 +1410,24 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                     setShowTranslationPanel(true);
                                 }}
                                 className="flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-lg transition-all duration-200 shadow-md"
-                                title={siteLanguage === 'english' ? 'Translate with AI' : 'AI ilə tərcümə et'}
+                                title={content.translateWithAI}
                             >
                                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
                                 </svg>
-                                {siteLanguage === 'english' ? 'AI Translate' : 'AI Tərcümə'}
+                                {content.aiTranslate}
                             </button>
 
                             {/* Font Manager Button */}
                             <button
                                 onClick={() => setShowFontPanel(true)}
                                 className="flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 rounded-lg transition-all duration-200 shadow-md"
-                                title={siteLanguage === 'english' ? 'Font settings' : 'Font tənzimləmələri'}
+                                title={content.fontSettings}
                             >
                                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
                                 </svg>
-                                {siteLanguage === 'english' ? 'Font Manager' : 'Font İdarə'}
+                                {content.fontManager}
                             </button>
 
                             {/* Mobile Status Indicator */}
@@ -1310,7 +1435,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                 {saving && (
                                     <div className="flex items-center text-xs text-blue-600">
                                         <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600 mr-1"></div>
-                                        {siteLanguage === 'english' ? 'Saving...' : 'Saxlanır...'}
+                                        {content.savingShort}
                                     </div>
                                 )}
                                 {success && (
@@ -1318,7 +1443,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                         </svg>
-                                        {siteLanguage === 'english' ? 'Saved' : 'Saxlanıldı'}
+                                        {content.savedShort}
                                     </span>
                                 )}
                             </div>
@@ -1335,7 +1460,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                         <div className="mb-8">
                             <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
                                 <h3 className="text-sm font-semibold text-gray-800 mb-4 px-2">
-                                    {siteLanguage === 'english' ? 'CV Sections' : 'CV Bölmələri'}
+                                    {content.cvSections}
                                 </h3>
                                 
                                 {/* Scrollable Main Sections */}
@@ -1437,7 +1562,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                         <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                                         <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
                                     </svg>
-                                    <span>{siteLanguage === 'english' ? 'Preview' : 'Önizləmə'}</span>
+                                    <span>{content.preview}</span>
                                 </h3>
                                 <div className="flex items-center space-x-3">
                                     <span className="text-xs font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
@@ -1610,7 +1735,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                     <div className="p-3 sm:p-4 lg:p-6">
                         <div className="flex justify-between items-center mb-3 sm:mb-4">
                             <h2 className="text-lg sm:text-xl font-bold text-gray-900">
-                                {siteLanguage === 'english' ? 'AI Translation Panel' : 'AI Tərcümə Paneli'}
+                                {content.aiTranslationPanel}
                             </h2>
                               <button
               onClick={() => setShowTranslationPanel(false)}
@@ -1694,7 +1819,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                 <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
                                 </svg>
-                                {siteLanguage === 'english' ? 'Font Manager' : 'Font İdarə'}
+                                {content.fontManager}
                             </h2>
                             <button
                                 onClick={() => setShowFontPanel(false)}
@@ -1702,7 +1827,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                          bg-white hover:bg-gray-100 rounded-full shadow-sm border border-gray-200
                                          text-gray-500 hover:text-gray-700 transition-all duration-200
                                          hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                aria-label={siteLanguage === 'english' ? 'Close' : 'Bağla'}
+                                aria-label={content.close}
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
@@ -1731,7 +1856,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Heading Size */}
                             <div>
                                 <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-1.5 text-center">
-                                    {siteLanguage === 'english' ? 'Heading Size' : 'Başlıq Ölçüsü'}
+                                    {content.headingSize}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1757,7 +1882,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Subheading Size */}
                             <div>
                                 <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-1.5 text-center">
-                                    {siteLanguage === 'english' ? 'Subheading Size' : 'Alt Başlıq Ölçüsü'}
+                                    {content.subheadingSize}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1783,7 +1908,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Body Size */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
-                                    {siteLanguage === 'english' ? 'Body Text Size' : 'Əsas Mətn Ölçüsü'}
+                                    {content.bodyTextSize}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1809,7 +1934,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Small Size */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
-                                    {siteLanguage === 'english' ? 'Small Text Size' : 'Kiçik Mətn Ölçüsü'}
+                                    {content.smallTextSize}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1835,7 +1960,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Heading Weight */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
-                                    {siteLanguage === 'english' ? 'Heading Weight' : 'Başlıq Qalınlığı'}
+                                    {content.headingWeight}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1861,7 +1986,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Subheading Weight */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
-                                    {siteLanguage === 'english' ? 'Subheading Weight' : 'Alt Başlıq Qalınlığı'}
+                                    {content.subheadingWeight}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1887,7 +2012,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Small Weight */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
-                                    {siteLanguage === 'english' ? 'Small Text Weight' : 'Kiçik Mətn Qalınlığı'}
+                                    {content.smallTextWeight}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1913,7 +2038,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Section Spacing Control */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
-                                    {siteLanguage === 'english' ? 'Section Spacing' : 'Bölmələr Arası Məsafə'}
+                                    {content.sectionSpacing}
                                 </label>
                                 <div className="flex items-center justify-center gap-2 sm:gap-3 max-w-36 sm:max-w-40 mx-auto">
                                     <button
@@ -1965,7 +2090,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                                      transition-all duration-200 shadow-sm"
                         >
-                            {siteLanguage === 'english' ? 'Reset' : 'Sıfırla'}
+                            {content.reset}
                         </button>
                     </div>
                 </div>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 import StandardHeader from '@/components/ui/StandardHeader';
 import Footer from '@/components/Footer';
 
@@ -12,6 +13,7 @@ interface Template {
   name: string;
   tier: string;
   description: string;
+  description_en?: string; // İngilis dili açıqlaması (optional)
   previewUrl: string;
   hasAccess: boolean;
   requiresUpgrade: boolean;
@@ -19,6 +21,7 @@ interface Template {
 }
 
 export default function SablonlarPage() {
+  const { siteLanguage } = useSiteLanguage();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -28,9 +31,220 @@ export default function SablonlarPage() {
   const { user } = useAuth();
   const router = useRouter();
 
+  // Site language mətnləri
+  const labels = {
+    azerbaijani: {
+      pageTitle: 'CV Şablonları',
+      pageSubtitle: 'Professional CV-nizi yaratmaq üçün ən uyğun şablonu seçin. Müxtəlif sahələr və təcrübə səviyyələri üçün nəzərdə tutulmuş şablonlar.',
+      errorTemplateLoading: 'Şablonlar yüklənərkən xəta baş verdi',
+      errorTemplateFormat: 'Şablonlar formatı yanlışdır',
+      errorDefaultMessage: 'Şablonlar yüklənərkən xəta baş verdi.',
+      alertLoginRequired: 'Şablonu istifadə etmək üçün giriş etməlisiniz',
+      alertUpgradeRequired: 'Bu şablon üçün abunəliyi yeniləmək lazımdır',
+      categoryAll: 'Hamısı',
+      categoryFree: 'Pulsuz',
+      categoryPopular: 'Populyar',
+      categoryPremium: 'Premium',
+      tierFree: 'Pulsuz',
+      tierPopular: 'Populyar',
+      tierPremium: 'Premium',
+      errorTitle: 'Xəta',
+      retryButton: 'Yenidən cəhd edin',
+      freeUsage: 'Pulsuz istifadə',
+      popularSubscription: 'Populyar abunəlik',
+      premiumSubscription: 'Premium abunəlik',
+      preview: 'Önizləmə',
+      selectTemplate: 'Şablonu seçin',
+      useTemplate: 'İstifadə edin',
+      closePreview: 'Bağlayın',
+      upgradeForAccess: 'Kiliddə',
+      noPreviewAvailable: 'Önizləmə mövcud deyil',
+      packageRequirement: 'Paket tələbi',
+      closeModal: 'Bağlayın',
+      useThisTemplate: 'Bu şablonu istifadə edin',
+      upgradeSubscription: 'Abunəliyi yeniləyin',
+      largePreview: 'böyük önizləmə',
+      noTemplatesFound: 'Şablon tapılmadı',
+      noTemplatesInCategory: 'Seçilmiş kateqoriyada heç bir şablon mövcud deyil.',
+      // Template preview modal mətnləri
+      features: 'Xüsusiyyətlər',
+      featureProfessionalDesign: 'Professional dizayn',
+      featureATSCompatible: 'ATS uyğun format',
+      featurePrintOptimized: 'Çap üçün optimizasiya edilmiş',
+      featurePremiumFunctions: 'Premium funksiyalar',
+      description: 'Təsvir',
+      // Template açıqlamaları
+      templateDescriptions: {
+        'Modern': 'Müasir və çağdaş dizayn ilə professional CV şablonu',
+        'Classic': 'Klassik və rəsmi görünüş ilə ənənəvi CV şablonu',
+        'Creative': 'Yaradıcı sahələr üçün fərqli və cəlbedici CV şablonu', 
+        'Minimalist': 'Sadə və təmiz görünüş ilə minimalist CV şablonu',
+        'Professional': 'İş axtaranlar üçün professional və etibarlı CV şablonu',
+        'Executive': 'Rəhbər mövqelər üçün nəzərdə tutulmuş premium CV şablonu',
+        'Technical': 'Texniki sahələr üçün xüsusi hazırlanmış CV şablonu',
+        'Academic': 'Akademik karyera üçün təhsil və araşdırma yönümlü CV şablonu',
+        'Simple': 'Anlaşılan və sadə strukturlu CV şablonu',
+        'Elegant': 'Zərif və estetik görünüşlü CV şablonu',
+        'Corporate': 'Korporativ mühit üçün rəsmi CV şablonu',
+        'Fresh': 'Təzə və dinamik görünüşlü CV şablonu'
+      },
+      defaultTemplateDescription: 'Professional CV şablonu'
+    },
+    english: {
+      pageTitle: 'CV Templates',
+      pageSubtitle: 'Choose the most suitable template to create your professional CV. Templates designed for various fields and experience levels.',
+      errorTemplateLoading: 'Error occurred while loading templates',
+      errorTemplateFormat: 'Template format is incorrect',
+      errorDefaultMessage: 'Error occurred while loading templates.',
+      alertLoginRequired: 'You must log in to use the template',
+      alertUpgradeRequired: 'Subscription upgrade required for this template',
+      categoryAll: 'All',
+      categoryFree: 'Free',
+      categoryPopular: 'Popular',
+      categoryPremium: 'Premium',
+      tierFree: 'Free',
+      tierPopular: 'Popular',
+      tierPremium: 'Premium',
+      errorTitle: 'Error',
+      retryButton: 'Try again',
+      freeUsage: 'Free usage',
+      popularSubscription: 'Popular subscription',
+      premiumSubscription: 'Premium subscription',
+      preview: 'Preview',
+      selectTemplate: 'Select template',
+      useTemplate: 'Use template',
+      closePreview: 'Close',
+      upgradeForAccess: 'Locked',
+      noPreviewAvailable: 'Preview not available',
+      packageRequirement: 'Package requirement',
+      closeModal: 'Close',
+      useThisTemplate: 'Use this template',
+      upgradeSubscription: 'Upgrade subscription',
+      largePreview: 'large preview',
+      noTemplatesFound: 'No templates found',
+      noTemplatesInCategory: 'No templates available in the selected category.',
+      // Template preview modal texts
+      features: 'Features',
+      featureProfessionalDesign: 'Professional design',
+      featureATSCompatible: 'ATS compatible format',
+      featurePrintOptimized: 'Print optimized',
+      featurePremiumFunctions: 'Premium features',
+      description: 'Description',
+      // Template descriptions
+      templateDescriptions: {
+        'Modern': 'Professional CV template with modern and contemporary design',
+        'Classic': 'Traditional CV template with classic and formal appearance',
+        'Creative': 'Distinctive and attractive CV template for creative fields',
+        'Minimalist': 'Minimalist CV template with simple and clean appearance',
+        'Professional': 'Professional and reliable CV template for job seekers',
+        'Executive': 'Premium CV template designed for executive positions',
+        'Technical': 'Specially prepared CV template for technical fields',
+        'Academic': 'Education and research oriented CV template for academic career',
+        'Simple': 'Understandable and simple structured CV template',
+        'Elegant': 'Elegant and aesthetic looking CV template',
+        'Corporate': 'Formal CV template for corporate environment',
+        'Fresh': 'Fresh and dynamic looking CV template'
+      },
+      defaultTemplateDescription: 'Professional CV template'
+    },
+    russian: {
+      pageTitle: 'Шаблоны резюме',
+      pageSubtitle: 'Выберите наиболее подходящий шаблон для создания вашего профессионального резюме. Шаблоны разработаны для различных областей и уровней опыта.',
+      errorTemplateLoading: 'Произошла ошибка при загрузке шаблонов',
+      errorTemplateFormat: 'Неверный формат шаблона',
+      errorDefaultMessage: 'Произошла ошибка при загрузке шаблонов.',
+      alertLoginRequired: 'Вы должны войти в систему, чтобы использовать шаблон',
+      alertUpgradeRequired: 'Требуется обновление подписки для этого шаблона',
+      categoryAll: 'Все',
+      categoryFree: 'Бесплатно',
+      categoryPopular: 'Популярные',
+      categoryPremium: 'Премиум',
+      tierFree: 'Бесплатно',
+      tierPopular: 'Популярные',
+      tierPremium: 'Премиум',
+      errorTitle: 'Ошибка',
+      retryButton: 'Попробовать снова',
+      freeUsage: 'Бесплатное использование',
+      popularSubscription: 'Популярная подписка',
+      premiumSubscription: 'Премиум подписка',
+      preview: 'Предварительный просмотр',
+      selectTemplate: 'Выбрать шаблон',
+      useTemplate: 'Использовать шаблон',
+      closePreview: 'Закрыть',
+      upgradeForAccess: 'Заблокировано',
+      noPreviewAvailable: 'Предварительный просмотр недоступен',
+      packageRequirement: 'Требование пакета',
+      closeModal: 'Закрыть',
+      useThisTemplate: 'Использовать этот шаблон',
+      upgradeSubscription: 'Обновить подписку',
+      largePreview: 'большой предварительный просмотр',
+      noTemplatesFound: 'Шаблоны не найдены',
+      noTemplatesInCategory: 'В выбранной категории нет доступных шаблонов.',
+      features: 'Особенности',
+      featureProfessionalDesign: 'Профессиональный дизайн',
+      featureATSCompatible: 'ATS совместимый формат',
+      featurePrintOptimized: 'Оптимизировано для печати',
+      featurePremiumFunctions: 'Премиум функции',
+      description: 'Описание',
+      templateDescriptions: {
+        'Modern': 'Профессиональный шаблон резюме с современным и актуальным дизайном',
+        'Classic': 'Традиционный шаблон резюме с классическим и формальным видом',
+        'Creative': 'Отличительный и привлекательный шаблон резюме для творческих областей',
+        'Minimalist': 'Минималистский шаблон резюме с простым и чистым видом',
+        'Professional': 'Профессиональный и надежный шаблон резюме для соискателей',
+        'Executive': 'Премиум шаблон резюме, разработанный для руководящих должностей',
+        'Technical': 'Специально подготовленный шаблон резюме для технических областей',
+        'Academic': 'Шаблон резюме, ориентированный на образование и исследования для академической карьеры',
+        'Simple': 'Понятный и простой структурированный шаблон резюме',
+        'Elegant': 'Элегантный и эстетичный шаблон резюме',
+        'Corporate': 'Формальный шаблон резюме для корпоративной среды',
+        'Fresh': 'Свежий и динамичный шаблон резюме'
+      },
+      defaultTemplateDescription: 'Профессиональный шаблон резюме'
+    }
+  };
+
+  const content = labels[siteLanguage];
+
+  // Template açıqlamasını site language-ə görə seçən funksiya
+  const getTemplateDescription = (template: Template): string => {
+    console.log('getTemplateDescription called:', {
+      siteLanguage,
+      templateName: template.name,
+      description: template.description,
+      description_en: template.description_en
+    });
+    
+    let finalDescription: string;
+    
+    if (siteLanguage === 'azerbaijani') {
+      // Azərbaycan dili üçün description (əsas) və ya description_en (fallback)
+      finalDescription = template.description || template.description_en || '';
+    } else {
+      // İngilis dili üçün description_en (əsas) və ya description (fallback)
+      finalDescription = template.description_en || template.description || '';
+    }
+    
+    // Əgər SQL-dən açıqlama gəlməyibsə, template adına görə açıqlama tapaq
+    if (!finalDescription || finalDescription.trim() === '') {
+      const templateKey = Object.keys(content.templateDescriptions).find(key => 
+        template.name.toLowerCase().includes(key.toLowerCase())
+      );
+      
+      if (templateKey && templateKey in content.templateDescriptions) {
+        finalDescription = (content.templateDescriptions as any)[templateKey];
+      } else {
+        finalDescription = content.defaultTemplateDescription;
+      }
+    }
+    
+    console.log('Final description:', finalDescription);
+    return finalDescription;
+  };
+
   useEffect(() => {
     loadTemplates();
-  }, []);
+  }, [siteLanguage]); // siteLanguage dəyişəndə template-ləri yenidən yüklə
 
   const loadTemplates = async () => {
     try {
@@ -40,6 +254,7 @@ export default function SablonlarPage() {
       const token = localStorage.getItem('authToken');
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
+        'x-site-language': siteLanguage // Site language header əlavə edək
       };
       
       if (token) {
@@ -52,21 +267,22 @@ export default function SablonlarPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Şablonlar yüklənərkən xəta baş verdi');
+        throw new Error(content.errorTemplateLoading);
       }
 
       const data = await response.json();
       const templateList = data.templates || data;
       
       if (Array.isArray(templateList)) {
+        // Template data-sını eləcə set edək, getTemplateDescription funksiyası düzgün description seçəcək
         setTemplates(templateList);
       } else {
         console.error('Unexpected templates response format:', data);
-        setError('Şablonlar formatı yanlışdır');
+        setError(content.errorTemplateFormat);
       }
     } catch (err) {
       console.error('Template loading error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Şablonlar yüklənərkən xəta baş verdi.';
+      const errorMessage = err instanceof Error ? err.message : content.errorDefaultMessage;
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -80,13 +296,13 @@ export default function SablonlarPage() {
 
   const handleTemplateSelect = (template: Template) => {
     if (!user) {
-      alert('Şablonu istifadə etmək üçün giriş etməlisiniz');
+      alert(content.alertLoginRequired);
       router.push('/login');
       return;
     }
 
     if (!template.hasAccess) {
-      alert('Bu şablon üçün abunəliyi yeniləmək lazımdır');
+      alert(content.alertUpgradeRequired);
       router.push('/pricing');
       return;
     }
@@ -124,18 +340,18 @@ export default function SablonlarPage() {
 
   const getTierLabel = (tier: string) => {
     switch (tier) {
-      case 'Free': return 'Pulsuz';
-      case 'Medium': return 'Populyar';
-      case 'Premium': return 'Premium';
-      default: return 'Pulsuz';
+      case 'Free': return content.tierFree;
+      case 'Medium': return content.tierPopular;
+      case 'Premium': return content.tierPremium;
+      default: return content.tierFree;
     }
   };
 
   const categories = [
-    { id: 'all', name: 'Hamısı', count: templates.length },
-    { id: 'free', name: 'Pulsuz', count: templates.filter(t => t.tier === 'Free').length },
-    { id: 'medium', name: 'Populyar', count: templates.filter(t => t.tier === 'Medium').length },
-    { id: 'premium', name: 'Premium', count: templates.filter(t => t.tier === 'Premium').length }
+    { id: 'all', name: content.categoryAll, count: templates.length },
+    { id: 'free', name: content.categoryFree, count: templates.filter(t => t.tier === 'Free').length },
+    { id: 'medium', name: content.categoryPopular, count: templates.filter(t => t.tier === 'Medium').length },
+    { id: 'premium', name: content.categoryPremium, count: templates.filter(t => t.tier === 'Premium').length }
   ];
 
   if (loading) {
@@ -168,9 +384,9 @@ export default function SablonlarPage() {
       <main className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">CV Şablonları</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">{content.pageTitle}</h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Professional CV-nizi yaratmaq üçün ən uyğun şablonu seçin. Müxtəlif sahələr və təcrübə səviyyələri üçün nəzərdə tutulmuş şablonlar.
+            {content.pageSubtitle}
           </p>
         </div>
 
@@ -201,7 +417,7 @@ export default function SablonlarPage() {
                 </svg>
               </div>
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">Xəta</h3>
+                <h3 className="text-sm font-medium text-red-800">{content.errorTitle}</h3>
                 <div className="mt-2 text-sm text-red-700">
                   <p>{error}</p>
                 </div>
@@ -210,7 +426,7 @@ export default function SablonlarPage() {
                     onClick={loadTemplates}
                     className="bg-red-100 px-3 py-1 rounded text-red-800 text-sm hover:bg-red-200"
                   >
-                    Yenidən cəhd et
+                    {content.retryButton}
                   </button>
                 </div>
               </div>
@@ -233,14 +449,14 @@ export default function SablonlarPage() {
               {/* Content */}
               <div className="p-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">{template.name}</h3>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">{template.description}</p>
+                <p className="text-gray-600 text-sm mb-4 line-clamp-2">{getTemplateDescription(template)}</p>
                 
                 {/* Features */}
                 <div className="flex items-center justify-between mb-4">
                   <div className="text-xs text-gray-500">
-                    {template.tier === 'Free' && '🆓 Pulsuz istifadə'}
-                    {template.tier === 'Medium' && '💎 Populyar abunəlik'}
-                    {template.tier === 'Premium' && '⭐ Premium abunəlik'}
+                    {template.tier === 'Free' && `🆓 ${content.freeUsage}`}
+                    {template.tier === 'Medium' && `💎 ${content.popularSubscription}`}
+                    {template.tier === 'Premium' && `⭐ ${content.premiumSubscription}`}
                   </div>
                 </div>
 
@@ -255,7 +471,7 @@ export default function SablonlarPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
-                    Bu şablona bax
+                    {content.preview}
                   </button>
                 </div>
               </div>
@@ -269,8 +485,8 @@ export default function SablonlarPage() {
             <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <h3 className="mt-4 text-lg font-medium text-gray-900">Şablon tapılmadı</h3>
-            <p className="mt-2 text-gray-500">Seçilmiş kateqoriyada heç bir şablon mövcud deyil.</p>
+            <h3 className="mt-4 text-lg font-medium text-gray-900">{content.noTemplatesFound}</h3>
+            <p className="mt-2 text-gray-500">{content.noTemplatesInCategory}</p>
           </div>
         )}
 
@@ -294,7 +510,7 @@ export default function SablonlarPage() {
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                       </svg>
-                      Kiliddə
+                      {content.upgradeForAccess}
                     </span>
                   )}
                 </div>
@@ -317,7 +533,7 @@ export default function SablonlarPage() {
                   <div className="w-full max-w-2xl">
                     <img
                       src={previewTemplate.previewUrl}
-                      alt={`${previewTemplate.name} böyük önizləmə`}
+                      alt={`${previewTemplate.name} ${content.largePreview}`}
                       className="w-full h-auto rounded-lg shadow-lg border border-gray-200"
                       style={{ maxHeight: '70vh' }}
                       onError={(e) => {
@@ -331,7 +547,7 @@ export default function SablonlarPage() {
                     <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2v12a2 2 0 002 2z" />
                     </svg>
-                    <p className="mt-4 text-lg text-gray-500">Önizləmə mövcud deyil</p>
+                    <p className="mt-4 text-lg text-gray-500">{content.noPreviewAvailable}</p>
                   </div>
                 )}
               </div>
@@ -341,7 +557,7 @@ export default function SablonlarPage() {
                 <div className="space-y-6">
                   {/* Description */}
                   <div>
-                    <h4 className="text-lg font-semibold text-gray-900 mb-2">Təsvir</h4>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">{content.description}</h4>
                     <p className="text-gray-600 leading-relaxed">
                       {previewTemplate.description || 'Bu şablon professional CV yaratmaq üçün hazırlanmışdır.'}
                     </p>
@@ -349,38 +565,32 @@ export default function SablonlarPage() {
 
                   {/* Features */}
                   <div>
-                    <h4 className="text-lg font-semibold text-gray-900 mb-3">Xüsusiyyətlər</h4>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-3">{content.features}</h4>
                     <ul className="space-y-2 text-sm text-gray-600">
                       <li className="flex items-center gap-2">
                         <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
-                        Professional dizayn
+                        {content.featureProfessionalDesign}
                       </li>
                       <li className="flex items-center gap-2">
                         <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
-                        ATS uyğun format
+                        {content.featureATSCompatible}
                       </li>
                       <li className="flex items-center gap-2">
                         <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
-                        Çap üçün optimizasiya edilmiş
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                        Responsive layouthya
+                        {content.featurePrintOptimized}
                       </li>
                       {previewTemplate.tier !== 'Free' && (
                         <li className="flex items-center gap-2">
                           <svg className="w-4 h-4 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
                           </svg>
-                          Premium funksiyalar
+                          {content.featurePremiumFunctions}
                         </li>
                       )}
                     </ul>
@@ -389,14 +599,14 @@ export default function SablonlarPage() {
                   {/* Tier Info */}
                   <div className="bg-gray-50 rounded-lg p-4">
                     <div className="text-center">
-                      <div className="text-sm text-gray-500 mb-1">Paket tələbi</div>
+                      <div className="text-sm text-gray-500 mb-1">{content.packageRequirement}</div>
                       <div className={`text-lg font-semibold ${
                         previewTemplate.tier === 'Free' ? 'text-green-600' :
                         previewTemplate.tier === 'Medium' ? 'text-blue-600' : 'text-purple-600'
                       }`}>
-                        {previewTemplate.tier === 'Free' && '🆓 Pulsuz istifadə'}
-                        {previewTemplate.tier === 'Medium' && '💎 Populyar abunəlik'}
-                        {previewTemplate.tier === 'Premium' && '⭐ Premium abunəlik'}
+                        {previewTemplate.tier === 'Free' && `🆓 ${content.freeUsage}`}
+                        {previewTemplate.tier === 'Medium' && `💎 ${content.popularSubscription}`}
+                        {previewTemplate.tier === 'Premium' && `⭐ ${content.premiumSubscription}`}
                       </div>
                     </div>
                   </div>
@@ -410,7 +620,7 @@ export default function SablonlarPage() {
                 onClick={() => setShowPreviewModal(false)}
                 className="px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors font-medium"
               >
-                Bağla
+                {content.closeModal}
               </button>
               <button
                 onClick={handleUseTemplate}
@@ -420,7 +630,7 @@ export default function SablonlarPage() {
                     : 'bg-orange-600 text-white hover:bg-orange-700 shadow-lg'
                 }`}
               >
-                {previewTemplate.hasAccess ? 'Bu şablonu istifadə et' : 'Abunəliyi yenilə'}
+                {previewTemplate.hasAccess ? content.useThisTemplate : content.upgradeSubscription}
               </button>
             </div>
           </div>

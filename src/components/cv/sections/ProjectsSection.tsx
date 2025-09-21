@@ -62,11 +62,96 @@ interface Project {
 interface ProjectsSectionProps {
   data: Project[];
   onChange: (data: Project[]) => void;
-  cvLanguage?: 'english' | 'azerbaijani';
+  cvLanguage?: 'english' | 'azerbaijani' | 'russian';
 }
 
 export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaijani' }: ProjectsSectionProps) {
   const { siteLanguage } = useSiteLanguage();
+  
+  // Projects labels
+  const labels = {
+    azerbaijani: {
+      title: 'Layihələr',
+      add: '+ Əlavə edin',
+      addShort: '+',
+      newProject: 'Yeni layihə',
+      projectDescription: 'Layihə təsviri',
+      moveUp: 'Yuxarı',
+      moveDown: 'Aşağı',
+      close: 'Bağlayın',
+      edit: 'Redaktə edin',
+      delete: 'Silin',
+      projectName: 'Layihə adı',
+      projectNamePlaceholder: 'Layihənin adı',
+      projectUrl: 'Layihə URL-i',
+      githubUrl: 'GitHub URL-i',
+      technologies: 'Texnologiyalar',
+      technologiesNote: '(vergüllə ayırın)',
+      optional: '(ixtiyari)',
+      startDate: 'Başlama tarixi',
+      endDate: 'Bitirmə tarixi',
+      currentWorking: 'Davam edir',
+      description: 'Təsvir',
+      noProjects: 'Hələ heç bir layihə əlavə etməmisiniz',
+      addFirst: 'İlk layihənizi əlavə edin',
+      addAnother: '+ Başqa layihə əlavə edin'
+    },
+    english: {
+      title: 'Projects',
+      add: '+ Add',
+      addShort: '+',
+      newProject: 'New project',
+      projectDescription: 'Project description',
+      moveUp: 'Move Up',
+      moveDown: 'Move Down',
+      close: 'Close',
+      edit: 'Edit',
+      delete: 'Delete',
+      projectName: 'Project Name',
+      projectNamePlaceholder: 'Project Name',
+      projectUrl: 'Project URL',
+      githubUrl: 'GitHub Repository',
+      technologies: 'Technologies',
+      technologiesNote: '(comma separated)',
+      optional: '(optional)',
+      startDate: 'Start Date',
+      endDate: 'End Date',
+      currentWorking: 'Currently working',
+      description: 'Description',
+      noProjects: 'No projects added yet',
+      addFirst: 'Add your first project',
+      addAnother: '+ Add another project'
+    },
+    russian: {
+      title: 'Проекты',
+      add: '+ Добавить',
+      addShort: '+',
+      newProject: 'Новый проект',
+      projectDescription: 'Описание проекта',
+      moveUp: 'Переместить вверх',
+      moveDown: 'Переместить вниз',
+      close: 'Закрыть',
+      edit: 'Редактировать',
+      delete: 'Удалить',
+      projectName: 'Название проекта',
+      projectNamePlaceholder: 'Название проекта',
+      projectUrl: 'URL проекта',
+      githubUrl: 'GitHub репозиторий',
+      technologies: 'Технологии',
+      technologiesNote: '(через запятую)',
+      optional: '(необязательно)',
+      startDate: 'Дата начала',
+      endDate: 'Дата окончания',
+      currentWorking: 'В настоящее время работаю',
+      description: 'Описание',
+      noProjects: 'Проекты еще не добавлены',
+      addFirst: 'Добавьте ваш первый проект',
+      addAnother: '+ Добавить еще один проект'
+    }
+  };
+
+  const content = labels[siteLanguage];
+  
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   // Normalize data to ensure technologies is always an array
@@ -132,7 +217,7 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">
-            {siteLanguage === 'english' ? 'Projects' : 'Layihələr'}
+            {content.title}
           </h3>
         </div>
         <button
@@ -140,10 +225,10 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
         >
           <span className="hidden sm:inline">
-            {siteLanguage === 'english' ? '+ Add' : '+ Əlavə edin'}
+            {content.add}
           </span>
           <span className="sm:hidden">
-            {siteLanguage === 'english' ? '+' : '+'}
+            {content.addShort}
           </span>
         </button>
       </div>
@@ -156,13 +241,13 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
             </svg>
           </div>
           <p className="text-gray-500 mb-4">
-            {siteLanguage === 'english' ? 'No projects added yet' : 'Hələ heç bir layihə əlavə etməmisiniz'}
+            {content.noProjects}
           </p>
           <button
             onClick={addProject}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            {siteLanguage === 'english' ? 'Add your first project' : 'İlk layihənizi əlavə edin'}
+            {content.addFirst}
           </button>
         </div>
       ) : (
@@ -173,11 +258,11 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-blue-500">🚀</span>
                   <h4 className="font-medium text-gray-900">
-                    {project.name || (siteLanguage === 'english' ? 'New project' : 'Yeni layihə')}
+                    {project.name || content.newProject}
                   </h4>
                 </div>
                 <p className="text-sm text-gray-600 line-clamp-2 whitespace-pre-line">
-                  {stripHtmlTags(project.description) || (siteLanguage === 'english' ? 'Project description' : 'Layihə təsviri')}
+                  {stripHtmlTags(project.description) || content.projectDescription}
                 </p>
                 {project.technologies && project.technologies.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
@@ -314,7 +399,7 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
                     startLabel={siteLanguage === 'english' ? 'Start Date' : 'Başlama tarixi'}
                     endLabel={siteLanguage === 'english' ? 'End Date' : 'Bitirmə tarixi'}
                     currentLabel={siteLanguage === 'english' ? 'Currently ongoing' : 'Davam edir'}
-                    cvLanguage={cvLanguage}
+                    cvLanguage={cvLanguage as 'english' | 'azerbaijani'}
                   />
 
 

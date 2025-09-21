@@ -34,7 +34,7 @@ interface PersonalInfoSectionProps {
   userTier?: string; // User tier for premium features
   cvData?: any; // Full CV data for AI context
   cvId?: string; // Add CV ID for AI summary generation
-  cvLanguage?: 'english' | 'azerbaijani'; // Add CV language prop
+  cvLanguage?: 'english' | 'azerbaijani' | 'russian';
 }
 
 export default function PersonalInfoSection({ data, onChange, userTier = 'Free', cvData, cvId, cvLanguage = 'azerbaijani' }: PersonalInfoSectionProps) {
@@ -45,6 +45,123 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
   // AI features are available for all paid tiers (not Free/Pulsuz tier)
   const canUseAI = userTier && !['free', 'pulsuz'].includes(userTier?.toLowerCase());
   const { showSuccess, showError, showWarning, showInfo } = useNotification();
+
+  // PersonalInfo labels
+  const labels = {
+    azerbaijani: {
+      profileImage: 'Profil Şəkli',
+      profileImageUploaded: 'Profil şəkli yükləndi',
+      removeImage: 'Şəkli sil',
+      noImage: 'Şəkil\nyox',
+      uploading: 'Yüklənir...',
+      chooseImage: 'Şəkil seçin',
+      firstName: 'Ad',
+      lastName: 'Soyad',
+      email: 'E-poçt',
+      phone: 'Telefon',
+      website: 'Veb sayt',
+      linkedin: 'LinkedIn',
+      fieldProfession: 'Sahə',
+      location: 'Yer (Ölkə, şəhər)',
+      optional: 'ixtiyari',
+      required: 'məcburi',
+      yourName: 'Adınız',
+      yourSurname: 'Soyadınız',
+      nameRequired: 'Ad sahəsi məcburidir',
+      surnameRequired: 'Soyad sahəsi məcburidir',
+      phoneExample: '+994 XX XXX XX XX',
+      fieldExample: 'məsələn, Proqram Mühəndisi',
+      linkedinPlaceholder: 'linkedin.com/in/username və ya www.linkedin.com/in/username',
+      locationPlaceholder: 'Azərbaycan, Bakı',
+      professionalSummary: 'Peşəkar Xülasə',
+      aiSummary: 'AI Xülasə',
+      aiGenerating: 'AI yaradır...',
+      aiProfessionalSummary: 'AI Peşəkar Xülasə',
+      generateAISummary: 'AI ilə avtomatik peşəkar xülasə yaradın',
+      aiFeaturesPremium: 'AI funksiyalar Premium/Pro/Populyar üçün mövcuddur',
+      generateFromData: 'Məlumatlarınızdan avtomatik Peşəkar Xülasə yaradın! Mövcuddur',
+      premiumProPopular: 'Premium, Populyar',
+      title: 'Şəxsi məlumatlar',
+      fillField: 'Zəhmət olmasa bu sahəni doldurun',
+      validEmail: 'Zəhmət olmasa düzgün email ünvanı daxil edin'
+    },
+    english: {
+      profileImage: 'Profile Image',
+      profileImageUploaded: 'Profile image uploaded',
+      removeImage: 'Remove Image',
+      noImage: 'No\nImage',
+      uploading: 'Uploading...',
+      chooseImage: 'Choose Image',
+      firstName: 'First Name',
+      lastName: 'Last Name',
+      email: 'Email',
+      phone: 'Phone',
+      website: 'Website',
+      linkedin: 'LinkedIn',
+      fieldProfession: 'Field/Profession',
+      location: 'Location (Country, city)',
+      optional: 'optional',
+      required: 'required',
+      yourName: 'Your Name',
+      yourSurname: 'Your Surname',
+      nameRequired: 'Name field is required',
+      surnameRequired: 'Surname field is required',
+      phoneExample: '+1 XXX XXX XXXX',
+      fieldExample: 'e.g., Software Engineer',
+      linkedinPlaceholder: 'linkedin.com/in/username or www.linkedin.com/in/username',
+      locationPlaceholder: 'United States, New York',
+      professionalSummary: 'Professional Summary',
+      aiSummary: 'AI Summary',
+      aiGenerating: 'AI generating...',
+      aiProfessionalSummary: 'AI Professional Summary',
+      generateAISummary: 'Generate automatic professional summary with AI',
+      aiFeaturesPremium: 'AI features available for Premium/Pro/Popular',
+      generateFromData: 'Generate automatic Professional Summary from your data! Available for',
+      premiumProPopular: 'Premium, Popular',
+      title: 'Personal Information',
+      fillField: 'Please fill out this field',
+      validEmail: 'Please enter a valid email address'
+    },
+    russian: {
+      profileImage: 'Фото профиля',
+      profileImageUploaded: 'Фото профиля загружено',
+      removeImage: 'Удалить фото',
+      noImage: 'Нет\nфото',
+      uploading: 'Загрузка...',
+      chooseImage: 'Выбрать фото',
+      firstName: 'Имя',
+      lastName: 'Фамилия',
+      email: 'Email',
+      phone: 'Телефон',
+      website: 'Веб-сайт',
+      linkedin: 'LinkedIn',
+      fieldProfession: 'Сфера/Профессия',
+      location: 'Местоположение (Страна, город)',
+      optional: 'необязательно',
+      required: 'обязательно',
+      yourName: 'Ваше имя',
+      yourSurname: 'Ваша фамилия',
+      nameRequired: 'Поле имени обязательно',
+      surnameRequired: 'Поле фамилии обязательно',
+      phoneExample: '+7 XXX XXX XXXX',
+      fieldExample: 'например, Программист',
+      linkedinPlaceholder: 'linkedin.com/in/username или www.linkedin.com/in/username',
+      locationPlaceholder: 'Россия, Москва',
+      professionalSummary: 'Профессиональное резюме',
+      aiSummary: 'AI Резюме',
+      aiGenerating: 'AI создает...',
+      aiProfessionalSummary: 'AI Профессиональное резюме',
+      generateAISummary: 'Создать автоматическое профессиональное резюме с AI',
+      aiFeaturesPremium: 'AI функции доступны для Premium/Pro/Popular',
+      generateFromData: 'Создать автоматическое профессиональное резюме из ваших данных! Доступно для',
+      premiumProPopular: 'Premium, Popular',
+      title: 'Личная информация',
+      fillField: 'Пожалуйста, заполните это поле',
+      validEmail: 'Пожалуйста, введите действительный адрес электронной почты'
+    }
+  };
+
+  const content = labels[siteLanguage];
 
   // Form validasiya mesajlarını Azərbaycan dilinə çevirmək
   useEffect(() => {
@@ -70,9 +187,9 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
         emailInput.oninvalid = function(e) {
           const target = e.target as HTMLInputElement;
           if (target.validity.valueMissing) {
-            target.setCustomValidity(siteLanguage === 'english' ? 'Please fill out this field' : 'Zəhmət olmasa bu sahəni doldurun');
+            target.setCustomValidity(content.fillField);
           } else if (target.validity.typeMismatch) {
-            target.setCustomValidity(siteLanguage === 'english' ? 'Please enter a valid email address' : 'Zəhmət olmasa düzgün email ünvanı daxil edin');
+            target.setCustomValidity(content.validEmail);
           }
         };
         emailInput.oninput = function(e) {
@@ -270,7 +387,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">
-            {siteLanguage === 'english' ? 'Personal Information' : 'Şəxsi məlumatlar'}
+            {content.title}
           </h3>
         </div>
       </div>
@@ -279,7 +396,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
         {isPremium && (
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {siteLanguage === 'english' ? 'Profile Image' : 'Profil Şəkli'} <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full">{userTier === 'Pro' ? 'Pro' : 'Premium'}</span>
+              {content.profileImage} <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full">{userTier === 'Pro' ? 'Pro' : 'Premium'}</span>
             </label>
             {data.profileImage ? (
               <div className="flex items-center space-x-4">
@@ -290,14 +407,14 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
                 />
                 <div className="flex flex-col space-y-2">
                   <p className="text-sm text-gray-600">
-                    {siteLanguage === 'english' ? 'Profile image uploaded' : 'Profil şəkli yükləndi'}
+                    {content.profileImageUploaded}
                   </p>
                   <button
                     type="button"
                     onClick={removeImage}
                     className="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                   >
-                    {siteLanguage === 'english' ? 'Remove Image' : 'Şəkli sil'}
+                    {content.removeImage}
                   </button>
                 </div>
               </div>
@@ -305,7 +422,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
               <div className="flex items-center space-x-4">
                 <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300">
                   <span className="text-gray-400 text-xs text-center">
-                    {siteLanguage === 'english' ? 'No\nImage' : 'Şəkil\nyox'}
+                    {content.noImage}
                   </span>
                 </div>
                 <div className="flex-1">
@@ -327,8 +444,8 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
                       }`}
                     >
                       {imageUploading 
-                        ? (siteLanguage === 'english' ? 'Uploading...' : 'Yüklənir...') 
-                        : (siteLanguage === 'english' ? 'Choose Image' : 'Şəkil seçin')
+                        ? content.uploading 
+                        : content.chooseImage
                       }
                     </label>
                   </div>
@@ -336,7 +453,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
                     <div className="mt-2 flex items-center space-x-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
                       <span className="text-sm text-gray-500">
-                        {siteLanguage === 'english' ? 'Uploading...' : 'Yüklənir...'}
+                        {content.uploading}
                       </span>
                     </div>
                   )}
@@ -354,7 +471,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {siteLanguage === 'english' ? 'First Name' : 'Ad'} <span className="text-red-500">*</span>
+            {content.firstName} <span className="text-red-500">*</span>
           </label>
           <input
             id="first_name"
@@ -362,10 +479,10 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
             value={safeData.firstName}
             onChange={(e) => handleChange('firstName', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder={siteLanguage === 'english' ? 'Your Name' : 'Adınız'}
+            placeholder={content.yourName}
             required
             onInvalid={(e) => {
-              (e.target as HTMLInputElement).setCustomValidity(siteLanguage === 'english' ? 'Name field is required' : 'Ad sahəsi məcburidir');
+              (e.target as HTMLInputElement).setCustomValidity(content.nameRequired);
             }}
             onInput={(e) => {
               (e.target as HTMLInputElement).setCustomValidity('');
@@ -375,7 +492,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {siteLanguage === 'english' ? 'Last Name' : 'Soyad'} <span className="text-red-500">*</span>
+            {content.lastName} <span className="text-red-500">*</span>
           </label>
           <input
             id="last_name"
@@ -383,10 +500,10 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
             value={safeData.lastName}
             onChange={(e) => handleChange('lastName', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder={siteLanguage === 'english' ? 'Your Surname' : 'Soyadınız'}
+            placeholder={content.yourSurname}
             required
             onInvalid={(e) => {
-              (e.target as HTMLInputElement).setCustomValidity(siteLanguage === 'english' ? 'Surname field is required' : 'Soyad sahəsi məcburidir');
+              (e.target as HTMLInputElement).setCustomValidity(content.surnameRequired);
             }}
             onInput={(e) => {
               (e.target as HTMLInputElement).setCustomValidity('');
@@ -398,7 +515,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {siteLanguage === 'english' ? 'Email' : 'E-poçt'} <span className="text-gray-400 text-xs">({siteLanguage === 'english' ? 'optional' : 'ixtiyari'})</span>
+            {content.email} <span className="text-gray-400 text-xs">({content.optional})</span>
           </label>
           <input
             id="email"
@@ -412,20 +529,20 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {siteLanguage === 'english' ? 'Phone' : 'Telefon'} <span className="text-gray-400 text-xs">({siteLanguage === 'english' ? 'optional' : 'ixtiyari'})</span>
+            {content.phone} <span className="text-gray-400 text-xs">({content.optional})</span>
           </label>
           <input
             type="tel"
             value={safeData.phone}
             onChange={(e) => handleChange('phone', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder={siteLanguage === 'english' ? '+1 XXX XXX XXXX' : '+994 XX XXX XX XX'}
+            placeholder={content.phoneExample}
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {siteLanguage === 'english' ? 'Website' : 'Veb sayt'}
+            {content.website}
           </label>
           <input
             type="url"
@@ -438,43 +555,40 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {siteLanguage === 'english' ? 'LinkedIn' : 'LinkedIn'}
+            {content.linkedin}
           </label>
           <input
             type="url"
             value={safeData.linkedin}
             onChange={(e) => handleChange('linkedin', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder={siteLanguage === 'english' 
-              ? "linkedin.com/in/username or www.linkedin.com/in/username" 
-              : "linkedin.com/in/username və ya www.linkedin.com/in/username"
-            }
+            placeholder={content.linkedinPlaceholder}
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {siteLanguage === 'english' ? 'Field/Profession' : 'Sahə'} <span className="text-gray-400 text-xs">({siteLanguage === 'english' ? 'optional' : 'ixtiyari'})</span>
+            {content.fieldProfession} <span className="text-gray-400 text-xs">({content.optional})</span>
           </label>
           <input
             type="text"
             value={safeData.field}
             onChange={(e) => handleChange('field', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder={siteLanguage === 'english' ? 'e.g., Software Engineer' : 'məsələn, Proqram Mühəndisi'}
+            placeholder={content.fieldExample}
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {siteLanguage === 'english' ? 'Location (Country, city)' : 'Yer (Ölkə, şəhər)'} <span className="text-gray-400 text-xs">{siteLanguage === 'english' ? '(optional)' : '(ixtiyari)'}</span>
+            {content.location} <span className="text-gray-400 text-xs">({content.optional})</span>
           </label>
           <input
             type="text"
             value={safeData.location || ''}
             onChange={(e) => handleChange('location', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder={siteLanguage === 'english' ? 'United States, New York' : 'Azərbaycan, Bakı'}
+            placeholder={content.locationPlaceholder}
           />
         </div>
       </div>
@@ -482,7 +596,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="block text-sm font-medium text-gray-700">
-            {siteLanguage === 'english' ? 'Professional Summary' : 'Peşəkar Xülasə'}
+            {content.professionalSummary}
           </label>
           <button
             type="button"
@@ -496,19 +610,19 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
                 : 'bg-gray-200 text-gray-500 cursor-not-allowed'
             }`}
             title={canUseAI 
-              ? (siteLanguage === 'english' ? 'Generate automatic professional summary with AI' : 'AI ilə avtomatik peşəkar xülasə yaradın')
-              : (siteLanguage === 'english' ? 'AI features available for Premium/Pro/Popular' : 'AI funksiyalar Premium/Pro/Populyar üçün mövcuddur')
+              ? content.generateAISummary
+              : content.aiFeaturesPremium
             }
           >
             {aiGenerating ? (
               <div className="flex items-center space-x-1">
                 <div className="animate-spin rounded-full h-3 w-3 border-b border-white"></div>
-                <span>{siteLanguage === 'english' ? 'AI generating...' : 'AI yaradır...'}</span>
+                <span>{content.aiGenerating}</span>
               </div>
             ) : (
               <div className="flex items-center space-x-1">
                 <span>🤖</span>
-                <span>{siteLanguage === 'english' ? 'AI Summary' : 'AI Xülasə'}</span>
+                <span>{content.aiSummary}</span>
                 {!canUseAI && <span className="ml-1">🔒</span>}
               </div>
             )}
@@ -521,17 +635,14 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
               <span className="text-purple-600">🤖</span>
               <div>
                 <p className="text-sm font-medium text-purple-800">
-                  {siteLanguage === 'english' ? 'AI Professional Summary' : 'AI Peşəkar Xülasə'}
+                  {content.aiProfessionalSummary}
                 </p>
                 <p className="text-xs text-purple-600">
-                  {siteLanguage === 'english' 
-                    ? 'Generate automatic Professional Summary from your data! Available for '
-                    : 'Məlumatlarınızdan avtomatik Peşəkar Xülasə yaradın! '
-                  }
+                  {content.generateFromData}
                   <span className="font-semibold">
-                    {siteLanguage === 'english' ? 'Premium, Pro and Popular' : 'Premium, Pro və Populyar'}
+                    {content.premiumProPopular}
                   </span>
-                  {siteLanguage === 'english' ? ' users.' : ' istifadəçilər üçün uyğundur.'}
+                  {siteLanguage === 'english' ? ' users.' : siteLanguage === 'russian' ? ' пользователей.' : ' istifadəçilər üçün uyğundur.'}
                 </p>
               </div>
             </div>

@@ -8,10 +8,11 @@ import { useState, useEffect, useCallback } from 'react';
 
 export default function StandardHeader() {
   const { user, logout, fetchCurrentUser } = useAuth();
-  const { siteLanguage, toggleSiteLanguage } = useSiteLanguage();
+  const { siteLanguage, setSiteLanguage, getLanguageDisplay } = useSiteLanguage();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
   const [userTier, setUserTier] = useState<string>('Free');
   const [tierLoading, setTierLoading] = useState(false);
 
@@ -85,6 +86,26 @@ export default function StandardHeader() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [refreshUserTier]);
 
+  // Handle clicks outside language dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      const languageMenu = document.querySelector('[data-language-menu]');
+      const profileMenu = document.querySelector('[data-profile-menu]');
+      
+      if (languageMenu && !languageMenu.contains(target)) {
+        setIsLanguageMenuOpen(false);
+      }
+      
+      if (profileMenu && !profileMenu.contains(target)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   // Header mətnləri
   const labels = {
     azerbaijani: {
@@ -98,7 +119,10 @@ export default function StandardHeader() {
       welcome: 'Xoş gəlmisiniz',
       logout: 'Çıxış',
       login: 'Giriş',
-      register: 'Qeydiyyat'
+      register: 'Qeydiyyat',
+      myCVs: 'CV-lərim',
+      linkedinImport: 'LinkedIn İdxal',
+      user: 'İstifadəçi'
     },
     english: {
       dashboard: 'Dashboard',
@@ -111,7 +135,26 @@ export default function StandardHeader() {
       welcome: 'Welcome',
       logout: 'Logout',
       login: 'Login',
-      register: 'Register'
+      register: 'Register',
+      myCVs: 'My CVs',
+      linkedinImport: 'LinkedIn Import',
+      user: 'User'
+    },
+    russian: {
+      dashboard: 'Панель',
+      newCV: 'Новое резюме',
+      templates: 'Шаблоны',
+      pricing: 'Тарифы',
+      profile: 'Профиль',
+      profileEdit: 'Редактировать профиль',
+      profileEditDesc: 'Изменить личную информацию',
+      welcome: 'Добро пожаловать',
+      logout: 'Выход',
+      login: 'Вход',
+      register: 'Регистрация',
+      myCVs: 'Мои резюме',
+      linkedinImport: 'Импорт LinkedIn',
+      user: 'Пользователь'
     }
   };
 
@@ -147,6 +190,21 @@ export default function StandardHeader() {
 
   const closeProfileMenu = () => {
     setIsProfileMenuOpen(false);
+  };
+
+  const toggleLanguageMenu = () => {
+    console.log('🌐 Language menu toggled. Current state:', isLanguageMenuOpen);
+    setIsLanguageMenuOpen(!isLanguageMenuOpen);
+  };
+
+  const closeLanguageMenu = () => {
+    setIsLanguageMenuOpen(false);
+  };
+
+  const handleLanguageChange = (language: string) => {
+    console.log('🔄 Language changed to:', language);
+    setSiteLanguage(language as any);
+    setIsLanguageMenuOpen(false);
   };
 
   // Close profile menu when clicking outside
@@ -279,10 +337,10 @@ export default function StandardHeader() {
               {content.dashboard}
             </Link>
             <Link href="/cv-list" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
-              {siteLanguage === 'azerbaijani' ? 'CV-lərim' : 'My CVs'}
+              {content.myCVs}
             </Link>
             <Link href="/linkedin-import" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
-              {siteLanguage === 'azerbaijani' ? 'LinkedIn İdxal' : 'LinkedIn Import'}
+              {content.linkedinImport}
             </Link>
             <Link href="/sablonlar" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
               {content.templates}
@@ -294,17 +352,73 @@ export default function StandardHeader() {
 
           {/* User Info & Profile Dropdown - Enhanced responsive design */}
           <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
-            {/* Language Switcher - positioned before profile */}
-            <button
-              onClick={toggleSiteLanguage}
-              className="flex items-center px-3 py-2 text-xs lg:text-sm font-medium text-white bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg hover:bg-white/20 transition-all duration-200"
-              title={siteLanguage === 'azerbaijani' ? 'Switch to English' : 'Azərbaycana keç'}
-            >
-              <svg className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-              </svg>
-              {siteLanguage === 'azerbaijani' ? 'EN' : 'AZ'}
-            </button>
+            {/* Language Dropdown - positioned before profile */}
+            <div className="relative" data-language-menu>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('🔍 Language button clicked');
+                  toggleLanguageMenu();
+                }}
+                className="flex items-center px-3 py-2 text-xs lg:text-sm font-medium text-white bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg hover:bg-white/20 transition-all duration-200"
+                title="Dili dəyişdir / Change language / Изменить язык"
+              >
+                <span className="mr-1 lg:mr-2 text-sm">
+                  {getLanguageDisplay(siteLanguage).flag}
+                </span>
+                <span className="hidden sm:inline">
+                  {getLanguageDisplay(siteLanguage).code}
+                </span>
+            
+                <svg 
+                  className={`w-3 h-3 ml-1 transition-transform duration-200 ${isLanguageMenuOpen ? 'rotate-180' : ''}`} 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {/* Language Dropdown Menu */}
+              {isLanguageMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-2xl border-2 border-red-500 py-1 z-[9999]">
+                  <div className="px-3 py-2 text-xs text-red-600 font-bold border-b border-gray-100">
+                   {siteLanguage === 'azerbaijani' ? 'Dil seçin' : siteLanguage === 'english' ? 'Select Language' : 'Выберите язык'}
+                  </div>
+                  
+                  {(['azerbaijani', 'english', 'russian'] as const).map((lang) => {
+                    const langData = getLanguageDisplay(lang);
+                    return (
+                      <button
+                        key={lang}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log('🌐 Language option clicked:', lang);
+                          handleLanguageChange(lang);
+                        }}
+                        className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors flex items-center space-x-3 ${
+                          siteLanguage === lang ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                        }`}
+                      >
+                        <span className="text-lg">{langData.flag}</span>
+                        <div className="flex-1">
+                          <div className="font-medium">{langData.name}</div>
+                          <div className="text-xs text-gray-500">{langData.code}</div>
+                        </div>
+                        {siteLanguage === lang && (
+                          <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
             {/* Profile Dropdown - Desktop */}
             <div className="hidden lg:block relative" data-profile-menu>
@@ -319,7 +433,7 @@ export default function StandardHeader() {
                 </div>
                 <div className="text-sm xl:text-base">
                   <p className="font-medium text-white">{content.welcome}!</p>
-                  <p className="text-blue-100 -mt-1 text-xs xl:text-sm">{user?.name || user?.email || (siteLanguage === 'azerbaijani' ? 'İstifadəçi' : 'User')}</p>
+                  <p className="text-blue-100 -mt-1 text-xs xl:text-sm">{user?.name || user?.email || content.user}</p>
                 </div>
                 <svg
                   className={`w-3 h-3 xl:w-4 xl:h-4 text-white/70 transition-transform duration-200 ${isProfileMenuOpen ? 'rotate-180' : ''}`}
@@ -343,7 +457,7 @@ export default function StandardHeader() {
                         </span>
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-900 text-sm">{user?.name || (siteLanguage === 'azerbaijani' ? 'İstifadəçi' : 'User')}</p>
+                        <p className="font-semibold text-gray-900 text-sm">{user?.name || content.user}</p>
                         <p className="text-gray-500 text-xs">{user?.email}</p>
                         <div className="flex items-center mt-1">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getTierBadgeColor(userTier)}`}>
@@ -433,18 +547,39 @@ export default function StandardHeader() {
             <div className="px-4 py-4 space-y-3">
               {/* Mobile Navigation Links */}
               {/* Language Switcher for Mobile */}
-              <button
-                onClick={() => {
-                  toggleSiteLanguage();
-                  closeMobileMenu();
-                }}
-                className="w-full bg-white/10 hover:bg-white/20 text-white px-4 py-3 rounded-lg font-medium transition-all duration-200 text-left flex items-center border border-white/20"
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-                </svg>
-                {siteLanguage === 'azerbaijani' ? 'Switch to English' : 'Azərbaycana keç'}
-              </button>
+              <div className="space-y-2">
+                <div className="text-white/80 text-sm font-medium px-4">
+                  {siteLanguage === 'azerbaijani' ? 'Dil seçin' : siteLanguage === 'english' ? 'Select Language' : 'Выберите язык'}
+                </div>
+                {(['azerbaijani', 'english', 'russian'] as const).map((lang) => {
+                  const langData = getLanguageDisplay(lang);
+                  return (
+                    <button
+                      key={lang}
+                      onClick={() => {
+                        handleLanguageChange(lang);
+                        closeMobileMenu();
+                      }}
+                      className={`w-full px-4 py-3 rounded-lg font-medium transition-all duration-200 text-left flex items-center border ${
+                        siteLanguage === lang 
+                          ? 'bg-white/20 text-white border-white/40' 
+                          : 'bg-white/10 hover:bg-white/20 text-white/90 border-white/20'
+                      }`}
+                    >
+                      <span className="text-lg mr-3">{langData.flag}</span>
+                      <div className="flex-1">
+                        <div className="font-medium">{langData.name}</div>
+                        <div className="text-xs opacity-75">{langData.code}</div>
+                      </div>
+                      {siteLanguage === lang && (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
 
               <Link
                 href="/dashboard"
@@ -496,7 +631,7 @@ export default function StandardHeader() {
                   </div>
                   <div>
                     <p className="font-medium text-white text-sm">{content.profile}</p>
-                    <p className="text-blue-100 text-xs">{user?.name || user?.email || 'İstifadəçi'}</p>
+                    <p className="text-blue-100 text-xs">{user?.name || user?.email || content.user}</p>
                   </div>
                 </Link>
 

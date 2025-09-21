@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer'; // Footer əlavə edirik
@@ -11,6 +12,94 @@ export default function RegisterPage() {
   // All hooks must be called at the top level, before any early returns
   const { user, register, loading: authLoading } = useAuth();
   const router = useRouter();
+  const { siteLanguage } = useSiteLanguage();
+
+  const content = {
+    azerbaijani: {
+      title: 'Qeydiyyat',
+      subtitle: 'CV yaratmaq üçün yeni hesab yaradın',
+      firstNameLabel: 'Ad',
+      firstNamePlaceholder: 'Adınızı daxil edin',
+      lastNameLabel: 'Soyad',
+      lastNamePlaceholder: 'Soyadınızı daxil edin',
+      emailLabel: 'E-poçt',
+      emailPlaceholder: 'E-poçt ünvanınızı daxil edin',
+      passwordLabel: 'Şifrə',
+      passwordPlaceholder: 'Şifrənizi daxil edin',
+      confirmPasswordLabel: 'Şifrəni təsdiq edin',
+      confirmPasswordPlaceholder: 'Şifrənizi təkrar daxil edin',
+      showPassword: 'Şifrəni göstər',
+      hidePassword: 'Şifrəni gizlət',
+      agreeToTerms: 'İstifadə şərtləri və məxfilik siyasəti ilə razıyam',
+      agreeToTermsPrefix: '',
+      agreeToTermsMiddle: ' və ',
+      agreeToTermsSuffix: ' ni qəbul edirəm',
+      termsLink: 'İstifadə şərtləri',
+      privacyLink: 'Məxfilik siyasəti',
+      registerButton: 'Qeydiyyat',
+      registering: 'Qeydiyyat edilir...',
+      haveAccount: 'Artıq hesabınız var?',
+      loginLink: 'Giriş edin',
+      orContinueWith: 'və ya',
+      continueWithLinkedIn: 'LinkedIn ilə qeydiyyat'
+    },
+    english: {
+      title: 'Sign Up',
+      subtitle: 'Create a new account to start building CVs',
+      firstNameLabel: 'First Name',
+      firstNamePlaceholder: 'Enter your first name',
+      lastNameLabel: 'Last Name',
+      lastNamePlaceholder: 'Enter your last name',
+      emailLabel: 'Email',
+      emailPlaceholder: 'Enter your email address',
+      passwordLabel: 'Password',
+      passwordPlaceholder: 'Enter your password',
+      confirmPasswordLabel: 'Confirm Password',
+      confirmPasswordPlaceholder: 'Re-enter your password',
+      showPassword: 'Show password',
+      hidePassword: 'Hide password',
+      agreeToTerms: 'I agree to the Terms of Service and Privacy Policy',
+      agreeToTermsPrefix: 'I agree to the ',
+      agreeToTermsMiddle: ' and ',
+      agreeToTermsSuffix: '',
+      termsLink: 'Terms of Service',
+      privacyLink: 'Privacy Policy',
+      registerButton: 'Sign Up',
+      registering: 'Signing up...',
+      haveAccount: 'Already have an account?',
+      loginLink: 'Sign in',
+      orContinueWith: 'or',
+      continueWithLinkedIn: 'Continue with LinkedIn'
+    },
+    russian: {
+      title: 'Регистрация',
+      subtitle: 'Создайте новый аккаунт для создания резюме',
+      firstNameLabel: 'Имя',
+      firstNamePlaceholder: 'Введите ваше имя',
+      lastNameLabel: 'Фамилия',
+      lastNamePlaceholder: 'Введите вашу фамилию',
+      emailLabel: 'Электронная почта',
+      emailPlaceholder: 'Введите адрес электронной почты',
+      passwordLabel: 'Пароль',
+      passwordPlaceholder: 'Введите пароль',
+      confirmPasswordLabel: 'Подтвердите пароль',
+      confirmPasswordPlaceholder: 'Повторите пароль',
+      showPassword: 'Показать пароль',
+      hidePassword: 'Скрыть пароль',
+      agreeToTerms: 'Я согласен с Условиями использования и Политикой конфиденциальности',
+      agreeToTermsPrefix: 'Я согласен с ',
+      agreeToTermsMiddle: ' и ',
+      agreeToTermsSuffix: '',
+      termsLink: 'Условия использования',
+      privacyLink: 'Политика конфиденциальности',
+      registerButton: 'Зарегистрироваться',
+      registering: 'Регистрация...',
+      haveAccount: 'Уже есть аккаунт?',
+      loginLink: 'Войти',
+      orContinueWith: 'или',
+      continueWithLinkedIn: 'Продолжить с LinkedIn'
+    }
+  }[siteLanguage];
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -279,8 +368,8 @@ export default function RegisterPage() {
           <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100" style={{ borderWidth: '2px', borderColor: '#3b82f6' }}>
             {/* Register Form Header */}
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Hesab yaradın</h1>
-
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">{content.title}</h1>
+              <p className="text-gray-600">{content.subtitle}</p>
             </div>
 
             {/* Error Message */}
@@ -296,7 +385,7 @@ export default function RegisterPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
-                    Ad
+                    {content.firstNameLabel}
                   </label>
                   <input
                     id="firstName"
@@ -311,12 +400,12 @@ export default function RegisterPage() {
                       setFormData({ ...formData, firstName: filteredValue });
                     }}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    placeholder="Adınız"
+                    placeholder={content.firstNamePlaceholder}
                   />
                 </div>
                 <div>
                   <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-                    Soyad
+                    {content.lastNameLabel}
                   </label>
                   <input
                     id="lastName"
@@ -331,7 +420,7 @@ export default function RegisterPage() {
                       setFormData({ ...formData, lastName: filteredValue });
                     }}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    placeholder="Soyadınız"
+                    placeholder={content.lastNamePlaceholder}
                   />
                 </div>
               </div>
@@ -339,7 +428,7 @@ export default function RegisterPage() {
               {/* Email Field */}
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  E-poçt ünvanı
+                  {content.emailLabel}
                 </label>
                 <input
                   id="email"
@@ -349,14 +438,14 @@ export default function RegisterPage() {
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  placeholder="numune@cvera.net"
+                  placeholder={content.emailPlaceholder}
                 />
               </div>
 
               {/* Password Fields */}
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                  Şifrə
+                  {content.passwordLabel}
                 </label>
                 <div className="relative">
                   <input
@@ -368,12 +457,13 @@ export default function RegisterPage() {
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors pr-12"
-                    placeholder="Ən azı 8 simvol"
+                    placeholder={content.passwordPlaceholder}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 flex items-center pr-4"
+                    title={showPassword ? content.hidePassword : content.showPassword}
                   >
                     {showPassword ? (
                       <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -391,7 +481,7 @@ export default function RegisterPage() {
 
               <div>
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                  Şifrəni təkrarla
+                  {content.confirmPasswordLabel}
                 </label>
                 <div className="relative">
                   <input
@@ -402,12 +492,13 @@ export default function RegisterPage() {
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors pr-12"
-                    placeholder="Şifrəni təkrar daxil edin"
+                    placeholder={content.confirmPasswordPlaceholder}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute inset-y-0 right-0 flex items-center pr-4"
+                    title={showConfirmPassword ? content.hidePassword : content.showPassword}
                   >
                     {showConfirmPassword ? (
                       <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -433,14 +524,15 @@ export default function RegisterPage() {
                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-1"
                 />
                 <label htmlFor="agreedToTerms" className="text-sm text-gray-600">
+                  {content.agreeToTermsPrefix}
                   <Link href="/terms" className="text-blue-600 hover:text-blue-700">
-                    İstifadə şərtləri
-                  </Link>{' '}
-                  və{' '}
-                  <Link href="/privacy" className="text-blue-600 hover:text-blue-700">
-                    məxfilik siyasəti
+                    {content.termsLink}
                   </Link>
-                  ni qəbul edirəm
+                  {content.agreeToTermsMiddle}
+                  <Link href="/privacy" className="text-blue-600 hover:text-blue-700">
+                    {content.privacyLink}
+                  </Link>
+                  {content.agreeToTermsSuffix}
                 </label>
               </div>
 
@@ -453,10 +545,10 @@ export default function RegisterPage() {
                 {loading ? (
                   <div className="flex items-center justify-center">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    <span className="ml-2">Qeydiyyat edilir...</span>
+                    <span className="ml-2">{content.registering}</span>
                   </div>
                 ) : (
-                  'Qeydiyyat'
+                  content.registerButton
                 )}
               </button>
             </form>
@@ -464,7 +556,7 @@ export default function RegisterPage() {
             {/* Social Login Divider */}
             <div className="my-6 flex items-center">
               <div className="flex-1 border-t border-gray-300"></div>
-              <span className="px-4 text-sm text-gray-500">və ya</span>
+              <span className="px-4 text-sm text-gray-500">{content.orContinueWith}</span>
               <div className="flex-1 border-t border-gray-300"></div>
             </div>
 
@@ -477,15 +569,15 @@ export default function RegisterPage() {
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
               </svg>
-              <span>LinkedIn ilə qeydiyyat</span>
+              <span>{content.continueWithLinkedIn}</span>
             </button>
 
             {/* Links */}
             <div className="mt-6 text-center">
               <div className="text-sm text-gray-600">
-                Artıq hesabınız var?{' '}
+                {content.haveAccount}{' '}
                 <Link href="/auth/login" className="text-blue-600 hover:text-blue-700 font-medium">
-                  Daxil olun
+                  {content.loginLink}
                 </Link>
               </div>
             </div>
