@@ -78,7 +78,6 @@ export default function OptimizedImage({
   }
 
   const commonProps = {
-    alt,
     className: `${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`,
     priority,
     quality,
@@ -99,6 +98,7 @@ export default function OptimizedImage({
       <Image
         src={src}
         fill
+        alt={alt || ''}
         sizes={sizes || "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"}
         placeholder={autoBlurDataURL ? 'blur' : placeholder}
         blurDataURL={autoBlurDataURL}
@@ -114,6 +114,7 @@ export default function OptimizedImage({
   return (
     <Image
       src={src}
+      alt={alt || ''}
       width={width}
       height={height}
       sizes={sizes}
