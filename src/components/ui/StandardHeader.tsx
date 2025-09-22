@@ -122,7 +122,10 @@ export default function StandardHeader() {
       register: 'Qeydiyyat',
       myCVs: 'CV-lərim',
       linkedinImport: 'LinkedIn İdxal',
-      user: 'İstifadəçi'
+      user: 'İstifadəçi',
+      selectLanguage: 'Dil seçin',
+      signOutAccount: 'Hesabdan çıxış edin',
+      signOut: 'Hesabdan çıxın'
     },
     english: {
       dashboard: 'Dashboard',
@@ -138,7 +141,10 @@ export default function StandardHeader() {
       register: 'Register',
       myCVs: 'My CVs',
       linkedinImport: 'LinkedIn Import',
-      user: 'User'
+      user: 'User',
+      selectLanguage: 'Select Language',
+      signOutAccount: 'Sign out of your account',
+      signOut: 'Sign out'
     },
     russian: {
       dashboard: 'Панель',
@@ -154,7 +160,10 @@ export default function StandardHeader() {
       register: 'Регистрация',
       myCVs: 'Мои резюме',
       linkedinImport: 'Импорт LinkedIn',
-      user: 'Пользователь'
+      user: 'Пользователь',
+      selectLanguage: 'Выберите язык',
+      signOutAccount: 'Выйти из аккаунта',
+      signOut: 'Выйти'
     }
   };
 
@@ -342,7 +351,7 @@ export default function StandardHeader() {
             <Link href="/linkedin-import" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
               {content.linkedinImport}
             </Link>
-            <Link href="/sablonlar" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
+            <Link href="/templates" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
               {content.templates}
             </Link>
             <Link href="/pricing" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
@@ -385,7 +394,7 @@ export default function StandardHeader() {
               {isLanguageMenuOpen && (
                 <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-2xl border-2 border-red-500 py-1 z-[9999]">
                   <div className="px-3 py-2 text-xs text-red-600 font-bold border-b border-gray-100">
-                   {siteLanguage === 'azerbaijani' ? 'Dil seçin' : siteLanguage === 'english' ? 'Select Language' : 'Выберите язык'}
+                   {content.selectLanguage}
                   </div>
                   
                   {(['azerbaijani', 'english', 'russian'] as const).map((lang) => {
@@ -507,7 +516,7 @@ export default function StandardHeader() {
                       </div>
                       <div>
                         <p className="font-medium text-black text-left">{content.logout}</p>
-                        <p className="text-xs text-gray-500">{siteLanguage === 'azerbaijani' ? 'Hesabdan çıxış edin' : 'Sign out of your account'}</p>
+                        <p className="text-xs text-gray-500">{content.signOutAccount}</p>
                       </div>
                     </button>
                   </div>
@@ -549,7 +558,7 @@ export default function StandardHeader() {
               {/* Language Switcher for Mobile */}
               <div className="space-y-2">
                 <div className="text-white/80 text-sm font-medium px-4">
-                  {siteLanguage === 'azerbaijani' ? 'Dil seçin' : siteLanguage === 'english' ? 'Select Language' : 'Выберите язык'}
+                  {content.selectLanguage}
                 </div>
                 {(['azerbaijani', 'english', 'russian'] as const).map((lang) => {
                   const langData = getLanguageDisplay(lang);
@@ -593,17 +602,17 @@ export default function StandardHeader() {
                 onClick={closeMobileMenu}
                 className="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all"
               >
-                {siteLanguage === 'azerbaijani' ? 'CV-lərim' : 'My CVs'}
+                {content.myCVs}
               </Link>
               <Link
                 href="/linkedin-import"
                 onClick={closeMobileMenu}
                 className="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all"
               >
-                {siteLanguage === 'azerbaijani' ? 'LinkedIn İdxal' : 'LinkedIn Import'}
+                {content.linkedinImport}
               </Link>
               <Link
-                href="/sablonlar"
+                href="/templates"
                 onClick={closeMobileMenu}
                 className="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all"
               >
@@ -651,7 +660,7 @@ export default function StandardHeader() {
                   </div>
                   <div>
                     <p className="font-medium text-left text-white text-sm">{content.logout}</p>
-                    <p className="text-gray-300 text-xs">{siteLanguage === 'azerbaijani' ? 'Hesabdan çıx' : 'Sign out'}</p>
+                    <p className="text-gray-300 text-xs">{content.signOut}</p>
                   </div>
                 </button>
               </div>

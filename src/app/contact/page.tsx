@@ -3,8 +3,105 @@
 import { useState } from 'react';
 import StandardHeader from '@/components/ui/StandardHeader';
 import Footer from '@/components/Footer';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 
 export default function ContactPage() {
+  const { siteLanguage } = useSiteLanguage();
+  
+  const contactContent = {
+    azerbaijani: {
+      title: 'Bizimlə Əlaqə',
+      subtitle: 'Suallarınız, təklifləriniz və ya dəstək üçün bizimlə əlaqə saxlayın',
+      contactInfo: {
+        title: 'Əlaqə Məlumatları',
+        email: 'E-poçt',
+        support: 'Dəstək',
+        socialMedia: 'Sosial Şəbəkələr',
+        businessHours: 'İş Saatları',
+        monday_friday: 'Bazar ert. - Cümə',
+        saturday: 'Şənbə',
+        sunday: 'Bazar',
+        supportNote: 'Dəstək xətti üçün qeyd olunub*'
+      },
+      form: {
+        title: 'Mesaj Göndərin',
+        nameLabel: 'Ad Soyad *',
+        namePlaceholder: 'Adınızı və soyadınızı daxil edin',
+        emailLabel: 'E-poçt ünvanı *',
+        emailPlaceholder: 'numune@cvera.net',
+        subjectLabel: 'Mövzu *',
+        subjectPlaceholder: 'Mesajınızın mövzusunu daxil edin',
+        messageLabel: 'Mesaj *',
+        messagePlaceholder: 'Mesajınızı buraya yazın...',
+        submitButton: 'Mesaj Göndərin',
+        submitting: 'Göndərilir...',
+        successMessage: 'Mesajınız uğurla göndərildi! Tezliklə sizə cavab verəcəyik.',
+        errorMessage: 'Mesaj göndərilərkən xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.'
+      }
+    },
+    english: {
+      title: 'Contact Us',
+      subtitle: 'Get in touch with us for questions, suggestions, or support',
+      contactInfo: {
+        title: 'Contact Information',
+        email: 'Email',
+        support: 'Support',
+        socialMedia: 'Social Networks',
+        businessHours: 'Business Hours',
+        monday_friday: 'Monday - Friday',
+        saturday: 'Saturday',
+        sunday: 'Sunday',
+        supportNote: 'Note for support line*'
+      },
+      form: {
+        title: 'Send Message',
+        nameLabel: 'Full Name *',
+        namePlaceholder: 'Enter your first and last name',
+        emailLabel: 'Email Address *',
+        emailPlaceholder: 'example@cvera.net',
+        subjectLabel: 'Subject *',
+        subjectPlaceholder: 'Enter your message subject',
+        messageLabel: 'Message *',
+        messagePlaceholder: 'Write your message here...',
+        submitButton: 'Send Message',
+        submitting: 'Sending...',
+        successMessage: 'Your message has been sent successfully! We will reply to you soon.',
+        errorMessage: 'An error occurred while sending the message. Please try again.'
+      }
+    },
+    russian: {
+      title: 'Свяжитесь с нами',
+      subtitle: 'Обратитесь к нам с вопросами, предложениями или за поддержкой',
+      contactInfo: {
+        title: 'Контактная информация',
+        email: 'Email',
+        support: 'Поддержка',
+        socialMedia: 'Социальные сети',
+        businessHours: 'Рабочие часы',
+        monday_friday: 'Пон. - Пятн.',
+        saturday: 'Суббота',
+        sunday: 'Воскресенье',
+        supportNote: 'Примечание для линии поддержки*'
+      },
+      form: {
+        title: 'Отправить сообщение',
+        nameLabel: 'Полное имя *',
+        namePlaceholder: 'Введите ваше имя и фамилию',
+        emailLabel: 'Адрес электронной почты *',
+        emailPlaceholder: 'example@cvera.net',
+        subjectLabel: 'Тема *',
+        subjectPlaceholder: 'Введите тему вашего сообщения',
+        messageLabel: 'Сообщение *',
+        messagePlaceholder: 'Напишите ваше сообщение здесь...',
+        submitButton: 'Отправить сообщение',
+        submitting: 'Отправка...',
+        successMessage: 'Ваше сообщение успешно отправлено! Мы скоро ответим вам.',
+        errorMessage: 'Произошла ошибка при отправке сообщения. Пожалуйста, попробуйте снова.'
+      }
+    }
+  };
+
+  const content = contactContent[siteLanguage] || contactContent.azerbaijani;
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -65,17 +162,17 @@ export default function ContactPage() {
           {/* Page Header */}
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Bizimlə Əlaqə
+              {content.title}
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Suallarınız, təklifləriniz və ya dəstək üçün bizimlə əlaqə saxlayın
+              {content.subtitle}
             </p>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-12">
             {/* Contact Information */}
             <div className="bg-white/80 backdrop-blur-md rounded-3xl  border-2 border-blue-200 p-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">Əlaqə Məlumatları</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6">{content.contactInfo.title}</h2>
 
               {/* Email */}
               <div className="flex items-center mb-6">
@@ -85,7 +182,7 @@ export default function ContactPage() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">E-poçt</h3>
+                  <h3 className="font-semibold text-gray-900">{content.contactInfo.email}</h3>
                   <a href="mailto:info@cvera.net" className="text-blue-600 hover:text-blue-700 transition-colors">
                     info@cvera.net
                   </a>
@@ -100,7 +197,7 @@ export default function ContactPage() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Dəstək</h3>
+                  <h3 className="font-semibold text-gray-900">{content.contactInfo.support}</h3>
                   <a href="mailto:support@cvera.net" className="text-blue-600 hover:text-blue-700 transition-colors">
                     support@cvera.net
                   </a>
@@ -115,7 +212,7 @@ export default function ContactPage() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Dəstək</h3>
+                  <h3 className="font-semibold text-gray-900">{content.contactInfo.support}</h3>
                   <a href="tel:+9941024242410" className="text-blue-600 hover:text-blue-700 transition-colors">
                     +994 (10) 424 24 10
                   </a>
@@ -123,7 +220,7 @@ export default function ContactPage() {
               </div>
               {/* Social Media */}
               <div className="border-t border-gray-200 pt-6">
-                <h3 className="font-semibold text-gray-900 mb-4">Sosial Şəbəkələr</h3>
+                <h3 className="font-semibold text-gray-900 mb-4">{content.contactInfo.socialMedia}</h3>
                 <div className="flex space-x-4">
                   {/* LinkedIn */}
                   <a
@@ -157,22 +254,22 @@ export default function ContactPage() {
 
               {/* Business Hours */}
               <div className="border-t border-gray-200 pt-6 mt-6">
-                <h3 className="font-semibold text-gray-900 mb-4">İş Saatları</h3>
+                <h3 className="font-semibold text-gray-900 mb-4">{content.contactInfo.businessHours}</h3>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Bazar ertəsi - Cümə</span>
+                    <span className="text-gray-600">{content.contactInfo.monday_friday}</span>
                     <span className="text-gray-900">09:00 - 22:00</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Şənbə</span>
+                    <span className="text-gray-600">{content.contactInfo.saturday}</span>
                     <span className="text-gray-900">10:00 - 21:00</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Bazar</span>
+                    <span className="text-gray-600">{content.contactInfo.sunday}</span>
                     <span className="text-gray-900">10:00 - 21:00</span>
                   </div>
                   <br/>
-                  <span className="text-gray-600/50">Dəstək xətti üçün qeyd olunub*</span>
+                  <span className="text-gray-600/50">{content.contactInfo.supportNote}</span>
 
                 </div>
               </div>
@@ -180,13 +277,13 @@ export default function ContactPage() {
 
             {/* Contact Form */}
             <div className="bg-white/80 backdrop-blur-md rounded-3xl  border-2 border-blue-200 p-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">Mesaj Göndərin</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6">{content.form.title}</h2>
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Name Field */}
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                    Ad Soyad *
+                    {content.form.nameLabel}
                   </label>
                   <input
                     type="text"
@@ -196,14 +293,14 @@ export default function ContactPage() {
                     onChange={handleInputChange}
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                    placeholder="Adınızı və soyadınızı daxil edin"
+                    placeholder={content.form.namePlaceholder}
                   />
                 </div>
 
                 {/* Email Field */}
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    E-poçt ünvanı *
+                    {content.form.emailLabel}
                   </label>
                   <input
                     type="email"
@@ -213,14 +310,14 @@ export default function ContactPage() {
                     onChange={handleInputChange}
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                    placeholder="numune@cvera.net"
+                    placeholder={content.form.emailPlaceholder}
                   />
                 </div>
 
                 {/* Subject Field */}
                 <div>
                   <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                    Mövzu *
+                    {content.form.subjectLabel}
                   </label>
                   <input
                     type="text"
@@ -230,14 +327,14 @@ export default function ContactPage() {
                     onChange={handleInputChange}
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                    placeholder="Mesajınızın mövzusunu daxil edin"
+                    placeholder={content.form.subjectPlaceholder}
                   />
                 </div>
 
                 {/* Message Field */}
                 <div>
                   <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                    Mesaj *
+                    {content.form.messageLabel}
                   </label>
                   <textarea
                     id="message"
@@ -247,7 +344,7 @@ export default function ContactPage() {
                     required
                     rows={6}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors resize-vertical"
-                    placeholder="Mesajınızı buraya yazın..."
+                    placeholder={content.form.messagePlaceholder}
                   />
                 </div>
 
@@ -260,10 +357,10 @@ export default function ContactPage() {
                   {isSubmitting ? (
                     <div className="flex items-center justify-center">
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                      Göndərilir...
+                      {content.form.submitting}
                     </div>
                   ) : (
-                    'Mesaj Göndərin'
+                    content.form.submitButton
                   )}
                 </button>
 
@@ -274,7 +371,7 @@ export default function ContactPage() {
                       <svg className="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                       </svg>
-                      <p className="text-green-700">Mesajınız uğurla göndərildi! Tezliklə sizə cavab verəcəyik.</p>
+                      <p className="text-green-700">{content.form.successMessage}</p>
                     </div>
                   </div>
                 )}
@@ -285,7 +382,7 @@ export default function ContactPage() {
                       <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                       </svg>
-                      <p className="text-red-700">Mesaj göndərilərkən xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.</p>
+                      <p className="text-red-700">{content.form.errorMessage}</p>
                     </div>
                   </div>
                 )}

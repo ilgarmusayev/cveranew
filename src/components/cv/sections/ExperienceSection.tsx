@@ -292,7 +292,7 @@ export default function ExperienceSection({ data, onChange, cvLanguage = 'azerba
                     startLabel={content.startDate}
                     endLabel={content.endDate}
                     currentLabel={content.currentWorking}
-                    cvLanguage={cvLanguage as 'english' | 'azerbaijani'}
+                    siteLanguage={siteLanguage}
                   />
 
                   <div>

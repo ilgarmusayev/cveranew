@@ -269,20 +269,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Don't change loading state - let the main app loader handle it
     setIsInitialized(true); // Keep initialized true
 
-    // 2. IMMEDIATE storage clearing - synchronous
+    // 2. IMMEDIATE storage clearing - synchronous (but preserve site language)
     if (typeof window !== 'undefined') {
       try {
+        // Save site language before clearing
+        const savedSiteLanguage = localStorage.getItem('siteLanguage');
+        console.log('🔧 Logout: Dil saxlanır:', savedSiteLanguage);
+        
         // Clear all possible storage immediately
         localStorage.clear();
         sessionStorage.clear();
 
-        // Clear specific items that might be cached
+        // Restore site language after clearing
+        if (savedSiteLanguage) {
+          localStorage.setItem('siteLanguage', savedSiteLanguage);
+          console.log('🔧 Logout: Dil restore edildi:', savedSiteLanguage);
+          
+          // Verify it was restored
+          const verifyLanguage = localStorage.getItem('siteLanguage');
+          console.log('🔧 Logout: Restore verify:', verifyLanguage);
+        }
+
+        // Clear specific items that might be cached (just in case)
         ['accessToken', 'refreshToken', 'user', 'auth-token', 'cvera-auth', 'cvera-token'].forEach(key => {
           localStorage.removeItem(key);
           sessionStorage.removeItem(key);
         });
 
-        console.log('✅ Storage təmizləndi');
+        console.log('✅ Storage təmizləndi (dil seçimi saxlanıldı)');
       } catch (e) {
         console.log('Storage clear error:', e);
       }

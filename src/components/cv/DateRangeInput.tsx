@@ -1,7 +1,24 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { MONTH_NAMES, CVLanguage } from '@/lib/cvLanguage';
+
+// Define our own month names for 3 languages
+const MONTH_NAMES_3LANG = {
+  azerbaijani: [
+    'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'İyun',
+    'İyul', 'Avqust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr'
+  ],
+  english: [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ],
+  russian: [
+    'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+    'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+  ]
+};
+
+type SiteLanguage = 'azerbaijani' | 'english' | 'russian';
 
 interface DateRangeInputProps {
   startDate: string;
@@ -14,7 +31,7 @@ interface DateRangeInputProps {
   endLabel?: string;
   currentLabel?: string;
   required?: boolean;
-  cvLanguage?: CVLanguage;
+  siteLanguage?: SiteLanguage;
   singleDate?: boolean; // For certifications - only show start date
 }
 
@@ -29,7 +46,7 @@ export default function DateRangeInput({
   endLabel = 'Bitirmə tarixi',
   currentLabel,
   required = false,
-  cvLanguage = 'azerbaijani',
+  siteLanguage = 'azerbaijani',
   singleDate = false
 }: DateRangeInputProps) {
 
@@ -37,19 +54,41 @@ export default function DateRangeInput({
   const [showEndPicker, setShowEndPicker] = useState(false);
 
   // Get localized month names and labels
-  const language = cvLanguage || 'azerbaijani';
-  const monthNames = MONTH_NAMES[language];
+  const language = siteLanguage || 'azerbaijani';
+  const monthNames = MONTH_NAMES_3LANG[language];
   
   // Localized UI texts
   const texts = {
-    clear: language === 'english' ? 'Clear' : 'Təmizlə',
-    thisMonth: language === 'english' ? 'This Month' : 'Bu ay',
-    close: language === 'english' ? 'Close' : 'Bağla',
-    selectMonth: language === 'english' ? 'Select month' : 'Ay seçin',
-    year: language === 'english' ? 'Year' : 'İl',
-    month: language === 'english' ? 'Month' : 'Ay',
-    currentlyWorking: language === 'english' ? 'Currently working' : 'Davam edir'
+    azerbaijani: {
+      clear: 'Təmizlə',
+      thisMonth: 'Bu ay',
+      close: 'Bağla',
+      selectMonth: 'Ay seçin',
+      year: 'İl',
+      month: 'Ay',
+      currentlyWorking: 'Davam edir'
+    },
+    english: {
+      clear: 'Clear',
+      thisMonth: 'This Month',
+      close: 'Close',
+      selectMonth: 'Select month',
+      year: 'Year',
+      month: 'Month',
+      currentlyWorking: 'Currently working'
+    },
+    russian: {
+      clear: 'Очистить',
+      thisMonth: 'Этот месяц',
+      close: 'Закрыть',
+      selectMonth: 'Выберите месяц',
+      year: 'Год',
+      month: 'Месяц',
+      currentlyWorking: 'В настоящее время работаю'
+    }
   };
+
+  const content = texts[language];
 
   // Format date for display (showing localized month names)
   const formatDateForDisplay = (date: string) => {
@@ -126,7 +165,7 @@ export default function DateRangeInput({
         {/* Year selector */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {texts.year}
+            {content.year}
           </label>
           <select
             value={selectedYear}
@@ -142,7 +181,7 @@ export default function DateRangeInput({
         {/* Month grid */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {texts.month}
+            {content.month}
           </label>
           <div className="grid grid-cols-3 gap-2">
             {monthNames.map((month, index) => {
@@ -182,7 +221,7 @@ export default function DateRangeInput({
             }}
             className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
           >
-            {texts.clear}
+            {content.clear}
           </button>
           
           <div className="flex gap-2">
@@ -190,13 +229,13 @@ export default function DateRangeInput({
               onClick={() => onSelect(currentYear, currentMonth)}
               className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
             >
-              {texts.thisMonth}
+              {content.thisMonth}
             </button>
             <button
               onClick={onClose}
               className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
             >
-              {texts.close}
+              {content.close}
             </button>
           </div>
         </div>
@@ -234,7 +273,7 @@ export default function DateRangeInput({
             onClick={() => setShowStartPicker(!showStartPicker)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-left bg-white hover:bg-gray-50 transition-colors"
           >
-            {formatDateForDisplay(startDate) || texts.selectMonth}
+            {formatDateForDisplay(startDate) || content.selectMonth}
           </button>
           
           <DatePicker
@@ -261,8 +300,8 @@ export default function DateRangeInput({
               }`}
             >
               {current 
-                ? texts.currentlyWorking
-                : formatDateForDisplay(endDate || '') || texts.selectMonth
+                ? content.currentlyWorking
+                : formatDateForDisplay(endDate || '') || content.selectMonth
               }
             </button>
             

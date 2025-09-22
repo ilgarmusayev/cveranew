@@ -221,6 +221,7 @@ export default function OrganizationsSection({ data, onChange, cvLanguage = 'aze
                     onEndDateChange={(date) => updateOrganization(index, { endDate: date })}
                     onCurrentChange={(current) => updateOrganization(index, { current })}
                     currentLabel={content.current}
+                    siteLanguage={siteLanguage}
                   />
                 </div>
 

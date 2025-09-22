@@ -351,7 +351,7 @@ export default function CertificationsSection({ data, onChange, cvLanguage = 'az
                       onEndDateChange={() => {}}
                       onCurrentChange={() => {}}
                       startLabel={getTranslation(siteLanguage, 'issueDate')}
-                      cvLanguage={cvLanguage === 'russian' ? 'english' : cvLanguage}
+                      siteLanguage={siteLanguage}
                       singleDate={true}
                     />
                   </div>

@@ -83,7 +83,8 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
       premiumProPopular: 'Premium, Populyar',
       title: 'Şəxsi məlumatlar',
       fillField: 'Zəhmət olmasa bu sahəni doldurun',
-      validEmail: 'Zəhmət olmasa düzgün email ünvanı daxil edin'
+      validEmail: 'Zəhmət olmasa düzgün email ünvanı daxil edin',
+      fileFormat: 'JPG, PNG formatında, maksimum 2MB'
     },
     english: {
       profileImage: 'Profile Image',
@@ -120,7 +121,8 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
       premiumProPopular: 'Premium, Popular',
       title: 'Personal Information',
       fillField: 'Please fill out this field',
-      validEmail: 'Please enter a valid email address'
+      validEmail: 'Please enter a valid email address',
+      fileFormat: 'JPG, PNG format, maximum 2MB'
     },
     russian: {
       profileImage: 'Фото профиля',
@@ -157,7 +159,8 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
       premiumProPopular: 'Premium, Popular',
       title: 'Личная информация',
       fillField: 'Пожалуйста, заполните это поле',
-      validEmail: 'Пожалуйста, введите действительный адрес электронной почты'
+      validEmail: 'Пожалуйста, введите действительный адрес электронной почты',
+      fileFormat: 'Формат JPG, PNG, максимум 2МБ'
     }
   };
 
@@ -458,10 +461,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
                     </div>
                   )}
                   <p className="text-xs text-gray-500 mt-1">
-                    {siteLanguage === 'english' 
-                      ? 'JPG, PNG format, maximum 2MB' 
-                      : 'JPG, PNG formatında, maksimum 2MB'
-                    }
+                    {content.fileFormat}
                   </p>
                 </div>
               </div>

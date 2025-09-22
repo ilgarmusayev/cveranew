@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import DateRangeInput from '@/components/cv/DateRangeInput';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 
 interface Publication {
   id: string;
@@ -118,6 +119,7 @@ const getTranslation = (cvLanguage: 'english' | 'azerbaijani' | 'russian', key: 
 };
 
 export default function PublicationsSection({ data, onChange, cvLanguage = 'azerbaijani' }: PublicationsSectionProps) {
+  const { siteLanguage } = useSiteLanguage();
   const [publications, setPublications] = useState<Publication[]>(data || []);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(null);
@@ -308,7 +310,7 @@ export default function PublicationsSection({ data, onChange, cvLanguage = 'azer
                       current={false}
                       onCurrentChange={() => {}}
                       singleDate={true}
-                      cvLanguage={cvLanguage as 'english' | 'azerbaijani'}
+                      siteLanguage={siteLanguage}
                     />
                   </div>
 

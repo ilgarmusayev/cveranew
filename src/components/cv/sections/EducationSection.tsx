@@ -401,7 +401,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                     startLabel={content.startDate}
                     endLabel={content.endDate}
                     currentLabel={content.currentStudying}
-                    cvLanguage={cvLanguage as 'english' | 'azerbaijani'}
+                    siteLanguage={siteLanguage}
                   />
 
                

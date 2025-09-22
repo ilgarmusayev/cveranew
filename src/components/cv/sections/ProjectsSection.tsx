@@ -399,7 +399,7 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
                     startLabel={siteLanguage === 'english' ? 'Start Date' : 'Başlama tarixi'}
                     endLabel={siteLanguage === 'english' ? 'End Date' : 'Bitirmə tarixi'}
                     currentLabel={siteLanguage === 'english' ? 'Currently ongoing' : 'Davam edir'}
-                    cvLanguage={cvLanguage as 'english' | 'azerbaijani'}
+                    siteLanguage={siteLanguage}
                   />
 
 

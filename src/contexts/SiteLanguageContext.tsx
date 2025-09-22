@@ -24,15 +24,21 @@ export function SiteLanguageProvider({ children }: SiteLanguageProviderProps) {
   // Site dilini local storage-dan yüklə
   useEffect(() => {
     const savedLanguage = localStorage.getItem('siteLanguage') as SiteLanguage;
+    console.log('🌐 SiteLanguageContext: localStorage-dan oxunan dil:', savedLanguage);
     if (savedLanguage && ['english', 'azerbaijani', 'russian'].includes(savedLanguage)) {
+      console.log('🌐 SiteLanguageContext: Dil set edilir:', savedLanguage);
       setSiteLanguageState(savedLanguage);
+    } else {
+      console.log('🌐 SiteLanguageContext: Default dil istifadə edilir: azerbaijani');
     }
   }, []);
 
   // Site dilini dəyişdirən funksiya
   const setSiteLanguage = (language: SiteLanguage) => {
+    console.log('🌐 SiteLanguageContext: Dil dəyişdirilir:', language);
     setSiteLanguageState(language);
     localStorage.setItem('siteLanguage', language);
+    console.log('🌐 SiteLanguageContext: localStorage-a saxlanıldı:', language);
   };
 
   // Site dilini toggle edən funksiya

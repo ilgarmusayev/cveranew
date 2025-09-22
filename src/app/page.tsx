@@ -635,7 +635,7 @@ export default function Index2() {
                     </button>
                   </Link>
 
-                  <Link href="/sablonlar">
+                  <Link href="/templates">
                     <button
                         className="group w-full sm:w-auto px-8 sm:px-10 lg:px-12 py-4 sm:py-5 lg:py-6 bg-white text-blue-600 font-bold rounded-xl sm:rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:bg-blue-50 transform hover:-translate-y-3 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl text-base sm:text-lg">
                     <span className="flex items-center justify-center gap-2 sm:gap-3">

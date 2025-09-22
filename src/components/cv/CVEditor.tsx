@@ -281,7 +281,9 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             subheadingWeight: 'Alt Başlıq Qalınlığı',
             smallTextWeight: 'Kiçik Mətn Qalınlığı',
             sectionSpacing: 'Bölmələr Arası Məsafə',
-            reset: 'Sıfırla'
+            reset: 'Sıfırla',
+            recommendationTip: 'Tövsiyə:',
+            recommendationText: 'Dil fərqi aşkarlandıqda AI tərcümədən istifadə edin.'
         },
         english: {
             templateSelection: 'Template Selection',
@@ -312,7 +314,9 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             subheadingWeight: 'Subheading Weight',
             smallTextWeight: 'Small Text Weight',
             sectionSpacing: 'Section Spacing',
-            reset: 'Reset'
+            reset: 'Reset',
+            recommendationTip: 'Recommendation:',
+            recommendationText: 'Use AI translation when language difference is detected.'
         },
         russian: {
             templateSelection: 'Выбор шаблона',
@@ -343,7 +347,9 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             subheadingWeight: 'Толщина подзаголовка',
             smallTextWeight: 'Толщина мелкого текста',
             sectionSpacing: 'Расстояние между разделами',
-            reset: 'Сбросить'
+            reset: 'Сбросить',
+            recommendationTip: 'Рекомендация:',
+            recommendationText: 'Используйте ИИ-перевод при обнаружении языковых различий.'
         }
     };
 
@@ -1108,8 +1114,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                         </svg>
                     </div>
                     <div className="flex-1">
-                        <span className="text-blue-800 font-semibold">💡 Tövsiyə: </span>
-                        <span className="text-blue-700">Dil fərqi aşkarlandıqda AI tərcümədən istifadə edin.</span>
+                        <span className="text-blue-800 font-semibold">💡 {content.recommendationTip} </span>
+                        <span className="text-blue-700">{content.recommendationText}</span>
                     </div>
                 </div>
 

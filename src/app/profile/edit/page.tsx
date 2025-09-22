@@ -71,7 +71,8 @@ export default function ProfileEditPage() {
       // Login methods
       emailLogin: 'E-poçt',
       googleLogin: 'Google',
-      linkedinLogin: 'LinkedIn'
+      linkedinLogin: 'LinkedIn',
+      createdCVs: 'Yaradılmış CV-lər'
     },
     english: {
       pageTitle: 'Profile Edit',
@@ -121,7 +122,8 @@ export default function ProfileEditPage() {
       // Login methods
       emailLogin: 'Email',
       googleLogin: 'Google',
-      linkedinLogin: 'LinkedIn'
+      linkedinLogin: 'LinkedIn',
+      createdCVs: 'Created CVs'
     },
     russian: {
       pageTitle: 'Редактирование профиля',
@@ -171,7 +173,8 @@ export default function ProfileEditPage() {
       // Login methods
       emailLogin: 'Электронная почта',
       googleLogin: 'Google',
-      linkedinLogin: 'LinkedIn'
+      linkedinLogin: 'LinkedIn',
+      createdCVs: 'Созданные резюме'
     }
   };
 
@@ -680,7 +683,7 @@ export default function ProfileEditPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="bg-gray-50 rounded-lg p-4 text-center">
                     <div className="text-2xl font-bold text-blue-600">{(profile as any)?.cvCount || 0}</div>
-                    <div className="text-sm text-gray-600">{siteLanguage === 'azerbaijani' ? 'Yaradılmış CV-lər' : 'Created CVs'}</div>
+                    <div className="text-sm text-gray-600">{content.createdCVs}</div>
                   </div>
                   <div className="bg-gray-50 rounded-lg p-4 text-center">
                     <div className="text-2xl font-bold text-green-600">
