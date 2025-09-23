@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { validateEmail } from '@/lib/validation';
 import { getConnectionSpeed } from '@/lib/performance';
+import { useLocalizedMessages } from '@/utils/errorMessages';
 
 interface LoginFormProps {
   onSwitchToRegister: () => void;
@@ -12,6 +13,7 @@ interface LoginFormProps {
 
 const LoginForm = ({ onSwitchToRegister, onSwitchToForgot }: LoginFormProps) => {
   const { login } = useAuth();
+  const { getErrorMessage } = useLocalizedMessages();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -141,7 +143,7 @@ const LoginForm = ({ onSwitchToRegister, onSwitchToForgot }: LoginFormProps) => 
 
       // No need to handle redirect here - auth.tsx handles it instantly
     } catch (err: any) {
-      setError(err.message || 'Giriş zamanı xəta baş verdi');
+      setError(err.message || getErrorMessage('loginError'));
       setLoading(false); // Only set loading false on error
     }
     // Don't set loading false on success - let redirect handle it
@@ -156,7 +158,7 @@ const LoginForm = ({ onSwitchToRegister, onSwitchToForgot }: LoginFormProps) => 
       // LinkedIn OAuth login
       window.location.href = '/api/auth/linkedin';
     } catch (error) {
-      setError('LinkedIn ilə giriş zamanı xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.');
+      setError(getErrorMessage('loginError'));
       setLoading(false);
     }
   };

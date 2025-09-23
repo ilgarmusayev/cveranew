@@ -4,8 +4,10 @@ import React, { useState, useEffect, useContext, createContext, useCallback } fr
 import jwt from 'jsonwebtoken';
 import { performanceTracker, getConnectionSpeed } from './performance';
 import { apiClient } from './api';
+import { apiPost, apiGet } from '@/utils/apiClient';
 import { useNotification } from '@/components/ui/Toast';
 import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
+import { useLocalizedMessages } from '@/utils/errorMessages';
 
 export interface User {
   id: string;
@@ -53,6 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [linkedInLogoutModal, setLinkedInLogoutModal] = useState(false);
   const { showSuccess, showInfo, showWarning } = useNotification();
   const { siteLanguage } = useSiteLanguage();
+  const { getSuccessMessage, getWarningMessage, getInfoMessage } = useLocalizedMessages();
 
   const getAuthLabels = () => {
     const labels = {
@@ -145,11 +148,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // BACKGROUND: API call to get full user data
-      fetch('/api/users/me', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }).then(response => {
+      apiGet('/api/users/me').then(response => {
         if (response.ok) {
           return response.json();
         } else {
@@ -190,13 +189,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('🌐 Detected connection speed:', speed);
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await apiPost('/api/auth/login', { email, password }, siteLanguage);
 
       console.log('📡 Login API response status:', response.status);
 
@@ -256,13 +249,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = useCallback(async (name: string, email: string, password: string) => {
     setLoading(true);
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, email, password }),
-      });
+      const response = await apiPost('/api/auth/register', { name, email, password }, siteLanguage);
 
       if (!response.ok) {
         const error = await response.json();
@@ -348,16 +335,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     // 4. Call logout API (fire and forget - don't wait or show loading)
-    const token = localStorage.getItem('accessToken') || '';
-    fetch('/api/auth/logout', {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': token ? `Bearer ${token}` : '',
-        'Cache-Control': 'no-cache',
-      },
-    }).then(() => {
+    apiPost('/api/auth/logout', {}, siteLanguage).then(() => {
       console.log('✅ Logout API çağırıldı');
     }).catch((error) => {
       console.log('Logout API error (ignoring):', error);
@@ -367,9 +345,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (isLinkedInUser) {
       console.log('🔗 LinkedIn ilə giriş edən istifadəçi - LinkedIn logout edilir...');
       setLinkedInLogoutModal(true);
-      showInfo('LinkedIn-dən də çıxış etmək istəyirsinizmi?');
+      showInfo(getInfoMessage('genericInfo'));
     } else {
-      showSuccess('Uğurla çıxış etdiniz');
+      showSuccess(); // Will use default success message from notificationMessages
       window.location.href = '/';
     }
   }, [user, showSuccess, showInfo]);
@@ -394,16 +372,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           try {
             logoutWindow.close();
           } catch (e) {}
-          showSuccess('LinkedIn-dən də çıxış etdiniz');
+          showSuccess(); // Will use default success message from notificationMessages
           window.location.href = '/';
         }, 3000);
       } else {
-        showWarning('LinkedIn çıxış pəncərəsi açıla bilmədi');
-        window.location.href = '/';
+  showWarning(); // Will use default warning message from notificationMessages
+  window.location.href = '/';
       }
     } else {
-      showSuccess('Uğurla çıxış etdiniz');
-      window.location.href = '/';
+  showSuccess(); // Will use default success message from notificationMessages
+  window.location.href = '/';
     }
   };
 
@@ -423,13 +401,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     setLoading(true);
     try {
-      const response = await fetch('/api/import/linkedin-auto', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await apiPost('/api/import/linkedin-auto', {}, siteLanguage);
 
       if (!response.ok) {
         const error = await response.json();

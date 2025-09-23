@@ -6,6 +6,7 @@ import Header from '@/components/Header';
 import { CVTranslationPanel } from '@/components/translation/CVTranslationPanel';
 import { CVLanguage } from '@/lib/cvLanguage';
 import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
+import { useLocalizedMessages } from '@/utils/errorMessages';
 // Import section components
 import PersonalInfoSection from './sections/PersonalInfoSection';
 import ExperienceSection from './sections/ExperienceSection';
@@ -776,6 +777,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
 
     // Notification hooks
     const { showSuccess, showError, showWarning } = useNotification();
+    const { getErrorMessage, getSuccessMessage } = useLocalizedMessages();
 
    const updateCVData = (section: keyof CVEditorState, data: any) => {
         console.log('📝 CVEditor updateCVData called:', {
@@ -847,12 +849,12 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
 
             if (cv.id) {
                 await apiClient.put(`/api/cv/${cv.id}`, payload);
-                showSuccess('CV uğurla yeniləndi');
+                showSuccess(getSuccessMessage('cvUpdateSuccess'));
             } else {
                 const response = await apiClient.post('/api/cv', payload);
                 const newCV = response.data;
                 setCv(prev => ({ ...prev, id: newCV.id }));
-                showSuccess('CV uğurla yaradıldı');
+                showSuccess(getSuccessMessage('cvCreateSuccess'));
                 // Yeni yaranan CV-ni ana komponentə ötürürük.
                 cvData.id = newCV.id;
             }
@@ -862,7 +864,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
 
         } catch (error) {
             console.error('❌ Save error:', error);
-            showError('CV saxlanılarkən xəta baş verdi');
+            showError(getErrorMessage('cvSaveError'));
         } finally {
             setSaving(false);
         }
@@ -879,7 +881,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             const cvPreviewElement = document.querySelector('.cv-preview');
             if (!cvPreviewElement) {
                 console.error('CVPreview elementi tapılmadı');
-                showError('CV preview hazır deyil');
+                showError(getErrorMessage('cvExportError'));
                 return;
             }
 
@@ -1005,7 +1007,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             if (!response.ok) {
                 const errorData = await response.text();
                 console.error('PDF export xətası:', response.status, errorData);
-                showError(`PDF export xətası: ${response.status}`);
+                showError(getErrorMessage('pdfExportError'));
                 return;
             }
 
@@ -1021,12 +1023,12 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
 
-            showSuccess('PDF uğurla yükləndi');
+            showSuccess(getSuccessMessage('genericSuccess'));
             console.log('✅ PDF export uğurlu oldu');
 
         } catch (error) {
             console.error('PDF export xətası:', error);
-            showError('PDF export zamanı xəta baş verdi');
+            showError(getErrorMessage('pdfExportError'));
         } finally {
             setSaving(false);
         }

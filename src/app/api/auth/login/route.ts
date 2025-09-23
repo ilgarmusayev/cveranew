@@ -4,17 +4,19 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { generateJWT, generateRefreshToken, createSessionCookieOptions, createRefreshCookieOptions } from "@/lib/jwt";
 import { EmailService } from "@/lib/email-service";
+import { getServerErrorMessage, detectLanguageFromRequest } from "@/utils/serverErrorMessages";
 
 const emailService = new EmailService();
 
 export async function POST(req: NextRequest) {
   try {
     const { email, password } = await req.json();
+    const userLanguage = detectLanguageFromRequest(req);
     
     // Input validation
     if (!email || !password) {
       return NextResponse.json({
-        message: "E-poçt və şifrə tələb olunur"
+        message: getServerErrorMessage('emailRequired', userLanguage)
       }, { status: 400 });
     }
 
@@ -43,14 +45,14 @@ export async function POST(req: NextRequest) {
     
     if (!user) {
       return NextResponse.json({ 
-        message: "E-poçt və ya şifrə yanlışdır"
+        message: getServerErrorMessage('invalidCredentials', userLanguage)
       }, { status: 401 });
     }
     
     // Check if user has a password (regular login) or uses LinkedIn login
     if (!user.password) {
       return NextResponse.json({
-        message: "Bu hesab LinkedIn ilə qeydiyyatdan keçib. LinkedIn ilə daxil olun.",
+        message: getServerErrorMessage('linkedinOnlyAccount', userLanguage),
         linkedinLogin: true
       }, { status: 400 });
     }
@@ -61,7 +63,7 @@ export async function POST(req: NextRequest) {
       const isValidPassword = await bcrypt.compare(password, user.password);
       if (!isValidPassword) {
         return NextResponse.json({
-          message: "E-poçt və ya şifrə yanlışdır"
+          message: getServerErrorMessage('invalidCredentials', userLanguage)
         }, { status: 401 });
       }
 
@@ -117,7 +119,7 @@ export async function POST(req: NextRequest) {
     // Check if account is active
     if (user.status !== "active") {
       return NextResponse.json({
-        message: "Hesabınız aktiv deyil. Dəstək komandası ilə əlaqə saxlayın.",
+        message: getServerErrorMessage('accountDeactivated', userLanguage),
         accountStatus: user.status
       }, { status: 403 });
     }
@@ -126,7 +128,7 @@ export async function POST(req: NextRequest) {
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
       return NextResponse.json({
-        message: "E-poçt və ya şifrə yanlışdır"
+        message: getServerErrorMessage('invalidCredentials', userLanguage)
       }, { status: 401 });
     }
     
@@ -174,10 +176,11 @@ export async function POST(req: NextRequest) {
     response.cookies.set("refreshToken", refreshToken, createRefreshCookieOptions());
 
     return response;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error);
+    const userLanguage = detectLanguageFromRequest(req);
     return NextResponse.json({
-      message: "Giriş zamanı xəta baş verdi"
+      message: getServerErrorMessage('invalidCredentials', userLanguage)
     }, { status: 500 });
   } finally {
     await prisma.$disconnect();

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createContext, useContext, ReactNode } from 'react';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 
 interface Toast {
   id: string;
@@ -157,24 +158,55 @@ const ToastItem = ({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
   );
 };
 
+// Notification messages for 3 languages
+const notificationMessages = {
+  azerbaijani: {
+    success: 'Əməliyyat uğurla tamamlandı',
+    error: 'Xəta baş verdi',
+    warning: 'Diqqət!',
+    info: 'Məlumat',
+    tryAgain: 'Yenidən cəhd et'
+  },
+  english: {
+    success: 'Operation completed successfully',
+    error: 'An error occurred',
+    warning: 'Warning!',
+    info: 'Info',
+    tryAgain: 'Try Again'
+  },
+  russian: {
+    success: 'Операция выполнена успешно',
+    error: 'Произошла ошибка',
+    warning: 'Внимание!',
+    info: 'Информация',
+    tryAgain: 'Попробовать ещё раз'
+  }
+};
+
 // Helper hook for common toast patterns
 export const useNotification = () => {
   const { addToast } = useToast();
+  const { siteLanguage } = useSiteLanguage();
 
-  const showSuccess = (message: string, title?: string) => {
-    addToast({ type: 'success', message, title });
+  const getMessage = (type: 'success' | 'error' | 'warning' | 'info', customMessage?: string) => {
+    const messages = notificationMessages[siteLanguage] || notificationMessages.azerbaijani;
+    return customMessage || messages[type];
   };
 
-  const showError = (message: string, title?: string) => {
-    addToast({ type: 'error', message, title });
+  const showSuccess = (message?: string, title?: string) => {
+    addToast({ type: 'success', message: getMessage('success', message), title });
   };
 
-  const showWarning = (message: string, title?: string) => {
-    addToast({ type: 'warning', message, title });
+  const showError = (message?: string, title?: string) => {
+    addToast({ type: 'error', message: getMessage('error', message), title });
   };
 
-  const showInfo = (message: string, title?: string) => {
-    addToast({ type: 'info', message, title });
+  const showWarning = (message?: string, title?: string) => {
+    addToast({ type: 'warning', message: getMessage('warning', message), title });
+  };
+
+  const showInfo = (message?: string, title?: string) => {
+    addToast({ type: 'info', message: getMessage('info', message), title });
   };
 
   return { showSuccess, showError, showWarning, showInfo };

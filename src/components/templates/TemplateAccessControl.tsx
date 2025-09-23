@@ -58,14 +58,14 @@ export default function TemplateAccessControl({
 
       setSelectedTemplate(template);
       setShowUpgradeModal(true);
-      showWarning(suggestion.message);
+  showWarning(); // Will use default warning message from notificationMessages
     }
   };
 
   const handleUpgradeConfirm = () => {
-    setShowUpgradeModal(false);
-    onUpgrade();
-    showInfo('Qiymətlər səhifəsinə yönləndirilirsiniz...');
+  setShowUpgradeModal(false);
+  onUpgrade();
+  showInfo(); // Will use default info message from notificationMessages
   };
 
   return (

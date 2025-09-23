@@ -1,6 +1,8 @@
 'use client';
 
 import React from 'react';
+import { useLocalizedMessages } from '@/utils/errorMessages';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 
 interface ErrorBoundaryState {
   hasError: boolean;

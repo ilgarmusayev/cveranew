@@ -4,6 +4,8 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
+import { useLocalizedMessages } from '@/utils/errorMessages';
+import { apiPost } from '@/utils/apiClient';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer'; // Footer əlavə edirik
@@ -12,6 +14,7 @@ function LoginPageContent() {
   // All hooks must be called at the top level, before any early returns
   const { user, loading: authLoading, isInitialized, login } = useAuth(); // login funksiyasını əlavə et
   const { siteLanguage } = useSiteLanguage();
+  const { getErrorMessage } = useLocalizedMessages();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -218,7 +221,7 @@ function LoginPageContent() {
 
     // Basic validation
     if (!formData.email || !formData.password) {
-      setError('Bütün sahələri doldurun');
+      setError(getErrorMessage('emailRequired'));
       setLoading(false);
       return;
     }
@@ -226,16 +229,10 @@ function LoginPageContent() {
     try {
       // Direct API call instead of useAuth (since test-login works)
       console.log('📡 Calling login API directly...');
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        }),
-      });
+      const response = await apiPost('/api/auth/login', {
+        email: formData.email,
+        password: formData.password
+      }, siteLanguage);
 
       console.log('📡 Response status:', response.status);
       const data = await response.json();
@@ -255,7 +252,7 @@ function LoginPageContent() {
           // Use window.location.href for reliable redirect
           window.location.href = '/dashboard';
         } else {
-          setError('Token alınmadı');
+          setError(getErrorMessage('loginError'));
         }
       } else if (response.status === 403 && data.requiresVerification) {
         // Handle email verification required
@@ -266,11 +263,11 @@ function LoginPageContent() {
         }
         setError(''); // Clear any error since this is a verification issue
       } else {
-        setError(data.message || data.error || 'Login xətası');
+        setError(data.message || data.error || getErrorMessage('invalidCredentials'));
       }
     } catch (error: any) {
       console.error('💥 Login error:', error);
-      setError('Giriş zamanı xəta baş verdi');
+      setError(getErrorMessage('loginError'));
     } finally {
       setLoading(false);
     }

@@ -3,6 +3,7 @@ import { useNotification } from '@/components/ui/Toast';
 import { CVData, PersonalInfo, Experience, Education, Skill, Language, Project, Certification, VolunteerExperience } from '@/types/cv';
 import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 import { getLoadingMessages } from '@/components/ui/Loading';
+import { useLocalizedMessages } from '@/utils/errorMessages';
 
 // Import section components
 import PersonalInfoSection from './sections/PersonalInfoSection';
@@ -234,6 +235,7 @@ export default function NewCVEditor({ cvId, onSave, onCancel, initialData, userT
 
     // Notification hooks
     const { showSuccess, showError, showWarning } = useNotification();
+    const { getErrorMessage, getSuccessMessage } = useLocalizedMessages();
 
     console.log('🔄 CV Editor State:', {
         cvId,
@@ -289,7 +291,7 @@ export default function NewCVEditor({ cvId, onSave, onCancel, initialData, userT
                     title: cvData.title,
                     cv_data: cvData.data
                 });
-                showSuccess('CV uğurla yeniləndi');
+                showSuccess(getSuccessMessage('cvUpdateSuccess'));
             } else {
                 // Create new CV
                 const result = await apiClient.post('/api/cv', {
@@ -297,10 +299,9 @@ export default function NewCVEditor({ cvId, onSave, onCancel, initialData, userT
                     templateId: cvData.templateId,
                     cv_data: cvData.data
                 });
-                
                 // Update the CV ID
                 setCv(prev => ({ ...prev, id: result.id }));
-                showSuccess('CV uğurla yaradıldı');
+                showSuccess(); // Will use default success message from notificationMessages
             }
 
             // Call the onSave callback
@@ -308,8 +309,8 @@ export default function NewCVEditor({ cvId, onSave, onCancel, initialData, userT
 
         } catch (error) {
             console.error('❌ Save error:', error);
-            setError('CV saxlanılarkən xəta baş verdi');
-            showError('CV saxlanılarkən xəta baş verdi');
+            setError(getErrorMessage('cvSaveError'));
+            showError(); // Will use default error message from notificationMessages
         } finally {
             setSaving(false);
         }

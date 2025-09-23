@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useNotification } from '@/components/ui/Toast';
+import { useLocalizedMessages } from '@/utils/errorMessages';
 import { apiClient } from '@/lib/api-client';
 
 interface AISummaryGeneratorProps {
@@ -20,13 +21,14 @@ export function AISummaryGenerator({
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedSummary, setGeneratedSummary] = useState<string>('');
   const { showSuccess, showError, showWarning } = useNotification();
+  const { getErrorMessage, getSuccessMessage, getWarningMessage } = useLocalizedMessages();
 
   // ✅ Include Pro/Populyar tiers for AI access
   const canUseAI = userTier === 'Medium' || userTier === 'Premium' || userTier === 'Pro' || userTier === 'Populyar';
 
   const handleGenerateAISummary = async () => {
     if (!canUseAI) {
-      showWarning('AI summary generation is only available for Medium, Pro and Premium subscribers');
+      showWarning(getWarningMessage('genericWarning'));
       return;
     }
 
@@ -50,7 +52,7 @@ export function AISummaryGenerator({
       const hasSkills = cvData.skills && Array.isArray(cvData.skills) && cvData.skills.length > 0;
       
       if (!hasSkills) {
-        showWarning('Bacarıq əlavə edin');
+        showWarning(getWarningMessage('genericWarning'));
         setIsGenerating(false);
         return;
       }

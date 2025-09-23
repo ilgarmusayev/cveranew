@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import CVEditor from '@/components/cv/CVEditor';
-import { ApiClient } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
+import { apiClient } from '@/lib/api';
+import { LoadingSpinner } from '../ui/Loading';
+import type { CVData } from '@/types/cv';
+import { useLocalizedMessages } from '@/utils/errorMessages';
 import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 import { getLoadingMessages } from '@/components/ui/Loading';
-
-const apiClient = new ApiClient();
 
 interface CVDataProps {
     cvId: string;
@@ -23,16 +25,23 @@ export default function CVData({ cvId, onSave, onCancel, userTier }: CVDataProps
     const router = useRouter();
     const { siteLanguage } = useSiteLanguage();
     const loadingMessages = getLoadingMessages(siteLanguage);
+    const { getErrorMessage } = useLocalizedMessages();
 
     const labels = {
         azerbaijani: {
-            preparingData: 'Məlumatlar hazırlanır'
+            preparingData: 'Məlumatlar hazırlanır',
+            tryAgain: 'Yenidən cəhd et',
+            goBack: 'Geri qayıt'
         },
         english: {
-            preparingData: 'Preparing data'
+            preparingData: 'Preparing data',
+            tryAgain: 'Try Again',
+            goBack: 'Go Back'
         },
         russian: {
-            preparingData: 'Подготовка данных'
+            preparingData: 'Подготовка данных',
+            tryAgain: 'Попробовать снова',
+            goBack: 'Назад'
         }
     };
 
@@ -64,7 +73,7 @@ export default function CVData({ cvId, onSave, onCancel, userTier }: CVDataProps
             
         } catch (error: any) {
             console.error('❌ Failed to load CV:', error);
-            setError(error.message || 'CV yüklənmədi');
+            setError(error.message || getErrorMessage('cvLoadError'));
         } finally {
             setLoading(false);
         }
@@ -98,20 +107,20 @@ export default function CVData({ cvId, onSave, onCancel, userTier }: CVDataProps
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                             </svg>
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Xəta baş verdi</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">{getErrorMessage('genericError')}</h3>
                         <p className="text-gray-600 mb-4">{error}</p>
                         <div className="flex space-x-3">
                             <button
                                 onClick={loadCV}
                                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                             >
-                                Yenidən cəhd et
+                                {labels[siteLanguage]?.tryAgain || labels.azerbaijani.tryAgain}
                             </button>
                             <button
                                 onClick={onCancel}
                                 className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
                             >
-                                Geri qayıt
+                                {labels[siteLanguage]?.goBack || labels.azerbaijani.goBack}
                             </button>
                         </div>
                     </div>

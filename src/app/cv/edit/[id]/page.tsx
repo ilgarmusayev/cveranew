@@ -8,6 +8,7 @@ import { apiClient } from '@/lib/api';
 import CVEditor from '@/components/cv/CVEditor';
 import CVDataLoader from '@/components/cv/CVData';
 import { LoadingSpinner } from '@/components/ui/Loading';
+import { useLocalizedMessages } from '@/utils/errorMessages';
 import { CVData } from '@/types/cv';
 import StandardHeader from '@/components/ui/StandardHeader';
 import Footer from '@/components/Footer';
@@ -22,6 +23,7 @@ export default function EditCVPage() {
   const [loading, setLoading] = useState(true);
   const { siteLanguage } = useSiteLanguage();
   const loadingMessages = getLoadingMessages(siteLanguage);
+  const { getErrorMessage } = useLocalizedMessages();
   const [error, setError] = useState('');
 
   const cvId = params.id as string;
@@ -129,15 +131,15 @@ export default function EditCVPage() {
               setSessionImportData(result.data);
             } else {
               console.error('Session data load failed:', result.error);
-              setError('Import məlumatları yüklənərkən xəta baş verdi');
+              setError(getErrorMessage('loadingError'));
             }
           } else {
             console.error('Session response not ok:', response.status);
-            setError('Import məlumatları yüklənərkən xəta baş verdi');
+            setError(getErrorMessage('loadingError'));
           }
         } catch (error) {
           console.error('Failed to load session import data:', error);
-          setError('Import məlumatları yüklənərkən xəta baş verdi');
+          setError(getErrorMessage('loadingError'));
         }
       };
       
@@ -154,8 +156,7 @@ export default function EditCVPage() {
       window.location.reload();
     } catch (err) {
       console.error('Edit page: CV save error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      setError(`CV saxlanılarkən xəta baş verdi: ${errorMessage}`);
+      setError(getErrorMessage('cvSaveError'));
     }
   };
 
@@ -209,7 +210,7 @@ export default function EditCVPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L5.732 15.5c-.77.833.192 2.5 1.732 2.5z" />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">Xəta Baş Verdi</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-3">{getErrorMessage('genericError')}</h3>
             <p className="text-gray-600 mb-6">{error}</p>
             <button
               onClick={() => router.push('/dashboard')}

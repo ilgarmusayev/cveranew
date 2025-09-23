@@ -212,7 +212,7 @@ export default function SubscriptionManagement({ user, onUserUpdate }: Subscript
       onUserUpdate(updatedUser);
 
     } catch (err) {
-      showError(err instanceof Error ? err.message : 'Xəta baş verdi');
+  showError(); // Will use default error message from notificationMessages
     } finally {
       setLoading(false);
       setCancelConfirmation('');

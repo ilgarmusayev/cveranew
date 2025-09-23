@@ -1,10 +1,18 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
+import { useLocalizedMessages } from '@/utils/errorMessages';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
+import { apiPost } from '@/utils/apiClient';
 
-export default function SimpleLoginTest() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+export default function TestLogin() {
+  const { getErrorMessage } = useLocalizedMessages();
+  const { siteLanguage } = useSiteLanguage();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState('');
@@ -15,18 +23,15 @@ export default function SimpleLoginTest() {
     setError('');
     setResult('');
 
-    console.log('🧪 TEST LOGIN başladı:', email);
+    console.log('🧪 TEST LOGIN başladı:', formData.email);
 
     try {
       // 1. API-ya birbaşa müraciət
       console.log('📡 Sending login request...');
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await apiPost('/api/auth/login', {
+        email: formData.email,
+        password: formData.password
+      }, siteLanguage);
 
       console.log('📡 Response status:', response.status);
       const data = await response.json();
@@ -52,10 +57,10 @@ export default function SimpleLoginTest() {
             window.location.href = '/dashboard';
           }, 1000);
         } else {
-          setError('Token alınmadı');
+          setError(getErrorMessage('loginError'));
         }
       } else {
-        setError(data.message || 'Login xətası');
+        setError(data.message || getErrorMessage('invalidCredentials'));
       }
     } catch (error: any) {
       console.error('💥 Login error:', error);
@@ -75,8 +80,8 @@ export default function SimpleLoginTest() {
             <label className="block text-sm font-medium mb-2">Email:</label>
             <input
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
               className="w-full p-3 border rounded-lg"
               placeholder="Email daxil edin"
               required
@@ -87,8 +92,8 @@ export default function SimpleLoginTest() {
             <label className="block text-sm font-medium mb-2">Password:</label>
             <input
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={formData.password}
+              onChange={(e) => setFormData({...formData, password: e.target.value})}
               className="w-full p-3 border rounded-lg"
               placeholder="Şifrə daxil edin"
               required

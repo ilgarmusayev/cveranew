@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
+import { useLocalizedMessages } from '@/utils/errorMessages';
+import { apiPost } from '@/utils/apiClient';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer'; // Footer əlavə edirik
@@ -13,6 +15,7 @@ export default function RegisterPage() {
   const { user, register, loading: authLoading } = useAuth();
   const router = useRouter();
   const { siteLanguage } = useSiteLanguage();
+  const { getErrorMessage } = useLocalizedMessages();
 
   const content = {
     azerbaijani: {
@@ -253,30 +256,24 @@ export default function RegisterPage() {
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Şifrələr uyğun gəlmir');
+      setError(getErrorMessage('passwordMismatch'));
       setLoading(false);
       return;
     }
 
     if (!agreedToTerms) {
-      setError('İstifadə qaydalarını qəbul etməlisiniz');
+      setError(getErrorMessage('termsRequired'));
       setLoading(false);
       return;
     }
 
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          password: formData.password
-        }),
-      });
+      const response = await apiPost('/api/auth/register', {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password
+      }, siteLanguage);
 
       if (response.ok) {
         const data = await response.json();
@@ -285,10 +282,10 @@ export default function RegisterPage() {
         router.push('/auth/login?message=email_verification_sent&email=' + encodeURIComponent(formData.email));
       } else {
         const errorData = await response.json();
-        setError(errorData.message || 'Qeydiyyat uğursuz oldu');
+        setError(errorData.message || getErrorMessage('registrationError'));
       }
     } catch (error) {
-      setError('Sistem xətası baş verdi');
+      setError(getErrorMessage('registrationError'));
     } finally {
       setLoading(false);
     }

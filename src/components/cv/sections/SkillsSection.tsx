@@ -346,25 +346,23 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
             setShowSuggestions(true);
             showSuccess(`${newSuggestions.length} ${content.aiSuggestionsGenerated}`);
           } else {
-            showInfo('Bütün təklif edilən bacarıqlar artıq mövcuddur.');
+            showInfo(); // Will use default info message from notificationMessages
           }
         } else {
-          showInfo('AI hazırda əlavə bacarıq təklif etmir.');
+          showInfo(); // Will use default info message from notificationMessages
         }
       } else {
-        const errorMessage = response.error || 'AI bacarıq təklifi almaq mümkün olmadı';
-        console.error('❌ AI Skills Error:', errorMessage);
-        showError(errorMessage);
+  const errorMessage = response.error;
+  console.error('❌ AI Skills Error:', errorMessage);
+  showError(errorMessage); // Will use default error message if errorMessage is undefined
       }
     } catch (error) {
       console.error('🚨 AI Skills Generation Error:', error);
       console.error('🚨 Error details:', {
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: error instanceof Error ? error.message : undefined,
         stack: error instanceof Error ? error.stack : undefined
       });
-      
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      showError(`${content.aiError}: ${errorMessage}`);
+      showError(); // Will use default error message from notificationMessages
     } finally {
       setAiSuggesting(false);
     }

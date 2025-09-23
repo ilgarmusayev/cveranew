@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLocalizedMessages } from '@/utils/errorMessages';
 
 export default function LinkedInCallbackPage() {
   const router = useRouter();
+  const { getErrorMessage } = useLocalizedMessages();
   const [status, setStatus] = useState('İnkişaf edir...');
 
   useEffect(() => {
@@ -45,7 +47,7 @@ export default function LinkedInCallbackPage() {
             }, 500);
 
           } else {
-            throw new Error('Token alınmadı');
+            throw new Error(getErrorMessage('loginError'));
           }
         } else {
           const errorData = await response.json().catch(() => ({}));

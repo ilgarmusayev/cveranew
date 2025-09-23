@@ -4,10 +4,13 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { validateEmail, validatePassword, validateName } from "@/lib/validation";
 import { EmailService } from "@/lib/email-service";
+import { getServerErrorMessage, detectLanguageFromRequest } from "@/utils/serverErrorMessages";
 
 const emailService = new EmailService();
 
 export async function POST(req: NextRequest) {
+  const userLanguage = detectLanguageFromRequest(req);
+  
   try {
     const { firstName, lastName, name, email, password } = await req.json();
     
@@ -18,21 +21,21 @@ export async function POST(req: NextRequest) {
     const nameValidation = validateName(fullName);
     if (!nameValidation.isValid) {
       return NextResponse.json({ 
-        message: nameValidation.error 
+        message: getServerErrorMessage('nameRequired', userLanguage)
       }, { status: 400 });
     }
 
     const emailValidation = validateEmail(email);
     if (!emailValidation.isValid) {
       return NextResponse.json({ 
-        message: emailValidation.error 
+        message: getServerErrorMessage('invalidEmail', userLanguage)
       }, { status: 400 });
     }
 
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.isValid) {
       return NextResponse.json({ 
-        message: passwordValidation.error 
+        message: getServerErrorMessage('passwordTooShort', userLanguage)
       }, { status: 400 });
     }
     
@@ -44,7 +47,7 @@ export async function POST(req: NextRequest) {
     
     if (existingUser) {
       return NextResponse.json({ 
-        message: "Bu e-poçt ünvanı artıq mövcuddur. Başqa e-poçt ünvanı istifadə edin." 
+        message: getServerErrorMessage('emailAlreadyExists', userLanguage)
       }, { status: 409 });
     }
     
@@ -105,7 +108,7 @@ export async function POST(req: NextRequest) {
       await prisma.user.delete({ where: { id: user.id } });
 
       return NextResponse.json({
-        message: "E-poçt göndərmədə xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.",
+        message: getServerErrorMessage('registrationError', userLanguage),
         error: emailResult.error
       }, { status: 500 });
     }
@@ -116,12 +119,12 @@ export async function POST(req: NextRequest) {
     // Handle Prisma unique constraint violations
     if (error.code === 'P2002') {
       return NextResponse.json({
-        message: "Bu e-poçt ünvanı artıq mövcuddur."
+        message: getServerErrorMessage('emailAlreadyExists', userLanguage)
       }, { status: 409 });
     }
 
     return NextResponse.json({
-      message: "Qeydiyyat zamanı xəta baş verdi. Zəhmət olmasa yenidən cəhd edin." 
+      message: getServerErrorMessage('registrationError', userLanguage)
     }, { status: 500 });
   } finally {
     await prisma.$disconnect();

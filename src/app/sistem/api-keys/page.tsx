@@ -213,12 +213,12 @@ export default function ApiKeysPage() {
       const data = await response.json();
 
       if (data.success) {
-        showSuccess(`✅ ${data.message}\n\nDetails: ${JSON.stringify(data.details, null, 2)}`);
+        showSuccess(); // Will use default success message from notificationMessages
       } else {
-        showError(`❌ Test uğursuz: ${data.error}\n\nDetails: ${JSON.stringify(data.details || {}, null, 2)}`);
+        showError(); // Will use default error message from notificationMessages
       }
     } catch (error) {
-      showError('Test xətası: ' + error);
+  showError(); // Will use default error message from notificationMessages
     } finally {
       setTestingKey(null);
     }
@@ -275,14 +275,14 @@ export default function ApiKeysPage() {
       if (data.success) {
         setDeleteModal({ show: false, keyId: '', keyName: '' });
         fetchApiKeys();
-        showSuccess('API key uğurla silindi');
+        showSuccess(); // Will use default success message from notificationMessages
       } else {
-        showError(data.error || 'API key silinə bilmədi');
+        showError(); // Will use default error message from notificationMessages
         setDeleteModal({ show: false, keyId: '', keyName: '' });
       }
     } catch (error) {
-      showError('API key silmə zamanı xəta baş verdi');
-      setDeleteModal({ show: false, keyId: '', keyName: '' });
+  showError(); // Will use default error message from notificationMessages
+  setDeleteModal({ show: false, keyId: '', keyName: '' });
     }
   };
 

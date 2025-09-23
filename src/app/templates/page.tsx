@@ -10,6 +10,7 @@ import OptimizedImage from '@/components/ui/OptimizedImage';
 import { generateStructuredData, organizationData, templateProductData, generateBreadcrumbData } from '@/lib/structured-data';
 import { useAuth } from '@/lib/auth'; // Import useAuth hook
 import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
+import { useLocalizedMessages } from '@/utils/errorMessages';
 
 // Content for 3 languages
 const templatesContent = {
@@ -160,6 +161,7 @@ interface TemplateApiResponse {
 export default function TemplatesPage() {
   const { siteLanguage } = useSiteLanguage();
   const content = templatesContent[siteLanguage];
+  const { getErrorMessage } = useLocalizedMessages();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [hoveredTemplate, setHoveredTemplate] = useState<string | null>(null);
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -228,7 +230,7 @@ export default function TemplatesPage() {
       setLoading(true);
       const response = await fetch('/api/templates');
       if (!response.ok) {
-        setError('Templates yüklənərkən xəta baş verdi');
+        setError(getErrorMessage('templateLoadError'));
         return;
       }
 
@@ -237,7 +239,7 @@ export default function TemplatesPage() {
       setError(''); // Clear any previous errors
     } catch (error) {
       console.error('Template loading error:', error);
-      setError('Templates yüklənərkən xəta baş verdi');
+      setError(getErrorMessage('templateLoadError'));
     } finally {
       setLoading(false);
     }

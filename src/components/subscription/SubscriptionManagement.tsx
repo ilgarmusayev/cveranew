@@ -189,7 +189,7 @@ export default function SubscriptionManagement({ user, onUserUpdate }: Subscript
       const result = await response.json();
 
       // Show success message with lost features
-      showSuccess(`Abunəlik uğurla ləğv edildi!\n\n${result.warningMessage}\n\nİtirilən xüsusiyyətlər:\n${result.lostFeatures?.join('\n')}`);
+  showSuccess(); // Will use default success message from notificationMessages
 
       // Update user data
       const updatedUser = { ...user, tier: 'Free' };
@@ -201,7 +201,7 @@ export default function SubscriptionManagement({ user, onUserUpdate }: Subscript
       onUserUpdate(updatedUser);
 
     } catch (err) {
-      showError(err instanceof Error ? err.message : 'Xəta baş verdi');
+  showError(); // Will use default error message from notificationMessages
     } finally {
       setLoading(false);
     }
