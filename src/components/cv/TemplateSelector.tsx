@@ -31,6 +31,99 @@ export default function TemplateSelector({ selectedTemplateId, onTemplateSelect,
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
   const router = useRouter();
 
+  // Translation labels
+  const labels = {
+    azerbaijani: {
+      selectTemplate: 'Şablon Seç',
+      chooseTemplate: 'CV-niz üçün uyğun şablonu seçin',
+      locked: 'Kiliddə',
+      selected: 'Seçildi',
+      preview: 'Önizləmə',
+      noTemplatesFound: 'Şablon tapılmadı',
+      close: 'Bağla',
+      selectThisTemplate: 'Bu Şablonu Seç',
+      upgradeSubscription: 'Abunəliyi Yenilə',
+      templateLocked: 'Şablon Kiliddə',
+      upgradeToUse: 'Bu şablonu istifadə etmək üçün abunəliyinizi yeniləyin.',
+      cancel: 'Ləğv et',
+      upgrade: 'Yenilə',
+      previewNotAvailable: 'Önizləmə mövcud deyil',
+      previewImageFailed: 'Önizləmə şəkli yüklənmədi',
+      templateLoadError: 'Şablonlar yüklənərkən xəta baş verdi.',
+      templateFormatError: 'Şablonlar formatı yanlışdır',
+      tiers: {
+        Free: 'Pulsuz',
+        Medium: 'Orta', 
+        Premium: 'Premium'
+      },
+      tierDescriptions: {
+        Free: 'Pulsuz - Əsas şablonlar',
+        Medium: 'Orta - Daha çox xüsusiyyətlər',
+        Premium: 'Premium - Ən yaxşı şablonlar'
+      }
+    },
+    english: {
+      selectTemplate: 'Select Template',
+      chooseTemplate: 'Choose a suitable template for your CV',
+      locked: 'Locked',
+      selected: 'Selected',
+      preview: 'Preview',
+      noTemplatesFound: 'No templates found',
+      close: 'Close',
+      selectThisTemplate: 'Select This Template',
+      upgradeSubscription: 'Upgrade Subscription',
+      templateLocked: 'Template Locked',
+      upgradeToUse: 'Upgrade your subscription to use this template.',
+      cancel: 'Cancel',
+      upgrade: 'Upgrade',
+      previewNotAvailable: 'Preview not available',
+      previewImageFailed: 'Preview image failed to load',
+      templateLoadError: 'Error occurred while loading templates.',
+      templateFormatError: 'Template format is incorrect',
+      tiers: {
+        Free: 'Free',
+        Medium: 'Medium',
+        Premium: 'Premium'
+      },
+      tierDescriptions: {
+        Free: 'Free - Basic templates',
+        Medium: 'Medium - More features',
+        Premium: 'Premium - Best templates'
+      }
+    },
+    russian: {
+      selectTemplate: 'Выбрать шаблон',
+      chooseTemplate: 'Выберите подходящий шаблон для вашего резюме',
+      locked: 'Заблокировано',
+      selected: 'Выбрано',
+      preview: 'Предпросмотр',
+      noTemplatesFound: 'Шаблоны не найдены',
+      close: 'Закрыть',
+      selectThisTemplate: 'Выбрать этот шаблон',
+      upgradeSubscription: 'Обновить подписку',
+      templateLocked: 'Шаблон заблокирован',
+      upgradeToUse: 'Обновите подписку, чтобы использовать этот шаблон.',
+      cancel: 'Отмена',
+      upgrade: 'Обновить',
+      previewNotAvailable: 'Предпросмотр недоступен',
+      previewImageFailed: 'Не удалось загрузить изображение предпросмотра',
+      templateLoadError: 'Произошла ошибка при загрузке шаблонов.',
+      templateFormatError: 'Неправильный формат шаблонов',
+      tiers: {
+        Free: 'Бесплатно',
+        Medium: 'Средний',
+        Premium: 'Премиум'
+      },
+      tierDescriptions: {
+        Free: 'Бесплатно - Базовые шаблоны',
+        Medium: 'Средний - Больше возможностей',
+        Premium: 'Премиум - Лучшие шаблоны'
+      }
+    }
+  };
+
+  const content = labels[siteLanguage] || labels.azerbaijani;
+
   useEffect(() => {
     loadTemplates();
   }, []);
@@ -49,11 +142,11 @@ export default function TemplateSelector({ selectedTemplateId, onTemplateSelect,
         setTemplates(templateList);
       } else {
         console.error('Unexpected templates response format:', result);
-        setError('Şablonlar formatı yanlışdır');
+        setError('Template format error');
       }
     } catch (err) {
       console.error('Template loading error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Şablonlar yüklənərkən xəta baş verdi.';
+      const errorMessage = err instanceof Error ? err.message : 'Template loading error';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -84,11 +177,7 @@ export default function TemplateSelector({ selectedTemplateId, onTemplateSelect,
     Premium: 'bg-purple-100 text-purple-800 border-purple-200'
   };
 
-  const tierLabels = {
-    Free: 'Pulsuz',
-    Medium: 'Orta',
-    Premium: 'Premium'
-  };
+
 
   if (loading) {
     return (
@@ -106,9 +195,11 @@ export default function TemplateSelector({ selectedTemplateId, onTemplateSelect,
   }
 
   if (error) {
+    const errorMessage = error === 'Template format error' ? content.templateFormatError : 
+                         error === 'Template loading error' ? content.templateLoadError : error;
     return (
       <div className="bg-white rounded-lg shadow-sm p-4">
-        <div className="text-red-600 text-sm">{error}</div>
+        <div className="text-red-600 text-sm">{errorMessage}</div>
       </div>
     );
   }
@@ -118,10 +209,10 @@ export default function TemplateSelector({ selectedTemplateId, onTemplateSelect,
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
         <div className="p-4 border-b border-gray-200">
           <h3 className="font-semibold text-gray-900">
-            {siteLanguage === 'english' ? 'Select Template' : 'Şablon Seç'}
+            {content.selectTemplate}
           </h3>
           <p className="text-sm text-gray-600 mt-1">
-            {siteLanguage === 'english' ? 'Choose a suitable template for your CV' : 'CV-niz üçün uyğun şablonu seçin'}
+            {content.chooseTemplate}
           </p>
         </div>
 
@@ -155,16 +246,16 @@ export default function TemplateSelector({ selectedTemplateId, onTemplateSelect,
                   <h4 className="font-medium text-gray-900">{template.name}</h4>
                   <div className="flex items-center gap-2 mt-1">
                     <span className={`px-2 py-1 text-xs rounded border ${tierColors[template.tier]}`}>
-                      {tierLabels[template.tier]}
+                      {content.tiers[template.tier]}
                     </span>
                     {!template.hasAccess && (
                       <span className="text-red-600 text-xs">
-                        🔒 {siteLanguage === 'english' ? 'Locked' : 'Kiliddə'}
+                        🔒 {content.locked}
                       </span>
                     )}
                     {selectedTemplateId === template.id && template.hasAccess && (
                       <span className="text-blue-600 text-sm">
-                        ✓ {siteLanguage === 'english' ? 'Selected' : 'Seçildi'}
+                        ✓ {content.selected}
                       </span>
                     )}
                   </div>
@@ -176,7 +267,7 @@ export default function TemplateSelector({ selectedTemplateId, onTemplateSelect,
                     onClick={(e) => handlePreviewClick(template, e)}
                     className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border transition-colors"
                   >
-                    👁️ {siteLanguage === 'english' ? 'Preview' : 'Önizləmə'}
+                    👁️ {content.preview}
                   </button>
                   
                   {template.preview_url && (
@@ -202,7 +293,7 @@ export default function TemplateSelector({ selectedTemplateId, onTemplateSelect,
 
         {(!Array.isArray(templates) || templates.length === 0) && !loading && (
           <div className="p-4 text-center text-gray-500">
-            <p>{siteLanguage === 'english' ? 'No templates found' : 'Şablon tapılmadı'}</p>
+            <p>{content.noTemplatesFound}</p>
           </div>
         )}
 
@@ -210,15 +301,15 @@ export default function TemplateSelector({ selectedTemplateId, onTemplateSelect,
           <div className="text-xs text-gray-600 space-y-1">
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 bg-green-100 border border-green-200 rounded"></span>
-              <span>{siteLanguage === 'english' ? 'Free - Basic templates' : 'Pulsuz - Əsas şablonlar'}</span>
+              <span>{content.tierDescriptions.Free}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 bg-blue-100 border border-blue-200 rounded"></span>
-              <span>{siteLanguage === 'english' ? 'Medium - More features' : 'Orta - Daha çox xüsusiyyətlər'}</span>
+              <span>{content.tierDescriptions.Medium}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 bg-purple-100 border border-purple-200 rounded"></span>
-              <span>{siteLanguage === 'english' ? 'Premium - Best templates' : 'Premium - Ən yaxşı şablonlar'}</span>
+              <span>{content.tierDescriptions.Premium}</span>
             </div>
           </div>
         </div>
@@ -233,11 +324,11 @@ export default function TemplateSelector({ selectedTemplateId, onTemplateSelect,
                 <h3 className="text-lg font-semibold text-gray-900">{previewTemplate.name}</h3>
                 <div className="flex items-center gap-2 mt-1">
                   <span className={`px-2 py-1 text-xs rounded border ${tierColors[previewTemplate.tier]}`}>
-                    {tierLabels[previewTemplate.tier]}
+                    {content.tiers[previewTemplate.tier]}
                   </span>
                   {!previewTemplate.hasAccess && (
                     <span className="text-red-600 text-xs">
-                      🔒 {siteLanguage === 'english' ? 'Locked' : 'Kiliddə'}
+                      🔒 {content.locked}
                     </span>
                   )}
                 </div>
@@ -266,14 +357,14 @@ export default function TemplateSelector({ selectedTemplateId, onTemplateSelect,
                       target.style.display = 'none';
                       const parent = target.parentElement;
                       if (parent) {
-                        parent.innerHTML = '<div class="text-gray-500 py-20">Önizləmə şəkli yüklənmədi</div>';
+                        parent.innerHTML = `<div class="text-gray-500 py-20">${content.previewImageFailed}</div>`;
                       }
                     }}
                   />
                 </div>
               ) : (
                 <div className="text-center text-gray-500 py-20">
-                  Önizləmə mövcud deyil
+                  {content.previewNotAvailable}
                 </div>
               )}
             </div>
@@ -284,7 +375,7 @@ export default function TemplateSelector({ selectedTemplateId, onTemplateSelect,
                   onClick={() => setShowPreviewModal(false)}
                   className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  Bağla
+                  {content.close}
                 </button>
                 {previewTemplate.hasAccess ? (
                   <button
@@ -294,7 +385,7 @@ export default function TemplateSelector({ selectedTemplateId, onTemplateSelect,
                     }}
                     className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
                   >
-                    Bu Şablonu Seç
+                    {content.selectThisTemplate}
                   </button>
                 ) : (
                   <button
@@ -304,7 +395,7 @@ export default function TemplateSelector({ selectedTemplateId, onTemplateSelect,
                     }}
                     className="px-4 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors"
                   >
-                    🔓 Abunəliyi Yenilə
+                    🔓 {content.upgradeSubscription}
                   </button>
                 )}
               </div>
@@ -318,23 +409,23 @@ export default function TemplateSelector({ selectedTemplateId, onTemplateSelect,
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-md w-full p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Şablon Kiliddə
+              {content.templateLocked}
             </h3>
             <p className="text-gray-600 mb-6">
-              Bu şablonu istifadə etmək üçün abunəliyinizi yeniləyin.
+              {content.upgradeToUse}
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowUpgradeModal(false)}
                 className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
               >
-                Ləğv et
+                {content.cancel}
               </button>
               <button
                 onClick={handleUpgrade}
                 className="flex-1 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Yenilə
+                {content.upgrade}
               </button>
             </div>
           </div>

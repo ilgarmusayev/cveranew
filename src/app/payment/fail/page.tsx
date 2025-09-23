@@ -4,6 +4,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import StandardHeader from '@/components/ui/StandardHeader';
 import Footer from '@/components/Footer';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
+import { getLoadingMessages } from '@/components/ui/Loading';
 
 function PaymentFailContent() {
   const router = useRouter();
@@ -72,9 +74,21 @@ function PaymentFailContent() {
   );
 }
 
+// Localized loading component for Suspense
+function LoadingFallback() {
+  const { siteLanguage } = useSiteLanguage();
+  const loadingMessages = getLoadingMessages(siteLanguage);
+  
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      {loadingMessages.loading}
+    </div>
+  );
+}
+
 export default function PaymentFailPageWrapper() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<LoadingFallback />}>
       <PaymentFailContent />
     </Suspense>
   );

@@ -327,6 +327,7 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
                     startLabel={content.startDate}
                     endLabel={content.endDate}
                     currentLabel={content.currentlyVolunteering}
+                    siteLanguage={siteLanguage}
                   />
 
                   <div>
@@ -354,13 +355,10 @@ export default function VolunteerExperienceSection({ data, onChange, cvLanguage 
             className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors whitespace-nowrap"
           >
             <span className="hidden sm:inline">
-              {siteLanguage === 'english' 
-                ? '+ Add another volunteer experience' 
-                : '+ Başqa könüllü təcrübə əlavə edin'
-              }
+              {content.addAnother}
             </span>
             <span className="sm:hidden">
-              {siteLanguage === 'english' ? '+ Add' : '+ Əlavə'}
+              {content.addButton}
             </span>
           </button>
         </div>

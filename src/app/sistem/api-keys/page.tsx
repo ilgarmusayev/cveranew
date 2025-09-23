@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useNotification } from '@/components/ui/Toast';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 
 interface ApiKey {
   id: string;
@@ -35,6 +36,24 @@ export default function ApiKeysPage() {
   });
   const { showSuccess, showError, showWarning } = useNotification();
   const router = useRouter();
+  const { siteLanguage } = useSiteLanguage();
+
+  const getApiKeysLabels = () => {
+    const labels = {
+      azerbaijani: {
+        loading: 'Yüklənir...'
+      },
+      english: {
+        loading: 'Loading...'
+      },
+      russian: {
+        loading: 'Загружается...'
+      }
+    };
+    return labels[siteLanguage] || labels.azerbaijani;
+  };
+
+  const apiLabels = getApiKeysLabels();
 
   // Add API Key Form State
   const [newApiKey, setNewApiKey] = useState({
@@ -428,7 +447,7 @@ export default function ApiKeysPage() {
           {loading ? (
             <div className="p-8 text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-2 text-gray-500">Yüklənir...</p>
+              <p className="mt-2 text-gray-500">{apiLabels.loading}</p>
             </div>
           ) : apiKeys.length === 0 ? (
             <div className="p-8 text-center text-gray-500">

@@ -1,6 +1,60 @@
 'use client';
 
 import React from 'react';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
+
+// Localized loading messages
+export const getLoadingMessages = (siteLanguage: string) => {
+  const messages = {
+    azerbaijani: {
+      loading: 'Yüklənir...',
+      cvLoading: 'CV yüklənir...',
+      pleaseWait: 'Zəhmət olmasa gözləyin',
+      redirecting: 'Yönləndirilib...',
+      processing: 'İşlənir...',
+      importing: 'İdxal edilir...',
+      saving: 'Saxlanılır...',
+      updating: 'Yenilənir...',
+      loggingIn: 'Giriş edilir...',
+      autoSaveActive: 'Avtomatik saxlama aktiv',
+      verifying: 'Təsdiqlənir...'
+    },
+    english: {
+      loading: 'Loading...',
+      cvLoading: 'Loading CV...',
+      pleaseWait: 'Please wait',
+      redirecting: 'Redirecting...',
+      processing: 'Processing...',
+      importing: 'Importing...',
+      saving: 'Saving...',
+      updating: 'Updating...',
+      loggingIn: 'Logging in...',
+      autoSaveActive: 'Auto-save active',
+      verifying: 'Verifying...'
+    },
+    russian: {
+      loading: 'Загрузка...',
+      cvLoading: 'Загрузка резюме...',
+      pleaseWait: 'Пожалуйста, подождите',
+      redirecting: 'Перенаправление...',
+      processing: 'Обработка...',
+      importing: 'Импорт...',
+      saving: 'Сохранение...',
+      updating: 'Обновление...',
+      loggingIn: 'Вход в систему...',
+      autoSaveActive: 'Автосохранение активно',
+      verifying: 'Проверка...'
+    }
+  };
+  
+  return messages[siteLanguage as keyof typeof messages] || messages.azerbaijani;
+};
+
+// Custom hook for loading messages
+export const useLoadingMessages = () => {
+  const { siteLanguage } = useSiteLanguage();
+  return getLoadingMessages(siteLanguage);
+};
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
@@ -56,9 +110,13 @@ interface LoadingOverlayProps {
 export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
   isLoading,
   children,
-  message = 'Loading...',
+  message,
   className = ''
 }) => {
+  const { siteLanguage } = useSiteLanguage();
+  const loadingMessages = getLoadingMessages(siteLanguage);
+  const displayMessage = message || loadingMessages.loading;
+  
   if (!isLoading) {
     return <>{children}</>;
   }
@@ -68,7 +126,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
       <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
         <div className="text-center">
           <LoadingSpinner size="lg" />
-          <p className="mt-2 text-gray-600">{message}</p>
+          <p className="mt-2 text-gray-600">{displayMessage}</p>
         </div>
       </div>
       <div className="opacity-50 pointer-events-none">
@@ -83,13 +141,17 @@ interface PageLoadingProps {
 }
 
 export const PageLoading: React.FC<PageLoadingProps> = ({ 
-  message = 'Loading...' 
+  message
 }) => {
+  const { siteLanguage } = useSiteLanguage();
+  const loadingMessages = getLoadingMessages(siteLanguage);
+  const displayMessage = message || loadingMessages.loading;
+  
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="text-center">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p className="mt-4 text-gray-600 text-lg">{message}</p>
+        <p className="mt-4 text-gray-600 text-lg">{displayMessage}</p>
       </div>
     </div>
   );
@@ -97,24 +159,31 @@ export const PageLoading: React.FC<PageLoadingProps> = ({
 
 // OPTIMIZED: Faster loading component with reduced animation
 export const QuickLoading: React.FC<{ message?: string }> = ({
-  message = 'Yüklənir...'
+  message
 }) => {
+  const { siteLanguage } = useSiteLanguage();
+  const loadingMessages = getLoadingMessages(siteLanguage);
+  const displayMessage = message || loadingMessages.loading;
+  
   return (
     <div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="text-center">
         <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-blue-600 border-t-transparent"></div>
-        <p className="mt-2 text-gray-700 text-sm font-medium">{message}</p>
+        <p className="mt-2 text-gray-700 text-sm font-medium">{displayMessage}</p>
       </div>
     </div>
   );
 };
 
 export const CVEditorLoading: React.FC = () => {
+  const { siteLanguage } = useSiteLanguage();
+  const loadingMessages = getLoadingMessages(siteLanguage);
+  
   return (
     <div className="min-h-[600px] bg-gray-50 rounded-lg flex items-center justify-center">
       <div className="text-center">
         <LoadingSpinner size="lg" />
-        <p className="mt-4 text-gray-600">CV yüklənir...</p>
+        <p className="mt-4 text-gray-600">{loadingMessages.cvLoading}</p>
       </div>
     </div>
   );
@@ -201,12 +270,16 @@ export const ButtonLoading: React.FC<ButtonLoadingProps> = ({
 };
 
 export const InlineLoading: React.FC<{ message?: string }> = ({ 
-  message = 'Loading...' 
+  message
 }) => {
+  const { siteLanguage } = useSiteLanguage();
+  const loadingMessages = getLoadingMessages(siteLanguage);
+  const displayMessage = message || loadingMessages.loading;
+  
   return (
     <div className="flex items-center space-x-2 py-2">
       <LoadingSpinner size="sm" />
-      <span className="text-gray-600">{message}</span>
+      <span className="text-gray-600">{displayMessage}</span>
     </div>
   );
 };

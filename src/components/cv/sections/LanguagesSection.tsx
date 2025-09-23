@@ -202,6 +202,11 @@ export default function LanguagesSection({ data, onChange, cvLanguage = 'azerbai
     Conversational: 'Conversational', 
     Professional: 'Professional',
     Native: 'Native'
+  } : siteLanguage === 'russian' ? {
+    Basic: 'Базовый',
+    Conversational: 'Разговорный',
+    Professional: 'Профессиональный',
+    Native: 'Родной'
   } : {
     Basic: 'Əsas',
     Conversational: 'Danışıq',
@@ -279,7 +284,7 @@ export default function LanguagesSection({ data, onChange, cvLanguage = 'azerbai
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                     }`}
-                    title={siteLanguage === 'english' ? 'Move Up' : 'Yuxarı'}
+                    title={siteLanguage === 'english' ? 'Move Up' : siteLanguage === 'russian' ? 'Вверх' : 'Yuxarı'}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -293,7 +298,7 @@ export default function LanguagesSection({ data, onChange, cvLanguage = 'azerbai
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                     }`}
-                    title={siteLanguage === 'english' ? 'Move Down' : 'Aşağı'}
+                    title={siteLanguage === 'english' ? 'Move Down' : siteLanguage === 'russian' ? 'Вниз' : 'Aşağı'}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -307,13 +312,13 @@ export default function LanguagesSection({ data, onChange, cvLanguage = 'azerbai
                     onClick={() => setExpandedId(expandedId === language.id ? null : language.id)}
                     className="text-blue-600 hover:text-blue-800 transition-colors text-sm cursor-pointer"
                   >
-                    {expandedId === language.id ? (siteLanguage === 'english' ? 'Close' : 'Bağlayın') : (siteLanguage === 'english' ? 'Edit' : 'Redaktə edin')}
+                    {expandedId === language.id ? (siteLanguage === 'english' ? 'Close' : siteLanguage === 'russian' ? 'Закрыть' : 'Bağlayın') : (siteLanguage === 'english' ? 'Edit' : siteLanguage === 'russian' ? 'Редактировать' : 'Redaktə edin')}
                   </button>
                   <button
                     onClick={() => removeLanguage(language.id)}
                     className="text-red-600 hover:text-red-800 transition-colors text-sm cursor-pointer"
                   >
-                    {siteLanguage === 'english' ? 'Delete' : 'Silin'}
+                    {siteLanguage === 'english' ? 'Delete' : siteLanguage === 'russian' ? 'Удалить' : 'Silin'}
                   </button>
                 </div>
               </div>
@@ -323,7 +328,7 @@ export default function LanguagesSection({ data, onChange, cvLanguage = 'azerbai
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {siteLanguage === 'english' ? 'Language' : 'Dil'} <span className="text-red-500">*</span>
+                        {siteLanguage === 'english' ? 'Language' : siteLanguage === 'russian' ? 'Язык' : 'Dil'} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -332,6 +337,8 @@ export default function LanguagesSection({ data, onChange, cvLanguage = 'azerbai
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                         placeholder={siteLanguage === 'english' 
                           ? 'English, Spanish, French, etc.' 
+                          : siteLanguage === 'russian' 
+                          ? 'Английский, Испанский, Французский и т.д.'
                           : 'Azərbaycan, İngilis, Rus, və s.'
                         }
                       />
@@ -343,7 +350,7 @@ export default function LanguagesSection({ data, onChange, cvLanguage = 'azerbai
                           <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          <span>{siteLanguage === 'english' ? 'Level' : 'Səviyyə'} <span className="text-red-500">*</span></span>
+                          <span>{siteLanguage === 'english' ? 'Level' : siteLanguage === 'russian' ? 'Уровень' : 'Səviyyə'} <span className="text-red-500">*</span></span>
                         </span>
                       </label>
                       <select
@@ -367,7 +374,7 @@ export default function LanguagesSection({ data, onChange, cvLanguage = 'azerbai
 
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h4 className="font-medium text-gray-900 mb-2">
-                      {siteLanguage === 'english' ? 'Level Description:' : 'Səviyyə izahı:'}
+                      {siteLanguage === 'english' ? 'Level Description:' : siteLanguage === 'russian' ? 'Описание уровня:' : 'Səviyyə izahı:'}
                     </h4>
                     <div className="space-y-1 text-sm text-gray-600">
                       {siteLanguage === 'english' ? (
@@ -376,6 +383,13 @@ export default function LanguagesSection({ data, onChange, cvLanguage = 'azerbai
                           <div><strong>Conversational:</strong> Can hold daily conversations, understands main topics</div>
                           <div><strong>Professional:</strong> Uses fluently in work environment</div>
                           <div><strong>Native:</strong> Perfect knowledge, native or near-native level</div>
+                        </>
+                      ) : siteLanguage === 'russian' ? (
+                        <>
+                          <div><strong>Базовый:</strong> Может составлять простые предложения, знает основную лексику</div>
+                          <div><strong>Разговорный:</strong> Может вести повседневные разговоры, понимает основные темы</div>
+                          <div><strong>Профессиональный:</strong> Свободно использует в рабочей среде</div>
+                          <div><strong>Родной:</strong> Идеальное знание, родной или почти родной уровень</div>
                         </>
                       ) : (
                         <>
@@ -403,7 +417,7 @@ export default function LanguagesSection({ data, onChange, cvLanguage = 'azerbai
             onClick={addLanguage}
             className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
           >
-            {siteLanguage === 'english' ? '+ Add another language' : '+ Başqa dil əlavə edin'}
+            {siteLanguage === 'english' ? '+ Add another language' : siteLanguage === 'russian' ? '+ Добавить другой язык' : '+ Başqa dil əlavə edin'}
           </button>
         </div>
       )}

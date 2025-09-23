@@ -50,7 +50,8 @@ function LoginPageContent() {
       genericError: 'Giriş zamanı xəta baş verdi',
       emailRequired: 'E-poçt tələb olunur',
       passwordRequired: 'Şifrə tələb olunur',
-      invalidEmail: 'Düzgün e-poçt ünvanı daxil edin'
+      invalidEmail: 'Düzgün e-poçt ünvanı daxil edin',
+      redirecting: 'Yönləndirilib...'
     },
     english: {
       title: 'Sign In',
@@ -75,7 +76,8 @@ function LoginPageContent() {
       genericError: 'Error occurred during sign in',
       emailRequired: 'Email is required',
       passwordRequired: 'Password is required',
-      invalidEmail: 'Please enter a valid email address'
+      invalidEmail: 'Please enter a valid email address',
+      redirecting: 'Redirecting...'
     },
     russian: {
       title: 'Вход в систему',
@@ -100,7 +102,8 @@ function LoginPageContent() {
       genericError: 'Ошибка при входе в систему',
       emailRequired: 'Требуется электронная почта',
       passwordRequired: 'Требуется пароль',
-      invalidEmail: 'Введите корректный адрес электронной почты'
+      invalidEmail: 'Введите корректный адрес электронной почты',
+      redirecting: 'Перенаправление...'
     }
   };
 
@@ -197,7 +200,7 @@ function LoginPageContent() {
       <div className="app-background flex items-center justify-center">
         <div className="bg-white rounded-3xl p-8 backdrop-blur-sm border border-white/20">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600 text-center">Yönləndirilib...</p>
+          <p className="mt-4 text-gray-600 text-center">{content.redirecting}</p>
         </div>
       </div>
     );

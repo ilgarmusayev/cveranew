@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import CVEditor from '@/components/cv/CVEditor';
 import { ApiClient } from '@/lib/api';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
+import { getLoadingMessages } from '@/components/ui/Loading';
 
 const apiClient = new ApiClient();
 
@@ -19,6 +21,22 @@ export default function CVData({ cvId, onSave, onCancel, userTier }: CVDataProps
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const router = useRouter();
+    const { siteLanguage } = useSiteLanguage();
+    const loadingMessages = getLoadingMessages(siteLanguage);
+
+    const labels = {
+        azerbaijani: {
+            preparingData: 'Məlumatlar hazırlanır'
+        },
+        english: {
+            preparingData: 'Preparing data'
+        },
+        russian: {
+            preparingData: 'Подготовка данных'
+        }
+    };
+
+    const content = labels[siteLanguage];
 
     useEffect(() => {
         loadCV();
@@ -62,8 +80,8 @@ export default function CVData({ cvId, onSave, onCancel, userTier }: CVDataProps
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                             </svg>
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">CV Yüklənir...</h3>
-                        <p className="text-gray-600">Məlumatlar hazırlanır</p>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">{loadingMessages.cvLoading}</h3>
+                        <p className="text-gray-600">{content.preparingData}</p>
                     </div>
                 </div>
             </div>

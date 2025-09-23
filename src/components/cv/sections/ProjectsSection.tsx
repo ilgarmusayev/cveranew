@@ -94,7 +94,8 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
       description: 'Təsvir',
       noProjects: 'Hələ heç bir layihə əlavə etməmisiniz',
       addFirst: 'İlk layihənizi əlavə edin',
-      addAnother: '+ Başqa layihə əlavə edin'
+      addAnother: '+ Başqa layihə əlavə edin',
+      descriptionPlaceholder: 'Layihənin məqsədini, istifadə olunan texnologiyaları və əldə olunan nəticələri təsvir edin...'
     },
     english: {
       title: 'Projects',
@@ -120,7 +121,8 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
       description: 'Description',
       noProjects: 'No projects added yet',
       addFirst: 'Add your first project',
-      addAnother: '+ Add another project'
+      addAnother: '+ Add another project',
+      descriptionPlaceholder: 'Describe the project\'s purpose, technologies used, and results achieved...'
     },
     russian: {
       title: 'Проекты',
@@ -146,7 +148,8 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
       description: 'Описание',
       noProjects: 'Проекты еще не добавлены',
       addFirst: 'Добавьте ваш первый проект',
-      addAnother: '+ Добавить еще один проект'
+      addAnother: '+ Добавить еще один проект',
+      descriptionPlaceholder: 'Опишите цель проекта, используемые технологии и достигнутые результаты...'
     }
   };
 
@@ -290,7 +293,7 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                     }`}
-                    title={siteLanguage === 'english' ? 'Move Up' : 'Yuxarı'}
+                    title={content.moveUp}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -304,7 +307,7 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                     }`}
-                    title={siteLanguage === 'english' ? 'Move Down' : 'Aşağı'}
+                    title={content.moveDown}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -318,13 +321,13 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
                     onClick={() => setExpandedId(expandedId === project.id ? null : project.id)}
                     className="text-blue-600 hover:text-blue-800 transition-colors text-sm cursor-pointer"
                   >
-                    {expandedId === project.id ? (siteLanguage === 'english' ? 'Close' : 'Bağlayın') : (siteLanguage === 'english' ? 'Edit' : 'Redaktə edin')}
+                    {expandedId === project.id ? content.close : content.edit}
                   </button>
                   <button
                     onClick={() => removeProject(project.id)}
                     className="text-red-600 hover:text-red-800 transition-colors text-sm cursor-pointer"
                   >
-                    {siteLanguage === 'english' ? 'Delete' : 'Silin'}
+                    {content.delete}
                   </button>
                 </div>
               </div>
@@ -334,20 +337,20 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {siteLanguage === 'english' ? 'Project Name' : 'Layihə adı'} <span className="text-red-500">*</span>
+                        {content.projectName} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         value={project.name}
                         onChange={(e) => updateProject(project.id, 'name', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        placeholder={siteLanguage === 'english' ? 'Project Name' : 'Layihənin adı'}
+                        placeholder={content.projectNamePlaceholder}
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {siteLanguage === 'english' ? 'Project URL' : 'Layihə URL-i'} <span className="text-gray-400 text-xs">{siteLanguage === 'english' ? '(optional)' : '(ixtiyari)'}</span>
+                        {content.projectUrl} <span className="text-gray-400 text-xs">{content.optional}</span>
                       </label>
                       <input
                         type="url"
@@ -360,7 +363,7 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {siteLanguage === 'english' ? 'GitHub Repository' : 'GitHub URL-i'} <span className="text-gray-400 text-xs">{siteLanguage === 'english' ? '(optional)' : '(ixtiyari)'}</span>
+                        {content.githubUrl} <span className="text-gray-400 text-xs">{content.optional}</span>
                       </label>
                       <input
                         type="url"
@@ -373,7 +376,7 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {siteLanguage === 'english' ? 'Technologies' : 'Texnologiyalar'} <span className="text-gray-400 text-xs">{siteLanguage === 'english' ? '(comma separated)' : '(vergüllə ayırın)'}</span>
+                        {content.technologies} <span className="text-gray-400 text-xs">{content.technologiesNote}</span>
                       </label>
                       <input
                         type="text"
@@ -396,24 +399,21 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
                       current, 
                       endDate: current ? '' : project.endDate 
                     })}
-                    startLabel={siteLanguage === 'english' ? 'Start Date' : 'Başlama tarixi'}
-                    endLabel={siteLanguage === 'english' ? 'End Date' : 'Bitirmə tarixi'}
-                    currentLabel={siteLanguage === 'english' ? 'Currently ongoing' : 'Davam edir'}
+                    startLabel={content.startDate}
+                    endLabel={content.endDate}
+                    currentLabel={content.currentWorking}
                     siteLanguage={siteLanguage}
                   />
 
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {siteLanguage === 'english' ? 'Description' : 'Təsvir'} <span className="text-red-500">*</span>
+                      {content.description} <span className="text-red-500">*</span>
                     </label>
                     <RichTextEditor
                       value={project.description}
                       onChange={(value) => updateProject(project.id, 'description', value)}
-                      placeholder={siteLanguage === 'english' 
-                        ? 'Describe the project\'s purpose, technologies used, and results achieved...' 
-                        : 'Layihənin məqsədini, istifadə olunan texnologiyaları və əldə olunan nəticələri təsvir edin...'
-                      }
+                      placeholder={content.descriptionPlaceholder}
                       minHeight="120px"
                     />
                   </div>
@@ -430,7 +430,7 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
             onClick={addProject}
             className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
           >
-            {siteLanguage === 'english' ? '+ Add another project' : '+ Başqa layihə əlavə edin'}
+            {content.addAnother}
           </button>
         </div>
       )}

@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api';
 import { User } from '@/lib/auth';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
+import { getLoadingMessages } from '@/components/ui/Loading';
 
 interface ProfileEditorProps {
   user: User;
@@ -11,6 +13,23 @@ interface ProfileEditorProps {
 }
 
 export default function ProfileEditor({ user, onUserUpdate, onClose }: ProfileEditorProps) {
+  const { siteLanguage } = useSiteLanguage();
+  const loadingMessages = getLoadingMessages(siteLanguage);
+  
+  const labels = {
+    azerbaijani: {
+      save: 'Yadda saxla'
+    },
+    english: {
+      save: 'Save'
+    },
+    russian: {
+      save: 'Сохранить'
+    }
+  };
+
+  const content = labels[siteLanguage];
+  
   const [formData, setFormData] = useState({
     name: user.name,
     email: user.email,
@@ -267,7 +286,7 @@ export default function ProfileEditor({ user, onUserUpdate, onClose }: ProfileEd
               disabled={loading}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
             >
-              {loading ? 'Yenilənir...' : 'Yadda saxla'}
+              {loading ? loadingMessages.updating : content.save}
             </button>
           </div>
         </form>

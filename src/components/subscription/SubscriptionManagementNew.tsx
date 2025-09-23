@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useNotification } from '@/components/ui/Toast';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 
 interface Subscription {
   id: string;
@@ -75,6 +76,24 @@ export default function SubscriptionManagement({ user, onUserUpdate }: Subscript
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelConfirmation, setCancelConfirmation] = useState('');
   const { showSuccess, showError, showWarning } = useNotification();
+  const { siteLanguage } = useSiteLanguage();
+
+  const getSubscriptionLabels = () => {
+    const labels = {
+      azerbaijani: {
+        updating: 'Yenilənir...'
+      },
+      english: {
+        updating: 'Updating...'
+      },
+      russian: {
+        updating: 'Обновляется...'
+      }
+    };
+    return labels[siteLanguage] || labels.azerbaijani;
+  };
+
+  const subscriptionLabels = getSubscriptionLabels();
 
   const currentSubscription = user.subscriptions?.find(sub => sub.status === 'active');
   const currentTier = currentSubscription?.tier || 'Free';
@@ -327,7 +346,7 @@ export default function SubscriptionManagement({ user, onUserUpdate }: Subscript
                     'bg-purple-600 text-white hover:bg-purple-700'
                   }`}
                 >
-                  {loading ? 'Yenilənir...' : 
+                  {loading ? subscriptionLabels.updating : 
                    tier === 'Free' ? 'Pulsuz Plana Keç' :
                    currentTier === 'Free' ? 'Yükselt' : 
                    'Planı Dəyiş'}

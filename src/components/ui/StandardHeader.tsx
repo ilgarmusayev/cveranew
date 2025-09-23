@@ -123,6 +123,7 @@ export default function StandardHeader() {
       myCVs: 'CV-lərim',
       linkedinImport: 'LinkedIn İdxal',
       user: 'İstifadəçi',
+      loadingUser: 'Yüklənir...',
       selectLanguage: 'Dil seçin',
       signOutAccount: 'Hesabdan çıxış edin',
       signOut: 'Hesabdan çıxın'
@@ -142,6 +143,7 @@ export default function StandardHeader() {
       myCVs: 'My CVs',
       linkedinImport: 'LinkedIn Import',
       user: 'User',
+      loadingUser: 'Loading...',
       selectLanguage: 'Select Language',
       signOutAccount: 'Sign out of your account',
       signOut: 'Sign out'
@@ -161,6 +163,7 @@ export default function StandardHeader() {
       myCVs: 'Мои резюме',
       linkedinImport: 'Импорт LinkedIn',
       user: 'Пользователь',
+      loadingUser: 'Загружается...',
       selectLanguage: 'Выберите язык',
       signOutAccount: 'Выйти из аккаунта',
       signOut: 'Выйти'
@@ -442,7 +445,12 @@ export default function StandardHeader() {
                 </div>
                 <div className="text-sm xl:text-base">
                   <p className="font-medium text-white">{content.welcome}!</p>
-                  <p className="text-blue-100 -mt-1 text-xs xl:text-sm">{user?.name || user?.email || content.user}</p>
+                  <p className="text-blue-100 -mt-1 text-xs xl:text-sm">
+                    {user?.name === 'Loading...' || user?.name === 'Yüklənir...' || user?.name === 'Загружается...' 
+                      ? content.loadingUser 
+                      : (user?.name || user?.email || content.user)
+                    }
+                  </p>
                 </div>
                 <svg
                   className={`w-3 h-3 xl:w-4 xl:h-4 text-white/70 transition-transform duration-200 ${isProfileMenuOpen ? 'rotate-180' : ''}`}
@@ -466,7 +474,12 @@ export default function StandardHeader() {
                         </span>
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-900 text-sm">{user?.name || content.user}</p>
+                        <p className="font-semibold text-gray-900 text-sm">
+                          {user?.name === 'Loading...' || user?.name === 'Yüklənir...' || user?.name === 'Загружается...' 
+                            ? content.loadingUser 
+                            : (user?.name || content.user)
+                          }
+                        </p>
                         <p className="text-gray-500 text-xs">{user?.email}</p>
                         <div className="flex items-center mt-1">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getTierBadgeColor(userTier)}`}>
@@ -640,7 +653,12 @@ export default function StandardHeader() {
                   </div>
                   <div>
                     <p className="font-medium text-white text-sm">{content.profile}</p>
-                    <p className="text-blue-100 text-xs">{user?.name || user?.email || content.user}</p>
+                    <p className="text-blue-100 text-xs">
+                      {user?.name === 'Loading...' || user?.name === 'Yüklənir...' || user?.name === 'Загружается...' 
+                        ? content.loadingUser 
+                        : (user?.name || user?.email || content.user)
+                      }
+                    </p>
                   </div>
                 </Link>
 

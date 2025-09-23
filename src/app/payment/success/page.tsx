@@ -7,12 +7,16 @@ import { apiClient } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import StandardHeader from '@/components/ui/StandardHeader';
 import Footer from '@/components/Footer';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
+import { getLoadingMessages } from '@/components/ui/Loading';
 
 function PaymentSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { fetchCurrentUser } = useAuth();
   const [loading, setLoading] = useState(true);
+  const { siteLanguage } = useSiteLanguage();
+  const loadingMessages = getLoadingMessages(siteLanguage);
   const [subscriptionCreated, setSubscriptionCreated] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null);
@@ -119,7 +123,7 @@ function PaymentSuccessContent() {
                 </svg>
               </div>
               <h1 className="text-2xl font-bold text-gray-900 mb-4">Abunəlik yaradılır...</h1>
-              <p className="text-gray-600">Zəhmət olmasa gözləyin</p>
+              <p className="text-gray-600">{loadingMessages.pleaseWait}</p>
             </div>
           ) : error ? (
             <div>
@@ -189,9 +193,21 @@ function PaymentSuccessContent() {
   );
 }
 
+// Localized loading component for Suspense
+function LoadingFallback() {
+  const { siteLanguage } = useSiteLanguage();
+  const loadingMessages = getLoadingMessages(siteLanguage);
+  
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      {loadingMessages.loading}
+    </div>
+  );
+}
+
 export default function PaymentSuccessPageWrapper() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<LoadingFallback />}>
       <PaymentSuccessContent />
     </Suspense>
   );

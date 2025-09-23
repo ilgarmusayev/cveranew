@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 // Temporarily disable drag and drop for build
 // import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
@@ -19,6 +20,24 @@ export default function TemplateManagement() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const { siteLanguage } = useSiteLanguage();
+
+  const getTemplateManagementLabels = () => {
+    const labels = {
+      azerbaijani: {
+        saving: 'Saxlanılır...'
+      },
+      english: {
+        saving: 'Saving...'
+      },
+      russian: {
+        saving: 'Сохраняется...'
+      }
+    };
+    return labels[siteLanguage] || labels.azerbaijani;
+  };
+
+  const templateLabels = getTemplateManagementLabels();
 
   // Fetch templates
   const fetchTemplates = async () => {
@@ -129,7 +148,7 @@ export default function TemplateManagement() {
 
       {saving && (
         <div className="mb-4 p-4 bg-blue-50 text-blue-700 border border-blue-200 rounded-md">
-          Saxlanılır...
+          {templateLabels.saving}
         </div>
       )}
 

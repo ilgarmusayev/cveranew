@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import CVPreview from '@/components/cv/CVPreview';
 import { apiClient } from '@/lib/api';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
+import { getLoadingMessages } from '@/components/ui/Loading';
 
 interface CVData {
     personalInfo: any;
@@ -30,6 +32,49 @@ export default function CVExportPage() {
     const params = useParams();
     const router = useRouter();
     const cvId = params.id as string;
+    const { siteLanguage } = useSiteLanguage();
+    const loadingMessages = getLoadingMessages(siteLanguage);
+
+    const labels = {
+        azerbaijani: {
+            cvNotFound: 'CV məlumatları tapılmadı',
+            cvLoadError: 'CV yükləmə xətası baş verdi',
+            cvNotFoundTitle: 'CV Tapılmadı',
+            cvDataNotAvailable: 'CV məlumatları mövcud deyil',
+            backToDashboard: 'Dashboard-a Qayıt',
+            export: 'Export',
+            print: 'Print',
+            pdfExport: 'PDF Export',
+            exporting: 'Export edilir...',
+            pdfExportError: 'PDF export zamanı xəta baş verdi'
+        },
+        english: {
+            cvNotFound: 'CV data not found',
+            cvLoadError: 'CV loading error occurred',
+            cvNotFoundTitle: 'CV Not Found',
+            cvDataNotAvailable: 'CV data not available',
+            backToDashboard: 'Back to Dashboard',
+            export: 'Export',
+            print: 'Print',
+            pdfExport: 'PDF Export',
+            exporting: 'Exporting...',
+            pdfExportError: 'Error occurred during PDF export'
+        },
+        russian: {
+            cvNotFound: 'Данные резюме не найдены',
+            cvLoadError: 'Произошла ошибка загрузки резюме',
+            cvNotFoundTitle: 'Резюме не найдено',
+            cvDataNotAvailable: 'Данные резюме недоступны',
+            backToDashboard: 'Вернуться к панели управления',
+            export: 'Экспорт',
+            print: 'Печать',
+            pdfExport: 'Экспорт PDF',
+            exporting: 'Экспорт...',
+            pdfExportError: 'Ошибка при экспорте PDF'
+        }
+    };
+
+    const content = labels[siteLanguage];
     
     const [cv, setCV] = useState<CV | null>(null);
     const [loading, setLoading] = useState(true);
@@ -61,11 +106,11 @@ export default function CVExportPage() {
                 if (response.status === 200 && response.data) {
                     setCV(response.data);
                 } else {
-                    setError('CV məlumatları tapılmadı');
+                    setError(content.cvNotFound);
                 }
             } catch (err) {
                 console.error('CV yükləmə xətası:', err);
-                setError('CV yükləmə xətası baş verdi');
+                setError(content.cvLoadError);
             } finally {
                 setLoading(false);
             }
@@ -226,7 +271,7 @@ export default function CVExportPage() {
         } catch (err) {
             console.error('PDF export xətası:', err);
             const errorMessage = err instanceof Error ? err.message : 'Naməlum xəta';
-            alert(`PDF export zamanı xəta baş verdi: ${errorMessage}`);
+            alert(`${content.pdfExportError}: ${errorMessage}`);
         } finally {
             setExporting(false);
         }
@@ -243,7 +288,7 @@ export default function CVExportPage() {
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">CV yüklənir...</p>
+                    <p className="mt-4 text-gray-600">{loadingMessages.cvLoading}</p>
                 </div>
             </div>
         );
@@ -254,13 +299,13 @@ export default function CVExportPage() {
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
                 <div className="text-center">
                     <div className="text-6xl mb-4">❌</div>
-                    <h1 className="text-2xl font-bold text-gray-800 mb-2">CV Tapılmadı</h1>
-                    <p className="text-gray-600 mb-6">{error || 'CV məlumatları mövcud deyil'}</p>
+                    <h1 className="text-2xl font-bold text-gray-800 mb-2">{content.cvNotFoundTitle}</h1>
+                    <p className="text-gray-600 mb-6">{error || content.cvDataNotAvailable}</p>
                     <button
                         onClick={() => router.push('/dashboard')}
                         className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                     >
-                        Dashboard-a Qayıt
+                        {content.backToDashboard}
                     </button>
                 </div>
             </div>
@@ -286,7 +331,7 @@ export default function CVExportPage() {
                                 onClick={handlePrint}
                                 className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2"
                             >
-                                🖨️ Print
+                                🖨️ {content.print}
                             </button>
                             
                             <button
@@ -297,11 +342,11 @@ export default function CVExportPage() {
                                 {exporting ? (
                                     <>
                                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                                        Export edilir...
+                                        {content.exporting}
                                     </>
                                 ) : (
                                     <>
-                                        📄 PDF Export
+                                        📄 {content.pdfExport}
                                     </>
                                 )}
                             </button>

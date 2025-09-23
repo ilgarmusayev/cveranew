@@ -8,6 +8,8 @@ import LinkedInAutoImport from '@/components/LinkedInAutoImport';
 import Link from 'next/link';
 import StandardHeader from '@/components/ui/StandardHeader';
 import Footer from '@/components/Footer';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
+import { getLoadingMessages } from '@/components/ui/Loading';
 
 function CreateCVContent() {
   const [selectedMethod, setSelectedMethod] = useState<'linkedin' | 'manual' | null>(null);
@@ -16,6 +18,8 @@ function CreateCVContent() {
   const searchParams = useSearchParams();
   const { user, loading } = useAuth();
   const { showError, showSuccess } = useNotification();
+  const { siteLanguage } = useSiteLanguage();
+  const loadingMessages = getLoadingMessages(siteLanguage);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -45,7 +49,7 @@ function CreateCVContent() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="bg-white rounded-3xl shadow-2xl p-8 backdrop-blur-sm border border-white/20">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600 text-center">Yüklənir...</p>
+          <p className="mt-4 text-gray-600 text-center">{loadingMessages.loading}</p>
         </div>
       </div>
     );

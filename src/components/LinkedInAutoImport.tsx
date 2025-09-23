@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/lib/auth';
 import { trackLinkedInImport, trackCVCreation } from '@/components/GoogleAnalytics';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
+import { getLoadingMessages } from '@/components/ui/Loading';
 
 interface LinkedInAutoImportProps {
   onImportSuccess?: (profileData: any) => void;
@@ -20,6 +22,31 @@ export default function LinkedInAutoImport({
   const { user, loading } = useAuth(); // canAutoImportLinkedIn funksiyasını çıxardıq
   const [importing, setImporting] = useState(false);
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const { siteLanguage } = useSiteLanguage();
+  const loadingMessages = getLoadingMessages(siteLanguage);
+
+  const labels = {
+    azerbaijani: {
+      importLinkedIn: 'LinkedIn profilimi import et',
+      importingLinkedIn: 'LinkedIn məlumatları yüklənir...',
+      importSuccess: '✅ Uğurla import edildi!',
+      importError: '❌ Xəta baş verdi'
+    },
+    english: {
+      importLinkedIn: 'Import my LinkedIn profile',
+      importingLinkedIn: 'Importing LinkedIn data...',
+      importSuccess: '✅ Successfully imported!',
+      importError: '❌ Error occurred'
+    },
+    russian: {
+      importLinkedIn: 'Импортировать мой профиль LinkedIn',
+      importingLinkedIn: 'Импорт данных LinkedIn...',
+      importSuccess: '✅ Успешно импортировано!',
+      importError: '❌ Произошла ошибка'
+    }
+  };
+
+  const content = labels[siteLanguage];
 
   const handleImport = async () => {
     setImporting(true);
@@ -85,12 +112,12 @@ export default function LinkedInAutoImport({
 
   const isDisabled = importing || loading;
   const buttonText = importing
-    ? 'LinkedIn məlumatları yüklənir...'
+    ? content.importingLinkedIn
     : importStatus === 'success'
-      ? '✅ Uğurla import edildi!'
+      ? content.importSuccess
       : importStatus === 'error'
-        ? '❌ Xəta baş verdi'
-        : 'LinkedIn profilimi import et';
+        ? content.importError
+        : content.importLinkedIn;
 
   return (
     <div className={`linkedin-auto-import ${className}`}>

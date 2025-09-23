@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 
 interface ResetPasswordFormProps {
   token: string;
@@ -14,6 +15,27 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const router = useRouter();
+  const { siteLanguage } = useSiteLanguage();
+
+  const getResetPasswordLabels = () => {
+    const labels = {
+      azerbaijani: {
+        resetPassword: 'Parolu yenilə',
+        updating: 'Yenilənir...'
+      },
+      english: {
+        resetPassword: 'Reset Password',
+        updating: 'Updating...'
+      },
+      russian: {
+        resetPassword: 'Сбросить пароль',
+        updating: 'Обновляется...'
+      }
+    };
+    return labels[siteLanguage] || labels.azerbaijani;
+  };
+
+  const resetPasswordLabels = getResetPasswordLabels();
 
   // Form validasiya mesajlarını Azərbaycan dilinə çevirmək
   useEffect(() => {
@@ -181,7 +203,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
               disabled={loading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
             >
-              {loading ? 'Yenilənir...' : 'Parolu yenilə'}
+              {loading ? resetPasswordLabels.updating : resetPasswordLabels.resetPassword}
             </button>
           </div>
         </form>

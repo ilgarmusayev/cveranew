@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useNotification } from '@/components/ui/Toast';
 import { CVData, PersonalInfo, Experience, Education, Skill, Language, Project, Certification, VolunteerExperience } from '@/types/cv';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
+import { getLoadingMessages } from '@/components/ui/Loading';
 
 // Import section components
 import PersonalInfoSection from './sections/PersonalInfoSection';
@@ -175,6 +177,26 @@ const getSections = (language: CVLanguage) => {
 };
 
 export default function NewCVEditor({ cvId, onSave, onCancel, initialData, userTier }: CVEditorProps) {
+    const { siteLanguage } = useSiteLanguage();
+    const loadingMessages = getLoadingMessages(siteLanguage);
+    
+    const labels = {
+        azerbaijani: {
+            saveCV: 'CV Saxla',
+            cancel: 'Ləğv et'
+        },
+        english: {
+            saveCV: 'Save CV',
+            cancel: 'Cancel'
+        },
+        russian: {
+            saveCV: 'Сохранить резюме',
+            cancel: 'Отмена'
+        }
+    };
+
+    const content = labels[siteLanguage];
+    
     // Initialize CV state
     const [cv, setCv] = useState<CVEditorState>(() => {
         if (initialData) {
@@ -437,14 +459,14 @@ export default function NewCVEditor({ cvId, onSave, onCancel, initialData, userT
                                 onClick={onCancel}
                                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                             >
-                                Ləğv et
+                                {content.cancel}
                             </button>
                             <button
                                 onClick={handleSave}
                                 disabled={saving}
                                 className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors"
                             >
-                                {saving ? 'Saxlanılır...' : 'CV Saxla'}
+                                {saving ? loadingMessages.saving : content.saveCV}
                             </button>
                         </div>
                     </div>

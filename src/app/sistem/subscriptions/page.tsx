@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 
 interface User {
   id: string;
@@ -23,6 +24,24 @@ export default function AdminSubscriptionsPage() {
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterTier, setFilterTier] = useState('all');
+  const { siteLanguage } = useSiteLanguage();
+
+  const getAdminLabels = () => {
+    const labels = {
+      azerbaijani: {
+        loadingSubscriptions: 'Abunəliklər yüklənir...'
+      },
+      english: {
+        loadingSubscriptions: 'Loading subscriptions...'
+      },
+      russian: {
+        loadingSubscriptions: 'Загрузка подписок...'
+      }
+    };
+    return labels[siteLanguage] || labels.azerbaijani;
+  };
+
+  const adminLabels = getAdminLabels();
 
   const fetchSubscriptions = async () => {
     try {
@@ -347,7 +366,7 @@ export default function AdminSubscriptionsPage() {
                   <div className="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
                   <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
                 </div>
-                <p className="text-gray-600 font-medium">Abunəliklər yüklənir...</p>
+                <p className="text-gray-600 font-medium">{adminLabels.loadingSubscriptions}</p>
               </div>
             </div>
           ) : filteredSubscriptions.length === 0 ? (

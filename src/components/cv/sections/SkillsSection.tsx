@@ -476,8 +476,8 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
 
       if (!token) {
         showError(
-          siteLanguage === 'english' ? 'Access denied. Please log in again.' : 'Giriş icazəsi yoxdur. Yenidən giriş edin.', 
-          siteLanguage === 'english' ? 'Authentication Error' : 'Autentifikasiya xətası'
+          siteLanguage === 'english' ? 'Access denied. Please log in again.' : siteLanguage === 'russian' ? 'Доступ запрещен. Пожалуйста, войдите снова.' : 'Giriş icazəsi yoxdur. Yenidən giriş edin.', 
+          siteLanguage === 'english' ? 'Authentication Error' : siteLanguage === 'russian' ? 'Ошибка аутентификации' : 'Autentifikasiya xətası'
         );
         return;
       }
@@ -531,8 +531,10 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
         showSuccess(
           siteLanguage === 'english' 
             ? `${userTier === 'Premium' ? 'Executive-level' : 'Professional'} quality generated and ATS optimized.`
+            : siteLanguage === 'russian' 
+            ? `Создано ${userTier === 'Premium' ? 'Исполнительного уровня' : 'Профессионального уровня'} качество и оптимизировано для ATS.`
             : `${userTier === 'Premium' ? 'Executive-level' : 'Peşəkar'} səviyyədə hazırlandı və ATS üçün optimallaşdırıldı.`,
-          siteLanguage === 'english' ? 'AI Skill Description Generated! 🎉' : 'AI Bacarıq Təsviri Yaradıldı! 🎉'
+          siteLanguage === 'english' ? 'AI Skill Description Generated! 🎉' : siteLanguage === 'russian' ? 'Создано AI описание навыка! 🎉' : 'AI Bacarıq Təsviri Yaradıldı! 🎉'
         );
       } else {
         console.log('❌ API returned success=false or no description');
@@ -542,8 +544,8 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
     } catch (error) {
       console.error('💥 AI Skill Description error:', error);
       showError(
-        siteLanguage === 'english' ? 'Error occurred while generating AI skill description. Please try again.' : 'AI bacarıq təsviri yaradarkən xəta baş verdi. Yenidən cəhd edin.', 
-        siteLanguage === 'english' ? 'AI Error' : 'AI Xətası'
+        siteLanguage === 'english' ? 'Error occurred while generating AI skill description. Please try again.' : siteLanguage === 'russian' ? 'Произошла ошибка при создании AI описания навыка. Пожалуйста, попробуйте снова.' : 'AI bacarıq təsviri yaradarkən xəta baş verdi. Yenidən cəhd edin.', 
+        siteLanguage === 'english' ? 'AI Error' : siteLanguage === 'russian' ? 'Ошибка AI' : 'AI Xətası'
       );
     } finally {
       setAiGeneratingSkill(null);
@@ -573,7 +575,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
             {aiSuggesting ? (
               <div className="flex items-center space-x-1">
                 <div className="animate-spin rounded-full h-3 w-3 border-b border-white"></div>
-                <span className="hidden sm:inline">{siteLanguage === 'english' ? 'AI suggesting...' : 'AI təklif edir...'}</span>
+                <span className="hidden sm:inline">{siteLanguage === 'english' ? 'AI suggesting...' : siteLanguage === 'russian' ? 'ИИ предлагает...' : 'AI təklif edir...'}</span>
                 <span className="sm:hidden">AI...</span>
               </div>
             ) : (
@@ -637,7 +639,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-blue-500">⚙️</span>
                         <h4 className="font-medium text-gray-900">
-                          {skill.name || (siteLanguage === 'english' ? 'New technical skill' : 'Yeni texniki bacarıq')}
+                          {skill.name || (siteLanguage === 'english' ? 'New technical skill' : siteLanguage === 'russian' ? 'Новый технический навык' : 'Yeni texniki bacarıq')}
                         </h4>
                       </div>
                     </div>
@@ -654,7 +656,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                               ? 'text-gray-300 cursor-not-allowed'
                               : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                           }`}
-                          title={siteLanguage === 'english' ? 'Move Up' : 'Yuxarı'}
+                          title={siteLanguage === 'english' ? 'Move Up' : siteLanguage === 'russian' ? 'Переместить вверх' : 'Yuxarı'}
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -668,7 +670,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                               ? 'text-gray-300 cursor-not-allowed'
                               : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                           }`}
-                          title={siteLanguage === 'english' ? 'Move Down' : 'Aşağı'}
+                          title={siteLanguage === 'english' ? 'Move Down' : siteLanguage === 'russian' ? 'Переместить вниз' : 'Aşağı'}
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -682,13 +684,13 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                           onClick={() => setExpandedId(expandedId === skill.id ? null : skill.id)}
                           className="text-blue-600 hover:text-blue-800 transition-colors text-sm cursor-pointer"
                         >
-                          {expandedId === skill.id ? (siteLanguage === 'english' ? 'Close' : 'Bağlayın') : (siteLanguage === 'english' ? 'Edit' : 'Redaktə edin')}
+                          {expandedId === skill.id ? (siteLanguage === 'english' ? 'Close' : siteLanguage === 'russian' ? 'Закрыть' : 'Bağlayın') : (siteLanguage === 'english' ? 'Edit' : siteLanguage === 'russian' ? 'Редактировать' : 'Redaktə edin')}
                         </button>
                         <button
                           onClick={() => removeSkill(skill.id)}
                           className="text-red-600 hover:text-red-800 transition-colors text-sm cursor-pointer"
                         >
-                          {siteLanguage === 'english' ? 'Delete' : 'Silin'}
+                          {siteLanguage === 'english' ? 'Delete' : siteLanguage === 'russian' ? 'Удалить' : 'Silin'}
                         </button>
                       </div>
                     </div>
@@ -698,7 +700,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                         <div className="grid grid-cols-1 gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                              {siteLanguage === 'english' ? 'Skill Name' : 'Bacarıq adı'} <span className="text-red-500">*</span>
+                              {siteLanguage === 'english' ? 'Skill Name' : siteLanguage === 'russian' ? 'Название навыка' : 'Bacarıq adı'} <span className="text-red-500">*</span>
                             </label>
                             <input
                               type="text"
@@ -710,7 +712,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                              {siteLanguage === 'english' ? 'Skill Type' : 'Bacarıq növü'}
+                              {siteLanguage === 'english' ? 'Skill Type' : siteLanguage === 'russian' ? 'Тип навыка' : 'Bacarıq növü'}
                             </label>
                             <select
                               value={skill.type || 'hard'}
@@ -718,10 +720,10 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                             >
                               <option value="hard">
-                                {siteLanguage === 'english' ? 'Technical Skill' : 'Texniki Bacarıq'}
+                                {siteLanguage === 'english' ? 'Technical Skill' : siteLanguage === 'russian' ? 'Технический навык' : 'Texniki Bacarıq'}
                               </option>
                               <option value="soft">
-                                {siteLanguage === 'english' ? 'Soft Skill' : 'Şəxsi Bacarıq'}
+                                {siteLanguage === 'english' ? 'Soft Skill' : siteLanguage === 'russian' ? 'Личный навык' : 'Şəxsi Bacarıq'}
                               </option>
                             </select>
                           </div>
@@ -754,7 +756,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-green-500">🤝</span>
                         <h4 className="font-medium text-gray-900">
-                          {skill.name || (siteLanguage === 'english' ? 'New soft skill' : 'Yeni şəxsi bacarıq')}
+                          {skill.name || (siteLanguage === 'english' ? 'New soft skill' : siteLanguage === 'russian' ? 'Новый личный навык' : 'Yeni şəxsi bacarıq')}
                         </h4>
                       </div>
                     </div>
@@ -771,7 +773,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                               ? 'text-gray-300 cursor-not-allowed'
                               : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                           }`}
-                          title={siteLanguage === 'english' ? 'Move Up' : 'Yuxarı'}
+                          title={siteLanguage === 'english' ? 'Move Up' : siteLanguage === 'russian' ? 'Переместить вверх' : 'Yuxarı'}
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -785,7 +787,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                               ? 'text-gray-300 cursor-not-allowed'
                               : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                           }`}
-                          title={siteLanguage === 'english' ? 'Move Down' : 'Aşağı'}
+                          title={siteLanguage === 'english' ? 'Move Down' : siteLanguage === 'russian' ? 'Переместить вниз' : 'Aşağı'}
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -799,13 +801,13 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                           onClick={() => setExpandedId(expandedId === skill.id ? null : skill.id)}
                           className="text-blue-600 hover:text-blue-800 transition-colors text-sm cursor-pointer"
                         >
-                          {expandedId === skill.id ? (siteLanguage === 'english' ? 'Close' : 'Bağlayın') : (siteLanguage === 'english' ? 'Edit' : 'Redaktə edin')}
+                          {expandedId === skill.id ? (siteLanguage === 'english' ? 'Close' : siteLanguage === 'russian' ? 'Закрыть' : 'Bağlayın') : (siteLanguage === 'english' ? 'Edit' : siteLanguage === 'russian' ? 'Редактировать' : 'Redaktə edin')}
                         </button>
                         <button
                           onClick={() => removeSkill(skill.id)}
                           className="text-red-600 hover:text-red-800 transition-colors text-sm cursor-pointer"
                         >
-                          {siteLanguage === 'english' ? 'Delete' : 'Silin'}
+                          {siteLanguage === 'english' ? 'Delete' : siteLanguage === 'russian' ? 'Удалить' : 'Silin'}
                         </button>
                       </div>
                     </div>
@@ -815,7 +817,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                         <div className="grid grid-cols-1 gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                              {siteLanguage === 'english' ? 'Skill Name' : 'Bacarıq adı'} <span className="text-red-500">*</span>
+                              {siteLanguage === 'english' ? 'Skill Name' : siteLanguage === 'russian' ? 'Название навыка' : 'Bacarıq adı'} <span className="text-red-500">*</span>
                             </label>
                             <input
                               type="text"
@@ -827,7 +829,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                              {siteLanguage === 'english' ? 'Skill Type' : 'Bacarıq növü'}
+                              {siteLanguage === 'english' ? 'Skill Type' : siteLanguage === 'russian' ? 'Тип навыка' : 'Bacarıq növü'}
                             </label>
                             <select
                               value={skill.type || 'soft'}
@@ -835,10 +837,10 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                             >
                               <option value="hard">
-                                {siteLanguage === 'english' ? 'Technical Skill' : 'Texniki Bacarıq'}
+                                {siteLanguage === 'english' ? 'Technical Skill' : siteLanguage === 'russian' ? 'Технический навык' : 'Texniki Bacarıq'}
                               </option>
                               <option value="soft">
-                                {siteLanguage === 'english' ? 'Soft Skill' : 'Şəxsi Bacarıq'}
+                                {siteLanguage === 'english' ? 'Soft Skill' : siteLanguage === 'russian' ? 'Личный навык' : 'Şəxsi Bacarıq'}
                               </option>
                             </select>
                           </div>
@@ -857,11 +859,13 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
       {data.length > 0 && (
         <div className="bg-white rounded-lg p-4 border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            {siteLanguage === 'english' ? 'Skills' : 'Bacarıqlar'}
+            {siteLanguage === 'english' ? 'Skills' : siteLanguage === 'russian' ? 'Навыки' : 'Bacarıqlar'}
           </h3>
           <p className="text-sm text-gray-700">
             {siteLanguage === 'english' 
               ? 'Organize your skills into categories (e.g., "Programming", "Design", "Management") and place the most important skills at the top.'
+              : siteLanguage === 'russian' 
+              ? 'Организуйте ваши навыки по категориям (например: "Программирование", "Дизайн", "Менеджмент") и разместите наиболее важные навыки вверху.'
               : 'Bacarıqlarınızı kateqoriyalara ayırın (məsələn: "Proqramlaşdırma", "Dizayn", "İdarəetmə") və ən vacib bacarıqlarınızı yuxarıda yerləşdirin.'
             }
           </p>
@@ -877,16 +881,20 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-900">
-                {siteLanguage === 'english' ? 'AI Professional Skills Analyzer' : 'AI Peşəkar Bacarıqlar Analizçisi'}
+                {siteLanguage === 'english' ? 'AI Professional Skills Analyzer' : siteLanguage === 'russian' ? 'ИИ Анализатор Профессиональных Навыков' : 'AI Peşəkar Bacarıqlar Analizçisi'}
               </h3>
               <p className="text-sm text-gray-600">
                 {canUseAI ?
                   (siteLanguage === 'english' 
                     ? `${userTier} member - Professional skills analysis and recommendations`
+                    : siteLanguage === 'russian'
+                    ? `${userTier} участник - Анализ профессиональных навыков и рекомендации`
                     : `${userTier} üzvü - Peşəkar bacarıqlar analizi və tövsiyələri`
                   ) :
                   (siteLanguage === 'english' 
                     ? 'Available for Premium and Medium members'
+                    : siteLanguage === 'russian'
+                    ? 'Доступно для Premium и Medium участников'
                     : 'Premium və Medium üzvlər üçün mövcuddur'
                   )
                 }
@@ -907,6 +915,8 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
               <strong>
                 {siteLanguage === 'english' 
                   ? 'AI will analyze your profile:' 
+                  : siteLanguage === 'russian'
+                  ? 'ИИ проанализирует ваш профиль:'
                   : 'AI sizin profilinizi analiz edəcək:'
                 }
               </strong>
@@ -915,30 +925,40 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
               <li>
                 {siteLanguage === 'english' 
                   ? 'Your work experience and career development'
+                  : siteLanguage === 'russian'
+                  ? 'Ваш рабочий опыт и карьерное развитие'
                   : 'İş təcrübəniz və karyera inkişafınız'
                 }
               </li>
               <li>
                 {siteLanguage === 'english' 
                   ? 'Educational background and certifications'
+                  : siteLanguage === 'russian'
+                  ? 'Образовательный фон и сертификаты'
                   : 'Təhsil fonu və sertifikatlarınız'
                 }
               </li>
               <li>
                 {siteLanguage === 'english' 
                   ? 'Current skills and expertise areas'
+                  : siteLanguage === 'russian'
+                  ? 'Текущие навыки и области экспертизы'
                   : 'Mövcud bacarıqlar və expertiza sahələri'
                 }
               </li>
               <li>
                 {siteLanguage === 'english' 
                   ? 'Industry trends and market demands'
+                  : siteLanguage === 'russian'
+                  ? 'Индустриальные тренды и рыночные требования'
                   : 'İndustiya trendləri və market tələbləri'
                 }
               </li>
               <li>
                 {siteLanguage === 'english' 
                   ? 'Strategic skills for your career goals'
+                  : siteLanguage === 'russian'
+                  ? 'Стратегические навыки для ваших карьерных целей'
                   : 'Karyera məqsədləriniz üçün strateji skills'
                 }
               </li>
@@ -962,6 +982,8 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                 <span>
                   {siteLanguage === 'english' 
                     ? 'AI analyzing your profile...' 
+                    : siteLanguage === 'russian'
+                    ? 'ИИ анализирует ваш профиль...'
                     : 'AI profilinizi analiz edir...'
                   }
                 </span>
@@ -972,6 +994,8 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                 <span>
                   {siteLanguage === 'english' 
                     ? 'Get Professional Skills Recommendations' 
+                    : siteLanguage === 'russian'
+                    ? 'Получить Рекомендации Профессиональных Навыков'
                     : 'Peşəkar Bacarıqlar Tövsiyələri Al'
                   }
                 </span>
@@ -985,11 +1009,20 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                 <span className="text-purple-600 text-lg">💎</span>
                 <div>
                   <p className="text-sm font-medium text-purple-800 mb-1">
-                    AI Peşəkar Bacarıqlar Analizçisi
+                    {siteLanguage === 'english' 
+                      ? 'AI Professional Skills Analyzer'
+                      : siteLanguage === 'russian'
+                      ? 'ИИ Анализатор Профессиональных Навыков'
+                      : 'AI Peşəkar Bacarıqlar Analizçisi'
+                    }
                   </p>
                   <p className="text-xs text-purple-700">
-                    CV məlumatlarınızı dərin analiz edərək karyeranız üçün ən münasib
-                    professional skills tövsiyələri verir. Premium və Medium planlar üçün mövcuddur.
+                    {siteLanguage === 'english' 
+                      ? 'Provides deep analysis of your CV data to recommend the most suitable professional skills for your career. Available for Premium and Medium plans.'
+                      : siteLanguage === 'russian'
+                      ? 'Проводит глубокий анализ данных вашего резюме для рекомендации наиболее подходящих профессиональных навыков для вашей карьеры. Доступно для Premium и Medium планов.'
+                      : 'CV məlumatlarınızı dərin analiz edərək karyeranız üçün ən münasib professional skills tövsiyələri verir. Premium və Medium planlar üçün mövcuddur.'
+                    }
                   </p>
                 </div>
               </div>
@@ -1196,7 +1229,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                 onClick={addSkill}
                 className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
             >
-              + Başqa bacarıq əlavə edin
+              {siteLanguage === 'english' ? '+ Add another skill' : siteLanguage === 'russian' ? '+ Добавить еще один навык' : '+ Başqa bacarıq əlavə edin'}
             </button>
           </div>
       )}

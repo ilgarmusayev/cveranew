@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
+import { getLoadingMessages } from '@/components/ui/Loading';
 
 function VerifyEmailContent() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'already_verified'>('loading');
@@ -13,6 +15,22 @@ function VerifyEmailContent() {
   const [userInfo, setUserInfo] = useState<{ name?: string; email?: string } | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { siteLanguage } = useSiteLanguage();
+  const loadingMessages = getLoadingMessages(siteLanguage);
+
+  const labels = {
+    azerbaijani: {
+      verifyingEmail: 'E-poçt Təsdiqlənir...'
+    },
+    english: {
+      verifyingEmail: 'Verifying Email...'
+    },
+    russian: {
+      verifyingEmail: 'Проверка электронной почты...'
+    }
+  };
+
+  const content = labels[siteLanguage];
 
   useEffect(() => {
     const token = searchParams.get('token');
@@ -65,8 +83,8 @@ function VerifyEmailContent() {
         return (
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-6"></div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">E-poçt Təsdiqlənir...</h2>
-            <p className="text-gray-600">Zəhmət olmasa gözləyin...</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">{content.verifyingEmail}</h2>
+            <p className="text-gray-600">{loadingMessages.pleaseWait}</p>
           </div>
         );
 

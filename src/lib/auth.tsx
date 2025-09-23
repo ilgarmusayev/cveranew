@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import { performanceTracker, getConnectionSpeed } from './performance';
 import { apiClient } from './api';
 import { useNotification } from '@/components/ui/Toast';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 
 export interface User {
   id: string;
@@ -51,6 +52,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false);
   const [linkedInLogoutModal, setLinkedInLogoutModal] = useState(false);
   const { showSuccess, showInfo, showWarning } = useNotification();
+  const { siteLanguage } = useSiteLanguage();
+
+  const getAuthLabels = () => {
+    const labels = {
+      azerbaijani: {
+        loading: 'yüklənir...',
+        name: 'Yüklənir...'
+      },
+      english: {
+        loading: 'loading...',
+        name: 'Loading...'
+      },
+      russian: {
+        loading: 'загружается...',
+        name: 'Загружается...'
+      }
+    };
+    return labels[siteLanguage] || labels.azerbaijani;
+  };
+
+  const authLabels = getAuthLabels();
 
   const isValidToken = (token: string) => {
     try {
@@ -111,8 +133,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Set a minimal user object to prevent redirect loop
           const tempUser = {
             id: decoded.userId,
-            email: decoded.email || 'loading...',
-            name: 'Loading...',
+            email: decoded.email || authLabels.loading,
+            name: authLabels.name,
             subscriptions: []
           };
           console.log('🔄 Setting temporary user from token:', tempUser.id);
