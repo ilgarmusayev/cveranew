@@ -67,7 +67,31 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
       accessDenied: 'Giriş icazəsi yoxdur. Yenidən giriş edin.',
       aiError: 'AI tövsiyələri alınarkən xəta baş verdi',
       upgradeRequired: 'AI xüsusiyyətlərindən istifadə etmək üçün abunəliyi yükseldin',
-      noSuggestions: 'Heç bir tövsiyə tapılmadı'
+      noSuggestions: 'Heç bir tövsiyə tapılmadı',
+      hardSkillPlaceholder: 'JavaScript, Python, Photoshop, AutoCAD, və s.',
+      softSkillPlaceholder: 'Liderlik, Komanda işi, Komunikasiya, və s.',
+      upgradeForAI: 'AI xüsusiyyətlərindən istifadə etmək üçün abunəliyi yükseldin',
+      noDefaultReason: 'Tövsiyə olunmuş bacarıq',
+      aiSuggestionsSuccess: 'AI tövsiyələri uğurla alındı',
+      skillExists: 'Bu bacarıq artıq mövcuddur!',
+      descriptionGenerated: 'AI təsviri uğurla yaradıldı!',
+      cvIdRequiredDesc: 'AI təsvir yaratmaq üçün CV ID lazımdır',
+      missingInfo: 'Məlumat çatışmır',
+      authError: 'Autentifikasiya xətası',
+      addExperienceFirst: 'AI tövsiyələri üçün əvvəlcə təcrübə və ya təhsil məlumatlarını doldurun',
+      recommendedBasedOnCV: 'CV profilinizə əsasən tövsiyə edilən',
+      aiSuggestionsGenerated: 'AI bacarıq təklifi hazırlandı! Seçib əlavə edin.',
+      skillAddedToCV: 'bacarığı CV-nizə əlavə edildi! 🎉',
+      skillNameRequired: 'AI təsvir yaratmaq üçün bacarıq adı lazımdır',
+      aiAccessDenied: 'Giriş icazəsi yoxdur. Yenidən giriş edin.',
+      aiAuthError: 'Autentifikasiya xətası',
+      aiDescriptionSuccessProfessional: 'Peşəkar səviyyədə hazırlandı və ATS üçün optimallaşdırıldı.',
+      aiDescriptionSuccessExecutive: 'Executive-level səviyyədə hazırlandı və ATS üçün optimallaşdırıldı.',
+      aiSkillDescGenerated: 'AI Bacarıq Təsviri Yaradıldı! 🎉',
+      aiGenerationError: 'AI bacarıq təsviri yaradarkən xəta baş verdi. Yenidən cəhd edin.',
+      aiErrorTitle: 'AI Xətası',
+      allSuggestedSkillsExist: 'Bütün təklif edilən bacarıqlar artıq mövcuddur.',
+      aiNotSuggestingSkills: 'AI hazırda əlavə bacarıq təklif etmir.'
     },
     english: {
       title: 'Skills',
@@ -97,8 +121,33 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
       accessDenied: 'Access denied. Please log in again.',
       aiError: 'Error occurred while getting AI suggestions',
       upgradeRequired: 'Upgrade subscription to use AI features',
-      noSuggestions: 'No suggestions found'
+      noSuggestions: 'No suggestions found',
+      hardSkillPlaceholder: 'JavaScript, Python, Photoshop, AutoCAD, etc.',
+      softSkillPlaceholder: 'Leadership, Teamwork, Communication, etc.',
+      upgradeForAI: 'Upgrade subscription to use AI features',
+      noDefaultReason: 'Recommended skill',
+      aiSuggestionsSuccess: 'AI suggestions retrieved successfully',
+      skillExists: 'This skill already exists!',
+      descriptionGenerated: 'AI description generated successfully!',
+      cvIdRequiredDesc: 'CV ID is required to generate AI description',
+      missingInfo: 'Missing Information',
+      authError: 'Authentication Error',
+      addExperienceFirst: 'Please first add work experience or education information for AI suggestions',
+      recommendedBasedOnCV: 'Recommended based on your CV profile',
+      aiSuggestionsGenerated: 'AI skill suggestions generated! Select and add them.',
+      skillAddedToCV: 'skill added to your CV! 🎉',
+      skillNameRequired: 'Skill name is required to generate AI description',
+      aiAccessDenied: 'Access denied. Please login again.',
+      aiAuthError: 'Authentication error',
+      aiDescriptionSuccessProfessional: 'Created professional-quality and optimized for ATS.',
+      aiDescriptionSuccessExecutive: 'Created executive-level quality and optimized for ATS.',
+      aiSkillDescGenerated: 'AI Skill Description Generated! 🎉',
+      aiGenerationError: 'An error occurred while generating AI skill description. Please try again.',
+      aiErrorTitle: 'AI Error',
+      allSuggestedSkillsExist: 'All suggested skills already exist in your CV.',
+      aiNotSuggestingSkills: 'AI is not suggesting new skills. All suggested skills are already in your CV.'
     },
+    
     russian: {
       title: 'Навыки',
       add: '+ Добавить',
@@ -127,7 +176,31 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
       accessDenied: 'Доступ запрещен. Войдите снова.',
       aiError: 'Ошибка при получении ИИ рекомендаций',
       upgradeRequired: 'Обновите подписку для использования ИИ функций',
-      noSuggestions: 'Рекомендации не найдены'
+      noSuggestions: 'Рекомендации не найдены',
+      hardSkillPlaceholder: 'JavaScript, Python, Photoshop, AutoCAD и т.д.',
+      softSkillPlaceholder: 'Лидерство, Командная работа, Коммуникация и т.д.',
+      upgradeForAI: 'Обновите подписку для использования ИИ функций',
+      noDefaultReason: 'Рекомендуемый навык',
+      aiSuggestionsSuccess: 'ИИ рекомендации успешно получены',
+      skillExists: 'Этот навык уже существует!',
+      descriptionGenerated: 'ИИ описание успешно создано!',
+      cvIdRequiredDesc: 'Для создания ИИ описания требуется ID резюме',
+      missingInfo: 'Недостающая информация',
+      authError: 'Ошибка аутентификации',
+      addExperienceFirst: 'Пожалуйста, сначала добавьте опыт работы или образование для ИИ рекомендаций',
+      recommendedBasedOnCV: 'Рекомендовано на основе вашего профиля резюме',
+      aiSuggestionsGenerated: 'ИИ рекомендации навыков созданы! Выберите и добавьте их.',
+      skillAddedToCV: 'навык добавлен в ваше резюме! 🎉',
+      skillNameRequired: 'Для создания ИИ описания требуется название навыка',
+      aiAccessDenied: 'Доступ запрещен. Пожалуйста, войдите снова.',
+      aiAuthError: 'Ошибка аутентификации',
+      aiDescriptionSuccessProfessional: 'Создано профессиональное качество и оптимизировано для ATS.',
+      aiDescriptionSuccessExecutive: 'Создано качество уровня руководителя и оптимизировано для ATS.',
+      aiSkillDescGenerated: 'Создано AI описание навыка! 🎉',
+      aiGenerationError: 'Произошла ошибка при создании AI описания навыка. Пожалуйста, попробуйте снова.',
+      aiErrorTitle: 'Ошибка AI',
+      allSuggestedSkillsExist: 'Все предложенные навыки уже существуют в вашем резюме.',
+      aiNotSuggestingSkills: 'ИИ не предлагает новые навыки. Все предложенные навыки уже в вашем резюме.'
     }
   };
 
@@ -196,10 +269,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
     const hasPersonalInfo = cvData?.personalInfo && cvData.personalInfo.fullName;
 
     if (!hasPersonalInfo || (!hasExperience && !hasEducation)) {
-      showWarning(siteLanguage === 'english' 
-        ? 'Please first add work experience or education information for AI suggestions' 
-        : 'AI tövsiyələri üçün əvvəlcə təcrübə və ya təhsil məlumatlarını doldurun'
-      );
+      showWarning(content.addExperienceFirst);
       return;
     }
 
@@ -261,10 +331,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
             .filter((skill: any) => !existingSkillNames.includes(skill.name.toLowerCase()))
             .map((skill: any) => ({
               name: skill.name,
-              reason: skill.reason || skill.cvConnection || (siteLanguage === 'english' 
-                ? 'Recommended based on your CV profile'
-                : 'CV profilinizə əsasən tövsiyə edilən'
-              ),
+              reason: skill.reason || skill.cvConnection || content.recommendedBasedOnCV,
               category: skill.category || 'Hard', // Use AI's actual category instead of hardcoding
               relevanceScore: skill.relevanceScore || 8,
               marketDemand: 'High',
@@ -277,10 +344,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
           if (newSuggestions.length > 0) {
             setSuggestions(newSuggestions);
             setShowSuggestions(true);
-            showSuccess(siteLanguage === 'english' 
-              ? `${newSuggestions.length} AI skill suggestions generated! Select and add them.`
-              : `${newSuggestions.length} AI bacarıq təklifi hazırlandı! Seçib əlavə edin.`
-            );
+            showSuccess(`${newSuggestions.length} ${content.aiSuggestionsGenerated}`);
           } else {
             showInfo('Bütün təklif edilən bacarıqlar artıq mövcuddur.');
           }
@@ -313,7 +377,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
     );
 
     if (existingSkill) {
-      showWarning(siteLanguage === 'english' ? 'This skill already exists!' : 'Bu bacarıq artıq mövcuddur!');
+      showWarning(content.skillExists);
       return;
     }
 
@@ -383,10 +447,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
     setSuggestions(prev => prev.filter(s => s.name !== suggestion.name));
 
     // Show success message
-    showSuccess(siteLanguage === 'english' 
-      ? `"${suggestion.name}" skill added to your CV! 🎉`
-      : `"${suggestion.name}" bacarığı CV-nizə əlavə edildi! 🎉`
-    );
+    showSuccess(`"${suggestion.name}" ${content.skillAddedToCV}`);
   };
 
   const generateAIDescription = async (skillId: string, skillName: string, skillType?: string) => {
@@ -397,18 +458,12 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
     }
 
     if (!cvId) {
-      showError(
-        siteLanguage === 'english' ? 'CV ID is required to generate AI description' : 'AI təsvir yaratmaq üçün CV ID lazımdır', 
-        siteLanguage === 'english' ? 'Missing Information' : 'Məlumat çatışmır'
-      );
+      showError(content.cvIdRequiredDesc, content.missingInfo);
       return;
     }
 
     if (!skillName.trim()) {
-      showWarning(siteLanguage === 'english' 
-        ? 'Skill name is required to generate AI description' 
-        : 'AI təsvir yaratmaq üçün bacarıq adı lazımdır'
-      );
+      showWarning(content.skillNameRequired);
       return;
     }
 
@@ -453,8 +508,8 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
       if (!response.ok) {
         if (response.status === 401) {
           showError(
-            siteLanguage === 'english' ? 'Access denied. Please log in again.' : 'Giriş icazəsi yoxdur. Yenidən giriş edin.', 
-            siteLanguage === 'english' ? 'Authentication Error' : 'Autentifikasiya xətası'
+            content.aiAccessDenied, 
+            content.aiAuthError
           );
         } else if (response.status === 403) {
           setShowUpgradeModal(true);
@@ -650,10 +705,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                               value={skill.name}
                               onChange={(e) => updateSkill(skill.id, 'name', e.target.value)}
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                              placeholder={siteLanguage === 'english' 
-                                ? 'JavaScript, Python, Photoshop, AutoCAD, etc.' 
-                                : 'JavaScript, Python, Photoshop, AutoCAD, və s.'
-                              }
+                              placeholder={content.hardSkillPlaceholder}
                             />
                           </div>
                           <div>
@@ -770,10 +822,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                               value={skill.name}
                               onChange={(e) => updateSkill(skill.id, 'name', e.target.value)}
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                              placeholder={siteLanguage === 'english' 
-                                ? 'Leadership, Teamwork, Communication, etc.' 
-                                : 'Liderlik, Komanda işi, Komunikasiya, və s.'
-                              }
+                              placeholder={content.softSkillPlaceholder}
                             />
                           </div>
                           <div>
