@@ -1,0 +1,20 @@
+Nihad Vəliyev
+Software Developer
+
+Əlaqə məlumatları:
+Email: nihad@example.com  
+Telefon: +994501234567
+
+İş təcrübəsi:
+2020-2024 - Frontend Developer
+JavaScript, React, Node.js ilə işləmişəm
+Layihələrdə komanda işi və liderlik keyfiyyətlərim var
+
+Təhsil:
+2016-2020 - Bakı Dövlət Universiteti
+Komputer elmləri ixtisası, bakalavr dərəcəsi
+
+Bacarıqlar:
+- Texniki: JavaScript, Python, HTML, CSS, React
+- Şəxsi: Liderlik, komanda işi, kommunikasiya, məsuliyyətlilik
+- Analitik düşüncə və problem həlli bacarığım var
