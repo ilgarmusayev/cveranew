@@ -4,38 +4,47 @@ import jwt from 'jsonwebtoken';
 
 
 async function verifyAdmin(request: NextRequest) {
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    throw new Error('Token tapılmadı');
+  }
+
+  const token = authHeader.substring(7);
+  
+  // Try both JWT secrets
+  let decoded: any;
   try {
-    const authHeader = request.headers.get('authorization');
+    const JWT_ADMIN_SECRET = process.env.JWT_ADMIN_SECRET || process.env.JWT_SECRET;
+    decoded = jwt.verify(token, JWT_ADMIN_SECRET!) as any;
+  } catch {
+    decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+  }
+  
+  // Check if it's an admin token
+  if (decoded.adminId && decoded.isAdmin) {
+    // This is an admin token, verify admin exists
+    const admin = await prisma.admin.findUnique({
+      where: { id: decoded.adminId }
+    });
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new Error('Token tapılmadı');
+    if (!admin || !admin.active) {
+      throw new Error('Admin icazəniz yoxdur');
     }
 
-    const token = authHeader.substring(7);
-    const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_key';
-    const JWT_ADMIN_SECRET = process.env.JWT_ADMIN_SECRET || process.env.JWT_SECRET || 'fallback_secret_key';
+    return admin;
+  } else if (decoded.userId) {
+    // This is a regular user token, check if user is admin
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId }
+    });
 
-    let decoded;
-    try {
-      // Try admin secret first, then regular secret
-      decoded = jwt.verify(token, JWT_ADMIN_SECRET) as any;
-    } catch {
-      decoded = jwt.verify(token, JWT_SECRET) as any;
+    if (!user || user.role !== 'ADMIN') {
+      throw new Error('Admin icazəniz yoxdur');
     }
 
-    // Check if user is admin
-    if (decoded.role === 'admin' ||
-        decoded.role === 'ADMIN' ||
-        decoded.role === 'SUPER_ADMIN' ||
-        decoded.isAdmin ||
-        decoded.adminId) {
-      return decoded;
-    }
-
-    throw new Error('Admin icazəniz yoxdur');
-  } catch (error) {
-    console.error('Admin verification failed:', error);
-    throw error;
+    return user;
+  } else {
+    throw new Error('Token səhvdir');
   }
 }
 

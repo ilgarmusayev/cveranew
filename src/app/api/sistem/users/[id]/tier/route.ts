@@ -10,17 +10,42 @@ async function verifyAdmin(request: NextRequest) {
   }
 
   const token = authHeader.substring(7);
-  const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
   
-  const user = await prisma.user.findUnique({
-    where: { id: decoded.userId }
-  });
-
-  if (!user || user.role !== 'ADMIN') {
-    throw new Error('Admin icazəniz yoxdur');
+  // Try both JWT secrets
+  let decoded: any;
+  try {
+    const JWT_ADMIN_SECRET = process.env.JWT_ADMIN_SECRET || process.env.JWT_SECRET;
+    decoded = jwt.verify(token, JWT_ADMIN_SECRET!) as any;
+  } catch {
+    decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
   }
+  
+  // Check if it's an admin token
+  if (decoded.adminId && decoded.isAdmin) {
+    // This is an admin token, verify admin exists
+    const admin = await prisma.admin.findUnique({
+      where: { id: decoded.adminId }
+    });
 
-  return user;
+    if (!admin || !admin.active) {
+      throw new Error('Admin icazəniz yoxdur');
+    }
+
+    return admin;
+  } else if (decoded.userId) {
+    // This is a regular user token, check if user is admin
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId }
+    });
+
+    if (!user || user.role !== 'ADMIN') {
+      throw new Error('Admin icazəniz yoxdur');
+    }
+
+    return user;
+  } else {
+    throw new Error('Token səhvdir');
+  }
 }
 
 export async function PUT(
@@ -35,7 +60,7 @@ export async function PUT(
     const userId = id;
 
     // Validate tier
-    if (!['Free', 'Medium', 'Premium'].includes(tier)) {
+    if (!['Free', 'Medium', 'Premium', 'Pro', 'Populyar'].includes(tier)) {
       return NextResponse.json({
         success: false,
         message: 'Yanlış plan səviyyəsi'

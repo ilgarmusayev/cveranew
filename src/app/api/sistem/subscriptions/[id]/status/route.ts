@@ -4,29 +4,48 @@ import jwt from 'jsonwebtoken';
 
 
 async function verifyAdmin(request: NextRequest) {
-  // In development, allow bypassing auth for testing
-  if (process.env.NODE_ENV === 'development' && !request.headers.get('authorization')) {
-    console.log('Development mode: bypassing admin auth for testing');
-    return { id: 'test-admin', email: 'admin@test.com', role: 'ADMIN' };
-  }
-
   const authHeader = request.headers.get('authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     throw new Error('Token tapılmadı');
   }
 
   const token = authHeader.substring(7);
-  const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
   
-  const user = await prisma.user.findUnique({
-    where: { id: decoded.userId }
-  });
-
-  if (!user || (user.role !== 'ADMIN' && user.role !== 'superadmin')) {
-    throw new Error('Admin icazəniz yoxdur');
+  // Try both JWT secrets
+  let decoded: any;
+  try {
+    const JWT_ADMIN_SECRET = process.env.JWT_ADMIN_SECRET || process.env.JWT_SECRET;
+    decoded = jwt.verify(token, JWT_ADMIN_SECRET!) as any;
+  } catch {
+    decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
   }
+  
+  // Check if it's an admin token
+  if (decoded.adminId && decoded.isAdmin) {
+    // This is an admin token, verify admin exists
+    const admin = await prisma.admin.findUnique({
+      where: { id: decoded.adminId }
+    });
 
-  return user;
+    if (!admin || !admin.active) {
+      throw new Error('Admin icazəniz yoxdur');
+    }
+
+    return admin;
+  } else if (decoded.userId) {
+    // This is a regular user token, check if user is admin
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId }
+    });
+
+    if (!user || user.role !== 'ADMIN') {
+      throw new Error('Admin icazəniz yoxdur');
+    }
+
+    return user;
+  } else {
+    throw new Error('Token səhvdir');
+  }
 }
 
 export async function PUT(
