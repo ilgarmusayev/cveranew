@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// PDF parsing
-import pdf from 'pdf-parse';
 // DOCX parsing  
 import mammoth from 'mammoth';
 
@@ -313,6 +311,8 @@ export async function POST(request: NextRequest) {
     // Extract text based on file type
     if (file.type === 'application/pdf') {
       try {
+        // Dynamic import to avoid build issues
+        const pdf = (await import('pdf-parse')).default;
         const pdfData = await pdf(buffer);
         extractedText = pdfData.text;
       } catch (error) {

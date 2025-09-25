@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Import PDF parsing library
-const pdf = require('pdf-parse');
-
 // ATS uygunluk kriterləri - daha realistik
 const ATS_CRITERIA = {
   // Format kriteriləri
@@ -258,7 +255,8 @@ async function extractTextFromFile(file: File): Promise<string> {
         
         console.log('PDF buffer ölçüsü:', buffer.length);
         
-        // pdf-parse paketini istifadə et
+        // pdf-parse paketini istifadə et - dynamic import
+        const pdf = (await import('pdf-parse')).default;
         const data = await pdf(buffer);
         const extractedText = data.text;
         
