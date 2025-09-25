@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
@@ -18,7 +19,8 @@ interface Template {
   description_en?: string;
 }
 
-export default function NewCVPage() {
+// NewCV component that uses searchParams
+function NewCVContent() {
   const { user } = useAuth();
   const { siteLanguage } = useSiteLanguage();
   const router = useRouter();
@@ -693,5 +695,51 @@ export default function NewCVPage() {
       </div>
       <Footer />
     </>
+  );
+}
+
+// Loading component for Suspense fallback
+function NewCVPageLoading() {
+  return (
+    <>
+      <StandardHeader />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-12">
+            <div className="text-center mb-12">
+              <div className="w-20 h-20 bg-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-6 animate-pulse">
+                <div className="w-10 h-10 bg-gray-300 rounded"></div>
+              </div>
+              <div className="h-8 bg-gray-200 rounded mb-4 animate-pulse"></div>
+              <div className="h-6 bg-gray-200 rounded max-w-2xl mx-auto animate-pulse"></div>
+            </div>
+            <div className="max-w-2xl mx-auto space-y-6">
+              <div className="h-12 bg-gray-200 rounded-xl animate-pulse"></div>
+              <div className="h-12 bg-gray-200 rounded-xl animate-pulse"></div>
+              <div className="bg-gray-50 rounded-2xl p-6">
+                <div className="h-6 bg-gray-200 rounded mb-4 animate-pulse"></div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="h-10 bg-gray-200 rounded-lg animate-pulse"></div>
+                  <div className="h-10 bg-gray-200 rounded-lg animate-pulse"></div>
+                  <div className="h-10 bg-gray-200 rounded-lg animate-pulse"></div>
+                  <div className="h-10 bg-gray-200 rounded-lg animate-pulse"></div>
+                </div>
+                <div className="mt-4 h-20 bg-gray-200 rounded-lg animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+      <Footer />
+    </>
+  );
+}
+
+// Main export component with Suspense boundary
+export default function NewCVPage() {
+  return (
+    <Suspense fallback={<NewCVPageLoading />}>
+      <NewCVContent />
+    </Suspense>
   );
 }
