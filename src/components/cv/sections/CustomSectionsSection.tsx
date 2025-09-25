@@ -225,7 +225,7 @@ function CustomSectionsSection({ data, onChange, userTier = 'Free', cvLanguage =
           </p>
           <button
             onClick={addSection}
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors break-words leading-tight max-w-48 mx-auto block"
           >
             {content.addFirstSection}
           </button>

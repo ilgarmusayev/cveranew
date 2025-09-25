@@ -31,10 +31,10 @@ export async function GET(req: NextRequest) {
     const siteLanguage = req.headers.get('x-site-language') || 'english';
     console.log('API Templates - Site Language:', siteLanguage);
 
-    // Get all templates with both descriptions using raw query
+    // Get all templates with all language descriptions using raw query
     const templates = await prisma.$queryRaw`
       SELECT 
-        id, name, tier, "previewUrl", description, description_en, "createdAt", "updatedAt"
+        id, name, tier, "previewUrl", description, description_en, description_ru, "createdAt", "updatedAt"
       FROM "Template" 
       ORDER BY "createdAt" DESC
     ` as Array<{
@@ -44,6 +44,7 @@ export async function GET(req: NextRequest) {
       previewUrl: string;
       description: string | null;
       description_en: string | null;
+      description_ru: string | null;
       createdAt: Date;
       updatedAt: Date;
     }>;
@@ -58,15 +59,18 @@ export async function GET(req: NextRequest) {
 
     // Add access information to each template and select appropriate description
     const templatesWithAccess = templates.map(template => {
-      // Site language-ə görə description seçək
+      // Site language-ə görə description seçək (3 dil dəstəyi)
       let finalDescription: string;
       
       if (siteLanguage === 'azerbaijani') {
-        // Azərbaycan dili üçün description (əsas) və ya description_en (fallback)
-        finalDescription = template.description || template.description_en || 'Professional CV şablonu';
+        // Azərbaycan dili üçün description (əsas) və ya fallback
+        finalDescription = template.description || template.description_en || template.description_ru || 'Professional CV şablonu';
+      } else if (siteLanguage === 'russian') {
+        // Rus dili üçün description_ru (əsas) və ya fallback
+        finalDescription = template.description_ru || template.description_en || template.description || 'Профессиональный CV шаблон';
       } else {
-        // İngilis dili üçün description_en (əsas) və ya description (fallback)
-        finalDescription = template.description_en || template.description || 'Professional CV template';
+        // İngilis dili üçün description_en (əsas) və ya fallback
+        finalDescription = template.description_en || template.description || template.description_ru || 'Professional CV template';
       }
 
       return {
@@ -75,7 +79,8 @@ export async function GET(req: NextRequest) {
         tier: template.tier,
         previewUrl: template.previewUrl,
         description: finalDescription, // Site language-ə uyğun description
-        description_en: template.description_en, // Frontend üçün əlavə məlumat
+        description_en: template.description_en, // İngilis dili açıqlaması
+        description_ru: template.description_ru, // Rus dili açıqlaması
         createdAt: template.createdAt,
         updatedAt: template.updatedAt,
         preview_url: template.previewUrl, // Add preview_url for backward compatibility

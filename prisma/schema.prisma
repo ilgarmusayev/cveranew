@@ -54,6 +54,7 @@ model Template {
   previewUrl    String
   description   String?  // Azərbaycan dili açıqlaması
   description_en String? // İngilis dili açıqlaması
+  description_ru String? // Rus dili açıqlaması
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }

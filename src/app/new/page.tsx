@@ -1,24 +1,33 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import Link from 'next/link';
 import StandardHeader from '@/components/ui/StandardHeader';
 import Footer from '@/components/Footer';
 import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 
+// Template interface
 interface Template {
   id: string;
   name: string;
   tier: string;
-  hasAccess?: boolean;
+  previewUrl?: string;
+  description: string;
+  description_en?: string;
 }
 
 export default function NewCVPage() {
   const { user } = useAuth();
   const { siteLanguage } = useSiteLanguage();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Template state
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
+  const [templatesLoading, setTemplatesLoading] = useState(true);
   
   // Site language mətnləri
   const content = {
@@ -33,8 +42,19 @@ export default function NewCVPage() {
       // Form fields
       cvTitleLabel: 'CV Başlığı *',
       cvTitlePlaceholder: 'məsələn: Frontend Developer CV',
-      templateLabel: 'CV Şablonu',
-      loadingTemplates: '⏳ Yüklənir...',
+      
+      // Template selection
+      templateSectionTitle: 'CV Şablonu *',
+      templateSectionDescription: 'CV-nizin görünüşünü müəyyən edəcək şablon seçin',
+      templateLoadingText: 'Şablonlar yüklənir...',
+      templateSelectPlaceholder: 'Şablon seçin',
+      
+      // Template tiers
+      tiers: {
+        Free: 'Pulsuz',
+        Medium: 'Populyar',
+        Premium: 'Premium'
+      },
       
       // Personal info section
       personalInfoTitle: 'Şəxsi Məlumatlar',
@@ -56,13 +76,14 @@ export default function NewCVPage() {
       
       // Error messages
       titleRequired: 'CV başlığı tələb olunur',
+      templateRequired: 'Template seçimi tələb olunur',
       loginRequiredError: 'Giriş tələb olunur',
       cvNotCreated: 'CV yaradılmadı',
       createError: 'CV yaradılanda xəta:',
       unknownError: 'Naməlum xəta',
       
       // Console messages
-      templatesLoadError: 'Templates yüklənərkən xəta:',
+
       linkedinDataLoaded: '📥 LinkedIn məlumatları yükləndi:',
       linkedinAutoFilled: '✅ LinkedIn məlumatları avtomatik dolduruldu',
       linkedinNotFound: 'LinkedIn məlumatları tapılmadı və ya yüklənmədi',
@@ -77,7 +98,7 @@ export default function NewCVPage() {
       nextStepsTitle: 'Növbəti addımlar',
       nextStep1: 'CV yaradıldıqdan sonra redaktə səhifəsinə yönləndiriləcəksiniz',
       nextStep2: 'İş təcrübəsi, təhsil və bacarıqlarınızı əlavə edə bilərsiniz',
-      nextStep3: 'Template-i istədiyiniz zaman dəyişə bilərsiniz',
+
       nextStep4: 'CV-ni PDF formatında yükləyə bilərsiniz',
     },
     english: {
@@ -91,8 +112,19 @@ export default function NewCVPage() {
       // Form fields
       cvTitleLabel: 'CV Title *',
       cvTitlePlaceholder: 'e.g.: Frontend Developer CV',
-      templateLabel: 'CV Template',
-      loadingTemplates: '⏳ Loading...',
+      
+      // Template selection
+      templateSectionTitle: 'CV Template *',
+      templateSectionDescription: 'Choose a template that will determine the appearance of your CV',
+      templateLoadingText: 'Loading templates...',
+      templateSelectPlaceholder: 'Select template',
+      
+      // Template tiers
+      tiers: {
+        Free: 'Free',
+        Medium: 'Popular',
+        Premium: 'Premium'
+      },
       
       // Personal info section
       personalInfoTitle: 'Personal Information',
@@ -114,13 +146,14 @@ export default function NewCVPage() {
       
       // Error messages
       titleRequired: 'CV title is required',
+      templateRequired: 'Template selection is required',
       loginRequiredError: 'Login required',
       cvNotCreated: 'CV not created',
       createError: 'Error creating CV:',
       unknownError: 'Unknown error',
       
       // Console messages
-      templatesLoadError: 'Error loading templates:',
+
       linkedinDataLoaded: '📥 LinkedIn data loaded:',
       linkedinAutoFilled: '✅ LinkedIn data auto-filled',
       linkedinNotFound: 'LinkedIn data not found or not loaded',
@@ -135,7 +168,7 @@ export default function NewCVPage() {
       nextStepsTitle: 'Next Steps',
       nextStep1: 'After creating the CV, you will be redirected to the edit page',
       nextStep2: 'You can add work experience, education and skills',
-      nextStep3: 'You can change the template at any time',
+
       nextStep4: 'You can download the CV in PDF format',
     },
     russian: {
@@ -149,8 +182,19 @@ export default function NewCVPage() {
       // Form fields
       cvTitleLabel: 'Название резюме *',
       cvTitlePlaceholder: 'например: Резюме Frontend разработчика',
-      templateLabel: 'Шаблон резюме',
-      loadingTemplates: '⏳ Загрузка...',
+      
+      // Template selection
+      templateSectionTitle: 'Шаблон резюме *',
+      templateSectionDescription: 'Выберите шаблон, который определит внешний вид вашего резюме',
+      templateLoadingText: 'Загрузка шаблонов...',
+      templateSelectPlaceholder: 'Выберите шаблон',
+      
+      // Template tiers
+      tiers: {
+        Free: 'Бесплатно',
+        Medium: 'Популярный',
+        Premium: 'Премиум'
+      },
       
       // Personal info section
       personalInfoTitle: 'Личная информация',
@@ -172,13 +216,14 @@ export default function NewCVPage() {
       
       // Error messages
       titleRequired: 'Название резюме обязательно',
+      templateRequired: 'Выбор шаблона обязателен',
       loginRequiredError: 'Требуется вход',
       cvNotCreated: 'Резюме не создано',
       createError: 'Ошибка при создании резюме:',
       unknownError: 'Неизвестная ошибка',
       
       // Console messages
-      templatesLoadError: 'Ошибка загрузки шаблонов:',
+
       linkedinDataLoaded: '📥 Данные LinkedIn загружены:',
       linkedinAutoFilled: '✅ Данные LinkedIn автоматически заполнены',
       linkedinNotFound: 'Данные LinkedIn не найдены или не загружены',
@@ -198,10 +243,8 @@ export default function NewCVPage() {
     }
   }[siteLanguage];
   
-  const [templates, setTemplates] = useState<Template[]>([]);
   const [formData, setFormData] = useState({
     title: '',
-    templateId: '', // Will be set when templates load
     personalInfo: {
       firstName: '',
       lastName: '',
@@ -212,49 +255,74 @@ export default function NewCVPage() {
     }
   });
   const [loading, setLoading] = useState(false);
-  const [templatesLoading, setTemplatesLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Load templates and LinkedIn data on component mount
+  // Load templates on component mount
   useEffect(() => {
-    const loadInitialData = async () => {
-      await Promise.all([
-        loadTemplates(),
-        loadLinkedInData()
-      ]);
-    };
+    loadTemplates();
+  }, []);
 
+  // Load LinkedIn data on component mount
+  useEffect(() => {
     if (user) {
-      loadInitialData();
+      loadLinkedInData();
     }
   }, [user]);
 
-  // Load available templates
+  // Load templates function - SQL-dən template məlumatları
   const loadTemplates = async () => {
     try {
       setTemplatesLoading(true);
-      const token = localStorage.getItem('accessToken');
+      console.log('🎨 Loading templates from database...');
+      
       const response = await fetch('/api/templates', {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'x-site-language': siteLanguage
         }
       });
-
+      
       if (response.ok) {
         const data = await response.json();
-        setTemplates(data.templates);
-
-        // Set default template to first accessible one
-        const accessibleTemplate = data.templates.find((t: Template) => t.hasAccess !== false);
-        if (accessibleTemplate && !formData.templateId) {
-          setFormData(prev => ({
-            ...prev,
-            templateId: accessibleTemplate.id
-          }));
+        console.log('✅ Templates API response:', data);
+        
+        // API { templates: [...], userTier: '...', limits: {...} } formatında cavab verir
+        const templateList = data.templates || data;
+        
+        if (Array.isArray(templateList) && templateList.length > 0) {
+          setTemplates(templateList);
+          
+          // URL-dən template parameter-i yoxla
+          const templateFromUrl = searchParams.get('template');
+          
+          if (templateFromUrl) {
+            // URL-dən gələn template ID-nin mövcud olub-olmadığını yoxla
+            const foundTemplate = templateList.find(t => t.id === templateFromUrl);
+            if (foundTemplate) {
+              setSelectedTemplateId(templateFromUrl);
+              console.log('🎯 Template selected from URL:', foundTemplate.name);
+            } else {
+              // URL template mövcud deyilsə, ilk template-i seç
+              setSelectedTemplateId(templateList[0].id);
+              console.log('⚠️ Template from URL not found, using default:', templateList[0].name);
+            }
+          } else {
+            // URL parameter yoxdursa, ilk template-i default seç
+            setSelectedTemplateId(templateList[0].id);
+            console.log('🎯 Default template selected:', templateList[0].name);
+          }
+          
+          console.log('📊 Total templates loaded:', templateList.length);
+        } else {
+          console.error('❌ No templates found in database');
+          setTemplates([]);
         }
+      } else {
+        console.error('❌ Template loading failed from database');
+        setTemplates([]);
       }
     } catch (error) {
-      console.error(content.templatesLoadError, error);
+      console.error('❌ Template loading error:', error);
+      setTemplates([]);
     } finally {
       setTemplatesLoading(false);
     }
@@ -327,6 +395,11 @@ export default function NewCVPage() {
       return;
     }
 
+    if (!selectedTemplateId) {
+      setError(content.templateRequired);
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -371,7 +444,7 @@ export default function NewCVPage() {
         },
         body: JSON.stringify({
           title: formData.title,
-          templateId: formData.templateId,
+          templateId: selectedTemplateId,
           cv_data: cvData
         })
       });
@@ -452,37 +525,33 @@ export default function NewCVPage() {
 
               {/* Template Selection */}
               <div>
-                <label htmlFor="templateId" className="block text-sm font-medium text-gray-700 mb-2">
-                  <span className="flex items-center space-x-2">
-                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <span>{content.templateLabel}</span>
-                  </span>
+                <label htmlFor="template" className="block text-sm font-medium text-gray-700 mb-2">
+                  {content.templateSectionTitle}
                 </label>
-                <select
-                  id="templateId"
-                  value={formData.templateId}
-                  onChange={(e) => handleInputChange('templateId', e.target.value)}
-                  className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-600/20 focus:border-blue-600 transition-all duration-200 shadow-sm hover:shadow-md appearance-none cursor-pointer"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                    backgroundPosition: 'right 0.75rem center',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundSize: '1.5em 1.5em'
-                  }}
-                  disabled={loading || templatesLoading}
-                >
-                  {templatesLoading ? (
-                    <option value="">{content.loadingTemplates}</option>
-                  ) : (
-                    templates.map((template) => (
+                <p className="text-sm text-gray-600 mb-3">{content.templateSectionDescription}</p>
+                
+                {templatesLoading ? (
+                  <div className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 text-gray-500">
+                    {content.templateLoadingText}
+                  </div>
+                ) : (
+                  <select
+                    id="template"
+                    value={selectedTemplateId}
+                    onChange={(e) => setSelectedTemplateId(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all duration-200"
+                    disabled={loading}
+                    required
+                  >
+                    <option value="">{content.templateSelectPlaceholder}</option>
+                    {Array.isArray(templates) && templates.map((template) => (
                       <option key={template.id} value={template.id}>
-                        📄 {template.name} ({template.tier})
+                        {template.name} - {content.tiers[template.tier as keyof typeof content.tiers] || template.tier}
                       </option>
-                    ))
-                  )}
-                </select>
+                    ))}
+                  </select>
+                )}
+
               </div>
 
               {/* Personal Info Section */}

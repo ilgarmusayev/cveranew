@@ -148,6 +148,8 @@ interface Template {
   tier: 'Free' | 'Medium' | 'Premium';
   previewUrl: string;
   description?: string;
+  description_en?: string;
+  description_ru?: string;
   hasAccess?: boolean;
   requiresUpgrade?: boolean;
 }
@@ -225,12 +227,17 @@ export default function TemplatesPage() {
     };
   }, []);
 
-  const loadTemplates = useCallback(async () => {
+  const loadTemplates = async (language?: string) => {
     try {
       setLoading(true);
-      const response = await fetch('/api/templates');
+      const langToUse = language || siteLanguage;
+      const response = await fetch('/api/templates', {
+        headers: {
+          'x-site-language': langToUse,
+        },
+      });
       if (!response.ok) {
-        setError(getErrorMessage('templateLoadError'));
+        setError('Şablonlar yüklənərkən xəta baş verdi');
         return;
       }
 
@@ -239,18 +246,25 @@ export default function TemplatesPage() {
       setError(''); // Clear any previous errors
     } catch (error) {
       console.error('Template loading error:', error);
-      setError(getErrorMessage('templateLoadError'));
+      setError('Şablonlar yüklənərkən xəta baş verdi');
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   // Authentication kontrolü
   useEffect(() => {
     if (user) {
       loadTemplates();
     }
-  }, [user, loadTemplates]);
+  }, [user]);
+
+  // Site language dəyişəndə templates yenidən yüklə
+  useEffect(() => {
+    if (user) {
+      loadTemplates(siteLanguage);
+    }
+  }, [siteLanguage]);
 
   useEffect(() => {
     AOS.init({
@@ -390,7 +404,7 @@ export default function TemplatesPage() {
           <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
             <p className="text-red-600">{error}</p>
             <button
-              onClick={loadTemplates}
+              onClick={() => loadTemplates()}
               className="mt-4 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
               {content.retry}
@@ -458,7 +472,9 @@ export default function TemplatesPage() {
                 {/* Template Info */}
                 <div className="p-6">
                   <h3 className="text-xl font-bold text-gray-900 mb-2">{template.name}</h3>
-                  <p className="text-gray-600 text-sm mb-4">{template.description || content.defaultDescription}</p>
+                  <p className="text-gray-600 text-sm mb-4">
+                    {template.description || content.defaultDescription}
+                  </p>
 
                   {/* Features */}
                   <div className="space-y-2 mb-4">
@@ -552,7 +568,9 @@ export default function TemplatesPage() {
               <div className="lg:w-1/3 w-full bg-white border-t lg:border-t-0 lg:border-l border-gray-200 flex flex-col">
                 <div className="p-3 sm:p-4 flex-1 overflow-y-auto">
                   <h4 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">{previewTemplate.name}</h4>
-                  <p className="text-gray-600 mb-4 text-xs sm:text-sm leading-relaxed">{previewTemplate.description || content.defaultDescription}</p>
+                  <p className="text-gray-600 mb-4 text-xs sm:text-sm leading-relaxed">
+                    {previewTemplate.description || content.defaultDescription}
+                  </p>
 
                   {/* Features */}
                   <div className="mb-4">

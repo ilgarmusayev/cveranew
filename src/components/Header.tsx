@@ -345,69 +345,39 @@ export default function Header({
             <div className="absolute top-full left-0 right-0 bg-gradient-to-r from-blue-600 to-blue-700 border-t border-blue-500 shadow-lg z-50 md:hidden w-full">
               <div className="px-4 py-4 w-full">
                 <div className="flex flex-col space-y-3 w-full max-w-none">
-                  {/* Language Dropdown for Mobile */}
-                  <div className="relative" data-language-menu-mobile>
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        toggleLanguageMenu();
-                      }}
-                      className="w-full bg-white/10 hover:bg-white/20 text-white px-4 py-3 rounded-lg font-medium transition-all duration-200 text-center flex items-center justify-center border border-white/20"
-                    >
-                      <span className="mr-2 text-lg">
-                        {getLanguageDisplay(siteLanguage).flag}
-                      </span>
-                      <span className="mr-2">
-                        {getLanguageDisplay(siteLanguage).name}
-                      </span>
-                      <svg 
-                        className={`w-4 h-4 transition-transform duration-200 ${isLanguageMenuOpen ? 'rotate-180' : ''}`} 
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-
-                    {/* Mobile Language Dropdown Menu */}
-                    {isLanguageMenuOpen && (
-                      <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-lg shadow-2xl border border-gray-200 py-1 z-[9999]">
-                        <div className="px-3 py-2 text-xs text-gray-600 font-bold border-b border-gray-100">
-                         {siteLanguage === 'azerbaijani' ? 'Dil seçin' : siteLanguage === 'english' ? 'Select Language' : 'Выберите язык'}
-                        </div>
-                        
-                        {(['azerbaijani', 'english', 'russian'] as const).map((lang) => {
-                          const langData = getLanguageDisplay(lang);
-                          return (
-                            <button
-                              key={lang}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleLanguageChange(lang);
-                                setIsMobileMenuOpen(false);
-                              }}
-                              className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors flex items-center space-x-3 ${
-                                siteLanguage === lang ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
-                              }`}
-                            >
-                              <span className="text-lg">{langData.flag}</span>
-                              <div className="flex-1">
-                                <div className="font-medium">{langData.name}</div>
-                                <div className="text-xs text-gray-500">{langData.code}</div>
-                              </div>
-                              {siteLanguage === lang && (
-                                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
+                  {/* Language Selection for Mobile - Direct buttons instead of dropdown */}
+                  <div className="space-y-2">
+                    <div className="text-white/80 text-sm font-medium px-4">
+                      {siteLanguage === 'azerbaijani' ? 'Dil seçin' : siteLanguage === 'english' ? 'Select Language' : 'Выберите язык'}
+                    </div>
+                    {(['azerbaijani', 'english', 'russian'] as const).map((lang) => {
+                      const langData = getLanguageDisplay(lang);
+                      return (
+                        <button
+                          key={lang}
+                          onClick={() => {
+                            handleLanguageChange(lang);
+                            setIsMobileMenuOpen(false);
+                          }}
+                          className={`w-full px-4 py-3 rounded-lg font-medium transition-all duration-200 text-left flex items-center border ${
+                            siteLanguage === lang 
+                              ? 'bg-white/20 text-white border-white/40' 
+                              : 'bg-white/10 hover:bg-white/20 text-white/90 border-white/20'
+                          }`}
+                        >
+                          <span className="text-lg mr-3">{langData.flag}</span>
+                          <div className="flex-1">
+                            <div className="font-medium">{langData.name}</div>
+                            <div className="text-xs opacity-75">{langData.code}</div>
+                          </div>
+                          {siteLanguage === lang && (
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
 
                   {/* AI Translate Button for Mobile */}

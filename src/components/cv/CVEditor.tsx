@@ -335,7 +335,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             save: 'Сохранить',
             saveShort: 'Сохранить',
             cvSections: 'Разделы резюме',
-            preview: 'Предварительный просмотр',
+            preview: 'Предпросмотр',
             aiTranslationPanel: 'Панель перевода ИИ',
             close: 'Закрыть',
             headingSize: 'Размер заголовка',
@@ -1573,9 +1573,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                     <span>{content.preview}</span>
                                 </h3>
                                 <div className="flex items-center space-x-3">
-                                    <span className="text-xs font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                                        A4 Format
-                                    </span>
+                                  
                                     <span className="text-xs font-bold text-blue-700 bg-blue-100 px-3 py-1 rounded-full capitalize">
                                         {cv.templateId.replace('-', ' ')}
                                     </span>

@@ -35,21 +35,37 @@ export const TIER_LIMITS: Record<string, TierLimits> = {
 };
 
 export async function getUserTierAndLimits(userId: string): Promise<{ tier: string; limits: TierLimits }> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    include: {
-      subscriptions: {
-        where: { status: 'active' },
-        orderBy: { startedAt: 'desc' },
-        take: 1,
+  try {
+    // Ensure Prisma connection is established
+    await prisma.$connect();
+    
+    const user = await prisma.user.findUnique({
+      where: { id: userId }
+    });
+
+    if (!user) {
+      console.warn(`User not found: ${userId}`);
+      return { tier: 'Free', limits: TIER_LIMITS.Free };
+    }
+
+    // Get active subscription separately to avoid relation issues
+    const activeSubscription = await prisma.subscription.findFirst({
+      where: { 
+        userId: userId,
+        status: 'active' 
       },
-    },
-  });
+      orderBy: { startedAt: 'desc' }
+    });
 
-  const tier = user?.subscriptions[0]?.tier || user?.tier || 'Free';
-  const limits = TIER_LIMITS[tier] || TIER_LIMITS.Free;
+    const tier = activeSubscription?.tier || user?.tier || 'Free';
+    const limits = TIER_LIMITS[tier] || TIER_LIMITS.Free;
 
-  return { tier, limits };
+    return { tier, limits };
+  } catch (error) {
+    console.error('Error in getUserTierAndLimits:', error);
+    // Return safe defaults on error
+    return { tier: 'Free', limits: TIER_LIMITS.Free };
+  }
 }
 
 export async function getDailyUsage(userId: string, date?: Date): Promise<{

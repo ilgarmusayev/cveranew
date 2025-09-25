@@ -27,6 +27,10 @@ interface FAQItem {
       contactSectionDescription: 'Dəstək komandamız sizə kömək etməyə hazırdır',
       emailButton: 'Email Göndər',
       liveChatButton: 'Canlı Söhbət',
+      helpful: 'Faydalı',
+      notHelpful: 'Faydasız',
+      share: 'Paylaş',
+      foundQuestionsText: 'Tapılan sual',
     faqData: [
       {
         id: 1,
@@ -132,6 +136,10 @@ interface FAQItem {
     contactSectionDescription: 'Our support team is ready to help you',
     emailButton: 'Send Email',
     liveChatButton: 'Live Chat',
+    helpful: 'Helpful',
+    notHelpful: 'Not helpful',
+    share: 'Share',
+    foundQuestionsText: 'Questions found',
     faqData: [
       {
         id: 1,
@@ -237,6 +245,10 @@ interface FAQItem {
     contactSectionDescription: 'Наша команда поддержки готова вам помочь',
     emailButton: 'Отправить Email',
     liveChatButton: 'Живой чат',
+    helpful: 'Полезно',
+    notHelpful: 'Бесполезно',
+    share: 'Поделиться',
+    foundQuestionsText: 'Найдено вопросов',
     faqData: [
       {
         id: 1,
@@ -448,7 +460,7 @@ export default function FAQPage() {
               >
                 <div className="text-center">
                   <div className="text-2xl font-bold text-blue-600">{filteredFAQs.length}</div>
-                  <div className="text-sm text-gray-600">Tapılan sual</div>
+                  <div className="text-sm text-gray-600">{content.foundQuestionsText}</div>
                 </div>
               </motion.div>
             </div>
@@ -533,7 +545,7 @@ export default function FAQPage() {
                                   className="flex items-center hover:text-green-600 transition-colors"
                                 >
                                   <span className="mr-1">👍</span>
-                                  Faydalı
+                                  {content.helpful}
                                 </motion.button>
                                 <motion.button
                                   whileHover={{ scale: 1.05 }}
@@ -541,7 +553,7 @@ export default function FAQPage() {
                                   className="flex items-center hover:text-red-600 transition-colors"
                                 >
                                   <span className="mr-1">👎</span>
-                                  Faydasız
+                                  {content.notHelpful}
                                 </motion.button>
                               </div>
                               <motion.button
@@ -549,7 +561,7 @@ export default function FAQPage() {
                                 whileTap={{ scale: 0.95 }}
                                 className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
                               >
-                                Paylaş
+                                {content.share}
                               </motion.button>
                             </motion.div>
                           </div>

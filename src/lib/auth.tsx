@@ -133,40 +133,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Decode token to get basic user info
         const decoded = jwt.decode(token) as any;
         if (decoded && decoded.userId) {
-          // Set a minimal user object to prevent redirect loop
+          // Create a more complete user object from JWT token
           const tempUser = {
             id: decoded.userId,
             email: decoded.email || authLabels.loading,
-            name: authLabels.name,
-            subscriptions: []
+            name: decoded.name || decoded.userName || authLabels.name,
+            loginMethod: decoded.loginMethod || 'email',
+            linkedinId: decoded.linkedinId || undefined,
+            linkedinUsername: decoded.linkedinUsername || undefined,
+            tier: decoded.tier || 'free',
+            createdAt: decoded.createdAt || new Date().toISOString(),
+            subscriptions: decoded.subscriptions || []
           };
-          console.log('🔄 Setting temporary user from token:', tempUser.id);
+          console.log('🔄 Setting complete user from token:', tempUser.id, tempUser.email);
           setUser(tempUser);
         }
       } catch (error) {
-        console.log('Could not decode token for temp user');
+        console.log('Could not decode token for temp user:', error);
       }
 
-      // BACKGROUND: API call to get full user data
+      // BACKGROUND: API call to get full user data (non-critical)
       apiGet('/api/users/me').then(response => {
         if (response.ok) {
           return response.json();
         } else {
-          console.log('API call failed - token invalid');
-          localStorage.removeItem('accessToken');
-          setUser(null);
-          throw new Error('Invalid token');
+          console.log('API call failed - keeping token user');
+          // Don't remove token or clear user - database connectivity issues
+          throw new Error('API failed - keeping local auth');
         }
       }).then(userData => {
         console.log('✅ Full user data loaded:', userData.email);
         setUser(userData);
         setIsInitialized(true);
       }).catch(error => {
-        console.error('Background user fetch error:', error);
-        localStorage.removeItem('accessToken');
-        setUser(null);
-        setLoading(false);
-        setIsInitialized(true);
+        console.log('Background user fetch failed (keeping auth):', error.message);
+        // CRITICAL FIX: Don't remove token on API failure
+        // The user already has a valid JWT token, database issues shouldn't log them out
+        console.log('🔄 Keeping user authenticated with token data');
+        // Keep the temporary user from token instead of clearing everything
       });
     } catch (error) {
       console.error('Error fetching user:', error);

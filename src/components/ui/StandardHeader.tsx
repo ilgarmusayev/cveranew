@@ -568,40 +568,6 @@ export default function StandardHeader() {
           <div className="md:hidden w-full bg-gradient-to-r from-blue-600 to-blue-700 border-t border-blue-500/50 shadow-xl">
             <div className="px-4 py-4 space-y-3">
               {/* Mobile Navigation Links */}
-              {/* Language Switcher for Mobile */}
-              <div className="space-y-2">
-                <div className="text-white/80 text-sm font-medium px-4">
-                  {content.selectLanguage}
-                </div>
-                {(['azerbaijani', 'english', 'russian'] as const).map((lang) => {
-                  const langData = getLanguageDisplay(lang);
-                  return (
-                    <button
-                      key={lang}
-                      onClick={() => {
-                        handleLanguageChange(lang);
-                        closeMobileMenu();
-                      }}
-                      className={`w-full px-4 py-3 rounded-lg font-medium transition-all duration-200 text-left flex items-center border ${
-                        siteLanguage === lang 
-                          ? 'bg-white/20 text-white border-white/40' 
-                          : 'bg-white/10 hover:bg-white/20 text-white/90 border-white/20'
-                      }`}
-                    >
-                      <span className="text-lg mr-3">{langData.flag}</span>
-                      <div className="flex-1">
-                        <div className="font-medium">{langData.name}</div>
-                        <div className="text-xs opacity-75">{langData.code}</div>
-                      </div>
-                      {siteLanguage === lang && (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
 
               <Link
                 href="/dashboard"

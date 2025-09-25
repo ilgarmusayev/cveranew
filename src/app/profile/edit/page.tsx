@@ -679,7 +679,11 @@ export default function ProfileEditPage() {
 
               {/* Account Statistics */}
               <div className="border-t pt-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">{siteLanguage === 'azerbaijani' ? 'Hesab Statistikaları' : 'Account Statistics'}</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  {siteLanguage === 'azerbaijani' ? 'Hesab Statistikaları' : 
+                   siteLanguage === 'english' ? 'Account Statistics' : 
+                   'Статистика аккаунта'}
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="bg-gray-50 rounded-lg p-4 text-center">
                     <div className="text-2xl font-bold text-blue-600">{(profile as any)?.cvCount || 0}</div>
@@ -687,13 +691,21 @@ export default function ProfileEditPage() {
                   </div>
                   <div className="bg-gray-50 rounded-lg p-4 text-center">
                     <div className="text-2xl font-bold text-green-600">
-                      {profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString(siteLanguage === 'azerbaijani' ? 'az-AZ' : 'en-US') : '—'}
+                      {profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString(
+                        siteLanguage === 'azerbaijani' ? 'az-AZ' : 
+                        siteLanguage === 'english' ? 'en-US' : 
+                        'ru-RU'
+                      ) : '—'}
                     </div>
                     <div className="text-sm text-gray-600">{content.joinDate}</div>
                   </div>
                   <div className="bg-gray-50 rounded-lg p-4 text-center">
                     <div className="text-2xl font-bold text-purple-600">
-                      {profile?.lastLogin ? new Date(profile.lastLogin).toLocaleDateString(siteLanguage === 'azerbaijani' ? 'az-AZ' : 'en-US') : '—'}
+                      {profile?.lastLogin ? new Date(profile.lastLogin).toLocaleDateString(
+                        siteLanguage === 'azerbaijani' ? 'az-AZ' : 
+                        siteLanguage === 'english' ? 'en-US' : 
+                        'ru-RU'
+                      ) : '—'}
                     </div>
                     <div className="text-sm text-gray-600">{content.lastLogin}</div>
                   </div>
