@@ -18,7 +18,7 @@ interface TemplateSelectorProps {
   selectedTemplateId: string;
   onTemplateSelect: (templateId: string) => void;
   userTier?: string;
-  cvLanguage?: 'english' | 'azerbaijani';
+  cvLanguage?: 'english' | 'azerbaijani' | 'russian';
 }
 
 export default function TemplateSelector({ selectedTemplateId, onTemplateSelect, userTier = 'Free', cvLanguage = 'azerbaijani' }: TemplateSelectorProps) {

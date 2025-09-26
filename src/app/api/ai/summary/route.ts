@@ -66,6 +66,7 @@ export async function POST(req: NextRequest) {
     // Parse CV data from request body
     const body = await req.json();
     const cvData: CVDataForSummary = body.cvData;
+    const language = body.language || 'azerbaijani'; // Default to Azerbaijani
 
     if (!cvData || !cvData.personalInfo) {
       return NextResponse.json(
@@ -94,8 +95,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Generate AI-powered professional summary with language detection
-    console.log('🧠 AI Summary yaradılır, CV data:', cvData, `(Skills: ${cvData.skills?.length || 0})`);
-    const summary = await generateProfessionalSummary(cvData);    if (!summary) {
+    console.log('🧠 AI Summary yaradılır, CV data:', cvData, `(Skills: ${cvData.skills?.length || 0}, Language: ${language})`);
+    const summary = await generateProfessionalSummary(cvData, language);    if (!summary) {
       return NextResponse.json(
         { error: "Failed to generate summary" },
         { status: 500 }

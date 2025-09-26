@@ -292,7 +292,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
         cvId: cvId, // Add CV ID to request
         cvData,
         // Pass SAME language as CV for same-language suggestions
-        targetLanguage: cvData?.cvLanguage || 'english',
+        targetLanguage: cvLanguage || cvData?.cvLanguage || 'azerbaijani',
         // Add timestamp to ensure new suggestions each time
         requestId: Date.now().toString()
       });
@@ -490,7 +490,8 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
           cvId, 
           skillId, 
           skillName,
-          skillType 
+          skillType,
+          targetLanguage: cvLanguage
         }),
       });
 

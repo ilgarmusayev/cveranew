@@ -243,6 +243,10 @@ export function AITranslationButton({
     english: {
       button: 'Translate to Azerbaijani',
       translating: 'Translating...'
+    },
+    russian: {
+      button: 'Перевести на английский',
+      translating: 'Переводится...'
     }
   };
 
@@ -321,6 +325,11 @@ export function TranslationProgress({
       title: 'Translating CV',
       error: 'Translation Error',
       close: 'Close'
+    },
+    russian: {
+      title: 'Переводится CV',
+      error: 'Ошибка перевода',
+      close: 'Закрыть'
     }
   };
 

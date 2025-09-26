@@ -202,7 +202,7 @@ export interface CVData {
   courses?: Course[];
   organizations?: Organization[];
   customSections?: CustomSection[];
-  cvLanguage?: 'azerbaijani' | 'english'; // CV display language
+  cvLanguage?: 'azerbaijani' | 'english' | 'russian'; // CV display language
   translationMetadata?: TranslationMetadata;
   sectionOrder?: any[];
   sectionNames?: Record<string, string>;

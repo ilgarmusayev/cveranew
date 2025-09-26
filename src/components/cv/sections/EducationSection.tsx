@@ -46,7 +46,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
       degreePlaceholder: 'Məsələn, Bakalavr',
       field: 'İxtisas sahəsi',
       fieldPlaceholder: 'Məsələn, Kompüter elmləri',
-      gpa: 'GPA/Orta bal',
+      gpa: 'ÜOMG/Orta bal',
       gpaPlaceholder: 'Məsələn, 3.8 və ya 85%',
       startDate: 'Başlama tarixi',
       endDate: 'Bitirmə tarixi',

@@ -133,7 +133,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
       chooseImage: 'Выбрать фото',
       firstName: 'Имя',
       lastName: 'Фамилия',
-      email: 'Email',
+      email: 'Электронная почта',
       phone: 'Телефон',
       website: 'Веб-сайт',
       linkedin: 'LinkedIn',
@@ -314,7 +314,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ cvId }),
+        body: JSON.stringify({ cvId, language: cvLanguage }),
       });
 
       console.log('📡 API Response:', {

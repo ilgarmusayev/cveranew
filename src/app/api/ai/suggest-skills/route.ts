@@ -338,8 +338,10 @@ export async function POST(request: NextRequest) {
       console.log('✅ DEBUG - Found education data, proceeding with AI analysis');
     }
 
-    // Advanced AI prompt for professional skill analysis - Updated Structure
-    const cvLanguage = cvData.cvLanguage === 'english' ? 'English' : 'Azerbaijani';
+    // Get language from request body or CV data
+    const preferredLanguage = requestBody.targetLanguage || cvData.cvLanguage || 'azerbaijani';
+    const cvLanguage = preferredLanguage === 'english' ? 'English' : 
+                      preferredLanguage === 'russian' ? 'Russian' : 'Azerbaijani';
     
     const prompt = `
 Analyze the following CV and suggest exactly 8 skills: 4 hard skills and 4 soft skills.

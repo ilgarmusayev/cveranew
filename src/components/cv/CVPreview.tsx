@@ -25,6 +25,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { CVData, PersonalInfo, Experience, Education, Skill, Language, Project, Certification, VolunteerExperience, CustomSection, CustomSectionItem } from '@/types/cv';
+import { getContactLabels } from '@/lib/cvLanguage';
 import '@/styles/cv-fonts.css';
 
 interface CVPreviewProps {
@@ -291,6 +292,7 @@ const getSectionName = (sectionKey: string, cvLanguage?: string, customSectionNa
     // Default section names based on language
     const sectionNames: Record<string, Record<string, string>> = {
         az: {
+            contact: 'Əlaqə',
             summary: 'Xülasə',
             professionalSummary: 'Peşəkar Xülasə',
             experience: 'İş Təcrübəsi',
@@ -313,6 +315,7 @@ const getSectionName = (sectionKey: string, cvLanguage?: string, customSectionNa
             organizations: 'Təşkilatlar'
         },
         en: {
+            contact: 'Contact',
             summary: 'Summary',
             professionalSummary: 'Professional Summary',
             experience: 'Work Experience',
@@ -335,6 +338,7 @@ const getSectionName = (sectionKey: string, cvLanguage?: string, customSectionNa
             organizations: 'Organizations'
         },
         ru: {
+            contact: 'Контакты',
             summary: 'Резюме',
             professionalSummary: 'Профессиональное резюме',
             experience: 'Опыт работы',
@@ -357,6 +361,7 @@ const getSectionName = (sectionKey: string, cvLanguage?: string, customSectionNa
             organizations: 'Организации'
         },
         tr: {
+            contact: 'İletişim',
             summary: 'Özet',
             professionalSummary: 'Profesyonel Özet',
             experience: 'Is Deneyimi',
@@ -1040,8 +1045,9 @@ const BasicTemplate: React.FC<{
     }
 }) => {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], publications = [], honorsAwards = [], courses = [], testScores = [], organizations = [], customSections = [] } = data;
+    const contactLabels = getContactLabels(data.cvLanguage as any);
     const [isDragActive, setIsDragActive] = useState(false);
-    const [activeId, setActiveId] = useState<string | null>(null);
+    const [activeId, setActiveId] = useState<string | null>(null);  
     const [dropTargetId, setDropTargetId] = useState<string | null>(null);
     const [isMobile, setIsMobile] = useState(false);
 
@@ -1274,7 +1280,7 @@ const BasicTemplate: React.FC<{
                                                     fontWeight: 'var(--cv-small-weight)',
                                                     color: '#6b7280'
                                                 }}>
-                                                    {[edu.field, edu.gpa && `${data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: ${edu.gpa}`].filter(Boolean).join(' - ')}
+                                                    {[edu.field, edu.gpa && `${data.cvLanguage === 'english' ? 'GPA' : data.cvLanguage === 'russian' ? 'Средний балл' : 'ÜOMG'}: ${edu.gpa}`].filter(Boolean).join(' - ')}
                                                 </p>
                                             )}
                                         </div>
@@ -1972,7 +1978,7 @@ const BasicTemplate: React.FC<{
                             {personalInfo.email && (
                                 <div className="flex items-center gap-2">
                                     <span className="font-medium min-w-[50px] flex-shrink-0">
-                                        {data.cvLanguage === 'english' ? 'Email:' : 'E-poçt:'}
+                                        {contactLabels.email}:
                                     </span>
                                     <span className="break-all">{personalInfo.email}</span>
                                 </div>
@@ -1980,7 +1986,7 @@ const BasicTemplate: React.FC<{
                             {personalInfo.phone && (
                                 <div className="flex items-center gap-2">
                                     <span className="font-medium min-w-[50px] flex-shrink-0">
-                                        {data.cvLanguage === 'english' ? 'Phone:' : 'Telefon:'}
+                                        {contactLabels.phone}:
                                     </span>
                                     <span>{personalInfo.phone}</span>
                                 </div>
@@ -1988,7 +1994,7 @@ const BasicTemplate: React.FC<{
                             {personalInfo.location && (
                                 <div className="flex items-center gap-2">
                                     <span className="font-medium min-w-[50px] flex-shrink-0">
-                                        {data.cvLanguage === 'english' ? 'Location:' : 'Ünvan:'}
+                                        {contactLabels.location}:
                                     </span>
                                     <span>{personalInfo.location}</span>
                                 </div>
@@ -2022,7 +2028,7 @@ const BasicTemplate: React.FC<{
                             {personalInfo.website && (
                                 <div className="flex items-center gap-2">
                                     <span className="font-medium min-w-[50px] flex-shrink-0">
-                                        {data.cvLanguage === 'english' ? 'Website:' : 'Veb-sayt:'}
+                                        {contactLabels.website}:
                                     </span>
                                     <a
                                         href={personalInfo.website?.startsWith('http') ? personalInfo.website : `https://${personalInfo.website}`}
@@ -2376,7 +2382,7 @@ const ModernTemplate: React.FC<{
                                                 )}
                                                 {(edu.field || edu.gpa) && (
                                                     <p className="text-gray-600 text-sm">
-                                                        {[edu.field, edu.gpa && `${data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: ${edu.gpa}`].filter(Boolean).join(' - ')}
+                                                        {[edu.field, edu.gpa && `${data.cvLanguage === 'english' ? 'GPA' : data.cvLanguage === 'russian' ? 'Средний балл' : 'ÜOMG'}: ${edu.gpa}`].filter(Boolean).join(' - ')}
                                                     </p>
                                                 )}
                                             </div>
@@ -3011,6 +3017,7 @@ const AtlasTemplate: React.FC<{
     isExport?: boolean;
 }> = ({ data, sectionOrder, onSectionReorder, activeSection, onSectionSelect, onLeftSectionReorder, leftColumnOrder: externalLeftColumnOrder, isExport = false }) => {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], publications = [], honorsAwards = [], courses = [], testScores = [], organizations = [], customSections = [] } = data;
+    const contactLabels = getContactLabels(data.cvLanguage as any);
     const [isDragActive, setIsDragActive] = useState(false);
     const [activeId, setActiveId] = useState<string | null>(null);
     const [dropTargetId, setDropTargetId] = useState<string | null>(null);
@@ -3403,7 +3410,7 @@ const AtlasTemplate: React.FC<{
                                                 )}
                                                 {(edu.field || edu.gpa) && (
                                                     <p className="text-xs text-gray-600">
-                                                        {[edu.field, edu.gpa && `${data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: ${edu.gpa}`].filter(Boolean).join(' - ')}
+                                                        {[edu.field, edu.gpa && `${data.cvLanguage === 'english' ? 'GPA' : data.cvLanguage === 'russian' ? 'Средний балл' : 'ÜOMG'}: ${edu.gpa}`].filter(Boolean).join(' - ')}
                                                     </p>
                                                 )}
                                             </div>
@@ -3927,13 +3934,13 @@ const AtlasTemplate: React.FC<{
                 {/* Contact Information */}
                 <div className="cv-section avoid-break mb-6">
                     <h2 className="text-sm font-bold text-white tracking-wide pb-1 uppercase mb-3">
-                        {data.cvLanguage === 'english' ? 'CONTACT' : 'ƏLAQƏ'}
+                        {getSectionName('contact', data.cvLanguage, data.sectionNames).toUpperCase()}
                     </h2>
                     <div className="text-xs space-y-3">
                         {personalInfo.email && (
                             <div className="flex items-start gap-3">
                                 <span className="font-medium text-blue-200 min-w-[50px]">
-                                    {data.cvLanguage === 'english' ? 'Email: ' : 'E-poçt: '}
+                                    {data.cvLanguage === 'english' ? 'Email: ' : data.cvLanguage === 'russian' ? 'Электронная почта: ' : 'E-poçt: '}
                                 </span>
                                 <span className="text-white">{personalInfo.email}</span>
                             </div>
@@ -4322,6 +4329,7 @@ const LumenTemplate: React.FC<{
     leftColumnOrder?: string[];
 }> = ({ data, sectionOrder, onSectionReorder, activeSection, onSectionSelect, onLeftSectionReorder, leftColumnOrder: externalLeftColumnOrder }) => {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], publications = [], honorsAwards = [], courses = [], testScores = [], organizations = [], customSections = [] } = data;
+    const contactLabels = getContactLabels(data.cvLanguage as any);
     const [isDragActive, setIsDragActive] = useState(false);
 
     // Force update state for real-time left panel updates
@@ -4708,7 +4716,7 @@ const LumenTemplate: React.FC<{
                                                 )}
                                                 {(edu.field || edu.gpa) && (
                                                     <p className="text-xs text-gray-600">
-                                                        {[edu.field, edu.gpa && `${data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: ${edu.gpa}`].filter(Boolean).join(' - ')}
+                                                        {[edu.field, edu.gpa && `${data.cvLanguage === 'english' ? 'GPA' : data.cvLanguage === 'russian' ? 'Средний балл' : 'ÜOMG'}: ${edu.gpa}`].filter(Boolean).join(' - ')}
                                                     </p>
                                                 )}
                                             </div>
@@ -5220,15 +5228,13 @@ const LumenTemplate: React.FC<{
                 {/* Contact Information */}
                 <div className="cv-section avoid-break mb-6">
                     <h2 className="text-sm font-bold text-gray-900 tracking-wide border-b border-gray-400 pb-1 mb-3 uppercase">
-                        {data.cvLanguage?.includes('en') ? 'CONTACT' : 
-                         data.cvLanguage?.includes('tr') ? 'ILETISIM' : 'ƏLAQƏ'}
+                        {getSectionName('contact', data.cvLanguage, data.sectionNames).toUpperCase()}
                     </h2>
                     <div className="text-xs space-y-3">
                         {personalInfo.email && (
                             <div className="flex items-start gap-3">
                                 <span className="font-medium text-gray-600 min-w-[70px]">
-                                    {data.cvLanguage?.includes('en') ? 'Email: ' : 
-                                     data.cvLanguage?.includes('tr') ? 'E-posta: ' : 'E-poçt: '}
+                                    {contactLabels.email}: 
                                 </span>
                                 <span className="text-gray-900">{personalInfo.email}</span>
                             </div>
@@ -5236,7 +5242,7 @@ const LumenTemplate: React.FC<{
                         {personalInfo.phone && (
                             <div className="flex items-start gap-3">
                                 <span className="font-medium text-gray-600 min-w-[70px]">
-                                    {data.cvLanguage === 'english' ? 'Phone: ' : 'Telefon: '}
+                                    {contactLabels.phone}: 
                                 </span>
                                 <span className="text-gray-900">{personalInfo.phone}</span>
                             </div>
@@ -5244,8 +5250,7 @@ const LumenTemplate: React.FC<{
                         {personalInfo.location && (
                             <div className="flex items-start gap-3">
                                 <span className="font-medium text-gray-600 min-w-[70px]">
-                                    {data.cvLanguage?.includes('en') ? 'Address: ' : 
-                                     data.cvLanguage?.includes('tr') ? 'Adres: ' : 'Ünvan: '}
+                                    {contactLabels.location}: 
                                 </span>
                                 <span className="text-gray-900">{personalInfo.location}</span>
                             </div>
@@ -5279,7 +5284,7 @@ const LumenTemplate: React.FC<{
                         {personalInfo.website && (
                             <div className="flex items-start gap-3">
                                 <span className="font-medium text-gray-600 min-w-[70px]">
-                                    {data.cvLanguage === 'english' ? 'Website: ' : 'Sayt: '}
+                                    {contactLabels.website}: 
                                 </span>
                                 <a
                                     href={personalInfo.website.startsWith('http') ? personalInfo.website : `https://${personalInfo.website}`}
@@ -5611,6 +5616,7 @@ const PrimeTemplate: React.FC<{
     onSectionSelect?: (sectionId: string | null) => void;
 }> = ({ data, sectionOrder, onSectionReorder, activeSection, onSectionSelect }) => {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], publications = [], honorsAwards = [], courses = [], testScores = [], organizations = [], customSections = [] } = data;
+    const contactLabels = getContactLabels(data.cvLanguage as any);
     const [isDragActive, setIsDragActive] = useState(false);
     const [activeId, setActiveId] = useState<string | null>(null);
     const [dropTargetId, setDropTargetId] = useState<string | null>(null);
@@ -5772,7 +5778,7 @@ const PrimeTemplate: React.FC<{
                                                 )}
                                                 {(edu.field || edu.gpa) && (
                                                     <p className="text-xs text-gray-600 mt-0">
-                                                        {[edu.field, edu.gpa && `${data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: ${edu.gpa}`].filter(Boolean).join(' - ')}
+                                                        {[edu.field, edu.gpa && `${data.cvLanguage === 'english' ? 'GPA' : data.cvLanguage === 'russian' ? 'Средний балл' : 'ÜOMG'}: ${edu.gpa}`].filter(Boolean).join(' - ')}
                                                     </p>
                                                 )}
                                             </div>
@@ -6246,7 +6252,7 @@ const PrimeTemplate: React.FC<{
                         
                         if (personalInfo.email) {
                             primaryContactItems.push({
-                                label: data.cvLanguage === 'english' ? 'Email:' : 'E-poçt:',
+                                label: contactLabels.email + ':',
                                 value: personalInfo.email,
                                 type: 'text'
                             });
@@ -6254,7 +6260,7 @@ const PrimeTemplate: React.FC<{
                         
                         if (personalInfo.phone) {
                             primaryContactItems.push({
-                                label: data.cvLanguage === 'english' ? 'Phone:' : 'Telefon:',
+                                label: contactLabels.phone + ':',
                                 value: personalInfo.phone,
                                 type: 'text'
                             });
@@ -6278,7 +6284,7 @@ const PrimeTemplate: React.FC<{
                         
                         if (personalInfo.website) {
                             primaryContactItems.push({
-                                label: data.cvLanguage === 'english' ? 'Website:' : 'Sayt:',
+                                label: contactLabels.website + ':',
                                 value: personalInfo.website,
                                 type: 'website'
                             });
@@ -6286,7 +6292,7 @@ const PrimeTemplate: React.FC<{
 
                         // Location as separate item (will be placed strategically)
                         const locationItem = personalInfo.location ? {
-                            label: data.cvLanguage === 'english' ? 'Location:' : 'Ünvan:',
+                            label: contactLabels.location + ':',
                             value: personalInfo.location,
                             type: 'text'
                         } : null;
@@ -6400,6 +6406,7 @@ const VertexTemplate: React.FC<{
     onSectionSelect?: (sectionId: string | null) => void;
 }> = ({ data, sectionOrder, onSectionReorder, activeSection, onSectionSelect }) => {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], publications = [], honorsAwards = [], courses = [], testScores = [], organizations = [], customSections = [] } = data;
+    const contactLabels = getContactLabels(data.cvLanguage as any);
 
     const [activeId, setActiveId] = useState<string | null>(null);
     // Mobil yoxlaması aradan qaldırıldı - hər zaman desktop versiyası göstərilir
@@ -6576,7 +6583,7 @@ const VertexTemplate: React.FC<{
                                                 {(edu.field || edu.gpa) && (
                                                     <div className="text-sm text-gray-600 mb-3 font-mono bg-gray-50 p-3 rounded border">
                                                         {edu.field && <div className="mb-1">{edu.field}</div>}
-                                                        {edu.gpa && <div>{data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: {edu.gpa}</div>}
+                                                        {edu.gpa && <div>{data.cvLanguage === 'english' ? 'GPA' : data.cvLanguage === 'russian' ? 'Средний балл' : 'ÜOMG'}: {edu.gpa}</div>}
                                                     </div>
                                                 )}
                                                 {edu.description && (
@@ -7125,7 +7132,7 @@ const VertexTemplate: React.FC<{
                                 {personalInfo.email && (
                                     <div className="flex items-center justify-between border-b border-gray-300 pb-2">
                                         <span className="text-xs uppercase tracking-wider text-gray-600 font-mono w-28 font-semibold">
-                                            {data.cvLanguage === 'english' ? 'Email' : 'E-poçt'}
+                                            {data.cvLanguage === 'english' ? 'Email' : data.cvLanguage === 'russian' ? 'Эл. почта' : 'E-poçt'}
                                         </span>
                                         <span className="text-sm text-gray-900 font-mono flex-1 text-right">{personalInfo.email}</span>
                                     </div>
@@ -7408,7 +7415,7 @@ const HorizonTemplate: React.FC<{
                                         <div className="text-sm text-gray-500 mb-2">
                                             {edu.field && <span>{edu.field}</span>}
                                             {edu.field && edu.gpa && <span> - </span>}
-                                            {edu.gpa && <span>{data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: {edu.gpa}</span>}
+                                            {edu.gpa && <span>{data.cvLanguage === 'english' ? 'GPA' : data.cvLanguage === 'russian' ? 'Средний балл' : 'ÜOMG'}: {edu.gpa}</span>}
                                         </div>
                                     )}
                                     {edu.description && (
@@ -8229,7 +8236,7 @@ const AuroraTemplate: React.FC<{
                                                 <div className="text-xs text-gray-600 mt-1">
                                                     {edu.field && <span>{edu.field}</span>}
                                                     {edu.field && edu.gpa && <span> - </span>}
-                                                    {edu.gpa && <span>{data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: {edu.gpa}</span>}
+                                                    {edu.gpa && <span>{data.cvLanguage === 'english' ? 'GPA' : data.cvLanguage === 'russian' ? 'Средний балл' : 'ÜOMG'}: {edu.gpa}</span>}
                                                 </div>
                                             )}
                                         </div>
@@ -8847,6 +8854,7 @@ const ExclusiveTemplate: React.FC<{
     onSectionSelect?: (sectionId: string | null) => void;
 }> = ({ data, sectionOrder, onSectionReorder, activeSection, onSectionSelect }) => {
     const { personalInfo, experience = [], education = [], skills = [], languages = [], projects = [], certifications = [], volunteerExperience = [], publications = [], honorsAwards = [], courses = [], testScores = [], organizations = [], customSections = [] } = data;
+    const contactLabels = getContactLabels(data.cvLanguage as any);
 
     const [activeId, setActiveId] = useState<string | null>(null);
     // Mobil yoxlaması aradan qaldırıldı - hər zaman desktop versiyası göstərilir
@@ -8977,7 +8985,7 @@ const ExclusiveTemplate: React.FC<{
                                                 <div className="text-xs text-gray-700 mt-1">
                                                     {edu.field && <span className="italic">{edu.field}</span>}
                                                     {edu.field && edu.gpa && <span> - </span>}
-                                                    {edu.gpa && <span><strong>{data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}:</strong> {edu.gpa}</span>}
+                                                    {edu.gpa && <span><strong>{data.cvLanguage === 'english' ? 'GPA' : data.cvLanguage === 'russian' ? 'Средний балл' : 'ÜOMG'}:</strong> {edu.gpa}</span>}
                                                 </div>
                                             )}
                                         </div>
@@ -9519,6 +9527,7 @@ const ExclusiveTemplate: React.FC<{
                                             <div className="text-blue-600 uppercase font-bold text-xs mb-2">
                                                 <p>
                                                     {data.cvLanguage?.includes('en') ? 'Email' : 
+                                                     data.cvLanguage === 'russian' ? 'Эл. почта' :
                                                      data.cvLanguage?.includes('tr') ? 'E-posta' : 'E-poçt'}
                                                 </p>
                                             </div>
@@ -10168,7 +10177,7 @@ const EssenceTemplate: React.FC<{
                                                 </span>
                                             )}
                                             {edu.gpa && (
-                                                <p className="text-xs text-gray-500">{data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: {edu.gpa}</p>
+                                                <p className="text-xs text-gray-500">{data.cvLanguage === 'english' ? 'GPA' : data.cvLanguage === 'russian' ? 'Средний балл' : 'ÜOMG'}: {edu.gpa}</p>
                                             )}
                                             {edu.description && (
                                                 <div className="text-xs text-gray-700 mt-2 leading-relaxed">
@@ -10504,7 +10513,7 @@ const ClarityTemplate: React.FC<{
                                                         colorAdjust: 'exact'
                                                     }}
                                                 >
-                                                    {data.cvLanguage === 'english' ? 'Email' : 'E-poçt'}
+                                                    {data.cvLanguage === 'english' ? 'Email' : data.cvLanguage === 'russian' ? 'Эл. почта' : 'E-poçt'}
                                                 </div>
                                                 <div className="font-semibold">{personalInfo.email}</div>
                                             </div>
@@ -10843,7 +10852,7 @@ const ClarityTemplate: React.FC<{
                                                         className="text-gray-600 text-sm mt-1"
                                                         style={{ fontSize: '13px' }}
                                                     >
-                                                        {[edu.field, edu.gpa && `${data.cvLanguage === 'english' ? 'GPA' : 'ÜOMG'}: ${edu.gpa}`].filter(Boolean).join(' • ')}
+                                                        {[edu.field, edu.gpa && `${data.cvLanguage === 'english' ? 'GPA' : data.cvLanguage === 'russian' ? 'Средний балл' : 'ÜOMG'}: ${edu.gpa}`].filter(Boolean).join(' • ')}
                                                     </p>
                                                 )}
                                             </div>

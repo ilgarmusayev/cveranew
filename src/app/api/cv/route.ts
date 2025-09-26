@@ -148,6 +148,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Import section name manager
+    const { generateSectionNamesForLanguage, detectSectionsNeedingTranslation } = await import('@/lib/sectionNameManager');
+    
+    // Map cvLanguage to proper format
+    const targetLanguage = cvLanguage === 'en' ? 'english' : 
+                          cvLanguage === 'ru' ? 'russian' : 'azerbaijani';
+    
+    // Set cvLanguage in cv_data and generate section names
+    cv_data.cvLanguage = targetLanguage;
+    
+    // Detect sections that exist in cv_data and generate appropriate section names
+    const sectionsWithData = detectSectionsNeedingTranslation(cv_data);
+    const sectionNames = generateSectionNamesForLanguage(sectionsWithData, targetLanguage);
+    cv_data.sectionNames = sectionNames;
+
+    console.log('🏷️ Generated section names for', targetLanguage, ':', sectionNames);
+
     const cv = await prisma.cV.create({
       data: {
         userId: decoded.userId,

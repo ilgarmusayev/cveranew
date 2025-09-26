@@ -90,6 +90,21 @@ export function CVTranslationPanel({
         'Technical terms preservation'
       ],
       warning: 'Note: Translation process may take a few minutes'
+    },
+    russian: {
+      title: 'ИИ Перевод',
+      description: 'Переведите всё содержимое резюме профессионально с помощью ИИ',
+      fullTranslation: 'Полный перевод резюме',
+      advancedOptions: 'Дополнительные опции',
+      currentLang: 'Текущий язык: Русский',
+      targetLang: 'Целевой язык: Азербайджанский',
+      features: [
+        'Перевод профессиональной терминологии',
+        'Контекстно-зависимый перевод',
+        'Точный перевод должностей и навыков',
+        'Сохранение технических терминов'
+      ],
+      warning: 'Примечание: Процесс перевода может занять несколько минут'
     }
   };
 

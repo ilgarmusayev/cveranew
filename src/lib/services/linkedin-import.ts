@@ -1201,7 +1201,7 @@ export class LinkedInImportService {
    * Generate AI-powered professional summary for paid users
    * This is now a separate method that can be called manually
    */
-  async generateAISummary(userId: string, cvId: string): Promise<{ success: boolean; summary?: string; error?: string; quotaExceeded?: boolean }> {
+  async generateAISummary(userId: string, cvId: string, preferredLanguage?: string): Promise<{ success: boolean; summary?: string; error?: string; quotaExceeded?: boolean }> {
     try {
       // Check user tier
       const user = await prisma.user.findUnique({
@@ -1250,8 +1250,8 @@ export class LinkedInImportService {
         };
       }
 
-      // Detect CV language - with improved detection
-      let cvLanguage = cvData.cvLanguage || 'azerbaijani';
+      // Use preferred language first, then CV language, then default to Azerbaijani
+      let cvLanguage = preferredLanguage || cvData.cvLanguage || 'azerbaijani';
       
       // Auto-detect language from content if not set
       if (!cvData.cvLanguage) {
@@ -1268,25 +1268,30 @@ export class LinkedInImportService {
 
         const combinedText = (personalInfoText + ' ' + experienceText).toLowerCase();
 
-        // Simple language detection based on common words
+        // Language detection with Russian support
         const englishWords = ['the', 'and', 'for', 'with', 'experience', 'company', 'work', 'project', 'manager', 'developer'];
         const azerbaijaniWords = ['və', 'üçün', 'ilə', 'təcrübə', 'şirkət', 'iş', 'layihə', 'menecer', 'inkişaf'];
+        const russianWords = ['и', 'в', 'на', 'с', 'для', 'опыт', 'работа', 'компания', 'проект', 'менеджер', 'разработчик'];
 
         const englishScore = englishWords.filter(word => combinedText.includes(word)).length;
         const azerbaijaniScore = azerbaijaniWords.filter(word => combinedText.includes(word)).length;
+        const russianScore = russianWords.filter(word => combinedText.includes(word)).length;
 
-        if (englishScore > azerbaijaniScore && englishScore > 2) {
+        if (russianScore > englishScore && russianScore > azerbaijaniScore && russianScore > 1) {
+          cvLanguage = 'russian';
+        } else if (englishScore > azerbaijaniScore && englishScore > 2) {
           cvLanguage = 'english';
         } else {
           cvLanguage = 'azerbaijani';
         }
 
-        console.log(`🌐 Auto-detected CV language: ${cvLanguage} (EN: ${englishScore}, AZ: ${azerbaijaniScore})`);
+        console.log(`🌐 Auto-detected CV language: ${cvLanguage} (EN: ${englishScore}, AZ: ${azerbaijaniScore}, RU: ${russianScore})`);
       } else {
         console.log(`🌐 Using CV language from data: ${cvLanguage}`);
       }
 
       const isEnglish = cvLanguage === 'english';
+      const isRussian = cvLanguage === 'russian';
 
       console.log(`🌐 Generating AI summary in ${cvLanguage}...`);
 
@@ -1307,6 +1312,18 @@ Experience: ${experience.slice(0, 2).map((exp: any) => `${exp.position} at ${exp
 Skills: ${skills.slice(0, 6).map((skill: any) => skill.name || skill).join(', ')}
 
 Requirements: Third-person perspective only, no time-based phrases or experience years, focus on achievements and practical impact, highlight unique value proposition, professional and authentic tone, 60-80 words, 4-5 sentences. Generate the summary:`;
+        } else if (isRussian) {
+          prompt = `Напишите профессиональное резюме строго на основе предоставленной информации. Текст должен быть в третьем лице (не от первого лица). Избегайте фраз типа "с опытом работы X лет". Вместо этого подчеркните качество опыта, конкретные результаты и уникальные сильные стороны. Не используйте клише, такие как "ответственный" или "результатоориентированный". Резюме должно звучать аутентично, подчеркивать практическое применение навыков и измеримое влияние, четко показывать ценность, которую кандидат может принести организации.
+
+Данные резюме:
+Должность: ${personalInfo.title || experience[0]?.position || 'Специалист'}
+Местоположение: ${personalInfo.location || ''}
+
+Опыт: ${experience.slice(0, 2).map((exp: any) => `${exp.position} в ${exp.company}`).join(', ')}
+
+Навыки: ${skills.slice(0, 6).map((skill: any) => skill.name || skill).join(', ')}
+
+Требования: Только от третьего лица, никаких временных фраз или лет опыта, фокус на достижениях и практическом влиянии, подчеркните уникальное ценностное предложение, профессиональный и аутентичный тон, 60-80 слов, 4-5 предложений. Сгенерируйте резюме:`;
         } else {
           prompt = `CV üçün peşəkar xülasə yaz. Yalnız CV-dəki məlumatlara əsaslan. Mətn 3-cü tərəf üslubunda olsun, "mən" formasından istifadə etmə. "X il təcrübəyə malikdir" tipli ifadələr işlətmə. Onun əvəzinə namizədin təcrübəsinin keyfiyyətini, nəticələrini və fərqləndirici tərəflərini vurğula. Klişe ifadələrdən ("məsuliyyətli", "nəticəyönümlü") uzaq dur. Mətn HR mütəxəssislərinin diqqətini çəkəcək, inandırıcı və unikallıq hissi verən üslubda yazılsın.
 
@@ -1348,6 +1365,18 @@ Requirements:
 - 60-80 words, 4-5 sentences
 
 Generate the executive summary:`;
+        } else if (isRussian) {
+          prompt = `Напишите профессиональное резюме руководителя строго на основе предоставленной информации. Текст должен быть в третьем лице (не от первого лица). Избегайте фраз типа "с опытом работы X лет". Вместо этого подчеркните качество опыта, управленческие достижения и стратегическое влияние. Используйте язык руководящего уровня и показывайте результаты, подкрепленные цифрами.
+
+Данные резюме руководителя:
+Должность: ${personalInfo.title || experience[0]?.position || 'Старший специалист'}
+Местоположение: ${personalInfo.location || ''}
+
+Опыт: ${experience.slice(0, 2).map((exp: any) => `${exp.position} в ${exp.company}`).join(', ')}
+
+Навыки: ${skills.slice(0, 6).map((skill: any) => skill.name || skill).join(', ')}
+
+Требования: От третьего лица руководящая перспектива, никаких временных фраз или лет опыта, фокус на достижения руководства и стратегическое влияние, подчеркните уникальное руководящее ценностное предложение, профессиональный тон руководящего уровня, 60-80 слов, 4-5 предложений. Сгенерируйте руководящее резюме:`;
         } else {
           prompt = `CV üçün peşəkar icraçı xülasəsi yaz. Yalnız CV-dəki məlumatlara əsaslan. Mətn 3-cü tərəf üslubunda olsun, "mən" formasından istifadə etmə. "X il təcrübəyə malikdir" tipli ifadələr işlətmə. Onun əvəzinə namizədin təcrübəsinin keyfiyyətini, rəhbərlik nailiyyətlərini və strateji təsirini vurğula. İcraçı səviyyəli dil istifadə et və rəqəmlərlə dəstəklənən nəticələri göstər.
 
@@ -1367,6 +1396,8 @@ Tələblər: 3-cü tərəf icraçı baxımından, vaxt əsaslı ifadələr yox, 
       if (!prompt) {
         if (isEnglish) {
           prompt = `Write a professional CV summary in third-person perspective based on: ${personalInfo.title || 'Professional'} in ${personalInfo.location || 'various locations'}. Skills: ${skills.slice(0, 4).map((skill: any) => skill.name || skill).join(', ')}. Focus on achievements and impact. 60-80 words.`;
+        } else if (isRussian) {
+          prompt = `Напишите профессиональное резюме от третьего лица на основе: ${personalInfo.title || 'Специалист'} в ${personalInfo.location || 'различных местах'}. Навыки: ${skills.slice(0, 4).map((skill: any) => skill.name || skill).join(', ')}. Сосредоточьтесь на достижениях и влиянии. 60-80 слов.`;
         } else {
           prompt = `Bu CV üçün peşəkar xülasə yaz: ${personalInfo.title || 'Peşəkar'}, ${personalInfo.location || 'müxtəlif yerlər'}. Bacarıqlar: ${skills.slice(0, 4).map((skill: any) => skill.name || skill).join(', ')}. Nailiyyətlərə fokus. 60-80 söz.`;
         }
@@ -1413,7 +1444,9 @@ Tələblər: 3-cü tərəf icraçı baxımından, vaxt əsaslı ifadələr yox, 
             success: false,
             error: isEnglish 
               ? 'AI API failed. Please try again in a few minutes.' 
-              : 'AI API uğursuz oldu. Zəhmət olmasa bir neçə dəqiqə sonra yenidən cəhd edin.',
+              : isRussian 
+                ? 'AI API не работает. Пожалуйста, попробуйте еще раз через несколько минут.'
+                : 'AI API uğursuz oldu. Zəhmət olmasa bir neçə dəqiqə sonra yenidən cəhd edin.',
             quotaExceeded: isQuotaError
           };
         }
@@ -1469,7 +1502,9 @@ Tələblər: 3-cü tərəf icraçı baxımından, vaxt əsaslı ifadələr yox, 
             success: false, 
             error: isEnglish ? 
               'AI service is temporarily unavailable due to high demand. Please try again later.' :
-              'AI xidməti yüksək tələb səbəbindən müvəqqəti əlçatan deyil. Zəhmət olmasa sonra yenidən cəhd edin.',
+              isRussian ?
+                'AI сервис временно недоступен из-за высокого спроса. Пожалуйста, попробуйте позже.' :
+                'AI xidməti yüksək tələb səbəbindən müvəqqəti əlçatan deyil. Zəhmət olmasa sonra yenidən cəhd edin.',
             quotaExceeded: true
           };
         } else if (apiError.message && apiError.message.includes('quota')) {
@@ -1477,7 +1512,9 @@ Tələblər: 3-cü tərəf icraçı baxımından, vaxt əsaslı ifadələr yox, 
             success: false, 
             error: isEnglish ?
               'AI service quota exceeded. Please try again tomorrow or contact support.' :
-              'AI xidməti kvotası aşılıb. Sabah yenidən cəhd edin və ya dəstəklə əlaqə saxlayın.'
+              isRussian ?
+                'Квота AI сервиса превышена. Попробуйте завтра или обратитесь в поддержку.' :
+                'AI xidməti kvotası aşılıb. Sabah yenidən cəhd edin və ya dəstəklə əlaqə saxlayın.'
           };
         } else {
           throw apiError; // Re-throw for general error handling

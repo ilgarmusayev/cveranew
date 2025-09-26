@@ -21,14 +21,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
     }
 
-    const { cvId } = await request.json();
+    const { cvId, language } = await request.json();
 
     if (!cvId) {
       return NextResponse.json({ error: 'CV ID is required' }, { status: 400 });
     }
 
-    // Generate AI summary using the authenticated user's ID
-    const result = await linkedInImportService.generateAISummary(payload.userId, cvId);
+    // Generate AI summary using the authenticated user's ID and language preference
+    const result = await linkedInImportService.generateAISummary(payload.userId, cvId, language);
 
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });

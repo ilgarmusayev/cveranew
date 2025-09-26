@@ -68,6 +68,28 @@ const CV_TRANSLATION_CONTEXT = {
       'Programming', 'Web Development', 'Mobile App Development', 'Database Management',
       'Project Management', 'Team Leadership', 'Customer Service', 'Sales & Marketing'
     ]
+  },
+
+  russian: {
+    systemPrompt: `Вы специалист по переводу профессионального содержания резюме. 
+    Следуйте этим рекомендациям:
+    - Используйте профессиональную терминологию
+    - Сохраняйте стандартные выражения резюме
+    - Не изменяйте названия компаний и технические термины
+    - Переводите с учетом контекста
+    - Поддерживайте формальный и профессиональный тон`,
+
+    jobTitles: [
+      'Старший инженер', 'Инженер-программист', 'Frontend разработчик',
+      'Backend разработчик', 'Full Stack разработчик', 'UI/UX дизайнер',
+      'Менеджер проектов', 'Продакт-менеджер', 'Менеджер по продажам', 'HR специалист',
+      'Финансовый аналитик', 'Маркетинг специалист', 'Бизнес-аналитик'
+    ],
+
+    skills: [
+      'Программирование', 'Веб-разработка', 'Разработка мобильных приложений', 'Управление базами данных',
+      'Управление проектами', 'Руководство командой', 'Обслуживание клиентов', 'Продажи и маркетинг'
+    ]
   }
 };
 
@@ -176,14 +198,17 @@ export class OpenAITranslationService implements AITranslationService {
 
   private buildTranslationPrompt(text: string, fromLang: CVLanguage, toLang: CVLanguage, systemPrompt: string): string {
     const langNames = {
-      azerbaijani: fromLang === 'azerbaijani' ? 'Azərbaycan dilindən' : 'Azerbaijani',
-      english: toLang === 'english' ? 'English' : 'İngilis dilinə'
+      azerbaijani: 'Azərbaycan dili',
+      english: 'English',
+      russian: 'Русский язык'
     };
 
     if (toLang === 'azerbaijani') {
-      return `Bu CV məzmununu ${langNames.english}-dən ${langNames.azerbaijani} tərcümə edin. Peşəkar terminologiya və konteksti saxlayın:\n\n"${text}"`;
+      return `Bu CV məzmununu ${langNames[fromLang]}-dən ${langNames.azerbaijani}-nə tərcümə edin. Peşəkar terminologiya və konteksti saxlayın:\n\n"${text}"`;
+    } else if (toLang === 'russian') {
+      return `Переведите это содержание резюме с ${langNames[fromLang]} на ${langNames.russian}. Сохраняйте профессиональную терминологию и контекст:\n\n"${text}"`;
     } else {
-      return `Translate this CV content from ${langNames.azerbaijani} to ${langNames.english}. Maintain professional terminology and context:\n\n"${text}"`;
+      return `Translate this CV content from ${langNames[fromLang]} to ${langNames.english}. Maintain professional terminology and context:\n\n"${text}"`;
     }
   }
 
@@ -213,16 +238,40 @@ export class OpenAITranslationService implements AITranslationService {
         'Mühəndis': 'Engineer',
         'Menecer': 'Manager',
         'Mütəxəssis': 'Specialist'
+      },
+      russian: {
+        'Software Engineer': 'Инженер-программист',
+        'Project Manager': 'Менеджер проектов',
+        'Senior Developer': 'Старший разработчик',
+        'Full Stack Developer': 'Full Stack разработчик',
+        'Frontend Developer': 'Frontend разработчик',
+        'Backend Developer': 'Backend разработчик',
+        'UI/UX Designer': 'UI/UX дизайнер',
+        'Data Analyst': 'Аналитик данных',
+        'Business Analyst': 'Бизнес-аналитик',
+        'Product Manager': 'Продакт-менеджер',
+        'Proqram Təminatı Mühəndisi': 'Инженер-программист',
+        'Layihə Meneceri': 'Менеджер проектов',
+        'Böyük Developer': 'Старший разработчик',
+        'Verilənlər Analitiki': 'Аналитик данных',
+        'Biznes Analitiki': 'Бизнес-аналитик',
+        'Məhsul Meneceri': 'Продакт-менеджер',
+        'Dizayner': 'Дизайнер',
+        'Mühəndis': 'Инженер',
+        'Menecer': 'Менеджер',
+        'Mütəxəssis': 'Специалист'
       }
     };
 
-    const translations = basicTranslations[toLang];
+    const translations = basicTranslations[toLang as keyof typeof basicTranslations];
+    if (!translations) return text;
+
     let translatedText = text;
 
     // Apply basic word-by-word translation for known terms
     Object.entries(translations).forEach(([original, translation]) => {
       const regex = new RegExp(`\\b${original}\\b`, 'gi');
-      translatedText = translatedText.replace(regex, translation);
+      translatedText = translatedText.replace(regex, translation as string);
     });
 
     return translatedText;
@@ -239,7 +288,8 @@ export class GoogleTranslateService implements AITranslationService {
     try {
       const langCodes = {
         azerbaijani: 'az',
-        english: 'en'
+        english: 'en',
+        russian: 'ru'
       };
 
       const url = `${TRANSLATION_API_CONFIG.apiUrl}?client=gtx&sl=${langCodes[fromLang]}&tl=${langCodes[toLang]}&dt=t&q=${encodeURIComponent(text)}`;

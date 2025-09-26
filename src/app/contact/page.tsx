@@ -74,7 +74,7 @@ export default function ContactPage() {
       subtitle: 'Обратитесь к нам с вопросами, предложениями или за поддержкой',
       contactInfo: {
         title: 'Контактная информация',
-        email: 'Email',
+        email: 'Электронная почта',
         support: 'Поддержка',
         socialMedia: 'Социальные сети',
         businessHours: 'Рабочие часы',
