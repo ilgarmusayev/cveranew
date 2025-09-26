@@ -167,6 +167,7 @@ const formatDate = (dateString: string, cvLanguage?: string): string => {
 
     const language = cvLanguage?.toLowerCase() || 'az';
     const isEnglish = language.includes('en');
+    const isRussian = language.includes('ru') || language === 'russian';
 
     // Handle different date formats
     let formattedDate = dateString.trim();
@@ -176,9 +177,14 @@ const formatDate = (dateString: string, cvLanguage?: string): string => {
         const [year, month] = formattedDate.split('-');
         const monthNum = parseInt(month);
 
-        const monthNames = isEnglish ?
-            ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] :
-            ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'İyn', 'İyl', 'Avq', 'Sen', 'Okt', 'Noy', 'Dek'];
+        let monthNames: string[];
+        if (isEnglish) {
+            monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        } else if (isRussian) {
+            monthNames = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+        } else {
+            monthNames = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'İyn', 'İyl', 'Avq', 'Sen', 'Okt', 'Noy', 'Dek'];
+        }
 
         if (monthNum >= 1 && monthNum <= 12) {
             formattedDate = `${monthNames[monthNum - 1]} ${year}`;
@@ -202,10 +208,24 @@ const formatDate = (dateString: string, cvLanguage?: string): string => {
             'Yanvar': 'January', 'Fevral': 'February', 'Mart': 'March', 'Aprel': 'April',
             'Iyun': 'June', 'Iyul': 'July', 'Avqust': 'August', 'Sentyabr': 'September',
             'Oktyabr': 'October', 'Noyabr': 'November', 'Dekabr': 'December'
+        },
+        ru: {
+            'Jan': 'Янв', 'Feb': 'Фев', 'Jun': 'Июн', 'Jul': 'Июл', 'Aug': 'Авг',
+            'Sep': 'Сен', 'Oct': 'Окт', 'Nov': 'Ноя', 'Dec': 'Дек',
+            'January': 'Январь', 'February': 'Февраль', 'March': 'Март', 'April': 'Апрель',
+            'May': 'Май', 'June': 'Июнь', 'July': 'Июль', 'August': 'Август', 'September': 'Сентябрь',
+            'October': 'Октябрь', 'November': 'Ноябрь', 'December': 'Декабрь',
+            // Convert from Azerbaijani to Russian
+            'Yan': 'Янв', 'Fev': 'Фев', 'Mar': 'Мар', 'Apr': 'Апр',
+            'İyn': 'Июн', 'İyl': 'Июл', 'Avq': 'Авг', 'Sen': 'Сен',
+            'Okt': 'Окт', 'Noy': 'Ноя', 'Dek': 'Дек',
+            'Yanvar': 'Январь', 'Fevral': 'Февраль', 'Mart': 'Март', 'Aprel': 'Апрель',
+            'İyun': 'Июнь', 'İyul': 'Июль', 'Avqust': 'Август', 'Sentyabr': 'Сентябрь',
+            'Oktyabr': 'Октябрь', 'Noyabr': 'Ноябрь', 'Dekabr': 'Декабрь'
         }
     };
 
-    const languageKey = isEnglish ? 'en' : 'az';
+    const languageKey = isEnglish ? 'en' : isRussian ? 'ru' : 'az';
 
     // Replace month names based on language
     if (monthTranslations[languageKey]) {
@@ -230,6 +250,8 @@ const getCurrentText = (cvLanguage?: string): string => {
     let currentText = '';
     if (language.includes('en')) {
         currentText = 'Present';
+    } else if (language.includes('ru') || language === 'russian') {
+        currentText = 'Настоящее время';
     } else if (language.includes('tr')) {
         currentText = 'Devam ediyor';
     } else {
@@ -312,6 +334,28 @@ const getSectionName = (sectionKey: string, cvLanguage?: string, customSectionNa
             testScores: 'Test Scores',
             organizations: 'Organizations'
         },
+        ru: {
+            summary: 'Резюме',
+            professionalSummary: 'Профессиональное резюме',
+            experience: 'Опыт работы',
+            professionalExperience: 'Профессиональный опыт',
+            education: 'Образование',
+            skills: 'Навыки',
+            technicalSkills: 'Технические навыки',
+            softSkills: 'Личные качества',
+            coreCompetencies: 'Основные компетенции',
+            languages: 'Языки',
+            projects: 'Проекты',
+            keyProjects: 'Ключевые проекты',
+            certifications: 'Сертификаты',
+            volunteerExperience: 'Волонтерский опыт',
+            volunteerWork: 'Волонтерская работа',
+            publications: 'Публикации',
+            honorsAwards: 'Награды и достижения',
+            courses: 'Курсы',
+            testScores: 'Результаты тестов',
+            organizations: 'Организации'
+        },
         tr: {
             summary: 'Özet',
             professionalSummary: 'Profesyonel Özet',
@@ -339,6 +383,7 @@ const getSectionName = (sectionKey: string, cvLanguage?: string, customSectionNa
     // Determine language (default to Azerbaijani)
     const language = cvLanguage?.toLowerCase() || 'az';
     const languageKey = language.includes('en') ? 'en' :
+                        language.includes('ru') || language === 'russian' ? 'ru' :
                         language.includes('tr') ? 'tr' : 'az';
 
     let sectionName = sectionNames[languageKey]?.[sectionKey] || sectionNames['az'][sectionKey] || sectionKey;

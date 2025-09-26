@@ -326,7 +326,7 @@ Xülasəni generasiya et:`;
       const { geminiAI, apiKeyId } = await getGeminiAI();
       
       const model = geminiAI.getGenerativeModel({ 
-        model: 'gemini-1.5-flash',
+        model: 'gemini-pro-latest',
         generationConfig: {
           temperature: 0.9, // High creativity for variety
           topP: 0.95, // Diverse token sampling

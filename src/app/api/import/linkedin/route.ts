@@ -128,7 +128,7 @@ async function generateLinkedInAISkills(profileData: any, existingSkills: any[])
     }
     `;
 
-    const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = geminiAI.getGenerativeModel({ model: 'gemini-pro-latest' });
     
     try {
       console.log('🔄 AI skills çağırışı...');

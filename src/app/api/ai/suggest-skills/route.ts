@@ -409,7 +409,7 @@ Randomization: ${randomSeed}
     });
 
     console.log('🚀 Making Gemini AI request...');
-    const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = geminiAI.getGenerativeModel({ model: 'gemini-pro-latest' });
     const result = await model.generateContent(prompt);
     const aiResponse = result.response.text().trim();
     console.log('✅ Gemini AI response received successfully');

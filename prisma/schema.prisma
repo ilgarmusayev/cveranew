@@ -39,6 +39,7 @@ model CV {
   title      String
   cv_data    Json
   templateId String?
+  cvLanguage String?             @default("az")
   createdAt  DateTime            @default(now())
   updatedAt  DateTime            @updatedAt
   user       User                @relation("UserCVs", fields: [userId], references: [id])
@@ -48,15 +49,15 @@ model CV {
 }
 
 model Template {
-  id            String   @id @default(uuid())
-  name          String
-  tier          String
-  previewUrl    String
-  description   String?  // Azərbaycan dili açıqlaması
-  description_en String? // İngilis dili açıqlaması
-  description_ru String? // Rus dili açıqlaması
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id             String   @id @default(uuid())
+  name           String
+  tier           String
+  previewUrl     String
+  description    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  description_en String?
+  description_ru String?
 }
 
 model Subscription {

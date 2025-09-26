@@ -2,15 +2,63 @@ import { NextRequest } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { verifyJWT } from '@/lib/jwt';
 import { prisma } from '@/lib/prisma';
+import { getBestApiKey, recordApiUsage, markApiKeyFailed } from '@/lib/api-service';
+import { validateApiKeyForService, formatApiKeyDisplay } from '@/lib/api-key-validator';
+import { MONTH_NAMES } from '@/lib/cvLanguage';
 
-// Initialize Gemini AI
-function initializeGeminiAI() {
-  const geminiApiKey = process.env.GEMINI_API_KEY;
-  if (!geminiApiKey) {
-    throw new Error('GEMINI_API_KEY environment variable tapılmadı');
+// Get Gemini AI instance using API keys from database
+const getGeminiAI = async () => {
+  try {
+    console.log('🔍 Attempting to get Gemini API key from database...');
+    const apiKeyInfo = await getBestApiKey('gemini');
+    
+    if (!apiKeyInfo) {
+      console.log('⚠️ No database API keys found, falling back to environment variables...');
+      // Fallback to environment variables if no DB keys available
+      const fallbackKeys = [
+        process.env.GEMINI_API_KEY,
+        process.env.GEMINI_API_KEY_2,
+        process.env.GEMINI_API_KEY_3
+      ].filter(Boolean) as string[];
+      
+      if (fallbackKeys.length === 0) {
+        throw new Error('No Gemini API keys configured in database or environment');
+      }
+      
+      // Try each fallback key
+      for (const key of fallbackKeys) {
+        const isValidFormat = validateApiKeyForService(key, 'gemini');
+        if (isValidFormat) {
+          console.log(`🔄 Using fallback Gemini API key from environment: ${formatApiKeyDisplay(key)}`);
+          return {
+            geminiAI: new GoogleGenerativeAI(key),
+            apiKeyId: null
+          };
+        } else {
+          console.error(`❌ Invalid Gemini API key format in environment: ${formatApiKeyDisplay(key)}`);
+        }
+      }
+      
+      throw new Error('All environment API keys have invalid format');
+    }
+    
+    // Validate database API key format
+    const isValidFormat = validateApiKeyForService(apiKeyInfo.apiKey, 'gemini');
+    if (!isValidFormat) {
+      console.error(`❌ Invalid Gemini API key format in database: ${formatApiKeyDisplay(apiKeyInfo.apiKey)}`);
+      throw new Error('Invalid Gemini API key format in database');
+    }
+    
+    console.log(`✅ Using valid Gemini API key from database (ID: ${apiKeyInfo.id}): ${formatApiKeyDisplay(apiKeyInfo.apiKey)}`);
+    return {
+      geminiAI: new GoogleGenerativeAI(apiKeyInfo.apiKey),
+      apiKeyId: apiKeyInfo.id
+    };
+  } catch (error) {
+    console.error('❌ Error getting Gemini AI instance:', error);
+    throw error;
   }
-  return new GoogleGenerativeAI(geminiApiKey);
-}
+};
 
 // Language mappings for better translation
 const LANGUAGE_NAMES = {
@@ -130,11 +178,78 @@ function restoreLinks(content: any, linkMap: Map<string, string>): any {
   return recursivelyRestoreLinks(content);
 }
 
-// Function to translate CV sections
-async function translateCVContent(content: any, targetLanguage: string, sourceLanguage: string = 'auto') {
-  const geminiAI = initializeGeminiAI();
-  const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+// Function to translate dates according to target language
+function translateDates(content: any, targetLanguage: string): any {
+  if (!content || !MONTH_NAMES[targetLanguage as keyof typeof MONTH_NAMES]) {
+    return content;
+  }
 
+  const monthNames = MONTH_NAMES[targetLanguage as keyof typeof MONTH_NAMES];
+  const englishMonths = MONTH_NAMES.english;
+  const azMonths = MONTH_NAMES.azerbaijani;
+  
+  function translateDateInString(text: string): string {
+    if (!text || typeof text !== 'string') return text;
+    
+    let translatedText = text;
+    
+    // Replace English month names with target language
+    englishMonths.forEach((englishMonth, index) => {
+      const regex = new RegExp(`\\b${englishMonth}\\b`, 'gi');
+      translatedText = translatedText.replace(regex, monthNames[index]);
+    });
+    
+    // Replace Azerbaijani month names with target language
+    azMonths.forEach((azMonth, index) => {
+      const regex = new RegExp(`\\b${azMonth}\\b`, 'gi');
+      translatedText = translatedText.replace(regex, monthNames[index]);
+    });
+    
+    return translatedText;
+  }
+  
+  function recursivelyTranslateDates(obj: any): any {
+    if (Array.isArray(obj)) {
+      return obj.map(item => recursivelyTranslateDates(item));
+    } else if (obj && typeof obj === 'object') {
+      const newObj: any = {};
+      for (const [key, value] of Object.entries(obj)) {
+        // Check if this field likely contains dates
+        if (key.toLowerCase().includes('date') || 
+            key.toLowerCase().includes('duration') ||
+            key.toLowerCase().includes('period') ||
+            key === 'startDate' || 
+            key === 'endDate') {
+          newObj[key] = translateDateInString(value as string);
+        } else {
+          newObj[key] = recursivelyTranslateDates(value);
+        }
+      }
+      return newObj;
+    } else if (typeof obj === 'string') {
+      return translateDateInString(obj);
+    }
+    return obj;
+  }
+  
+  return recursivelyTranslateDates(content);
+}
+
+// Function to translate CV sections with retry logic
+async function translateCVContent(content: any, targetLanguage: string, sourceLanguage: string = 'auto', retryCount: number = 0) {
+  const maxRetries = 2;
+  let geminiAI, apiKeyId;
+  
+  try {
+    const result = await getGeminiAI();
+    geminiAI = result.geminiAI;
+    apiKeyId = result.apiKeyId;
+  } catch (error) {
+    console.error('❌ Failed to get Gemini AI instance:', error);
+    throw new Error('AI xidmətinə qoşulmaq mümkün olmadı');
+  }
+  
+  const model = geminiAI.getGenerativeModel({ model: 'gemini-pro-latest' });
   const targetLangName = LANGUAGE_NAMES[targetLanguage as keyof typeof LANGUAGE_NAMES] || targetLanguage;
   const sourceLangName = sourceLanguage === 'auto' ? 'mətndə olan dil' : LANGUAGE_NAMES[sourceLanguage as keyof typeof LANGUAGE_NAMES];
 
@@ -286,11 +401,65 @@ OUTPUT: [
     // Restore all protected links
     const finalContent = restoreLinks(translatedContent, linkMap);
     
+    // Record successful API usage
+    if (apiKeyId) {
+      await recordApiUsage(apiKeyId, true, 'CV translation completed successfully');
+    }
+    
     console.log('✅ Link protection applied successfully:', linkMap.size, 'links protected');
     return finalContent;
   } catch (error) {
     console.error('Translation error:', error);
-    throw new Error('Tərcümə zamanı xəta baş verdi');
+    
+    let errorMessage = 'Unknown error';
+    let userFriendlyMessage = 'Tərcümə zamanı xəta baş verdi';
+    
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      
+      // Handle specific error types
+      if (error.message.includes('404') && error.message.includes('model')) {
+        userFriendlyMessage = 'AI modeli əlçatan deyil. Daha sonra yenidən cəhd edin.';
+        console.error('❌ Model not found error - API key might be invalid or model version not supported');
+      } else if (error.message.includes('API key')) {
+        userFriendlyMessage = 'API açarı problemi. Yenidən cəhd edilir...';
+        console.error('❌ API key error detected');
+      } else if (error.message.includes('quota') || error.message.includes('limit')) {
+        userFriendlyMessage = 'API limitə çatdı. Bir az gözləyin və yenidən cəhd edin.';
+        console.error('❌ API quota/limit exceeded');
+      } else if (error.message.includes('network') || error.message.includes('fetch')) {
+        userFriendlyMessage = 'Şəbəkə problemi. İnternet bağlantınızı yoxlayın.';
+        console.error('❌ Network error detected');
+      }
+    }
+    
+    // Record failed API usage
+    if (apiKeyId) {
+      await recordApiUsage(apiKeyId, false, `Translation failed: ${errorMessage}`);
+      
+      // Mark API key as failed only for certain error types
+      if (errorMessage.includes('404') || errorMessage.includes('401') || errorMessage.includes('403')) {
+        await markApiKeyFailed(apiKeyId, `API key error: ${errorMessage}`);
+        console.log(`🚫 API key ${apiKeyId} marked as failed due to: ${errorMessage}`);
+      }
+    }
+    
+    // Retry logic for certain errors
+    if (retryCount < maxRetries) {
+      const shouldRetry = errorMessage.includes('404') || 
+                         errorMessage.includes('API key') || 
+                         errorMessage.includes('network') ||
+                         errorMessage.includes('fetch') ||
+                         errorMessage.includes('timeout');
+      
+      if (shouldRetry) {
+        console.log(`🔄 Retrying translation (attempt ${retryCount + 1}/${maxRetries}) due to: ${errorMessage}`);
+        await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000)); // Progressive delay
+        return translateCVContent(content, targetLanguage, sourceLanguage, retryCount + 1);
+      }
+    }
+    
+    throw new Error(userFriendlyMessage);
   }
 }
 
@@ -344,6 +513,30 @@ function getDefaultSectionNames(targetLanguage: string): Record<string, string> 
       recommendations: 'Recommendations',
       courses: 'Courses',
       customSections: 'Additional Sections'
+    },
+    'ru': {
+      personalInfo: 'Личная информация',
+      summary: 'Профессиональное резюме',
+      professionalSummary: 'Профессиональное резюме',
+      experience: 'Опыт работы',
+      professionalExperience: 'Профессиональный опыт',
+      education: 'Образование',
+      skills: 'Навыки',
+      technicalSkills: 'Технические навыки',
+      softSkills: 'Личные навыки',
+      coreCompetencies: 'Основные компетенции',
+      languages: 'Языки',
+      projects: 'Проекты',
+      keyProjects: 'Ключевые проекты',
+      certifications: 'Сертификаты',
+      volunteerExperience: 'Волонтерский опыт',
+      volunteerWork: 'Волонтерская работа',
+      publications: 'Публикации',
+      honorsAwards: 'Награды и достижения',
+      testScores: 'Результаты тестов',
+      recommendations: 'Рекомендации',
+      courses: 'Курсы',
+      customSections: 'Дополнительные разделы'
     }
   };
 
@@ -654,8 +847,10 @@ export async function POST(req: NextRequest) {
     const languageMapping: { [key: string]: string } = {
       'azerbaijani': 'az',
       'english': 'en',
+      'russian': 'ru',
       'az': 'az',
-      'en': 'en'
+      'en': 'en',
+      'ru': 'ru'
     };
 
     const mappedTargetLanguage = languageMapping[targetLanguage] || targetLanguage;
@@ -694,16 +889,20 @@ export async function POST(req: NextRequest) {
     const translatedContent = await translateCVContent(translatableContent, mappedTargetLanguage, sourceLanguage);
     console.log('🎯 Translation completed with keys:', Object.keys(translatedContent || {}));
 
+    // Translate dates in the translated content
+    const contentWithTranslatedDates = translateDates(translatedContent, mappedTargetLanguage);
+    console.log('📅 Dates translated for target language:', mappedTargetLanguage);
+
     // Get default section names for target language
     const defaultSectionNames = getDefaultSectionNames(mappedTargetLanguage);
 
     console.log('🏷️ Default section names for target language:', defaultSectionNames);
-    console.log('🔄 Translated section names from AI:', translatedContent.sectionNames);
+    console.log('🔄 Translated section names from AI:', contentWithTranslatedDates.sectionNames);
 
     // FORCE section names translation - use AI translated names or defaults
     const finalSectionNames = {
       ...defaultSectionNames, // Start with defaults for target language
-      ...(translatedContent.sectionNames || {}) // Override with AI translated names
+      ...(contentWithTranslatedDates.sectionNames || {}) // Override with AI translated names
     };
 
     console.log('✅ Final section names:', finalSectionNames);
@@ -711,17 +910,18 @@ export async function POST(req: NextRequest) {
     // Merge translated content back with original CV data, preserving structure
     const translatedData = {
       ...cvToTranslate,
-      ...translatedContent,
+      ...contentWithTranslatedDates,
       // CRITICAL: Preserve original personal info and merge only translated fields
       personalInfo: {
         ...cvToTranslate.personalInfo, // Keep ALL original personal info (names, contact, etc.)
-        ...(translatedContent.personalInfo || {}) // Add only translated fields (summary, title, etc.)
+        ...(contentWithTranslatedDates.personalInfo || {}) // Add only translated fields (summary, title, etc.)
       },
-      cvLanguage: targetLanguage, // Use original frontend language code
+      cvLanguage: targetLanguage === 'russian' ? 'russian' : targetLanguage, // Use original frontend language code
       sectionNames: finalSectionNames, // Ensure section names are properly set
       translationMetadata: {
         sourceLanguage: sourceLanguage,
-        targetLanguage: mappedTargetLanguage,
+        targetLanguage: mappedTargetLanguage, // Backend language code (ru)
+        frontendTargetLanguage: targetLanguage, // Frontend language code (russian)
         translatedAt: new Date().toISOString(),
         translatedBy: 'Gemini AI',
         originalLanguage: cvToTranslate.cvLanguage || sourceLanguage,

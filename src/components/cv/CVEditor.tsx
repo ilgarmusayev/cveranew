@@ -261,6 +261,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             aiTranslate: 'AI Tərcümə',
             fontSettings: 'Font tənzimləmələri',
             fontManager: 'Font İdarə',
+
             saving: 'Yadda saxlanılır...',
             saved: 'Yadda saxlanıldı',
             downloadPDF: 'PDF Yüklə',
@@ -294,6 +295,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             aiTranslate: 'AI Translate',
             fontSettings: 'Font settings',
             fontManager: 'Font Manager',
+
             saving: 'Saving...',
             saved: 'Saved',
             downloadPDF: 'Download PDF',
@@ -327,6 +329,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             aiTranslate: 'ИИ Перевод',
             fontSettings: 'Настройки шрифта',
             fontManager: 'Менеджер шрифтов',
+
             saving: 'Сохранение...',
             saved: 'Сохранено',
             downloadPDF: 'Скачать PDF',
@@ -407,7 +410,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 organizations: cvData.organizations || [],
                 customSections: cvData.customSections || [],
                 sectionOrder: cvData.sectionOrder && cvData.sectionOrder.length > 0 ? cvData.sectionOrder : defaultSectionOrder,
-                cvLanguage: cvData.cvLanguage || 'azerbaijani'
+                cvLanguage: cvData.cvLanguage || 'azerbaijani',
+                sectionNames: cvData.sectionNames || {}
             };
 
             console.log('✅ CVEditor initialized CV state with publications:', result.publications);
@@ -421,7 +425,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             title: 'Yeni CV',
             templateId: 'basic',
             ...defaultData,
-            sectionOrder: defaultSectionOrder
+            sectionOrder: defaultSectionOrder,
+            sectionNames: {}
         };
     });
 
@@ -471,6 +476,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
     // Auto-save states - hybrid system (debounced + periodic)
     const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
     const [periodicSaveTimer, setPeriodicSaveTimer] = useState<NodeJS.Timeout | null>(null);
+
     const [lastSavedHash, setLastSavedHash] = useState<string>('');
     const [isDirty, setIsDirty] = useState(false);
     const [lastSaveTime, setLastSaveTime] = useState<number>(Date.now());
@@ -724,6 +730,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
         };
     }, [cv.id, lastSaveTime, isDirty, saving]);
 
+
+
     // Auto save function - hybrid system with performance optimization
     const handleAutoSave = useCallback(async (trigger: 'debounced' | 'periodic' = 'debounced') => {
         if (!cv.id || saving || !isDirty) return;
@@ -800,6 +808,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
         // isDirty set et ki save edilsin
         setIsDirty(true);
     };
+
+
 
       const handleSave = useCallback(async () => {
         setSaving(true);
@@ -1335,6 +1345,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                     </svg>
                                     {content.fontManager}
                                 </button>
+
+
                             </div>
                         </div>
                         
@@ -1437,6 +1449,10 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                 </svg>
                                 {content.fontManager}
                             </button>
+
+
+
+
 
                             {/* Mobile Status Indicator */}
                             <div className="md:hidden flex items-center ml-auto">

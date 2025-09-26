@@ -1,6 +1,10 @@
 /**
- * AI Translation Panel Component
- * Complete translation interface for CV content
+ * AI Translation Panel Compone  const handleFullTranslation = async (targetLanguage: CVLanguage | 'russian') => {
+    // AI tercümə artıq bütün istifadəçilər üçün mövcuddur
+
+    try {
+      setTargetLanguageInTranslation(targetLanguage as any);
+      resetTranslationState();Complete translation interface for CV content
  */
 
 import React, { useState } from 'react';
@@ -28,16 +32,16 @@ export function CVTranslationPanel({
 }: CVTranslationPanelProps) {
   const { translationState, translateFullCV, resetTranslationState } = useAITranslation();
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [targetLanguageInTranslation, setTargetLanguageInTranslation] = useState<CVLanguage | null>(null);
+  const [targetLanguageInTranslation, setTargetLanguageInTranslation] = useState<CVLanguage | 'russian' | null>(null);
   
   // AI translation permission check - Artıq bütün istifadəçilər AI tercümə edə bilər
   const canUseAI = true;
 
-  const handleFullTranslation = async (targetLanguage: CVLanguage) => {
+  const handleFullTranslation = async (targetLanguage: CVLanguage | 'russian') => {
     // AI tercümə artıq bütün istifadəçilər üçün mövcuddur
 
     try {
-      setTargetLanguageInTranslation(targetLanguage);
+      setTargetLanguageInTranslation(targetLanguage as any);
       resetTranslationState();
 
       console.log('🌐 CVTranslationPanel: Starting full CV translation...', {
@@ -47,7 +51,7 @@ export function CVTranslationPanel({
       });
 
       // Translate the CV using the enhanced API
-      const translatedCV = await translateFullCV(cvData, currentLanguage, targetLanguage);
+      const translatedCV = await translateFullCV(cvData, currentLanguage, targetLanguage as any);
 
       console.log('✅ CVTranslationPanel: Translation completed, updating state...', {
         translatedKeys: Object.keys(translatedCV || {}),
@@ -59,8 +63,10 @@ export function CVTranslationPanel({
       // This ensures the UI immediately reflects the translated content
       onCVUpdate(translatedCV);
 
-      // Update the language in the UI
-      onLanguageChange(targetLanguage);
+            // Update the language in the UI (only for supported CVLanguages)
+      if (targetLanguage === 'azerbaijani' || targetLanguage === 'english') {
+        onLanguageChange(targetLanguage);
+      }
 
       // Force re-render by updating component state as well
       console.log('🔄 CVTranslationPanel: Frontend state updated with translated content');
@@ -77,22 +83,24 @@ export function CVTranslationPanel({
 
   const labels = {
     azerbaijani: {
-      title: 'Süni İntellekt ilə Tərcümə',
-      description: 'Bütün CV məzmununu Sİ vasitəsilə peşəkar şəkildə tərcümə edin',
-      fullTranslation: 'Tam CV Tərcümə',
-      advancedOptions: 'Ətraflı Seçimlər',
-      currentLang: 'Hazırki dil: Azərbaycan',
+      title: 'AI Tərcümə',
+      description: 'Bütün CV məzmununuzu AI ilə tərcümə edin',
+      fullTranslation: 'Tam CV Tərcüməsi',
+      advancedOptions: 'Əlavə Seçimlər',
+      currentLang: 'Hazırkı dil: Azərbaycan',
       targetLang: 'Hədəf dil: İngilis',
-      current: 'Hazırki',
+      current: 'Hazırkı',
       featuresTitle: 'Xüsusiyyətlər:',
-      translateTo: 'Tərcümə ediləcək:',
+      translateTo: 'Tərcümə et:',
       languageNames: {
         azerbaijani: 'Azərbaycan dili',
-        english: 'English'
+        english: 'English',
+        russian: 'Русский'
       },
       languageSubtitles: {
         azerbaijani: 'Azerbaijani',
-        english: 'İngilis dili'
+        english: 'İngilis dili',
+        russian: 'Rus dili'
       },
       features: [
         'Peşəkar terminologiya tərcüməsi',
@@ -114,11 +122,13 @@ export function CVTranslationPanel({
       translateTo: 'Translate to:',
       languageNames: {
         azerbaijani: 'Azərbaycan dili',
-        english: 'English'
+        english: 'English',
+        russian: 'Русский'
       },
       languageSubtitles: {
         azerbaijani: 'Azerbaijani',
-        english: 'İngilis dili'
+        english: 'İngilis dili',
+        russian: 'Russian'
       },
       features: [
         'Professional terminology translation',
@@ -140,11 +150,13 @@ export function CVTranslationPanel({
       translateTo: 'Перевести на:',
       languageNames: {
         azerbaijani: 'Azərbaycan dili',
-        english: 'English'
+        english: 'English',
+        russian: 'Русский'
       },
       languageSubtitles: {
         azerbaijani: 'Азербайджанский',
-        english: 'Английский язык'
+        english: 'Английский язык',
+        russian: 'Русский'
       },
       features: [
         'Перевод профессиональной терминологии',
@@ -157,7 +169,66 @@ export function CVTranslationPanel({
   };
 
   const content = labels[uiLanguage];
-  const targetLanguage: CVLanguage = currentLanguage === 'azerbaijani' ? 'english' : 'azerbaijani';
+  
+  // Create dynamic current language display
+  // Helper function to detect if CV is in Russian
+  const isCurrentlyRussian = () => {
+    return (currentLanguage as any) === 'russian' ||
+           cvData?.cvLanguage === 'russian' ||
+           cvData?.translationMetadata?.targetLanguage === 'ru' || 
+           cvData?.translationMetadata?.targetLanguage === 'russian' ||
+           cvData?.translationMetadata?.frontendTargetLanguage === 'russian' ||
+           (cvData?.personalInfo?.summary && /[а-яё]/i.test(cvData.personalInfo.summary)) ||
+           (cvData?.personalInfo?.title && /[а-яё]/i.test(cvData.personalInfo.title));
+  };
+
+  // Helper function to detect if CV is in English
+  const isCurrentlyEnglish = () => {
+    return (currentLanguage as any) === 'english' ||
+           (cvData?.cvLanguage === 'english' && !isCurrentlyRussian());
+  };
+
+  // Helper function to detect if CV is in Azerbaijani (default)
+  const isCurrentlyAzerbaijani = () => {
+    return (currentLanguage as any) === 'azerbaijani' ||
+           (cvData?.cvLanguage === 'azerbaijani') ||
+           (!isCurrentlyRussian() && !isCurrentlyEnglish()); // Default fallback
+  };
+
+  const getCurrentLanguageDisplay = () => {
+    console.log('🔍 Debug cvData for language detection:', {
+      cvLanguage: cvData?.cvLanguage,
+      currentLanguage: currentLanguage,
+      translationMetadata: cvData?.translationMetadata,
+      hasCyrillicText: cvData?.personalInfo?.summary ? /[а-яё]/i.test(cvData.personalInfo.summary) : false,
+      summaryPreview: cvData?.personalInfo?.summary?.substring(0, 50),
+      uiLanguage: uiLanguage
+    });
+    
+    const isRussian = isCurrentlyRussian();
+    const isEnglish = isCurrentlyEnglish();
+    
+    console.log('🔍 Language detection result:', { 
+      isRussian, 
+      isEnglish, 
+      currentLanguage, 
+      cvLanguage: cvData?.cvLanguage 
+    });
+    
+    if (isRussian) {
+      return uiLanguage === 'azerbaijani' ? 'Hazırkı dil: Rus' : 
+             uiLanguage === 'english' ? 'Current language: Russian' : 'Текущий язык: Русский';
+    }
+    
+    if (isEnglish) {
+      return uiLanguage === 'azerbaijani' ? 'Hazırkı dil: İngilis' : 
+             uiLanguage === 'english' ? 'Current language: English' : 'Текущий язык: Английский';
+    }
+    
+    // Default to Azerbaijani
+    return uiLanguage === 'azerbaijani' ? 'Hazırkı dil: Azərbaycan' : 
+           uiLanguage === 'english' ? 'Current language: Azerbaijani' : 'Текущий язык: Азербайджанский';
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
@@ -180,20 +251,11 @@ export function CVTranslationPanel({
         )}
       </div>
 
-      {/* Language Status */}
+      {/* Current Language Status */}
       <div className="bg-gray-50 rounded-lg p-4 mb-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-            <span className="text-sm font-medium text-gray-700">{content.currentLang}</span>
-          </div>
-          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-          </svg>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-            <span className="text-sm font-medium text-gray-700">{content.targetLang}</span>
-          </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+          <span className="text-sm font-medium text-gray-700">{getCurrentLanguageDisplay()}</span>
         </div>
       </div>
 
@@ -206,12 +268,12 @@ export function CVTranslationPanel({
           {/* Azerbaijani Option */}
           <button
             onClick={() => handleFullTranslation('azerbaijani')}
-            disabled={!canUseAI || translationState.isTranslating || currentLanguage === 'azerbaijani'}
+            disabled={!canUseAI || translationState.isTranslating || isCurrentlyAzerbaijani()}
             className={`
               relative p-4 border-2 rounded-lg text-left transition-all duration-200
               ${!canUseAI 
                 ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-50'
-                : currentLanguage === 'azerbaijani' 
+                : isCurrentlyAzerbaijani() 
                 ? 'border-green-200 bg-green-50 cursor-not-allowed' 
                 : translationState.isTranslating 
                   ? 'border-gray-200 bg-gray-50 cursor-not-allowed'
@@ -225,7 +287,7 @@ export function CVTranslationPanel({
                 <div className="font-medium text-gray-900">{content.languageNames.azerbaijani}</div>
                 <div className="text-sm text-gray-500">{content.languageSubtitles.azerbaijani}</div>
               </div>
-              {currentLanguage === 'azerbaijani' && (
+              {isCurrentlyAzerbaijani() && (
                 <div className="flex items-center gap-1 text-green-600">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -247,12 +309,12 @@ export function CVTranslationPanel({
           {/* English Option */}
           <button
             onClick={() => handleFullTranslation('english')}
-            disabled={!canUseAI || translationState.isTranslating || currentLanguage === 'english'}
+            disabled={!canUseAI || translationState.isTranslating || isCurrentlyEnglish()}
             className={`
               relative p-4 border-2 rounded-lg text-left transition-all duration-200
               ${!canUseAI 
                 ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-50'
-                : currentLanguage === 'english' 
+                : isCurrentlyEnglish() 
                 ? 'border-green-200 bg-green-50 cursor-not-allowed' 
                 : translationState.isTranslating 
                   ? 'border-gray-200 bg-gray-50 cursor-not-allowed'
@@ -266,7 +328,7 @@ export function CVTranslationPanel({
                 <div className="font-medium text-gray-900">{content.languageNames.english}</div>
                 <div className="text-sm text-gray-500">{content.languageSubtitles.english}</div>
               </div>
-              {currentLanguage === 'english' && (
+              {isCurrentlyEnglish() && (
                 <div className="flex items-center gap-1 text-green-600">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -276,6 +338,47 @@ export function CVTranslationPanel({
               )}
               {/* LOADING ONLY ON SELECTED TARGET LANGUAGE */}
               {translationState.isTranslating && targetLanguageInTranslation === 'english' && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 rounded-lg">
+                  <svg className="w-6 h-6 animate-spin text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                </div>
+              )}
+            </div>
+          </button>
+
+          {/* Russian Option */}
+          <button
+            onClick={() => handleFullTranslation('russian')}
+            disabled={!canUseAI || translationState.isTranslating || isCurrentlyRussian()}
+            className={`
+              relative p-4 border-2 rounded-lg text-left transition-all duration-200
+              ${!canUseAI 
+                ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-50'
+                : isCurrentlyRussian()
+                ? 'border-green-200 bg-green-50 cursor-not-allowed' 
+                : translationState.isTranslating 
+                  ? 'border-gray-200 bg-gray-50 cursor-not-allowed'
+                  : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50 cursor-pointer'
+              }
+            `}
+          >
+            <div className="flex items-center gap-3">
+              <div className="text-2xl">🇷🇺</div>
+              <div className="flex-1">
+                <div className="font-medium text-gray-900">{content.languageNames.russian}</div>
+                <div className="text-sm text-gray-500">{content.languageSubtitles.russian}</div>
+              </div>
+              {isCurrentlyRussian() && (
+                <div className="flex items-center gap-1 text-green-600">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-xs font-medium">{content.current}</span>
+                </div>
+              )}
+              {/* LOADING ONLY ON SELECTED TARGET LANGUAGE */}
+              {translationState.isTranslating && targetLanguageInTranslation === 'russian' && (
                 <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 rounded-lg">
                   <svg className="w-6 h-6 animate-spin text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />

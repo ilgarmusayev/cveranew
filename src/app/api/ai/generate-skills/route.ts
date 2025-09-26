@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
 
     // Generate AI skills using Gemini with maximum randomness
     const model = geminiAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-pro-latest',
       generationConfig: {
         temperature: 1.5, // Maksimal yaradıcılıq və çeşitlilik (0.0-2.0)
         topP: 0.98, // Çox yüksək diversity (0.0-1.0)

@@ -9,6 +9,8 @@ import StandardHeader from '@/components/ui/StandardHeader';
 import Footer from '@/components/Footer';
 import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 
+type CVLanguage = 'az' | 'en' | 'ru';
+
 // Template interface
 interface Template {
   id: string;
@@ -31,6 +33,9 @@ function NewCVContent() {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
   const [templatesLoading, setTemplatesLoading] = useState(true);
   
+  // CV Language state
+  const [selectedCVLanguage, setSelectedCVLanguage] = useState<CVLanguage>('az');
+  
   // Site language mətnləri
   const content = {
     azerbaijani: {
@@ -44,6 +49,10 @@ function NewCVContent() {
       // Form fields
       cvTitleLabel: 'CV Başlığı *',
       cvTitlePlaceholder: 'məsələn: Frontend Developer CV',
+      
+      // CV Language selection
+      cvLanguageTitle: 'CV Dili *',
+      cvLanguageDescription: 'Seçdiyiniz dil vasitəsi ilə sistem CV-dəki başlıqları təyin edəcək və Süni intellektin tövsiyələrini həmin dildə təqdim edəcək.',
       
       // Template selection
       templateSectionTitle: 'CV Şablonu *',
@@ -100,7 +109,7 @@ function NewCVContent() {
       nextStepsTitle: 'Növbəti addımlar',
       nextStep1: 'CV yaradıldıqdan sonra redaktə səhifəsinə yönləndiriləcəksiniz',
       nextStep2: 'İş təcrübəsi, təhsil və bacarıqlarınızı əlavə edə bilərsiniz',
-
+      nextStep3: 'Şablonu istənilən vaxt dəyişə bilərsiniz',
       nextStep4: 'CV-ni PDF formatında yükləyə bilərsiniz',
     },
     english: {
@@ -115,9 +124,13 @@ function NewCVContent() {
       cvTitleLabel: 'CV Title *',
       cvTitlePlaceholder: 'e.g.: Frontend Developer CV',
       
+      // CV Language selection
+      cvLanguageTitle: 'CV Language *',
+      cvLanguageDescription: 'The selected language will determine CV section headers and AI recommendations will be provided in the same language.',
+      
       // Template selection
       templateSectionTitle: 'CV Template *',
-      templateSectionDescription: 'Choose a template that will determine the appearance of your CV',
+      templateSectionDescription: 'Choose a template that will determine how your resume looks',
       templateLoadingText: 'Loading templates...',
       templateSelectPlaceholder: 'Select template',
       
@@ -170,7 +183,7 @@ function NewCVContent() {
       nextStepsTitle: 'Next Steps',
       nextStep1: 'After creating the CV, you will be redirected to the edit page',
       nextStep2: 'You can add work experience, education and skills',
-
+      nextStep3: 'You can change the template at any time',
       nextStep4: 'You can download the CV in PDF format',
     },
     russian: {
@@ -184,6 +197,10 @@ function NewCVContent() {
       // Form fields
       cvTitleLabel: 'Название резюме *',
       cvTitlePlaceholder: 'например: Резюме Frontend разработчика',
+      
+      // CV Language selection
+      cvLanguageTitle: 'Язык резюме *',
+      cvLanguageDescription: 'Выбранный язык определит заголовки разделов резюме, а рекомендации ИИ будут предоставлены на том же языке.',
       
       // Template selection
       templateSectionTitle: 'Шаблон резюме *',
@@ -447,6 +464,7 @@ function NewCVContent() {
         body: JSON.stringify({
           title: formData.title,
           templateId: selectedTemplateId,
+          cvLanguage: selectedCVLanguage,
           cv_data: cvData
         })
       });
@@ -523,6 +541,61 @@ function NewCVContent() {
                   disabled={loading}
                   required
                 />
+              </div>
+
+              {/* CV Language Selection */}
+              <div>
+                <label htmlFor="cvLanguage" className="block text-sm font-medium text-gray-700 mb-2">
+                  {content.cvLanguageTitle}
+                </label>
+                <p className="text-sm text-gray-600 mb-3">{content.cvLanguageDescription}</p>
+                <div className="space-y-3 mb-3">
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      id="cv-lang-az"
+                      name="cvLanguage"
+                      value="az"
+                      checked={selectedCVLanguage === 'az'}
+                      onChange={(e) => setSelectedCVLanguage(e.target.value as CVLanguage)}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      disabled={loading}
+                    />
+                    <label htmlFor="cv-lang-az" className="ml-2 text-sm font-medium text-gray-700">
+                      Azərbaycan dili
+                    </label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      id="cv-lang-en"
+                      name="cvLanguage"
+                      value="en"
+                      checked={selectedCVLanguage === 'en'}
+                      onChange={(e) => setSelectedCVLanguage(e.target.value as CVLanguage)}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      disabled={loading}
+                    />
+                    <label htmlFor="cv-lang-en" className="ml-2 text-sm font-medium text-gray-700">
+                      English
+                    </label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      id="cv-lang-ru"
+                      name="cvLanguage"
+                      value="ru"
+                      checked={selectedCVLanguage === 'ru'}
+                      onChange={(e) => setSelectedCVLanguage(e.target.value as CVLanguage)}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      disabled={loading}
+                    />
+                    <label htmlFor="cv-lang-ru" className="ml-2 text-sm font-medium text-gray-700">
+                      Русский
+                    </label>
+                  </div>
+                </div>
               </div>
 
               {/* Template Selection */}

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { MONTH_NAMES } from '@/lib/cvLanguage';
 
 // Type definitions for CV data structures
 interface PersonalInfo {
@@ -47,6 +48,71 @@ interface CVData {
   cvLanguage?: string; // Add CV language field
 }
 
+// Function to translate dates in CV data for preview
+function translateDatesForPreview(cvData: CVData): CVData {
+  if (!cvData.cvLanguage) return cvData;
+  
+  // Map language codes to MONTH_NAMES keys
+  const languageMap: Record<string, string> = {
+    'russian': 'russian',
+    'ru': 'russian',
+    'english': 'english',
+    'en': 'english',
+    'azerbaijani': 'azerbaijani',
+    'az': 'azerbaijani'
+  };
+  
+  const targetLang = languageMap[cvData.cvLanguage];
+  if (!targetLang || !MONTH_NAMES[targetLang as keyof typeof MONTH_NAMES]) {
+    return cvData;
+  }
+  
+  const monthNames = MONTH_NAMES[targetLang as keyof typeof MONTH_NAMES];
+  const englishMonths = MONTH_NAMES.english;
+  const azMonths = MONTH_NAMES.azerbaijani;
+  
+  function translateDateString(text: string): string {
+    if (!text || typeof text !== 'string') return text;
+    
+    let translatedText = text;
+    
+    // Replace English month names
+    englishMonths.forEach((englishMonth, index) => {
+      const regex = new RegExp(`\\b${englishMonth}\\b`, 'gi');
+      translatedText = translatedText.replace(regex, monthNames[index]);
+    });
+    
+    // Replace Azerbaijani month names
+    azMonths.forEach((azMonth, index) => {
+      const regex = new RegExp(`\\b${azMonth}\\b`, 'gi');
+      translatedText = translatedText.replace(regex, monthNames[index]);
+    });
+    
+    return translatedText;
+  }
+  
+  // Create a deep copy and translate dates
+  const translatedData = JSON.parse(JSON.stringify(cvData));
+  
+  // Translate experience dates
+  if (translatedData.experience) {
+    translatedData.experience.forEach((exp: Experience) => {
+      if (exp.startDate) exp.startDate = translateDateString(exp.startDate);
+      if (exp.endDate) exp.endDate = translateDateString(exp.endDate);
+    });
+  }
+  
+  // Translate education dates
+  if (translatedData.education) {
+    translatedData.education.forEach((edu: Education) => {
+      if (edu.startDate) edu.startDate = translateDateString(edu.startDate);
+      if (edu.endDate) edu.endDate = translateDateString(edu.endDate);
+    });
+  }
+  
+  return translatedData;
+}
+
 // CV Preview API endpoint for PDF generation
 export async function GET(request: NextRequest) {
   try {
@@ -78,6 +144,10 @@ export async function GET(request: NextRequest) {
         { headers: { 'Content-Type': 'text/html' } }
       );
     }
+
+    // Translate dates if needed
+    cvData = translateDatesForPreview(cvData);
+    console.log('CV dates translated for language:', cvData.cvLanguage);
 
     // Generate HTML that matches the preview component exactly
     const html = generatePreviewHTML(cvData, templateId);

@@ -132,7 +132,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { title, cv_data, templateId } = await request.json();
+    const { title, cv_data, templateId, cvLanguage } = await request.json();
+
+    console.log('🔍 CV Creation: Received data:', {
+      title,
+      templateId,
+      cvLanguage,
+      hasData: !!cv_data
+    });
 
     if (!title || !cv_data) {
       return NextResponse.json(
@@ -146,14 +153,19 @@ export async function POST(request: NextRequest) {
         userId: decoded.userId,
         title: title,
         cv_data: cv_data,
-        templateId: templateId || 'professional'
-      }
+        templateId: templateId || 'professional',
+        cvLanguage: cvLanguage || 'az'
+      } as any
     });
 
     // Increment usage counter after successful CV creation
     await incrementCVUsage(decoded.userId);
 
-    console.log('✅ CV yaradıldı:', cv.id);
+    console.log('✅ CV yaradıldı:', {
+      id: cv.id,
+      cvLanguage: (cv as any).cvLanguage,
+      templateId: cv.templateId
+    });
 
     // Get updated limits for response
     const updatedLimits = await checkCVCreationLimit(decoded.userId);

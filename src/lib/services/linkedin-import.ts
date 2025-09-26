@@ -879,7 +879,7 @@ export class LinkedInImportService {
       // Try to generate summary using API service system
       try {
         const { geminiAI, apiKeyId } = await getGeminiAI();
-        const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        const model = geminiAI.getGenerativeModel({ model: 'gemini-pro-latest' });
 
         const prompt = `
           Based on the following LinkedIn profile information, create a professional summary for a CV:
@@ -1379,7 +1379,7 @@ Tələblər: 3-cü tərəf icraçı baxımından, vaxt əsaslı ifadələr yox, 
         // Try to generate summary using API service system
         try {
           const { geminiAI, apiKeyId } = await getGeminiAI();
-          const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+          const model = geminiAI.getGenerativeModel({ model: 'gemini-pro-latest' });
 
           const result = await model.generateContent(prompt);
           aiSummary = result.response.text().trim();
@@ -1516,7 +1516,7 @@ Tələblər: 3-cü tərəf icraçı baxımından, vaxt əsaslı ifadələr yox, 
         // Try to extract skills using API service system
         try {
           const { geminiAI, apiKeyId } = await getGeminiAI();
-          const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+          const model = geminiAI.getGenerativeModel({ model: 'gemini-pro-latest' });
 
           const prompt = `
             Analyze this LinkedIn profile text and extract technical skills, programming languages, frameworks, tools, and technologies mentioned. 
@@ -1699,7 +1699,7 @@ Tələblər: 3-cü tərəf icraçı baxımından, vaxt əsaslı ifadələr yox, 
       // Try to generate skill description using API service system
       try {
         const { geminiAI, apiKeyId } = await getGeminiAI();
-        const model = geminiAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        const model = geminiAI.getGenerativeModel({ model: 'gemini-pro-latest' });
 
         const result = await model.generateContent(prompt);
         aiDescription = result.response.text().trim();

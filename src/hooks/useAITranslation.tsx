@@ -36,7 +36,7 @@ export function useAITranslation(): UseAITranslationReturn {
     });
   }, []);
 
-  const translateFullCV = useCallback(async (cvData: any, fromLang: CVLanguage, toLang: CVLanguage) => {
+  const translateFullCV = useCallback(async (cvData: any, fromLang: CVLanguage, toLang: CVLanguage | 'russian') => {
     console.log('🌐 useAITranslation: Starting full CV translation...', {
       fromLang,
       toLang,
