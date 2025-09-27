@@ -82,6 +82,13 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
       professionalDesign: 'Peşəkar dizayn',
       customizable: 'Özəlləşdirə bilən',
       startCreating: 'Yeni CV yaratmağa başlayın',
+      coverLetter: 'Cover Letter',
+      createCoverLetter: 'Cover Letter yaradın',
+      coverLetterDescription: 'CV-nizə əsaslanan peşəkar cover letter yaradın. İş müraciətinizi gücləndirin!',
+      personalizedContent: 'Şəxsiləşdirilmiş məzmun',
+      professionalFormat: 'Peşəkar format',
+      quickGeneration: 'Sürətli yaradılma',
+      startCreatingCL: 'Cover Letter yaradın',
       myCVs: 'CV-lər',
       created: 'Yaradılıb',
       lastUpdated: 'Son yenilənmə',
@@ -126,6 +133,13 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
       fullControl: 'Full control',
       professionalDesign: 'Professional design',
       customizable: 'Customizable',
+      coverLetter: 'Cover Letter',
+      createCoverLetter: 'Create cover letter',
+      coverLetterDescription: 'Create a professional cover letter based on your CV. Strengthen your job application!',
+      personalizedContent: 'Personalized content',
+      professionalFormat: 'Professional format',
+      quickGeneration: 'Quick generation',
+      startCreatingCL: 'Create cover letter',
       startCreating: 'Start creating new CV',
       myCVs: 'My CVs',
       created: 'Created',
@@ -171,6 +185,13 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
       fullControl: 'Полный контроль',
       professionalDesign: 'Профессиональный дизайн',
       customizable: 'Настраиваемый',
+      coverLetter: 'Cover Letter',
+      createCoverLetter: 'Создать сопроводительное письмо',
+      coverLetterDescription: 'Создайте профессиональное сопроводительное письмо на основе вашего резюме. Усильте свою заявку на работу!',
+      personalizedContent: 'Персонализированный контент',
+      professionalFormat: 'Профессиональный формат',
+      quickGeneration: 'Быстрое создание',
+      startCreatingCL: 'Создать сопроводительное письмо',
       startCreating: 'Начать создание нового резюме',
       myCVs: 'Мои резюме',
       created: 'Создано',
@@ -481,7 +502,7 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
         </div>
 
         {/* Action Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           {/* LinkedIn Import Card */}
           <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
             <div className="flex items-center mb-6">
@@ -580,6 +601,58 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
             >
               <div className="flex items-center justify-center">
                 <span className="text-lg">{content.startCreating}</span>
+                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </button>
+          </div>
+
+          {/* Cover Letter Card */}
+          <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+            <div className="flex items-center mb-6">
+              <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mr-4">
+                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900">{content.coverLetter}</h3>
+                <p className="text-gray-600 mt-1">{content.createCoverLetter}</p>
+              </div>
+            </div>
+
+            <p className="text-gray-700 mb-6 leading-relaxed">
+              {content.coverLetterDescription}
+            </p>
+
+            <div className="space-y-3 mb-8">
+              <div className="flex items-center text-gray-700">
+                <svg className="w-5 h-5 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                {content.personalizedContent}
+              </div>
+              <div className="flex items-center text-gray-700">
+                <svg className="w-5 h-5 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                {content.professionalFormat}
+              </div>
+              <div className="flex items-center text-gray-700">
+                <svg className="w-5 h-5 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                {content.quickGeneration}
+              </div>
+            </div>
+
+            <button
+              onClick={() => router.push('/coverletter')}
+              className="w-full bg-blue-600 text-white border-2 rounded-xl px-6 py-4 font-medium hover:bg-white hover:text-blue-600 hover:border-2 hover:border-blue-600 transition-all duration-200"
+            >
+              <div className="flex items-center justify-center">
+                <span className="text-lg">{content.startCreatingCL}</span>
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>

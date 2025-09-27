@@ -15,6 +15,7 @@ export default function Footer() {
       followUs: 'Bizi izləyin:',
       services: 'Xidmətlər',
       createCV: 'CV Yaratmaq',
+      coverLetter: 'Cover Letter',
       templates: 'CV Şablonları',
       pricing: 'Qiymətlər',
       general: 'Ümumi',
@@ -30,6 +31,7 @@ export default function Footer() {
       followUs: 'Follow us:',
       services: 'Services',
       createCV: 'Create CV',
+      coverLetter: 'Cover Letter',
       templates: 'CV Templates',
       pricing: 'Pricing',
       general: 'General',
@@ -45,6 +47,7 @@ export default function Footer() {
       followUs: 'Подписывайтесь:',
       services: 'Услуги',
       createCV: 'Создать резюме',
+      coverLetter: 'Сопроводительное письмо',
       templates: 'Шаблоны резюме',
       pricing: 'Тарифы',
       general: 'Общее',
@@ -133,6 +136,7 @@ export default function Footer() {
                   <h3 className="text-base lg:text-lg font-semibold text-gray-900 mb-3 lg:mb-6">{content.services}</h3>
                   <ul className="space-y-2 lg:space-y-4">
                     <li><Link href="/dashboard" className="text-gray-600 hover:text-blue-600 transition-colors duration-200 text-xs sm:text-sm lg:text-base">{content.createCV}</Link></li>
+                    <li><Link href="/coverletter" className="text-gray-600 hover:text-blue-600 transition-colors duration-200 text-xs sm:text-sm lg:text-base">{content.coverLetter}</Link></li>
                     <li><Link href="/templates" className="text-gray-600 hover:text-blue-600 transition-colors duration-200 text-xs sm:text-sm lg:text-base">{content.templates}</Link></li>
                     <li><Link href="/pricing" className="text-gray-600 hover:text-blue-600 transition-colors duration-200 text-xs sm:text-sm lg:text-base">{content.pricing}</Link></li>
                   </ul>

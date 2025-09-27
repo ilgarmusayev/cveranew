@@ -26,6 +26,7 @@ model User {
   loginMethod      String?
   lastLogout       DateTime?
   cvs              CV[]             @relation("UserCVs")
+  coverLetters     CoverLetter[]    @relation("UserCoverLetters")
   dailyUsage       DailyUsage[]     @relation("UserDailyUsage")
   importSessions   ImportSession[]  @relation("UserImportSessions")
   payments         Payment[]        @relation("UserPayments")
@@ -41,9 +42,10 @@ model CV {
   templateId String?
   cvLanguage String?             @default("az")
   createdAt  DateTime            @default(now())
-  updatedAt  DateTime            @updatedAt
-  user       User                @relation("UserCVs", fields: [userId], references: [id])
-  fileJobs   FileGenerationJob[] @relation("CVFileJobs")
+  updatedAt    DateTime            @updatedAt
+  user         User                @relation("UserCVs", fields: [userId], references: [id])
+  fileJobs     FileGenerationJob[] @relation("CVFileJobs")
+  coverLetters CoverLetter[]       @relation("CVCoverLetters")
 
   @@index([userId])
 }
@@ -202,4 +204,23 @@ model PromoCodeUsage {
   @@unique([userId, promoCodeId])
   @@index([userId])
   @@index([promoCodeId])
+}
+
+model CoverLetter {
+  id             String   @id @default(uuid())
+  userId         String
+  cvId           String
+  jobTitle       String
+  companyName    String
+  jobDescription String   @db.Text
+  tone           String   @default("formal")
+  length         String   @default("medium")
+  content        String   @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation("UserCoverLetters", fields: [userId], references: [id])
+  cv             CV       @relation("CVCoverLetters", fields: [cvId], references: [id])
+
+  @@index([userId])
+  @@index([cvId])
 }

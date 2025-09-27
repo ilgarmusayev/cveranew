@@ -112,6 +112,7 @@ export default function StandardHeader() {
       dashboard: 'İdarəetmə Paneli',
       newCV: 'Yeni CV',
       templates: 'Şablonlar',
+      coverLetter: 'Cover Letter',
       pricing: 'Qiymətlər',
       profile: 'Profil',
       profileEdit: 'Profil Redaktəsi',
@@ -132,6 +133,7 @@ export default function StandardHeader() {
       dashboard: 'Dashboard',
       newCV: 'New CV',
       templates: 'Templates',
+      coverLetter: 'Cover Letter',
       pricing: 'Pricing',
       profile: 'Profile',
       profileEdit: 'Edit Profile',
@@ -152,6 +154,7 @@ export default function StandardHeader() {
       dashboard: 'Панель',
       newCV: 'Новое резюме',
       templates: 'Шаблоны',
+      coverLetter: 'Сопроводительное письмо',
       pricing: 'Тарифы',
       profile: 'Профиль',
       profileEdit: 'Редактировать профиль',
@@ -356,6 +359,9 @@ export default function StandardHeader() {
             </Link>
             <Link href="/templates" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
               {content.templates}
+            </Link>
+            <Link href="/coverletter" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
+              {content.coverLetter}
             </Link>
             <Link href="/pricing" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
               {content.pricing}
@@ -596,6 +602,13 @@ export default function StandardHeader() {
                 className="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all"
               >
                 {content.templates}
+              </Link>
+              <Link
+                href="/coverletter"
+                onClick={closeMobileMenu}
+                className="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all"
+              >
+                {content.coverLetter}
               </Link>
               <Link
                 href="/pricing"

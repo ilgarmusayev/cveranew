@@ -85,6 +85,7 @@ export default function Index2() {
       // CTA
       ctaTitle: 'Peşəkar CV-nizə bu gün başlayın!',
       ctaButton: 'Pulsuz CV Yaradın',
+      coverLetterButton: 'Cover Letter',
       templatesButton: 'Şablonlar',
       trustIndicator1: '100-lərlə məmnun müştəri',
       trustIndicator2: 'Təhlükəsiz və qorunan',
@@ -158,6 +159,7 @@ export default function Index2() {
       // CTA
       ctaTitle: 'Start your professional CV today!',
       ctaButton: 'Create Free CV',
+      coverLetterButton: 'Cover Letter',
       templatesButton: 'Templates',
       trustIndicator1: 'Hundreds of satisfied customers',
       trustIndicator2: 'Safe and secure',
@@ -231,6 +233,7 @@ export default function Index2() {
       // CTA
       ctaTitle: 'Начните создавать профессиональное резюме сегодня!',
       ctaButton: 'Создать бесплатное резюме',
+      coverLetterButton: 'Cover Letter',
       templatesButton: 'Шаблоны',
       trustIndicator1: 'Сотни довольных клиентов',
       trustIndicator2: 'Безопасно и надежно',
@@ -635,6 +638,7 @@ export default function Index2() {
                     </button>
                   </Link>
 
+
                   <Link href="/templates">
                     <button
                         className="group w-full sm:w-auto px-8 sm:px-10 lg:px-12 py-4 sm:py-5 lg:py-6 bg-white text-blue-600 font-bold rounded-xl sm:rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:bg-blue-50 transform hover:-translate-y-3 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl text-base sm:text-lg">
@@ -646,6 +650,22 @@ export default function Index2() {
                               d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                               d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                      </svg>
+                    </span>
+                    </button>
+                  </Link>
+
+
+                  <Link href="/coverletter">
+                    <button
+                        className="group w-full sm:w-auto px-8 sm:px-10 lg:px-12 py-4 sm:py-5 lg:py-6 bg-blue-600 text-white font-bold rounded-xl sm:rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-3 hover:scale-105 transition-all duration-300 overflow-hidden text-base sm:text-lg">
+                      <div
+                          className="absolute inset-0 bg-blue-700 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+                      <span className="relative flex items-center justify-center gap-3 sm:gap-4">
+                      {content.coverLetterButton}
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-3 transition-transform" fill="none"
+                           stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                       </svg>
                     </span>
                     </button>
