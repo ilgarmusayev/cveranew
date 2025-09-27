@@ -3,10 +3,11 @@ import { verifyJWT } from '@/lib/jwt';
 import puppeteer from 'puppeteer';
 import chromium from '@sparticuz/chromium';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
+import { withRateLimit } from '@/lib/rate-limiter';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     // Check authentication
     const authHeader = request.headers.get('Authorization');
@@ -214,3 +215,6 @@ async function generateDOCX(coverLetter: string, jobTitle?: string, companyName?
     throw error;
   }
 }
+
+// Rate limited POST export
+export const POST = withRateLimit(handlePOST, 'general');

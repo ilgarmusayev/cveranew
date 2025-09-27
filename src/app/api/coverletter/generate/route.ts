@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getGeminiApiKey, recordApiUsage, markApiKeyFailed, getBestApiKey } from '@/lib/api-service';
 import { validateApiKeyForService, formatApiKeyDisplay } from '@/lib/api-key-validator';
+import { withRateLimit } from '@/lib/rate-limiter';
 
 // Get Gemini AI instance using API keys from database
 const getGeminiAI = async () => {
@@ -206,7 +207,7 @@ NƏTICƏ: Yalnız hazır cover letter mətnini ver, heç bir əlavə izah və ya
 `;
 }
 
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     // Check authentication
     const authHeader = request.headers.get('Authorization');
@@ -309,3 +310,6 @@ export async function POST(request: NextRequest) {
     }, { status: 500 });
   }
 }
+
+// Rate limited POST export
+export const POST = withRateLimit(handlePOST, 'coverLetterGeneration');
