@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyJWT } from '@/lib/jwt';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { prisma } from '@/lib/prisma';
+import { getBestApiKey, recordApiUsage, markApiKeyFailed } from '@/lib/api-service';
+import { GeminiV1Client } from '@/lib/gemini-v1-client';
 
 const geminiAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
@@ -92,17 +94,17 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Generate AI skills using Gemini with maximum randomness
-    const model = geminiAI.getGenerativeModel({
-      model: 'gemini-pro-latest',
-      generationConfig: {
-        temperature: 1.5, // Maksimal yaradıcılıq və çeşitlilik (0.0-2.0)
-        topP: 0.98, // Çox yüksək diversity (0.0-1.0)
-        topK: 64, // Daha çox token seçenəyi
-        maxOutputTokens: 2048,
-        candidateCount: 1
-      }
-    });    // Create language-specific prompt with anti-duplicate logic
+    // Get API key info for v1 API usage
+    const apiKeyInfo = await getBestApiKey('gemini');
+    const apiKey = apiKeyInfo?.apiKey;
+    const apiKeyId = apiKeyInfo?.id;
+    
+    if (!apiKey) {
+      return NextResponse.json({
+        success: false,
+        error: 'AI xidməti mövcud deyil'
+      }, { status: 500 });
+    }    // Create language-specific prompt with anti-duplicate logic
     const getLanguagePrompt = (lang: string, textContent: string) => {
       const randomId = Math.random().toString(36).substring(7);
       const timestamp = new Date().toISOString();
@@ -263,11 +265,51 @@ export async function POST(request: NextRequest) {
     console.log('� Request count:', requestCount);
     console.log('✨ Force unique:', forceUnique);
     
-    try {
-      console.log('🚀 Calling Gemini API with enhanced creativity...');
-      const result = await model.generateContent(prompt);
-      const aiResponse = result.response.text().trim();
+    let aiResponse = '';
 
+    try {
+      console.log('🚀 Calling Gemini v1 API with Flash model...');
+      // Use v1 API with gemini-2.5-flash model (sərfəli və sürətli)
+      const geminiV1 = new GeminiV1Client(apiKey);
+      aiResponse = await geminiV1.generateContent('gemini-2.5-flash', prompt);
+      
+      // Record successful API usage
+      if (apiKeyId) {
+        await recordApiUsage(apiKeyId, true, 'AI skills generated (v1 gemini-2.5-flash)');
+      }
+      
+      console.log('✅ AI skills generated successfully with v1 API');
+    } catch (error: any) {
+      console.log(`❌ Gemini v1 API failed:`, error.message);
+      
+      // Fallback to v1 API with gemini-2.0-flash
+      try {
+        console.log('🔄 Trying fallback to gemini-2.0-flash...');
+        const geminiV1Fallback = new GeminiV1Client(apiKey);
+        aiResponse = await geminiV1Fallback.generateContent('gemini-2.0-flash', prompt);
+        
+        // Record successful API usage
+        if (apiKeyId) {
+          await recordApiUsage(apiKeyId, true, 'AI skills generated (v1 gemini-2.0-flash fallback)');
+        }
+        
+        console.log('✅ AI skills generated with fallback gemini-2.0-flash');
+      } catch (fallbackError: any) {
+        console.log(`❌ All Gemini v1 attempts failed:`, fallbackError.message);
+        
+        // Record API failure
+        if (apiKeyId) {
+          await markApiKeyFailed(apiKeyId, fallbackError.message);
+        }
+        
+        return NextResponse.json({
+          success: false,
+          error: 'AI xidməti ilə əlaqə qurmaq mümkün olmadı'
+        }, { status: 500 });
+      }
+    }
+
+    try {
       console.log('🤖 AI Response:', aiResponse);
 
       // Parse AI response

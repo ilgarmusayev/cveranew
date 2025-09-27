@@ -5,6 +5,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getGeminiApiKey, recordApiUsage, markApiKeyFailed, getBestApiKey } from '@/lib/api-service';
 import { validateApiKeyForService, formatApiKeyDisplay } from '@/lib/api-key-validator';
 import { withRateLimit } from '@/lib/rate-limiter';
+import { GeminiV1Client } from '@/lib/gemini-v1-client';
 
 // Get Gemini AI instance using API keys from database
 const getGeminiAI = async () => {
@@ -261,32 +262,63 @@ async function handlePOST(request: NextRequest) {
     let lastError: Error | null = null;
 
     try {
-      const { geminiAI, apiKeyId } = await getGeminiAI();
-      const model = geminiAI.getGenerativeModel({ model: 'gemini-pro-latest' });
+      const apiKeyInfo = await getBestApiKey('gemini');
+      const apiKey = apiKeyInfo?.apiKey;
+      const apiKeyId = apiKeyInfo?.id;
+      
+      if (!apiKey) {
+        throw new Error('No valid API key available');
+      }
+      
       const prompt = generatePrompt(cvData, jobTitle, companyName, jobDescription, tone, length, coverLetterLanguage);
-
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      coverLetter = response.text();
+      
+      // Use v1 API with gemini-2.5-flash model (sərfəli və sürətli)
+      const geminiV1 = new GeminiV1Client(apiKey);
+      coverLetter = await geminiV1.generateContent('gemini-2.5-flash', prompt);
       
       // Record successful API usage
       if (apiKeyId) {
-        await recordApiUsage(apiKeyId, true, 'Cover letter generated');
+        await recordApiUsage(apiKeyId, true, 'Cover letter generated (v1 gemini-2.5-flash)');
       }
       
-      console.log(`✅ Cover letter generated successfully`);
+      console.log(`✅ Cover letter generated successfully with v1 API`);
     } catch (error: any) {
       lastError = error;
-      console.log(`❌ Gemini API failed:`, error.message);
+      console.log(`❌ Gemini v1 API failed:`, error.message);
       
-      // Try to get API key info for error reporting
+      // Fallback to v1 API with gemini-2.0-flash
       try {
-        const { apiKeyId } = await getGeminiAI();
-        if (apiKeyId) {
-          await markApiKeyFailed(apiKeyId, error.message);
+        console.log('🔄 Trying fallback to gemini-2.0-flash...');
+        const apiKeyInfo = await getBestApiKey('gemini');
+        const apiKey = apiKeyInfo?.apiKey;
+        const apiKeyId = apiKeyInfo?.id;
+        
+        if (apiKey) {
+          const prompt = generatePrompt(cvData, jobTitle, companyName, jobDescription, tone, length, coverLetterLanguage);
+          const geminiV1Fallback = new GeminiV1Client(apiKey);
+          coverLetter = await geminiV1Fallback.generateContent('gemini-2.0-flash', prompt);
+          
+          // Record successful API usage
+          if (apiKeyId) {
+            await recordApiUsage(apiKeyId, true, 'Cover letter generated (v1 gemini-2.0-flash fallback)');
+          }
+          
+          console.log(`✅ Cover letter generated with fallback gemini-2.0-flash`);
         }
-      } catch (e) {
-        console.error('Error recording API failure:', e);
+      } catch (fallbackError: any) {
+        console.log(`❌ All Gemini v1 attempts failed:`, fallbackError.message);
+        
+        // Record API failure
+        try {
+          const apiKeyInfo = await getBestApiKey('gemini');
+          if (apiKeyInfo?.id) {
+            await markApiKeyFailed(apiKeyInfo.id, fallbackError.message);
+          }
+        } catch (e) {
+          console.error('Error recording API failure:', e);
+        }
+        
+        lastError = fallbackError;
       }
     }
 

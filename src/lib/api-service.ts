@@ -62,10 +62,65 @@ export async function getBestApiKey(service: string): Promise<ApiKeyInfo | null>
     return null;
   }
   
-  const selectedKey = validApiKeys[0];
-  console.log(`✅ Selected valid API key for ${service}: ${selectedKey.id} (${selectedKey.apiKey.substring(0, 10)}...)`);
+  // Smart selection: prefer keys with recent success and low usage
+  const scoredKeys = validApiKeys.map(key => {
+    let score = 100 - key.priority; // Lower priority = higher score
+    
+    // Bonus for recent success
+    if (key.lastResult?.includes('SUCCESS')) {
+      score += 20;
+    }
+    
+    // Penalty for recent failures
+    if (key.lastResult?.includes('FAILED')) {
+      score -= 30;
+    }
+    
+    // Penalty for high usage
+    const usageRatio = key.dailyUsage / key.dailyLimit;
+    score -= usageRatio * 50;
+    
+    // Bonus for being unused recently
+    if (!key.lastUsed || (Date.now() - key.lastUsed.getTime()) > 300000) { // 5 minutes
+      score += 10;
+    }
+    
+    return { ...key, score };
+  });
+  
+  // Sort by score (highest first)
+  scoredKeys.sort((a, b) => b.score - a.score);
+  
+  const selectedKey = scoredKeys[0];
+  console.log(`✅ Selected API key for ${service}: ${selectedKey.id} (Priority: ${selectedKey.priority}, Score: ${selectedKey.score.toFixed(1)}, Usage: ${selectedKey.dailyUsage}/${selectedKey.dailyLimit})`);
   
   return selectedKey;
+}
+
+/**
+ * Get next available API key when current one fails (smart rotation)
+ */
+export async function getNextApiKey(service: string, failedKeyId?: string): Promise<ApiKeyInfo | null> {
+  const apiKeys = await getActiveApiKeys(service);
+  
+  // Filter out the failed key and invalid formats
+  const validApiKeys = apiKeys.filter(key => {
+    if (failedKeyId && key.id === failedKeyId) {
+      return false; // Skip the failed key
+    }
+    
+    return validateApiKeyForService(key.apiKey, service);
+  });
+  
+  if (validApiKeys.length === 0) {
+    console.error(`❌ No alternative API keys available for service: ${service}`);
+    return null;
+  }
+  
+  const nextKey = validApiKeys[0];
+  console.log(`🔄 Switching to next API key for ${service}: ${nextKey.id} (Priority: ${nextKey.priority})`);
+  
+  return nextKey;
 }
 
 /**
@@ -96,13 +151,52 @@ export async function recordApiUsage(
  */
 export async function markApiKeyFailed(apiKeyId: string, error: string): Promise<void> {
   try {
+    // Check if this is an overload/quota error
+    const isOverloadError = error.includes('quota') || 
+                           error.includes('limit') || 
+                           error.includes('overload') ||
+                           error.includes('429') ||
+                           error.includes('rate limit') ||
+                           error.includes('too many requests');
+    
+    const isAuthError = error.includes('401') || 
+                       error.includes('403') || 
+                       error.includes('invalid') ||
+                       error.includes('unauthorized');
+    
     await prisma.apiKey.update({
       where: { id: apiKeyId },
       data: {
         lastResult: `FAILED: ${error}`,
-        lastUsed: new Date()
+        lastUsed: new Date(),
+        // Temporarily deactivate if quota/overload error
+        active: isOverloadError ? false : undefined,
+        // Mark for review if auth error  
+        priority: isAuthError ? 999 : undefined
       }
     });
+    
+    if (isOverloadError) {
+      console.log(`🚫 API key ${apiKeyId} temporarily deactivated due to overload/quota: ${error}`);
+      
+      // Reactivate after 1 hour for quota issues
+      setTimeout(async () => {
+        try {
+          await prisma.apiKey.update({
+            where: { id: apiKeyId },
+            data: { active: true }
+          });
+          console.log(`✅ API key ${apiKeyId} reactivated after cooldown period`);
+        } catch (e) {
+          console.error('Error reactivating API key:', e);
+        }
+      }, 60 * 60 * 1000); // 1 hour
+    }
+    
+    if (isAuthError) {
+      console.log(`🔐 API key ${apiKeyId} marked for review due to auth error: ${error}`);
+    }
+    
   } catch (error) {
     console.error('Error marking API key as failed:', error);
   }

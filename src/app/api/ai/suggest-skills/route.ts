@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyJWT } from '@/lib/jwt';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { prisma } from '@/lib/prisma';
+import { getBestApiKey, recordApiUsage, markApiKeyFailed } from '@/lib/api-service';
+import { validateApiKeyForService, formatApiKeyDisplay } from '@/lib/api-key-validator';
+import { withRateLimit } from '@/lib/rate-limiter';
+import { GeminiV1Client } from '@/lib/gemini-v1-client';
 
 // Type definitions for CV data structures
 interface Experience {
@@ -198,12 +202,53 @@ function determineIndustryContext(experience: any[], education: any[]): string {
   }
 }
 
-const geminiAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+// Get Gemini AI instance using API keys from database
+const getGeminiAI = async () => {
+  const apiKeyInfo = await getBestApiKey('gemini');
+  
+  if (!apiKeyInfo) {
+    // Fallback to environment variables if no DB keys available
+    const fallbackKeys = [
+      process.env.GEMINI_API_KEY,
+      process.env.GEMINI_API_KEY_2,
+      process.env.GEMINI_API_KEY_3
+    ].filter(Boolean) as string[];
+    
+    if (fallbackKeys.length === 0) {
+      throw new Error('No Gemini API keys configured');
+    }
+    
+    // Validate fallback key format
+    const isValidFormat = validateApiKeyForService(fallbackKeys[0], 'gemini');
+    if (!isValidFormat) {
+      console.error(`❌ Invalid Gemini API key format in environment: ${formatApiKeyDisplay(fallbackKeys[0])}`);
+      throw new Error('Invalid Gemini API key format in environment variables');
+    }
+    
+    console.log(`🔄 Using fallback Gemini API key from environment: ${formatApiKeyDisplay(fallbackKeys[0])}`);
+    return {
+      geminiAI: new GoogleGenerativeAI(fallbackKeys[0]),
+      apiKeyId: null
+    };
+  }
+  
+  // Validate database API key format
+  const isValidFormat = validateApiKeyForService(apiKeyInfo.apiKey, 'gemini');
+  if (!isValidFormat) {
+    console.error(`❌ Invalid Gemini API key format in database: ${formatApiKeyDisplay(apiKeyInfo.apiKey)}`);
+    throw new Error('Invalid Gemini API key format in database');
+  }
+  
+  console.log(`✅ Using valid Gemini API key from database (ID: ${apiKeyInfo.id}): ${formatApiKeyDisplay(apiKeyInfo.apiKey)}`);
+  return {
+    geminiAI: new GoogleGenerativeAI(apiKeyInfo.apiKey),
+    apiKeyId: apiKeyInfo.id
+  };
+};
 
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
-    console.log('🔑 Gemini API Key exists:', !!process.env.GEMINI_API_KEY);
-    console.log('🔑 Gemini API Key length:', process.env.GEMINI_API_KEY?.length || 0);
+    console.log('🔑 Starting AI skills suggestion request...');
     
     // Get JWT token from Authorization header or cookies
     const authHeader = request.headers.get('authorization');
@@ -411,10 +456,74 @@ Randomization: ${randomSeed}
     });
 
     console.log('🚀 Making Gemini AI request...');
-    const model = geminiAI.getGenerativeModel({ model: 'gemini-pro-latest' });
-    const result = await model.generateContent(prompt);
-    const aiResponse = result.response.text().trim();
-    console.log('✅ Gemini AI response received successfully');
+    
+    // Get Gemini AI with proper API key
+    let aiResponse = '';
+    let lastError: Error | null = null;
+
+    // Get API key info outside try block for scope access
+    const apiKeyInfo = await getBestApiKey('gemini');
+    const apiKey = apiKeyInfo?.apiKey;
+    const apiKeyId = apiKeyInfo?.id;
+    
+    if (!apiKey) {
+      throw new Error('No valid API key available');
+    }
+
+    try {
+      // Use v1 API with gemini-2.5-flash model
+      const geminiV1 = new GeminiV1Client(apiKey);
+      aiResponse = await geminiV1.generateContent('gemini-2.5-flash', prompt);
+      
+      // Record successful API usage
+      if (apiKeyId) {
+        await recordApiUsage(apiKeyId, true, 'AI skills suggestion generated (v1 API)');
+      }
+      
+      console.log('✅ Gemini v1 API response received successfully');
+    } catch (error: any) {
+      lastError = error;
+      console.log(`❌ Gemini v1 API failed:`, error.message);
+      
+      // Fallback to v1 API with gemini-2.0-flash
+      try {
+        console.log('🔄 Trying fallback to v1 API with gemini-2.0-flash...');
+        const geminiV1Fallback = new GeminiV1Client(apiKey);
+        aiResponse = await geminiV1Fallback.generateContent('gemini-2.0-flash', prompt);
+        
+        // Record successful API usage
+        if (apiKeyId) {
+          await recordApiUsage(apiKeyId, true, 'AI skills suggestion generated (v1 gemini-2.0-flash fallback)');
+        }
+        
+        console.log('✅ Gemini v1 API gemini-2.0-flash fallback successful');
+      } catch (fallbackError: any) {
+        console.log(`❌ Gemini v1 fallback also failed:`, fallbackError.message);
+        
+        // Final fallback to gemini-2.0-flash-lite
+        try {
+          console.log('🔄 Final fallback to gemini-2.0-flash-lite...');
+          const geminiV1FinalFallback = new GeminiV1Client(apiKey);
+          aiResponse = await geminiV1FinalFallback.generateContent('gemini-2.0-flash-lite', prompt);
+          
+          // Record successful API usage
+          if (apiKeyId) {
+            await recordApiUsage(apiKeyId, true, 'AI skills suggestion generated (v1 gemini-2.0-flash-lite)');
+          }
+          
+          console.log('✅ Gemini v1 API gemini-2.0-flash-lite successful');
+        } catch (finalError: any) {
+          console.log(`❌ All Gemini API attempts failed:`, finalError.message);
+          
+          // Record API failure
+          if (apiKeyId) {
+            await markApiKeyFailed(apiKeyId, finalError.message);
+          }
+          
+          throw finalError; // Re-throw the final error
+        }
+      }
+    }
 
     console.log('🔍 AI Response:', aiResponse);
 
@@ -776,3 +885,6 @@ function analyzeEducationRelevance(education: any): string {
 
   return 'General academic background';
 }
+
+// Rate limited POST export
+export const POST = withRateLimit(handlePOST, 'aiServices');

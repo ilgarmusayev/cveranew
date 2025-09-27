@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { getBestApiKey, recordApiUsage, markApiKeyFailed } from '@/lib/api-service';
 import { validateApiKeyForService, formatApiKeyDisplay } from '@/lib/api-key-validator';
 import { MONTH_NAMES } from '@/lib/cvLanguage';
+import { GeminiV1Client } from '@/lib/gemini-v1-client';
 
 // Get Gemini AI instance using API keys from database
 const getGeminiAI = async () => {
@@ -238,18 +239,20 @@ function translateDates(content: any, targetLanguage: string): any {
 // Function to translate CV sections with retry logic
 async function translateCVContent(content: any, targetLanguage: string, sourceLanguage: string = 'auto', retryCount: number = 0) {
   const maxRetries = 2;
-  let geminiAI, apiKeyId;
+  let apiKey, apiKeyId;
   
   try {
-    const result = await getGeminiAI();
-    geminiAI = result.geminiAI;
-    apiKeyId = result.apiKeyId;
+    const apiKeyInfo = await getBestApiKey('gemini');
+    apiKey = apiKeyInfo?.apiKey;
+    apiKeyId = apiKeyInfo?.id;
+    
+    if (!apiKey) {
+      throw new Error('No valid API key available');
+    }
   } catch (error) {
-    console.error('❌ Failed to get Gemini AI instance:', error);
+    console.error('❌ Failed to get Gemini API key:', error);
     throw new Error('AI xidmətinə qoşulmaq mümkün olmadı');
   }
-  
-  const model = geminiAI.getGenerativeModel({ model: 'gemini-pro-latest' });
   const targetLangName = LANGUAGE_NAMES[targetLanguage as keyof typeof LANGUAGE_NAMES] || targetLanguage;
   const sourceLangName = sourceLanguage === 'auto' ? 'mətndə olan dil' : LANGUAGE_NAMES[sourceLanguage as keyof typeof LANGUAGE_NAMES];
 
@@ -362,7 +365,22 @@ OUTPUT: [
 ⚠️ ÇOX ÖNƏMLİ: Cavabınızda "sectionNames" obyektini MÜTLƏQ daxil edin!
 ⚠️ SKILLS XƏBƏRDARLıĞı: Skills array-də hər skill-in category/type-ini (soft/hard/technical) heç vaxt dəyişmə və qarışdırma!
 🚫 ÖNƏMLİ: Mövcud olmayan yeni skill-lər əlavə etmə - YALNIZ mövcud skill-ləri tərcümə et!
-🎯 YALNIZ tərcümə edilmiş JSON qaytarın, başqa heç nə yazmayın:`;
+
+🔥 JSON FORMAT QAYDALARı:
+- YALNIZ valid JSON qaytarın, heç başqa mətn yox
+- JSON-da string-lər düzgün quote edilməli (double quotes)
+- Trailing comma-lar qadağandır
+- Proper escaping istifadə edin (\", \\, \/, \n və s.)
+- JSON açıq və bağlı mötərizələrlə başlayıb bitməlidir
+- Multiline string-lər üçün \n istifadə edin
+
+🎯 YALNIZ bu formatda cavab verin:
+{
+  "key": "value",
+  "array": ["item1", "item2"]
+}
+
+CAVAB YALNIZ JSON OLMALIDIR - BAŞQA HEÇ NƏ YAZMAYIN!`;
 
   // Extract and protect all links before translation
   const { content: protectedContent, linkMap } = extractAndProtectLinks(content);
@@ -376,13 +394,71 @@ OUTPUT: [
   // Add protected content to prompt
   const fullPrompt = prompt + `\n\nINPUT JSON:\n${JSON.stringify(protectedContent, null, 2)}`;
 
+  let translatedText = '';
+
   try {
-    const result = await model.generateContent(fullPrompt);
-    const response = await result.response;
-    const translatedText = response.text().trim();
+    // Use v1 API with gemini-2.5-flash model (sərfəli və sürətli)
+    const geminiV1 = new GeminiV1Client(apiKey);
+    translatedText = await geminiV1.generateContent('gemini-2.5-flash', fullPrompt);
+    
+    // Record successful API usage
+    if (apiKeyId) {
+      await recordApiUsage(apiKeyId, true, 'CV translation generated (v1 gemini-2.5-flash)');
+    }
+    
+    console.log('✅ CV translation generated successfully with v1 API');
+  } catch (error: any) {
+    console.log(`❌ Gemini v1 API failed:`, error.message);
+    
+    // Fallback to v1 API with gemini-2.0-flash
+    try {
+      console.log('🔄 Trying fallback to gemini-2.0-flash...');
+      const geminiV1Fallback = new GeminiV1Client(apiKey);
+      translatedText = await geminiV1Fallback.generateContent('gemini-2.0-flash', fullPrompt);
+      
+      // Record successful API usage
+      if (apiKeyId) {
+        await recordApiUsage(apiKeyId, true, 'CV translation generated (v1 gemini-2.0-flash fallback)');
+      }
+      
+      console.log('✅ CV translation generated with fallback gemini-2.0-flash');
+    } catch (fallbackError: any) {
+      console.log(`❌ All Gemini v1 attempts failed:`, fallbackError.message);
+      
+      // Record API failure
+      if (apiKeyId) {
+        await markApiKeyFailed(apiKeyId, fallbackError.message);
+      }
+      
+      throw fallbackError; // Re-throw the final error
+    }
+  }
+
+  try {
+    console.log('🔍 Raw AI Response length:', translatedText.length);
+    console.log('🔍 AI Response preview:', translatedText.substring(0, 500));
 
     // Clean the response and parse JSON
-    const cleanedResponse = translatedText.replace(/```json\s*|\s*```/g, '').trim();
+    let cleanedResponse = translatedText.replace(/```json\s*|\s*```/g, '').trim();
+    
+    // Remove any extra text before the first { or after the last }
+    const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      cleanedResponse = jsonMatch[0];
+    } else {
+      console.error('❌ No valid JSON found in AI response');
+      throw new Error('AI response does not contain valid JSON');
+    }
+    
+    // Additional JSON cleaning
+    cleanedResponse = cleanedResponse
+      .replace(/,\s*}/g, '}')  // Remove trailing commas
+      .replace(/,\s*]/g, ']')  // Remove trailing commas in arrays
+      .replace(/\n\s*\n/g, '\n') // Remove extra newlines
+      .trim();
+    
+    console.log('🔍 Cleaned JSON preview:', cleanedResponse.substring(0, 300));
+    
     const translatedContent = JSON.parse(cleanedResponse);
     
     // Validate that placeholders are preserved in translation
@@ -421,6 +497,9 @@ OUTPUT: [
       if (error.message.includes('404') && error.message.includes('model')) {
         userFriendlyMessage = 'AI modeli əlçatan deyil. Daha sonra yenidən cəhd edin.';
         console.error('❌ Model not found error - API key might be invalid or model version not supported');
+      } else if (error.message.includes('JSON') || error.message.includes('parse') || error.message.includes('Unterminated')) {
+        userFriendlyMessage = 'AI cavabında format xətası. Yenidən cəhd edilir...';
+        console.error('❌ JSON parse error - AI response malformed:', translatedText.substring(0, 200));
       } else if (error.message.includes('API key')) {
         userFriendlyMessage = 'API açarı problemi. Yenidən cəhd edilir...';
         console.error('❌ API key error detected');
@@ -450,7 +529,10 @@ OUTPUT: [
                          errorMessage.includes('API key') || 
                          errorMessage.includes('network') ||
                          errorMessage.includes('fetch') ||
-                         errorMessage.includes('timeout');
+                         errorMessage.includes('timeout') ||
+                         errorMessage.includes('JSON') ||
+                         errorMessage.includes('parse') ||
+                         errorMessage.includes('Unterminated');
       
       if (shouldRetry) {
         console.log(`🔄 Retrying translation (attempt ${retryCount + 1}/${maxRetries}) due to: ${errorMessage}`);

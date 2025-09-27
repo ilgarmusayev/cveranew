@@ -3,6 +3,8 @@ import { verifyJWT } from '@/lib/jwt';
 import { prisma } from '@/lib/prisma';
 import { ScrapingDogLinkedInService } from '@/lib/services/scrapingdog-linkedin';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { getBestApiKey, recordApiUsage, markApiKeyFailed } from '@/lib/api-service';
+import { GeminiV1Client } from '@/lib/gemini-v1-client';
 import axios from 'axios';
 
 // Helper function to extract and normalize LinkedIn username from various URL formats
@@ -128,13 +130,58 @@ async function generateLinkedInAISkills(profileData: any, existingSkills: any[])
     }
     `;
 
-    const model = geminiAI.getGenerativeModel({ model: 'gemini-pro-latest' });
+    // Get API key info for v1 API usage
+    const apiKeyInfo = await getBestApiKey('gemini');
+    const apiKey = apiKeyInfo?.apiKey;
+    const apiKeyId = apiKeyInfo?.id;
+    
+    if (!apiKey) {
+      throw new Error('No valid API key available');
+    }
+    
+    let aiResponse = '';
     
     try {
-      console.log('🔄 AI skills çağırışı...');
+      console.log('🔄 AI skills çağırışı v1 API ilə...');
       
-      const result = await model.generateContent(prompt);
-      const aiResponse = result.response.text().trim();
+      // Use v1 API with gemini-2.5-flash model (sərfəli və sürətli)
+      const geminiV1 = new GeminiV1Client(apiKey);
+      aiResponse = await geminiV1.generateContent('gemini-2.5-flash', prompt);
+      
+      // Record successful API usage
+      if (apiKeyId) {
+        await recordApiUsage(apiKeyId, true, 'LinkedIn AI skills generated (v1 gemini-2.5-flash)');
+      }
+      
+      console.log('✅ LinkedIn AI skills generated successfully with v1 API');
+    } catch (error: any) {
+      console.log(`❌ Gemini v1 API failed:`, error.message);
+      
+      // Fallback to v1 API with gemini-2.0-flash
+      try {
+        console.log('🔄 Trying fallback to gemini-2.0-flash...');
+        const geminiV1Fallback = new GeminiV1Client(apiKey);
+        aiResponse = await geminiV1Fallback.generateContent('gemini-2.0-flash', prompt);
+        
+        // Record successful API usage
+        if (apiKeyId) {
+          await recordApiUsage(apiKeyId, true, 'LinkedIn AI skills generated (v1 gemini-2.0-flash fallback)');
+        }
+        
+        console.log('✅ LinkedIn AI skills generated with fallback gemini-2.0-flash');
+      } catch (fallbackError: any) {
+        console.log(`❌ All Gemini v1 attempts failed:`, fallbackError.message);
+        
+        // Record API failure
+        if (apiKeyId) {
+          await markApiKeyFailed(apiKeyId, fallbackError.message);
+        }
+        
+        throw fallbackError; // Re-throw the final error
+      }
+    }
+
+    try {
 
       console.log('🔍 AI Skills Response:', aiResponse);
 

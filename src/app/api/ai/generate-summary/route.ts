@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { prisma } from '@/lib/prisma';
 import { getGeminiApiKey, recordApiUsage, markApiKeyFailed, getBestApiKey } from '@/lib/api-service';
+import { GeminiV1Client } from '@/lib/gemini-v1-client';
 
 
 // Get Gemini AI instance using API keys from database
@@ -169,9 +170,9 @@ function prepareCVDataForAI(profileData: any): string {
   return cvText;
 }
 
-// Get style-specific instructions for variety in summary generation
-function getStyleInstructions(style: string, isEnglish: boolean): string {
-  const instructions = {
+// Get comprehensive style instructions for maximum variety
+function getStyleInstructions(style: string, structure: string, pattern: string, isEnglish: boolean): string {
+  const styleMap = {
     achievement_focused: {
       en: `Focus on specific accomplishments and measurable results. Start with what the person achieved.`,
       az: `Konkret nailiyyətlər və ölçülə bilən nəticələrə fokuslan. Şəxsin nə əldə etdiyi ilə başla.`
@@ -194,8 +195,80 @@ function getStyleInstructions(style: string, isEnglish: boolean): string {
     }
   };
 
-  const instruction = instructions[style as keyof typeof instructions];
-  return instruction ? (isEnglish ? instruction.en : instruction.az) : '';
+  const structureMap = {
+    impact_first: {
+      en: `Start with the most significant impact or achievement, then explain capabilities.`,
+      az: `Ən böyük təsir və ya nailiyyətlə başla, sonra qabiliyyətləri izah et.`
+    },
+    skill_showcase: {
+      en: `Lead with core competencies, then demonstrate their application and results.`,
+      az: `Əsas bacarıqlarla başla, sonra onların tətbiqi və nəticələrini göstər.`
+    },
+    problem_solver: {
+      en: `Position as someone who identifies and solves complex challenges effectively.`,
+      az: `Mürəkkəb problemləri təyin edən və effektiv həll edən şəxs kimi təqdim et.`
+    },
+    value_creator: {
+      en: `Emphasize how they create tangible value and drive organizational success.`,
+      az: `Necə konkret dəyər yaratdıqlarını və təşkilati uğura təsir etdiklərini vurğula.`
+    },
+    industry_expert: {
+      en: `Present as a recognized authority with deep industry knowledge and insights.`,
+      az: `Dərin sahə bilik və görüşləri olan tanınmış mütəxəssis kimi təqdim et.`
+    },
+    strategic_leader: {
+      en: `Highlight strategic thinking and leadership in driving organizational goals.`,
+      az: `Strateji düşüncə və təşkilati məqsədlərə nail olmaqda liderliyi vurğula.`
+    },
+    innovation_driver: {
+      en: `Show how they drive innovation and bring fresh perspectives to challenges.`,
+      az: `Necə innovasiyaya rəhbərlik etdiklərini və problemlərə yeni baxış gətirdiklərini göstər.`
+    },
+    results_builder: {
+      en: `Focus on systematic approach to building measurable results and outcomes.`,
+      az: `Ölçülə bilən nəticələr və yekunlar yaratmaqda sistematik yanaşmaya fokuslan.`
+    }
+  };
+
+  const patternMap = {
+    active_dynamic: {
+      en: `Use dynamic action verbs and energetic language. Keep sentences punchy and impactful.`,
+      az: `Dinamik hərəkət felləri və enerjili dil işlət. Cümlələri dolğun və təsirli saxla.`
+    },
+    consultative: {
+      en: `Adopt an advisory tone. Present expertise as guidance and strategic insight.`,
+      az: `Məsləhətçi ton işlət. Ekspertizanı rəhbərlik və strateji görüş kimi təqdim et.`
+    },
+    technical_precise: {
+      en: `Use precise technical language. Focus on exact methodologies and specific outcomes.`,
+      az: `Dəqiq texniki dil işlət. Xüsusi metodologiya və konkret nəticələrə fokuslan.`
+    },
+    business_focused: {
+      en: `Emphasize business impact, ROI, and organizational benefits. Use commercial language.`,
+      az: `Biznes təsiri, gəlirlilik və təşkilati faydaları vurğula. Kommersiya dili işlət.`
+    },
+    creative_engaging: {
+      en: `Use engaging, creative language flow. Make the summary memorable and distinctive.`,
+      az: `Cəlbedici və yaradıcı dil axını işlət. Xülasəni yadda qalan və fərqləndirici et.`
+    },
+    analytical_sharp: {
+      en: `Present information with analytical precision. Use sharp, insightful observations.`,
+      az: `Məlumatı analitik dəqiqliklə təqdim et. Kəskin və dərindən görüşlər işlət.`
+    }
+  };
+
+  const styleInstruction = styleMap[style as keyof typeof styleMap];
+  const structureInstruction = structureMap[structure as keyof typeof structureMap];
+  const patternInstruction = patternMap[pattern as keyof typeof patternMap];
+
+  const lang = isEnglish ? 'en' : 'az';
+  
+  let combinedInstruction = '';
+  if (styleInstruction) combinedInstruction += styleInstruction[lang] + ' ';
+  if (structureInstruction) combinedInstruction += structureInstruction[lang] + ' ';
+  if (patternInstruction) combinedInstruction += patternInstruction[lang];
+
+  return combinedInstruction;
 }
 
 export async function POST(req: NextRequest) {
@@ -268,10 +341,33 @@ export async function POST(req: NextRequest) {
       'industry_expertise'
     ];
     
-    // Randomly select a style to ensure variety
-    const selectedStyle = summaryStyles[Math.floor(Math.random() * summaryStyles.length)];
+    // Writing structure variations for maximum diversity
+    const writingStructures = [
+      'impact_first',      // Start with biggest achievement
+      'skill_showcase',    // Lead with core competencies  
+      'problem_solver',    // Position as solution provider
+      'value_creator',     // Focus on value delivered
+      'industry_expert',   // Emphasize domain knowledge
+      'strategic_leader',  // Highlight leadership qualities
+      'innovation_driver', // Show innovative thinking
+      'results_builder'    // Focus on building results
+    ];
     
-    console.log(`🎯 Selected summary style: ${selectedStyle}`);
+    const sentencePatterns = [
+      'active_dynamic',    // Dynamic action-oriented sentences
+      'consultative',      // Advisory and consultative tone
+      'technical_precise', // Precise technical language
+      'business_focused',  // Business impact language
+      'creative_engaging', // Engaging and creative flow
+      'analytical_sharp'   // Sharp analytical presentation
+    ];
+    
+    // Randomly select style and structure variations
+    const selectedStyle = summaryStyles[Math.floor(Math.random() * summaryStyles.length)];
+    const selectedStructure = writingStructures[Math.floor(Math.random() * writingStructures.length)];
+    const selectedPattern = sentencePatterns[Math.floor(Math.random() * sentencePatterns.length)];
+    
+
 
     // Create enhanced prompt with style variation
     const basePrompt = isEnglish ? 
@@ -305,58 +401,161 @@ Tələblər:
 
 Xülasəni generasiya et:`;
 
-    // Add style-specific instructions
-    const styleInstructions = getStyleInstructions(selectedStyle, isEnglish);
+    // Add comprehensive style instructions
+    const styleInstructions = getStyleInstructions(selectedStyle, selectedStructure, selectedPattern, isEnglish);
     
-    // Add timestamp and randomness for uniqueness
+    // Enhanced randomness and uniqueness factors
     const timestamp = Date.now();
-    const randomSeed = Math.floor(Math.random() * 10000);
+    const randomSeed = Math.floor(Math.random() * 100000);
+    const creativityFactor = Math.random();
+    const structuralVariation = Math.floor(Math.random() * 5) + 1;
+    
+    // Dynamic opening approaches
+    const openingStyles = [
+      'expertise_highlight', 'achievement_opener', 'value_proposition', 
+      'competency_showcase', 'impact_leader', 'solution_architect'
+    ];
+    const selectedOpening = openingStyles[Math.floor(Math.random() * openingStyles.length)];
     
     const uniquenessPrompt = isEnglish ? 
-      `\n\nUNIQUENESS REQUIREMENT: Generate a completely unique summary. Timestamp: ${timestamp}, Seed: ${randomSeed}. Vary sentence structure, word choice, and emphasis points to ensure each generation is distinctly different from previous versions.` :
-      `\n\nUNİKALLıQ TƏLƏBİ: Tamamilə unikal xülasə yarat. Timestamp: ${timestamp}, Seed: ${randomSeed}. Cümlə strukturunu, söz seçimini və vurğu nöqtələrini dəyiş ki, hər generasiya əvvəlki versiyalardan fərqli olsun.`;
+      `\n\n🎯 CREATIVE GENERATION PARAMETERS:
+Timestamp: ${timestamp} | Seed: ${randomSeed} | Creativity: ${creativityFactor.toFixed(3)}
+Structural Variation: ${structuralVariation} | Opening Style: ${selectedOpening}
+
+CRITICAL DIVERSITY REQUIREMENTS:
+✅ Use completely different opening phrases each time
+✅ Vary sentence lengths: mix short punchy statements with flowing descriptions  
+✅ Alternate between different grammatical structures
+✅ Rotate focus points: skills → results → value → expertise
+✅ Change vocabulary choices and power words
+✅ Modify the logical flow and connection patterns
+✅ Experiment with emphasis placement and highlight different strengths
+
+FORBIDDEN REPETITIVE PATTERNS:
+❌ Same sentence starters or connectors
+❌ Identical word combinations or phrases  
+❌ Repetitive structure or rhythm
+❌ Similar emphasis points or focus areas
+❌ Standard templated language
+
+CREATE A COMPLETELY FRESH PERSPECTIVE EVERY TIME!` :
+      
+      `\n\n🎯 YARADıCı GENERASİYA PARAMETRLƏRİ:
+Timestamp: ${timestamp} | Seed: ${randomSeed} | Yaradıcılıq: ${creativityFactor.toFixed(3)}
+Struktur Dəyişkənliyi: ${structuralVariation} | Açılış Üslubu: ${selectedOpening}
+
+KRİTİK ÇEŞİTLİLİK TƏLƏBLƏRİ:
+✅ Hər dəfə tamamilə fərqli açılış ifadələri işlət
+✅ Cümlə uzunluqlarını dəyişdir: qısa təsirli ifadələri axıcı təsvirlərlə qarışdır
+✅ Müxtəlif qrammatik strukturlar arasında dəyişir  
+✅ Fokus nöqtələrini döndər: bacarıqlar → nəticələr → dəyər → ekspertiza
+✅ Söz seçimləri və güclü sözləri dəyişdir
+✅ Məntiqi axın və bağlantı nümunələrini dəyişdir
+✅ Vurğu yerləşdirilməsi ilə eksperiment et və müxtəlif güclü tərəfləri vurğula
+
+QADAĞAN EDİLƏN TƏKRARLANAN NÜMUNƏLƏR:
+❌ Eyni cümlə başlanğıcları və ya bağlayıcılar
+❌ Eyni söz kombinasiyaları və ya ifadələr
+❌ Təkrarlanan struktur və ya ritm  
+❌ Oxşar vurğu nöqtələri və ya fokus sahələri
+❌ Standart şablon dili
+
+HƏR DƏFƏ TAMAMILƏ TƏZƏ PERSPEKTIV YARAT!`;
+
+    // Dynamic creativity booster
+    const creativityBooster = isEnglish ? 
+      `\n\n🚀 CREATIVE EXECUTION PROTOCOL:
+1. BEGIN with an unexpected angle or fresh perspective
+2. WEAVE in the selected writing style naturally  
+3. BALANCE professional tone with engaging language
+4. INTEGRATE quantifiable achievements creatively
+5. CONCLUDE with forward-looking impact statement
+6. ENSURE every word adds unique value
+7. AVOID generic phrases and clichéd expressions
+8. CREATE memorable, distinctive professional narrative
+
+INNOVATION MANDATE: Think outside conventional CV summary patterns. Be professional yet distinctive, formal yet engaging, comprehensive yet concise.` :
+      
+      `\n\n🚀 YARADıCı İCRA PROTOKOLU:
+1. Gözlənilməz bucaq və ya təzə perspektivlə BAŞLA
+2. Seçilmiş yazı üslubunu təbii şəkildə DAXIL ET
+3. Peşəkar tonu cəlbedici dillə BALANSLAŞDIR  
+4. Kəmiyyət göstəricilərini yaradıcı şəkildə İNTEQRASİYA ET
+5. Gələcəyə yönəlik təsir bəyanı ilə TAMAMLA
+6. Hər sözün unikal dəyər əlavə etməsini TƏMİN ET
+7. Ümumi ifadələr və klişe ifadələrdən ÇƏKIN
+8. Yadda qalan, fərqli peşəkar hekayə YARAT
+
+İNNOVASİYA MANDATı: Ənənəvi CV xülasə nümunələrindən kənarda düşün. Peşəkar, lakin fərqli, formal, lakin cəlbedici, əhatəli, lakin qısa ol.`;
+
+    const finalChallenge = isEnglish ? 
+      `\n\n🎨 FINAL GENERATION CHALLENGE: Create a professional summary that perfectly embodies ALL selected parameters while delivering maximum impact and memorability. Make it IMPOSSIBLE to confuse with any previous generation!` :
+      `\n\n🎨 SON GENERASİYA ÇAĞIRIŞI: Seçilmiş bütün parametrləri mükəmməl şəkildə əks etdirən, maksimum təsir və yadda qalmaq qabiliyyəti olan peşəkar xülasə yarat. Onu əvvəlki generasiyalarla qarışdırmaq MÜMKÜNSİZ olsun!`;
     
-    const prompt = basePrompt + '\n\n' + styleInstructions + uniquenessPrompt;
+    const prompt = basePrompt + '\n\n' + styleInstructions + uniquenessPrompt + creativityBooster + finalChallenge;
+
+    console.log('🎯 Advanced Generation Parameters:', {
+      language: isEnglish ? 'English' : 'Azerbaijani',
+      writingStyle: selectedStyle,
+      structure: selectedStructure,
+      sentencePattern: selectedPattern,
+      creativityFactor: creativityFactor,
+      structuralVariation: structuralVariation,
+      openingStyle: selectedOpening,
+      timestamp: timestamp,
+      seed: randomSeed,
+      promptLength: prompt.length,
+      totalVariations: summaryStyles.length * writingStructures.length * sentencePatterns.length
+    });
 
     let lastError: Error | null = null;
     let generatedSummary = '';
 
-    // Try each API key until one works
-    try {
-      const { geminiAI, apiKeyId } = await getGeminiAI();
-      
-      const model = geminiAI.getGenerativeModel({ 
-        model: 'gemini-pro-latest',
-        generationConfig: {
-          temperature: 0.9, // High creativity for variety
-          topP: 0.95, // Diverse token sampling
-          topK: 40, // Token variety
-          maxOutputTokens: 150, // Sufficient for summary
-        }
-      });
+    // Get API key info outside try block for scope access
+    const apiKeyInfo = await getBestApiKey('gemini');
+    const apiKey = apiKeyInfo?.apiKey;
+    const apiKeyId = apiKeyInfo?.id;
+    
+    if (!apiKey) {
+      throw new Error('No valid API key available');
+    }
 
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      generatedSummary = response.text().trim();
+    try {
+      // Use v1 API with gemini-2.5-flash model (sərfəli və sürətli)
+      const geminiV1 = new GeminiV1Client(apiKey);
+      generatedSummary = await geminiV1.generateContent('gemini-2.5-flash', prompt);
       
-      // Record successful usage if using DB API key
+      // Record successful usage
       if (apiKeyId) {
-        await recordApiUsage(apiKeyId, true, 'Summary generated successfully');
+        await recordApiUsage(apiKeyId, true, 'Professional summary generated (v1 gemini-2.5-flash)');
       }
       
-      console.log(`✅ AI Professional Summary generated successfully`);
+      console.log(`✅ AI Professional Summary generated successfully with v1 API`);
     } catch (error: any) {
       lastError = error;
-      console.log(`❌ Gemini API failed:`, error.message);
+      console.log(`❌ Gemini v1 API failed:`, error.message);
       
-      // If using DB API key, mark it as failed
+      // Fallback to v1 API with gemini-2.0-flash
       try {
-        const { apiKeyId } = await getGeminiAI();
+        console.log('🔄 Trying fallback to gemini-2.0-flash...');
+        const geminiV1Fallback = new GeminiV1Client(apiKey);
+        generatedSummary = await geminiV1Fallback.generateContent('gemini-2.0-flash', prompt);
+        
+        // Record successful API usage
         if (apiKeyId) {
-          await markApiKeyFailed(apiKeyId, error.message);
+          await recordApiUsage(apiKeyId, true, 'Professional summary generated (v1 gemini-2.0-flash fallback)');
         }
-      } catch (e) {
-        console.error('Error marking API key as failed:', e);
+        
+        console.log('✅ Professional summary generated with fallback gemini-2.0-flash');
+      } catch (fallbackError: any) {
+        console.log(`❌ All Gemini v1 attempts failed:`, fallbackError.message);
+        
+        // Record API failure
+        if (apiKeyId) {
+          await markApiKeyFailed(apiKeyId, fallbackError.message);
+        }
+        
+        lastError = fallbackError;
       }
     }
 
@@ -373,7 +572,23 @@ Xülasəni generasiya et:`;
       }, { status: isQuotaError ? 429 : 500 });
     }
 
-    console.log(`✅ AI Peşəkar Xülasə generasiya edildi (${targetLanguage})`);
+    console.log(`✅ AI Professional Summary generated successfully (${targetLanguage})`, {
+      summaryLength: generatedSummary.length,
+      wordsCount: generatedSummary.split(' ').length,
+      uniquenessFactors: {
+        style: selectedStyle,
+        structure: selectedStructure,
+        pattern: selectedPattern,
+        creativityScore: creativityFactor.toFixed(3),
+        structuralVar: structuralVariation,
+        openingApproach: selectedOpening
+      },
+      apiPerformance: {
+        keyUsed: apiKeyId,
+        totalPromptLength: prompt.length,
+        generationTime: Date.now() - timestamp
+      }
+    });
 
     return NextResponse.json({
       success: true,
