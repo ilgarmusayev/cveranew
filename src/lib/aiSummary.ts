@@ -40,7 +40,7 @@ export interface CVDataForSummary {
  */
 export async function generateProfessionalSummary(cvData: CVDataForSummary, language?: string): Promise<string> {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     // Create a comprehensive prompt based on CV data and language
     const prompt = createSummaryPrompt(cvData, language);
