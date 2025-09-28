@@ -360,9 +360,7 @@ export default function StandardHeader() {
             <Link href="/templates" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
               {content.templates}
             </Link>
-            <Link href="/coverletter" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
-              {content.coverLetter}
-            </Link>
+            
             <Link href="/pricing" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
               {content.pricing}
             </Link>
@@ -603,13 +601,7 @@ export default function StandardHeader() {
               >
                 {content.templates}
               </Link>
-              <Link
-                href="/coverletter"
-                onClick={closeMobileMenu}
-                className="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all"
-              >
-                {content.coverLetter}
-              </Link>
+             
               <Link
                 href="/pricing"
                 onClick={closeMobileMenu}

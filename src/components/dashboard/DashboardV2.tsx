@@ -71,7 +71,7 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
       linkedinImport: 'LinkedIn İdxal',
       autoProfileImport: 'Avtomatik profil İdxalı',
       linkedinImportButton: 'LinkedIn profilinizi idxal edin',
-      linkedinDescription: 'LinkedIn profilinizi bir kliklə idxal edin və avtomatik olaraq CV yaradın. Sürətli və təhlükəsiz!',
+      linkedinDescription: 'LinkedIn profilinizi bir kliklə idxal edin və avtomatik olaraq CV yaradın!',
       autoDataFill: 'Avtomatik məlumat doldurma',
       workExperience: 'İş təcrübəsi və təhsil',
       skillsCompetencies: 'Bacarıqlar və kompetensiyalar',
@@ -89,6 +89,13 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
       professionalFormat: 'Peşəkar format',
       quickGeneration: 'Sürətli yaradılma',
       startCreatingCL: 'Cover Letter yaradın',
+      motivationLetter: 'Motivasiya Məktubu',
+      createMotivationLetter: 'Motivasiya məktubu yaradın',
+      motivationLetterDescription: 'CV-nizə əsaslanan peşəkar motivasiya məktubu yaradın. Müraciətinizi gücləndin!',
+      targetedContent: 'Hədəflənmiş məzmun',
+      personalizedApproach: 'Şəxsiləşdirilmiş yanaşma',
+      academicProfessional: 'Akademik və peşəkar',
+      startCreatingML: 'Motivasiya məktubu yaradın',
       myCVs: 'CV-lər',
       created: 'Yaradılıb',
       lastUpdated: 'Son yenilənmə',
@@ -140,6 +147,13 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
       professionalFormat: 'Professional format',
       quickGeneration: 'Quick generation',
       startCreatingCL: 'Create cover letter',
+      motivationLetter: 'Motivation Letter',
+      createMotivationLetter: 'Create motivation letter',
+      motivationLetterDescription: 'Create a professional motivation letter based on your CV. Strengthen your application!',
+      targetedContent: 'Targeted content',
+      personalizedApproach: 'Personalized approach',
+      academicProfessional: 'Academic & professional',
+      startCreatingML: 'Create motivation letter',
       startCreating: 'Start creating new CV',
       myCVs: 'My CVs',
       created: 'Created',
@@ -192,6 +206,13 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
       professionalFormat: 'Профессиональный формат',
       quickGeneration: 'Быстрое создание',
       startCreatingCL: 'Создать сопроводительное письмо',
+      motivationLetter: 'Мотивационное письмо',
+      createMotivationLetter: 'Создать мотивационное письмо',
+      motivationLetterDescription: 'Создайте профессиональное мотивационное письмо на основе вашего резюме. Усильте свою заявку!',
+      targetedContent: 'Целевой контент',
+      personalizedApproach: 'Персонализированный подход',
+      academicProfessional: 'Академический и профессиональный',
+      startCreatingML: 'Создать мотивационное письмо',
       startCreating: 'Начать создание нового резюме',
       myCVs: 'Мои резюме',
       created: 'Создано',
@@ -502,54 +523,53 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
         </div>
 
         {/* Action Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {/* LinkedIn Import Card */}
-          <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
-            <div className="flex items-center mb-6">
-              <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mr-4">
-                <svg className="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mr-3">
+                <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
                 </svg>
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-gray-900">{content.linkedinImport}</h3>
-                <p className="text-gray-600 mt-1">{content.autoProfileImport}</p>
+                <h3 className="text-lg font-bold text-gray-900">{content.linkedinImport}</h3>
+                <p className="text-gray-600 text-sm mt-1">{content.autoProfileImport}</p>
               </div>
             </div>
 
-            <p className="text-gray-700 mb-6 leading-relaxed">
+            <p className="text-gray-700 text-sm mb-4 leading-relaxed">
               {content.linkedinDescription}
             </p>
 
-            <div className="space-y-3 mb-8">
-              <div className="flex items-center text-gray-700">
-                <svg className="w-5 h-5 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="space-y-2 mb-6">
+              <div className="flex items-center text-gray-700 text-sm">
+                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 {content.autoDataFill}
               </div>
-              <div className="flex items-center text-gray-700">
-                <svg className="w-5 h-5 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex items-center text-gray-700 text-sm">
+                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 {content.workExperience}
               </div>
-              <div className="flex items-center text-gray-700">
-                <svg className="w-5 h-5 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex items-center text-gray-700 text-sm">
+                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 {content.skillsCompetencies}
               </div>
             </div>
 
-            {/* Replace the LinkedInAutoImport component with direct implementation */}
             <button
               onClick={() => router.push('/linkedin-import')}
-              className="w-full bg-blue-600 text-white rounded-xl px-6 py-4 font-medium hover:bg-white hover:text-blue-600 hover:border-2 hover:border-blue-600 border-2 transition-all duration-200"
+              className="w-full bg-blue-600 text-white border-2 rounded-xl px-4 py-3 font-medium hover:bg-white hover:text-blue-600 hover:border-2 hover:border-blue-600 transition-all duration-200"
             >
               <div className="flex items-center justify-center">
-                <span className="text-lg">{content.linkedinImportButton}</span>
-                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span className="text-sm">{content.linkedinImportButton}</span>
+                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </div>
@@ -557,38 +577,38 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
           </div>
 
           {/* Manual CV Creation Card */}
-          <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
-            <div className="flex items-center mb-6">
-              <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mr-4">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mr-3">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-gray-900">{content.manualCV}</h3>
-                <p className="text-gray-600 mt-1">{content.createFromScratch}</p>
+                <h3 className="text-lg font-bold text-gray-900">{content.manualCV}</h3>
+                <p className="text-gray-600 text-sm mt-1">{content.createFromScratch}</p>
               </div>
             </div>
 
-            <p className="text-gray-700 mb-6 leading-relaxed">
+            <p className="text-gray-700 text-sm mb-4 leading-relaxed">
               {content.manualDescription}
             </p>
 
-            <div className="space-y-3 mb-8">
-              <div className="flex items-center text-gray-700">
-                <svg className="w-5 h-5 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="space-y-2 mb-6">
+              <div className="flex items-center text-gray-700 text-sm">
+                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 {content.fullControl}
               </div>
-              <div className="flex items-center text-gray-700">
-                <svg className="w-5 h-5 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex items-center text-gray-700 text-sm">
+                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 {content.professionalDesign}
               </div>
-              <div className="flex items-center text-gray-700">
-                <svg className="w-5 h-5 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex items-center text-gray-700 text-sm">
+                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 {content.customizable}
@@ -597,11 +617,11 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
 
             <button
               onClick={() => router.push('/new')}
-              className="w-full bg-blue-600 text-white border-2 rounded-xl px-6 py-4 font-medium hover:bg-white hover:text-blue-600 hover:border-2 hover:border-blue-600 transition-all duration-200"
+              className="w-full bg-blue-600 text-white border-2 rounded-xl px-4 py-3 font-medium hover:bg-white hover:text-blue-600 hover:border-2 hover:border-blue-600 transition-all duration-200"
             >
               <div className="flex items-center justify-center">
-                <span className="text-lg">{content.startCreating}</span>
-                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span className="text-sm">{content.startCreating}</span>
+                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </div>
@@ -609,38 +629,38 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
           </div>
 
           {/* Cover Letter Card */}
-          <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
-            <div className="flex items-center mb-6">
-              <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mr-4">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mr-3">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-gray-900">{content.coverLetter}</h3>
-                <p className="text-gray-600 mt-1">{content.createCoverLetter}</p>
+                <h3 className="text-lg font-bold text-gray-900">{content.coverLetter}</h3>
+                <p className="text-gray-600 text-sm mt-1">{content.createCoverLetter}</p>
               </div>
             </div>
 
-            <p className="text-gray-700 mb-6 leading-relaxed">
+            <p className="text-gray-700 text-sm mb-4 leading-relaxed">
               {content.coverLetterDescription}
             </p>
 
-            <div className="space-y-3 mb-8">
-              <div className="flex items-center text-gray-700">
-                <svg className="w-5 h-5 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="space-y-2 mb-6">
+              <div className="flex items-center text-gray-700 text-sm">
+                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 {content.personalizedContent}
               </div>
-              <div className="flex items-center text-gray-700">
-                <svg className="w-5 h-5 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex items-center text-gray-700 text-sm">
+                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 {content.professionalFormat}
               </div>
-              <div className="flex items-center text-gray-700">
-                <svg className="w-5 h-5 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex items-center text-gray-700 text-sm">
+                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 {content.quickGeneration}
@@ -649,11 +669,63 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
 
             <button
               onClick={() => router.push('/coverletter')}
-              className="w-full bg-blue-600 text-white border-2 rounded-xl px-6 py-4 font-medium hover:bg-white hover:text-blue-600 hover:border-2 hover:border-blue-600 transition-all duration-200"
+              className="w-full bg-blue-600 text-white border-2 rounded-xl px-4 py-3 font-medium hover:bg-white hover:text-blue-600 hover:border-2 hover:border-blue-600 transition-all duration-200"
             >
               <div className="flex items-center justify-center">
-                <span className="text-lg">{content.startCreatingCL}</span>
-                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span className="text-sm">{content.startCreatingCL}</span>
+                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </button>
+          </div>
+
+          {/* Motivation Letter Card */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mr-3">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">{content.motivationLetter}</h3>
+                <p className="text-gray-600 text-sm mt-1">{content.createMotivationLetter}</p>
+              </div>
+            </div>
+
+            <p className="text-gray-700 text-sm mb-4 leading-relaxed">
+              {content.motivationLetterDescription}
+            </p>
+
+            <div className="space-y-2 mb-6">
+              <div className="flex items-center text-gray-700 text-sm">
+                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                {content.targetedContent}
+              </div>
+              <div className="flex items-center text-gray-700 text-sm">
+                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                {content.personalizedApproach}
+              </div>
+              <div className="flex items-center text-gray-700 text-sm">
+                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                {content.academicProfessional}
+              </div>
+            </div>
+
+            <button
+              onClick={() => router.push('/motivationletter')}
+              className="w-full bg-blue-600 text-white border-2 rounded-xl px-4 py-3 font-medium hover:bg-white hover:text-blue-600 hover:border-2 hover:border-blue-600 transition-all duration-200"
+            >
+              <div className="flex items-center justify-center">
+                <span className="text-sm">{content.startCreatingML}</span>
+                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </div>
