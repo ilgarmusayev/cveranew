@@ -6,12 +6,12 @@ export class EmailService {
 
   constructor() {
     this.transporter = nodemailer.createTransport({
-      host: 'smtp.hostinger.com',
+      host: 'smtp.privateemail.com',
       port: 465,
       secure: true,
       auth: {
-        user: 'noreply@cvera.net',
-        pass: 'ilqarilqar1M@@'
+        user: 'sender@cvera.net',
+        pass: 'ilqarilqar1M'
       }
     });
   }
@@ -170,7 +170,7 @@ Bu e-poçt avtomatik olaraq göndərilmişdir.
       const mailOptions = {
         from: {
           name: 'CVERA Support',
-          address: 'noreply@cvera.net'
+          address: 'sender@cvera.net'
         },
         to: userEmail,
         subject: '🔐 CVERA - Şifrə Yeniləmə Tələbi',
@@ -249,7 +249,7 @@ Bu e-poçt avtomatik olaraq göndərilmişdir.
       const mailOptions = {
         from: {
           name: 'CVERA Support',
-          address: 'noreply@cvera.net'
+          address: 'sender@cvera.net'
         },
         to: userEmail,
         subject: '✅ CVERA - Şifrəniz Uğurla Yeniləndi',
@@ -455,7 +455,7 @@ Bu e-poçt avtomatik olaraq göndərilmişdir.
       const mailOptions = {
         from: {
           name: 'CVERA Support',
-          address: 'noreply@cvera.net'
+          address: 'sender@cvera.net'
         },
         to: userEmail,
         subject: '🎉 CVERA-ya Xoş Gəlmisiniz - E-poçt Təsdiqi',
@@ -538,7 +538,7 @@ Bu e-poçt avtomatik olaraq göndərilmişdir.
       const mailOptions = {
         from: {
           name: 'CVERA Support',
-          address: 'noreply@cvera.net'
+          address: 'sender@cvera.net'
         },
         to: userEmail,
         subject: '🎊 Hesabınız Aktivləşdirildi - CVERA',
