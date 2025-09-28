@@ -385,7 +385,7 @@ export default function TermsPage() {
           title: '13. Контакт',
           content: 'Если у вас есть вопросы по условиям использования, свяжитесь с нами:',
           details: {
-            email: 'Email: support@cvera.net',
+            email: 'Электронная почта: support@cvera.net',
             phone: 'Телефон: +994 10 424 24 10',
             address: 'Адрес: Баку, Азербайджан'
           }

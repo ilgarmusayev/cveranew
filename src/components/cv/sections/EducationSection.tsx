@@ -139,7 +139,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
     }
   };
 
-  const content = labels[siteLanguage];
+  const content = labels[cvLanguage] || labels.azerbaijani;
 
   const addEducation = () => {
     const newEducation: Education = {

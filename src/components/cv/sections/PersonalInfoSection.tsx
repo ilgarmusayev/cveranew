@@ -84,7 +84,25 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
       title: 'Şəxsi məlumatlar',
       fillField: 'Zəhmət olmasa bu sahəni doldurun',
       validEmail: 'Zəhmət olmasa düzgün email ünvanı daxil edin',
-      fileFormat: 'JPG, PNG formatında, maksimum 2MB'
+      fileFormat: 'JPG, PNG formatında, maksimum 2MB',
+      fileSizeError: 'Şəkil ölçüsü 2MB-dan çox ola bilməz',
+      fileSizeErrorTitle: 'Fayl ölçüsü xətası',
+      imageUploadSuccess: 'Şəkil uğurla yükləndi!',
+      uploadCompleted: 'Yükləmə tamamlandı',
+      imageUploadError: 'Şəkil yüklənərkən xəta baş verdi',
+      uploadError: 'Yükləmə xətası',
+      summaryPlaceholderWithAI: 'Peşəkar təcrübənizi yazın və ya yuxarıdakı AI butonundan avtomatik yaradın...',
+      summaryPlaceholderNoAI: 'Peşəkar təcrübənizi və məqsədlərinizi qısaca təsvir edin...',
+      aiSummarySuccess: 'Peşəkar səviyyədə hazırlandı və ATS üçün optimallaşdırıldı.',
+      aiSummaryTitle: 'AI Peşəkar Xülasə Yaradıldı! 🎉',
+      aiSummaryError: 'AI peşəkar xülasə yaradarkən xəta baş verdi. Yenidən cəhd edin.',
+      aiErrorTitle: 'AI Xətası',
+      fileTypeError: 'Yalnız şəkil faylları qəbul edilir',
+      fileTypeErrorTitle: 'Fayl növü xətası',
+      aiCvIdRequired: 'AI summary yaratmaq üçün CV ID lazımdır',
+      dataInsufficient: 'Məlumat çatışmır',
+      authError: 'Giriş icazəsi yoxdur. Yenidən giriş edin.',
+      authErrorTitle: 'Autentifikasiya xətası'
     },
     english: {
       profileImage: 'Profile Image',
@@ -122,7 +140,25 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
       title: 'Personal Information',
       fillField: 'Please fill out this field',
       validEmail: 'Please enter a valid email address',
-      fileFormat: 'JPG, PNG format, maximum 2MB'
+      fileFormat: 'JPG, PNG format, maximum 2MB',
+      fileSizeError: 'Image size cannot exceed 2MB',
+      fileSizeErrorTitle: 'File size error',
+      imageUploadSuccess: 'Image uploaded successfully!',
+      uploadCompleted: 'Upload completed',
+      imageUploadError: 'Error occurred while uploading image',
+      uploadError: 'Upload error',
+      summaryPlaceholderWithAI: 'Write your professional experience or generate automatically with the AI button above...',
+      summaryPlaceholderNoAI: 'Briefly describe your professional experience and goals...',
+      aiSummarySuccess: 'Professional level summary created and ATS optimized.',
+      aiSummaryTitle: 'AI Professional Summary Created! 🎉',
+      aiSummaryError: 'Error occurred while creating AI professional summary. Please try again.',
+      aiErrorTitle: 'AI Error',
+      fileTypeError: 'Only image files are accepted',
+      fileTypeErrorTitle: 'File type error',
+      aiCvIdRequired: 'CV ID is required to create AI summary',
+      dataInsufficient: 'Insufficient data',
+      authError: 'Access denied. Please log in again.',
+      authErrorTitle: 'Authentication error'
     },
     russian: {
       profileImage: 'Фото профиля',
@@ -160,7 +196,25 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
       title: 'Личная информация',
       fillField: 'Пожалуйста, заполните это поле',
       validEmail: 'Пожалуйста, введите действительный адрес электронной почты',
-      fileFormat: 'Формат JPG, PNG, максимум 2МБ'
+      fileFormat: 'Формат JPG, PNG, максимум 2МБ',
+      fileSizeError: 'Размер изображения не может превышать 2МБ',
+      fileSizeErrorTitle: 'Ошибка размера файла',
+      imageUploadSuccess: 'Изображение успешно загружено!',
+      uploadCompleted: 'Загрузка завершена',
+      imageUploadError: 'Произошла ошибка при загрузке изображения',
+      uploadError: 'Ошибка загрузки',
+      summaryPlaceholderWithAI: 'Напишите свой профессиональный опыт или создайте автоматически с помощью кнопки ИИ выше...',
+      summaryPlaceholderNoAI: 'Кратко опишите свой профессиональный опыт и цели...',
+      aiSummarySuccess: 'Профессиональное резюме создано и оптимизировано для ATS.',
+      aiSummaryTitle: 'Профессиональное резюме ИИ создано! 🎉',
+      aiSummaryError: 'Произошла ошибка при создании профессионального резюме ИИ. Попробуйте еще раз.',
+      aiErrorTitle: 'Ошибка ИИ',
+      fileTypeError: 'Принимаются только файлы изображений',
+      fileTypeErrorTitle: 'Ошибка типа файла',
+      aiCvIdRequired: 'Для создания резюме ИИ требуется ID CV',
+      dataInsufficient: 'Недостаточно данных',
+      authError: 'Доступ запрещен. Пожалуйста, войдите снова.',
+      authErrorTitle: 'Ошибка аутентификации'
     }
   };
 
@@ -226,13 +280,13 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      showError('Yalnız şəkil faylları qəbul edilir', 'Fayl növü xətası');
+      showError(content.fileTypeError, content.fileTypeErrorTitle);
       return;
     }
 
     // Validate file size (max 2MB)
     if (file.size > 2 * 1024 * 1024) {
-      showError('Şəkil ölçüsü 2MB-dan çox ola bilməz', 'Fayl ölçüsü xətası');
+      showError(content.fileSizeError, content.fileSizeErrorTitle);
       return;
     }
 
@@ -243,13 +297,13 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
       reader.onload = (e) => {
         const base64String = e.target?.result as string;
         handleChange('profileImage', base64String);
-        showSuccess('Şəkil uğurla yükləndi!', 'Yükləmə tamamlandı');
+        showSuccess(content.imageUploadSuccess, content.uploadCompleted);
         setImageUploading(false);
       };
       reader.readAsDataURL(file);
     } catch (error) {
       console.error('Image upload error:', error);
-      showError('Şəkil yüklənərkən xəta baş verdi', 'Yükləmə xətası');
+      showError(content.imageUploadError, content.uploadError);
       setImageUploading(false);
     }
   };
@@ -276,7 +330,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
     if (!cvId) {
       console.log('❌ No CV ID provided');
-      showError('AI summary yaratmaq üçün CV ID lazımdır', 'Məlumat çatışmır');
+      showError(content.aiCvIdRequired, content.dataInsufficient);
       return;
     }
 
@@ -303,7 +357,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
       const token = localStorage.getItem('accessToken') || localStorage.getItem('token') || localStorage.getItem('auth-token');
       
       if (!token) {
-        showError('Giriş icazəsi yoxdur. Yenidən giriş edin.', 'Autentifikasiya xətası');
+        showError(content.authError, content.authErrorTitle);
         setAiGenerating(false);
         return;
       }
@@ -328,7 +382,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
       if (!response.ok) {
         if (response.status === 401) {
-          showError('Giriş icazəsi yoxdur. Yenidən giriş edin.', 'Autentifikasiya xətası');
+          showError(content.authError, content.authErrorTitle);
         } else if (response.status === 403) {
           showWarning(result.error || 'AI funksiyalar üçün Premium/Populyar planı lazımdır', 'Plan məhdudiyyəti');
         } else {
@@ -353,8 +407,8 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
         }, 100);
         
         showSuccess(
-          `${userTier === 'Premium' ? 'Executive-level' : 'Peşəkar'} səviyyədə hazırlandı və ATS üçün optimallaşdırıldı.`,
-          'AI Peşəkar Xülasə Yaradıldı! 🎉'
+          content.aiSummarySuccess,
+          content.aiSummaryTitle
         );
       } else {
         console.log('❌ API returned success=false or no summary');
@@ -363,7 +417,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
 
     } catch (error) {
       console.error('💥 AI Summary error:', error);
-      showError('AI peşəkar xülasə yaradarkən xəta baş verdi. Yenidən cəhd edin.', 'AI Xətası');
+      showError(content.aiSummaryError, content.aiErrorTitle);
     } finally {
       setAiGenerating(false);
     }
@@ -654,14 +708,8 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
           value={safeData.summary}
           onChange={(value) => handleChange('summary', value)}
           placeholder={canUseAI
-            ? (siteLanguage === 'english' 
-              ? "Write your professional experience or generate automatically with the AI button above..."
-              : "Peşəkar təcrübənizi yazın və ya yuxarıdakı AI butonundan avtomatik yaradın..."
-            )
-            : (siteLanguage === 'english'
-              ? "Briefly describe your professional experience and goals..."
-              : "Peşəkar təcrübənizi və məqsədlərinizi qısaca təsvir edin..."
-            )
+            ? content.summaryPlaceholderWithAI
+            : content.summaryPlaceholderNoAI
           }
           minHeight="120px"
           data-testid="summary-editor"

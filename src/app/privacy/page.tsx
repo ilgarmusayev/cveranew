@@ -273,7 +273,7 @@ export default function PrivacyPolicyPage() {
           title: '11. Контакт',
           content: 'Если у вас есть вопросы по политике конфиденциальности, свяжитесь с нами:',
           details: {
-            email: 'Email: contact@cvera.net',
+            email: 'Электронная почта: contact@cvera.net',
             address: 'Адрес: Баку, Азербайджан'
           }
         }

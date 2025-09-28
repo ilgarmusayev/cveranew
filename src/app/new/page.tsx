@@ -82,7 +82,7 @@ function NewCVContent() {
       
       // Buttons
       cancelButton: 'Ləğv et',
-      createButton: 'CV yaradın və redaktəyə başlayın',
+      createButton: 'Yaradın',
       creatingButton: 'Yaradılır...',
       
       // Error messages
@@ -156,7 +156,7 @@ function NewCVContent() {
       
       // Buttons
       cancelButton: 'Cancel',
-      createButton: 'Create CV and start editing',
+      createButton: 'Create',
       creatingButton: 'Creating...',
       
       // Error messages
@@ -230,7 +230,7 @@ function NewCVContent() {
       
       // Buttons
       cancelButton: 'Отмена',
-      createButton: 'Создать резюме и начать редактирование',
+      createButton: 'Создать',
       creatingButton: 'Создание...',
       
       // Error messages

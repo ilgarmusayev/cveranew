@@ -27,8 +27,8 @@ interface FAQItem {
       contactSectionDescription: 'Dəstək komandamız sizə kömək etməyə hazırdır',
       emailButton: 'Email Göndər',
       liveChatButton: 'Canlı Söhbət',
-      helpful: 'Faydalı',
-      notHelpful: 'Faydasız',
+      helpful: '',
+      notHelpful: '',
       share: 'Paylaş',
       foundQuestionsText: 'Tapılan sual',
     faqData: [
@@ -136,8 +136,8 @@ interface FAQItem {
     contactSectionDescription: 'Our support team is ready to help you',
     emailButton: 'Send Email',
     liveChatButton: 'Live Chat',
-    helpful: 'Helpful',
-    notHelpful: 'Not helpful',
+    helpful: '',
+    notHelpful: '',
     share: 'Share',
     foundQuestionsText: 'Questions found',
     faqData: [
@@ -245,8 +245,8 @@ interface FAQItem {
     contactSectionDescription: 'Наша команда поддержки готова вам помочь',
     emailButton: 'Отправить Email',
     liveChatButton: 'Живой чат',
-    helpful: 'Полезно',
-    notHelpful: 'Бесполезно',
+    helpful: '',
+    notHelpful: '',
     share: 'Поделиться',
     foundQuestionsText: 'Найдено вопросов',
     faqData: [

@@ -408,7 +408,7 @@ export default function ProjectsSection({ data, onChange, cvLanguage = 'azerbaij
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {content.description} <span className="text-red-500">*</span>
+                      {content.description}
                     </label>
                     <RichTextEditor
                       value={project.description}
