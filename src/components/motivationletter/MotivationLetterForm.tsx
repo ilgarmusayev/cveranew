@@ -103,6 +103,7 @@ export default function MotivationLetterForm({ userProfile, onBack }: Motivation
       steps: {
         1: {
           title: 'Əsas Məlumatlar',
+          note: '💡 Tövsiyə: Əsas məlumatları doldurmaq tövsiyə olunur, lakin hamısını doldurmaq məcburi deyil.',
           // CV Selection
           selectCV: 'CV Seçin',
           selectCVPlaceholder: 'Motivasiya məktubu üçün CV seçin',
@@ -113,7 +114,7 @@ export default function MotivationLetterForm({ userProfile, onBack }: Motivation
           // Recipient Info
           recipientInfo: 'Alıcı Məlumatları',
           recipientName: 'Alıcının adı',
-          recipientNamePlaceholder: 'Dr. John Smith',
+          recipientNamePlaceholder: 'Dr. Nizamali Shahbazli',
           recipientTitle: 'Alıcının vəzifəsi',
           recipientTitlePlaceholder: 'Qəbul Komitəsi Sədri',
           organization: 'Təşkilat/Universitet',
@@ -158,6 +159,7 @@ export default function MotivationLetterForm({ userProfile, onBack }: Motivation
       steps: {
         1: {
           title: 'Basic Information',
+          note: '💡 Tip: It is recommended to fill in the basic information, but it is not required to fill in everything.',
           // CV Selection
           selectCV: 'Select CV',
           selectCVPlaceholder: 'Select CV for motivation letter',
@@ -213,6 +215,7 @@ export default function MotivationLetterForm({ userProfile, onBack }: Motivation
       steps: {
         1: {
           title: 'Основная информация',
+          note: '💡 Совет: Рекомендуется заполнить основную информацию, но заполнять все не обязательно.',
           // CV Selection
           selectCV: 'Выберите резюме',
           selectCVPlaceholder: 'Выберите резюме для мотивационного письма',
@@ -606,6 +609,24 @@ export default function MotivationLetterForm({ userProfile, onBack }: Motivation
         return sections.length > 0 ? '\n\n' + sections.join(' ') : '';
       };
       
+      // Get name from personal info with fallback
+      const getFullName = () => {
+        if (personalInfo?.fullName && personalInfo.fullName.trim()) {
+          return personalInfo.fullName.trim();
+        }
+        
+        const firstName = personalInfo?.firstName?.trim() || '';
+        const lastName = personalInfo?.lastName?.trim() || '';
+        
+        if (firstName || lastName) {
+          return `${firstName} ${lastName}`.trim();
+        }
+        
+        return formData.letterLanguage === 'azerbaijani' ? 'Sizin Adınız' : 
+               formData.letterLanguage === 'russian' ? 'Ваше имя' : 
+               'Your Name';
+      };
+      
       const motivationLetter = `
 ${formData.recipientName ? `${formData.recipientName}` : ''}
 ${formData.recipientTitle ? `${formData.recipientTitle}` : ''}
@@ -622,7 +643,7 @@ ${formData.qualifications}${createCVContext()}
 ${formData.conclusion}
 
 ${template.closing},
-${personalInfo?.fullName || personalInfo?.firstName + ' ' + personalInfo?.lastName || 'Your Name'}
+${getFullName()}
 ${personalInfo?.email ? personalInfo.email : ''}
 ${personalInfo?.phone ? personalInfo.phone : ''}
       `.trim();
@@ -704,6 +725,13 @@ ${personalInfo?.phone ? personalInfo.phone : ''}
               <h2 className="text-xl font-semibold text-gray-900 mb-6 text-center">
                 {currentContent.steps[1].title}
               </h2>
+
+              {/* Information Note */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <p className="text-blue-800 text-sm">
+                  {currentContent.steps[1].note}
+                </p>
+              </div>
 
               {/* Template Selection */}
               <div className="mb-8">
