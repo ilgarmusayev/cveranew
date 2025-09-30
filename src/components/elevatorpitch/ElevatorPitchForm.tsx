@@ -66,7 +66,7 @@ export default function ElevatorPitchForm({ onBack }: ElevatorPitchFormProps) {
   const content = {
     azerbaijani: {
       title: '30 Saniyəlik Elevator Pitch Yaradın',
-      steps: ['CV Seçin', 'Məlumatları Daxil Edin', 'Nəticə'],
+      steps: ['Məlumatları Daxil Edin', 'Nəticə'],
       selectCv: 'CV Seçin',
       noCvs: 'Heç bir CV tapılmadı',
       loadingCvs: 'CV-lər yüklənir...',
@@ -103,7 +103,7 @@ export default function ElevatorPitchForm({ onBack }: ElevatorPitchFormProps) {
     },
     english: {
       title: 'Create 30-Second Elevator Pitch',
-      steps: ['Select CV', 'Enter Details', 'Result'],
+      steps: ['Enter Details', 'Result'],
       selectCv: 'Select CV',
       noCvs: 'No CVs found',
       loadingCvs: 'Loading CVs...',
@@ -140,7 +140,7 @@ export default function ElevatorPitchForm({ onBack }: ElevatorPitchFormProps) {
     },
     russian: {
       title: 'Создать 30-секундную презентацию',
-      steps: ['Выбрать CV', 'Ввести данные', 'Результат'],
+      steps: ['Ввести данные', 'Результат'],
       selectCv: 'Выберите CV',
       noCvs: 'CV не найдены',
       loadingCvs: 'Загружаются CV...',
@@ -232,6 +232,12 @@ export default function ElevatorPitchForm({ onBack }: ElevatorPitchFormProps) {
         console.log('📋 Elevator Pitch: CV məlumatları:', data);
         setCvs(data.cvs || []);
         console.log('✅ Elevator Pitch: CV sayı:', data.cvs?.length || 0);
+        
+        // Auto-select first CV since step 1 (CV selection) is removed
+        if (data.cvs && data.cvs.length > 0) {
+          setSelectedCV(data.cvs[0]);
+          console.log('🎯 Elevator Pitch: İlk CV avtomatik seçildi:', data.cvs[0].title);
+        }
       } else {
         console.error('❌ Elevator Pitch: API xətası:', response.status);
       }
@@ -255,7 +261,28 @@ export default function ElevatorPitchForm({ onBack }: ElevatorPitchFormProps) {
   };
 
   const generateWithAI = async () => {
-    if (!selectedCV) return;
+    console.log('🤖 AI Generation başladı...');
+    console.log('📋 Selected CV:', selectedCV);
+    console.log('📝 Form Data:', formData);
+    console.log('📚 Available CVs:', cvs);
+    
+    // If no CV is selected but CVs are available, auto-select the first one
+    let cvToUse = selectedCV;
+    if (!cvToUse && cvs.length > 0) {
+      console.log('🎯 CV avtomatik seçilir...');
+      cvToUse = cvs[0];
+      setSelectedCV(cvToUse);
+    }
+    
+    if (!cvToUse) {
+      console.log('❌ Heç bir CV mövcud deyil!');
+      setAiError(siteLanguage === 'azerbaijani' 
+        ? 'CV tapılmadı. Əvvəlcə CV yaradın.'
+        : siteLanguage === 'english'
+        ? 'No CV found. Please create a CV first.'
+        : 'CV не найдено. Сначала создайте CV.');
+      return;
+    }
     
     setAiLoading(true);
     setAiError('');
@@ -263,17 +290,17 @@ export default function ElevatorPitchForm({ onBack }: ElevatorPitchFormProps) {
     try {
       const cvContext = `
         CV Information:
-        Name: ${getFullName(selectedCV.data?.personalInfo)}
-        Email: ${selectedCV.data?.personalInfo?.email}
-        Job Title: ${selectedCV.data?.personalInfo?.jobTitle || selectedCV.data?.personalInfo?.position}
-        Professional Summary: ${selectedCV.data?.professionalSummary}
-        Work Experience: ${selectedCV.data?.workExperience?.map((exp: any) => 
+        Name: ${getFullName(cvToUse.data?.personalInfo)}
+        Email: ${cvToUse.data?.personalInfo?.email}
+        Job Title: ${cvToUse.data?.personalInfo?.jobTitle || cvToUse.data?.personalInfo?.position}
+        Professional Summary: ${cvToUse.data?.professionalSummary}
+        Work Experience: ${cvToUse.data?.workExperience?.map((exp: any) => 
           `${exp.jobTitle} at ${exp.company} (${exp.duration}): ${exp.description}`
         ).join('; ') || 'No work experience listed'}
-        Education: ${selectedCV.data?.education?.map((edu: any) => 
+        Education: ${cvToUse.data?.education?.map((edu: any) => 
           `${edu.degree} from ${edu.institution} (${edu.year})`
         ).join('; ') || 'No education listed'}
-        Skills: ${selectedCV.data?.skills?.join(', ') || 'No skills listed'}
+        Skills: ${cvToUse.data?.skills?.join(', ') || 'No skills listed'}
         
         Pitch Details:
         Target Audience: ${formData.targetAudience}
@@ -284,8 +311,8 @@ export default function ElevatorPitchForm({ onBack }: ElevatorPitchFormProps) {
         Additional: ${formData.additionalPoints}
       `;
 
-      const fullName = getFullName(selectedCV.data?.personalInfo);
-      const firstName = selectedCV.data?.personalInfo?.firstName || fullName.split(' ')[0] || '';
+      const fullName = getFullName(cvToUse.data?.personalInfo);
+      const firstName = cvToUse.data?.personalInfo?.firstName || fullName.split(' ')[0] || '';
       
       const styleGuide = {
         professional: 'formal, business-like tone with industry terminology',
@@ -319,7 +346,6 @@ Köməkçi Olma, Çağırış Et: Mənə hazır cavab vermə. Mənim düşüncə
 
 4. Məqsəd: Yuxarıdakı şəxsiyyət və qaydalar çərçivəsində, aşağıdakı sorğunu cavablandır:
 
-
 CRITICAL REQUIREMENTS:
 - MUST use "${fullName}" as the actual name (NOT placeholder like [Adınız] or [Your Name])
 - Exactly 75-100 words (30 seconds when spoken)
@@ -328,6 +354,7 @@ CRITICAL REQUIREMENTS:
 - Be AUTHENTIC and REAL - avoid all marketing language
 - Focus on CONCRETE achievements and specific skills from their CV
 - Make it sound like a REAL person talking, not a robot
+- Use team/company language instead of personal pronouns (we/our platform/our team instead of I/my)
 
 STRICTLY AVOID these phrases and patterns:
 - "My name is..." / "Mənim adım..." / "Меня зовут..."
@@ -335,7 +362,16 @@ STRICTLY AVOID these phrases and patterns:
 - "I have X years of experience..." / "X il təcrübəm var" / "У меня X лет опыта..."
 - "I am a hard worker..." / "Çalışqan biriyəm" / "Я трудолюбивый..."
 - "I am looking for opportunities..." / "Fürsətlər axtarıram" / "Ищу возможности..."
+- "My project..." / "Mənim layihəm..." / "Мой проект..."
+- "My company..." / "Mənim şirkətim..." / "Моя компания..."
 - Any generic corporate language about "innovative solutions" or "value creation"
+
+PREFERRED CORPORATE LANGUAGE PATTERNS:
+- "Our platform developed..." / "Bizim platforma hazırladı..." / "Наша платформа разработала..."
+- "Our team achieved..." / "Bizim komanda nail oldu..." / "Наша команда достигла..."
+- "We implemented..." / "Biz tətbiq etdik..." / "Мы внедрили..."
+- "Our solution delivered..." / "Bizim həll təqdim etdi..." / "Наше решение обеспечило..."
+- "The company I worked with accomplished..." / "İşlədiyim şirkət nail oldu..." / "Компания, с которой я работал, достигла..."
 
 EXTRACT AND USE SPECIFIC CV DATA:
 From their work experience: Use actual job titles, company names, and specific achievements
@@ -353,7 +389,7 @@ Context about ${fullName}:
 ${cvContext}
 
 MANDATORY: Extract specific information from their CV data above:
-- Use their actual job title: ${selectedCV.data?.personalInfo?.jobTitle || selectedCV.data?.personalInfo?.position || 'their role'}
+- Use their actual job title: ${cvToUse.data?.personalInfo?.jobTitle || cvToUse.data?.personalInfo?.position || 'their role'}
 - Reference their work experience companies and achievements
 - Mention their key skills naturally in context
 - Include any quantifiable results from their experience
@@ -370,12 +406,21 @@ Write as if ${fullName} is confidently introducing themselves at a coffee meetin
         body: JSON.stringify({ prompt }),
       });
 
+      console.log('🌐 API Response status:', response.status);
+      console.log('🌐 API Response ok:', response.ok);
+
       if (response.ok) {
         const data = await response.json();
+        console.log('📄 API Response data:', data);
         if (data.text) {
+          console.log('✅ AI mətn alındı, step 2-yə keçirik');
+          console.log('📝 Generated pitch:', data.text);
           setGeneratedPitch(data.text);
-          setCurrentStep(3);
+          console.log('🔄 Current step before change:', currentStep);
+          setCurrentStep(2);
+          console.log('🔄 Setting current step to 2');
         } else {
+          console.log('❌ data.text mövcud deyil:', data);
           setAiError(siteLanguage === 'azerbaijani' 
             ? 'AI cavab vermədi. Yenidən cəhd edin.'
             : siteLanguage === 'english'
@@ -383,7 +428,9 @@ Write as if ${fullName} is confidently introducing themselves at a coffee meetin
             : 'ИИ не ответил. Попробуйте снова.');
         }
       } else {
+        console.log('❌ API Response failed with status:', response.status);
         const errorData = await response.json().catch(() => ({}));
+        console.log('❌ Error data:', errorData);
         setAiError(siteLanguage === 'azerbaijani' 
           ? 'AI xidməti əlçatan deyil. Yenidən cəhd edin.'
           : siteLanguage === 'english'
@@ -447,25 +494,15 @@ Write as if ${fullName} is confidently introducing themselves at a coffee meetin
     window.speechSynthesis.speak(utterance);
   };
 
-  const renderStep1 = () => (
+  const renderStep2 = () => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="space-y-6"
+      className="space-y-8"
     >
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          {currentContent.selectCv}
-        </h2>
-      </div>
-
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">{currentContent.loadingCvs}</p>
-        </div>
-      ) : cvs.length === 0 ? (
+      {/* Check if CVs are available */}
+      {cvs.length === 0 ? (
         <div className="text-center py-12">
           <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-600 mb-4">{currentContent.noCvs}</p>
@@ -492,85 +529,22 @@ Write as if ${fullName} is confidently introducing themselves at a coffee meetin
           </div>
         </div>
       ) : (
-        <div className="space-y-4">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-medium text-blue-800">
-                {siteLanguage === 'azerbaijani' 
-                  ? 'CV seçin:'
-                  : siteLanguage === 'english'
-                  ? 'Choose your CV:'
-                  : 'Выберите CV:'
-                }
-              </h3>
-              {cvs.length > 5 && (
-                <span className="text-xs text-blue-600">
-                  {siteLanguage === 'azerbaijani' 
-                    ? `${cvs.length} CV - aşağı yuxarı hərəkət edin`
-                    : siteLanguage === 'english'
-                    ? `${cvs.length} CVs - scroll to see more`
-                    : `${cvs.length} CV - прокрутите для просмотра`
-                  }
-                </span>
-              )}
-            </div>
-            <div className="max-h-96 overflow-y-auto space-y-2 pr-2 scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-gray-100">
-              {cvs.map((cv) => (
-                <motion.div
-                  key={cv.id}
-                  whileHover={{ scale: 1.01 }}
-                  className="p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all"
-                  onClick={() => handleCVSelect(cv)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-medium text-gray-900 truncate">
-                        {getFullName(cv.data?.personalInfo) || cv.title || 'CV'}
-                      </h4>
-                      {cv.data?.personalInfo?.jobTitle && (
-                        <p className="text-xs text-gray-500 truncate">
-                          {cv.data.personalInfo.jobTitle}
-                        </p>
-                      )}
-                      {cv.data?.personalInfo?.email && (
-                        <p className="text-xs text-gray-400 truncate">
-                          {cv.data.personalInfo.email}
-                        </p>
-                      )}
-                    </div>
-                    <ChevronLeft className="h-4 w-4 text-gray-400 rotate-180 flex-shrink-0 ml-2" />
-                  </div>
-                </motion.div>
-              ))}
+        <>
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              {currentContent.pitchInfo}
+            </h2>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <div className="flex items-start space-x-3">
+                <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-blue-800">
+                  {currentContent.optionalNote}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </motion.div>
-  );
 
-  const renderStep2 = () => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="space-y-8"
-    >
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          {currentContent.pitchInfo}
-        </h2>
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <div className="flex items-start space-x-3">
-            <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-blue-800">
-              {currentContent.optionalNote}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             {currentContent.targetAudience}
@@ -753,10 +727,17 @@ Write as if ${fullName} is confidently introducing themselves at a coffee meetin
           <li>• {currentContent.tips.tip4}</li>
         </ul>
       </div>
+        </>
+      )}
     </motion.div>
   );
 
-  const renderStep3 = () => (
+  const renderStep3 = () => {
+    console.log('🎬 renderStep3 çağırıldı');
+    console.log('📝 generatedPitch:', generatedPitch);
+    console.log('🔢 currentStep:', currentStep);
+    
+    return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -830,7 +811,8 @@ Write as if ${fullName} is confidently introducing themselves at a coffee meetin
         </p>
       </div>
     </motion.div>
-  );
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -857,10 +839,10 @@ Write as if ${fullName} is confidently introducing themselves at a coffee meetin
             {/* Progress Steps */}
             <div className="flex justify-center mt-6">
               <div className="flex items-center space-x-4">
-                {[1, 2, 3].map((step) => (
+                {[1, 2].map((step) => (
                   <div key={step} className="flex items-center">
                     <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
+                      className={`w-12 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
                         step <= currentStep
                           ? 'bg-white text-green-600'
                           : 'bg-white/20 text-white/60'
@@ -868,9 +850,9 @@ Write as if ${fullName} is confidently introducing themselves at a coffee meetin
                     >
                       {step}
                     </div>
-                    {step < 3 && (
+                    {step < 2 && (
                       <div
-                        className={`w-12 h-1 mx-2 transition-colors ${
+                        className={`w-16 h-1 mx-2 transition-colors ${
                           step < currentStep ? 'bg-white' : 'bg-white/20'
                         }`}
                       />
@@ -899,14 +881,13 @@ Write as if ${fullName} is confidently introducing themselves at a coffee meetin
           {/* Content */}
           <div className="p-8">
             <AnimatePresence mode="wait">
-              {currentStep === 1 && renderStep1()}
-              {currentStep === 2 && renderStep2()}
-              {currentStep === 3 && renderStep3()}
+              {currentStep === 1 && renderStep2()}
+              {currentStep === 2 && renderStep3()}
             </AnimatePresence>
           </div>
 
           {/* Navigation */}
-          {currentStep > 1 && currentStep < 3 && (
+          {currentStep === 2 && (
             <div className="border-t bg-gray-50 px-8 py-4 flex justify-between">
               <button
                 onClick={() => setCurrentStep(currentStep - 1)}
