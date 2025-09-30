@@ -66,7 +66,7 @@ export default function ElevatorPitchForm({ onBack }: ElevatorPitchFormProps) {
   const content = {
     azerbaijani: {
       title: '30 Saniyəlik Elevator Pitch Yaradın',
-      steps: ['Məlumatları Daxil Edin', 'Nəticə'],
+      steps: ['Məlumatlarız', 'Nəticə'],
       selectCv: 'CV Seçin',
       noCvs: 'Heç bir CV tapılmadı',
       loadingCvs: 'CV-lər yüklənir...',
@@ -822,14 +822,9 @@ Write as if ${fullName} is confidently introducing themselves at a coffee meetin
           <div className="bg-gradient-to-r from-blue-600 to-blue-600 text-white p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <button
-                  onClick={onBack}
-                  className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
+               
                 <div>
-                  <h1 className="text-2xl font-bold text-center text-white">
+                  <h1 className="text-2xl font-bold text-center text-white ">
                     {currentContent.title}
                   </h1>
                 </div>
@@ -852,7 +847,7 @@ Write as if ${fullName} is confidently introducing themselves at a coffee meetin
                     </div>
                     {step < 2 && (
                       <div
-                        className={`w-16 h-1 mx-2 transition-colors ${
+                        className={`w-12 h-1 mx-2 transition-colors ${
                           step < currentStep ? 'bg-white' : 'bg-white/20'
                         }`}
                       />

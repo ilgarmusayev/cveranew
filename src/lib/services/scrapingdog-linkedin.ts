@@ -165,26 +165,35 @@ export class ScrapingDogLinkedInService {
   private lastRotationTime = 0; // Track last rotation time to avoid rapid switching
 
   /**
-   * Get active ScrapingDog API keys from database (all active keys for rotation)
+   * Get active ScrapingDog API keys from database (only working keys)
    */
   private async getActiveScrapingDogApiKeys(): Promise<string[]> {
     try {
       const activeApiKeys = await prisma.apiKey.findMany({
         where: {
           service: 'scrapingdog',
-          active: true
+          active: true,
+          OR: [
+            { lastResult: 'success' },
+            { lastResult: null },
+            { lastResult: { not: 'RATE_LIMITED' } }
+          ]
         },
-        orderBy: {
-          priority: 'asc' // Lower number = higher priority
-        }
+        orderBy: [
+          { priority: 'asc' },
+          { usageCount: 'asc' } // Prefer less used keys
+        ]
       });
 
       if (!activeApiKeys || activeApiKeys.length === 0) {
         console.warn('❌ No active ScrapingDog API keys found in database, using fallback keys');
-        // Fallback to multiple working keys
+        // Fallback to multiple working keys from recent test
         return [
-          '68a99929b4148b34852a88be', // Your main working key
-          '6882894b855f5678d36484c8'  // Secondary key from instructions
+          '68c5bd9c7c82e46d2c42c3e0', // 0 usage
+          '68cfae3c5e84d9f5c8b3c9a1', // 0 usage
+          '68cfaf1c5f95eaf6d9c4dab2', // 0 usage
+          '68d26258d1a6fbe7eaf5ebc3', // 0 usage
+          '68d262705e84d9f5c8b3c9a1'  // 0 usage
         ];
       }
 
@@ -193,33 +202,48 @@ export class ScrapingDogLinkedInService {
       return keys;
     } catch (error) {
       console.error('❌ API keys lookup failed:', error);
-      // Fallback to multiple working keys
+      // Fallback to working keys
       return [
-        '68a99929b4148b34852a88be',
-        '6882894b855f5678d36484c8'
+        '68c5bd9c7c82e46d2c42c3e0',
+        '68cfae3c5e84d9f5c8b3c9a1'
       ];
     }
   }
 
   /**
-   * Get next API key using round-robin rotation
+   * Get next API key using smart selection (prefer fresh keys)
    */
   private async getNextScrapingDogApiKey(): Promise<string> {
-    const apiKeys = await this.getActiveScrapingDogApiKeys();
-    
-    if (apiKeys.length === 1) {
-      console.log('✅ Using single API key:', apiKeys[0].substring(0, 8) + '***');
-      return apiKeys[0];
-    }
+    try {
+      // Get fresh working keys from database with account status
+      const workingKeys = await prisma.apiKey.findMany({
+        where: {
+          service: 'scrapingdog',
+          active: true,
+          lastResult: 'success'
+        },
+        orderBy: [
+          { usageCount: 'asc' }, // Prefer less used keys
+          { priority: 'asc' }
+        ],
+        take: 10 // Get top 10 working keys
+      });
 
-    // Round-robin rotation
-    const selectedKey = apiKeys[this.currentKeyIndex];
-    console.log(`🔄 Using API key ${this.currentKeyIndex + 1}/${apiKeys.length}:`, selectedKey.substring(0, 8) + '***');
-    
-    // Move to next key for next request
-    this.currentKeyIndex = (this.currentKeyIndex + 1) % apiKeys.length;
-    
-    return selectedKey;
+      if (workingKeys.length === 0) {
+        console.warn('⚠️ No working keys found, using fallback');
+        return '68c5bd9c7c82e46d2c42c3e0'; // Known working key
+      }
+
+      // Select least used key
+      const selectedKey = workingKeys[0];
+      console.log(`🔄 Using API key (Usage: ${selectedKey.usageCount}):`, selectedKey.apiKey.substring(0, 8) + '***');
+      
+      return selectedKey.apiKey;
+      
+    } catch (error) {
+      console.error('❌ Smart key selection failed:', error);
+      return '68c5bd9c7c82e46d2c42c3e0'; // Fallback
+    }
   }
 
   /**
@@ -284,55 +308,68 @@ export class ScrapingDogLinkedInService {
   /**
    * Retry API request with different keys if rate limited
    */
-  private async makeRequestWithRetry(linkedinUsername: string, maxRetries: number = 3): Promise<any> {
+  private async makeRequestWithRetry(linkedinUsername: string, maxRetries: number = 5): Promise<any> {
     let lastError: any = null;
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      let currentApiKey: string = '';
+      
       try {
         console.log(`📡 Making request to ScrapingDog API (attempt ${attempt}/${maxRetries})...`);
         
-        const apiKey = await this.getNextScrapingDogApiKey();
+        currentApiKey = await this.getNextScrapingDogApiKey();
         
         const params = {
-          api_key: apiKey,
+          api_key: currentApiKey,
           type: 'profile',
           linkId: linkedinUsername,
-          premium: 'true', // Enable premium mode for full data
+          premium: 'false', // Use free mode to conserve quota
         };
 
-        // Add small delay between requests to prevent rate limiting
+        // Add delay between requests
         if (attempt > 1) {
-          const delayMs = attempt * 1000; // 1s, 2s, 3s delay
+          const delayMs = attempt * 1500; // 1.5s, 3s, 4.5s delay
           console.log(`⏳ Waiting ${delayMs}ms before retry...`);
           await this.delay(delayMs);
         }
 
         const response = await axios.get(this.SCRAPINGDOG_URL, {
           params: params,
-          timeout: 30000
+          timeout: 25000
         });
 
         if (response.status !== 200) {
           throw new Error(`ScrapingDog API responded with status ${response.status}`);
         }
 
-        await this.updateApiKeyUsage(apiKey, true);
+        // Success - update key usage
+        await this.updateApiKeyUsage(currentApiKey, true);
+        console.log(`✅ ScrapingDog request successful with key: ${currentApiKey.substring(0, 8)}***`);
         return response.data;
         
       } catch (error: any) {
         lastError = error;
         console.error(`❌ Attempt ${attempt} failed:`, error.message);
         
-        // Update usage as failed for this API key
-        try {
-          const apiKey = await this.getNextScrapingDogApiKey();
-          await this.updateApiKeyUsage(apiKey, false);
-        } catch (updateError) {
-          console.error('Failed to update API usage:', updateError);
+        // Handle different error types
+        if (currentApiKey) {
+          if (this.isRateLimitError(error)) {
+            console.log(`🚫 Rate limit detected for key: ${currentApiKey.substring(0, 8)}***`);
+            await this.markApiKeyRateLimited(currentApiKey);
+          } else {
+            await this.updateApiKeyUsage(currentApiKey, false);
+          }
         }
         
-        // If it's the last attempt or not a rate limit error, break
-        if (attempt === maxRetries || !this.isRateLimitError(error)) {
+        // If it's the last attempt, break
+        if (attempt === maxRetries) {
+          console.error(`💥 All ${maxRetries} attempts failed`);
+          break;
+        }
+        
+        // If not a retryable error, break early
+        if (error.response?.status === 404) {
+          console.error(`❌ LinkedIn profile not found (404) - not retrying`);
           break;
         }
         
@@ -344,17 +381,38 @@ export class ScrapingDogLinkedInService {
   }
 
   /**
-   * Check if error is related to rate limiting
+   * Check if error is related to rate limiting or LinkedIn limit
    */
   private isRateLimitError(error: any): boolean {
     const errorMessage = error.message?.toLowerCase() || '';
     const errorStatus = error.response?.status;
+    const responseData = error.response?.data?.message?.toLowerCase() || '';
     
     // Common rate limit indicators
     return errorStatus === 429 || 
+           errorStatus === 403 && responseData.includes('free pack') ||
+           errorStatus === 403 && responseData.includes('linkedin') ||
            errorMessage.includes('rate limit') ||
            errorMessage.includes('too many requests') ||
            errorMessage.includes('quota exceeded');
+  }
+
+  /**
+   * Mark API key as rate limited
+   */
+  private async markApiKeyRateLimited(apiKey: string): Promise<void> {
+    try {
+      await prisma.apiKey.updateMany({
+        where: { apiKey: apiKey },
+        data: {
+          lastResult: 'RATE_LIMITED',
+          lastUsed: new Date()
+        }
+      });
+      console.log(`🚫 Marked API key as rate limited: ${apiKey.substring(0, 8)}***`);
+    } catch (error) {
+      console.log('Failed to mark key as rate limited:', error);
+    }
   }
 
   /**
