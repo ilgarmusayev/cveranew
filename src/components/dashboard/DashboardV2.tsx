@@ -68,6 +68,15 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
       totalRemaining: 'Ümumi qalan',
       dailyRemaining: 'Bu gün qalan',
       unlimitedUsage: 'Limitsiz istifadə',
+      createCV: 'CV Yaradın',
+      createCVDescription: 'LinkedIn idxal və ya sıfırdan yaratma',
+      newCVCard: 'Yeni CV Yaradın',
+      newCVCardSubtitle: 'LinkedIn və ya manual seçimi',
+      newCVCardDescription: 'LinkedIn profilinizdən avtomatik idxal və ya sıfırdan manual yaratma arasında seçim edin.',
+      newCVCardFeature1: 'Sİ istifadəsi',
+      newCVCardFeature2: 'Peşəkar şablonlar',
+      newCVCardFeature3: 'Sürətli yaratma',
+      newCVCardButton: 'CV Yaratmağa Başla',
       linkedinImport: 'LinkedIn İdxal',
       autoProfileImport: 'Avtomatik profil İdxalı',
       linkedinImportButton: 'LinkedIn profilinizi idxal edin',
@@ -96,6 +105,20 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
       personalizedApproach: 'Şəxsiləşdirilmiş yanaşma',
       academicProfessional: 'Akademik və peşəkar',
       startCreatingML: 'Motivasiya məktubu yaradın',
+      jobMatch: 'İş Uyğunluq Analizi',
+      createJobMatch: 'CV-ni iş elanı ilə müqayisə edin',
+      jobMatchDescription: 'AI ilə CV-nizin iş elanlarına uyğunluğunu analiz edin və peşəkar tövsiyələr alın!',
+      compatibilityAnalysis: 'Uyğunluq analizi',
+      improvementTips: 'İnkişaf tövsiyələri',
+      careerGuidance: 'Karyera bələdçiliyi',
+      startJobMatch: 'İş analizi et',
+      cvChecker: 'CV Yoxlayıcı',
+      createCVChecker: 'CV peşəkarlığınızı yoxlayın',
+      cvCheckerDescription: 'AI ilə CV-nizin peşəkarlığını analiz edin və çatışmayan elementləri öyrənin!',
+      professionalAnalysis: 'Peşəkar analiz',
+      missingElements: 'Çatışmayan elementlər',
+      improvementTipsShort: 'İnkişaf məsləhətləri',
+      startCVChecker: 'CV-ni yoxla',
       elevatorPitch: '30 Saniyəlik Pitch',
       createElevatorPitch: 'Elevator Pitch yaradın',
       elevatorPitchDescription: 'CV-nizə əsaslanan 30 saniyəlik güclü təqdimat hazırlayın. Özünüzü təsirli şəkildə təqdim edin!',
@@ -134,6 +157,15 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
       totalRemaining: 'Total remaining',
       dailyRemaining: 'Remaining today',
       unlimitedUsage: 'Unlimited usage',
+      createCV: 'Create CV',
+      createCVDescription: 'LinkedIn import or create from scratch',
+      newCVCard: 'Create New CV',
+      newCVCardSubtitle: 'LinkedIn or manual option',
+      newCVCardDescription: 'Choose between automatic LinkedIn import or manual creation from scratch.',
+      newCVCardFeature1: 'AI usage',
+      newCVCardFeature2: 'Professional templates',
+      newCVCardFeature3: 'Quick creation',
+      newCVCardButton: 'Start Creating CV',
       linkedinImport: 'LinkedIn Import',
       autoProfileImport: 'Automatic profile import',
       linkedinImportButton: 'Import your LinkedIn profile',
@@ -161,6 +193,27 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
       personalizedApproach: 'Personalized approach',
       academicProfessional: 'Academic & professional',
       startCreatingML: 'Create motivation letter',
+      jobMatch: 'Job Match Analysis',
+      createJobMatch: 'Compare CV with job listings',
+      jobMatchDescription: 'Analyze your CV compatibility with job positions using AI and get professional recommendations!',
+      compatibilityAnalysis: 'Compatibility analysis',
+      improvementTips: 'Improvement tips',
+      careerGuidance: 'Career guidance',
+      startJobMatch: 'Analyze job match',
+      cvChecker: 'CV Checker',
+      createCVChecker: 'Check your CV professionalism',
+      cvCheckerDescription: 'Analyze your CV professionalism with AI and learn what elements are missing!',
+      professionalAnalysis: 'Professional analysis',
+      missingElements: 'Missing elements',
+      improvementTipsShort: 'Improvement tips',
+      startCVChecker: 'Check CV',
+      elevatorPitch: '30-Second Pitch',
+      createElevatorPitch: 'Create elevator pitch',
+      elevatorPitchDescription: 'Prepare a powerful 30-second presentation based on your CV. Present yourself impressively!',
+      impactfulPresentation: 'Impactful presentation',
+      quickIntroduction: 'Quick introduction',
+      speechPractice: 'Speech practice',
+      startCreatingEP: 'Create elevator pitch',
       startCreating: 'Start creating new CV',
       myCVs: 'My CVs',
       created: 'Created',
@@ -193,6 +246,15 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
       totalRemaining: 'Всего осталось',
       dailyRemaining: 'Осталось сегодня',
       unlimitedUsage: 'Безлимитное использование',
+      createCV: 'Создать CV',
+      createCVDescription: 'Импорт LinkedIn или создание с нуля',
+      newCVCard: 'Создать новое CV',
+      newCVCardSubtitle: 'LinkedIn или ручной вариант',
+      newCVCardDescription: 'Выберите между автоматическим импортом LinkedIn или ручным созданием с нуля.',
+      newCVCardFeature1: 'Использование ИИ',
+      newCVCardFeature2: 'Профессиональные шаблоны',
+      newCVCardFeature3: 'Быстрое создание',
+      newCVCardButton: 'Начать создание CV',
       linkedinImport: 'Импорт LinkedIn',
       autoProfileImport: 'Автоматический импорт профиля',
       linkedinImportButton: 'Импортировать ваш профиль LinkedIn',
@@ -220,6 +282,27 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
       personalizedApproach: 'Персонализированный подход',
       academicProfessional: 'Академический и профессиональный',
       startCreatingML: 'Создать мотивационное письмо',
+      jobMatch: 'Анализ соответствия работе',
+      createJobMatch: 'Сравнить резюме с вакансиями',
+      jobMatchDescription: 'Анализируйте совместимость вашего резюме с вакансиями с помощью ИИ и получайте профессиональные рекомендации!',
+      compatibilityAnalysis: 'Анализ совместимости',
+      improvementTips: 'Советы по улучшению',
+      careerGuidance: 'Карьерное руководство',
+      startJobMatch: 'Анализировать соответствие',
+      cvChecker: 'Проверка резюме',
+      createCVChecker: 'Проверьте профессионализм резюме',
+      cvCheckerDescription: 'Анализируйте профессионализм вашего резюме с помощью ИИ и узнайте, каких элементов не хватает!',
+      professionalAnalysis: 'Профессиональный анализ',
+      missingElements: 'Отсутствующие элементы',
+      improvementTipsShort: 'Советы по улучшению',
+      startCVChecker: 'Проверить резюме',
+      elevatorPitch: '30-секундная презентация',
+      createElevatorPitch: 'Создать elevator pitch',
+      elevatorPitchDescription: 'Подготовьте мощную 30-секундную презентацию на основе вашего резюме. Представьте себя впечатляюще!',
+      impactfulPresentation: 'Впечатляющая презентация',
+      quickIntroduction: 'Быстрое знакомство',
+      speechPractice: 'Практика речи',
+      startCreatingEP: 'Создать elevator pitch',
       startCreating: 'Начать создание нового резюме',
       myCVs: 'Мои резюме',
       created: 'Создано',
@@ -405,7 +488,7 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
             <h1 className="text-4xl font-bold text-gray-900">
               {content.dashboardTitle}
             </h1>
-           
+         
           </div>
           <span className="block text-2xl font-normal text-gray-600 mt-2">{content.manageCVs}</span>
           <div className="w-24 h-1 bg-blue-600 mx-auto rounded-full mt-4"></div>
@@ -531,59 +614,7 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
 
         {/* Action Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {/* LinkedIn Import Card */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-            <div className="flex items-center mb-4">
-              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mr-3">
-                <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">{content.linkedinImport}</h3>
-                <p className="text-gray-600 text-sm mt-1">{content.autoProfileImport}</p>
-              </div>
-            </div>
-
-            <p className="text-gray-700 text-sm mb-4 leading-relaxed">
-              {content.linkedinDescription}
-            </p>
-
-            <div className="space-y-2 mb-6">
-              <div className="flex items-center text-gray-700 text-sm">
-                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                {content.autoDataFill}
-              </div>
-              <div className="flex items-center text-gray-700 text-sm">
-                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                {content.workExperience}
-              </div>
-              <div className="flex items-center text-gray-700 text-sm">
-                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                {content.skillsCompetencies}
-              </div>
-            </div>
-
-            <button
-              onClick={() => router.push('/linkedin-import')}
-              className="w-full bg-blue-600 text-white border-2 rounded-xl px-4 py-3 font-medium hover:bg-white hover:text-blue-600 hover:border-2 hover:border-blue-600 transition-all duration-200"
-            >
-              <div className="flex items-center justify-center">
-                <span className="text-sm">{content.linkedinImportButton}</span>
-                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            </button>
-          </div>
-
-          {/* Manual CV Creation Card */}
+          {/* New CV Creation Card */}
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
             <div className="flex items-center mb-4">
               <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mr-3">
@@ -592,13 +623,13 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900">{content.manualCV}</h3>
-                <p className="text-gray-600 text-sm mt-1">{content.createFromScratch}</p>
+                <h3 className="text-lg font-bold text-gray-900">{content.newCVCard}</h3>
+                <p className="text-gray-600 text-sm mt-1">{content.newCVCardSubtitle}</p>
               </div>
             </div>
 
             <p className="text-gray-700 text-sm mb-4 leading-relaxed">
-              {content.manualDescription}
+              {content.newCVCardDescription}
             </p>
 
             <div className="space-y-2 mb-6">
@@ -606,28 +637,28 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
                 <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                {content.fullControl}
+                {content.newCVCardFeature1}
               </div>
               <div className="flex items-center text-gray-700 text-sm">
                 <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                {content.professionalDesign}
+                {content.newCVCardFeature2}
               </div>
               <div className="flex items-center text-gray-700 text-sm">
                 <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                {content.customizable}
+                {content.newCVCardFeature3}
               </div>
             </div>
 
             <button
-              onClick={() => router.push('/new')}
+              onClick={() => router.push('/create')}
               className="w-full bg-blue-600 text-white border-2 rounded-xl px-4 py-3 font-medium hover:bg-white hover:text-blue-600 hover:border-2 hover:border-blue-600 transition-all duration-200"
             >
               <div className="flex items-center justify-center">
-                <span className="text-sm">{content.startCreating}</span>
+                <span className="text-sm">{content.newCVCardButton}</span>
                 <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -732,6 +763,110 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
             >
               <div className="flex items-center justify-center">
                 <span className="text-sm">{content.startCreatingML}</span>
+                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </button>
+          </div>
+
+          {/* Job Match Card */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mr-3">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">{content.jobMatch}</h3>
+                <p className="text-gray-600 text-sm mt-1">{content.createJobMatch}</p>
+              </div>
+            </div>
+
+            <p className="text-gray-700 text-sm mb-4 leading-relaxed">
+              {content.jobMatchDescription}
+            </p>
+
+            <div className="space-y-2 mb-6">
+              <div className="flex items-center text-gray-700 text-sm">
+                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                {content.compatibilityAnalysis}
+              </div>
+              <div className="flex items-center text-gray-700 text-sm">
+                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                {content.improvementTips}
+              </div>
+              <div className="flex items-center text-gray-700 text-sm">
+                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                {content.careerGuidance}
+              </div>
+            </div>
+
+            <button
+              onClick={() => router.push('/jobmatch')}
+              className="w-full bg-blue-600 text-white border-2 rounded-xl px-4 py-3 font-medium hover:bg-white hover:text-blue-600 hover:border-2 hover:border-blue-600 transition-all duration-200"
+            >
+              <div className="flex items-center justify-center">
+                <span className="text-sm">{content.startJobMatch}</span>
+                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </button>
+          </div>
+
+          {/* Elevator Pitch Card */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mr-3">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">{content.elevatorPitch}</h3>
+                <p className="text-gray-600 text-sm mt-1">{content.createElevatorPitch}</p>
+              </div>
+            </div>
+
+            <p className="text-gray-700 text-sm mb-4 leading-relaxed">
+              {content.elevatorPitchDescription}
+            </p>
+
+            <div className="space-y-2 mb-6">
+              <div className="flex items-center text-gray-700 text-sm">
+                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                {content.impactfulPresentation}
+              </div>
+              <div className="flex items-center text-gray-700 text-sm">
+                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                {content.quickIntroduction}
+              </div>
+              <div className="flex items-center text-gray-700 text-sm">
+                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                {content.speechPractice}
+              </div>
+            </div>
+
+            <button
+              onClick={() => router.push('/30sec')}
+              className="w-full bg-blue-600 text-white border-2 rounded-xl px-4 py-3 font-medium hover:bg-white hover:text-blue-600 hover:border-2 hover:border-blue-600 transition-all duration-200"
+            >
+              <div className="flex items-center justify-center">
+                <span className="text-sm">{content.startCreatingEP}</span>
                 <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>

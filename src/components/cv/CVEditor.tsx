@@ -264,8 +264,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
 
             saving: 'Yadda saxlanılır...',
             saved: 'Yadda saxlanıldı',
-            downloadPDF: 'PDF Yüklə',
-            pdf: 'PDF',
+            downloadPDF: 'PDF Yükləyin',
+            pdf: 'PDF Yükləyin',
             goBack: 'Geri qayıdın',
             save: 'Yadda Saxlayın',
             saveShort: 'Saxla',

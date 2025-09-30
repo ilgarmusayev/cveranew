@@ -14,6 +14,8 @@ interface SiteLanguageContextType {
 
 const SiteLanguageContext = createContext<SiteLanguageContextType | undefined>(undefined);
 
+export { SiteLanguageContext };
+
 interface SiteLanguageProviderProps {
   children: ReactNode;
 }

@@ -122,7 +122,7 @@ export default function StandardHeader() {
       login: 'Giriş',
       register: 'Qeydiyyat',
       myCVs: 'CV-lərim',
-      linkedinImport: 'LinkedIn İdxal',
+      linkedinImport: 'CV Yaratmaq',
       user: 'İstifadəçi',
       loadingUser: 'Yüklənir...',
       selectLanguage: 'Dil seçin',
@@ -143,7 +143,7 @@ export default function StandardHeader() {
       login: 'Login',
       register: 'Register',
       myCVs: 'My CVs',
-      linkedinImport: 'LinkedIn Import',
+      linkedinImport: 'CV Creation',
       user: 'User',
       loadingUser: 'Loading...',
       selectLanguage: 'Select Language',
@@ -164,7 +164,7 @@ export default function StandardHeader() {
       login: 'Вход',
       register: 'Регистрация',
       myCVs: 'Мои резюме',
-      linkedinImport: 'Импорт LinkedIn',
+      linkedinImport: 'Создание резюме',
       user: 'Пользователь',
       loadingUser: 'Загружается...',
       selectLanguage: 'Выберите язык',
@@ -354,7 +354,7 @@ export default function StandardHeader() {
             <Link href="/cv-list" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
               {content.myCVs}
             </Link>
-            <Link href="/linkedin-import" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
+            <Link href="/create" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
               {content.linkedinImport}
             </Link>
             <Link href="/templates" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">

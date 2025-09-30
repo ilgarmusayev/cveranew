@@ -149,7 +149,7 @@ export default function EditCVPage() {
 
   const handleSave = async (cvData: any) => {
     try {
-      console.log('Edit page: CV saved successfully by CVEditor:', cvData);
+            console.log('Edit page: CV saved successfully by CVEditor:', cvData);
       
       // CVEditor already handles the save operation, we just refresh the page to update data
       // Instead of redirecting to dashboard, refresh the current page
@@ -238,6 +238,42 @@ export default function EditCVPage() {
           <div className="absolute bottom-20 right-1/4 w-64 h-64 bg-gradient-to-bl from-emerald-200/20 to-teal-200/20 rounded-full blur-3xl"></div>
         </div>
 
+        {/* Job Match Notification */}
+        <div className="relative z-50 px-4 pt-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="bg-white border-l-4 border-blue-500 shadow-md rounded-lg p-3 mb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="bg-blue-500 rounded-full p-1.5 mr-3">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">
+                      {siteLanguage === 'azerbaijani' && 'CV-nizi tam bitirdikdən sonra işə uyğunluğunu yoxlayın'}
+                      {siteLanguage === 'english' && 'Check job compatibility after completing your CV'}
+                      {siteLanguage === 'russian' && 'Проверьте совместимость с работой после завершения резюме'}
+                    </p>
+                    <p className="text-xs text-gray-600 mt-1">
+                      {siteLanguage === 'azerbaijani' && 'AI CV-nizi iş elanları ilə müqayisə edib uyğunluq faizini hesablayır'}
+                      {siteLanguage === 'english' && 'AI compares your CV with job listings and calculates compatibility'}
+                      {siteLanguage === 'russian' && 'ИИ сравнивает резюме с вакансиями и рассчитывает совместимость'}
+                    </p>
+                  </div>
+                </div>
+                <Link
+                  href="/jobmatch"
+                  className="bg-blue-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700 transition-colors duration-200 whitespace-nowrap ml-4 shadow-sm"
+                >
+                  {siteLanguage === 'azerbaijani' && 'İşə Uyğunluq'}
+                  {siteLanguage === 'english' && 'Job Match'}
+                  {siteLanguage === 'russian' && 'Анализ Работы'}
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Main Content */}
         <div className="relative z-10">

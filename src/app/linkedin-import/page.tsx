@@ -15,7 +15,7 @@ export default function LinkedInImportPage() {
   const [linkedinUrl, setLinkedinUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [provider, setProvider] = useState<'scrapingdog' | 'brightdata'>('scrapingdog');
+  const [provider, setProvider] = useState<'scrapingdog' | 'brightdata'>('brightdata');
 
   // Site language mətnləri
   const labels = {
@@ -59,8 +59,8 @@ export default function LinkedInImportPage() {
       errorLinkedInImport: 'İdxal zamanı xəta baş verdi',
       errorUnknown: 'Naməlum xəta baş verdi',
       providerSelection: 'İdxal Üsulunu Seçin',
-      scrapingdogProvider: 'Əsas',
-      brightdataProvider: 'Alternativ',
+      scrapingdogProvider: 'Alternativ',
+      brightdataProvider: 'Əsas',
       scrapingdogDescription: 'Təxminən 0.5-1 dəqiqə',
       brightdataDescription: 'Təxminən 1-1.5 dəqiqə',
       fastImport: 'Sürətli İdxal',
@@ -110,8 +110,8 @@ export default function LinkedInImportPage() {
       errorLinkedInImport: 'Import error occurred',
       errorUnknown: 'Unknown error occurred',
       providerSelection: 'Choose Import Method',
-      scrapingdogProvider: 'Primary',
-      brightdataProvider: 'Alternative',
+      scrapingdogProvider: 'Alternative',
+      brightdataProvider: 'Primary',
       scrapingdogDescription: 'Approximately 0.5-1 minute',
       brightdataDescription: 'Approximately 1-1.5 minutes',
       fastImport: 'Fast Import',
@@ -161,8 +161,8 @@ export default function LinkedInImportPage() {
       errorLinkedInImport: 'Произошла ошибка импорта',
       errorUnknown: 'Произошла неизвестная ошибка',
       providerSelection: 'Выберите метод импорта',
-      scrapingdogProvider: 'Основной',
-      brightdataProvider: 'Альтернативный',
+      scrapingdogProvider: 'Альтернативный',
+      brightdataProvider: 'Основной',
       scrapingdogDescription: 'Примерно 0.5-1 минута',
       brightdataDescription: 'Примерно 1-1.5 минуты',
       fastImport: 'Быстрый импорт',
@@ -361,35 +361,6 @@ export default function LinkedInImportPage() {
                     </label>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div 
-                        onClick={() => setProvider('scrapingdog')}
-                        className={`cursor-pointer rounded-xl border-2 p-4 transition-all duration-200 ${
-                          provider === 'scrapingdog' 
-                            ? 'border-blue-500 bg-blue-50' 
-                            : 'border-gray-200 bg-white hover:border-gray-300'
-                        }`}
-                      >
-                        <div className="flex items-center">
-                          <div className={`flex-shrink-0 w-4 h-4 rounded-full border-2 ${
-                            provider === 'scrapingdog' 
-                              ? 'border-blue-500 bg-blue-500' 
-                              : 'border-gray-300'
-                          }`}>
-                            {provider === 'scrapingdog' && (
-                              <div className="w-full h-full rounded-full bg-white scale-50"></div>
-                            )}
-                          </div>
-                          <div className="ml-3">
-                            <h3 className="text-sm font-medium text-gray-900">
-                              {content.scrapingdogProvider}
-                            </h3>
-                            <p className="text-xs text-gray-500">
-                              {content.scrapingdogDescription}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div 
                         onClick={() => setProvider('brightdata')}
                         className={`cursor-pointer rounded-xl border-2 p-4 transition-all duration-200 ${
                           provider === 'brightdata' 
@@ -413,6 +384,35 @@ export default function LinkedInImportPage() {
                             </h3>
                             <p className="text-xs text-gray-500">
                               {content.brightdataDescription}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div 
+                        onClick={() => setProvider('scrapingdog')}
+                        className={`cursor-pointer rounded-xl border-2 p-4 transition-all duration-200 ${
+                          provider === 'scrapingdog' 
+                            ? 'border-blue-500 bg-blue-50' 
+                            : 'border-gray-200 bg-white hover:border-gray-300'
+                        }`}
+                      >
+                        <div className="flex items-center">
+                          <div className={`flex-shrink-0 w-4 h-4 rounded-full border-2 ${
+                            provider === 'scrapingdog' 
+                              ? 'border-blue-500 bg-blue-500' 
+                              : 'border-gray-300'
+                          }`}>
+                            {provider === 'scrapingdog' && (
+                              <div className="w-full h-full rounded-full bg-white scale-50"></div>
+                            )}
+                          </div>
+                          <div className="ml-3">
+                            <h3 className="text-sm font-medium text-gray-900">
+                              {content.scrapingdogProvider}
+                            </h3>
+                            <p className="text-xs text-gray-500">
+                              {content.scrapingdogDescription}
                             </p>
                           </div>
                         </div>
