@@ -1,7 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-
-// Gemini API client
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+import { getWorkingGeminiApiKey, markApiKeyAsInactive } from '@/lib/geminiApiKeyService';
 
 export interface CVDataForSummary {
   personalInfo: {
@@ -40,6 +38,15 @@ export interface CVDataForSummary {
  */
 export async function generateProfessionalSummary(cvData: CVDataForSummary, language?: string): Promise<string> {
   try {
+    // Get API key from database
+    const apiKey = await getWorkingGeminiApiKey();
+    
+    if (!apiKey) {
+      console.log('❌ No active Gemini API key available, using fallback');
+      return generateFallbackSummary(cvData, language);
+    }
+
+    const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     // Create a comprehensive prompt based on CV data and language
@@ -57,6 +64,22 @@ export async function generateProfessionalSummary(cvData: CVDataForSummary, lang
     return summary.trim();
   } catch (error) {
     console.error('❌ Gemini AI error:', error);
+    
+    // If it's an API key related error, mark the key as inactive
+    if (error instanceof Error) {
+      const errorMessage = error.message.toLowerCase();
+      if (errorMessage.includes('api key') || 
+          errorMessage.includes('authentication') || 
+          errorMessage.includes('unauthorized') ||
+          errorMessage.includes('quota') ||
+          errorMessage.includes('billing')) {
+        
+        const apiKey = await getWorkingGeminiApiKey();
+        if (apiKey) {
+          await markApiKeyAsInactive(apiKey, error.message);
+        }
+      }
+    }
     
     // Fallback: Generate basic summary from data
     return generateFallbackSummary(cvData, language);

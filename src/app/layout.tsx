@@ -49,6 +49,18 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
+  icons: {
+    icon: [
+      { url: '/favicon.ico?v=2', sizes: '32x32', type: 'image/x-icon' },
+      { url: '/favicon-16x16.png?v=2', sizes: '16x16', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/android-chrome-192x192.png?v=2', sizes: '192x192', type: 'image/png' },
+    ],
+    other: [
+      { rel: 'icon', url: '/favicon.ico?v=2' },
+    ],
+  },
   metadataBase: new URL('https://cvera.net'),
   alternates: {
     canonical: '/',
@@ -97,6 +109,11 @@ export default function RootLayout({
     <html lang="az" className="scroll-smooth">
       <head>
         <meta name="format-detection" content="telephone=no, date=no, email=no, address=no" />
+        <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=2" />
+        <link rel="apple-touch-icon" sizes="192x192" href="/android-chrome-192x192.png?v=2" />
+        <link rel="shortcut icon" href="/favicon.ico?v=2" />
+        <link rel="manifest" href="/manifest.json" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} antialiased overflow-x-hidden`}

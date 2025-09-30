@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNotification } from '@/components/ui/Toast';
 import { CVData, PersonalInfo, Experience, Education, Skill, Language, Project, Certification, VolunteerExperience } from '@/types/cv';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import Header from '@/components/Header';
 import { CVTranslationPanel } from '@/components/translation/CVTranslationPanel';
 import { CVLanguage } from '@/lib/cvLanguage';
@@ -265,11 +266,11 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
 
             saving: 'Yadda saxlanılır...',
             saved: 'Yadda saxlanıldı',
-            downloadPDF: 'PDF Yükləyin',
+            downloadPDF: 'Yükləyin',
             pdf: 'PDF Yükləyin',
             goBack: 'Geri qayıdın',
             save: 'Yadda Saxlayın',
-            saveShort: 'Saxla',
+            saveShort: 'Saxlayın',
             cvSections: 'CV Bölmələri',
             preview: 'Önizləmə',
             aiTranslationPanel: 'AI Tərcümə Paneli',
@@ -285,8 +286,11 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             smallTextWeight: 'Kiçik Mətn Qalınlığı',
             sectionSpacing: 'Bölmələr Arası Məsafə',
             reset: 'Sıfırla',
-            recommendationTip: 'Tövsiyə:',
-            recommendationText: 'Dil fərqi aşkarlandıqda AI tərcümədən istifadə edin.'
+            jobMatchTip: 'İşə Uyğunluq Tövsiyəsi:',
+            jobMatchText: 'CV-nizin vakansiyaya uyğunluğunu yoxlamaq üçün buraya klikləyin',
+            jobMatchLink: '/jobmatch',
+            languageTip: 'Dil Tövsiyəsi:',
+            languageText: 'CV-nizin dilinin vakansiyanın dili ilə uyğun olduğundan əmin olun və AI tərcümədən istifadə edin.'
         },
         english: {
             templateSelection: 'Template Selection',
@@ -299,7 +303,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
 
             saving: 'Saving...',
             saved: 'Saved',
-            downloadPDF: 'Download PDF',
+            downloadPDF: 'Download',
             pdf: 'PDF',
             goBack: 'Go Back',
             save: 'Save',
@@ -319,8 +323,11 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             smallTextWeight: 'Small Text Weight',
             sectionSpacing: 'Section Spacing',
             reset: 'Reset',
-            recommendationTip: 'Recommendation:',
-            recommendationText: 'Use AI translation when language difference is detected.'
+            jobMatchTip: 'Job Match Recommendation:',
+            jobMatchText: 'Click here to check your CV compatibility with job postings',
+            jobMatchLink: '/jobmatch',
+            languageTip: 'Language Recommendation:',
+            languageText: 'Ensure your CV language matches the job posting language and use AI translation when needed.'
         },
         russian: {
             templateSelection: 'Выбор шаблона',
@@ -333,7 +340,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
 
             saving: 'Сохранение...',
             saved: 'Сохранено',
-            downloadPDF: 'Скачать PDF',
+            downloadPDF: 'Скачать',
             pdf: 'PDF',
             goBack: 'Назад',
             save: 'Сохранить',
@@ -353,8 +360,11 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             smallTextWeight: 'Толщина мелкого текста',
             sectionSpacing: 'Расстояние между разделами',
             reset: 'Сбросить',
-            recommendationTip: 'Рекомендация:',
-            recommendationText: 'Используйте ИИ-перевод при обнаружении языковых различий.'
+            jobMatchTip: 'Рекомендация по соответствию работе:',
+            jobMatchText: 'Нажмите здесь, чтобы проверить совместимость вашего резюме с вакансиями',
+            jobMatchLink: '/jobmatch',
+            languageTip: 'Языковая рекомендация:',
+            languageText: 'Убедитесь, что язык резюме соответствует языку вакансии, и используйте ИИ-перевод при необходимости.'
         }
     };
 
@@ -488,6 +498,11 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
 
     // ATS Template Left Column Order State
     const [leftColumnOrder, setLeftColumnOrder] = useState<string[]>(['skills', 'languages', 'certifications']);
+    
+    // AI Assistant Modal State
+    const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+    const [isAiAnalyzing, setIsAiAnalyzing] = useState(false);
+    const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
     
     // Check if current template is ATS or Aurora or Vertex
     const isAtlasTemplate = cv.templateId?.toLowerCase().includes('ats') || 
@@ -1137,6 +1152,242 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
         console.log('✅ CVEditor setActiveMobileSection to:', sectionId);
     }, [showWarning, activeMobileSection]);
 
+    // AI Analysis Function
+    const handleAiAnalysis = useCallback(async () => {
+        setIsAiAnalyzing(true);
+        setIsAiModalOpen(true);
+        
+        try {
+            // Prepare CV data for analysis
+            const cvText = `
+PERSONAL INFO:
+Name: ${cv.personalInfo.firstName} ${cv.personalInfo.lastName}
+Email: ${cv.personalInfo.email}
+Phone: ${cv.personalInfo.phone}
+Location: ${cv.personalInfo.location || cv.personalInfo.address || ''}
+Summary: ${cv.personalInfo.summary}
+
+EXPERIENCE:
+${cv.experience.map(exp => `
+- ${exp.position} at ${exp.company} (${exp.startDate} - ${exp.endDate || 'Present'})
+  ${exp.description}
+`).join('')}
+
+EDUCATION:
+${cv.education.map(edu => `
+- ${edu.degree} at ${edu.institution} (${edu.startDate} - ${edu.endDate || 'Present'})
+  ${edu.description || ''}
+`).join('')}
+
+SKILLS:
+${cv.skills.map(skill => `${skill.name} (${skill.level})`).join(', ')}
+
+LANGUAGES:
+${cv.languages.map(lang => `${lang.language} (${lang.level})`).join(', ')}
+
+PROJECTS:
+${cv.projects.map(proj => `
+- ${proj.name}: ${proj.description}
+  Technologies: ${proj.technologies?.join(', ')}
+`).join('')}
+            `.trim();
+
+            const response = await fetch('/api/ai/analyze-cv', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    cvText,
+                    language: cv.cvLanguage || 'az', // CV dili: az/en/ru
+                    personalInfo: cv.personalInfo,
+                    experience: cv.experience,
+                    education: cv.education,
+                    skills: cv.skills,
+                    languages: cv.languages,
+                    projects: cv.projects
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('AI analysis failed');
+            }
+
+            const result = await response.json();
+            setAiSuggestions(result.suggestions || []);
+            
+        } catch (error) {
+            console.error('AI Analysis Error:', error);
+            showError('AI analizi zamanı xəta baş verdi');
+            setIsAiModalOpen(false);
+        } finally {
+            setIsAiAnalyzing(false);
+        }
+    }, [cv, showError]);
+
+    // Apply AI Suggestion Function
+    const applyAiSuggestion = useCallback((suggestion: any) => {
+        try {
+            const { type, field, newValue, sectionIndex } = suggestion;
+            
+            setCv(prevCv => {
+                const newCv = { ...prevCv };
+                
+                switch (type) {
+                    case 'personalInfo':
+                    case 'summary':
+                        newCv.personalInfo = {
+                            ...newCv.personalInfo,
+                            [field]: newValue
+                        };
+                        break;
+                    case 'experience':
+                        if (sectionIndex !== undefined && newCv.experience[sectionIndex]) {
+                            newCv.experience[sectionIndex] = {
+                                ...newCv.experience[sectionIndex],
+                                [field]: newValue
+                            };
+                        }
+                        break;
+                    case 'education':
+                        if (sectionIndex !== undefined && newCv.education[sectionIndex]) {
+                            newCv.education[sectionIndex] = {
+                                ...newCv.education[sectionIndex],
+                                [field]: newValue
+                            };
+                        }
+                        break;
+                    case 'skills':
+                        if (field && sectionIndex !== undefined && newCv.skills[sectionIndex]) {
+                            // Konkret skill-i yeniləmək
+                            newCv.skills[sectionIndex] = {
+                                ...newCv.skills[sectionIndex],
+                                [field]: newValue
+                            };
+                        } else if (Array.isArray(newValue)) {
+                            // Bütün skills array-ini əvəz etmək
+                            newCv.skills = newValue;
+                        }
+                        break;
+                    case 'languages':
+                        if (sectionIndex !== undefined && newCv.languages[sectionIndex]) {
+                            newCv.languages[sectionIndex] = {
+                                ...newCv.languages[sectionIndex],
+                                [field]: newValue
+                            };
+                        } else if (Array.isArray(newValue)) {
+                            newCv.languages = newValue;
+                        }
+                        break;
+                    case 'projects':
+                        if (sectionIndex !== undefined && newCv.projects[sectionIndex]) {
+                            newCv.projects[sectionIndex] = {
+                                ...newCv.projects[sectionIndex],
+                                [field]: newValue
+                            };
+                        } else if (Array.isArray(newValue)) {
+                            newCv.projects = newValue;
+                        }
+                        break;
+                    case 'certifications':
+                        if (sectionIndex !== undefined && newCv.certifications[sectionIndex]) {
+                            newCv.certifications[sectionIndex] = {
+                                ...newCv.certifications[sectionIndex],
+                                [field]: newValue
+                            };
+                        } else if (Array.isArray(newValue)) {
+                            newCv.certifications = newValue;
+                        }
+                        break;
+                    case 'volunteerExperience':
+                        if (sectionIndex !== undefined && newCv.volunteerExperience[sectionIndex]) {
+                            newCv.volunteerExperience[sectionIndex] = {
+                                ...newCv.volunteerExperience[sectionIndex],
+                                [field]: newValue
+                            };
+                        } else if (Array.isArray(newValue)) {
+                            newCv.volunteerExperience = newValue;
+                        }
+                        break;
+                    case 'publications':
+                        if (sectionIndex !== undefined && newCv.publications[sectionIndex]) {
+                            newCv.publications[sectionIndex] = {
+                                ...newCv.publications[sectionIndex],
+                                [field]: newValue
+                            };
+                        } else if (Array.isArray(newValue)) {
+                            newCv.publications = newValue;
+                        }
+                        break;
+                    case 'honorsAwards':
+                        if (sectionIndex !== undefined && newCv.honorsAwards[sectionIndex]) {
+                            newCv.honorsAwards[sectionIndex] = {
+                                ...newCv.honorsAwards[sectionIndex],
+                                [field]: newValue
+                            };
+                        } else if (Array.isArray(newValue)) {
+                            newCv.honorsAwards = newValue;
+                        }
+                        break;
+                    case 'courses':
+                        if (sectionIndex !== undefined && newCv.courses[sectionIndex]) {
+                            newCv.courses[sectionIndex] = {
+                                ...newCv.courses[sectionIndex],
+                                [field]: newValue
+                            };
+                        } else if (Array.isArray(newValue)) {
+                            newCv.courses = newValue;
+                        }
+                        break;
+                    case 'testScores':
+                        if (sectionIndex !== undefined && newCv.testScores[sectionIndex]) {
+                            newCv.testScores[sectionIndex] = {
+                                ...newCv.testScores[sectionIndex],
+                                [field]: newValue
+                            };
+                        } else if (Array.isArray(newValue)) {
+                            newCv.testScores = newValue;
+                        }
+                        break;
+                    case 'organizations':
+                        if (sectionIndex !== undefined && newCv.organizations[sectionIndex]) {
+                            newCv.organizations[sectionIndex] = {
+                                ...newCv.organizations[sectionIndex],
+                                [field]: newValue
+                            };
+                        } else if (Array.isArray(newValue)) {
+                            newCv.organizations = newValue;
+                        }
+                        break;
+                    case 'customSections':
+                        if (sectionIndex !== undefined && newCv.customSections[sectionIndex]) {
+                            newCv.customSections[sectionIndex] = {
+                                ...newCv.customSections[sectionIndex],
+                                [field]: newValue
+                            };
+                        } else if (Array.isArray(newValue)) {
+                            newCv.customSections = newValue;
+                        }
+                        break;
+                    default:
+                        console.warn('Unknown suggestion type:', type);
+                }
+                
+                return newCv;
+            });
+            
+            setIsDirty(true);
+            showSuccess('Təklif tətbiq edildi');
+            
+            // Remove applied suggestion from list
+            setAiSuggestions(prev => prev.filter(s => s.id !== suggestion.id));
+            
+        } catch (error) {
+            console.error('Error applying suggestion:', error);
+            showError('Təklifi tətbiq etmək mümkün olmadı');
+        }
+    }, [setCv, setIsDirty, showSuccess, showError]);
+
     // Render preview based on template
     const renderPreview = () => {
         const previewData = {
@@ -1170,16 +1421,36 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
 
         return (
             <>
-                {/* Language Consistency Tip */}
-                <div className="mb-3 p-2.5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-md flex items-center gap-2.5 text-xs shadow-sm">
+                {/* Job Match Recommendation */}
+                <Link href={content.jobMatchLink} className="block mb-1.5 sm:mb-2 p-1.5 sm:p-2 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-md hover:from-green-100 hover:to-emerald-100 hover:border-green-300 transition-all duration-200 cursor-pointer">
+                    <div className="flex items-center gap-1 sm:gap-1.5 text-xs shadow-sm">
+                        <div className="flex-shrink-0">
+                            <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                        </div>
+                        <div className="flex-1">
+                            <span className="text-green-800 font-medium text-xs leading-tight">🎯 {content.jobMatchTip} </span>
+                            <span className="text-green-700 underline text-xs leading-tight">{content.jobMatchText}</span>
+                        </div>
+                        <div className="flex-shrink-0">
+                            <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                </Link>
+
+                {/* Language Recommendation */}
+                <div className="mb-1.5 sm:mb-2 p-1.5 sm:p-2 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-md flex items-center gap-1 sm:gap-1.5 text-xs shadow-sm">
                     <div className="flex-shrink-0">
-                        <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                         </svg>
                     </div>
                     <div className="flex-1">
-                        <span className="text-blue-800 font-semibold">💡 {content.recommendationTip} </span>
-                        <span className="text-blue-700">{content.recommendationText}</span>
+                        <span className="text-blue-800 font-medium text-xs leading-tight">🌐 {content.languageTip} </span>
+                        <span className="text-blue-700 text-xs leading-tight">{content.languageText}</span>
                     </div>
                 </div>
 
@@ -1424,23 +1695,27 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                             {/* Action Buttons */}
                             {cv.id && (
                                 <>
-                                    {/* 🚀 SENIOR DEV: Birbaşa PDF Export Button */}
+                                    {/* 🚀 SENIOR DEV: Birbaşa PDF Export Button - Mobile Optimized */}
                                     <button
                                         onClick={handleDirectPDFExport}
                                         disabled={saving}
-                                        className="flex items-center justify-center h-10 w-10 sm:h-auto sm:w-auto sm:px-3 sm:py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="flex items-center justify-center px-3 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                         aria-label={content.downloadPDF}
                                     >
                                         {saving ? (
                                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                                         ) : (
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c-.621 0-1.125-.504-1.125-1.125V11.25a9 9 0 00-9-9z" />
-                                            </svg>
+                                            <>
+                                                {/* Icon only on desktop */}
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 hidden sm:block">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c-.621 0-1.125-.504-1.125-1.125V11.25a9 9 0 00-9-9z" />
+                                                </svg>
+                                                {/* Text always visible */}
+                                                <span className="sm:ml-2">
+                                                    {content.downloadPDF}
+                                                </span>
+                                            </>
                                         )}
-                                        <span className="hidden sm:inline ml-2">
-                                            {content.pdf}
-                                        </span>
                                     </button>
 
                                    
@@ -1991,7 +2266,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                     <button
                                         onClick={() => setFontSettings(prev => ({ ...prev, bodySize: Math.max(10, prev.bodySize - 1) }))}
                                         disabled={fontSettings.bodySize <= 10}
-                                        className="w-8 h-8 sm:w-9 sm:h-9 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center hover:bg-purple-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base font-semibold"
+                                        className="w-8 h-8 sm:w-9 sm:h-9 bg-blue-100 text-purple-600 rounded-full flex items-center justify-center hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base font-semibold"
                                     >
                                         -
                                     </button>
@@ -2001,7 +2276,7 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                                     <button
                                         onClick={() => setFontSettings(prev => ({ ...prev, bodySize: Math.min(18, prev.bodySize + 1) }))}
                                         disabled={fontSettings.bodySize >= 18}
-                                        className="w-8 h-8 sm:w-9 sm:h-9 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center hover:bg-purple-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base font-semibold"
+                                        className="w-8 h-8 sm:w-9 sm:h-9 bg-blue-100 text-purple-600 rounded-full flex items-center justify-center hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base font-semibold"
                                     >
                                         +
                                     </button>
@@ -2169,6 +2444,216 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                         >
                             {content.reset}
                         </button>
+                    </div>
+                </div>
+            </div>
+        )}
+        
+        {/* AI Assistant Floating Button */}
+        <div className="fixed bottom-6 left-6 z-[60]">
+            <button
+                onClick={handleAiAnalysis}
+                disabled={isAiAnalyzing}
+                className="group relative bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 
+                         text-white rounded-lg px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 
+                         disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 font-medium"
+                title={
+                    siteLanguage === 'azerbaijani' ? 'AI ilə CV-ni təkmilləşdirin' :
+                    siteLanguage === 'english' ? 'Improve your CV with AI' :
+                    'Улучшите резюме с помощью ИИ'
+                }
+            >
+                {isAiAnalyzing ? (
+                    <>
+                        <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>
+                            {siteLanguage === 'azerbaijani' && 'Analiz edilir...'}
+                            {siteLanguage === 'english' && 'Analyzing...'}
+                            {siteLanguage === 'russian' && 'Анализируется...'}
+                        </span>
+                    </>
+                ) : (
+                    <>
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                        </svg>
+                        <span>
+                            {siteLanguage === 'azerbaijani' && 'Süni İntellekt ilə təkmilləşdirin'}
+                            {siteLanguage === 'english' && 'Improve with AI'}
+                            {siteLanguage === 'russian' && 'Улучшить с ИИ'}
+                        </span>
+                    </>
+                )}
+            </button>
+        </div>
+
+        {/* AI Suggestions Modal */}
+        {isAiModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70] p-4">
+                <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+                    <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                                <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                                          d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                                </svg>
+                                <div>
+                                    <h2 className="text-2xl font-bold text-white">
+                                        {siteLanguage === 'azerbaijani' && 'AI Köməkçi'}
+                                        {siteLanguage === 'english' && 'AI Assistant'}
+                                        {siteLanguage === 'russian' && 'ИИ Помощник'}
+                                    </h2>
+                                    <p className="text-purple-100">
+                                        {siteLanguage === 'azerbaijani' && 'CV təkmilləşdirmə təklifləri'}
+                                        {siteLanguage === 'english' && 'CV improvement suggestions'}
+                                        {siteLanguage === 'russian' && 'Предложения по улучшению резюме'}
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setIsAiModalOpen(false)}
+                                className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-2 transition-all"
+                            >
+                                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+                        {isAiAnalyzing ? (
+                            <div className="flex flex-col items-center justify-center py-12">
+                                <svg className="animate-spin h-12 w-12 text-purple-600 mb-4" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                                    {siteLanguage === 'azerbaijani' && 'CV analiz edilir...'}
+                                    {siteLanguage === 'english' && 'Analyzing CV...'}
+                                    {siteLanguage === 'russian' && 'Анализ резюме...'}
+                                </h3>
+                                <p className="text-gray-600">
+                                    {siteLanguage === 'azerbaijani' && 'Zəhmət olmasa gözləyin, Aİ sizin CV-nizi analiz edir'}
+                                    {siteLanguage === 'english' && 'Please wait, AI is analyzing your CV'}
+                                    {siteLanguage === 'russian' && 'Пожалуйста, подождите, ИИ анализирует ваше резюме'}
+                                </p>
+                            </div>
+                        ) : aiSuggestions.length === 0 ? (
+                            <div className="text-center py-12">
+                                <svg className="h-16 w-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                                    {siteLanguage === 'azerbaijani' && 'Təklif tapılmadı'}
+                                    {siteLanguage === 'english' && 'No suggestions found'}
+                                    {siteLanguage === 'russian' && 'Предложения не найдены'}
+                                </h3>
+                                <p className="text-gray-600">
+                                    {siteLanguage === 'azerbaijani' && 'CV-nizə heç bir təkmilləşdirmə təklifi tapılmadı'}
+                                    {siteLanguage === 'english' && 'No improvement suggestions were found for your CV'}
+                                    {siteLanguage === 'russian' && 'Для вашего резюме не найдено предложений по улучшению'}
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                <div className="mb-6">
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                                        {siteLanguage === 'azerbaijani' && `${aiSuggestions.length} təkmilləşdirmə təklifi`}
+                                        {siteLanguage === 'english' && `${aiSuggestions.length} improvement suggestions`}
+                                        {siteLanguage === 'russian' && `${aiSuggestions.length} предложений по улучшению`}
+                                    </h3>
+                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                        <p className="text-blue-800 text-sm">
+                                            {siteLanguage === 'azerbaijani' && '💡 Hər təklifi diqqətlə nəzərdən keçirin və yalnız uyğun olanları tətbiq edin'}
+                                            {siteLanguage === 'english' && '💡 Review each suggestion carefully and apply only the relevant ones'}
+                                            {siteLanguage === 'russian' && '💡 Внимательно изучите каждое предложение и применяйте только подходящие'}
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                {aiSuggestions.map((suggestion, index) => (
+                                    <div key={suggestion.id || index} 
+                                         className="border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
+                                        <div className="flex items-start justify-between mb-3">
+                                            <div className="flex-1">
+                                                <div className="flex items-center space-x-2 mb-2">
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                                        suggestion.priority === 'high' ? 'bg-red-100 text-red-800' :
+                                                        suggestion.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                                                        'bg-green-100 text-green-800'
+                                                    }`}>
+                                                        {suggestion.priority === 'high' ? (
+                                                            siteLanguage === 'azerbaijani' ? 'Yüksək' :
+                                                            siteLanguage === 'english' ? 'High' : 'Высокий'
+                                                        ) : suggestion.priority === 'medium' ? (
+                                                            siteLanguage === 'azerbaijani' ? 'Orta' :
+                                                            siteLanguage === 'english' ? 'Medium' : 'Средний'
+                                                        ) : (
+                                                            siteLanguage === 'azerbaijani' ? 'Aşağı' :
+                                                            siteLanguage === 'english' ? 'Low' : 'Низкий'
+                                                        )}
+                                                    </span>
+                                                    <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
+                                                        {suggestion.type}
+                                                    </span>
+                                                </div>
+                                                <h4 className="font-semibold text-gray-800 mb-2">{suggestion.title}</h4>
+                                                <p className="text-gray-600 text-sm mb-3">{suggestion.description}</p>
+                                                
+                                                {suggestion.currentValue && suggestion.newValue && (
+                                                    <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                                                        <div>
+                                                            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                                                                {siteLanguage === 'azerbaijani' && 'Mövcud:'}
+                                                                {siteLanguage === 'english' && 'Current:'}
+                                                                {siteLanguage === 'russian' && 'Текущее:'}
+                                                            </span>
+                                                            <p className="text-sm text-gray-800 mt-1">{suggestion.currentValue}</p>
+                                                        </div>
+                                                        <div>
+                                                            <span className="text-xs font-medium text-green-600 uppercase tracking-wide">
+                                                                {siteLanguage === 'azerbaijani' && 'Təklif:'}
+                                                                {siteLanguage === 'english' && 'Suggested:'}
+                                                                {siteLanguage === 'russian' && 'Предложение:'}
+                                                            </span>
+                                                            <p className="text-sm text-green-800 mt-1 font-medium">{suggestion.newValue}</p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex justify-end space-x-3">
+                                            <button
+                                                onClick={() => setAiSuggestions(prev => prev.filter(s => s.id !== suggestion.id))}
+                                                className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 
+                                                         hover:border-gray-400 rounded-lg transition-colors text-sm font-medium"
+                                            >
+                                                {siteLanguage === 'azerbaijani' && 'Rədd edin'}
+                                                {siteLanguage === 'english' && 'Dismiss'}
+                                                {siteLanguage === 'russian' && 'Отклонить'}
+                                            </button>
+                                            <button
+                                                onClick={() => applyAiSuggestion(suggestion)}
+                                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white 
+                                                         rounded-lg transition-colors text-sm font-medium"
+                                            >
+                                                {siteLanguage === 'azerbaijani' && 'Tətbiq edin'}
+                                                {siteLanguage === 'english' && 'Apply'}
+                                                {siteLanguage === 'russian' && 'Применить'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
