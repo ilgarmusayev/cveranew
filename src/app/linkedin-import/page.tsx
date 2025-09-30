@@ -15,6 +15,7 @@ export default function LinkedInImportPage() {
   const [linkedinUrl, setLinkedinUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [provider, setProvider] = useState<'scrapingdog' | 'brightdata'>('scrapingdog');
 
   // Site language mətnləri
   const labels = {
@@ -42,10 +43,10 @@ export default function LinkedInImportPage() {
       importButton: 'LinkedIn-dən İdxal Edin',
       importing: 'İdxal olunur...',
       exampleFormats: 'Düzgün formatlar:',
-      errorEmptyURL: 'LinkedIn linkinizi daxil edin',
+      errorEmptyURL: 'LinkedIn URL-ni daxil edin',
       errorInvalidFormat: 'Düzgün LinkedIn URL formatı daxil edin. Məsələn: https://www.linkedin.com/in/ilgarmusayev/',
       errorLoginRequired: 'Giriş tələb olunur',
-      errorImport: 'LinkedIn import xətası',
+      errorImport: 'İdxal zamanı xəta baş verdi',
       successMessage: 'LinkedIn CV uğurla yaradıldı',
       linkedinURLLabel: 'LinkedIn URL',
       helpInstruction: 'Tam LinkedIn URL-ni daxil edin. Məsələn:',
@@ -55,8 +56,13 @@ export default function LinkedInImportPage() {
       step3Instruction: 'Bütün məlumatlar avtomatik olaraq CV formatında tərtib ediləcək',
       step4Instruction: 'Yaradılan CV-ni redaktə edə və fərdiləşdirə bilərsiniz',
       errorCVNotCreated: 'CV yaradılmadı',
-      errorLinkedInImport: 'LinkedIn idxal xətası',
-      errorUnknown: 'Naməlum xəta',
+      errorLinkedInImport: 'İdxal zamanı xəta baş verdi',
+      errorUnknown: 'Naməlum xəta baş verdi',
+      providerSelection: 'İdxal Üsulunu Seçin',
+      scrapingdogProvider: 'Əsas',
+      brightdataProvider: 'Alternativ',
+      scrapingdogDescription: 'Təxminən 0.5-1 dəqiqə',
+      brightdataDescription: 'Təxminən 1-1.5 dəqiqə',
       fastImport: 'Sürətli İdxal',
       fastImportDesc: 'Bir neçə saniyədə bütün məlumatlarınız idxal edilir',
       accurateData: 'Dəqiq Məlumat',
@@ -91,7 +97,7 @@ export default function LinkedInImportPage() {
       errorEmptyURL: 'Please enter your LinkedIn URL',
       errorInvalidFormat: 'Please enter a valid LinkedIn URL format. Example: https://www.linkedin.com/in/mikayilzeynalabdinov/',
       errorLoginRequired: 'Login required',
-      errorImport: 'LinkedIn import error',
+      errorImport: 'Import error occurred',
       successMessage: 'LinkedIn CV successfully created',
       linkedinURLLabel: 'LinkedIn URL',
       helpInstruction: 'Enter the complete LinkedIn URL. For example:',
@@ -101,8 +107,13 @@ export default function LinkedInImportPage() {
       step3Instruction: 'All information will be automatically organized in CV format',
       step4Instruction: 'You can edit and customize the created CV',
       errorCVNotCreated: 'CV was not created',
-      errorLinkedInImport: 'LinkedIn import error',
-      errorUnknown: 'Unknown error',
+      errorLinkedInImport: 'Import error occurred',
+      errorUnknown: 'Unknown error occurred',
+      providerSelection: 'Choose Import Method',
+      scrapingdogProvider: 'Primary',
+      brightdataProvider: 'Alternative',
+      scrapingdogDescription: 'Approximately 0.5-1 minute',
+      brightdataDescription: 'Approximately 1-1.5 minutes',
       fastImport: 'Fast Import',
       fastImportDesc: 'All your information is imported in seconds',
       accurateData: 'Accurate Data',
@@ -137,7 +148,7 @@ export default function LinkedInImportPage() {
       errorEmptyURL: 'Пожалуйста, введите URL LinkedIn',
       errorInvalidFormat: 'Пожалуйста, введите правильный формат URL LinkedIn. Пример: https://www.linkedin.com/in/ilgarmusayev/',
       errorLoginRequired: 'Требуется вход',
-      errorImport: 'Ошибка импорта LinkedIn',
+      errorImport: 'Произошла ошибка импорта',
       successMessage: 'Резюме LinkedIn успешно создано',
       linkedinURLLabel: 'URL LinkedIn',
       helpInstruction: 'Введите полный URL LinkedIn. Например:',
@@ -147,8 +158,13 @@ export default function LinkedInImportPage() {
       step3Instruction: 'Вся информация будет автоматически организована в формате резюме',
       step4Instruction: 'Вы можете редактировать и настраивать созданное резюме',
       errorCVNotCreated: 'Резюме не было создано',
-      errorLinkedInImport: 'Ошибка импорта LinkedIn',
-      errorUnknown: 'Неизвестная ошибка',
+      errorLinkedInImport: 'Произошла ошибка импорта',
+      errorUnknown: 'Произошла неизвестная ошибка',
+      providerSelection: 'Выберите метод импорта',
+      scrapingdogProvider: 'Основной',
+      brightdataProvider: 'Альтернативный',
+      scrapingdogDescription: 'Примерно 0.5-1 минута',
+      brightdataDescription: 'Примерно 1-1.5 минуты',
       fastImport: 'Быстрый импорт',
       fastImportDesc: 'Вся ваша информация импортируется за секунды',
       accurateData: 'Точные данные',
@@ -220,9 +236,14 @@ export default function LinkedInImportPage() {
         return;
       }
 
-      console.log('🔍 LinkedIn import: Username:', username);
+      console.log(`🔍 LinkedIn import via ${provider}: Username:`, username);
 
-      const response = await fetch('/api/import/linkedin', {
+      // Select endpoint based on provider
+      const endpoint = provider === 'brightdata' 
+        ? '/api/import/linkedin-brightdata' 
+        : '/api/import/linkedin';
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -241,18 +262,21 @@ export default function LinkedInImportPage() {
         return;
       }
 
-      if (result.success && result.cvId) {
-        console.log('✅ LinkedIn CV successfully created:', result.cvId);
+      if (result.success && (result.cvId || result.data?.cvId)) {
+        const cvId = result.cvId || result.data?.cvId;
+        console.log(`✅ LinkedIn CV successfully created via ${provider}:`, cvId);
+        console.log('📊 Full result:', result);
         
         // Redirect to edit the created CV
-        router.push(`/cv/edit/${result.cvId}`);
+        router.push(`/cv/edit/${cvId}`);
       } else {
+        console.log('❌ CV ID not found in response:', result);
         setError(result.error || content.errorCVNotCreated);
       }
 
     } catch (error) {
       console.error('❌ LinkedIn import error:', error);
-      setError(`${content.errorLinkedInImport}: ${error instanceof Error ? error.message : content.errorUnknown}`);
+      setError(content.errorLinkedInImport);
     } finally {
       setLoading(false);
     }
@@ -330,6 +354,72 @@ export default function LinkedInImportPage() {
                 <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">{content.enterLinkedInURL}</h2>
 
                 <div className="space-y-6">
+                  {/* Provider Selection */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      {content.providerSelection}
+                    </label>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div 
+                        onClick={() => setProvider('scrapingdog')}
+                        className={`cursor-pointer rounded-xl border-2 p-4 transition-all duration-200 ${
+                          provider === 'scrapingdog' 
+                            ? 'border-blue-500 bg-blue-50' 
+                            : 'border-gray-200 bg-white hover:border-gray-300'
+                        }`}
+                      >
+                        <div className="flex items-center">
+                          <div className={`flex-shrink-0 w-4 h-4 rounded-full border-2 ${
+                            provider === 'scrapingdog' 
+                              ? 'border-blue-500 bg-blue-500' 
+                              : 'border-gray-300'
+                          }`}>
+                            {provider === 'scrapingdog' && (
+                              <div className="w-full h-full rounded-full bg-white scale-50"></div>
+                            )}
+                          </div>
+                          <div className="ml-3">
+                            <h3 className="text-sm font-medium text-gray-900">
+                              {content.scrapingdogProvider}
+                            </h3>
+                            <p className="text-xs text-gray-500">
+                              {content.scrapingdogDescription}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div 
+                        onClick={() => setProvider('brightdata')}
+                        className={`cursor-pointer rounded-xl border-2 p-4 transition-all duration-200 ${
+                          provider === 'brightdata' 
+                            ? 'border-blue-500 bg-blue-50' 
+                            : 'border-gray-200 bg-white hover:border-gray-300'
+                        }`}
+                      >
+                        <div className="flex items-center">
+                          <div className={`flex-shrink-0 w-4 h-4 rounded-full border-2 ${
+                            provider === 'brightdata' 
+                              ? 'border-blue-500 bg-blue-500' 
+                              : 'border-gray-300'
+                          }`}>
+                            {provider === 'brightdata' && (
+                              <div className="w-full h-full rounded-full bg-white scale-50"></div>
+                            )}
+                          </div>
+                          <div className="ml-3">
+                            <h3 className="text-sm font-medium text-gray-900">
+                              {content.brightdataProvider}
+                            </h3>
+                            <p className="text-xs text-gray-500">
+                              {content.brightdataDescription}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   <div>
                     <label htmlFor="linkedinUrl" className="block text-sm font-medium text-gray-700 mb-2">
                       {content.linkedinURLLabel}

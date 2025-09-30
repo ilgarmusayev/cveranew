@@ -15,6 +15,10 @@ export function validateApiKeyForService(apiKey: string, service: string): boole
       // ScrapingDog API keys are 24-character hex strings
       return /^[a-f0-9]{24}$/i.test(apiKey);
       
+    case 'brightdata':
+      // BrightData tokens are usually long alphanumeric strings
+      return apiKey.length >= 32 && /^[a-zA-Z0-9_-]+$/.test(apiKey);
+      
     case 'openai':
       // OpenAI API keys start with "sk-"
       return apiKey.startsWith('sk-') && apiKey.length >= 40;
@@ -42,6 +46,9 @@ export function detectServiceFromApiKey(apiKey: string): string | null {
     return 'anthropic';
   } else if (apiKey.startsWith('sk-')) {
     return 'openai';
+  } else if (apiKey.length >= 32 && /^[a-zA-Z0-9_-]+$/.test(apiKey)) {
+    // BrightData tokens are longer alphanumeric strings - check this last
+    return 'brightdata';
   }
   
   return null;

@@ -68,7 +68,8 @@ export default function ApiKeysPage() {
     { value: 'rapidapi', label: 'RapidAPI' },
     { value: 'openai', label: 'OpenAI' },
     { value: 'gemini', label: 'Google Gemini' },
-    { value: 'linkedin', label: 'LinkedIn' }
+    { value: 'linkedin', label: 'LinkedIn' },
+    { value: 'brightdata', label: 'BrightData' }
   ];
 
   useEffect(() => {

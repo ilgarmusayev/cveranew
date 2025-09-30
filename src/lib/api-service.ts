@@ -23,10 +23,7 @@ export async function getActiveApiKeys(service: string): Promise<ApiKeyInfo[]> {
     const apiKeys = await prisma.apiKey.findMany({
       where: {
         service: service,
-        active: true,
-        dailyUsage: {
-          lt: prisma.apiKey.fields.dailyLimit
-        }
+        active: true
       },
       orderBy: [
         { priority: 'asc' },
@@ -35,7 +32,12 @@ export async function getActiveApiKeys(service: string): Promise<ApiKeyInfo[]> {
       ]
     });
 
-    return apiKeys;
+    // Filter by daily limit in code instead of query
+    const filteredKeys = apiKeys.filter(key => 
+      !key.dailyLimit || key.dailyUsage < key.dailyLimit
+    );
+
+    return filteredKeys;
   } catch (error) {
     console.error(`Error fetching API keys for ${service}:`, error);
     return [];
@@ -255,5 +257,13 @@ export async function getLinkedInApiKey(): Promise<string | null> {
  */
 export async function getRapidApiKey(): Promise<string | null> {
   const apiKey = await getBestApiKey('rapidapi');
+  return apiKey?.apiKey || null;
+}
+
+/**
+ * Get API key for BrightData service
+ */
+export async function getBrightDataApiKey(): Promise<string | null> {
+  const apiKey = await getBestApiKey('brightdata');
   return apiKey?.apiKey || null;
 }
