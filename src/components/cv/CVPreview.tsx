@@ -26,6 +26,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { CVData, PersonalInfo, Experience, Education, Skill, Language, Project, Certification, VolunteerExperience, CustomSection, CustomSectionItem } from '@/types/cv';
 import { getContactLabels } from '@/lib/cvLanguage';
+import { useUndoRedoState } from '@/hooks/useUndoRedoState';
 import '@/styles/cv-fonts.css';
 
 interface CVPreviewProps {

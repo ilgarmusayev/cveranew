@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNotification } from '@/components/ui/Toast';
 import { CVData, PersonalInfo, Experience, Education, Skill, Language, Project, Certification, VolunteerExperience } from '@/types/cv';
 import dynamic from 'next/dynamic';
@@ -7,6 +7,7 @@ import { CVTranslationPanel } from '@/components/translation/CVTranslationPanel'
 import { CVLanguage } from '@/lib/cvLanguage';
 import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 import { useLocalizedMessages } from '@/utils/errorMessages';
+import { useUndoRedoState } from '@/hooks/useUndoRedoState';
 // Import section components
 import PersonalInfoSection from './sections/PersonalInfoSection';
 import ExperienceSection from './sections/ExperienceSection';
@@ -496,13 +497,64 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                          cv.templateId?.toLowerCase().includes('aurora') ||
                          cv.templateId?.toLowerCase().includes('vertex');
 
-    // Mobile section reorder hook - Define sectionOrder first
-    const sectionOrder = cv.sectionOrder || [
-        'summary', 'experience', 'education', 'skills', 
-        'languages', 'projects', 'certifications', 'volunteer', 
-        'publications', 'honorsAwards', 'courses', 'testScores', 
-        'organizations', 'customSections'
-    ];
+    // Section order with undo/redo support
+    const {
+        state: sectionOrder,
+        saveState: saveSectionOrderState,
+        undo: undoSectionOrder,
+        redo: redoSectionOrder,
+        canUndo: canUndoSectionOrder,
+        canRedo: canRedoSectionOrder
+    } = useUndoRedoState<string[]>(cv.sectionOrder || defaultSectionOrder);
+
+    // Sync sectionOrder state with CV state when CV changes
+    useEffect(() => {
+        const currentSectionOrder = cv.sectionOrder || defaultSectionOrder;
+        if (JSON.stringify(currentSectionOrder) !== JSON.stringify(sectionOrder)) {
+            // Update the undo/redo state when CV is loaded or changed externally
+            saveSectionOrderState(currentSectionOrder);
+        }
+    }, [cv.sectionOrder]);
+
+    // Keyboard handler for section order undo/redo
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Only handle if not typing in an input field
+            const target = e.target as HTMLElement;
+            const isInputField = target.tagName === 'INPUT' || 
+                               target.tagName === 'TEXTAREA' || 
+                               target.contentEditable === 'true' ||
+                               target.closest('[contenteditable="true"]');
+            
+            if (!isInputField && (e.ctrlKey || e.metaKey)) {
+                if (e.key === 'z' && !e.shiftKey && canUndoSectionOrder) {
+                    e.preventDefault();
+                    undoSectionOrder();
+                    // The state will be updated by the undo function, we'll sync it in the next effect
+                } else if ((e.key === 'y' || (e.key === 'z' && e.shiftKey)) && canRedoSectionOrder) {
+                    e.preventDefault();
+                    redoSectionOrder();
+                    // The state will be updated by the redo function, we'll sync it in the next effect
+                }
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [canUndoSectionOrder, canRedoSectionOrder, undoSectionOrder, redoSectionOrder]);
+
+    // Sync CV state when sectionOrder changes from undo/redo (but avoid infinite loop)
+    const previousSectionOrderRef = useRef<string[]>(sectionOrder);
+    useEffect(() => {
+        if (JSON.stringify(previousSectionOrderRef.current) !== JSON.stringify(sectionOrder)) {
+            setCv(prevCv => ({
+                ...prevCv,
+                sectionOrder: sectionOrder
+            }));
+            setIsDirty(true);
+            previousSectionOrderRef.current = sectionOrder;
+        }
+    }, [sectionOrder]);
 
     // Function to get actual visible sections count
     const getVisibleSectionsCount = useCallback(() => {
@@ -1139,6 +1191,9 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
                 onSectionSelect={handleMobileSectionSelect}
                 onSectionReorder={(newOrder: string[]) => {
                     console.log('📋 Section reorder from CVPreview:', newOrder);
+                    // Save current state for undo
+                    saveSectionOrderState(sectionOrder);
+                    // Update both local undo/redo state and CV state
                     setCv(prevCv => ({
                         ...prevCv,
                         sectionOrder: newOrder

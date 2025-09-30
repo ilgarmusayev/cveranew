@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import DateRangeInput from '@/components/cv/DateRangeInput';
+import { useUndoRedo, useHybridUndoRedo } from '@/hooks/useUndoRedo';
+import { useUndoRedoState } from '@/hooks/useUndoRedoState';
 
 interface Education {
   id: string;
@@ -26,6 +28,41 @@ interface EducationSectionProps {
 export default function EducationSection({ data, onChange, cvLanguage = 'azerbaijani' }: EducationSectionProps) {
   const { siteLanguage } = useSiteLanguage();
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  
+  // Use input-only undo/redo for input fields
+  const { handleKeyDown } = useUndoRedo();
+  
+  // Simple undo/redo state for move operations
+  const [undoStack, setUndoStack] = useState<Education[][]>([]);
+  const [redoStack, setRedoStack] = useState<Education[][]>([]);
+  
+  const saveToUndoStack = (currentData: Education[]) => {
+    setUndoStack(prev => [...prev.slice(-19), currentData]); // Keep max 20 states
+    setRedoStack([]); // Clear redo stack
+  };
+  
+  const handleUndo = () => {
+    if (undoStack.length > 0) {
+      const newUndoStack = [...undoStack];
+      const previousState = newUndoStack.pop()!;
+      setUndoStack(newUndoStack);
+      setRedoStack(prev => [data, ...prev]);
+      onChange(previousState);
+    }
+  };
+  
+  const handleRedo = () => {
+    if (redoStack.length > 0) {
+      const newRedoStack = [...redoStack];
+      const nextState = newRedoStack.shift()!;
+      setRedoStack(newRedoStack);
+      setUndoStack(prev => [...prev, data]);
+      onChange(nextState);
+    }
+  };
+  
+  // Hybrid keyboard handler
+  const { handleKeyDown: handleHybridKeyDown } = useHybridUndoRedo(handleUndo, handleRedo);
 
   // Education labels
   const labels = {
@@ -169,6 +206,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
   };
 
   const moveEducation = (id: string, direction: 'up' | 'down') => {
+    saveToUndoStack(data); // Save current state before moving
     const index = data.findIndex(edu => edu.id === id);
     if (direction === 'up' && index > 0) {
       const updated = [...data];
@@ -182,7 +220,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" onKeyDown={handleHybridKeyDown} tabIndex={-1}>
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">
@@ -306,6 +344,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                         type="text"
                         value={education.institution || ''}
                         onChange={(e) => updateEducation(education.id, { institution: e.target.value })}
+                        onKeyDown={handleKeyDown}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                         placeholder={content.institutionPlaceholder}
                       />
@@ -333,7 +372,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                           backgroundRepeat: 'no-repeat',
                           backgroundSize: '1.5em 1.5em'
                         }}
-                      >
+                      > 
                         <option value="">
                           {content.selectDegree}
                         </option>
@@ -368,6 +407,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                         type="text"
                         value={education.field || ''}
                         onChange={(e) => updateEducation(education.id, { field: e.target.value })}
+                        onKeyDown={handleKeyDown}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                         placeholder={content.fieldPlaceholder}
                       />
@@ -381,6 +421,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                         type="text"
                         value={education.gpa || ''}
                         onChange={(e) => updateEducation(education.id, { gpa: e.target.value })}
+                        onKeyDown={handleKeyDown}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                         placeholder={content.gpaPlaceholder}
                       />

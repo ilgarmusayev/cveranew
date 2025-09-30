@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import DateRangeInput from '@/components/cv/DateRangeInput';
 import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
+import { useUndoRedo, useHybridUndoRedo } from '@/hooks/useUndoRedo';
+import { useUndoRedoState } from '@/hooks/useUndoRedoState';
 
 interface Experience {
   id: string;
@@ -24,6 +26,30 @@ interface ExperienceSectionProps {
 export default function ExperienceSection({ data, onChange, cvLanguage = 'azerbaijani' }: ExperienceSectionProps) {
   const { siteLanguage } = useSiteLanguage();
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  
+  // Use undo/redo system for drag & drop and other operations
+  const { 
+    state: experienceData, 
+    saveState, 
+    undo, 
+    redo, 
+    canUndo, 
+    canRedo,
+    reset
+  } = useUndoRedoState<Experience[]>(data);
+
+  // Use hybrid undo/redo that handles both input fields and custom operations
+  const { handleKeyDown: handleHybridKeyDown } = useHybridUndoRedo(undo, redo);
+  
+  // Use input-only undo/redo for input fields
+  const { handleKeyDown } = useUndoRedo();
+
+  // Sync external data changes with internal state
+  useEffect(() => {
+    if (JSON.stringify(data) !== JSON.stringify(experienceData)) {
+      reset(data);
+    }
+  }, [data, experienceData, reset]);
 
   // Experience labels
   const labels = {
@@ -113,36 +139,43 @@ export default function ExperienceSection({ data, onChange, cvLanguage = 'azerba
       endDate: '',
       current: false
     };
-    onChange([newExperience, ...data]);
+    const newData = [newExperience, ...experienceData];
+    saveState(newData);
+    onChange(newData);
     setExpandedId(newExperience.id);
   };
 
   const updateExperience = (id: string, updates: Partial<Experience>) => {
-    const updated = data.map(exp =>
+    const updated = experienceData.map(exp =>
       exp.id === id ? { ...exp, ...updates } : exp
     );
     onChange([...updated]);
+    // Don't save state for every keystroke, only for significant changes
   };
 
   const removeExperience = (id: string) => {
-    onChange(data.filter(exp => exp.id !== id));
+    const newData = experienceData.filter(exp => exp.id !== id);
+    saveState(newData);
+    onChange(newData);
   };
 
   const moveExperience = (id: string, direction: 'up' | 'down') => {
-    const index = data.findIndex(exp => exp.id === id);
+    const index = experienceData.findIndex(exp => exp.id === id);
     if (direction === 'up' && index > 0) {
-      const updated = [...data];
+      const updated = [...experienceData];
       [updated[index], updated[index - 1]] = [updated[index - 1], updated[index]];
+      saveState(updated);
       onChange(updated);
-    } else if (direction === 'down' && index < data.length - 1) {
-      const updated = [...data];
+    } else if (direction === 'down' && index < experienceData.length - 1) {
+      const updated = [...experienceData];
       [updated[index], updated[index + 1]] = [updated[index + 1], updated[index]];
+      saveState(updated);
       onChange(updated);
     }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" onKeyDown={handleHybridKeyDown} tabIndex={-1}>
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">
@@ -162,7 +195,7 @@ export default function ExperienceSection({ data, onChange, cvLanguage = 'azerba
         </button>
       </div>
 
-      {data.length === 0 ? (
+      {experienceData.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
           <div className="text-gray-400 mb-4">
             <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -181,7 +214,7 @@ export default function ExperienceSection({ data, onChange, cvLanguage = 'azerba
         </div>
       ) : (
         <div className="space-y-4">
-          {data.map((experience, index) => (
+          {experienceData.map((experience, index) => (
             <div key={experience.id} className="bg-white border border-gray-200 rounded-lg p-4">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
@@ -215,9 +248,9 @@ export default function ExperienceSection({ data, onChange, cvLanguage = 'azerba
                   </button>
                   <button
                     onClick={() => moveExperience(experience.id, 'down')}
-                    disabled={index === data.length - 1}
+                    disabled={index === experienceData.length - 1}
                     className={`p-1 rounded transition-colors ${
-                      index === data.length - 1
+                      index === experienceData.length - 1
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                     }`}
@@ -260,6 +293,7 @@ export default function ExperienceSection({ data, onChange, cvLanguage = 'azerba
                         type="text"
                         value={experience.position}
                         onChange={(e) => updateExperience(experience.id, { position: e.target.value })}
+                        onKeyDown={handleKeyDown}
                         placeholder={content.positionPlaceholder}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       />
@@ -272,6 +306,7 @@ export default function ExperienceSection({ data, onChange, cvLanguage = 'azerba
                         type="text"
                         value={experience.company}
                         onChange={(e) => updateExperience(experience.id, { company: e.target.value })}
+                        onKeyDown={handleKeyDown}
                         placeholder={content.companyPlaceholder}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       />
@@ -313,7 +348,7 @@ export default function ExperienceSection({ data, onChange, cvLanguage = 'azerba
         </div>
       )}
 
-      {data.length > 0 && (
+      {experienceData.length > 0 && (
         <div className="text-center">
           <button
             onClick={addExperience}

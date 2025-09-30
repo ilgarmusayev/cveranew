@@ -5,6 +5,7 @@ import { getLabel } from '@/lib/cvLanguage';
 import { useNotification } from '@/components/ui/Toast';
 import { apiClient } from '@/lib/api-client';
 import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
+import { useUndoRedo } from '@/hooks/useUndoRedo';
 
 interface Skill {
   id: string;
@@ -36,6 +37,9 @@ interface SkillSuggestion {
 
 export default function SkillsSection({ data, onChange, userTier = 'Free', cvData, cvId, cvLanguage = 'azerbaijani' }: SkillsSectionProps) {
   const { siteLanguage } = useSiteLanguage();
+  
+  // Use undo/redo hook for all input fields
+  const { handleKeyDown } = useUndoRedo();
   
   // Skills labels
   const labels = {
@@ -705,6 +709,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                               type="text"
                               value={skill.name}
                               onChange={(e) => updateSkill(skill.id, 'name', e.target.value)}
+                              onKeyDown={handleKeyDown}
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                               placeholder={content.hardSkillPlaceholder}
                             />
@@ -822,6 +827,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                               type="text"
                               value={skill.name}
                               onChange={(e) => updateSkill(skill.id, 'name', e.target.value)}
+                              onKeyDown={handleKeyDown}
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                               placeholder={content.softSkillPlaceholder}
                             />

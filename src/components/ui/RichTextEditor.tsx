@@ -216,6 +216,11 @@ export default function RichTextEditor({
           document.execCommand('insertText', false, text);
         }}
         onKeyDown={(e) => {
+          // Allow native undo/redo operations
+          if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'y')) {
+            return; // Let browser handle undo/redo
+          }
+          
           // Handle Enter key properly - single line break
           if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();

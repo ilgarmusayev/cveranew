@@ -5,6 +5,7 @@ import { getLabel } from '@/lib/cvLanguage';
 import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 import { useNotification } from '@/components/ui/Toast';
 import RichTextEditor from '@/components/ui/RichTextEditor';
+import { useUndoRedo } from '@/hooks/useUndoRedo';
 
 interface PersonalInfo {
   fullName: string;      // Tam ad - API-dən gələn
@@ -45,6 +46,9 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
   // AI features are available for all paid tiers (not Free/Pulsuz tier)
   const canUseAI = userTier && !['free', 'pulsuz'].includes(userTier?.toLowerCase());
   const { showSuccess, showError, showWarning, showInfo } = useNotification();
+
+  // Use undo/redo hook for all input fields
+  const { handleKeyDown } = useUndoRedo();
 
   // PersonalInfo labels
   const labels = {
@@ -532,6 +536,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
             type="text"
             value={safeData.firstName}
             onChange={(e) => handleChange('firstName', e.target.value)}
+            onKeyDown={handleKeyDown}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             placeholder={content.yourName}
             required
@@ -553,6 +558,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
             type="text"
             value={safeData.lastName}
             onChange={(e) => handleChange('lastName', e.target.value)}
+            onKeyDown={handleKeyDown}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             placeholder={content.yourSurname}
             required
@@ -576,6 +582,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
             type="email"
             value={safeData.email}
             onChange={(e) => handleChange('email', e.target.value)}
+            onKeyDown={handleKeyDown}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             placeholder="email@example.com"
           />
@@ -589,6 +596,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
             type="tel"
             value={safeData.phone}
             onChange={(e) => handleChange('phone', e.target.value)}
+            onKeyDown={handleKeyDown}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             placeholder={content.phoneExample}
           />
@@ -602,6 +610,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
             type="url"
             value={safeData.website}
             onChange={(e) => handleChange('website', e.target.value)}
+            onKeyDown={handleKeyDown}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             placeholder="https://example.com"
           />
@@ -615,6 +624,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
             type="url"
             value={safeData.linkedin}
             onChange={(e) => handleChange('linkedin', e.target.value)}
+            onKeyDown={handleKeyDown}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             placeholder={content.linkedinPlaceholder}
           />
@@ -628,6 +638,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
             type="text"
             value={safeData.field}
             onChange={(e) => handleChange('field', e.target.value)}
+            onKeyDown={handleKeyDown}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             placeholder={content.fieldExample}
           />
@@ -641,6 +652,7 @@ export default function PersonalInfoSection({ data, onChange, userTier = 'Free',
             type="text"
             value={safeData.location || ''}
             onChange={(e) => handleChange('location', e.target.value)}
+            onKeyDown={handleKeyDown}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             placeholder={content.locationPlaceholder}
           />
