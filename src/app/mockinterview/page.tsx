@@ -7,10 +7,10 @@ import { apiClient } from '@/lib/api';
 // Interview mərhələləri
 type InterviewStage = 'selection' | 'interview' | 'result';
 
-// Position və Level tipləri
-type PositionType = 'frontend' | 'backend' | 'fullstack' | 'mobile' | 'devops' | 'data' | 'hr' | 'sales' | 'marketing' | 'product';
+// Level və Language tipləri
 type LevelType = 'junior' | 'mid' | 'senior';
 type ModeType = 'text' | 'voice';
+type LanguageType = 'az' | 'en' | 'ru';
 
 interface CV {
     id: string;
@@ -23,9 +23,10 @@ interface CV {
 
 interface InterviewConfig {
     cvId: string | null;
-    position: PositionType | null;
+    jobDescription: string;
     level: LevelType | null;
     mode: ModeType;
+    language: LanguageType;
 }
 
 interface Question {
@@ -49,32 +50,26 @@ interface InterviewResult {
     generalFeedback: string;
 }
 
-const POSITIONS = [
-    { id: 'frontend' as PositionType, name: 'Frontend Developer', icon: '💻' },
-    { id: 'backend' as PositionType, name: 'Backend Developer', icon: '⚙️' },
-    { id: 'fullstack' as PositionType, name: 'Full Stack Developer', icon: '🚀' },
-    { id: 'mobile' as PositionType, name: 'Mobile Developer', icon: '📱' },
-    { id: 'devops' as PositionType, name: 'DevOps Engineer', icon: '🔧' },
-    { id: 'data' as PositionType, name: 'Data Scientist', icon: '📊' },
-    { id: 'hr' as PositionType, name: 'HR Manager', icon: '👥' },
-    { id: 'sales' as PositionType, name: 'Sales Specialist', icon: '💼' },
-    { id: 'marketing' as PositionType, name: 'Marketing Manager', icon: '📢' },
-    { id: 'product' as PositionType, name: 'Product Manager', icon: '🎯' },
-];
-
 const LEVELS = [
     { id: 'junior' as LevelType, name: 'Junior', description: 'Təcrübəsi 0-2 il' },
     { id: 'mid' as LevelType, name: 'Middle', description: 'Təcrübəsi 2-5 il' },
     { id: 'senior' as LevelType, name: 'Senior', description: 'Təcrübəsi 5+ il' },
 ];
 
+const LANGUAGES = [
+    { id: 'az' as LanguageType, name: 'Azərbaycan', flag: '🇦🇿', description: 'Suallar Azərbaycan dilində olacaq' },
+    { id: 'en' as LanguageType, name: 'English', flag: '🇬🇧', description: 'Questions will be in English' },
+    { id: 'ru' as LanguageType, name: 'Русский', flag: '🇷🇺', description: 'Вопросы будут на русском языке' },
+];
+
 export default function MockInterviewPage() {
     const [stage, setStage] = useState<InterviewStage>('selection');
     const [config, setConfig] = useState<InterviewConfig>({
         cvId: null,
-        position: null,
+        jobDescription: '',
         level: null,
         mode: 'text',
+        language: 'az',
     });
     const [cvList, setCvList] = useState<CV[]>([]);
     const [loadingCVs, setLoadingCVs] = useState(true);
@@ -111,8 +106,8 @@ export default function MockInterviewPage() {
 
     // Müsahibəni başlat
     const startInterview = async () => {
-        if (!config.cvId || !config.position || !config.level) {
-            alert('Zəhmət olmasa CV, sahə və səviyyə seçin');
+        if (!config.cvId || !config.jobDescription.trim() || !config.level) {
+            alert('Zəhmət olmasa CV, vakansiya təsviri və səviyyə daxil edin');
             return;
         }
 
@@ -129,9 +124,10 @@ export default function MockInterviewPage() {
                 },
                 body: JSON.stringify({
                     cvId: config.cvId,
-                    position: config.position,
+                    jobDescription: config.jobDescription,
                     level: config.level,
                     mode: config.mode,
+                    language: config.language,
                 }),
             });
 
@@ -191,9 +187,10 @@ export default function MockInterviewPage() {
                 },
                 body: JSON.stringify({
                     cvId: config.cvId,
-                    position: config.position,
+                    jobDescription: config.jobDescription,
                     level: config.level,
                     questions: allQuestions,
+                    language: config.language,
                 }),
             });
 
@@ -215,7 +212,7 @@ export default function MockInterviewPage() {
     // Yenidən başla
     const resetInterview = () => {
         setStage('selection');
-        setConfig({ cvId: null, position: null, level: null, mode: 'text' });
+        setConfig({ cvId: null, jobDescription: '', level: null, mode: 'text', language: 'az' });
         setQuestions([]);
         setCurrentQuestionIndex(0);
         setCurrentAnswer('');
@@ -312,36 +309,53 @@ export default function MockInterviewPage() {
                         {/* Position Selection - Dropdown */}
                         <div className="mb-8">
                             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                                2️⃣ Sahəni seçin
+                                2️⃣ Vakansiya təsvirini daxil edin
                             </h2>
-                            <div className="relative">
-                                <select
-                                    value={config.position || ''}
-                                    onChange={(e) => setConfig({ ...config, position: e.target.value as PositionType })}
-                                    className="w-full px-4 py-4 border-2 border-gray-300 rounded-xl focus:border-blue-600 focus:outline-none text-gray-900 bg-white text-lg appearance-none cursor-pointer hover:border-blue-400 transition-colors"
-                                >
-                                    <option value="">Sahə seçin...</option>
-                                    {POSITIONS.map((pos) => (
-                                        <option key={pos.id} value={pos.id}>
-                                            {pos.icon} {pos.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
-                                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </div>
+                            <textarea
+                                value={config.jobDescription}
+                                onChange={(e) => setConfig({ ...config, jobDescription: e.target.value })}
+                                rows={6}
+                                placeholder="Məsələn: Senior Frontend Developer vəzifəsi üçün müsahibə. React, TypeScript, Next.js bilməli. 5+ il təcrübə. Komanda ilə işləmə bacarığı. REST API və GraphQL bilməli..."
+                                className="w-full px-4 py-4 border-2 border-gray-300 rounded-xl focus:border-blue-600 focus:outline-none text-gray-900 bg-white resize-none"
+                            />
+                            <p className="text-sm text-gray-500 mt-2">💡 Vakansiya təsviri nə qədər ətraflı olsa, AI o qədər dəqiq suallar verəcək</p>
+                        </div>
+
+                        {/* Language Selection */}
+                        <div className="mb-8">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                                3️⃣ Müsahibə dilini seçin
+                            </h2>
+                            <p className="text-sm text-gray-600 mb-4">🌐 AI tərəfindən verilən suallar və nəticələr bu dildə olacaq</p>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {LANGUAGES.map((lang) => (
+                                    <button
+                                        key={lang.id}
+                                        onClick={() => setConfig({ ...config, language: lang.id })}
+                                        className={`p-6 rounded-xl border-2 transition-all hover:shadow-lg ${
+                                            config.language === lang.id
+                                                ? 'border-blue-600 bg-blue-50 shadow-md'
+                                                : 'border-gray-200 hover:border-blue-300'
+                                        }`}
+                                    >
+                                        <div className="text-4xl mb-2">{lang.flag}</div>
+                                        <div className="text-lg font-bold text-gray-900 mb-1">
+                                            {lang.name}
+                                        </div>
+                                        <div className="text-xs text-gray-600">
+                                            {lang.description}
+                                        </div>
+                                    </button>
+                                ))}
                             </div>
                         </div>
 
                         {/* Level Selection */}
                         <div className="mb-8">
                             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                                3️⃣ Səviyyəni seçin
+                                4️⃣ Səviyyəni seçin
                             </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {LEVELS.map((lvl) => (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">{LEVELS.map((lvl) => (
                                     <button
                                         key={lvl.id}
                                         onClick={() => setConfig({ ...config, level: lvl.id })}
@@ -404,7 +418,7 @@ export default function MockInterviewPage() {
                         <div className="text-center">
                             <button
                                 onClick={startInterview}
-                                disabled={!config.position || !config.level || isLoading}
+                                disabled={!config.jobDescription.trim() || !config.level || isLoading}
                                 className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isLoading ? (

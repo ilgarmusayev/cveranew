@@ -25,18 +25,6 @@ interface AnalysisResult {
     generalFeedback: string;
 }
 
-const POSITION_NAMES: Record<string, string> = {
-    frontend: 'Frontend Developer',
-    backend: 'Backend Developer',
-    fullstack: 'Full Stack Developer',
-    mobile: 'Mobile Developer',
-    devops: 'DevOps Engineer',
-    data: 'Data Scientist',
-    hr: 'HR Manager',
-    sales: 'Sales Specialist',
-    marketing: 'Marketing Manager',
-    product: 'Product Manager',
-};
 
 const LEVEL_NAMES: Record<string, string> = {
     junior: 'Junior',
@@ -47,14 +35,15 @@ const LEVEL_NAMES: Record<string, string> = {
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { position, level, questions, cvId } = body as {
-            position: string;
+        const { jobDescription, level, questions, cvId, language = 'az' } = body as {
+            jobDescription: string;
             level: string;
             cvId: string;
             questions: Question[];
+            language?: string;
         };
 
-        if (!position || !level || !questions || questions.length === 0 || !cvId) {
+        if (!jobDescription || !level || !questions || questions.length === 0 || !cvId) {
             return NextResponse.json(
                 { success: false, error: 'Məlumatlar natamam göndərilib' },
                 { status: 400 }
@@ -103,7 +92,7 @@ export async function POST(req: NextRequest) {
         
         // Təcrübələri formatlayaq
         const experienceSummary = experience.slice(0, 3).map((exp: any) => 
-            `${exp.position || ''} at ${exp.company || ''}`
+            `${exp.jobDescription || ''} at ${exp.company || ''}`
         ).join('; ');
 
         // Bacarıqları formatlayaq
@@ -122,33 +111,49 @@ export async function POST(req: NextRequest) {
         const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
 
-        const positionName = POSITION_NAMES[position] || position;
+        // Sual-cavabları formatlayaq
+        const qaText = questions.map((q, i) => 
+            `Question ${i + 1}: ${q.question}\nAnswer: ${q.answer || 'No answer provided'}`
+        ).join('\n\n');
+
         const levelName = LEVEL_NAMES[level] || level;
 
-        // Q&A-ları formatlayaq
-        const qaText = questions
-            .map((q, idx) => `Sual ${idx + 1}: ${q.question}\nCavab ${idx + 1}: ${q.answer}`)
-            .join('\n\n');
+        // Dil ayarları
+        const languageInstructions: Record<string, string> = {
+            az: 'Azerbaijani',
+            en: 'English',
+            ru: 'Russian',
+        };
 
-        // Analiz promptu - CV məlumatları ilə
-        const prompt = `You are an expert HR interviewer analyzing a mock interview for a ${levelName} ${positionName} position.
+        const feedbackLanguage = languageInstructions[language] || 'Azerbaijani';
 
-CANDIDATE BACKGROUND:
+        const prompt = `You are an expert HR interviewer analyzing a mock interview.
+
+JOB DESCRIPTION:
+${jobDescription}
+
+CANDIDATE CV INFORMATION:
 - Name: ${candidateName}
 - Experience: ${experienceSummary || 'No experience listed'}
 - Skills: ${skillsList || 'No skills listed'}
+- Level: ${levelName}
 
 Interview Questions & Answers:
 ${qaText}
 
-Analyze the candidate's performance considering their actual CV background. 
-Provide a detailed evaluation in Azerbaijani language.
+Analyze the candidate's performance considering:
+1. The job requirements from the job description
+2. Their actual CV background
+3. How well they match the job requirements
+
+Provide a detailed evaluation in ${feedbackLanguage} language.
 
 IMPORTANT: 
-- Compare their answers with their CV experience and skills
+- Compare their answers with the job requirements and their CV
 - Check if they accurately represented their background
-- Evaluate if their knowledge matches their claimed expertise
+- Evaluate if their knowledge matches the job requirements
 - Note any inconsistencies between CV and interview answers
+- ALL text fields (strengths, weaknesses, recommendations, generalFeedback) must be in ${feedbackLanguage}
 
 Return ONLY a valid JSON object with this exact structure (no markdown, no code blocks):
 {
@@ -160,24 +165,23 @@ Return ONLY a valid JSON object with this exact structure (no markdown, no code 
     "problemSolving": <number 0-10>,
     "relevance": <number 0-10>
   },
-  "strengths": [<array of 3-5 strength points in Azerbaijani, reference their CV where relevant>],
-  "weaknesses": [<array of 3-5 weakness points in Azerbaijani, note gaps between CV and answers>],
-  "recommendations": [<array of 3-5 improvement recommendations in Azerbaijani, based on their background>],
-  "generalFeedback": "<detailed paragraph in Azerbaijani about overall performance, mention how well they represented their CV experience>"
+  "strengths": [<array of 3-5 strength points in ${feedbackLanguage}>],
+  "weaknesses": [<array of 3-5 weakness points in ${feedbackLanguage}>],
+  "recommendations": [<array of 3-5 improvement recommendations in ${feedbackLanguage}>],
+  "generalFeedback": "<detailed paragraph in ${feedbackLanguage} about overall performance>"
 }
 
 Evaluation criteria:
-Evaluation criteria:
-- Technical: Domain knowledge and technical competence (matches their CV skills?)
+- Technical: Domain knowledge and technical competence (matches job requirements and CV skills?)
 - Communication: Clarity, structure, and articulation
 - Confidence: Self-assurance and conviction in answers
 - Problem Solving: Analytical thinking and approach to challenges
-- Relevance: How well answers match the question, role, AND their CV background
+- Relevance: How well answers match the question, job requirements, AND their CV background
 
-Be honest, constructive, and specific. Consider the ${levelName} level expectations and their actual CV experience.
+Be honest, constructive, and specific. Consider the ${levelName} level expectations.
 Write everything in natural, professional Azerbaijani language.`;
 
-        console.log('🔍 Analyzing interview for:', candidateName, positionName, levelName);
+        console.log('🔍 Analyzing interview for:', candidateName, levelName);
         console.log('📊 Questions analyzed:', questions.length);
 
         // Gemini-dən analiz al

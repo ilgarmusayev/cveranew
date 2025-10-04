@@ -4,20 +4,6 @@ import { getWorkingGeminiApiKey } from '@/lib/geminiApiKeyService';
 import { prisma } from '@/lib/prisma';
 import { verifyJWT } from '@/lib/jwt';
 
-// Position adları
-const POSITION_NAMES: Record<string, string> = {
-    frontend: 'Frontend Developer',
-    backend: 'Backend Developer',
-    fullstack: 'Full Stack Developer',
-    mobile: 'Mobile Developer',
-    devops: 'DevOps Engineer',
-    data: 'Data Scientist',
-    hr: 'HR Manager',
-    sales: 'Sales Specialist',
-    marketing: 'Marketing Manager',
-    product: 'Product Manager',
-};
-
 // Səviyyə adları
 const LEVEL_NAMES: Record<string, string> = {
     junior: 'Junior',
@@ -28,11 +14,11 @@ const LEVEL_NAMES: Record<string, string> = {
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { position, level, mode, cvId } = body;
+        const { jobDescription, level, mode, cvId, language = 'az' } = body;
 
-        if (!position || !level || !cvId) {
+        if (!jobDescription || !level || !cvId) {
             return NextResponse.json(
-                { success: false, error: 'Position, level və CV ID tələb olunur' },
+                { success: false, error: 'Vakansiya təsviri, level və CV ID tələb olunur' },
                 { status: 400 }
             );
         }
@@ -92,7 +78,6 @@ export async function POST(req: NextRequest) {
         const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
 
         // Prompt hazırla
-        const positionName = POSITION_NAMES[position] || position;
         const levelName = LEVEL_NAMES[level] || level;
 
         // CV məlumatlarını formatlayaq
@@ -112,7 +97,28 @@ export async function POST(req: NextRequest) {
         // Bacarıqları formatlayaq
         const skillsList = skills.slice(0, 10).map((skill: any) => skill.name || skill).join(', ');
 
-        const prompt = `You are an expert AI interviewer conducting a mock interview for a ${levelName} ${positionName} position.
+        // Dil ayarları
+        const languageInstructions: Record<string, { name: string; example: string }> = {
+            az: { 
+                name: 'Azerbaijani', 
+                example: '["Sual 1", "Sual 2", "Sual 3", "Sual 4", "Sual 5"]'
+            },
+            en: { 
+                name: 'English', 
+                example: '["Question 1", "Question 2", "Question 3", "Question 4", "Question 5"]'
+            },
+            ru: { 
+                name: 'Russian', 
+                example: '["Вопрос 1", "Вопрос 2", "Вопрос 3", "Вопрос 4", "Вопрос 5"]'
+            },
+        };
+
+        const langConfig = languageInstructions[language] || languageInstructions.az;
+
+        const prompt = `You are an expert AI interviewer conducting a mock interview.
+
+JOB DESCRIPTION:
+${jobDescription}
 
 CANDIDATE CV INFORMATION:
 - Name: ${candidateName}
@@ -121,29 +127,32 @@ CANDIDATE CV INFORMATION:
 - Work Experience: ${experienceSummary || 'No experience listed'}
 - Education: ${educationSummary || 'No education listed'}
 - Skills: ${skillsList || 'No skills listed'}
+- Experience Level: ${levelName}
 
-IMPORTANT: Generate 5 PERSONALIZED interview questions in Azerbaijani language based on the candidate's actual CV information above.
+IMPORTANT: Generate 5 PERSONALIZED interview questions in ${langConfig.name} language based on the job description and candidate's actual CV information above.
 
 Questions should:
 1. Be appropriate for a ${levelName} level candidate
-2. Be relevant to ${positionName} role
-3. Reference SPECIFIC details from their CV (their experience, skills, education)
+2. Be directly relevant to the job requirements mentioned in the job description
+3. Reference SPECIFIC details from their CV (their experience, skills, education) and compare with job requirements
 4. Be progressive in difficulty (starting easier, getting harder)
-5. Mix technical questions (based on their skills) and behavioral questions (based on their experience)
+5. Mix technical questions (based on job requirements and their skills) and behavioral questions (based on their experience)
 6. Be natural and conversational in tone
-7. Be UNIQUE to this candidate - not generic questions
+7. Be UNIQUE to this candidate and this specific job - not generic questions
+8. BE WRITTEN COMPLETELY IN ${langConfig.name.toUpperCase()} - all questions must be in this language
 
 For example:
 - If they worked at Company X, ask about their experience there
 - If they have Skill Y, ask them to explain or demonstrate it
 - If they studied Z, ask how it relates to this position
 
-Return ONLY a JSON array of 5 questions, nothing else. Format:
-["Sual 1", "Sual 2", "Sual 3", "Sual 4", "Sual 5"]
+Return ONLY a JSON array of 5 questions, nothing else. Format example:
+${langConfig.example}
 
-Make each question specific to THIS candidate's background and experience.`;
+Make each question specific to THIS candidate's background and experience, and ensure ALL questions are in ${langConfig.name}.`;
 
-        console.log('🎯 Generating personalized interview questions for:', candidateName, positionName, levelName);
+        console.log('🎯 Generating personalized interview questions for:', candidateName, levelName);
+        console.log('📄 Job Description:', jobDescription.substring(0, 100));
         console.log('📄 CV Summary:', { 
             experience: experienceSummary.substring(0, 100),
             skills: skillsList.substring(0, 100) 
@@ -185,7 +194,7 @@ Make each question specific to THIS candidate's background and experience.`;
         return NextResponse.json({
             success: true,
             questions,
-            position: positionName,
+            jobDescription: jobDescription.substring(0, 200) + '...',
             level: levelName,
         });
 
