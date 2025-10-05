@@ -268,7 +268,7 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
       fullControl: 'Полный контроль',
       professionalDesign: 'Профессиональный дизайн',
       customizable: 'Настраиваемый',
-      coverLetter: 'Cover Letter',
+      coverLetter: 'Ковер Леттер',
       createCoverLetter: 'Создать сопроводительное письмо',
       coverLetterDescription: 'Создайте профессиональное сопроводительное письмо на основе вашего резюме. Усильте свою заявку на работу!',
       personalizedContent: 'Персонализированный контент',
@@ -613,9 +613,9 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
         </div>
 
         {/* Action Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 items-stretch">
           {/* New CV Creation Card */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 flex flex-col">
             <div className="flex items-center mb-4">
               <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mr-3">
                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -632,7 +632,7 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
               {content.newCVCardDescription}
             </p>
 
-            <div className="space-y-2 mb-6">
+            <div className="space-y-2 mb-6 flex-grow">
               <div className="flex items-center text-gray-700 text-sm">
                 <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -667,7 +667,7 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
           </div>
 
           {/* Cover Letter Card */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 flex flex-col">
             <div className="flex items-center mb-4">
               <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mr-3">
                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -684,7 +684,7 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
               {content.coverLetterDescription}
             </p>
 
-            <div className="space-y-2 mb-6">
+            <div className="space-y-2 mb-6 flex-grow">
               <div className="flex items-center text-gray-700 text-sm">
                 <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -719,7 +719,7 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
           </div>
 
           {/* Motivation Letter Card */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 flex flex-col">
             <div className="flex items-center mb-4">
               <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mr-3">
                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -736,7 +736,7 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
               {content.motivationLetterDescription}
             </p>
 
-            <div className="space-y-2 mb-6">
+            <div className="space-y-2 mb-6 flex-grow">
               <div className="flex items-center text-gray-700 text-sm">
                 <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -771,7 +771,7 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
           </div>
 
           {/* Job Match Card */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 flex flex-col">
             <div className="flex items-center mb-4">
               <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mr-3">
                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -788,7 +788,7 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
               {content.jobMatchDescription}
             </p>
 
-            <div className="space-y-2 mb-6">
+            <div className="space-y-2 mb-6 flex-grow">
               <div className="flex items-center text-gray-700 text-sm">
                 <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -823,7 +823,7 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
           </div>
 
           {/* Elevator Pitch Card */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 flex flex-col">
             <div className="flex items-center mb-4">
               <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mr-3">
                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -840,7 +840,7 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
               {content.elevatorPitchDescription}
             </p>
 
-            <div className="space-y-2 mb-6">
+            <div className="space-y-2 mb-6 flex-grow">
               <div className="flex items-center text-gray-700 text-sm">
                 <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />

@@ -19,6 +19,18 @@ export default function MotivationLetterForm({ userProfile, onBack }: Motivation
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedLetter, setGeneratedLetter] = useState('');
+  
+  // Toast notification state
+  const [notification, setNotification] = useState<{
+    show: boolean;
+    message: string;
+    type: 'success' | 'error' | 'info';
+  }>({
+    show: false,
+    message: '',
+    type: 'info'
+  });
+
   const [formData, setFormData] = useState({
     // CV Selection
     selectedCvId: '',
@@ -151,6 +163,14 @@ export default function MotivationLetterForm({ userProfile, onBack }: Motivation
         generate: 'Yaradın',
         aiHelp: 'AI Köməyi',
         generatingAI: 'AI kömək edir...'
+      },
+      notifications: {
+        selectCV: 'Zəhmət olmasa CV seçin',
+        fillRequired: 'Zəhmət olmasa bütün vacib sahələri doldurun!',
+        completeContent: 'Zəhmət olmasa motivasiya məktubu məzmununu tamamlayın!',
+        generateError: 'Motivasiya məktubu yaradarkən xəta baş verdi!',
+        aiError: 'AI köməyi zamanı xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.',
+        docxError: 'DOCX faylı yaradılarkən xəta baş verdi'
       }
     },
     english: {
@@ -207,6 +227,14 @@ export default function MotivationLetterForm({ userProfile, onBack }: Motivation
         generate: 'Generate',
         aiHelp: 'AI Help',
         generatingAI: 'AI is helping...'
+      },
+      notifications: {
+        selectCV: 'Please select a CV',
+        fillRequired: 'Please fill in all required fields!',
+        completeContent: 'Please complete the motivation letter content!',
+        generateError: 'Error generating motivation letter!',
+        aiError: 'Error during AI assistance. Please try again.',
+        docxError: 'Error creating DOCX file'
       }
     },
     russian: {
@@ -261,15 +289,34 @@ export default function MotivationLetterForm({ userProfile, onBack }: Motivation
         generate: 'Создать',
         aiHelp: 'Помощь ИИ',
         generatingAI: 'ИИ помогает...'
+      },
+      notifications: {
+        selectCV: 'Пожалуйста, выберите CV',
+        fillRequired: 'Пожалуйста, заполните все обязательные поля!',
+        completeContent: 'Пожалуйста, завершите содержание мотивационного письма!',
+        generateError: 'Ошибка при создании мотивационного письма!',
+        aiError: 'Ошибка при помощи ИИ. Пожалуйста, попробуйте снова.',
+        docxError: 'Ошибка при создании файла DOCX'
       }
     }
   };
 
   const currentContent = content[siteLanguage] || content.azerbaijani;
 
+  // Toast notification helper
+  const showNotification = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setNotification({ show: true, message, type });
+    setTimeout(() => {
+      setNotification({ show: false, message: '', type: 'info' });
+    }, 4000);
+  };
+
   // CV məlumatlarından tam ad əldə etmək üçün helper function
   const getFullNameFromCV = (cv: any) => {
-    const personalInfo = cv.data?.personalInfo;
+    // cv.data və ya cv.cv_data yoxla
+    const cvData = cv.data || cv.cv_data;
+    const personalInfo = cvData?.personalInfo;
+    
     if (!personalInfo) return cv.title || currentContent.steps[1].untitledCV;
 
     // Əvvəlcə fullName yoxla
@@ -291,7 +338,10 @@ export default function MotivationLetterForm({ userProfile, onBack }: Motivation
 
   // CV-dən job title əldə etmək üçün helper function
   const getJobTitleFromCV = (cv: any) => {
-    const personalInfo = cv.data?.personalInfo;
+    // cv.data və ya cv.cv_data yoxla
+    const cvData = cv.data || cv.cv_data;
+    const personalInfo = cvData?.personalInfo;
+    
     if (!personalInfo) return currentContent.steps[1].noJobTitle;
 
     return personalInfo.jobTitle || 
@@ -310,18 +360,20 @@ export default function MotivationLetterForm({ userProfile, onBack }: Motivation
   // AI köməyi funksiyası
   const handleAIHelp = async () => {
     if (!formData.selectedCvId) {
-      alert('Zəhmət olmasa əvvəlcə CV seçin');
+      showNotification(currentContent.notifications.selectCV, 'error');
       return;
     }
 
     setIsGeneratingAI(true);
     try {
       const selectedCV = cvs.find(cv => cv.id === formData.selectedCvId);
-      const personalInfo = selectedCV?.data?.personalInfo;
-      const experience = selectedCV?.data?.experience || [];
-      const education = selectedCV?.data?.education || [];
-      const skills = selectedCV?.data?.skills || [];
-      const certifications = selectedCV?.data?.certifications || [];
+      // cv.data və ya cv.cv_data yoxla
+      const cvData = selectedCV?.data || selectedCV?.cv_data;
+      const personalInfo = cvData?.personalInfo;
+      const experience = cvData?.experience || [];
+      const education = cvData?.education || [];
+      const skills = cvData?.skills || [];
+      const certifications = cvData?.certifications || [];
 
       // Format experience for prompt
       const experienceText = experience.length > 0 
@@ -444,7 +496,7 @@ export default function MotivationLetterForm({ userProfile, onBack }: Motivation
       }
     } catch (error) {
       console.error('AI Help Error:', error);
-      alert('AI köməyi zamanı xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.');
+      showNotification(currentContent.notifications.aiError, 'error');
     } finally {
       setIsGeneratingAI(false);
     }
@@ -514,7 +566,7 @@ export default function MotivationLetterForm({ userProfile, onBack }: Motivation
       
     } catch (error) {
       console.error('DOCX export error:', error);
-      alert('DOCX faylı yaradılarkən xəta baş verdi');
+      showNotification(currentContent.notifications.docxError, 'error');
     }
   };
 
@@ -522,33 +574,29 @@ export default function MotivationLetterForm({ userProfile, onBack }: Motivation
   const handleGenerate = async () => {
     // Form validation
     if (!formData.selectedCvId) {
-      alert(formData.letterLanguage === 'azerbaijani' ? 'Zəhmət olmasa CV seçin!' : 
-            formData.letterLanguage === 'russian' ? 'Пожалуйста, выберите резюме!' : 
-            'Please select a CV!');
+      showNotification(currentContent.notifications.selectCV, 'error');
       return;
     }
 
     if (!formData.recipientName || !formData.organization || !formData.position) {
-      alert(formData.letterLanguage === 'azerbaijani' ? 'Zəhmət olmasa bütün vacib sahələri doldurun!' : 
-            formData.letterLanguage === 'russian' ? 'Пожалуйста, заполните все обязательные поля!' : 
-            'Please fill in all required fields!');
+      showNotification(currentContent.notifications.fillRequired, 'error');
       return;
     }
 
     if (!formData.motivation || !formData.goals || !formData.qualifications || !formData.conclusion) {
-      alert(formData.letterLanguage === 'azerbaijani' ? 'Zəhmət olmasa motivasiya məktubu məzmununu tamamlayın!' : 
-            formData.letterLanguage === 'russian' ? 'Пожалуйста, завершите содержание мотивационного письма!' : 
-            'Please complete the motivation letter content!');
+      showNotification(currentContent.notifications.completeContent, 'error');
       return;
     }
 
     setIsGenerating(true);
     try {
       const selectedCV = cvs.find(cv => cv.id === formData.selectedCvId);
-      const personalInfo = selectedCV?.data?.personalInfo;
-      const experience = selectedCV?.data?.experience || [];
-      const education = selectedCV?.data?.education || [];
-      const skills = selectedCV?.data?.skills || [];
+      // cv.data və ya cv.cv_data yoxla
+      const cvData = selectedCV?.data || selectedCV?.cv_data;
+      const personalInfo = cvData?.personalInfo;
+      const experience = cvData?.experience || [];
+      const education = cvData?.education || [];
+      const skills = cvData?.skills || [];
 
       // Get relevant experience and education for the letter
       const relevantExperience = experience.slice(0, 2); // Last 2 experiences
@@ -653,9 +701,7 @@ ${personalInfo?.phone ? personalInfo.phone : ''}
 
     } catch (error) {
       console.error('Generate Error:', error);
-      alert(formData.letterLanguage === 'azerbaijani' ? 'Motivasiya məktubu yaradarkən xəta baş verdi!' : 
-            formData.letterLanguage === 'russian' ? 'Ошибка при создании мотивационного письма!' : 
-            'Error generating motivation letter!');
+      showNotification(currentContent.notifications.generateError, 'error');
     } finally {
       setIsGenerating(false);
     }
@@ -670,6 +716,48 @@ ${personalInfo?.phone ? personalInfo.phone : ''}
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
+      {/* Toast Notification */}
+      {notification.show && (
+        <div className="fixed top-4 right-4 z-50 transition-all duration-300 ease-in-out transform">
+          <div className={`rounded-lg shadow-lg p-4 max-w-md ${
+            notification.type === 'error' ? 'bg-red-500 text-white' :
+            notification.type === 'success' ? 'bg-green-500 text-white' :
+            'bg-blue-500 text-white'
+          }`}>
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                {notification.type === 'error' && (
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                )}
+                {notification.type === 'success' && (
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+                {notification.type === 'info' && (
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium">{notification.message}</p>
+              </div>
+              <button
+                onClick={() => setNotification({ ...notification, show: false })}
+                className="ml-auto flex-shrink-0 inline-flex text-white hover:text-gray-200"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="relative mb-8">

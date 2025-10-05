@@ -214,8 +214,8 @@ export default function Index2() {
       
       // Features
       featuresTitle: 'Почему CVERA?',
-      linkedinImport: 'Импорт LinkedIn',
-      linkedinDesc: 'Импортируйте ваш профиль LinkedIn одним кликом',
+      linkedinImport: 'Импорт Линкедин',
+      linkedinDesc: 'Импортируйте ваш профиль Линкедин одним кликом',
       professionalTemplates: 'Профессиональные шаблоны',
       templatesDesc: '15+ современных и профессиональных шаблонов резюме',
       quickDownload: 'Быстрая загрузка',
@@ -233,7 +233,7 @@ export default function Index2() {
       // CTA
       ctaTitle: 'Начните создавать профессиональное резюме сегодня!',
       ctaButton: 'Создать бесплатное резюме',
-      coverLetterButton: 'Cover Letter',
+      coverLetterButton: 'Ковер Леттер',
       templatesButton: 'Шаблоны',
       trustIndicator1: 'Сотни довольных клиентов',
       trustIndicator2: 'Безопасно и надежно',
@@ -252,8 +252,8 @@ export default function Index2() {
       aiDescription: 'Искусственный интеллект, усовершенствованный данными миллионов успешных резюме, готовит ваше резюме в персонализированном и оптимальном виде.',
       premiumTitle: 'Коллекция премиум шаблонов',
       premiumDescription: 'Привлекательные и функциональные шаблоны, подготовленные HR-специалистами и профессиональными дизайнерами, дают вам преимущество в процессе найма.',
-      linkedinTitle: 'Система импорта LinkedIn',
-      linkedinDescription: 'Информация из вашего профиля LinkedIn автоматически добавляется, и ваше резюме быстро готовится.',
+      linkedinTitle: 'Система импорта Линкедин',
+      linkedinDescription: 'Информация из вашего профиля Линкедин автоматически добавляется, и ваше резюме быстро готовится.',
       
       // Features section cards
       feature1Title: 'Искусственный интеллект',
@@ -266,9 +266,9 @@ export default function Index2() {
       // Steps section
       howItWorksTitle: 'Как это работает?',
       registrationTitle: 'Регистрация',
-      registrationDescription: 'Зарегистрируйтесь с помощью электронной почты или учетной записи LinkedIn',
-      linkedinImportTitle: 'Импорт профиля LinkedIn',
-      linkedinImportDescription: 'Введите ссылку на ваш профиль LinkedIn и добавьте вашу информацию в резюме.',
+      registrationDescription: 'Зарегистрируйтесь с помощью электронной почты или учетной записи Линкедин',
+      linkedinImportTitle: 'Импорт профиля Линкедин',
+      linkedinImportDescription: 'Введите ссылку на ваш профиль Линкедин и добавьте вашу информацию в резюме.',
       downloadTitle: 'Скачать резюме',
       downloadDescription: 'Выберите шаблон и скачайте ваше профессиональное резюме в формате PDF.',
       

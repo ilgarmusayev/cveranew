@@ -39,8 +39,8 @@ export default function LinkedInAutoImport({
       importError: '❌ Error occurred'
     },
     russian: {
-      importLinkedIn: 'Импортировать мой профиль LinkedIn',
-      importingLinkedIn: 'Импорт данных LinkedIn...',
+      importLinkedIn: 'Импортировать мой профиль Линкедин',
+      importingLinkedIn: 'Импорт данных Линкедин...',
       importSuccess: '✅ Успешно импортировано!',
       importError: '❌ Произошла ошибка'
     }

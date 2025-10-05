@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 import StandardHeader from '@/components/ui/StandardHeader';
@@ -243,7 +243,7 @@ interface FAQItem {
     clearSearchButton: 'Очистить поиск',
     contactSectionTitle: 'Не нашли ответ на свой вопрос?',
     contactSectionDescription: 'Наша команда поддержки готова вам помочь',
-    emailButton: 'Отправить Email',
+    emailButton: 'Отправить письмо',
     liveChatButton: 'Живой чат',
     helpful: '',
     notHelpful: '',
@@ -351,6 +351,13 @@ export default function FAQPage() {
   const [activeCategory, setActiveCategory] = useState(content.categories[0]);
   const [openItems, setOpenItems] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Dil dəyişəndə kateqoriya və axtarışı sıfırla
+  useEffect(() => {
+    setActiveCategory(content.categories[0]);
+    setSearchTerm('');
+    setOpenItems([]);
+  }, [siteLanguage, content.categories]);
 
   const toggleItem = (id: number) => {
     setOpenItems(prev =>

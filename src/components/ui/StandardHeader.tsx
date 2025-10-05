@@ -254,14 +254,30 @@ export default function StandardHeader() {
 
   // Function to get display name for tier
   const getTierDisplayName = (tier: string) => {
-    const tierNames: { [key: string]: string } = {
-      'Free': 'Pulsuz',
-      'Pro': 'Populyar',
-      'Premium': 'Premium',
-      'Medium': 'Populyar', // Legacy support
-      'Orta': 'Populyar'    // Legacy support
+    const tierNames = {
+      azerbaijani: {
+        'Free': 'Pulsuz',
+        'Pro': 'Populyar',
+        'Premium': 'Premium',
+        'Medium': 'Populyar', // Legacy support
+        'Orta': 'Populyar'    // Legacy support
+      },
+      english: {
+        'Free': 'Free',
+        'Pro': 'Popular',
+        'Premium': 'Premium',
+        'Medium': 'Popular', // Legacy support
+        'Orta': 'Popular'    // Legacy support
+      },
+      russian: {
+        'Free': 'Бесплатный',
+        'Pro': 'Популярный',
+        'Premium': 'Премиум',
+        'Medium': 'Популярный', // Legacy support
+        'Orta': 'Популярный'    // Legacy support
+      }
     };
-    return tierNames[tier] || tier;
+    return tierNames[siteLanguage][tier as keyof typeof tierNames.azerbaijani] || tier;
   };
 
   // Function to get tier badge color

@@ -33,7 +33,7 @@ export const serverErrorMessages = {
     invalidCredentials: 'Неверный email или пароль',
     emailRequired: 'Требуются email и пароль',
     accountDeactivated: 'Ваш аккаунт неактивен. Обратитесь в службу поддержки.',
-    linkedinOnlyAccount: 'Этот аккаунт зарегистрирован через LinkedIn. Войдите через LinkedIn.',
+    linkedinOnlyAccount: 'Этот аккаунт зарегистрирован через Линкедин. Войдите через Линкедин.',
     emailNotVerified: 'Ваш email не подтверждён',
     verificationEmailSent: 'Новая ссылка подтверждения отправлена на ваш email',
     emailAlreadyExists: 'Этот email уже существует',

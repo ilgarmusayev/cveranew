@@ -195,14 +195,21 @@ UZUNLUQ: ${settings.lengthGuide[length as keyof typeof settings.lengthGuide]}
 DİL: ${settings.language}
 
 COVER LETTER YARATMA TƏLİMATLARI:
-1. YALNIZ hazır cover letter mətnini ver, başqa heç bir şey yazma
+1. Professional cover letter formatında yaz
 2. Heç bir format işarəsi istifadə etmə (*, -, [Tarix], *** və s.)
 3. ${settings.instruction}
-4. Struktur: Giriş, əsas hissə və yekun hissələrini natural şəkildə birləşdir
+4. STRUKTUR (bu sıra ilə):
+   - Başda: İstifadəçinin adı-soyadı, telefon, email, ünvan (varsa)
+   - Sonra: Şirkətin adı və müraciət olunan vəzifə
+   - Giriş paraqraf: Özünü təqdim et və vəzifəyə maraq bildir
+   - Əsas hissə: İş təcrübəsi və bacarıqları vakansiyaya uyğun vurğula
+   - Yekun: Motivasiya və əməkdaşlığa hazır olduğunu bildir
+   - Son: Professional salamlaşma
 5. ${settings.toneGuide[tone as keyof typeof settings.toneGuide]} tərzində yaz
 6. ${settings.lengthGuide[length as keyof typeof settings.lengthGuide]} həcmində olsun
 7. CV-dəki təcrübə və bacarıqlardan vakansiyaya uyğun olanları vurğula
-8. Motivasiya və əməkdaşlığa hazır olduğunu bildir
+8. TARİX YAZMA - nə bugünkü, nə də köhnə tarix əlavə etmə
+9. AZƏRBAYCAN DİLİ QAYDASI: "işə" (yönlük hal) istifadə et, "işe" yox - Məsələn: "işə qəbul meneceri", "işə başlamaq", "işə müraciət"
 
 NƏTICƏ: Yalnız hazır cover letter mətnini ver, heç bir əlavə izah və ya format işarəsi olmadan.
 `;

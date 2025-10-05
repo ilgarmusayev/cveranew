@@ -268,6 +268,84 @@ const getCurrentText = (cvLanguage?: string): string => {
     return currentText;
 };
 
+// Translate education degree based on CV language
+const translateDegree = (degree: string, cvLanguage?: string): string => {
+    if (!degree) return '';
+    
+    const language = cvLanguage?.toLowerCase() || 'az';
+    
+    // Degree translations
+    const degreeTranslations: Record<string, Record<string, string>> = {
+        azerbaijani: {
+            'Bachelor': 'Bakalavr',
+            'Master': 'Magistr',
+            'PhD': 'Doktorantura',
+            'Diploma': 'Diploma',
+            'Certificate': 'Sertifikat',
+            'Other': 'Digər',
+            // English to Azerbaijani
+            'Bakalavr': 'Bakalavr',
+            'Magistr': 'Magistr',
+            'Doktorantura': 'Doktorantura',
+            // Russian to Azerbaijani
+            'Бакалавр': 'Bakalavr',
+            'Магистр': 'Magistr',
+            'Кандидат наук': 'Doktorantura',
+            'Диплом': 'Diploma',
+            'Сертификат': 'Sertifikat',
+            'Другое': 'Digər'
+        },
+        english: {
+            'Bakalavr': 'Bachelor',
+            'Magistr': 'Master',
+            'Doktorantura': 'PhD',
+            'Diploma': 'Diploma',
+            'Sertifikat': 'Certificate',
+            'Digər': 'Other',
+            // Keep English as is
+            'Bachelor': 'Bachelor',
+            'Master': 'Master',
+            'PhD': 'PhD',
+            'Certificate': 'Certificate',
+            'Other': 'Other',
+            // Russian to English
+            'Бакалавр': 'Bachelor',
+            'Магистр': 'Master',
+            'Кандидат наук': 'PhD',
+            'Диплом': 'Diploma',
+            'Сертификат': 'Certificate',
+            'Другое': 'Other'
+        },
+        russian: {
+            'Bachelor': 'Бакалавр',
+            'Master': 'Магистр',
+            'PhD': 'Кандидат наук',
+            'Diploma': 'Диплом',
+            'Certificate': 'Сертификат',
+            'Other': 'Другое',
+            // Azerbaijani to Russian
+            'Bakalavr': 'Бакалавр',
+            'Magistr': 'Магистр',
+            'Doktorantura': 'Кандидат наук',
+            'Sertifikat': 'Сертификат',
+            'Digər': 'Другое',
+            // Keep Russian as is
+            'Бакалавр': 'Бакалавр',
+            'Магистр': 'Магистр',
+            'Кандидат наук': 'Кандидат наук',
+            'Диплом': 'Диплом',
+            'Сертификат': 'Сертификат',
+            'Другое': 'Другое'
+        }
+    };
+
+    const languageKey = language.includes('en') ? 'english' :
+                        language.includes('ru') || language === 'russian' ? 'russian' : 'azerbaijani';
+
+    // Return translated degree or original if no translation found
+    return degreeTranslations[languageKey]?.[degree] || degree;
+};
+
 // Dynamic section name mapping based on language
 const getSectionName = (sectionKey: string, cvLanguage?: string, customSectionNames?: Record<string, string>, cvData?: any): string => {
     // If custom section names exist (from translation), use them
@@ -1258,7 +1336,7 @@ const BasicTemplate: React.FC<{
                                                     fontWeight: 'var(--cv-subheading-weight)',
                                                     color: '#111827',
                                                     marginBottom: '4px'
-                                                }}>{edu.degree}</h3>
+                                                }}>{translateDegree(edu.degree, data.cvLanguage)}</h3>
                                             ) : (
                                                 <h3 style={{ 
                                                     fontSize: 'var(--cv-subheading-size)', // Institution üçün subheading ölçüsü
@@ -2374,7 +2452,7 @@ const ModernTemplate: React.FC<{
                                         <div className="flex justify-between items-start mb-1">
                                             <div className="flex-1">
                                                 {edu.degree ? (
-                                                    <h3 className="font-bold text-gray-900">{edu.degree}</h3>
+                                                    <h3 className="font-bold text-gray-900">{translateDegree(edu.degree, data.cvLanguage)}</h3>
                                                 ) : (
                                                     <h3 className="font-bold text-gray-900">{edu.institution}</h3>
                                                 )}
@@ -3402,7 +3480,7 @@ const AtlasTemplate: React.FC<{
                                         <div className="flex justify-between items-start mb-2">
                                             <div className="flex-1">
                                                 {edu.degree ? (
-                                                    <h3 className="text-sm font-bold text-gray-900 mb-1">{edu.degree}</h3>
+                                                    <h3 className="text-sm font-bold text-gray-900 mb-1">{translateDegree(edu.degree, data.cvLanguage)}</h3>
                                                 ) : (
                                                     <h3 className="text-sm font-bold text-gray-900 mb-1">{edu.institution}</h3>
                                                 )}
@@ -4708,7 +4786,7 @@ const LumenTemplate: React.FC<{
                                         <div className="flex justify-between items-start mb-1">
                                             <div>
                                                 {edu.degree ? (
-                                                    <h3 className="text-sm font-bold text-gray-900">{edu.degree}</h3>
+                                                    <h3 className="text-sm font-bold text-gray-900">{translateDegree(edu.degree, data.cvLanguage)}</h3>
                                                 ) : (
                                                     <h3 className="text-sm font-bold text-gray-900">{edu.institution}</h3>
                                                 )}
@@ -5770,7 +5848,7 @@ const PrimeTemplate: React.FC<{
                                         <div className="flex justify-between items-start mb-1 flex-wrap gap-1">
                                             <div className="flex-1 min-w-0">
                                                 {edu.degree ? (
-                                                    <h3 className="text-base font-bold text-gray-900 leading-tight">{edu.degree}</h3>
+                                                    <h3 className="text-base font-bold text-gray-900 leading-tight">{translateDegree(edu.degree, data.cvLanguage)}</h3>
                                                 ) : (
                                                     <h3 className="text-base font-bold text-gray-900 leading-tight">{edu.institution}</h3>
                                                 )}
@@ -6574,7 +6652,7 @@ const VertexTemplate: React.FC<{
                                         <div className="col-span-9">
                                             <div className="border-l-4 border-gray-300 pl-6">
                                                 {edu.degree ? (
-                                                    <h3 className="font-bold text-gray-900 text-lg mb-2">{edu.degree}</h3>
+                                                    <h3 className="font-bold text-gray-900 text-lg mb-2">{translateDegree(edu.degree, data.cvLanguage)}</h3>
                                                 ) : (
                                                     <h3 className="font-bold text-gray-900 text-lg mb-2">{edu.institution}</h3>
                                                 )}
@@ -7397,7 +7475,7 @@ const HorizonTemplate: React.FC<{
                                 <div key={edu.id || index} >
                                     <div className="flex justify-between items-start mb-2">
                                         <div className="flex-1">
-                                            <h3 className="font-bold text-gray-800 text-base">{edu.degree}</h3>
+                                            <h3 className="font-bold text-gray-800 text-base">{translateDegree(edu.degree, data.cvLanguage)}</h3>
                                             <h4 className="text-gray-600 text-sm">{edu.institution}</h4>
                                         </div>
                                         <div className="text-right text-sm text-gray-500 ml-4">
@@ -8226,7 +8304,7 @@ const AuroraTemplate: React.FC<{
                                     <div className="flex justify-between items-start mb-1">
                                         <div className="flex-1">
                                             {edu.degree ? (
-                                                <h3 className="font-semibold text-gray-900 text-sm">{edu.degree}</h3>
+                                                <h3 className="font-semibold text-gray-900 text-sm">{translateDegree(edu.degree, data.cvLanguage)}</h3>
                                             ) : (
                                                 <h3 className="font-semibold text-gray-900 text-sm">{edu.institution}</h3>
                                             )}
@@ -8727,89 +8805,105 @@ const AuroraTemplate: React.FC<{
             }}>
                 {/* Header Section - Clean and Professional */}
                 <div className="pb-6 border-b-[3px] border-gray-900" style={{ marginTop: 0, marginBottom: '24px', paddingTop: 0 }}>
-                    <div className="text-center">
-                        {/* Name */}
-                        <h1 className="text-3xl font-bold text-gray-900 mb-4 tracking-wide">
-                            {getFullName(personalInfo, data.cvLanguage)}
-                        </h1>
-                        
-                        {personalInfo.field && (
-                            <p className="text-lg text-gray-600 font-medium mb-4">
-                                {personalInfo.field}
-                            </p>
-                        )}
-                        
-                        {/* Contact Information - Split into two lines */}
-                        <div className="text-center text-sm text-gray-700 space-y-2 mt-4">
-                            {(() => {
-                                // First line: email, phone, location
-                                const firstLineItems = [];
-                                if (personalInfo.email) firstLineItems.push(personalInfo.email);
-                                if (personalInfo.phone) firstLineItems.push(personalInfo.phone);
-                                if (personalInfo.location) firstLineItems.push(personalInfo.location);
-                                
-                                // Second line: linkedin, github, website
-                                const secondLineItems = [];
-                                if (personalInfo.linkedin) secondLineItems.push({
-                                    type: 'link', 
-                                    text: getLinkedInDisplay(personalInfo.linkedin).displayText,
-                                    url: getLinkedInDisplay(personalInfo.linkedin).url
-                                });
-                                if (personalInfo.github) secondLineItems.push({
-                                    type: 'link',
-                                    text: getGitHubDisplay(personalInfo.github).displayText,
-                                    url: getGitHubDisplay(personalInfo.github).url
-                                });
-                                if (personalInfo.website) secondLineItems.push({
-                                    type: 'text',
-                                    text: personalInfo.website
-                                });
-                                
-                                return (
-                                    <>
-                                        {firstLineItems.length > 0 && (
-                                            <div className="flex flex-wrap justify-center items-center gap-6">
-                                                {firstLineItems.map((item, index) => (
-                                                    <React.Fragment key={`first-${index}`}>
-                                                        <span>{item}</span>
-                                                        {index < firstLineItems.length - 1 && (
-                                                            <span className="text-gray-500">•</span>
-                                                        )}
-                                                    </React.Fragment>
-                                                ))}
-                                            </div>
-                                        )}
-                                        {secondLineItems.length > 0 && (
-                                            <div className="flex flex-wrap justify-center items-center gap-6">
-                                                {secondLineItems.map((item, index) => (
-                                                    <React.Fragment key={`second-${index}`}>
-                                                        {item.type === 'link' ? (
-                                                            <a
-                                                                href={item.url}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="text-gray-700 hover:text-gray-600 underline transition-colors"
-                                                            >
-                                                                {item.text}
-                                                            </a>
-                                                        ) : (
-                                                            <span>{item.text}</span>
-                                                        )}
-                                                        {index < secondLineItems.length - 1 && (
-                                                            <span className="text-gray-500">•</span>
-                                                        )}
-                                                    </React.Fragment>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </>
-                                );
-                            })()}
+                    <div className="flex items-start justify-between gap-6">
+                        <div className="flex-1">
+                            {/* Name */}
+                            <h1 className="text-3xl font-bold text-gray-900 mb-4 tracking-wide">
+                                {getFullName(personalInfo, data.cvLanguage)}
+                            </h1>
+                            
+                            {personalInfo.field && (
+                                <p className="text-lg text-gray-600 font-medium mb-4">
+                                    {personalInfo.field}
+                                </p>
+                            )}
+                            
+                            {/* Contact Information - Split into two lines */}
+                            <div className="text-sm text-gray-700 space-y-2 mt-4">
+                                {(() => {
+                                    // First line: email, phone, location
+                                    const firstLineItems = [];
+                                    if (personalInfo.email) firstLineItems.push(personalInfo.email);
+                                    if (personalInfo.phone) firstLineItems.push(personalInfo.phone);
+                                    if (personalInfo.location) firstLineItems.push(personalInfo.location);
+                                    
+                                    // Second line: linkedin, github, website
+                                    const secondLineItems = [];
+                                    if (personalInfo.linkedin) secondLineItems.push({
+                                        type: 'link', 
+                                        text: getLinkedInDisplay(personalInfo.linkedin).displayText,
+                                        url: getLinkedInDisplay(personalInfo.linkedin).url
+                                    });
+                                    if (personalInfo.github) secondLineItems.push({
+                                        type: 'link',
+                                        text: getGitHubDisplay(personalInfo.github).displayText,
+                                        url: getGitHubDisplay(personalInfo.github).url
+                                    });
+                                    if (personalInfo.website) secondLineItems.push({
+                                        type: 'text',
+                                        text: personalInfo.website
+                                    });
+                                    
+                                    return (
+                                        <>
+                                            {firstLineItems.length > 0 && (
+                                                <div className="flex flex-wrap items-center gap-4">
+                                                    {firstLineItems.map((item, index) => (
+                                                        <React.Fragment key={`first-${index}`}>
+                                                            <span>{item}</span>
+                                                            {index < firstLineItems.length - 1 && (
+                                                                <span className="text-gray-500">•</span>
+                                                            )}
+                                                        </React.Fragment>
+                                                    ))}
+                                                </div>
+                                            )}
+                                            {secondLineItems.length > 0 && (
+                                                <div className="flex flex-wrap items-center gap-4">
+                                                    {secondLineItems.map((item, index) => (
+                                                        <React.Fragment key={`second-${index}`}>
+                                                            {item.type === 'link' ? (
+                                                                <a
+                                                                    href={item.url}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="text-gray-700 hover:text-gray-600 underline transition-colors"
+                                                                >
+                                                                    {item.text}
+                                                                </a>
+                                                            ) : (
+                                                                <span>{item.text}</span>
+                                                            )}
+                                                            {index < secondLineItems.length - 1 && (
+                                                                <span className="text-gray-500">•</span>
+                                                            )}
+                                                        </React.Fragment>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </>
+                                    );
+                                })()}
+                            </div>
                         </div>
+                        
+                        {/* Profile Image - Right Side, Square */}
+                        {personalInfo.profileImage && (
+                            <div className="flex-shrink-0">
+                                <img
+                                    src={personalInfo.profileImage}
+                                    alt="Profile"
+                                    className="w-24 h-24 object-cover border-4 border-gray-900"
+                                    style={{
+                                        WebkitPrintColorAdjust: 'exact',
+                                        colorAdjust: 'exact',
+                                        printColorAdjust: 'exact'
+                                    }}
+                                />
+                            </div>
+                        )}
                     </div>
-                </div>
-
-                {/* Main Content - Draggable Sections */}
+                </div>                {/* Main Content - Draggable Sections */}
                 <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
                     <div 
                         className={`transition-all duration-300 ${activeId ? 'opacity-95' : ''}`}
@@ -8975,7 +9069,7 @@ const ExclusiveTemplate: React.FC<{
                                     <div className="flex flex-row items-start justify-between gap-3 mb-2">
                                         <div className="flex-1">
                                             {edu.degree ? (
-                                                <h3 className="font-semibold text-sm text-gray-800">{edu.degree}</h3>
+                                                <h3 className="font-semibold text-sm text-gray-800">{translateDegree(edu.degree, data.cvLanguage)}</h3>
                                             ) : (
                                                 <h3 className="font-semibold text-sm text-gray-800">{edu.institution}</h3>
                                             )}
@@ -10162,7 +10256,7 @@ const EssenceTemplate: React.FC<{
                                 <div className="space-y-3">
                                     {education.map((edu) => (
                                         <div key={edu.id} className="bg-white p-3 rounded border border-gray-100">
-                                            <h3 className="text-xs font-bold text-black">{edu.degree}</h3>
+                                            <h3 className="text-xs font-bold text-black">{translateDegree(edu.degree, data.cvLanguage)}</h3>
                                             <p className="text-xs text-gray-600">{edu.institution}</p>
                                             {(edu.startDate || edu.endDate) && (
                                                 <span className="text-xs text-gray-500">
@@ -10827,7 +10921,7 @@ const ClarityTemplate: React.FC<{
                                                             fontFamily: '"Inter", "Segoe UI", sans-serif'
                                                         }}
                                                     >
-                                                        {edu.degree}
+                                                        {translateDegree(edu.degree, data.cvLanguage)}
                                                     </h3>
                                                 ) : (
                                                     <h3 
@@ -12077,6 +12171,18 @@ export default function CVPreview({
         if (normalizedTemplate.includes('prime') ||
             normalizedTemplate === 'prime') {
             return <PrimeTemplate 
+                data={cv.data} 
+                sectionOrder={sectionOrder} 
+                onSectionReorder={handleSectionReorder}
+                activeSection={activeSection}
+                onSectionSelect={handleSectionSelect}
+            />;
+        }
+
+        // Vertex Template - Technology & Innovation Focused ATS-Friendly Design
+        if (normalizedTemplate.includes('vertex') ||
+            normalizedTemplate === 'vertex') {
+            return <VertexTemplate 
                 data={cv.data} 
                 sectionOrder={sectionOrder} 
                 onSectionReorder={handleSectionReorder}

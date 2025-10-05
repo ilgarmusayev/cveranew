@@ -42,7 +42,7 @@ export default function PricingPage() {
       // Popular plan features
       popularCVLimit: 'Gündə 5 CV yaratma',
       popularTemplates: 'Pulsuz və Populyar səviyyə şablonlar',
-      pdfDocxFormats: 'PDF və DOCX formatında yükləmə',
+      pdfFormats: 'PDF formatında yükləmə',
       onlineSupport: 'Saytda texniki dəstək',
       aiCVImprovement: 'AI ilə CV təkmilləşdirmə',
       professionalCollection: 'Professional şablon kolleksiyası',
@@ -89,7 +89,7 @@ export default function PricingPage() {
       // Popular plan features
       popularCVLimit: 'Create 5 CVs per day',
       popularTemplates: 'Free and Popular tier templates',
-      pdfDocxFormats: 'PDF and DOCX format downloads',
+      pdfFormats: 'PDF format downloads',
       onlineSupport: 'Online technical support',
       aiCVImprovement: 'AI CV enhancement',
       professionalCollection: 'Professional template collection',
@@ -136,7 +136,7 @@ export default function PricingPage() {
       // Popular plan features
       popularCVLimit: 'Создавать 5 резюме в день',
       popularTemplates: 'Шаблоны бесплатного и популярного уровня',
-      pdfDocxFormats: 'Скачивание в форматах PDF и DOCX',
+      pdfFormats: 'Скачивание в формате PDF',
       onlineSupport: 'Онлайн техническая поддержка',
       aiCVImprovement: 'Улучшение резюме с помощью ИИ',
       professionalCollection: 'Коллекция профессиональных шаблонов',
@@ -188,7 +188,7 @@ export default function PricingPage() {
       features: [
         content.popularCVLimit,
         content.popularTemplates,
-        content.pdfDocxFormats,
+        content.pdfFormats,
         content.onlineSupport,
         content.linkedinImport,
         content.aiCVImprovement,
@@ -204,7 +204,7 @@ export default function PricingPage() {
       features: [
         content.unlimitedCV,
         content.allTemplates,
-        content.pdfDocxFormats,
+        content.pdfFormats,
         content.onlineSupport,
         content.linkedinImport,
         content.aiCVImprovement,
@@ -569,13 +569,13 @@ export default function PricingPage() {
           </div>
 
           {/* Pricing Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 max-w-6xl mx-auto mt-8 sm:mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 max-w-6xl mx-auto mt-8 sm:mt-6 items-stretch">
             {plans.map((plan, index) => {
                 const isCurrentPlan = plan.id === currentUserPlanId;
                 return (
                 <div
                     key={plan.id}
-                    className={`relative bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 mt-6 sm:mt-4 ${
+                    className={`relative bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 mt-6 sm:mt-4 p-6 sm:p-8 flex flex-col ${
                         isCurrentPlan
                             ? 'border-green-500 ring-4 ring-green-100 bg-green-50'
                             : plan.popular
@@ -600,8 +600,6 @@ export default function PricingPage() {
                   </span>
                       </div>
                   )}
-
-                  <div className="p-6 sm:p-8 flex flex-col h-full border-2 border-blue-400 rounded-2xl">
                     {/* Plan Header */}
                     <div className="text-center mb-6">
                       <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
@@ -616,7 +614,7 @@ export default function PricingPage() {
                     </div>
 
                     {/* Features List */}
-                    <div className="space-y-4 mb-8 ">
+                    <div className="space-y-4 flex-grow">
                       {plan.features.map((feature, idx) => (
                           <div key={idx} className="flex items-start space-x-3">
                             <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -627,10 +625,8 @@ export default function PricingPage() {
                       ))}
                     </div>
 
-                    {/* Spacer to push button down */}
-                    <div className="flex-grow" />
-
                     {/* CTA Button */}
+                    <div className="mt-8">
                     {isCurrentPlan ? (
                       // Show cancel subscription button for paid users, active status for free users
                       userTier === 'Free' ? (
@@ -685,7 +681,7 @@ export default function PricingPage() {
                         )}
                       </button>
                     )}
-                  </div>
+                    </div>
                 </div>
                 );
             })}

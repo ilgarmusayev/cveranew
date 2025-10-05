@@ -196,8 +196,8 @@ export const errorMessages = {
     subscriptionCancelError: 'Ошибка отмены подписки',
     
     // LinkedIn errors
-    linkedinImportError: 'Ошибка импорта из LinkedIn',
-    linkedinLogoutError: 'Не удалось выйти из LinkedIn',
+    linkedinImportError: 'Ошибка импорта из Линкедин',
+    linkedinLogoutError: 'Не удалось выйти из Линкедин',
     
     // AI errors
     aiError: 'Ошибка получения AI рекомендаций',
@@ -273,7 +273,7 @@ export const successMessages = {
     profileUpdateSuccess: 'Профиль обновлён',
     subscriptionCancelSuccess: 'Подписка отменена',
     logoutSuccess: 'Выход выполнен',
-    linkedinLogoutSuccess: 'Выход из LinkedIn выполнен',
+    linkedinLogoutSuccess: 'Выход из Линкедин выполнен',
     apiKeyDeleteSuccess: 'API ключ удалён',
     testSuccess: 'Тест завершён'
   }
