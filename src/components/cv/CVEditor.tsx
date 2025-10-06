@@ -1214,6 +1214,9 @@ ${cv.projects.map(proj => `
             }
 
             const result = await response.json();
+            console.log('🤖 AI Response:', result);
+            console.log('📋 AI Suggestions:', result.suggestions);
+            console.log('🔍 Skills suggestions:', result.suggestions?.filter((s: any) => s.type === 'skills'));
             setAiSuggestions(result.suggestions || []);
             
         } catch (error) {
@@ -1228,7 +1231,9 @@ ${cv.projects.map(proj => `
     // Apply AI Suggestion Function
     const applyAiSuggestion = useCallback((suggestion: any) => {
         try {
+            console.log('🔧 Applying AI suggestion:', suggestion);
             const { type, field, newValue, sectionIndex } = suggestion;
+            console.log('📋 Type:', type, 'Field:', field, 'Value:', newValue);
             
             setCv(prevCv => {
                 const newCv = { ...prevCv };
@@ -1247,6 +1252,13 @@ ${cv.projects.map(proj => `
                                 ...newCv.experience[sectionIndex],
                                 [field]: newValue
                             };
+                        } else if (field === 'add' && typeof newValue === 'object' && !Array.isArray(newValue)) {
+                            // Yeni iş təcrübəsi əlavə etmək - ID avtomatik əlavə et
+                            const newExperience = {
+                                id: `exp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                                ...newValue
+                            };
+                            newCv.experience = [...newCv.experience, newExperience];
                         }
                         break;
                     case 'education':
@@ -1255,18 +1267,43 @@ ${cv.projects.map(proj => `
                                 ...newCv.education[sectionIndex],
                                 [field]: newValue
                             };
+                        } else if (field === 'add' && typeof newValue === 'object' && !Array.isArray(newValue)) {
+                            // Yeni təhsil əlavə etmək - ID avtomatik əlavə et
+                            const newEducation = {
+                                id: `edu-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                                ...newValue
+                            };
+                            newCv.education = [...newCv.education, newEducation];
                         }
                         break;
                     case 'skills':
+                        console.log('🎯 Skills case - field:', field, 'sectionIndex:', sectionIndex);
+                        console.log('🎯 newValue:', newValue);
+                        console.log('🎯 Current skills:', newCv.skills);
+                        
                         if (field && sectionIndex !== undefined && newCv.skills[sectionIndex]) {
                             // Konkret skill-i yeniləmək
+                            console.log('✏️ Updating existing skill at index:', sectionIndex);
                             newCv.skills[sectionIndex] = {
                                 ...newCv.skills[sectionIndex],
                                 [field]: newValue
                             };
                         } else if (Array.isArray(newValue)) {
                             // Bütün skills array-ini əvəz etmək
+                            console.log('🔄 Replacing entire skills array');
                             newCv.skills = newValue;
+                        } else if (field === 'add' && typeof newValue === 'object' && !Array.isArray(newValue)) {
+                            // Yeni skill əlavə etmək - ID avtomatik əlavə et
+                            console.log('➕ Adding new skill:', newValue);
+                            const newSkill = {
+                                id: `skill-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                                ...newValue
+                            };
+                            console.log('✅ New skill with ID:', newSkill);
+                            newCv.skills = [...newCv.skills, newSkill];
+                            console.log('📦 Updated skills array:', newCv.skills);
+                        } else {
+                            console.error('⚠️ Skills case - no condition matched!');
                         }
                         break;
                     case 'languages':
@@ -1277,6 +1314,13 @@ ${cv.projects.map(proj => `
                             };
                         } else if (Array.isArray(newValue)) {
                             newCv.languages = newValue;
+                        } else if (field === 'add' && typeof newValue === 'object' && !Array.isArray(newValue)) {
+                            // Yeni dil əlavə etmək - ID avtomatik əlavə et
+                            const newLanguage = {
+                                id: `language-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                                ...newValue
+                            };
+                            newCv.languages = [...newCv.languages, newLanguage];
                         }
                         break;
                     case 'projects':
@@ -1287,6 +1331,13 @@ ${cv.projects.map(proj => `
                             };
                         } else if (Array.isArray(newValue)) {
                             newCv.projects = newValue;
+                        } else if (field === 'add' && typeof newValue === 'object' && !Array.isArray(newValue)) {
+                            // Yeni layihə əlavə etmək - ID avtomatik əlavə et
+                            const newProject = {
+                                id: `project-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                                ...newValue
+                            };
+                            newCv.projects = [...newCv.projects, newProject];
                         }
                         break;
                     case 'certifications':
@@ -1297,6 +1348,9 @@ ${cv.projects.map(proj => `
                             };
                         } else if (Array.isArray(newValue)) {
                             newCv.certifications = newValue;
+                        } else if (field === 'add' && typeof newValue === 'object' && !Array.isArray(newValue)) {
+                            // Yeni sertifikat əlavə etmək
+                            newCv.certifications = [...newCv.certifications, newValue];
                         }
                         break;
                     case 'volunteerExperience':
@@ -1307,6 +1361,9 @@ ${cv.projects.map(proj => `
                             };
                         } else if (Array.isArray(newValue)) {
                             newCv.volunteerExperience = newValue;
+                        } else if (field === 'add' && typeof newValue === 'object' && !Array.isArray(newValue)) {
+                            // Yeni könüllü təcrübə əlavə etmək
+                            newCv.volunteerExperience = [...newCv.volunteerExperience, newValue];
                         }
                         break;
                     case 'publications':
@@ -1317,6 +1374,9 @@ ${cv.projects.map(proj => `
                             };
                         } else if (Array.isArray(newValue)) {
                             newCv.publications = newValue;
+                        } else if (field === 'add' && typeof newValue === 'object' && !Array.isArray(newValue)) {
+                            // Yeni nəşr əlavə etmək
+                            newCv.publications = [...newCv.publications, newValue];
                         }
                         break;
                     case 'honorsAwards':
@@ -1327,6 +1387,9 @@ ${cv.projects.map(proj => `
                             };
                         } else if (Array.isArray(newValue)) {
                             newCv.honorsAwards = newValue;
+                        } else if (field === 'add' && typeof newValue === 'object' && !Array.isArray(newValue)) {
+                            // Yeni mükafat əlavə etmək
+                            newCv.honorsAwards = [...newCv.honorsAwards, newValue];
                         }
                         break;
                     case 'courses':
@@ -1337,6 +1400,9 @@ ${cv.projects.map(proj => `
                             };
                         } else if (Array.isArray(newValue)) {
                             newCv.courses = newValue;
+                        } else if (field === 'add' && typeof newValue === 'object' && !Array.isArray(newValue)) {
+                            // Yeni kurs əlavə etmək
+                            newCv.courses = [...newCv.courses, newValue];
                         }
                         break;
                     case 'testScores':
@@ -1347,6 +1413,9 @@ ${cv.projects.map(proj => `
                             };
                         } else if (Array.isArray(newValue)) {
                             newCv.testScores = newValue;
+                        } else if (field === 'add' && typeof newValue === 'object' && !Array.isArray(newValue)) {
+                            // Yeni test nəticəsi əlavə etmək
+                            newCv.testScores = [...newCv.testScores, newValue];
                         }
                         break;
                     case 'organizations':
@@ -1357,6 +1426,9 @@ ${cv.projects.map(proj => `
                             };
                         } else if (Array.isArray(newValue)) {
                             newCv.organizations = newValue;
+                        } else if (field === 'add' && typeof newValue === 'object' && !Array.isArray(newValue)) {
+                            // Yeni təşkilat əlavə etmək
+                            newCv.organizations = [...newCv.organizations, newValue];
                         }
                         break;
                     case 'customSections':
@@ -2452,29 +2524,42 @@ ${cv.projects.map(proj => `
         {/* AI Assistant Floating Button */}
         <div className="fixed bottom-6 left-6 z-[60]">
             <button
-                onClick={() => {}}
-                disabled={true}
-                className="group relative bg-gray-400 cursor-not-allowed
-                         text-white rounded-lg px-6 py-3 shadow-lg transition-all duration-300 
-                         opacity-60 flex items-center gap-3 font-medium"
+                onClick={handleAiAnalysis}
+                disabled={isAiAnalyzing}
+                className="group relative bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 
+                         text-white rounded-lg px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 
+                         disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 font-medium"
                 title={
-                    siteLanguage === 'azerbaijani' ? 'Çox yaxında aktivləşdiriləcək' :
-                    siteLanguage === 'english' ? 'Coming very soon' :
-                    'Скоро будет активирован'
+                    siteLanguage === 'azerbaijani' ? 'AI ilə CV-ni təkmilləşdirin' :
+                    siteLanguage === 'english' ? 'Improve your CV with AI' :
+                    'Улучшите резюме с помощью ИИ'
                 }
             >
-                {/* Always show "Coming Soon" message */}
-                <>
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                    </svg>
-                    <span>
-                        {siteLanguage === 'azerbaijani' && 'Çox yaxında'}
-                        {siteLanguage === 'english' && 'Coming Soon'}
-                        {siteLanguage === 'russian' && 'Скоро'}
-                    </span>
-                </>
+                {isAiAnalyzing ? (
+                    <>
+                        <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>
+                            {siteLanguage === 'azerbaijani' && 'Analiz edilir...'}
+                            {siteLanguage === 'english' && 'Analyzing...'}
+                            {siteLanguage === 'russian' && 'Анализируется...'}
+                        </span>
+                    </>
+                ) : (
+                    <>
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                        </svg>
+                        <span>
+                            {siteLanguage === 'azerbaijani' && 'Süni İntellekt ilə təkmilləşdirin'}
+                            {siteLanguage === 'english' && 'Improve with AI'}
+                            {siteLanguage === 'russian' && 'Улучшить с ИИ'}
+                        </span>
+                    </>
+                )}
             </button>
         </div>
 
@@ -2594,7 +2679,62 @@ ${cv.projects.map(proj => `
                                                 <h4 className="font-semibold text-gray-800 mb-2">{suggestion.title}</h4>
                                                 <p className="text-gray-600 text-sm mb-3">{suggestion.description}</p>
                                                 
-                                                {suggestion.currentValue && suggestion.newValue && (
+                                                {/* Yeni element əlavə etmək üçün - sadəcə newValue göstər */}
+                                                {suggestion.field === 'add' && suggestion.newValue && (
+                                                    <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+                                                        <span className="text-xs font-medium text-green-700 uppercase tracking-wide mb-2 block">
+                                                            {siteLanguage === 'azerbaijani' && '➕ Əlavə ediləcək:'}
+                                                            {siteLanguage === 'english' && '➕ Will be added:'}
+                                                            {siteLanguage === 'russian' && '➕ Будет добавлено:'}
+                                                        </span>
+                                                        <p className="text-sm text-green-900 font-medium">
+                                                            {typeof suggestion.newValue === 'object' ? (
+                                                                suggestion.type === 'skills' ? (
+                                                                    <>
+                                                                        <span className="font-bold">{suggestion.newValue?.name || 'N/A'}</span>
+                                                                        <span className="text-green-700"> ({suggestion.newValue?.level || 'N/A'})</span>
+                                                                        <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
+                                                                            suggestion.newValue?.type === 'hard' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                                                                        }`}>
+                                                                            {suggestion.newValue?.type === 'hard' ? 
+                                                                                (siteLanguage === 'azerbaijani' ? 'Texniki' : siteLanguage === 'english' ? 'Technical' : 'Техническая') : 
+                                                                                (siteLanguage === 'azerbaijani' ? 'Soft' : siteLanguage === 'english' ? 'Soft' : 'Мягкая')
+                                                                            }
+                                                                        </span>
+                                                                        {suggestion.newValue?.category && (
+                                                                            <span className="text-green-600 text-xs ml-2">• {suggestion.newValue.category}</span>
+                                                                        )}
+                                                                    </>
+                                                                ) : suggestion.type === 'projects' ? (
+                                                                    <>
+                                                                        <span className="font-bold">{suggestion.newValue?.name || 'N/A'}</span>
+                                                                        <span className="text-green-700 block mt-1">{suggestion.newValue?.description || ''}</span>
+                                                                        {suggestion.newValue?.technologies && Array.isArray(suggestion.newValue.technologies) && (
+                                                                            <span className="text-green-600 text-xs block mt-1">
+                                                                                {suggestion.newValue.technologies.join(', ')}
+                                                                            </span>
+                                                                        )}
+                                                                    </>
+                                                                ) : suggestion.type === 'languages' ? (
+                                                                    `${suggestion.newValue?.language || 'N/A'} (${suggestion.newValue?.level || 'N/A'})`
+                                                                ) : suggestion.type === 'experience' ? (
+                                                                    <>
+                                                                        <span className="font-bold">{suggestion.newValue?.position || 'N/A'}</span>
+                                                                        <span className="text-green-700"> at {suggestion.newValue?.company || 'N/A'}</span>
+                                                                    </>
+                                                                ) : suggestion.type === 'education' ? (
+                                                                    <>
+                                                                        <span className="font-bold">{suggestion.newValue?.degree || 'N/A'}</span>
+                                                                        <span className="text-green-700"> at {suggestion.newValue?.institution || 'N/A'}</span>
+                                                                    </>
+                                                                ) : JSON.stringify(suggestion.newValue, null, 2)
+                                                            ) : suggestion.newValue}
+                                                        </p>
+                                                    </div>
+                                                )}
+                                                
+                                                {/* Mövcud elementi yeniləmək üçün - current və new göstər */}
+                                                {suggestion.field !== 'add' && suggestion.currentValue && suggestion.newValue && (
                                                     <div className="bg-gray-50 rounded-lg p-3 space-y-2">
                                                         <div>
                                                             <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
@@ -2602,7 +2742,9 @@ ${cv.projects.map(proj => `
                                                                 {siteLanguage === 'english' && 'Current:'}
                                                                 {siteLanguage === 'russian' && 'Текущее:'}
                                                             </span>
-                                                            <p className="text-sm text-gray-800 mt-1">{suggestion.currentValue}</p>
+                                                            <p className="text-sm text-gray-800 mt-1">
+                                                                {typeof suggestion.currentValue === 'object' ? JSON.stringify(suggestion.currentValue, null, 2) : suggestion.currentValue}
+                                                            </p>
                                                         </div>
                                                         <div>
                                                             <span className="text-xs font-medium text-green-600 uppercase tracking-wide">
@@ -2610,7 +2752,24 @@ ${cv.projects.map(proj => `
                                                                 {siteLanguage === 'english' && 'Suggested:'}
                                                                 {siteLanguage === 'russian' && 'Предложение:'}
                                                             </span>
-                                                            <p className="text-sm text-green-800 mt-1 font-medium">{suggestion.newValue}</p>
+                                                            <p className="text-sm text-green-800 mt-1 font-medium">
+                                                                {typeof suggestion.newValue === 'object' ? (
+                                                                    suggestion.type === 'skills' ? (
+                                                                        `${suggestion.newValue?.name || 'N/A'} (${suggestion.newValue?.level || 'N/A'}) - ${suggestion.newValue?.type === 'hard' ? 
+                                                                            (siteLanguage === 'azerbaijani' ? 'Texniki bacarıq' : siteLanguage === 'english' ? 'Technical Skill' : 'Техническая навык') : 
+                                                                            (siteLanguage === 'azerbaijani' ? 'Soft bacarıq' : siteLanguage === 'english' ? 'Soft Skill' : 'Мягкая навык')
+                                                                        }`
+                                                                    ) : suggestion.type === 'projects' ? (
+                                                                        `${suggestion.newValue?.name || 'N/A'}: ${suggestion.newValue?.description?.substring(0, 100) || ''}...`
+                                                                    ) : suggestion.type === 'languages' ? (
+                                                                        `${suggestion.newValue?.language || 'N/A'} (${suggestion.newValue?.level || 'N/A'})`
+                                                                    ) : suggestion.type === 'experience' ? (
+                                                                        `${suggestion.newValue?.position || 'N/A'} at ${suggestion.newValue?.company || 'N/A'}`
+                                                                    ) : suggestion.type === 'education' ? (
+                                                                        `${suggestion.newValue?.degree || 'N/A'} at ${suggestion.newValue?.institution || 'N/A'}`
+                                                                    ) : JSON.stringify(suggestion.newValue, null, 2)
+                                                                ) : suggestion.newValue}
+                                                            </p>
                                                         </div>
                                                     </div>
                                                 )}

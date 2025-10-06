@@ -89,6 +89,56 @@ MÜHİM QAYDALAR:
   }
 }
 
+YENI ELEMENT ƏLAVƏ ETMƏK ÜÇÜN FORMAT:
+Yeni bacarıq əlavə etmək üçün (type MÜTLƏQ "hard" və ya "soft" olmalıdır):
+{
+  "type": "skills",
+  "field": "add",
+  "newValue": {
+    "name": "React.js",
+    "type": "hard",
+    "level": "Expert",
+    "category": "Frontend Development"
+  }
+}
+
+Yeni soft skill əlavə etmək üçün:
+{
+  "type": "skills",
+  "field": "add",
+  "newValue": {
+    "name": "Liderlik və komanda idarəetməsi",
+    "type": "soft",
+    "level": "Advanced",
+    "category": "Management"
+  }
+}
+
+Yeni layihə əlavə etmək üçün:
+{
+  "type": "projects",
+  "field": "add",
+  "newValue": {
+    "name": "E-commerce Platforması",
+    "description": "React və Node.js ilə 10k+ istifadəçi üçün tam funksional platforma hazırlandı",
+    "technologies": "React, Node.js, MongoDB",
+    "url": ""
+  }
+}
+
+Yeni təcrübə əlavə etmək üçün:
+{
+  "type": "experience",
+  "field": "add",
+  "newValue": {
+    "position": "Senior Developer",
+    "company": "Tech Corp",
+    "startDate": "2023-01",
+    "endDate": "2024-01",
+    "description": "3 layihəyə rəhbərlik edərək komanda məhsuldarlığını 40% artırdı"
+  }
+}
+
 TÖVSIYƏ PRINSIPLƏRİ:
 1. RƏQƏMLƏRLƏ DƏSTƏKLƏ: "35% artım", "150 layihə", "5 nəfərlik komanda"
 2. KONKRET TEXNOLOGİYALAR: React, Python, Adobe Creative Suite
@@ -176,6 +226,56 @@ IMPORTANT RULES:
   }
 }
 
+FORMAT FOR ADDING NEW ITEMS:
+To add new skill (type MUST be "hard" or "soft"):
+{
+  "type": "skills",
+  "field": "add",
+  "newValue": {
+    "name": "React.js",
+    "type": "hard",
+    "level": "Expert",
+    "category": "Frontend Development"
+  }
+}
+
+To add new soft skill:
+{
+  "type": "skills",
+  "field": "add",
+  "newValue": {
+    "name": "Leadership and Team Management",
+    "type": "soft",
+    "level": "Advanced",
+    "category": "Management"
+  }
+}
+
+To add new project:
+{
+  "type": "projects",
+  "field": "add",
+  "newValue": {
+    "name": "E-commerce Platform",
+    "description": "Built fully functional platform for 10k+ users using React and Node.js",
+    "technologies": "React, Node.js, MongoDB",
+    "url": ""
+  }
+}
+
+To add new experience:
+{
+  "type": "experience",
+  "field": "add",
+  "newValue": {
+    "position": "Senior Developer",
+    "company": "Tech Corp",
+    "startDate": "2023-01",
+    "endDate": "2024-01",
+    "description": "Led 3 projects, increasing team productivity by 40%"
+  }
+}
+
 RECOMMENDATION PRINCIPLES:
 1. QUANTIFY WITH NUMBERS: "35% increase", "150 projects", "5-person team"
 2. SPECIFY TECHNOLOGIES: React, Python, Adobe Creative Suite, Salesforce
@@ -260,6 +360,56 @@ Projects: ${JSON.stringify(projects)}`
     "weaknesses": ["слабые стороны"],
     "score": 85,
     "recommendations": ["общие рекомендации"]
+  }
+}
+
+ФОРМАТ ДЛЯ ДОБАВЛЕНИЯ НОВЫХ ЭЛЕМЕНТОВ:
+Для добавления нового навыка (type ОБЯЗАТЕЛЬНО должен быть "hard" или "soft"):
+{
+  "type": "skills",
+  "field": "add",
+  "newValue": {
+    "name": "React.js",
+    "type": "hard",
+    "level": "Expert",
+    "category": "Frontend Development"
+  }
+}
+
+Для добавления гибкого навыка (soft skill):
+{
+  "type": "skills",
+  "field": "add",
+  "newValue": {
+    "name": "Лидерство и управление командой",
+    "type": "soft",
+    "level": "Advanced",
+    "category": "Management"
+  }
+}
+
+Для добавления нового проекта:
+{
+  "type": "projects",
+  "field": "add",
+  "newValue": {
+    "name": "E-commerce Платформа",
+    "description": "Создал полнофункциональную платформу для 10k+ пользователей на React и Node.js",
+    "technologies": "React, Node.js, MongoDB",
+    "url": ""
+  }
+}
+
+Для добавления нового опыта:
+{
+  "type": "experience",
+  "field": "add",
+  "newValue": {
+    "position": "Senior Developer",
+    "company": "Tech Corp",
+    "startDate": "2023-01",
+    "endDate": "2024-01",
+    "description": "Руководил 3 проектами, повысив производительность команды на 40%"
   }
 }
 
