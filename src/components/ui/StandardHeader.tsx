@@ -362,25 +362,27 @@ export default function StandardHeader() {
             />
           </Link>
 
-          {/* Navigation Menu - Better responsive spacing */}
-          <nav className="hidden md:flex items-center space-x-4 lg:space-x-6 xl:space-x-8">
-            <Link href="/dashboard" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
-              {content.dashboard}
-            </Link>
-            <Link href="/cv-list" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
-              {content.myCVs}
-            </Link>
-            <Link href="/create" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
-              {content.linkedinImport}
-            </Link>
-            <Link href="/templates" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
-              {content.templates}
-            </Link>
-            
-            <Link href="/pricing" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
-              {content.pricing}
-            </Link>
-          </nav>
+          {/* Navigation Menu - Only show when user is logged in */}
+          {user && (
+            <nav className="hidden md:flex items-center space-x-4 lg:space-x-6 xl:space-x-8">
+              <Link href="/dashboard" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
+                {content.dashboard}
+              </Link>
+              <Link href="/cv-list" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
+                {content.myCVs}
+              </Link>
+              <Link href="/create" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
+                {content.linkedinImport}
+              </Link>
+              <Link href="/templates" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
+                {content.templates}
+              </Link>
+              
+              <Link href="/pricing" className="text-white/90 hover:text-white font-medium transition-colors text-sm lg:text-base">
+                {content.pricing}
+              </Link>
+            </nav>
+          )}
 
           {/* User Info & Profile Dropdown - Enhanced responsive design */}
           <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
@@ -452,8 +454,27 @@ export default function StandardHeader() {
               )}
             </div>
 
-            {/* Profile Dropdown - Desktop */}
-            <div className="hidden lg:block relative" data-profile-menu>
+            {/* Login/Register Buttons - Show only when user is NOT logged in */}
+            {!user && (
+              <>
+                <Link
+                  href="/auth/login"
+                  className="hidden sm:inline-flex items-center text-white hover:text-blue-900 hover:bg-white rounded-lg transition-colors duration-200 px-3 lg:px-4 py-2 text-sm lg:text-base font-medium"
+                >
+                  {content.login}
+                </Link>
+                <Link
+                  href="/auth/register"
+                  className="hidden sm:inline-flex items-center bg-white text-blue-600 hover:bg-blue-500 hover:text-white px-4 lg:px-6 py-2 lg:py-2.5 rounded-lg font-semibold transition-colors duration-200 text-sm lg:text-base"
+                >
+                  {content.register}
+                </Link>
+              </>
+            )}
+
+            {/* Profile Dropdown - Desktop - Show only when user is logged in */}
+            {user && (
+              <div className="hidden lg:block relative" data-profile-menu>
               <button
                 onClick={toggleProfileMenu}
                 className="flex items-center space-x-2 xl:space-x-3 bg-white/10 backdrop-blur-sm px-3 xl:px-4 py-2 rounded-full border border-white/20 hover:bg-white/20 transition-all duration-200 cursor-pointer"
@@ -555,14 +576,17 @@ export default function StandardHeader() {
                   </div>
                 </div>
               )}
-            </div>
+              </div>
+            )}
 
-            {/* Mobile/Tablet Profile Button - Simplified for smaller screens */}
-            <div className="lg:hidden relative" data-profile-menu>
+            {/* Mobile/Tablet Profile Button - Simplified for smaller screens - Show only when user is logged in */}
+            {user && (
+              <div className="lg:hidden relative" data-profile-menu>
 
 
 
-            </div>
+              </div>
+            )}
 
             {/* Mobile hamburger menu button */}
             <button
@@ -587,88 +611,110 @@ export default function StandardHeader() {
         {isMobileMenuOpen && (
           <div className="md:hidden w-full bg-gradient-to-r from-blue-600 to-blue-700 border-t border-blue-500/50 shadow-xl">
             <div className="px-4 py-4 space-y-3">
-              {/* Mobile Navigation Links */}
+              {/* Show navigation links only when user is logged in */}
+              {user ? (
+                <>
+                  {/* Mobile Navigation Links */}
+                  <Link
+                    href="/dashboard"
+                    onClick={closeMobileMenu}
+                    className="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all"
+                  >
+                    {content.dashboard}
+                  </Link>
+                  <Link
+                    href="/cv-list"
+                    onClick={closeMobileMenu}
+                    className="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all"
+                  >
+                    {content.myCVs}
+                  </Link>
+                  <Link
+                    href="/linkedin-import"
+                    onClick={closeMobileMenu}
+                    className="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all"
+                  >
+                    {content.linkedinImport}
+                  </Link>
+                  <Link
+                    href="/templates"
+                    onClick={closeMobileMenu}
+                    className="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all"
+                  >
+                    {content.templates}
+                  </Link>
+                  
+                  <Link
+                    href="/pricing"
+                    onClick={closeMobileMenu}
+                    className="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all"
+                  >
+                        {content.pricing}
+                  </Link>
 
-              <Link
-                href="/dashboard"
-                onClick={closeMobileMenu}
-                className="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all"
-              >
-                {content.dashboard}
-              </Link>
-              <Link
-                href="/cv-list"
-                onClick={closeMobileMenu}
-                className="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all"
-              >
-                {content.myCVs}
-              </Link>
-              <Link
-                href="/linkedin-import"
-                onClick={closeMobileMenu}
-                className="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all"
-              >
-                {content.linkedinImport}
-              </Link>
-              <Link
-                href="/templates"
-                onClick={closeMobileMenu}
-                className="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all"
-              >
-                {content.templates}
-              </Link>
-             
-              <Link
-                href="/pricing"
-                onClick={closeMobileMenu}
-                className="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all"
-              >
-                {content.pricing}
-              </Link>
+                  {/* Mobile User Profile */}
+                  <div className="border-t border-white/20 pt-3 mt-3">
+                    <Link
+                      href="/profile/edit"
+                      onClick={closeMobileMenu}
+                      className="flex items-center space-x-3 py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+                    >
+                      <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/30">
+                        <span className="text-white text-sm font-medium">
+                          {user?.name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-medium text-white text-sm">{content.profile}</p>
+                        <p className="text-blue-100 text-xs">
+                          {user?.name === 'Loading...' || user?.name === 'Yüklənir...' || user?.name === 'Загружается...' 
+                            ? content.loadingUser 
+                            : (user?.name || user?.email || content.user)
+                          }
+                        </p>
+                      </div>
+                    </Link>
 
-              {/* Mobile User Profile */}
-              <div className="border-t border-white/20 pt-3 mt-3">
-                <Link
-                  href="/profile/edit"
-                  onClick={closeMobileMenu}
-                  className="flex items-center space-x-3 py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all"
-                >
-                  <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/30">
-                    <span className="text-white text-sm font-medium">
-                      {user?.name?.charAt(0) || user?.email?.charAt(0) || 'U'}
-                    </span>
+                    {/* Mobile Logout Button */}
+                    <button
+                      onClick={() => {
+                        console.log('🔴 MOBILE LOGOUT CLICKED - TEST');
+                        closeMobileMenu();
+                        handleLogout();
+                      }}
+                      className="flex items-center space-x-3 py-3 px-4 text-white hover:text-white hover:bg-blue-500/10 rounded-lg transition-all w-full mt-2"
+                    >
+                      <div className="w-8 h-8 bg-blue-500/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-red-400/30">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-medium text-left text-white text-sm">{content.logout}</p>
+                        <p className="text-gray-300 text-xs">{content.signOut}</p>
+                      </div>
+                    </button>
                   </div>
-                  <div>
-                    <p className="font-medium text-white text-sm">{content.profile}</p>
-                    <p className="text-blue-100 text-xs">
-                      {user?.name === 'Loading...' || user?.name === 'Yüklənir...' || user?.name === 'Загружается...' 
-                        ? content.loadingUser 
-                        : (user?.name || user?.email || content.user)
-                      }
-                    </p>
-                  </div>
-                </Link>
-
-                {/* Mobile Logout Button */}
-                <button
-                  onClick={() => {
-                    console.log('🔴 MOBILE LOGOUT CLICKED - TEST');
-                    closeMobileMenu();
-                    handleLogout();
-                  }}
-                  className="flex items-center space-x-3 py-3 px-4 text-white hover:text-white hover:bg-blue-500/10 rounded-lg transition-all w-full mt-2"
-                >
-                  <div className="w-8 h-8 bg-blue-500/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-red-400/30">
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="font-medium text-left text-white text-sm">{content.logout}</p>
-                    <p className="text-gray-300 text-xs">{content.signOut}</p>
-                  </div>
-                </button>
-              </div>
+                </>
+              ) : (
+                <>
+                  {/* Mobile Login/Register Buttons - Show when user is NOT logged in */}
+                  <Link
+                    href="/auth/login"
+                    onClick={closeMobileMenu}
+                    className="block py-3 px-4 text-center text-white hover:text-blue-900 hover:bg-white rounded-lg transition-colors duration-200 font-medium"
+                  >
+                    {content.login}
+                  </Link>
+                  <Link
+                    href="/auth/register"
+                    onClick={closeMobileMenu}
+                    className="block py-3 px-4 text-center bg-white text-blue-600 hover:bg-blue-500 hover:text-white rounded-lg font-semibold transition-colors duration-200"
+                  >
+                    {content.register}
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}

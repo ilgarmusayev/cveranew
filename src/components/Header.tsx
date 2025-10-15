@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
@@ -72,9 +73,9 @@ export default function Header({
   // Language helper function
   const getLanguageDisplay = (lang: 'azerbaijani' | 'english' | 'russian') => {
     const displays = {
-      azerbaijani: { flag: '🇦🇿', code: 'AZ', name: 'Azərbaycan' },
-      english: { flag: '🇺🇸', code: 'EN', name: 'English' },
-      russian: { flag: '🇷🇺', code: 'RU', name: 'Русский' }
+      azerbaijani: { flagImg: '/flagaz.png', code: 'AZ', name: 'Azərbaycan' },
+      english: { flagImg: '/flagusa.png', code: 'EN', name: 'English' },
+      russian: { flagImg: '/flagrus.png', code: 'RU', name: 'Русский' }
     };
     return displays[lang];
   };
@@ -185,9 +186,13 @@ export default function Header({
                 className="flex items-center px-3 lg:px-4 py-2 text-xs lg:text-sm font-medium text-white bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg hover:bg-white/20 transition-all duration-200"
                 title="Dili dəyişdir / Change language / Изменить язык"
               >
-                <span className="mr-1 lg:mr-2 text-sm">
-                  {getLanguageDisplay(siteLanguage).flag}
-                </span>
+                <Image 
+                  src={getLanguageDisplay(siteLanguage).flagImg}
+                  alt={getLanguageDisplay(siteLanguage).code}
+                  width={20}
+                  height={15}
+                  className="mr-1 lg:mr-2 rounded-sm object-cover"
+                />
                 <span className="hidden sm:inline">
                   {getLanguageDisplay(siteLanguage).code}
                 </span>
@@ -224,7 +229,13 @@ export default function Header({
                           siteLanguage === lang ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
                         }`}
                       >
-                        <span className="text-lg">{langData.flag}</span>
+                        <Image 
+                          src={langData.flagImg}
+                          alt={langData.code}
+                          width={24}
+                          height={18}
+                          className="rounded-sm object-cover"
+                        />
                         <div className="flex-1">
                           <div className="font-medium">{langData.name}</div>
                           <div className="text-xs text-gray-500">{langData.code}</div>
@@ -365,7 +376,13 @@ export default function Header({
                               : 'bg-white/10 hover:bg-white/20 text-white/90 border-white/20'
                           }`}
                         >
-                          <span className="text-lg mr-3">{langData.flag}</span>
+                          <Image 
+                            src={langData.flagImg}
+                            alt={langData.code}
+                            width={24}
+                            height={18}
+                            className="mr-3 rounded-sm object-cover"
+                          />
                           <div className="flex-1">
                             <div className="font-medium">{langData.name}</div>
                             <div className="text-xs opacity-75">{langData.code}</div>

@@ -134,67 +134,6 @@ function LoginPageContent() {
     }
   }, [searchParams]);
 
-  // Set custom validation messages for Azerbaijani
-  useEffect(() => {
-    const setCustomValidationMessages = () => {
-      const emailInput = document.getElementById('email') as HTMLInputElement;
-      const passwordInput = document.getElementById('password') as HTMLInputElement;
-
-      if (emailInput) {
-        emailInput.setCustomValidity('');
-
-        // Set initial custom validity for empty field
-        if (!emailInput.value.trim()) {
-          emailInput.setCustomValidity('Zəhmət olmasa bu sahəni doldurun');
-        }
-
-        emailInput.oninput = function() {
-          (this as HTMLInputElement).setCustomValidity('');
-        };
-
-        emailInput.oninvalid = function() {
-          const target = this as HTMLInputElement;
-          if (target.validity.valueMissing) {
-            target.setCustomValidity('Zəhmət olmasa bu sahəni doldurun');
-          } else if (target.validity.typeMismatch) {
-            target.setCustomValidity('Zəhmət olmasa düzgün email ünvanı daxil edin');
-          } else {
-            target.setCustomValidity('Zəhmət olmasa bu sahəni düzgün doldurun');
-          }
-        };
-      }
-
-      if (passwordInput) {
-        passwordInput.setCustomValidity('');
-
-        // Set initial custom validity for empty field
-        if (!passwordInput.value.trim()) {
-          passwordInput.setCustomValidity('Zəhmət olmasa bu sahəni doldurun');
-        }
-
-        passwordInput.oninput = function() {
-          (this as HTMLInputElement).setCustomValidity('');
-        };
-
-        passwordInput.oninvalid = function() {
-          const target = this as HTMLInputElement;
-          if (target.validity.valueMissing) {
-            target.setCustomValidity('Zəhmət olmasa bu sahəni doldurun');
-          } else if (target.validity.tooShort) {
-            target.setCustomValidity('Şifrə ən azı 8 simvoldan ibarət olmalıdır');
-          } else {
-            target.setCustomValidity('Zəhmət olmasa bu sahəni düzgün doldurun');
-          }
-        };
-      }
-    };
-
-    // Apply validation with delay to ensure DOM is ready
-    const timer = setTimeout(setCustomValidationMessages, 500);
-
-    return () => clearTimeout(timer);
-  }, []);
-
 
 
   // Don't render login form if user is authenticated (extra safety check)
@@ -327,6 +266,25 @@ function LoginPageContent() {
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onInvalid={(e) => {
+                    const input = e.target as HTMLInputElement;
+                    if (!input.value) {
+                      input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Zəhmət olmasa bu sahəni doldurun' : 
+                                               siteLanguage === 'russian' ? 'Пожалуйста, заполните это поле' : 
+                                               'Please fill out this field');
+                    } else if (input.validity.typeMismatch) {
+                      input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Zəhmət olmasa düzgün e-poçt ünvanı daxil edin' : 
+                                               siteLanguage === 'russian' ? 'Пожалуйста, введите правильный адрес электронной почты' : 
+                                               'Please enter a valid email address');
+                    } else {
+                      input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Zəhmət olmasa bu sahəni düzgün doldurun' : 
+                                               siteLanguage === 'russian' ? 'Пожалуйста, правильно заполните это поле' : 
+                                               'Please fill out this field correctly');
+                    }
+                  }}
+                  onInput={(e) => {
+                    (e.target as HTMLInputElement).setCustomValidity('');
+                  }}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   placeholder={content.emailPlaceholder}
                 />
@@ -345,6 +303,25 @@ function LoginPageContent() {
                     required
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    onInvalid={(e) => {
+                      const input = e.target as HTMLInputElement;
+                      if (!input.value) {
+                        input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Zəhmət olmasa bu sahəni doldurun' : 
+                                                 siteLanguage === 'russian' ? 'Пожалуйста, заполните это поле' : 
+                                                 'Please fill out this field');
+                      } else if (input.validity.tooShort) {
+                        input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Şifrə ən azı 8 simvoldan ibarət olmalıdır' : 
+                                                 siteLanguage === 'russian' ? 'Пароль должен содержать минимум 8 символов' : 
+                                                 'Password must be at least 8 characters');
+                      } else {
+                        input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Zəhmət olmasa bu sahəni düzgün doldurun' : 
+                                                 siteLanguage === 'russian' ? 'Пожалуйста, правильно заполните это поле' : 
+                                                 'Please fill out this field correctly');
+                      }
+                    }}
+                    onInput={(e) => {
+                      (e.target as HTMLInputElement).setCustomValidity('');
+                    }}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors pr-12"
                     placeholder={content.passwordPlaceholder}
                   />

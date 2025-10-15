@@ -125,49 +125,6 @@ export default function RegisterPage() {
     }
   }, [user, authLoading, router]);
 
-  // Set custom validation messages for Azerbaijani
-  useEffect(() => {
-    const setCustomValidationMessages = () => {
-      // Get all required inputs
-      const inputs = document.querySelectorAll('input[required]') as NodeListOf<HTMLInputElement>;
-
-      inputs.forEach((input) => {
-        // Clear any existing custom validity
-        input.setCustomValidity('');
-
-        // Set initial custom validity for empty fields
-        if (!input.value.trim()) {
-          input.setCustomValidity('Zəhmət olmasa bu sahəni doldurun');
-        }
-
-        // Handle validation on input
-        input.oninput = function() {
-          (this as HTMLInputElement).setCustomValidity('');
-        };
-
-        // Handle validation on invalid event
-        input.oninvalid = function() {
-          const target = this as HTMLInputElement;
-
-          if (target.validity.valueMissing) {
-            target.setCustomValidity('Zəhmət olmasa bu sahəni doldurun');
-          } else if (target.type === 'email' && target.validity.typeMismatch) {
-            target.setCustomValidity('Zəhmət olmasa düzgün email ünvanı daxil edin');
-          } else if (target.id === 'password' && target.validity.tooShort) {
-            target.setCustomValidity('Şifrə ən azı 8 simvoldan ibarət olmalıdır');
-          } else {
-            target.setCustomValidity('Zəhmət olmasa bu sahəni düzgün doldurun');
-          }
-        };
-      });
-    };
-
-    // Apply validation with delay to ensure DOM is ready
-    const timer = setTimeout(setCustomValidationMessages, 500);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   // Show loading while checking authentication
   if (authLoading) {
     return (
@@ -396,6 +353,21 @@ export default function RegisterPage() {
                       const filteredValue = value.replace(/[^a-zA-ZəğĞıİöÖşŞüÜçÇ\s'-]/g, '');
                       setFormData({ ...formData, firstName: filteredValue });
                     }}
+                    onInvalid={(e) => {
+                      const input = e.target as HTMLInputElement;
+                      if (!input.value) {
+                        input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Zəhmət olmasa bu sahəni doldurun' : 
+                                                 siteLanguage === 'russian' ? 'Пожалуйста, заполните это поле' : 
+                                                 'Please fill out this field');
+                      } else {
+                        input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Zəhmət olmasa bu sahəni düzgün doldurun' : 
+                                                 siteLanguage === 'russian' ? 'Пожалуйста, правильно заполните это поле' : 
+                                                 'Please fill out this field correctly');
+                      }
+                    }}
+                    onInput={(e) => {
+                      (e.target as HTMLInputElement).setCustomValidity('');
+                    }}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     placeholder={content.firstNamePlaceholder}
                   />
@@ -416,6 +388,21 @@ export default function RegisterPage() {
                       const filteredValue = value.replace(/[^a-zA-ZəğĞıİöÖşŞüÜçÇ\s'-]/g, '');
                       setFormData({ ...formData, lastName: filteredValue });
                     }}
+                    onInvalid={(e) => {
+                      const input = e.target as HTMLInputElement;
+                      if (!input.value) {
+                        input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Zəhmət olmasa bu sahəni doldurun' : 
+                                                 siteLanguage === 'russian' ? 'Пожалуйста, заполните это поле' : 
+                                                 'Please fill out this field');
+                      } else {
+                        input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Zəhmət olmasa bu sahəni düzgün doldurun' : 
+                                                 siteLanguage === 'russian' ? 'Пожалуйста, правильно заполните это поле' : 
+                                                 'Please fill out this field correctly');
+                      }
+                    }}
+                    onInput={(e) => {
+                      (e.target as HTMLInputElement).setCustomValidity('');
+                    }}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     placeholder={content.lastNamePlaceholder}
                   />
@@ -434,6 +421,25 @@ export default function RegisterPage() {
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onInvalid={(e) => {
+                    const input = e.target as HTMLInputElement;
+                    if (!input.value) {
+                      input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Zəhmət olmasa bu sahəni doldurun' : 
+                                               siteLanguage === 'russian' ? 'Пожалуйста, заполните это поле' : 
+                                               'Please fill out this field');
+                    } else if (input.validity.typeMismatch) {
+                      input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Zəhmət olmasa düzgün e-poçt ünvanı daxil edin' : 
+                                               siteLanguage === 'russian' ? 'Пожалуйста, введите правильный адрес электронной почты' : 
+                                               'Please enter a valid email address');
+                    } else {
+                      input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Zəhmət olmasa bu sahəni düzgün doldurun' : 
+                                               siteLanguage === 'russian' ? 'Пожалуйста, правильно заполните это поле' : 
+                                               'Please fill out this field correctly');
+                    }
+                  }}
+                  onInput={(e) => {
+                    (e.target as HTMLInputElement).setCustomValidity('');
+                  }}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   placeholder={content.emailPlaceholder}
                 />
@@ -453,6 +459,25 @@ export default function RegisterPage() {
                     minLength={8}
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    onInvalid={(e) => {
+                      const input = e.target as HTMLInputElement;
+                      if (!input.value) {
+                        input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Zəhmət olmasa bu sahəni doldurun' : 
+                                                 siteLanguage === 'russian' ? 'Пожалуйста, заполните это поле' : 
+                                                 'Please fill out this field');
+                      } else if (input.validity.tooShort) {
+                        input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Şifrə ən azı 8 simvoldan ibarət olmalıdır' : 
+                                                 siteLanguage === 'russian' ? 'Пароль должен содержать минимум 8 символов' : 
+                                                 'Password must be at least 8 characters');
+                      } else {
+                        input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Zəhmət olmasa bu sahəni düzgün doldurun' : 
+                                                 siteLanguage === 'russian' ? 'Пожалуйста, правильно заполните это поле' : 
+                                                 'Please fill out this field correctly');
+                      }
+                    }}
+                    onInput={(e) => {
+                      (e.target as HTMLInputElement).setCustomValidity('');
+                    }}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors pr-12"
                     placeholder={content.passwordPlaceholder}
                   />
@@ -488,6 +513,21 @@ export default function RegisterPage() {
                     required
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                    onInvalid={(e) => {
+                      const input = e.target as HTMLInputElement;
+                      if (!input.value) {
+                        input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Zəhmət olmasa bu sahəni doldurun' : 
+                                                 siteLanguage === 'russian' ? 'Пожалуйста, заполните это поле' : 
+                                                 'Please fill out this field');
+                      } else {
+                        input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Zəhmət olmasa bu sahəni düzgün doldurun' : 
+                                                 siteLanguage === 'russian' ? 'Пожалуйста, правильно заполните это поле' : 
+                                                 'Please fill out this field correctly');
+                      }
+                    }}
+                    onInput={(e) => {
+                      (e.target as HTMLInputElement).setCustomValidity('');
+                    }}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors pr-12"
                     placeholder={content.confirmPasswordPlaceholder}
                   />

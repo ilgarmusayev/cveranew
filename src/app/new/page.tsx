@@ -93,6 +93,12 @@ function NewCVContent() {
       createError: 'CV yaradılanda xəta:',
       unknownError: 'Naməlum xəta',
       
+      // Validation titles (HTML5)
+      emailValidationTitle: 'Düzgün e-poçt ünvanı daxil edin. @ işarəsindən sonra nöqtə (.) olmalıdır (məsələn: ilgar@cvera.net)',
+      phoneValidationTitle: 'Yalnız rəqəm və + işarəsi daxil edin (məsələn: +994 55 123 45 67)',
+      emailMustIncludeAt: "Zəhmət olmasa e-poçt ünvanına '@' simvolunu daxil edin. 'ilgar@cvera.net' formatında olmalıdır.",
+      nameValidationTitle: 'Yalnız hərflər daxil edin. Rəqəm və xüsusi simvollar qəbul edilmir (məsələn: Əli, Fatimə)',
+      
       // Console messages
 
       linkedinDataLoaded: '📥 LinkedIn məlumatları yükləndi:',
@@ -167,6 +173,12 @@ function NewCVContent() {
       createError: 'Error creating CV:',
       unknownError: 'Unknown error',
       
+      // Validation titles (HTML5)
+      emailValidationTitle: 'Please enter a valid email address. Must have a dot (.) after @ sign (e.g., ilgar@cvera.net)',
+      phoneValidationTitle: 'Only digits and + sign allowed (e.g., +1 555 123 4567)',
+      emailMustIncludeAt: "Please include an '@' in the email address. It should be in the format 'ilgar@cvera.net'.",
+      nameValidationTitle: 'Only letters allowed. Numbers and special characters are not accepted (e.g., John, Mary)',
+      
       // Console messages
 
       linkedinDataLoaded: '📥 LinkedIn data loaded:',
@@ -240,6 +252,12 @@ function NewCVContent() {
       cvNotCreated: 'Резюме не создано',
       createError: 'Ошибка при создании резюме:',
       unknownError: 'Неизвестная ошибка',
+      
+      // Validation titles (HTML5)
+      emailValidationTitle: 'Пожалуйста, введите действительный адрес электронной почты. После @ должна быть точка (.) (например: ilgar@cvera.net)',
+      phoneValidationTitle: 'Разрешены только цифры и знак + (например: +7 999 123 45 67)',
+      emailMustIncludeAt: "Пожалуйста, включите символ '@' в адрес электронной почты. Он должен быть в формате 'ilgar@cvera.net'.",
+      nameValidationTitle: 'Разрешены только буквы. Цифры и специальные символы не принимаются (например: Иван, Мария)',
       
       // Console messages
 
@@ -390,6 +408,50 @@ function NewCVContent() {
   };
 
   const handleInputChange = (field: string, value: string) => {
+    // Ad və Soyad field-ləri üçün yalnız hərflərə icazə ver
+    if (field === 'firstName' || field === 'lastName') {
+      // Yalnız hərflər (Az, En, Ru), boşluq və tire (-) qəbul et
+      // Rəqəm və xüsusi simvollar qadağandır
+      const cleanedValue = value.replace(/[^a-zA-ZçÇğĞıİöÖşŞüÜəƏа-яА-ЯёЁ\s-]/g, '');
+      setFormData(prev => ({
+        ...prev,
+        personalInfo: {
+          ...prev.personalInfo,
+          [field]: cleanedValue
+        }
+      }));
+      return;
+    }
+    
+    // Telefon field-i üçün yalnız rəqəm və + işarəsinə icazə ver
+    if (field === 'phone') {
+      // Yalnız rəqəmlər, + işarəsi və boşluq qəbul et (boşluq formatlaşdırma üçün)
+      const cleanedValue = value.replace(/[^\d+\s]/g, '');
+      setFormData(prev => ({
+        ...prev,
+        personalInfo: {
+          ...prev.personalInfo,
+          [field]: cleanedValue
+        }
+      }));
+      return;
+    }
+    
+    // Email field-i üçün custom validation mesajı
+    if (field === 'email') {
+      const emailInput = document.getElementById('email') as HTMLInputElement;
+      if (emailInput) {
+        // Custom validation mesajlarını təyin et
+        if (!value.includes('@')) {
+          emailInput.setCustomValidity(content.emailMustIncludeAt);
+        } else if (!value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+          emailInput.setCustomValidity(content.emailValidationTitle);
+        } else {
+          emailInput.setCustomValidity(''); // Valid olduqda mesajı təmizlə
+        }
+      }
+    }
+    
     if (field === 'title' || field === 'templateId') {
       setFormData(prev => ({
         ...prev,
@@ -409,14 +471,86 @@ function NewCVContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validation - CV Title
     if (!formData.title.trim()) {
       setError(content.titleRequired);
       return;
     }
 
+    // Validation - Template Selection
     if (!selectedTemplateId) {
       setError(content.templateRequired);
       return;
+    }
+
+    // Validation - First Name (required)
+    if (!formData.personalInfo.firstName.trim()) {
+      setError(siteLanguage === 'azerbaijani' ? 'Ad tələb olunur' : 
+               siteLanguage === 'russian' ? 'Требуется имя' : 
+               'First name is required');
+      return;
+    }
+
+    // Validation - Last Name (required)
+    if (!formData.personalInfo.lastName.trim()) {
+      setError(siteLanguage === 'azerbaijani' ? 'Soyad tələb olunur' : 
+               siteLanguage === 'russian' ? 'Требуется фамилия' : 
+               'Last name is required');
+      return;
+    }
+
+    // Validation - Email (required and format)
+    if (!formData.personalInfo.email.trim()) {
+      setError(siteLanguage === 'azerbaijani' ? 'E-poçt tələb olunur' : 
+               siteLanguage === 'russian' ? 'Требуется электронная почта' : 
+               'Email is required');
+      return;
+    }
+    
+    // @ işarəsi yoxlaması
+    if (!formData.personalInfo.email.includes('@')) {
+      setError(content.emailMustIncludeAt);
+      return;
+    }
+    
+    // Email format validation - @ işarəsindən sonra ən azı 1 nöqtə olmalıdır
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.personalInfo.email)) {
+      setError(siteLanguage === 'azerbaijani' ? 'Düzgün e-poçt ünvanı daxil edin (məsələn: ilgar@cvera.net)' : 
+               siteLanguage === 'russian' ? 'Введите действительный адрес электронной почты (например: ilgar@cvera.net)' : 
+               'Enter a valid email address (e.g., ilgar@cvera.net)');
+      return;
+    }
+    
+    // @ işarəsindən sonra nöqtə yoxlaması
+    const atIndex = formData.personalInfo.email.indexOf('@');
+    const lastDotIndex = formData.personalInfo.email.lastIndexOf('.');
+    if (atIndex === -1 || lastDotIndex === -1 || lastDotIndex <= atIndex) {
+      setError(siteLanguage === 'azerbaijani' ? 'E-poçt ünvanında @ işarəsindən sonra nöqtə (.) olmalıdır' : 
+               siteLanguage === 'russian' ? 'В адресе электронной почты после @ должна быть точка (.)' : 
+               'Email address must have a dot (.) after @ sign');
+      return;
+    }
+
+    // Validation - Phone (optional, but if provided, validate format)
+    if (formData.personalInfo.phone.trim()) {
+      // Allow only digits, +, and spaces
+      const phoneRegex = /^[+]?[\d\s]+$/;
+      if (!phoneRegex.test(formData.personalInfo.phone.trim())) {
+        setError(siteLanguage === 'azerbaijani' ? 'Telefon nömrəsində yalnız rəqəm və + işarəsi ola bilər' : 
+                 siteLanguage === 'russian' ? 'Номер телефона может содержать только цифры и знак +' : 
+                 'Phone number can only contain digits and + sign');
+        return;
+      }
+      
+      // Check minimum length (at least 7 digits)
+      const digitsOnly = formData.personalInfo.phone.replace(/[^\d]/g, '');
+      if (digitsOnly.length < 7) {
+        setError(siteLanguage === 'azerbaijani' ? 'Telefon nömrəsi ən azı 7 rəqəm olmalıdır' : 
+                 siteLanguage === 'russian' ? 'Номер телефона должен содержать минимум 7 цифр' : 
+                 'Phone number must have at least 7 digits');
+        return;
+      }
     }
 
     setLoading(true);
@@ -536,6 +670,17 @@ function NewCVContent() {
                   id="title"
                   value={formData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
+                  onInvalid={(e) => {
+                    const input = e.target as HTMLInputElement;
+                    if (!input.value) {
+                      input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Zəhmət olmasa bu sahəni doldurun' : 
+                                               siteLanguage === 'russian' ? 'Пожалуйста, заполните это поле' : 
+                                               'Please fill out this field');
+                    }
+                  }}
+                  onInput={(e) => {
+                    (e.target as HTMLInputElement).setCustomValidity('');
+                  }}
                   placeholder={content.cvTitlePlaceholder}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all duration-200"
                   disabled={loading}
@@ -636,46 +781,111 @@ function NewCVContent() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-                      {content.firstNameLabel}
+                      {content.firstNameLabel} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       id="firstName"
                       value={formData.personalInfo.firstName}
                       onChange={(e) => handleInputChange('firstName', e.target.value)}
+                      onInvalid={(e) => {
+                        const input = e.target as HTMLInputElement;
+                        if (!input.value) {
+                          input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Ad tələb olunur' : 
+                                                   siteLanguage === 'russian' ? 'Требуется имя' : 
+                                                   'First name is required');
+                        } else if (input.value.length < 2) {
+                          input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Ad ən azı 2 hərf olmalıdır' : 
+                                                   siteLanguage === 'russian' ? 'Имя должно содержать минимум 2 буквы' : 
+                                                   'First name must be at least 2 letters');
+                        } else {
+                          input.setCustomValidity(content.nameValidationTitle);
+                        }
+                      }}
+                      onInput={(e) => {
+                        (e.target as HTMLInputElement).setCustomValidity('');
+                      }}
                       placeholder={content.firstNamePlaceholder}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                       disabled={loading}
+                      required
+                      minLength={2}
+                      maxLength={50}
+                      pattern="[a-zA-ZçÇğĞıİöÖşŞüÜəƏа-яА-ЯёЁ\s-]+"
+                      title={content.nameValidationTitle}
                     />
                   </div>
 
                   <div>
                     <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-                      {content.lastNameLabel}
+                      {content.lastNameLabel} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       id="lastName"
                       value={formData.personalInfo.lastName}
                       onChange={(e) => handleInputChange('lastName', e.target.value)}
+                      onInvalid={(e) => {
+                        const input = e.target as HTMLInputElement;
+                        if (!input.value) {
+                          input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Soyad tələb olunur' : 
+                                                   siteLanguage === 'russian' ? 'Требуется фамилия' : 
+                                                   'Last name is required');
+                        } else if (input.value.length < 2) {
+                          input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Soyad ən azı 2 hərf olmalıdır' : 
+                                                   siteLanguage === 'russian' ? 'Фамилия должна содержать минимум 2 буквы' : 
+                                                   'Last name must be at least 2 letters');
+                        } else {
+                          input.setCustomValidity(content.nameValidationTitle);
+                        }
+                      }}
+                      onInput={(e) => {
+                        (e.target as HTMLInputElement).setCustomValidity('');
+                      }}
                       placeholder={content.lastNamePlaceholder}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                       disabled={loading}
+                      required
+                      minLength={2}
+                      maxLength={50}
+                      pattern="[a-zA-ZçÇğĞıİöÖşŞüÜəƏа-яА-ЯёЁ\s-]+"
+                      title={content.nameValidationTitle}
                     />
                   </div>
 
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                      {content.emailLabel}
+                      {content.emailLabel} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="email"
                       id="email"
                       value={formData.personalInfo.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
+                      onInvalid={(e) => {
+                        const input = e.target as HTMLInputElement;
+                        // e.preventDefault() SİLDİK - bu bildirişi tamamilə blok edirdi
+                        // İndi yalnız custom mesaj təyin edirik
+                        if (!input.value) {
+                          input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'E-poçt tələb olunur' : 
+                                                   siteLanguage === 'russian' ? 'Требуется электронная почта' : 
+                                                   'Email is required');
+                        } else if (!input.value.includes('@')) {
+                          input.setCustomValidity(content.emailMustIncludeAt);
+                        } else {
+                          input.setCustomValidity(content.emailValidationTitle);
+                        }
+                      }}
+                      onInput={(e) => {
+                        // Input dəyişəndə custom validity-ni təmizlə
+                        (e.target as HTMLInputElement).setCustomValidity('');
+                      }}
                       placeholder={content.emailPlaceholder}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                       disabled={loading}
+                      required
+                      pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
+                      title={content.emailValidationTitle}
                     />
                   </div>
 
@@ -688,9 +898,18 @@ function NewCVContent() {
                       id="phone"
                       value={formData.personalInfo.phone}
                       onChange={(e) => handleInputChange('phone', e.target.value)}
+                      onKeyPress={(e) => {
+                        // Yalnız rəqəm, +, və boşluğa icazə ver
+                        const allowedChars = /[\d+\s]/;
+                        if (!allowedChars.test(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
                       placeholder={content.phonePlaceholder}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                       disabled={loading}
+                      pattern="[+]?[\d\s]+"
+                      title={content.phoneValidationTitle}
                     />
                   </div>
                 </div>
@@ -735,7 +954,14 @@ function NewCVContent() {
 
                 <button
                   type="submit"
-                  disabled={loading || !formData.title.trim()}
+                  disabled={
+                    loading || 
+                    !formData.title.trim() || 
+                    !selectedTemplateId ||
+                    !formData.personalInfo.firstName.trim() ||
+                    !formData.personalInfo.lastName.trim() ||
+                    !formData.personalInfo.email.trim()
+                  }
                   className="px-8 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-300 font-medium text-lg"
                 >
                   {loading ? (

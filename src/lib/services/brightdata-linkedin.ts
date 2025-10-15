@@ -193,15 +193,23 @@ export class BrightDataLinkedInService {
             // Check for actual LinkedIn profile data
             if (Array.isArray(data) && data.length > 0) {
               console.log('✅ REAL LinkedIn profile data ready!');
-              console.log('📊 Profile data keys:', Object.keys(data[0] || {}));
+              const profileData = data[0];
+              console.log('📊 Profile data keys:', Object.keys(profileData || {}));
               console.log('📊 Profile sample:', {
-                name: data[0]?.name,
-                first_name: data[0]?.first_name,
-                last_name: data[0]?.last_name,
-                position: data[0]?.position,
-                about: data[0]?.about
+                name: profileData?.name,
+                first_name: profileData?.first_name,
+                last_name: profileData?.last_name,
+                position: profileData?.position,
+                about: profileData?.about
               });
-              return data[0]; // Return first profile
+              
+              // Validate profile data
+              if (!profileData.name && !profileData.first_name && !profileData.position && !profileData.headline) {
+                console.log('⚠️ LinkedIn profil məlumatları etibarsızdır - boş profil');
+                throw new Error('PROFILE_INVALID'); // Special error code
+              }
+              
+              return profileData; // Return first profile
             } else if (data && typeof data === 'object' && Object.keys(data).length > 0 && 
                        !data.status && (data.name || data.first_name || data.position)) {
               console.log('✅ REAL single profile data ready!');
@@ -213,6 +221,13 @@ export class BrightDataLinkedInService {
                 position: data?.position,
                 about: data?.about
               });
+              
+              // Validate profile data
+              if (!data.name && !data.first_name && !data.position && !data.headline) {
+                console.log('⚠️ LinkedIn profil məlumatları etibarsızdır - boş profil');
+                throw new Error('PROFILE_INVALID'); // Special error code
+              }
+              
               return data;
             } else {
               console.log('⏳ Data not ready yet, status:', data.status);
@@ -227,6 +242,14 @@ export class BrightDataLinkedInService {
           
         } catch (error) {
           console.error(`❌ Polling attempt ${attempt} error:`, error);
+          
+          // If it's a profile validation error, stop immediately
+          if (error instanceof Error && error.message === 'PROFILE_INVALID') {
+            console.log('🛑 Profile invalid - stopping polling');
+            throw new Error('LinkedIn profili tapılmadı və ya etibarsızdır');
+          }
+          
+          // For other errors, continue polling
         }
         
         // Wait before next polling attempt (critical fix)

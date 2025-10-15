@@ -4,14 +4,47 @@ import { EmailService } from '@/lib/email-service';
 
 const emailService = new EmailService();
 
+// Get error messages in 3 languages
+const getMessages = (language: string = 'azerbaijani') => {
+  const messages = {
+    azerbaijani: {
+      emailRequired: 'E-poçt tələb olunur',
+      emailNotFound: 'Bu e-poçt ünvanı ilə qeydiyyatdan keçmiş istifadəçi tapılmadı. Zəhmət olmasa düzgün e-poçt ünvanını daxil edin və ya qeydiyyatdan keçin.',
+      emailSent: 'Şifrə yeniləmə linki e-poçt ünvanınıza göndərildi',
+      emailSendError: 'E-poçt göndərmədə xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.',
+      serverError: 'Server xətası baş verdi. Zəhmət olmasa yenidən cəhd edin.'
+    },
+    english: {
+      emailRequired: 'Email is required',
+      emailNotFound: 'No user found with this email address. Please enter a valid email address or register.',
+      emailSent: 'Password reset link has been sent to your email address',
+      emailSendError: 'Error sending email. Please try again.',
+      serverError: 'Server error occurred. Please try again.'
+    },
+    russian: {
+      emailRequired: 'Требуется электронная почта',
+      emailNotFound: 'Пользователь с этим адресом электронной почты не найден. Пожалуйста, введите правильный адрес электронной почты или зарегистрируйтесь.',
+      emailSent: 'Ссылка для сброса пароля отправлена на ваш адрес электронной почты',
+      emailSendError: 'Ошибка при отправке электронной почты. Пожалуйста, попробуйте снова.',
+      serverError: 'Произошла ошибка сервера. Пожалуйста, попробуйте снова.'
+    }
+  };
+  
+  return messages[language as keyof typeof messages] || messages.azerbaijani;
+};
+
 export async function POST(request: NextRequest) {
   try {
+    // Get site language from headers
+    const siteLanguage = request.headers.get('x-site-language') || 'azerbaijani';
+    const content = getMessages(siteLanguage);
+    
     const { email } = await request.json();
 
     // Validate email
     if (!email) {
       return NextResponse.json(
-        { message: 'Email tələb olunur' },
+        { message: content.emailRequired },
         { status: 400 }
       );
     }
@@ -22,10 +55,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user) {
-      // Security: Don't reveal if user exists or not
+      // Return user-friendly error message that email is not registered
       return NextResponse.json(
-        { message: 'Əgər bu email mövcuddursa, şifrə yeniləmə linki göndəriləcək' },
-        { status: 200 }
+        { message: content.emailNotFound },
+        { status: 404 }
       );
     }
 
@@ -54,7 +87,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json(
         {
-          message: 'Şifrə yeniləmə linki email ünvanınıza göndərildi',
+          message: content.emailSent,
           success: true
         },
         { status: 200 }
@@ -63,16 +96,19 @@ export async function POST(request: NextRequest) {
       console.error('❌ Failed to send email:', emailResult.error);
 
       return NextResponse.json(
-        { message: 'Email göndərmədə xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.' },
+        { message: content.emailSendError },
         { status: 500 }
       );
     }
 
   } catch (error: any) {
     console.error('❌ Forgot password error:', error);
+    
+    const siteLanguage = request.headers.get('x-site-language') || 'azerbaijani';
+    const content = getMessages(siteLanguage);
 
     return NextResponse.json(
-      { message: 'Server xətası baş verdi. Zəhmət olmasa yenidən cəhd edin.' },
+      { message: content.serverError },
       { status: 500 }
     );
   } finally {

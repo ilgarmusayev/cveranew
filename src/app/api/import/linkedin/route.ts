@@ -49,6 +49,53 @@ function extractLinkedInUsername(input: string): { username: string; normalizedU
 // ScrapingDog LinkedIn Service instance
 const scrapingDogService = new ScrapingDogLinkedInService();
 
+// Error messages in 3 languages
+const getErrorMessages = (language: string = 'azerbaijani') => {
+  const messages = {
+    azerbaijani: {
+      authRequired: 'Authorization token tələb olunur',
+      invalidToken: 'Etibarsız və ya müddəti bitmiş token',
+      urlRequired: 'LinkedIn URL tələb olunur',
+      invalidUrl: 'Düzgün LinkedIn URL və ya username daxil edin (məs: musayevcreate və ya https://linkedin.com/in/musayevcreate)',
+      profileNotFound: 'LinkedIn profili tapılmadı. Zəhmət olmasa mövcud LinkedIn istifadəçi URL və ya username daxil edin (məsələn: musayevcreate və ya linkedin.com/in/musayevcreate)',
+      rateLimitError: 'İdxal məhdudiyyəti - 24 saat ərzində maksimum sorğu sayına çatdınız. Zəhmət olmasa sabah yenidən cəhd edin.',
+      serviceUnavailable: 'İdxal xətası baş verdi. Zəhmət olmasa bir neçə dəqiqə sonra yenidən cəhd edin.',
+      generalError: 'LinkedIn məlumatları əldə edilərkən xəta baş verdi',
+      rapidApiError: 'Əlavə skills əldə edilərkən xəta baş verdi (RapidAPI)',
+      noDataReceived: 'Heç bir məlumat alınmadı',
+      profileInvalid: 'LinkedIn profili tapılmadı və ya etibarsızdır. Zəhmət olmasa düzgün LinkedIn istifadəçi profil URL-i daxil edin.'
+    },
+    english: {
+      authRequired: 'Authorization token required',
+      invalidToken: 'Invalid or expired token',
+      urlRequired: 'LinkedIn URL is required',
+      invalidUrl: 'Enter a valid LinkedIn URL or username (e.g., musayevcreate or https://linkedin.com/in/musayevcreate)',
+      profileNotFound: 'LinkedIn profile not found. Please enter a valid LinkedIn user URL or username (e.g., musayevcreate or linkedin.com/in/musayevcreate)',
+      rateLimitError: 'Import rate limit - You have reached the maximum number of requests in 24 hours. Please try again tomorrow.',
+      serviceUnavailable: 'Import error occurred. Please try again in a few minutes.',
+      generalError: 'An error occurred while fetching LinkedIn data',
+      rapidApiError: 'Error fetching additional skills (RapidAPI)',
+      noDataReceived: 'No data received',
+      profileInvalid: 'LinkedIn profile not found or invalid. Please enter a valid LinkedIn user profile URL.'
+    },
+    russian: {
+      authRequired: 'Требуется токен авторизации',
+      invalidToken: 'Недействительный или истекший токен',
+      urlRequired: 'Требуется ЛинкедИн URL',
+      invalidUrl: 'Введите действительный ЛинкедИн URL или имя пользователя (например: musayevcreate или https://linkedin.com/in/musayevcreate)',
+      profileNotFound: 'Профиль ЛинкедИн не найден. Пожалуйста, введите действительный URL пользователя ЛинкедИн или имя пользователя (например: musayevcreate или linkedin.com/in/musayevcreate)',
+      rateLimitError: 'Лимит импорта - Вы достигли максимального количества запросов за 24 часа. Пожалуйста, попробуйте снова завтра.',
+      serviceUnavailable: 'Произошла ошибка импорта. Пожалуйста, попробуйте снова через несколько минут.',
+      generalError: 'Произошла ошибка при получении данных ЛинкедИн',
+      rapidApiError: 'Ошибка при получении дополнительных навыков (RapidAPI)',
+      noDataReceived: 'Данные не получены',
+      profileInvalid: 'Профиль ЛинкедИн не найден или недействителен. Пожалуйста, введите действительный URL профиля пользователя ЛинкедИн.'
+    }
+  };
+  
+  return messages[language as keyof typeof messages] || messages.azerbaijani;
+};
+
 // Gemini AI for skill generation
 const geminiAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
@@ -720,11 +767,16 @@ export async function POST(request: NextRequest) {
   try {
     console.log('🚀 LinkedIn import - ScrapingDog + RapidAPI paralel');
 
+    // Get language from request body or default to azerbaijani
+    const body = await request.json();
+    const language = body.language || 'azerbaijani';
+    const errorMessages = getErrorMessages(language);
+
     // Verify JWT token
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
     if (!token) {
       return NextResponse.json(
-        { error: 'Authorization token required' },
+        { error: errorMessages.authRequired },
         { status: 401 }
       );
     }
@@ -732,16 +784,16 @@ export async function POST(request: NextRequest) {
     const decoded = await verifyJWT(token);
     if (!decoded?.userId) {
       return NextResponse.json(
-        { error: 'Invalid or expired token' },
+        { error: errorMessages.invalidToken },
         { status: 401 }
       );
     }
 
     // Get LinkedIn URL from request
-    const { linkedinUrl } = await request.json();
+    const { linkedinUrl } = body;
     if (!linkedinUrl?.trim()) {
       return NextResponse.json(
-        { error: 'LinkedIn URL tələb olunur' },
+        { error: errorMessages.urlRequired },
         { status: 400 }
       );
     }
@@ -750,7 +802,7 @@ export async function POST(request: NextRequest) {
     const linkedinData = extractLinkedInUsername(linkedinUrl);
     if (!linkedinData) {
       return NextResponse.json(
-        { error: 'Düzgün LinkedIn URL və ya username daxil edin (məs: musayevcreate və ya https://linkedin.com/in/musayevcreate)' },
+        { error: errorMessages.invalidUrl },
         { status: 400 }
       );
     }
@@ -780,18 +832,47 @@ export async function POST(request: NextRequest) {
         : 'No data';
       console.error('❌ ScrapingDog xətası:', errorMessage);
       
-      // Check if it's a rate limiting or 400 error
-      const isRateLimitError = errorMessage.includes('400') || errorMessage.includes('status code 400') || 
-                              errorMessage.includes('rate limit') || errorMessage.includes('too many requests');
+      // Check error type for appropriate user message
+      const isProfileNotFound = errorMessage.includes('tapılmadı') || 
+                                errorMessage.includes('not found') ||
+                                errorMessage.includes('profil') ||
+                                errorMessage.includes('404');
       
-      const userFriendlyMessage = isRateLimitError 
-        ? 'Zəhmət olmasa təkrar yoxlayın. Sorğu sıxlığı səbəbindən ləğv edildi'
-        : `ScrapingDog import uğursuz: ${errorMessage}`;
+      const isAllKeysRateLimited = errorMessage.includes('Bütün') && errorMessage.includes('limit');
+      
+      const isRateLimitError = errorMessage.includes('rate limit') || 
+                              errorMessage.includes('too many requests') ||
+                              errorMessage.includes('429');
+      
+      let userFriendlyMessage = '';
+      let statusCode = 500;
+      
+      if (isProfileNotFound) {
+        // LinkedIn profile not found
+        console.log('🛑 LinkedIn profil tapılmadı');
+        userFriendlyMessage = errorMessages.profileNotFound;
+        statusCode = 404;
+      } else if (isAllKeysRateLimited) {
+        // All API keys are rate limited
+        console.log('🚫 Bütün API key-lər limit-ə çatıb');
+        userFriendlyMessage = errorMessages.rateLimitError;
+        statusCode = 429;
+      } else if (isRateLimitError) {
+        // Single key rate limit
+        console.log('⚠️ API rate limit');
+        userFriendlyMessage = errorMessages.rateLimitError;
+        statusCode = 429;
+      } else {
+        // General error
+        console.log('❌ Ümumi ScrapingDog xətası');
+        userFriendlyMessage = errorMessages.serviceUnavailable;
+        statusCode = 503;
+      }
       
       return NextResponse.json({
         success: false,
         error: userFriendlyMessage
-      }, { status: 500 });
+      }, { status: statusCode });
     }
 
     // Check RapidAPI result (optional)

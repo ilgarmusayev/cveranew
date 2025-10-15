@@ -22,12 +22,12 @@ export default function ForgotPasswordPage() {
       emailLabel: 'E-poçt ünvanı',
       emailPlaceholder: 'numune@cvera.net',
       sendingText: 'Göndərilir...',
-      sendButton: 'Şifrə Yeniləmə Linki Göndər',
-      backToLogin: '← Girişə qayıt',
+      sendButton: 'Şifrə Yeniləmə Linki Göndərin',
+      backToLogin: '← Girişə qayıdın',
       emailSentTitle: 'E-poçt Göndərildi!',
       checkSpam: 'E-poçt almadınızsa spam qovluğunu yoxlayın',
-      tryAgain: 'Başqa e-poçt ilə yenidən cəhd et',
-      backToLoginButton: 'Girişə qayıt',
+      tryAgain: 'Başqa e-poçt ilə yenidən cəhd edin',
+      backToLoginButton: 'Girişə qayıdın',
       errorMessage: 'Bir xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.',
     },
     english: {
@@ -129,6 +129,25 @@ export default function ForgotPasswordPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  onInvalid={(e) => {
+                    const input = e.target as HTMLInputElement;
+                    if (!input.value) {
+                      input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'E-poçt tələb olunur' : 
+                                               siteLanguage === 'russian' ? 'Требуется электронная почта' : 
+                                               'Email is required');
+                    } else if (input.validity.typeMismatch) {
+                      input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Zəhmət olmasa düzgün e-poçt ünvanı daxil edin' : 
+                                               siteLanguage === 'russian' ? 'Пожалуйста, введите правильный адрес электронной почты' : 
+                                               'Please enter a valid email address');
+                    } else {
+                      input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Zəhmət olmasa bu sahəni düzgün doldurun' : 
+                                               siteLanguage === 'russian' ? 'Пожалуйста, правильно заполните это поле' : 
+                                               'Please fill out this field correctly');
+                    }
+                  }}
+                  onInput={(e) => {
+                    (e.target as HTMLInputElement).setCustomValidity('');
+                  }}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder={content.emailPlaceholder}
                 />

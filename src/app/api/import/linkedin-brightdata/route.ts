@@ -9,6 +9,99 @@ import { GeminiV1Client } from '@/lib/gemini-v1-client';
 // Gemini AI for skill generation
 const geminiAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
+// Validate LinkedIn URL format (client-side validation without API call)
+function validateLinkedInUrlFormat(url: string): { valid: boolean; error?: string; normalizedUrl?: string } {
+  try {
+    console.log('🔍 LinkedIn URL formatı yoxlanılır:', url);
+    
+    const trimmedUrl = url.trim();
+    
+    // Check if empty
+    if (!trimmedUrl) {
+      return { valid: false, error: 'urlRequired' };
+    }
+    
+    // Extract username from various formats
+    const usernameMatch = trimmedUrl.match(/(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/([a-zA-Z0-9_-]+)/);
+    
+    if (usernameMatch) {
+      const username = usernameMatch[1];
+      
+      // Validate username format (LinkedIn usernames: 3-100 chars, alphanumeric, dash, underscore)
+      if (username.length < 3 || username.length > 100) {
+        console.log('❌ LinkedIn username uzunluğu düzgün deyil:', username.length);
+        return { valid: false, error: 'invalidUrl' };
+      }
+      
+      // Check for invalid characters
+      if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+        console.log('❌ LinkedIn username etibarsız simvollar saxlayır');
+        return { valid: false, error: 'invalidUrl' };
+      }
+      
+      const normalizedUrl = `https://www.linkedin.com/in/${username}`;
+      console.log('✅ LinkedIn URL formatı düzgündür:', normalizedUrl);
+      return { valid: true, normalizedUrl };
+    }
+    
+    // If just username provided (no linkedin.com in URL)
+    if (!trimmedUrl.includes('linkedin.com') && !trimmedUrl.includes('http')) {
+      const cleanUsername = trimmedUrl.replace(/^@/, '').replace(/[^\w-]/g, '');
+      
+      if (cleanUsername.length >= 3 && cleanUsername.length <= 100 && /^[a-zA-Z0-9_-]+$/.test(cleanUsername)) {
+        const normalizedUrl = `https://www.linkedin.com/in/${cleanUsername}`;
+        console.log('✅ LinkedIn username formatı düzgündür:', normalizedUrl);
+        return { valid: true, normalizedUrl };
+      }
+    }
+    
+    console.log('❌ LinkedIn URL formatı yanlışdır');
+    return { valid: false, error: 'invalidUrl' };
+    
+  } catch (error: any) {
+    console.error('❌ LinkedIn URL format yoxlama xətası:', error.message);
+    return { valid: false, error: 'invalidUrl' };
+  }
+}
+
+// Error messages in 3 languages for BrightData
+const getErrorMessages = (language: string = 'azerbaijani') => {
+  const messages = {
+    azerbaijani: {
+      authRequired: 'Giriş token-i tələb olunur',
+      invalidToken: 'Etibarsız token',
+      urlRequired: 'LinkedIn URL tələb olunur',
+      invalidUrl: 'Etibarsız LinkedIn URL formatı. Zəhmət olmasa düzgün format daxil edin (məsələn: linkedin.com/in/istifadeci-adi)',
+      profileNotFound: 'LinkedIn profili tapılmadı. Zəhmət olmasa düzgün LinkedIn profil URL-i daxil edin (məsələn: linkedin.com/in/istifadeci-adi)',
+      profileInvalid: 'LinkedIn profili tapılmadı və ya etibarsızdır. Zəhmət olmasa düzgün LinkedIn istifadəçi profil URL-i daxil edin.',
+      apiError: 'İdxal edərkən xəta yarandı - istifadəçi adının doğruluğunu yoxlayın',
+      noDataReceived: 'İdxal edərkən xəta yarandı - istifadəçi adının doğruluğunu yoxlayın'
+    },
+    english: {
+      authRequired: 'Login token required',
+      invalidToken: 'Invalid token',
+      urlRequired: 'LinkedIn URL is required',
+      invalidUrl: 'Invalid LinkedIn URL format. Please enter a valid format (e.g., linkedin.com/in/username)',
+      profileNotFound: 'LinkedIn profile not found. Please enter a valid LinkedIn profile URL (e.g., linkedin.com/in/ilgarmusayev)',
+      profileInvalid: 'LinkedIn profile not found or invalid. Please enter a valid LinkedIn user profile URL.',
+      apiError: 'Import error - please verify the username is correct',
+      noDataReceived: 'Import error - please verify the username is correct'
+    },
+    russian: {
+      authRequired: 'Требуется токен входа',
+      invalidToken: 'Недействительный токен',
+      urlRequired: 'Требуется URL ЛинкедИн',
+      invalidUrl: 'Неверный формат URL ЛинкедИн. Пожалуйста, введите правильный формат (например: linkedin.com/in/username)',
+      profileNotFound: 'Профиль ЛинкедИн не найден. Пожалуйста, введите действительный URL профиля ЛинкедИн (например: linkedin.com/in/ilgarmusayev)',
+      profileInvalid: 'Профиль ЛинкедИн не найден или недействителен. Пожалуйста, введите действительный URL профиля пользователя ЛинкедИн.',
+      apiError: 'Ошибка импорта - проверьте правильность имени пользователя',
+      noDataReceived: 'Ошибка импорта - проверьте правильность имени пользователя'
+    }
+  };
+  
+  return messages[language as keyof typeof messages] || messages.azerbaijani;
+};
+
 // Generate AI-suggested skills for BrightData LinkedIn import
 async function generateBrightDataAISkills(profileData: any, existingSkills: any[]) {
   try {
@@ -222,20 +315,38 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json();
-    const { linkedinUrl } = body;
+    const { linkedinUrl, language = 'azerbaijani' } = body;
+    const errorMessages = getErrorMessages(language);
 
     if (!linkedinUrl) {
       return NextResponse.json(
-        { error: 'LinkedIn URL tələb olunur' },
+        { error: errorMessages.urlRequired },
         { status: 400 }
       );
     }
+
+    // Validate LinkedIn URL format BEFORE calling expensive API
+    console.log('🔍 LinkedIn URL formatı yoxlanılır...');
+    const validationResult = validateLinkedInUrlFormat(linkedinUrl);
+    
+    if (!validationResult.valid) {
+      console.log('❌ LinkedIn URL formatı yanlışdır');
+      const errorKey = validationResult.error || 'invalidUrl';
+      return NextResponse.json(
+        { error: errorMessages[errorKey as keyof typeof errorMessages] || errorMessages.invalidUrl },
+        { status: 400 }
+      );
+    }
+    
+    // Use normalized URL from validation
+    const normalizedUrl = validationResult.normalizedUrl || linkedinUrl;
+    console.log('✅ LinkedIn URL formatı düzgündür, normalized:', normalizedUrl);
 
     // Verify user authentication
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
-        { error: 'Giriş token-i tələb olunur' },
+        { error: errorMessages.authRequired },
         { status: 401 }
       );
     }
@@ -247,14 +358,13 @@ export async function POST(request: NextRequest) {
       decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
     } catch (error) {
       return NextResponse.json(
-        { error: 'Etibarsız token' },
+        { error: errorMessages.invalidToken },
         { status: 401 }
       );
     }
 
-    // Normalize LinkedIn URL
-    const normalizedUrl = linkedinUrl.replace(/\/$/, '');
-    console.log('🔗 Normalized LinkedIn URL:', normalizedUrl);
+    // Use normalized URL from validation (already done above)
+    console.log('🔗 Using normalized LinkedIn URL:', normalizedUrl);
 
     // Initialize REAL BrightData service
     const brightDataService = new BrightDataLinkedInService();
@@ -279,8 +389,22 @@ export async function POST(request: NextRequest) {
       
     } catch (apiError) {
       console.error('❌ REAL BrightData API xətası:', apiError);
+      
+      // Check if it's a profile validation error
+      if (apiError instanceof Error && 
+          (apiError.message.includes('tapılmadı') || 
+           apiError.message.includes('etibarsız') ||
+           apiError.message.includes('invalid'))) {
+        console.log('🛑 LinkedIn profil etibarsızdır - istifadəçiyə bildirilir');
+        return NextResponse.json(
+          { error: errorMessages.profileInvalid },
+          { status: 404 }
+        );
+      }
+      
+      // For other API errors
       return NextResponse.json(
-        { error: 'REAL BrightData API xətası', details: apiError instanceof Error ? apiError.message : 'Unknown error' },
+        { error: errorMessages.apiError },
         { status: 500 }
       );
     }
@@ -288,7 +412,21 @@ export async function POST(request: NextRequest) {
     if (!realProfileData || Object.keys(realProfileData).length === 0) {
       console.log('⚠️ REAL BrightData API boş cavab qaytardı');
       return NextResponse.json(
-        { error: 'REAL BrightData API-dən məlumat alınmadı' },
+        { error: errorMessages.profileNotFound },
+        { status: 400 }
+      );
+    }
+
+    // Validate profile data - check if essential fields exist
+    const hasValidProfile = realProfileData.name || 
+                           realProfileData.first_name || 
+                           realProfileData.position || 
+                           realProfileData.headline;
+
+    if (!hasValidProfile) {
+      console.log('⚠️ LinkedIn profil məlumatları etibarsızdır - əsas sahələr yoxdur');
+      return NextResponse.json(
+        { error: errorMessages.profileInvalid },
         { status: 400 }
       );
     }

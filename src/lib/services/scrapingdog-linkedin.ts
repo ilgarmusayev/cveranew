@@ -306,30 +306,42 @@ export class ScrapingDogLinkedInService {
   }
 
   /**
-   * Retry API request with different keys if rate limited
+   * Retry API request with ALL available keys if rate limited
+   * Tries every key in database before giving up
    */
-  private async makeRequestWithRetry(linkedinUsername: string, maxRetries: number = 5): Promise<any> {
-    let lastError: any = null;
+  private async makeRequestWithRetry(linkedinUsername: string): Promise<any> {
+    console.log(`📡 Starting LinkedIn profile scraping for: ${linkedinUsername}`);
     
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      let currentApiKey: string = '';
+    // Get ALL active API keys from database
+    const allApiKeys = await this.getActiveScrapingDogApiKeys();
+    
+    if (!allApiKeys || allApiKeys.length === 0) {
+      throw new Error('ScrapingDog API key-lər tapılmadı. Zəhmət olmasa admin ilə əlaqə saxlayın.');
+    }
+    
+    console.log(`� Found ${allApiKeys.length} API keys to try`);
+    
+    let lastError: any = null;
+    let attemptCount = 0;
+    
+    // Try EVERY API key until one works
+    for (const apiKey of allApiKeys) {
+      attemptCount++;
       
       try {
-        console.log(`📡 Making request to ScrapingDog API (attempt ${attempt}/${maxRetries})...`);
-        
-        currentApiKey = await this.getNextScrapingDogApiKey();
+        console.log(`📡 Attempt ${attemptCount}/${allApiKeys.length} with API key: ${apiKey.substring(0, 8)}***`);
         
         const params = {
-          api_key: currentApiKey,
+          api_key: apiKey,
           type: 'profile',
           linkId: linkedinUsername,
           premium: 'false', // Use free mode to conserve quota
         };
 
-        // Add delay between requests
-        if (attempt > 1) {
-          const delayMs = attempt * 1500; // 1.5s, 3s, 4.5s delay
-          console.log(`⏳ Waiting ${delayMs}ms before retry...`);
+        // Add delay between requests (avoid rapid-fire)
+        if (attemptCount > 1) {
+          const delayMs = 1000; // 1 second delay between keys
+          console.log(`⏳ Waiting ${delayMs}ms before next key...`);
           await this.delay(delayMs);
         }
 
@@ -342,42 +354,40 @@ export class ScrapingDogLinkedInService {
           throw new Error(`ScrapingDog API responded with status ${response.status}`);
         }
 
-        // Success - update key usage
-        await this.updateApiKeyUsage(currentApiKey, true);
-        console.log(`✅ ScrapingDog request successful with key: ${currentApiKey.substring(0, 8)}***`);
+        // ✅ SUCCESS - update key usage and return data
+        await this.updateApiKeyUsage(apiKey, true);
+        console.log(`✅ ScrapingDog request successful with key ${attemptCount}/${allApiKeys.length}: ${apiKey.substring(0, 8)}***`);
         return response.data;
         
       } catch (error: any) {
         lastError = error;
-        console.error(`❌ Attempt ${attempt} failed:`, error.message);
+        console.error(`❌ Attempt ${attemptCount}/${allApiKeys.length} failed:`, error.message);
         
         // Handle different error types
-        if (currentApiKey) {
-          if (this.isRateLimitError(error)) {
-            console.log(`🚫 Rate limit detected for key: ${currentApiKey.substring(0, 8)}***`);
-            await this.markApiKeyRateLimited(currentApiKey);
-          } else {
-            await this.updateApiKeyUsage(currentApiKey, false);
-          }
+        if (this.isRateLimitError(error)) {
+          console.log(`🚫 Rate limit detected for key: ${apiKey.substring(0, 8)}***`);
+          await this.markApiKeyRateLimited(apiKey);
+          console.log(`🔄 Trying next API key...`);
+        } else if (error.response?.status === 404) {
+          // Profile not found - don't try other keys
+          console.error(`❌ LinkedIn profile not found (404) - stopping all attempts`);
+          throw new Error('LinkedIn profili tapılmadı. Zəhmət olmasa düzgün istifadəçi URL və ya username daxil edin.');
+        } else {
+          await this.updateApiKeyUsage(apiKey, false);
+          console.log(`⚠️ API error with key ${apiKey.substring(0, 8)}*** - trying next key...`);
         }
-        
-        // If it's the last attempt, break
-        if (attempt === maxRetries) {
-          console.error(`💥 All ${maxRetries} attempts failed`);
-          break;
-        }
-        
-        // If not a retryable error, break early
-        if (error.response?.status === 404) {
-          console.error(`❌ LinkedIn profile not found (404) - not retrying`);
-          break;
-        }
-        
-        console.log(`🔄 Retrying with next API key...`);
       }
     }
     
-    throw lastError;
+    // All keys failed
+    console.error(`� All ${allApiKeys.length} API keys failed`);
+    
+    // Determine best error message
+    if (this.isRateLimitError(lastError)) {
+      throw new Error('Bütün ScrapingDog API key-lər limit-ə çatıb. Zəhmət olmasa bir az sonra yenidən cəhd edin.');
+    }
+    
+    throw lastError || new Error('ScrapingDog API xətası - bütün key-lər uğursuz oldu');
   }
 
   /**
@@ -440,6 +450,13 @@ export class ScrapingDogLinkedInService {
       console.log('🔍 ScrapingDog response keys:', Object.keys(data));
       console.log('🔍 ScrapingDog full response sample:', JSON.stringify(data, null, 2).substring(0, 1000) + '...');
 
+      // Validate profile data - check if it's a valid LinkedIn profile
+      const isValidProfile = this.validateLinkedInProfile(data);
+      if (!isValidProfile) {
+        console.error('❌ Invalid LinkedIn profile data - profile not found or user does not exist');
+        throw new Error('LinkedIn profili tapılmadı. Zəhmət olmasa düzgün istifadəçi URL və ya username daxil edin.');
+      }
+
       // Transform to our standard format
       const profile = this.transformScrapingDogData(data);
 
@@ -474,6 +491,66 @@ export class ScrapingDogLinkedInService {
 
       throw error; // Re-throw error to see what's really happening
     }
+  }
+
+  /**
+   * Validate if the LinkedIn profile data is valid and contains essential information
+   */
+  private validateLinkedInProfile(data: any): boolean {
+    // Handle array response
+    let profileData = data;
+    if (Array.isArray(data)) {
+      if (data.length === 0) {
+        console.log('❌ Validation failed: Empty array response');
+        return false;
+      }
+      profileData = data[0];
+    }
+
+    // Check if data is an object
+    if (!profileData || typeof profileData !== 'object') {
+      console.log('❌ Validation failed: Data is not an object');
+      return false;
+    }
+
+    // Check for essential fields that indicate a valid profile
+    // At minimum, we need name or fullName to consider it valid
+    const hasName = !!(
+      profileData.fullName || 
+      profileData.full_name ||
+      (profileData.first_name && profileData.last_name) ||
+      (profileData.firstName && profileData.lastName)
+    );
+
+    if (!hasName) {
+      console.log('❌ Validation failed: No name information found');
+      console.log('Available keys:', Object.keys(profileData));
+      return false;
+    }
+
+    // Additional check: if the response has an error field or status indicating failure
+    if (profileData.error || profileData.status === 'error' || profileData.success === false) {
+      console.log('❌ Validation failed: Error in response data');
+      console.log('Error details:', profileData.error || profileData.message);
+      return false;
+    }
+
+    // Check if it's an empty or stub profile (all key fields are empty)
+    const hasAnyContent = !!(
+      profileData.headline ||
+      profileData.about ||
+      profileData.summary ||
+      (profileData.experience && profileData.experience.length > 0) ||
+      (profileData.education && profileData.education.length > 0)
+    );
+
+    if (!hasAnyContent) {
+      console.log('⚠️ Warning: Profile has name but no other content (possibly invalid or private profile)');
+      // We'll still allow this but log a warning
+    }
+
+    console.log('✅ Profile validation passed');
+    return true;
   }
 
   /**
