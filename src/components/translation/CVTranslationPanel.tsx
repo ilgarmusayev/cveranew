@@ -8,6 +8,7 @@
  */
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { CVLanguage } from '@/lib/cvLanguage';
 import { useAITranslation, TranslationProgress } from '@/hooks/useAITranslation';
 
@@ -282,7 +283,15 @@ export function CVTranslationPanel({
             `}
           >
             <div className="flex items-center gap-3">
-              <div className="text-2xl">🇦🇿</div>
+              <div className="flex items-center">
+                <Image
+                  src="/flagaz.png"
+                  alt="Azerbaijan"
+                  width={32}
+                  height={24}
+                  className="rounded"
+                />
+              </div>
               <div className="flex-1">
                 <div className="font-medium text-gray-900">{content.languageNames.azerbaijani}</div>
                 <div className="text-sm text-gray-500">{content.languageSubtitles.azerbaijani}</div>
@@ -323,7 +332,15 @@ export function CVTranslationPanel({
             `}
           >
             <div className="flex items-center gap-3">
-              <div className="text-2xl">🇺🇸</div>
+              <div className="flex items-center">
+                <Image
+                  src="/flagusa.png"
+                  alt="English"
+                  width={32}
+                  height={24}
+                  className="rounded"
+                />
+              </div>
               <div className="flex-1">
                 <div className="font-medium text-gray-900">{content.languageNames.english}</div>
                 <div className="text-sm text-gray-500">{content.languageSubtitles.english}</div>
@@ -364,7 +381,15 @@ export function CVTranslationPanel({
             `}
           >
             <div className="flex items-center gap-3">
-              <div className="text-2xl">🇷🇺</div>
+              <div className="flex items-center">
+                <Image
+                  src="/flagrus.png"
+                  alt="Russian"
+                  width={32}
+                  height={24}
+                  className="rounded"
+                />
+              </div>
               <div className="flex-1">
                 <div className="font-medium text-gray-900">{content.languageNames.russian}</div>
                 <div className="text-sm text-gray-500">{content.languageSubtitles.russian}</div>

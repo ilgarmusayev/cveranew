@@ -4,6 +4,7 @@
  */
 
 import { useState, useCallback } from 'react';
+import Image from 'next/image';
 import { CVLanguage } from '@/lib/cvLanguage';
 import { apiClient } from '@/lib/api-client';
 
@@ -276,10 +277,16 @@ export function AITranslationButton({
       <div className="flex items-center gap-2">
         {/* Target language indicator */}
         <div className="flex items-center gap-1">
-          <span className="text-xs opacity-80">
-            {targetLanguage === 'english' ? '🇺🇸' : '🇦🇿'}
+          <span className="flex items-center">
+            <Image
+              src={targetLanguage === 'english' ? '/flagusa.png' : '/flagaz.png'}
+              alt={targetLanguage === 'english' ? 'English' : 'Azerbaijani'}
+              width={16}
+              height={12}
+              className="rounded"
+            />
           </span>
-          {targetLanguage === 'english' ? 'EN' : 'AZ'}
+          <span className="ml-1">{targetLanguage === 'english' ? 'EN' : 'AZ'}</span>
         </div>
         
         {/* Loading spinner only on selected language */}

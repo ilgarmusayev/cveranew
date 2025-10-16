@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import StandardHeader from '@/components/ui/StandardHeader';
 import { apiClient } from '@/lib/api';
 
@@ -57,9 +58,9 @@ const LEVELS = [
 ];
 
 const LANGUAGES = [
-    { id: 'az' as LanguageType, name: 'Azərbaycan', flag: '🇦🇿', description: 'Suallar Azərbaycan dilində olacaq' },
-    { id: 'en' as LanguageType, name: 'English', flag: '🇬🇧', description: 'Questions will be in English' },
-    { id: 'ru' as LanguageType, name: 'Русский', flag: '🇷🇺', description: 'Вопросы будут на русском языке' },
+    { id: 'az' as LanguageType, name: 'Azərbaycan', flag: '/flagaz.png', description: 'Suallar Azərbaycan dilində olacaq' },
+    { id: 'en' as LanguageType, name: 'English', flag: '/flagusa.png', description: 'Questions will be in English' },
+    { id: 'ru' as LanguageType, name: 'Русский', flag: '/flagrus.png', description: 'Вопросы будут на русском языке' },
 ];
 
 export default function MockInterviewPage() {
@@ -338,7 +339,15 @@ export default function MockInterviewPage() {
                                                 : 'border-gray-200 hover:border-blue-300'
                                         }`}
                                     >
-                                        <div className="text-4xl mb-2">{lang.flag}</div>
+                                        <div className="flex justify-center mb-2">
+                                            <Image
+                                                src={lang.flag}
+                                                alt={lang.name}
+                                                width={48}
+                                                height={36}
+                                                className="rounded"
+                                            />
+                                        </div>
                                         <div className="text-lg font-bold text-gray-900 mb-1">
                                             {lang.name}
                                         </div>

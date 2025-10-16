@@ -95,7 +95,29 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
       aiGenerationError: 'AI bacarıq təsviri yaradarkən xəta baş verdi. Yenidən cəhd edin.',
       aiErrorTitle: 'AI Xətası',
       allSuggestedSkillsExist: 'Bütün təklif edilən bacarıqlar artıq mövcuddur.',
-      aiNotSuggestingSkills: 'AI hazırda əlavə bacarıq təklif etmir.'
+      aiNotSuggestingSkills: 'AI hazırda əlavə bacarıq təklif etmir.',
+      aiProfessionalSkillsTitle: 'AI Peşəkar Bacarıqlar Analizçisi',
+      aiProfessionalRecommendations: 'AI Peşəkar Tövsiyələri',
+      suggestionsCount: 'təklif',
+      addToCV: 'CV-yə əlavə edin',
+      relevance: 'Uyğunluq',
+      howToDevelop: 'Necə inkişaf etdirin',
+      timeToMaster: 'Mənimsəmə müddəti',
+      industryTrend: 'İndustiya trendi',
+      getNewSuggestions: 'Yeni tövsiyələr alın',
+      aiSuggestionsNote: 'Hər dəfə fərqli professional skills tövsiyələri alacaqsınız',
+      skillsOrganizeInfo: 'Bacarıqlarınızı kateqoriyalara ayırın (məsələn: "Proqramlaşdırma", "Dizayn", "İdarəetmə") və ən vacib bacarıqlarınızı yuxarıda yerləşdirin.',
+      aiMemberAnalysis: 'üzvü - Peşəkar bacarıqlar analizi və tövsiyələri',
+      aiAvailableFor: 'Premium və Populyar abunəlikli üzvlər üçün mövcuddur',
+      aiWillAnalyze: 'AI sizin profilinizi analiz edəcək:',
+      aiAnalyzeExperience: 'İş təcrübəniz və karyera inkişafınız',
+      aiAnalyzeEducation: 'Təhsil və sertifikatlarınız',
+      aiAnalyzeCurrentSkills: 'Mövcud bacarıqlar və expertiza sahələri',
+      aiAnalyzeIndustry: 'İndustiya trendləri və market tələbləri',
+      aiAnalyzeStrategic: 'Karyera məqsədləriniz üçün strateji skills',
+      aiAnalyzingProfile: 'AI profilinizi analiz edir...',
+      getSkillsRecommendations: 'Peşəkar Bacarıqlar Tövsiyələri Alın',
+      aiDeepAnalysis: 'CV məlumatlarınızı dərin analiz edərək karyeranız üçün ən münasib professional skills tövsiyələri verir. Premium və Medium planlar üçün mövcuddur.'
     },
     english: {
       title: 'Skills',
@@ -149,7 +171,29 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
       aiGenerationError: 'An error occurred while generating AI skill description. Please try again.',
       aiErrorTitle: 'AI Error',
       allSuggestedSkillsExist: 'All suggested skills already exist in your CV.',
-      aiNotSuggestingSkills: 'AI is not suggesting new skills. All suggested skills are already in your CV.'
+      aiNotSuggestingSkills: 'AI is not suggesting new skills. All suggested skills are already in your CV.',
+      aiProfessionalSkillsTitle: 'AI Professional Skills Analyzer',
+      aiProfessionalRecommendations: 'AI Professional Recommendations',
+      suggestionsCount: 'suggestions',
+      addToCV: 'Add to CV',
+      relevance: 'Relevance',
+      howToDevelop: 'How to develop',
+      timeToMaster: 'Time to master',
+      industryTrend: 'Industry trend',
+      getNewSuggestions: 'Get new suggestions',
+      aiSuggestionsNote: 'You will receive different professional skills recommendations each time',
+      skillsOrganizeInfo: 'Organize your skills into categories (e.g., "Programming", "Design", "Management") and place the most important skills at the top.',
+      aiMemberAnalysis: 'member - Professional skills analysis and recommendations',
+      aiAvailableFor: 'Available for Premium and Medium members',
+      aiWillAnalyze: 'AI will analyze your profile:',
+      aiAnalyzeExperience: 'Your work experience and career development',
+      aiAnalyzeEducation: 'Educational background and certifications',
+      aiAnalyzeCurrentSkills: 'Current skills and expertise areas',
+      aiAnalyzeIndustry: 'Industry trends and market demands',
+      aiAnalyzeStrategic: 'Strategic skills for your career goals',
+      aiAnalyzingProfile: 'AI analyzing your profile...',
+      getSkillsRecommendations: 'Get Professional Skills Recommendations',
+      aiDeepAnalysis: 'Provides deep analysis of your CV data to recommend the most suitable professional skills for your career. Available for Premium and Medium plans.'
     },
     
     russian: {
@@ -204,7 +248,29 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
       aiGenerationError: 'Произошла ошибка при создании AI описания навыка. Пожалуйста, попробуйте снова.',
       aiErrorTitle: 'Ошибка AI',
       allSuggestedSkillsExist: 'Все предложенные навыки уже существуют в вашем резюме.',
-      aiNotSuggestingSkills: 'ИИ не предлагает новые навыки. Все предложенные навыки уже в вашем резюме.'
+      aiNotSuggestingSkills: 'ИИ не предлагает новые навыки. Все предложенные навыки уже в вашем резюме.',
+      aiProfessionalSkillsTitle: 'ИИ Анализатор Профессиональных Навыков',
+      aiProfessionalRecommendations: 'ИИ Профессиональные Рекомендации',
+      suggestionsCount: 'предложений',
+      addToCV: 'Добавить в резюме',
+      relevance: 'Соответствие',
+      howToDevelop: 'Как развивать',
+      timeToMaster: 'Время освоения',
+      industryTrend: 'Отраслевой тренд',
+      getNewSuggestions: 'Получить новые рекомендации',
+      aiSuggestionsNote: 'Вы будете получать разные профессиональные рекомендации навыков каждый раз',
+      skillsOrganizeInfo: 'Организуйте ваши навыки по категориям (например: "Программирование", "Дизайн", "Менеджмент") и разместите наиболее важные навыки вверху.',
+      aiMemberAnalysis: 'участник - Анализ профессиональных навыков и рекомендации',
+      aiAvailableFor: 'Доступно для Premium и Medium участников',
+      aiWillAnalyze: 'ИИ проанализирует ваш профиль:',
+      aiAnalyzeExperience: 'Ваш рабочий опыт и карьерное развитие',
+      aiAnalyzeEducation: 'Образование и сертификаты',
+      aiAnalyzeCurrentSkills: 'Текущие навыки и области экспертизы',
+      aiAnalyzeIndustry: 'Индустриальные тренды и рыночные требования',
+      aiAnalyzeStrategic: 'Стратегические навыки для ваших карьерных целей',
+      aiAnalyzingProfile: 'ИИ анализирует ваш профиль...',
+      getSkillsRecommendations: 'Получить Рекомендации Профессиональных Навыков',
+      aiDeepAnalysis: 'Проводит глубокий анализ данных вашего резюме для рекомендации наиболее подходящих профессиональных навыков для вашей карьеры. Доступно для Premium и Medium планов.'
     }
   };
 
@@ -864,15 +930,10 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
       {data.length > 0 && (
         <div className="bg-white rounded-lg p-4 border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            {siteLanguage === 'english' ? 'Skills' : siteLanguage === 'russian' ? 'Навыки' : 'Bacarıqlar'}
+            {content.title}
           </h3>
           <p className="text-sm text-gray-700">
-            {siteLanguage === 'english' 
-              ? 'Organize your skills into categories (e.g., "Programming", "Design", "Management") and place the most important skills at the top.'
-              : siteLanguage === 'russian' 
-              ? 'Организуйте ваши навыки по категориям (например: "Программирование", "Дизайн", "Менеджмент") и разместите наиболее важные навыки вверху.'
-              : 'Bacarıqlarınızı kateqoriyalara ayırın (məsələn: "Proqramlaşdırma", "Dizayn", "İdarəetmə") və ən vacib bacarıqlarınızı yuxarıda yerləşdirin.'
-            }
+            {content.skillsOrganizeInfo}
           </p>
         </div>
       )}
@@ -886,22 +947,12 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-900">
-                {siteLanguage === 'english' ? 'AI Professional Skills Analyzer' : siteLanguage === 'russian' ? 'ИИ Анализатор Профессиональных Навыков' : 'AI Peşəkar Bacarıqlar Analizçisi'}
+                {content.aiProfessionalSkillsTitle}
               </h3>
               <p className="text-sm text-gray-600">
-                {canUseAI ?
-                  (siteLanguage === 'english' 
-                    ? `${userTier} member - Professional skills analysis and recommendations`
-                    : siteLanguage === 'russian'
-                    ? `${userTier} участник - Анализ профессиональных навыков и рекомендации`
-                    : `${userTier} üzvü - Peşəkar bacarıqlar analizi və tövsiyələri`
-                  ) :
-                  (siteLanguage === 'english' 
-                    ? 'Available for Premium and Medium members'
-                    : siteLanguage === 'russian'
-                    ? 'Доступно для Premium и Medium участников'
-                    : 'Premium və Medium üzvlər üçün mövcuddur'
-                  )
+                {canUseAI 
+                  ? `${userTier} ${content.aiMemberAnalysis}`
+                  : content.aiAvailableFor
                 }
               </p>
             </div>
@@ -918,54 +969,24 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
           <div className="text-sm text-gray-700">
             <p className="mb-2">
               <strong>
-                {siteLanguage === 'english' 
-                  ? 'AI will analyze your profile:' 
-                  : siteLanguage === 'russian'
-                  ? 'ИИ проанализирует ваш профиль:'
-                  : 'AI sizin profilinizi analiz edəcək:'
-                }
+                {content.aiWillAnalyze}
               </strong>
             </p>
             <ul className="list-disc list-inside space-y-1 text-xs text-gray-600 ml-2">
               <li>
-                {siteLanguage === 'english' 
-                  ? 'Your work experience and career development'
-                  : siteLanguage === 'russian'
-                  ? 'Ваш рабочий опыт и карьерное развитие'
-                  : 'İş təcrübəniz və karyera inkişafınız'
-                }
+                {content.aiAnalyzeExperience}
               </li>
               <li>
-                {siteLanguage === 'english' 
-                  ? 'Educational background and certifications'
-                  : siteLanguage === 'russian'
-                  ? 'Образовательный фон и сертификаты'
-                  : 'Təhsil fonu və sertifikatlarınız'
-                }
+                {content.aiAnalyzeEducation}
               </li>
               <li>
-                {siteLanguage === 'english' 
-                  ? 'Current skills and expertise areas'
-                  : siteLanguage === 'russian'
-                  ? 'Текущие навыки и области экспертизы'
-                  : 'Mövcud bacarıqlar və expertiza sahələri'
-                }
+                {content.aiAnalyzeCurrentSkills}
               </li>
               <li>
-                {siteLanguage === 'english' 
-                  ? 'Industry trends and market demands'
-                  : siteLanguage === 'russian'
-                  ? 'Индустриальные тренды и рыночные требования'
-                  : 'İndustiya trendləri və market tələbləri'
-                }
+                {content.aiAnalyzeIndustry}
               </li>
               <li>
-                {siteLanguage === 'english' 
-                  ? 'Strategic skills for your career goals'
-                  : siteLanguage === 'russian'
-                  ? 'Стратегические навыки для ваших карьерных целей'
-                  : 'Karyera məqsədləriniz üçün strateji skills'
-                }
+                {content.aiAnalyzeStrategic}
               </li>
             </ul>
           </div>
@@ -985,24 +1006,14 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
               <div className="flex items-center justify-center gap-2">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600"></div>
                 <span>
-                  {siteLanguage === 'english' 
-                    ? 'AI analyzing your profile...' 
-                    : siteLanguage === 'russian'
-                    ? 'ИИ анализирует ваш профиль...'
-                    : 'AI profilinizi analiz edir...'
-                  }
+                  {content.aiAnalyzingProfile}
                 </span>
               </div>
             ) : (
               <div className="flex items-center justify-center gap-2">
                 <span>🎯</span>
                 <span>
-                  {siteLanguage === 'english' 
-                    ? 'Get Professional Skills Recommendations' 
-                    : siteLanguage === 'russian'
-                    ? 'Получить Рекомендации Профессиональных Навыков'
-                    : 'Peşəkar Bacarıqlar Tövsiyələri Al'
-                  }
+                  {content.getSkillsRecommendations}
                 </span>
               </div>
             )}
@@ -1014,20 +1025,10 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                 <span className="text-purple-600 text-lg">💎</span>
                 <div>
                   <p className="text-sm font-medium text-purple-800 mb-1">
-                    {siteLanguage === 'english' 
-                      ? 'AI Professional Skills Analyzer'
-                      : siteLanguage === 'russian'
-                      ? 'ИИ Анализатор Профессиональных Навыков'
-                      : 'AI Peşəkar Bacarıqlar Analizçisi'
-                    }
+                    {content.aiProfessionalSkillsTitle}
                   </p>
                   <p className="text-xs text-purple-700">
-                    {siteLanguage === 'english' 
-                      ? 'Provides deep analysis of your CV data to recommend the most suitable professional skills for your career. Available for Premium and Medium plans.'
-                      : siteLanguage === 'russian'
-                      ? 'Проводит глубокий анализ данных вашего резюме для рекомендации наиболее подходящих профессиональных навыков для вашей карьеры. Доступно для Premium и Medium планов.'
-                      : 'CV məlumatlarınızı dərin analiz edərək karyeranız üçün ən münasib professional skills tövsiyələri verir. Premium və Medium planlar üçün mövcuddur.'
-                    }
+                    {content.aiDeepAnalysis}
                   </p>
                 </div>
               </div>
@@ -1039,10 +1040,10 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
             <div className="mt-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h4 className="text-base font-semibold text-gray-900">
-                  🎯 AI Peşəkar Tövsiyələri
+                  🎯 {content.aiProfessionalRecommendations}
                 </h4>
                 <span className="text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
-                  {suggestions.length} təklif
+                  {suggestions.length} {content.suggestionsCount}
                 </span>
               </div>
 
@@ -1072,7 +1073,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                         <div className="flex items-center gap-4 mb-2 flex-wrap">
                           {suggestion.relevanceScore && (
                             <div className="flex items-center gap-1 min-w-0">
-                              <span className="text-xs text-gray-500 whitespace-nowrap">Uyğunluq:</span>
+                              <span className="text-xs text-gray-500 whitespace-nowrap">{content.relevance}:</span>
                               <div className="flex">
                                 {[...Array(10)].map((_, i) => (
                                   <span key={i} className={`text-xs ${
@@ -1111,21 +1112,21 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                       <div className="bg-gray-50 p-3 rounded-lg mb-3 space-y-2 overflow-hidden">
                         {suggestion.implementation && (
                           <div className="flex items-start gap-2">
-                            <span className="text-xs text-gray-500 font-medium whitespace-nowrap flex-shrink-0">💡 Necə inkişaf etdirin:</span>
+                            <span className="text-xs text-gray-500 font-medium whitespace-nowrap flex-shrink-0">💡 {content.howToDevelop}:</span>
                             <span className="text-xs text-gray-700 break-words">{suggestion.implementation}</span>
                           </div>
                         )}
 
                         {suggestion.timeToMaster && (
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs text-gray-500 font-medium whitespace-nowrap">⏱️ Mənimsəmə müddəti:</span>
+                            <span className="text-xs text-gray-500 font-medium whitespace-nowrap">⏱️ {content.timeToMaster}:</span>
                             <span className="text-xs text-gray-700">{suggestion.timeToMaster}</span>
                           </div>
                         )}
 
                         {suggestion.industryTrend && (
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs text-gray-500 font-medium whitespace-nowrap">📊 İndustiya trendi:</span>
+                            <span className="text-xs text-gray-500 font-medium whitespace-nowrap">📊 {content.industryTrend}:</span>
                             <span className={`text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap ${
                               suggestion.industryTrend === 'Future-Critical' ? 'bg-purple-100 text-purple-700' :
                               suggestion.industryTrend === 'Essential' ? 'bg-red-100 text-red-700' :
@@ -1144,7 +1145,7 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                       onClick={() => addSuggestedSkill(suggestion)}
                       className="w-full px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm font-medium rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 shadow-sm hover:shadow-md"
                     >
-                      ✨ CV-yə əlavə et
+                      ✨ {content.addToCV}
                     </button>
                   </div>
                 ))}
@@ -1157,10 +1158,10 @@ export default function SkillsSection({ data, onChange, userTier = 'Free', cvDat
                   disabled={aiSuggesting}
                   className="w-full px-4 py-2 text-purple-600 border border-purple-300 rounded-lg hover:bg-purple-50 transition-colors text-sm font-medium"
                 >
-                  🔄 Yeni tövsiyələr al
+                  🔄 {content.getNewSuggestions}
                 </button>
                 <p className="text-xs text-gray-500 text-center mt-2">
-                  Hər dəfə fərqli professional skills tövsiyələri alacaqsınız
+                  {content.aiSuggestionsNote}
                 </p>
               </div>
             </div>

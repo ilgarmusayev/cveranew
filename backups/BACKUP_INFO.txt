@@ -1,0 +1,105 @@
+╔══════════════════════════════════════════════════════════════╗
+║            CVERA DATABASE BACKUP INFORMATION                 ║
+╚══════════════════════════════════════════════════════════════╝
+
+📅 Backup Tarixi: 2025-10-16 23:29
+🗄️  Database: cvera
+🌐 Host: cvera.postgres.database.azure.com
+👤 User: admincvera
+�� PostgreSQL Version: 17.6
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📁 BACKUP FAYLARI:
+
+1. cvera_backup_20251016_232835.backup
+   └─ Format: Custom (PostgreSQL binary format)
+   └─ Həcm: 8.3 MB
+   └─ Compressed: Bəli
+   └─ Restore: pg_restore ilə
+   └─ İstifadə: Production restore üçün tövsiyə edilir
+
+2. cvera_backup_20251016_232921.sql
+   └─ Format: SQL (Plain text)
+   └─ Həcm: 12 MB
+   └─ Compressed: Xeyr
+   └─ Restore: psql ilə
+   └─ İstifadə: Manual editing və debugging üçün
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🗂️ DATABASE STRUKTURU:
+
+Cədvəllər (15):
+  ├─ Admin              (İdarəçi hesabları)
+  ├─ ApiKey             (API açarları - Gemini, ScrapingDog)
+  ├─ CV                 (98 CV mövcuddur)
+  ├─ CoverLetter        (Cover letter-lər)
+  ├─ DailyUsage         (Gündəlik istifadə statistikası)
+  ├─ FileGenerationJob  (PDF/DOCX generasiya tapşırıqları)
+  ├─ ImportSession      (LinkedIn import sessiyaları)
+  ├─ Payment            (Ödəniş məlumatları)
+  ├─ PromoCode          (Promo kodlar)
+  ├─ PromoCodeUsage     (Promo kod istifadəsi)
+  ├─ Subscription       (Aktiv abunəliklər)
+  ├─ Template           (CV şablonları)
+  ├─ TokenBlacklist     (Qara siyahıdakı token-lər)
+  ├─ User               (İstifadəçi hesabları)
+  └─ _prisma_migrations (Prisma migration tarixçəsi)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔄 RESTORE TƏLIMATI:
+
+Custom Format (.backup):
+  PGPASSWORD='***' pg_restore \
+    -h cvera.postgres.database.azure.com \
+    -U admincvera -d cvera \
+    --clean --if-exists \
+    -v cvera_backup_20251016_232835.backup
+
+SQL Format (.sql):
+  PGPASSWORD='***' psql \
+    -h cvera.postgres.database.azure.com \
+    -U admincvera -d cvera \
+    -f cvera_backup_20251016_232921.sql
+
+Avtomatik Script:
+  ./restore-database.sh
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️  TƏHLÜKƏSİZLİK XƏBƏRDARLIQLARI:
+
+  • Bu backup faylları həssas məlumatlar ehtiva edir!
+  • İstifadəçi şifrələri (bcrypt hash)
+  • Email ünvanları
+  • API açarları
+  • Şəxsi məlumatlar
+
+  ⛔ BU FAYLARI PAYLAŞMAYIN!
+  ⛔ GIT-ə COMMIT ETMƏYİN!
+  ⛔ PUBLIC SERVER-LƏRƏ YÜKLƏMƏYİN!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 BACKUP SIYASƏTI:
+
+  ✓ Gündəlik avtomatik backup (cron)
+  ✓ 30 gündən köhnə backup-lar avtomatik silinir
+  ✓ İki format saxlanılır (custom + sql)
+  ✓ Backup qovluğu: ./backups/
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🛠️ YARADILMIŞ ALƏTLƏR:
+
+  1. backup-database.sh   → Backup almaq üçün
+  2. restore-database.sh  → Restore etmək üçün
+  3. backups/README.md    → Ətraflı sənədləşmə
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ BACKUP STATUSU: UĞURLU
+🎉 Database tam olaraq backup edildi!
+

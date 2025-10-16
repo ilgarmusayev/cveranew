@@ -75,6 +75,11 @@ temp/
 *.db
 *.sqlite
 
+# Database Backups
+backups/*.backup
+backups/*.sql
+backups/*.log
+
 # Local development files
 .env.local
 .env.development

@@ -176,7 +176,11 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
     }
   };
 
-  const content = labels[cvLanguage] || labels.azerbaijani;
+  // Section labels (site language için)
+  const sectionContent = labels[siteLanguage] || labels.azerbaijani;
+  
+  // Degree labels (CV language için - dropdown'da göstərilən seçimlər)
+  const degreeContent = labels[cvLanguage] || labels.azerbaijani;
 
   const addEducation = () => {
     const newEducation: Education = {
@@ -224,7 +228,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">
-            {content.title}
+            {sectionContent.title}
           </h3>
         </div>
         <button
@@ -232,10 +236,10 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
         >
           <span className="hidden sm:inline">
-            {content.add}
+            {sectionContent.add}
           </span>
           <span className="sm:hidden">
-            {content.addShort}
+            {sectionContent.addShort}
           </span>
         </button>
       </div>
@@ -249,13 +253,13 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
             </svg>
           </div>
           <p className="text-gray-500 mb-4">
-            {content.noEducation}
+            {sectionContent.noEducation}
           </p>
           <button
             onClick={addEducation}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors break-words leading-tight max-w-48 mx-auto block"
           >
-            {content.addFirst}
+            {sectionContent.addFirst}
           </button>
         </div>
       ) : (
@@ -266,11 +270,11 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-blue-500">🎓</span>
                   <h4 className="font-medium text-gray-900">
-                    {education.degree || content.newEducation}
+                    {education.degree || sectionContent.newEducation}
                   </h4>
                 </div>
                 <p className="text-sm text-gray-600">
-                  {education.institution || content.institutionName}
+                  {education.institution || sectionContent.institutionName}
                 </p>
                 {(education.field || education.gpa) && (
                   <p className="text-xs text-gray-500 mt-1">
@@ -291,7 +295,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                     }`}
-                    title={content.moveUp}
+                    title={sectionContent.moveUp}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -305,7 +309,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                     }`}
-                    title={content.moveDown}
+                    title={sectionContent.moveDown}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -320,15 +324,15 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                     className="text-blue-600 hover:text-blue-800 transition-colors text-sm cursor-pointer"
                   >
                     {expandedId === education.id 
-                      ? content.close
-                      : content.edit
+                      ? sectionContent.close
+                      : sectionContent.edit
                     }
                   </button>
                   <button
                     onClick={() => removeEducation(education.id)}
                     className="text-red-600 hover:text-red-800 transition-colors text-sm cursor-pointer"
                   >
-                    {content.delete}
+                    {sectionContent.delete}
                   </button>
                 </div>
               </div>
@@ -338,7 +342,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {content.institution} <span className="text-red-500">*</span>
+                        {sectionContent.institution} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -346,7 +350,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                         onChange={(e) => updateEducation(education.id, { institution: e.target.value })}
                         onKeyDown={handleKeyDown}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        placeholder={content.institutionPlaceholder}
+                        placeholder={sectionContent.institutionPlaceholder}
                       />
                     </div>
 
@@ -358,7 +362,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                           </svg>
                           <span>
-                            {content.degree} <span className="text-gray-400 text-xs">({content.optional})</span>
+                            {sectionContent.degree} <span className="text-gray-400 text-xs">({sectionContent.optional})</span>
                           </span>
                         </span>
                       </label>
@@ -374,25 +378,25 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                         }}
                       > 
                         <option value="">
-                          {content.selectDegree}
+                          {sectionContent.selectDegree}
                         </option>
-                        <option value={content.bachelor}>
-                          🎓 {content.bachelor}
+                        <option value={degreeContent.bachelor}>
+                          🎓 {sectionContent.bachelor}
                         </option>
-                        <option value={content.master}>
-                          🎓 {content.master}
+                        <option value={degreeContent.master}>
+                          🎓 {sectionContent.master}
                         </option>
-                        <option value={content.phd}>
-                          🎓 {content.phd}
+                        <option value={degreeContent.phd}>
+                          🎓 {sectionContent.phd}
                         </option>
-                        <option value={content.diploma}>
-                          📜 {content.diploma}
+                        <option value={degreeContent.diploma}>
+                          📜 {sectionContent.diploma}
                         </option>
-                        <option value={content.certificate}>
-                          📋 {content.certificate}
+                        <option value={degreeContent.certificate}>
+                          📋 {sectionContent.certificate}
                         </option>
-                        <option value={content.other}>
-                          📚 {content.other}
+                        <option value={degreeContent.other}>
+                          📚 {sectionContent.other}
                         </option>
                       </select>
                     </div>
@@ -401,7 +405,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {content.field} <span className="text-gray-400 text-xs">({content.optional})</span>
+                        {sectionContent.field} <span className="text-gray-400 text-xs">({sectionContent.optional})</span>
                       </label>
                       <input
                         type="text"
@@ -409,13 +413,13 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                         onChange={(e) => updateEducation(education.id, { field: e.target.value })}
                         onKeyDown={handleKeyDown}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        placeholder={content.fieldPlaceholder}
+                        placeholder={sectionContent.fieldPlaceholder}
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {content.gpa} <span className="text-gray-400 text-xs">({content.optional})</span>
+                        {sectionContent.gpa} <span className="text-gray-400 text-xs">({sectionContent.optional})</span>
                       </label>
                       <input
                         type="text"
@@ -423,7 +427,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                         onChange={(e) => updateEducation(education.id, { gpa: e.target.value })}
                         onKeyDown={handleKeyDown}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        placeholder={content.gpaPlaceholder}
+                        placeholder={sectionContent.gpaPlaceholder}
                       />
                     </div>
                   </div>
@@ -439,9 +443,9 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                       current, 
                       endDate: current ? '' : education.endDate 
                     })}
-                    startLabel={content.startDate}
-                    endLabel={content.endDate}
-                    currentLabel={content.currentStudying}
+                    startLabel={sectionContent.startDate}
+                    endLabel={sectionContent.endDate}
+                    currentLabel={sectionContent.currentStudying}
                     siteLanguage={siteLanguage}
                   />
 
@@ -449,12 +453,12 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
 
                <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {content.description}
+                      {sectionContent.description}
                     </label>
                     <RichTextEditor
                       value={education.description ?? ''}
                       onChange={(value) => updateEducation(education.id, { description: value })}
-                      placeholder={content.descriptionPlaceholder}
+                      placeholder={sectionContent.descriptionPlaceholder}
                       minHeight="120px"
                     />
                   </div>
@@ -471,7 +475,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
             onClick={addEducation}
             className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
           >
-            {content.addAnother}
+            {sectionContent.addAnother}
           </button>
         </div>
       )}

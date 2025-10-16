@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { ArrowLeftIcon, DocumentTextIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
@@ -107,6 +108,14 @@ export default function MotivationLetterForm({ userProfile, onBack }: Motivation
 
     loadCVs();
   }, []);
+
+  // Auto-scroll to top when step changes
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, [step]);
 
   const content = {
     azerbaijani: {
@@ -763,15 +772,19 @@ ${personalInfo?.phone ? personalInfo.phone : ''}
         <div className="relative mb-8">
           <div className="absolute left-0 top-0 flex items-center">
             {/* Ana səhifəyə qayıtma buttonu - yalnız step 1-də gizlət */}
-            {step !== 1 && (
-              <button
-                onClick={onBack}
-                className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                <ArrowLeftIcon className="h-5 w-5 mr-2" />
-                {currentContent.backButton}
-              </button>
-            )}
+            <button
+              onClick={() => {
+                if (step === 1) {
+                  onBack(); // Go back to dashboard
+                } else {
+                  setStep(step - 1); // Go to previous step
+                }
+              }}
+              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <ArrowLeftIcon className="h-5 w-5 mr-2" />
+              {currentContent.backButton}
+            </button>
           </div>
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900">
@@ -865,12 +878,8 @@ ${personalInfo?.phone ? personalInfo.phone : ''}
                   >
                     <option value="">{currentContent.steps[1].selectCVPlaceholder}</option>
                     {cvs.map((cv, index) => {
-                      const fullName = getFullNameFromCV(cv);
-                      const jobTitle = getJobTitleFromCV(cv);
-                      
-                      // Əgər job title default text-dirsə, sadəcə adı göstər
-                      const isDefaultJobTitle = jobTitle === currentContent.steps[1].noJobTitle;
-                      const displayText = isDefaultJobTitle ? fullName : `${fullName} - ${jobTitle}`;
+                      // CV-nin title-ını istifadə et, yoxdursa default mətn göstər
+                      const displayText = cv.title || currentContent.steps[1].untitledCV || 'Untitled CV';
                       
                       return (
                         <option key={cv.id} value={cv.id}>
@@ -891,9 +900,9 @@ ${personalInfo?.phone ? personalInfo.phone : ''}
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {[
-                    { id: 'azerbaijani', name: 'Azərbaycan dili', flag: '🇦🇿' },
-                    { id: 'english', name: 'English', flag: '🇺🇸' },
-                    { id: 'russian', name: 'Русский язык', flag: '🇷🇺' }
+                    { id: 'azerbaijani', name: 'Azərbaycan dili', flag: '/flagaz.png' },
+                    { id: 'english', name: 'English', flag: '/flagusa.png' },
+                    { id: 'russian', name: 'Русский язык', flag: '/flagrus.png' }
                   ].map((language) => (
                     <button
                       key={language.id}
@@ -905,7 +914,15 @@ ${personalInfo?.phone ? personalInfo.phone : ''}
                           : 'border-gray-200 hover:border-gray-300 bg-white text-gray-700'
                       }`}
                     >
-                      <span className="text-2xl">{language.flag}</span>
+                      <span className="flex items-center">
+                        <Image
+                          src={language.flag}
+                          alt={language.name}
+                          width={32}
+                          height={24}
+                          className="rounded"
+                        />
+                      </span>
                       <span className="font-medium">{language.name}</span>
                     </button>
                   ))}

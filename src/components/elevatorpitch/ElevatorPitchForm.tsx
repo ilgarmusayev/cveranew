@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, Download, User, Play, Pause, Clock, Sparkles, Info } from 'lucide-react';
 import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
@@ -198,6 +199,14 @@ export default function ElevatorPitchForm({ onBack }: ElevatorPitchFormProps) {
   useEffect(() => {
     fetchCVs();
   }, []);
+
+  // Auto-scroll to top when step changes
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, [currentStep]);
 
   const fetchCVs = async () => {
     setLoading(true);
@@ -614,9 +623,9 @@ Write as if ${fullName} is confidently introducing themselves at a coffee meetin
           <div className="space-y-3">
             <div className="grid grid-cols-3 gap-3">
               {[
-                { id: 'azerbaijani', name: 'Azərbaycan', flag: '🇦🇿' },
-                { id: 'english', name: 'English', flag: '🇺🇸' },
-                { id: 'russian', name: 'Русский', flag: '🇷🇺' }
+                { id: 'azerbaijani', name: 'Azərbaycan', flag: '/flagaz.png' },
+                { id: 'english', name: 'English', flag: '/flagusa.png' },
+                { id: 'russian', name: 'Русский', flag: '/flagrus.png' }
               ].map((lang) => (
                 <button
                   key={lang.id}
@@ -628,7 +637,15 @@ Write as if ${fullName} is confidently introducing themselves at a coffee meetin
                       : 'border-gray-200 hover:border-gray-300 bg-white text-gray-700'
                   }`}
                 >
-                  <span className="text-xl">{lang.flag}</span>
+                  <span className="flex items-center">
+                    <Image
+                      src={lang.flag}
+                      alt={lang.name}
+                      width={28}
+                      height={21}
+                      className="rounded"
+                    />
+                  </span>
                   <span className="text-xs font-medium">{lang.name}</span>
                 </button>
               ))}
@@ -821,14 +838,25 @@ Write as if ${fullName} is confidently introducing themselves at a coffee meetin
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-600 to-blue-600 text-white p-6">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-               
-                <div>
-                  <h1 className="text-2xl font-bold text-center text-white ">
-                    {currentContent.title}
-                  </h1>
-                </div>
+              <button
+                onClick={() => {
+                  if (currentStep === 1) {
+                    onBack(); // Go back to dashboard
+                  } else {
+                    setCurrentStep(currentStep - 1); // Go to previous step
+                  }
+                }}
+                className="flex items-center text-white hover:text-gray-200 transition-colors"
+              >
+                <ChevronLeft className="h-5 w-5 mr-2" />
+                <span>{currentContent.previous}</span>
+              </button>
+              <div className="flex-1 text-center">
+                <h1 className="text-2xl font-bold text-white">
+                  {currentContent.title}
+                </h1>
               </div>
+              <div className="w-24"></div> {/* Spacer for centering */}
             </div>
 
             {/* Progress Steps */}
