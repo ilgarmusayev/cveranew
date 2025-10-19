@@ -31,6 +31,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { cvId, jobTitle, jobDescription, language = 'az' } = body;
 
+    console.log('🔍 Job Match API received language:', language);
+    console.log('📋 Request body:', { cvId, jobTitle, jobDescriptionLength: jobDescription?.length, language });
+
     if (!cvId || !jobTitle || !jobDescription) {
       return NextResponse.json(
         { error: 'CV ID, iş başlığı və iş təsviri tələb olunur' },
@@ -340,15 +343,41 @@ async function generateJobMatchAnalysis(cvText: string, jobTitle: string, jobDes
   try {
     console.log('🤖 AI Job Match analizi başlayır...');
 
-    // Language-specific prompts
+    // Get full language name for better AI understanding
+    const languageNames = {
+      'az': 'AZERBAIJANI (AZƏRBAYCAN DİLİ)',
+      'en': 'ENGLISH',
+      'ru': 'RUSSIAN (РУССКИЙ ЯЗЫК)'
+    };
+    
+    const fullLanguageName = languageNames[language as keyof typeof languageNames] || languageNames.az;
+    console.log('🌐 Full language name for AI:', fullLanguageName);
+
+    // Language-specific prompts with EMBEDDED language parameter
     const prompts = {
       az: `
+LANGUAGE: AZERBAIJANI
+OUTPUT LANGUAGE: AZERBAIJANI (AZƏRBAYCAN DİLİ)
+CAVAB DİLİ: AZƏRBAYCAN DİLİ
+
+⚠️⚠️⚠️ CRITICAL SYSTEM INSTRUCTION ⚠️⚠️⚠️
+RESPONSE LANGUAGE: ${fullLanguageName}
+YOU MUST RESPOND ONLY IN AZERBAIJANI LANGUAGE (AZƏRBAYCAN DİLİ).
+ABSOLUTELY NO ENGLISH, RUSSIAN OR OTHER LANGUAGES ALLOWED IN YOUR RESPONSE.
+ALL text arrays (matchingPoints, improvementAreas, recommendations) MUST BE 100% IN AZERBAIJANI.
+IF YOU USE ANY NON-AZERBAIJANI TEXT, THE SYSTEM WILL FAIL.
+
+MƏCBURI: Yalnız AZƏRBAYCAN dilində cavab verin!
+⚠️⚠️⚠️ END OF CRITICAL INSTRUCTION ⚠️⚠️⚠️
+
 Sən peşəkar karyera məsləhətçisisən. 
-Sənin vəzifən verilmiş CV məlumatlarını və iş elanını analiz edərək:
+Sənin vəzifən verilmiş CV məlumatlarını və iş elanını AZƏRBAYCAN DİLİNDƏ analiz edərək:
 1. Namizədin iş elanına uyğunluq dərəcəsini qiymətləndirmək (0%-100%). 
 2. Əsas uyğunluq məqamlarını (skill, təcrübə, təhsil və s.) qısa maddələrlə göstərmək. 
 3. Uyğun olmayan və ya inkişaf etdirilməli sahələri qeyd etmək. 
 4. CV-ni həmin vakansiyaya daha uyğunlaşdırmaq üçün konkret tövsiyələr vermək.
+
+⚠️ REMINDER: Your response MUST be in ${fullLanguageName} language!
 
 ---
 ### İş Elanı:
@@ -391,6 +420,38 @@ TƏLƏBLƏR:
 - Tövsiyələr praktik və həyata keçirilə bilən olsun
 - Azərbaycan dilində cavab ver
 
+⚠️ LANGUAGE REQUIREMENT: Your response MUST be 100% in AZERBAIJANI (Azərbaycan dili).
+⚠️ EXAMPLE of CORRECT format (in Azerbaijani):
+{
+  "overallScore": 75,
+  "matchingPoints": [
+    "Namizəddə güclü Java proqramlaşdırma təcrübəsi mövcuddur",
+    "3 il peşəkar iş təcrübəsi tələbə tam uyğundur",
+    "Spring Boot framework bilgisi var"
+  ],
+  "improvementAreas": [
+    "React framework bilikləri zəifdir və inkişaf etdirilməlidir",
+    "UI/UX dizayn təcrübəsi yoxdur",
+    "Müasir frontend texnologiyaları ilə iş təcrübəsi məhduddur"
+  ],
+  "recommendations": [
+    "React və Next.js texnologiyalarını öyrənin və praktik layihələr yaradın",
+    "Şəxsi portfolio websaytı hazırlayın və GitHub-da layihələrinizi paylaşın",
+    "Frontend sertifikatları əldə edin (məsələn, React Developer Certification)"
+  ]
+}
+
+⚠️ CRITICAL: All text in arrays MUST be in AZERBAIJANI language. NO English words allowed!
+
+⚠️⚠️⚠️ FINAL WARNING ⚠️⚠️⚠️
+RESPONSE LANGUAGE REQUIRED: ${fullLanguageName}
+BEFORE YOU SUBMIT YOUR RESPONSE:
+1. CHECK that ALL text is in AZERBAIJANI (Azərbaycan dili)
+2. CHECK that NO English or Russian words exist
+3. CHECK that matchingPoints, improvementAreas, recommendations are 100% AZERBAIJANI
+IF ANY TEXT IS NOT IN AZERBAIJANI, START OVER!
+⚠️⚠️⚠️ END WARNING ⚠️⚠️⚠️
+
 MÜHİM: Yalnız JSON formatında cavab ver, heç bir əlavə mətn yazmadan:
 
 {
@@ -413,12 +474,28 @@ MÜHİM: Yalnız JSON formatında cavab ver, heç bir əlavə mətn yazmadan:
 }
 `,
       en: `
+LANGUAGE: ENGLISH
+OUTPUT LANGUAGE: ENGLISH
+RESPONSE LANGUAGE: ENGLISH
+
+⚠️⚠️⚠️ CRITICAL SYSTEM INSTRUCTION ⚠️⚠️⚠️
+RESPONSE LANGUAGE: ${fullLanguageName}
+YOU MUST RESPOND ONLY IN ENGLISH LANGUAGE.
+ABSOLUTELY NO AZERBAIJANI, RUSSIAN OR OTHER LANGUAGES ALLOWED IN YOUR RESPONSE.
+ALL text arrays (matchingPoints, improvementAreas, recommendations) MUST BE 100% IN ENGLISH.
+IF YOU USE ANY NON-ENGLISH TEXT, THE SYSTEM WILL FAIL.
+
+MANDATORY: Respond ONLY in ENGLISH!
+⚠️⚠️⚠️ END OF CRITICAL INSTRUCTION ⚠️⚠️⚠️
+
 You are a professional career advisor.
-Your task is to analyze the given CV and job posting data to:
+Your task is to analyze the given CV and job posting data IN ENGLISH to:
 1. Evaluate the candidate's compatibility with the job posting (0%-100%).
 2. Show main matching points (skills, experience, education, etc.) in bullet points.
 3. Identify areas that don't match or need development.
 4. Provide specific recommendations to better align the CV with this vacancy.
+
+⚠️ REMINDER: Your response MUST be in ${fullLanguageName} language!
 
 ---
 ### Job Posting:
@@ -461,6 +538,38 @@ REQUIREMENTS:
 - Recommendations should be practical and achievable
 - Respond in English
 
+⚠️ LANGUAGE REQUIREMENT: Your response MUST be 100% in ENGLISH.
+⚠️ EXAMPLE of CORRECT format (in English):
+{
+  "overallScore": 75,
+  "matchingPoints": [
+    "Candidate has strong Java development expertise",
+    "Meets 3 years of professional experience requirement",
+    "Has Spring Boot framework knowledge"
+  ],
+  "improvementAreas": [
+    "React framework skills are weak and need improvement",
+    "No UI/UX design experience",
+    "Limited experience with modern frontend technologies"
+  ],
+  "recommendations": [
+    "Learn React and Next.js technologies and build practical projects",
+    "Create a personal portfolio website and share projects on GitHub",
+    "Obtain frontend certifications (e.g., React Developer Certification)"
+  ]
+}
+
+⚠️ CRITICAL: All text in arrays MUST be in ENGLISH language. NO other language allowed!
+
+⚠️⚠️⚠️ FINAL WARNING ⚠️⚠️⚠️
+RESPONSE LANGUAGE REQUIRED: ${fullLanguageName}
+BEFORE YOU SUBMIT YOUR RESPONSE:
+1. CHECK that ALL text is in ENGLISH
+2. CHECK that NO Azerbaijani or Russian words exist
+3. CHECK that matchingPoints, improvementAreas, recommendations are 100% ENGLISH
+IF ANY TEXT IS NOT IN ENGLISH, START OVER!
+⚠️⚠️⚠️ END WARNING ⚠️⚠️⚠️
+
 IMPORTANT: Respond only in JSON format, without any additional text:
 
 {
@@ -483,12 +592,28 @@ IMPORTANT: Respond only in JSON format, without any additional text:
 }
 `,
       ru: `
+LANGUAGE: RUSSIAN
+OUTPUT LANGUAGE: RUSSIAN (РУССКИЙ ЯЗЫК)
+ЯЗЫК ОТВЕТА: РУССКИЙ
+
+⚠️⚠️⚠️ CRITICAL SYSTEM INSTRUCTION ⚠️⚠️⚠️
+RESPONSE LANGUAGE: ${fullLanguageName}
+YOU MUST RESPOND ONLY IN RUSSIAN LANGUAGE (РУССКИЙ ЯЗЫК).
+ABSOLUTELY NO AZERBAIJANI, ENGLISH OR OTHER LANGUAGES ALLOWED IN YOUR RESPONSE.
+ALL text arrays (matchingPoints, improvementAreas, recommendations) MUST BE 100% IN RUSSIAN.
+IF YOU USE ANY NON-RUSSIAN TEXT, THE SYSTEM WILL FAIL.
+
+ОБЯЗАТЕЛЬНО: Отвечайте ТОЛЬКО на РУССКОМ языке!
+⚠️⚠️⚠️ END OF CRITICAL INSTRUCTION ⚠️⚠️⚠️
+
 Вы профессиональный карьерный консультант.
-Ваша задача - проанализировать предоставленные данные резюме и вакансии для:
+Ваша задача - проанализировать предоставленные данные резюме и вакансии НА РУССКОМ ЯЗЫКЕ для:
 1. Оценки совместимости кандидата с вакансией (0%-100%).
 2. Отображения основных совпадений (навыки, опыт, образование и т.д.) в виде пунктов.
 3. Выявления несоответствующих или требующих развития областей.
 4. Предоставления конкретных рекомендаций для лучшего соответствия резюме данной вакансии.
+
+⚠️ НАПОМИНАНИЕ: Ваш ответ ДОЛЖЕН быть на ${fullLanguageName} языке!
 
 ---
 ### Вакансия:
@@ -531,6 +656,38 @@ ${cvText}
 - Рекомендации должны быть практичными и достижимыми
 - Отвечайте на русском языке
 
+⚠️ ЯЗЫКОВОЕ ТРЕБОВАНИЕ: Ваш ответ ДОЛЖЕН быть на 100% на РУССКОМ языке.
+⚠️ ПРИМЕР ПРАВИЛЬНОГО формата (на русском):
+{
+  "overallScore": 75,
+  "matchingPoints": [
+    "Кандидат обладает сильными навыками разработки на Java",
+    "Соответствует требованию 3 года профессионального опыта",
+    "Имеет знания фреймворка Spring Boot"
+  ],
+  "improvementAreas": [
+    "Навыки фреймворка React слабые и нуждаются в улучшении",
+    "Отсутствует опыт UI/UX дизайна",
+    "Ограниченный опыт работы с современными frontend технологиями"
+  ],
+  "recommendations": [
+    "Изучить технологии React и Next.js и создать практические проекты",
+    "Создать персональный портфолио-сайт и делиться проектами на GitHub",
+    "Получить сертификаты по frontend (например, React Developer Certification)"
+  ]
+}
+
+⚠️ КРИТИЧНО: Весь текст в массивах ДОЛЖЕН быть на РУССКОМ языке. Другие языки НЕ допускаются!
+
+⚠️⚠️⚠️ ФИНАЛЬНОЕ ПРЕДУПРЕЖДЕНИЕ ⚠️⚠️⚠️
+ТРЕБУЕМЫЙ ЯЗЫК ОТВЕТА: ${fullLanguageName}
+ПЕРЕД ОТПРАВКОЙ ОТВЕТА:
+1. ПРОВЕРЬТЕ, что ВЕСЬ текст на РУССКОМ языке
+2. ПРОВЕРЬТЕ, что НЕТ азербайджанских или английских слов
+3. ПРОВЕРЬТЕ, что matchingPoints, improvementAreas, recommendations - 100% на РУССКОМ
+ЕСЛИ КАКОЙ-ЛИБО ТЕКСТ НЕ НА РУССКОМ, НАЧНИТЕ ЗАНОВО!
+⚠️⚠️⚠️ КОНЕЦ ПРЕДУПРЕЖДЕНИЯ ⚠️⚠️⚠️
+
 ВАЖНО: Отвечайте только в формате JSON, без дополнительного текста:
 
 {
@@ -555,6 +712,9 @@ ${cvText}
     };
 
     const prompt = prompts[language as keyof typeof prompts] || prompts.az;
+
+    console.log('🤖 Selected prompt language:', language);
+    console.log('📝 Using prompt for language:', language in prompts ? language : 'az (fallback)');
 
     // Get API key for Gemini
     const apiKeyInfo = await getBestApiKey('gemini');
@@ -608,7 +768,9 @@ ${cvText}
     }
 
     try {
-      console.log('🔍 Job Match AI Response:', aiResponse);
+      console.log('🔍 Job Match AI Response (first 500 chars):', aiResponse.substring(0, 500));
+      console.log('🔍 Response length:', aiResponse.length);
+      console.log('🌐 Expected language:', language);
 
       // Try multiple JSON extraction methods
       let jsonString = '';
@@ -670,18 +832,18 @@ ${cvText}
       
       // Return fallback analysis
       console.log('🔄 Fallback analizi yaradılır...');
-      return generateFallbackAnalysis(cvText, jobTitle, jobDescription);
+      return generateFallbackAnalysis(cvText, jobTitle, jobDescription, language);
     }
 
   } catch (error) {
     console.error('❌ Job Match AI analizi ümumi xətası:', error);
-    return generateFallbackAnalysis(cvText, jobTitle, jobDescription);
+    return generateFallbackAnalysis(cvText, jobTitle, jobDescription, language);
   }
 }
 
 // Generate fallback analysis when AI fails
-function generateFallbackAnalysis(cvText: string, jobTitle: string, jobDescription: string) {
-  console.log('🔄 Fallback Job Match analizi yaradılır...');
+function generateFallbackAnalysis(cvText: string, jobTitle: string, jobDescription: string, language: string = 'az') {
+  console.log('🔄 Fallback Job Match analizi yaradılır...', language);
   
   const cvLower = cvText.toLowerCase();
   const jobLower = jobDescription.toLowerCase();
@@ -702,22 +864,67 @@ function generateFallbackAnalysis(cvText: string, jobTitle: string, jobDescripti
   
   score = Math.max(0, Math.min(100, score));
   
+  // Multi-language fallback messages
+  const messages = {
+    az: {
+      matchingPoints: [
+        'Profildə uyğun bacarıqlar mövcuddur',
+        'İş təcrübəsi qeyd edilmişdir',
+        'Təhsil məlumatları düzgündür'
+      ],
+      improvementAreas: [
+        'Daha spesifik texniki bacarıqlar əlavə edin',
+        'İş təcrübəsi təsvirlərini genişləndirin',
+        'Sertifikat və kurslar əlavə edin'
+      ],
+      recommendations: [
+        'CV-də iş elanına uyğun açar sözlər istifadə edin',
+        'Layihə portfelinizi əlavə edin',
+        'Peşəkar şəbəkəni genişləndirin'
+      ]
+    },
+    en: {
+      matchingPoints: [
+        'Relevant skills are present in the profile',
+        'Work experience is documented',
+        'Education information is complete'
+      ],
+      improvementAreas: [
+        'Add more specific technical skills',
+        'Expand work experience descriptions',
+        'Include certifications and courses'
+      ],
+      recommendations: [
+        'Use keywords matching the job posting in your CV',
+        'Add your project portfolio',
+        'Expand your professional network'
+      ]
+    },
+    ru: {
+      matchingPoints: [
+        'В профиле присутствуют соответствующие навыки',
+        'Опыт работы задокументирован',
+        'Информация об образовании полная'
+      ],
+      improvementAreas: [
+        'Добавьте более конкретные технические навыки',
+        'Расширьте описания опыта работы',
+        'Включите сертификаты и курсы'
+      ],
+      recommendations: [
+        'Используйте ключевые слова из вакансии в вашем резюме',
+        'Добавьте портфолио проектов',
+        'Расширьте профессиональную сеть'
+      ]
+    }
+  };
+
+  const langMessages = messages[language as keyof typeof messages] || messages.az;
+  
   return {
     overallScore: score,
-    matchingPoints: [
-      'Profildə uyğun bacarıqlar mövcuddur',
-      'İş təcrübəsi qeyd edilmişdir',
-      'Təhsil məlumatları düzgündür'
-    ],
-    improvementAreas: [
-      'Daha spesifik texniki bacarıqlar əlavə edin',
-      'İş təcrübəsi təsvirlərini genişləndirin',
-      'Sertifikat və kurslar əlavə edin'
-    ],
-    recommendations: [
-      'CV-də iş elanına uyğun açar sözlər istifadə edin',
-      'Layihə portfelinizi əlavə edin',
-      'Peşəkar şəbəkəni genişləndirin'
-    ]
+    matchingPoints: langMessages.matchingPoints,
+    improvementAreas: langMessages.improvementAreas,
+    recommendations: langMessages.recommendations
   };
 }

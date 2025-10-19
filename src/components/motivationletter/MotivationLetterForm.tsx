@@ -134,13 +134,13 @@ export default function MotivationLetterForm({ userProfile, onBack }: Motivation
           noJobTitle: 'Vəzifə yoxdur',
           // Recipient Info
           recipientInfo: 'Alıcı Məlumatları',
-          recipientName: 'Alıcının adı',
+          recipientName: 'Alıcının adı *',
           recipientNamePlaceholder: 'Dr. Nizamali Shahbazli',
           recipientTitle: 'Alıcının vəzifəsi',
           recipientTitlePlaceholder: 'Qəbul Komitəsi Sədri',
-          organization: 'Təşkilat/Universitet',
+          organization: 'Təşkilat/Universitet *',
           organizationPlaceholder: 'Harvard Universiteti',
-          position: 'Vəzifə/Proqram',
+          position: 'Vəzifə/Proqram *',
           positionPlaceholder: 'Magistratura Proqramı',
           program: 'Xüsusi proqram',
           programPlaceholder: 'Kompüter Elmləri',
@@ -149,14 +149,27 @@ export default function MotivationLetterForm({ userProfile, onBack }: Motivation
         },
         2: {
           title: 'Məzmun Yaratma',
-          motivation: 'Motivasiya',
+          motivation: 'Motivasiya *',
           motivationPlaceholder: 'Bu proqrama niyə müraciət edirsiniz?',
-          goals: 'Məqsədlər',
+          goals: 'Məqsədlər *',
           goalsPlaceholder: 'Gələcək planlarınız və məqsədləriniz',
-          qualifications: 'Keyfiyyətlər',
+          qualifications: 'Keyfiyyətlər *',
           qualificationsPlaceholder: 'Sizin güclü tərəfləriniz və təcrübəniz',
-          conclusion: 'Nəticə',
+          conclusion: 'Nəticə *',
           conclusionPlaceholder: 'Yekun fikir və minnətdarlıq'
+        },
+        3: {
+          title: 'Motivasiya Məktubunuz Hazırdır!',
+          subtitle: 'Məktubunuzu yoxlayın və lazım olan əməliyyatları həyata keçirin',
+          actions: 'Əməliyyatlar',
+          copyButton: 'Kopyala',
+          copied: 'Kopyalandı',
+          downloadButton: 'DOCX Endir',
+          editButton: 'Redaktə Et',
+          tipTitle: 'Faydalı Məlumat',
+          tipText: 'DOCX formatında endirdiyiniz məktubda əlavə formatlamalar və peşəkar görünüş var. Siz həmçinin məktubunuzu kopyalayaraq istənilən yerə yapışdıra bilərsiniz.',
+          previewTitle: 'Motivasiya Məktubu',
+          previewFor: 'üçün'
         }
       },
       templates: {
@@ -170,6 +183,7 @@ export default function MotivationLetterForm({ userProfile, onBack }: Motivation
         next: 'Növbəti',
         previous: 'Əvvəlki',
         generate: 'Yaradın',
+        generating: 'Yaradılır...',
         aiHelp: 'AI Köməyi',
         generatingAI: 'AI kömək edir...'
       },
@@ -198,13 +212,13 @@ export default function MotivationLetterForm({ userProfile, onBack }: Motivation
           noJobTitle: 'No Job Title',
           // Recipient Info
           recipientInfo: 'Recipient Information',
-          recipientName: 'Recipient Name',
+          recipientName: 'Recipient Name *',
           recipientNamePlaceholder: 'Dr. John Smith',
           recipientTitle: 'Recipient Title',
           recipientTitlePlaceholder: 'Admissions Committee Chair',
-          organization: 'Organization/University',
+          organization: 'Organization/University *',
           organizationPlaceholder: 'Harvard University',
-          position: 'Position/Program',
+          position: 'Position/Program *',
           positionPlaceholder: 'Master\'s Program',
           program: 'Specific program',
           programPlaceholder: 'Computer Science',
@@ -213,14 +227,27 @@ export default function MotivationLetterForm({ userProfile, onBack }: Motivation
         },
         2: {
           title: 'Content Creation',
-          motivation: 'Motivation',
+          motivation: 'Motivation *',
           motivationPlaceholder: 'Why are you applying to this program?',
-          goals: 'Goals',
+          goals: 'Goals *',
           goalsPlaceholder: 'Your future plans and objectives',
-          qualifications: 'Qualifications',
+          qualifications: 'Qualifications *',
           qualificationsPlaceholder: 'Your strengths and experience',
-          conclusion: 'Conclusion',
+          conclusion: 'Conclusion *',
           conclusionPlaceholder: 'Final thoughts and gratitude'
+        },
+        3: {
+          title: 'Your Motivation Letter is Ready!',
+          subtitle: 'Review your letter and take the necessary actions',
+          actions: 'Actions',
+          copyButton: 'Copy',
+          copied: 'Copied',
+          downloadButton: 'Download DOCX',
+          editButton: 'Edit Letter',
+          tipTitle: 'Helpful Information',
+          tipText: 'The letter downloaded in DOCX format has additional formatting and a professional appearance. You can also copy the letter and paste it anywhere.',
+          previewTitle: 'Motivation Letter',
+          previewFor: 'For'
         }
       },
       templates: {
@@ -234,6 +261,7 @@ export default function MotivationLetterForm({ userProfile, onBack }: Motivation
         next: 'Next',
         previous: 'Previous',
         generate: 'Generate',
+        generating: 'Generating...',
         aiHelp: 'AI Help',
         generatingAI: 'AI is helping...'
       },
@@ -262,27 +290,40 @@ export default function MotivationLetterForm({ userProfile, onBack }: Motivation
           noJobTitle: 'Без должности',
           // Recipient Info
           recipientInfo: 'Информация о получателе',
-          recipientName: 'Имя получателя',
+          recipientName: 'Имя получателя *',
           recipientNamePlaceholder: 'Др. Иван Иванов',
           recipientTitle: 'Должность получателя',
           recipientTitlePlaceholder: 'Председатель приемной комиссии',
-          organization: 'Организация/Университет',
+          organization: 'Организация/Университет *',
           organizationPlaceholder: 'МГУ им. М.В. Ломоносова',
-          position: 'Должность/Программа',
+          position: 'Должность/Программа *',
           positionPlaceholder: 'Магистерская программа',
           program: 'Конкретная программа',
           programPlaceholder: 'Информатика'
         },
         2: {
           title: 'Создание содержания',
-          motivation: 'Мотивация',
+          motivation: 'Мотивация *',
           motivationPlaceholder: 'Почему вы подаете заявку на эту программу?',
-          goals: 'Цели',
+          goals: 'Цели *',
           goalsPlaceholder: 'Ваши будущие планы и цели',
-          qualifications: 'Квалификация',
+          qualifications: 'Квалификация *',
           qualificationsPlaceholder: 'Ваши сильные стороны и опыт',
-          conclusion: 'Заключение',
+          conclusion: 'Заключение *',
           conclusionPlaceholder: 'Заключительные мысли и благодарность'
+        },
+        3: {
+          title: 'Ваше мотивационное письмо готово!',
+          subtitle: 'Проверьте ваше письмо и выполните необходимые действия',
+          actions: 'Действия',
+          copyButton: 'Копировать',
+          copied: 'Скопировано',
+          downloadButton: 'Скачать DOCX',
+          editButton: 'Редактировать',
+          tipTitle: 'Полезная информация',
+          tipText: 'Письмо, загруженное в формате DOCX, имеет дополнительное форматирование и профессиональный вид. Вы также можете скопировать письмо и вставить его в любое место.',
+          previewTitle: 'Мотивационное письмо',
+          previewFor: 'Для'
         }
       },
       templates: {
@@ -296,6 +337,7 @@ export default function MotivationLetterForm({ userProfile, onBack }: Motivation
         next: 'Далее',
         previous: 'Назад',
         generate: 'Создать',
+        generating: 'Создается...',
         aiHelp: 'Помощь ИИ',
         generatingAI: 'ИИ помогает...'
       },
@@ -986,7 +1028,6 @@ ${personalInfo?.phone ? personalInfo.phone : ''}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
-                </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -999,6 +1040,7 @@ ${personalInfo?.phone ? personalInfo.phone : ''}
                     placeholder={currentContent.steps[1].programPlaceholder}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
+                </div>
                 </div>
               </div>
             </motion.div>
@@ -1097,7 +1139,7 @@ ${personalInfo?.phone ? personalInfo.phone : ''}
                   className="flex items-center px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <DocumentTextIcon className="h-5 w-5 mr-2" />
-                  {isGenerating ? (formData.letterLanguage === 'azerbaijani' ? 'Yaradılır...' : formData.letterLanguage === 'russian' ? 'Создается...' : 'Generating...') : currentContent.buttons.generate}
+                  {isGenerating ? currentContent.buttons.generating : currentContent.buttons.generate}
                 </button>
               </div>
             )}
@@ -1110,33 +1152,27 @@ ${personalInfo?.phone ? personalInfo.phone : ''}
                 className="max-w-4xl mx-auto"
               >
                 {/* Success Header */}
-                <div className="text-center mb-8">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="text-center mb-6 sm:mb-8">
+                  <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-full mb-3 sm:mb-4">
+                    <svg className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                    {formData.letterLanguage === 'azerbaijani' ? 'Motivasiya Məktubunuz Hazırdır!' : 
-                     formData.letterLanguage === 'russian' ? 'Ваше мотивационное письмо готово!' : 
-                     'Your Motivation Letter is Ready!'}
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 px-4">
+                    {currentContent.steps[3].title}
                   </h2>
-                  <p className="text-gray-600">
-                    {formData.letterLanguage === 'azerbaijani' ? 'Məktubunuzu yoxlayın və lazım olan əməliyyatları həyata keçirin' : 
-                     formData.letterLanguage === 'russian' ? 'Проверьте ваше письмо и выполните необходимые действия' : 
-                     'Review your letter and take the necessary actions'}
+                  <p className="text-sm sm:text-base text-gray-600 px-4">
+                    {currentContent.steps[3].subtitle}
                   </p>
                 </div>
 
                 {/* Action Buttons - Moved to top */}
-                <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 mb-8">
-                  <h4 className="font-semibold text-gray-900 mb-4">
-                    {formData.letterLanguage === 'azerbaijani' ? 'Əməliyyatlar' : 
-                     formData.letterLanguage === 'russian' ? 'Действия' : 
-                     'Actions'}
+                <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6 mb-6 sm:mb-8">
+                  <h4 className="font-semibold text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">
+                    {currentContent.steps[3].actions}
                   </h4>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                     {/* Copy Button */}
                     <button
                       onClick={() => {
@@ -1144,34 +1180,28 @@ ${personalInfo?.phone ? personalInfo.phone : ''}
                         // Show success feedback without alert
                         const button = event?.target as HTMLButtonElement;
                         const originalText = button.innerHTML;
-                        button.innerHTML = `✅ ${formData.letterLanguage === 'azerbaijani' ? 'Kopyalandı' : 
-                                                formData.letterLanguage === 'russian' ? 'Скопировано' : 
-                                                'Copied'}`;
+                        button.innerHTML = `✅ ${currentContent.steps[3].copied}`;
                         setTimeout(() => {
                           button.innerHTML = originalText;
                         }, 2000);
                       }}
-                      className="group flex items-center justify-center px-6 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
+                      className="group flex items-center justify-center px-4 sm:px-6 py-3 sm:py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-all duration-200 transform hover:scale-105 hover:shadow-lg text-sm sm:text-base"
                     >
-                      <svg className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:scale-110 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                       </svg>
-                      {formData.letterLanguage === 'azerbaijani' ? 'Kopyala' : 
-                       formData.letterLanguage === 'russian' ? 'Копировать' : 
-                       'Copy'}
+                      <span className="truncate">{currentContent.steps[3].copyButton}</span>
                     </button>
                     
                     {/* Download Button */}
                     <button
                       onClick={downloadAsDOCX}
-                      className="group flex items-center justify-center px-6 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
+                      className="group flex items-center justify-center px-4 sm:px-6 py-3 sm:py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-all duration-200 transform hover:scale-105 hover:shadow-lg text-sm sm:text-base"
                     >
-                      <svg className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:scale-110 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
-                      {formData.letterLanguage === 'azerbaijani' ? 'DOCX Endir' : 
-                       formData.letterLanguage === 'russian' ? 'Скачать DOCX' : 
-                       'Download DOCX'}
+                      <span className="truncate">{currentContent.steps[3].downloadButton}</span>
                     </button>
 
                     {/* Edit Button */}
@@ -1180,33 +1210,27 @@ ${personalInfo?.phone ? personalInfo.phone : ''}
                         setStep(2);
                         setGeneratedLetter('');
                       }}
-                      className="group flex items-center justify-center px-6 py-4 text-blue-600 border-2 border-blue-600 rounded-lg hover:bg-blue-50 font-medium transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
+                      className="group flex items-center justify-center px-4 sm:px-6 py-3 sm:py-4 text-blue-600 border-2 border-blue-600 rounded-lg hover:bg-blue-50 font-medium transition-all duration-200 transform hover:scale-105 hover:shadow-lg text-sm sm:text-base sm:col-span-2 lg:col-span-1"
                     >
-                      <svg className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:scale-110 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
-                      {formData.letterLanguage === 'azerbaijani' ? 'Redaktə Et' : 
-                       formData.letterLanguage === 'russian' ? 'Редактировать' : 
-                       'Edit Letter'}
+                      <span className="truncate">{currentContent.steps[3].editButton}</span>
                     </button>
                   </div>
 
                   {/* Additional Info */}
-                  <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-                    <div className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="mt-6 p-3 sm:p-4 bg-blue-50 rounded-lg">
+                    <div className="flex items-start space-x-2 sm:space-x-3">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <div className="text-sm text-blue-800">
+                      <div className="text-xs sm:text-sm text-blue-800">
                         <p className="font-medium mb-1">
-                          {formData.letterLanguage === 'azerbaijani' ? 'Tövsiyə:' : 
-                           formData.letterLanguage === 'russian' ? 'Рекомендация:' : 
-                           'Tip:'}
+                          {currentContent.steps[3].tipTitle}
                         </p>
-                        <p>
-                          {formData.letterLanguage === 'azerbaijani' ? 'DOCX faylını yükləməklə Microsoft Word və ya Google Docs-da əlavə düzəlişlər edə bilərsiniz. Məktubu göndərməzdən əvvəl yenidən oxuyun.' : 
-                           formData.letterLanguage === 'russian' ? 'Загрузите DOCX файл для редактирования в Microsoft Word или Google Docs. Перечитайте письмо перед отправкой.' : 
-                           'Download the DOCX file to make additional edits in Microsoft Word or Google Docs. Review the letter before sending.'}
+                        <p className="leading-relaxed">
+                          {currentContent.steps[3].tipText}
                         </p>
                       </div>
                     </div>
@@ -1214,30 +1238,26 @@ ${personalInfo?.phone ? personalInfo.phone : ''}
                 </div>
 
                 {/* Letter Preview Card */}
-                <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden mb-8">
+                <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden mb-6 sm:mb-8">
                   {/* Card Header */}
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <svg className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
                         </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900">
-                            {formData.letterLanguage === 'azerbaijani' ? 'Motivasiya Məktubu' : 
-                             formData.letterLanguage === 'russian' ? 'Мотивационное письмо' : 
-                             'Motivation Letter'}
+                        <div className="min-w-0">
+                          <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">
+                            {currentContent.steps[3].previewTitle}
                           </h3>
-                          <p className="text-sm text-gray-500">
-                            {formData.letterLanguage === 'azerbaijani' ? `${formData.organization} üçün` : 
-                             formData.letterLanguage === 'russian' ? `Для ${formData.organization}` : 
-                             `For ${formData.organization}`}
+                          <p className="text-xs sm:text-sm text-gray-500 truncate">
+                            {currentContent.steps[3].previewFor} {formData.organization}
                           </p>
                         </div>
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-xs sm:text-sm text-gray-500 flex-shrink-0">
                         {new Date().toLocaleDateString(
                           formData.letterLanguage === 'azerbaijani' ? 'az-AZ' :
                           formData.letterLanguage === 'russian' ? 'ru-RU' : 'en-US'
@@ -1247,9 +1267,9 @@ ${personalInfo?.phone ? personalInfo.phone : ''}
                   </div>
 
                   {/* Letter Content */}
-                  <div className="p-8">
-                    <div className="bg-white border-2 border-dashed border-gray-200 rounded-lg p-8 min-h-96">
-                      <pre className="whitespace-pre-wrap text-gray-800 font-serif text-base leading-relaxed tracking-wide">
+                  <div className="p-4 sm:p-8">
+                    <div className="bg-white border-2 border-dashed border-gray-200 rounded-lg p-4 sm:p-8 min-h-64 sm:min-h-96">
+                      <pre className="whitespace-pre-wrap text-gray-800 font-serif text-sm sm:text-base leading-relaxed tracking-wide break-words">
                         {generatedLetter}
                       </pre>
                     </div>

@@ -57,6 +57,52 @@ async function checkAndDeactivateExpiredPromoCodes() {
 }
 
 export async function POST(req: NextRequest) {
+  // Error messages in multiple languages (defined at top level)
+  const getMessages = (lang: string = 'azerbaijani') => {
+    const messages = {
+      azerbaijani: {
+        loginRequired: "Giriş tələb olunur",
+        invalidToken: "Token etibarsızdır",
+        enterCode: "Promokod daxil edin",
+        databaseError: "Database xətası",
+        notFound: "Promokod tapılmadı",
+        inactive: "Bu promokod artıq aktiv deyil",
+        alreadyUsed: "Bu promokodu artıq istifadə etmisiniz",
+        limitExceeded: "Bu promokoddun istifadə limiti bitib",
+        expired: "Bu promokoddun vaxtı keçib",
+        valid: "Promokod keçərlidir",
+        serverError: "Server xətası"
+      },
+      english: {
+        loginRequired: "Login required",
+        invalidToken: "Token is invalid",
+        enterCode: "Enter promo code",
+        databaseError: "Database error",
+        notFound: "Promo code not found",
+        inactive: "This promo code is no longer active",
+        alreadyUsed: "You have already used this promo code",
+        limitExceeded: "Usage limit for this promo code has been reached",
+        expired: "This promo code has expired",
+        valid: "Promo code is valid",
+        serverError: "Server error"
+      },
+      russian: {
+        loginRequired: "Требуется вход",
+        invalidToken: "Токен недействителен",
+        enterCode: "Введите промокод",
+        databaseError: "Ошибка базы данных",
+        notFound: "Промокод не найден",
+        inactive: "Этот промокод больше не активен",
+        alreadyUsed: "Вы уже использовали этот промокод",
+        limitExceeded: "Лимит использования этого промокода исчерпан",
+        expired: "Срок действия этого промокода истек",
+        valid: "Промокод действителен",
+        serverError: "Ошибка сервера"
+      }
+    };
+    return messages[lang as keyof typeof messages] || messages.azerbaijani;
+  };
+  
   try {
     // Auto-check and deactivate expired promo codes before validation
     await checkAndDeactivateExpiredPromoCodes();
@@ -71,7 +117,8 @@ export async function POST(req: NextRequest) {
       'Expires': '0'
     };
 
-    const { promoCode } = await req.json();
+    const { promoCode, language = 'azerbaijani' } = await req.json();
+    const msg = getMessages(language);
 
     // Get user from token with production-safe fallbacks
     const authHeader = req.headers.get('authorization');
@@ -84,7 +131,7 @@ export async function POST(req: NextRequest) {
       console.log('❌ [VALIDATE] No token provided for promo validation');
       return NextResponse.json({
         success: false,
-        message: "Giriş tələb olunur"
+        message: msg.loginRequired
       }, { status: 401, headers });
     }
 
@@ -101,7 +148,7 @@ export async function POST(req: NextRequest) {
       console.error('❌ [VALIDATE] JWT verification failed:', jwtError);
       return NextResponse.json({
         success: false,
-        message: "Token etibarsızdır"
+        message: msg.invalidToken
       }, { status: 401, headers });
     }
 
@@ -114,7 +161,7 @@ export async function POST(req: NextRequest) {
       console.log('❌ [VALIDATE] Invalid promo code input');
       return NextResponse.json({
         success: false,
-        message: "Promokod daxil edin"
+        message: msg.enterCode
       }, { status: 400, headers });
     }
 
@@ -144,7 +191,7 @@ export async function POST(req: NextRequest) {
       console.error('❌ [VALIDATE] Database error:', dbError);
       return NextResponse.json({
         success: false,
-        message: "Database xətası"
+        message: msg.databaseError
       }, { status: 500, headers });
     }
 
@@ -152,7 +199,7 @@ export async function POST(req: NextRequest) {
       console.log(`❌ [VALIDATE] Promo code not found in database: "${promoCode}"`);
       return NextResponse.json({
         success: false,
-        message: "Promokod tapılmadı"
+        message: msg.notFound
       }, { status: 404, headers });
     }
 
@@ -163,7 +210,7 @@ export async function POST(req: NextRequest) {
       console.log(`❌ [VALIDATE] Promo code is inactive: ${foundPromoCode.code}`);
       return NextResponse.json({
         success: false,
-        message: "Bu promokod artıq aktiv deyil"
+        message: msg.inactive
       }, { status: 400, headers });
     }
 
@@ -172,7 +219,7 @@ export async function POST(req: NextRequest) {
       console.log(`❌ [VALIDATE] User already used this promo code: ${foundPromoCode.code}`);
       return NextResponse.json({
         success: false,
-        message: "Bu promokodu artıq istifadə etmisiniz"
+        message: msg.alreadyUsed
       }, { status: 400, headers });
     }
 
@@ -181,7 +228,7 @@ export async function POST(req: NextRequest) {
       console.log(`❌ [VALIDATE] Usage limit exceeded: ${foundPromoCode.usedCount}/${foundPromoCode.usageLimit}`);
       return NextResponse.json({
         success: false,
-        message: "Bu promokoddun istifadə limiti bitib"
+        message: msg.limitExceeded
       }, { status: 400, headers });
     }
 
@@ -190,7 +237,7 @@ export async function POST(req: NextRequest) {
       console.log(`❌ [VALIDATE] Promo code expired: ${foundPromoCode.expiresAt}`);
       return NextResponse.json({
         success: false,
-        message: "Bu promokoddun vaxtı keçib"
+        message: msg.expired
       }, { status: 400, headers });
     }
 
@@ -207,7 +254,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       valid: true, // Add explicit valid field
-      message: "Promokod keçərlidir",
+      message: msg.valid,
       tier: foundPromoCode.tier, // Add tier field at root level
       promoCode: {
         code: foundPromoCode.code,
@@ -225,7 +272,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: false,
       valid: false,
-      message: "Server xətası"
+      message: getMessages('azerbaijani').serverError
     }, { status: 500 });
   } finally {
     try {

@@ -290,7 +290,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             jobMatchText: 'CV-nizin vakansiyaya uyğunluğunu yoxlamaq üçün buraya klikləyin',
             jobMatchLink: '/jobmatch',
             languageTip: 'Dil Tövsiyəsi:',
-            languageText: 'CV-nizin dilinin vakansiyanın dili ilə uyğun olduğundan əmin olun və AI tərcümədən istifadə edin.'
+            languageText: 'CV-nizin dilinin vakansiyanın dili ilə uyğun olduğundan əmin olun və AI tərcümədən istifadə edin.',
+            selectedSection: 'Seçilmiş Bölmə:'
         },
         english: {
             templateSelection: 'Template Selection',
@@ -327,7 +328,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             jobMatchText: 'Click here to check your CV compatibility with job postings',
             jobMatchLink: '/jobmatch',
             languageTip: 'Language Recommendation:',
-            languageText: 'Ensure your CV language matches the job posting language and use AI translation when needed.'
+            languageText: 'Ensure your CV language matches the job posting language and use AI translation when needed.',
+            selectedSection: 'Selected Section:'
         },
         russian: {
             templateSelection: 'Выбор шаблона',
@@ -364,7 +366,8 @@ export default function CVEditor({ cvId, onSave, onCancel, initialData, userTier
             jobMatchText: 'Нажмите здесь, чтобы проверить совместимость вашего резюме с вакансиями',
             jobMatchLink: '/jobmatch',
             languageTip: 'Языковая рекомендация:',
-            languageText: 'Убедитесь, что язык резюме соответствует языку вакансии, и используйте ИИ-перевод при необходимости.'
+            languageText: 'Убедитесь, что язык резюме соответствует языку вакансии, и используйте ИИ-перевод при необходимости.',
+            selectedSection: 'Выбранный раздел:'
         }
     };
 
@@ -1495,15 +1498,15 @@ ${cv.projects.map(proj => `
             <>
                 {/* Job Match Recommendation */}
                 <Link href={content.jobMatchLink} className="block mb-1.5 sm:mb-2 p-1.5 sm:p-2 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-md hover:from-green-100 hover:to-emerald-100 hover:border-green-300 transition-all duration-200 cursor-pointer">
-                    <div className="flex items-center gap-1 sm:gap-1.5 text-xs shadow-sm">
+                    <div className="flex items-center gap-1 sm:gap-1.5 shadow-sm">
                         <div className="flex-shrink-0">
                             <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                             </svg>
                         </div>
                         <div className="flex-1">
-                            <span className="text-green-800 font-medium text-xs leading-tight">🎯 {content.jobMatchTip} </span>
-                            <span className="text-green-700 underline text-xs leading-tight">{content.jobMatchText}</span>
+                            <span className="text-green-800 font-medium text-[10px] sm:text-xs leading-tight">🎯 {content.jobMatchTip} </span>
+                            <span className="text-green-700 underline text-[10px] sm:text-xs leading-tight">{content.jobMatchText}</span>
                         </div>
                         <div className="flex-shrink-0">
                             <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
@@ -1514,15 +1517,15 @@ ${cv.projects.map(proj => `
                 </Link>
 
                 {/* Language Recommendation */}
-                <div className="mb-1.5 sm:mb-2 p-1.5 sm:p-2 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-md flex items-center gap-1 sm:gap-1.5 text-xs shadow-sm">
+                <div className="mb-1.5 sm:mb-2 p-1.5 sm:p-2 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-md flex items-center gap-1 sm:gap-1.5 shadow-sm">
                     <div className="flex-shrink-0">
                         <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                         </svg>
                     </div>
                     <div className="flex-1">
-                        <span className="text-blue-800 font-medium text-xs leading-tight">🌐 {content.languageTip} </span>
-                        <span className="text-blue-700 text-xs leading-tight">{content.languageText}</span>
+                        <span className="text-blue-800 font-medium text-[10px] sm:text-xs leading-tight">🌐 {content.languageTip} </span>
+                        <span className="text-blue-700 text-[10px] sm:text-xs leading-tight">{content.languageText}</span>
                     </div>
                 </div>
 
@@ -2000,10 +2003,19 @@ ${cv.projects.map(proj => `
 
                     {/* A4 Preview Container */}
 <div className="bg-slate-50 rounded-xl border border-dashed border-slate-300 transition-all duration-300 overflow-hidden">
-    {/* Desktop: Vertical scrolling enabled for long CVs */}
-    <div className="hidden lg:block h-[calc(100vh-12rem)] p-4 sm:p-8 flex justify-center items-start border border-white overflow-y-auto">
+    {/* Desktop: A4 size container with vertical scrolling */}
+    <div 
+        className="hidden lg:flex p-4 sm:p-8 justify-center items-start border border-white overflow-y-auto"
+        style={{
+            height: '297mm'
+        }}
+    >
         <div 
             className="bg-white rounded-xl border border-white shadow-2xl shadow-slate-300/60 transition-transform duration-300 mb-8"
+            style={{
+                width: '210mm',
+                minHeight: '297mm'
+            }}
         >
             {renderPreview()}
         </div>
@@ -2038,7 +2050,7 @@ ${cv.projects.map(proj => `
                 <div className="max-w-lg mx-auto">
                     {/* Selected Section Info */}
                     <div className="text-center mb-4">
-                        <div className="text-sm text-gray-600 mb-1">Seçilmiş Bölmə:</div>
+                        <div className="text-sm text-gray-600 mb-1">{content.selectedSection}</div>
                         <div className="text-lg font-semibold text-gray-800 bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
                             {getSectionName(activeMobileSection, siteLanguage, cv.sectionNames, cv)}
                         </div>
@@ -2125,7 +2137,9 @@ ${cv.projects.map(proj => `
 
                     {/* Helper Text */}
                     <div className="text-center text-xs text-gray-500 mt-3">
-                        📱 CV bölməsinin yerini dəyişmək üçün yuxarı və ya aşağı düymələrini istifadə edin
+                        📱 {siteLanguage === 'azerbaijani' ? 'CV bölməsinin yerini dəyişmək üçün yuxarı və ya aşağı düymələrini istifadə edin' : 
+                             siteLanguage === 'russian' ? 'Используйте кнопки вверх или вниз, чтобы изменить положение раздела резюме' : 
+                             'Use the up or down buttons to change the position of the CV section'}
                     </div>
                 </div>
             </div>
@@ -2136,10 +2150,14 @@ ${cv.projects.map(proj => `
             <div className="bg-blue-50 border-t border-blue-200 p-4">
                 <div className="text-center">
                     <div className="text-sm text-blue-700 font-medium">
-                        📋 Sırasını dəyişmək istədiyiniz bölməni seçin
+                        📋 {siteLanguage === 'azerbaijani' ? 'Sırasını dəyişmək istədiyiniz bölməni seçin' : 
+                             siteLanguage === 'russian' ? 'Выберите раздел для изменения порядка' : 
+                             'Select the section you want to reorder'}
                     </div>
                     <div className="text-xs text-blue-600 mt-1">
-                        CV-də istənilən bölməyə toxunaraq seçə bilərsiniz
+                        {siteLanguage === 'azerbaijani' ? 'CV-də istənilən bölməyə toxunaraq seçə bilərsiniz' : 
+                         siteLanguage === 'russian' ? 'Вы можете выбрать любой раздел в резюме, нажав на него' : 
+                         'You can select any section in the CV by tapping on it'}
                     </div>
                 </div>
             </div>

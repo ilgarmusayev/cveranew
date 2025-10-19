@@ -47,6 +47,7 @@ interface JobMatch {
   description: string;
   requirements: string[];
   benefits: string[];
+  improvementAreas?: string[]; // AI analysis - areas needing improvement
 }
 
 interface JobMatchFormProps {
@@ -55,6 +56,12 @@ interface JobMatchFormProps {
 
 export default function JobMatchForm({ onBack }: JobMatchFormProps) {
   const { siteLanguage } = useSiteLanguage();
+  
+  // 🔍 DEBUG: Monitor siteLanguage changes
+  useEffect(() => {
+    console.log('🔄 JobMatchForm: siteLanguage dəyişdi:', siteLanguage);
+  }, [siteLanguage]);
+  
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedCV, setSelectedCV] = useState<CV | null>(null);
   const [cvs, setCvs] = useState<CV[]>([]);
@@ -62,6 +69,9 @@ export default function JobMatchForm({ onBack }: JobMatchFormProps) {
   const [searchLoading, setSearchLoading] = useState(false);
   const [jobMatches, setJobMatches] = useState<JobMatch[]>([]);
   const [searchError, setSearchError] = useState('');
+  
+  // Analysis language - independent from site language
+  const [analysisLanguage, setAnalysisLanguage] = useState<'az' | 'en' | 'ru'>('az');
   
   // Form data
   const [formData, setFormData] = useState({
@@ -107,7 +117,9 @@ export default function JobMatchForm({ onBack }: JobMatchFormProps) {
       next: 'Növbəti',
       previous: 'Əvvəlki',
       optionalNote: '* Bu sahələr məcburi deyil, lakin doldurulması axtarış nəticələrini yaxşılaşdıracaq.',
-      aiAnalysis: 'AI sizin CV-nizi analiz edərək ən uyğun iş imkanlarını tapacaq və uyğunluq faizini göstərəcək.'
+      aiAnalysis: 'AI sizin CV-nizi analiz edərək ən uyğun iş imkanlarını tapacaq və uyğunluq faizini göstərəcək.',
+      analysisLanguageLabel: 'Analiz Dili',
+      analysisLanguageHint: 'AI cavabları hansı dildə olsun?'
     },
     english: {
       title: 'Job Match Analysis',
@@ -141,7 +153,9 @@ export default function JobMatchForm({ onBack }: JobMatchFormProps) {
       next: 'Next',
       previous: 'Previous',
       optionalNote: '* These fields are optional, but filling them will improve search results.',
-      aiAnalysis: 'AI will analyze your CV to find the most suitable job opportunities and show match percentages.'
+      aiAnalysis: 'AI will analyze your CV to find the most suitable job opportunities and show match percentages.',
+      analysisLanguageLabel: 'Analysis Language',
+      analysisLanguageHint: 'In which language should AI responses be?'
     },
     russian: {
       title: 'Анализ соответствия вакансий',
@@ -175,7 +189,9 @@ export default function JobMatchForm({ onBack }: JobMatchFormProps) {
       next: 'Далее',
       previous: 'Назад',
       optionalNote: '* Эти поля необязательны, но их заполнение улучшит результаты поиска.',
-      aiAnalysis: 'ИИ проанализирует ваше CV, чтобы найти наиболее подходящие вакансии и показать процент соответствия.'
+      aiAnalysis: 'ИИ проанализирует ваше CV, чтобы найти наиболее подходящие вакансии и показать процент соответствия.',
+      analysisLanguageLabel: 'Язык анализа',
+      analysisLanguageHint: 'На каком языке должны быть ответы ИИ?'
     }
   };
 
@@ -265,58 +281,170 @@ export default function JobMatchForm({ onBack }: JobMatchFormProps) {
     setSearchError('');
     
     try {
-      // Mock job matches for now - later integrate with real job APIs
-      const mockJobs: JobMatch[] = [
-        {
-          id: '1',
-          title: 'Senior Software Developer',
-          company: 'TechCorp Azerbaijan',
-          location: 'Baku, Azerbaijan',
-          type: 'Full-time',
-          salary: '2000-3000 AZN',
-          matchPercentage: 95,
-          description: 'We are looking for an experienced software developer to join our team...',
-          requirements: ['React.js', 'Node.js', 'TypeScript', '3+ years experience'],
-          benefits: ['Health insurance', 'Remote work options', 'Professional development']
-        },
-        {
-          id: '2',
-          title: 'Frontend Developer',
-          company: 'Digital Agency',
-          location: 'Remote',
-          type: 'Contract',
-          salary: '1500-2200 AZN',
-          matchPercentage: 87,
-          description: 'Join our creative team to build amazing user interfaces...',
-          requirements: ['HTML/CSS', 'JavaScript', 'React', 'UI/UX knowledge'],
-          benefits: ['Flexible hours', 'Project bonuses', 'Learning budget']
-        },
-        {
-          id: '3',
-          title: 'Full Stack Engineer',
-          company: 'StartupHub',
-          location: 'Baku, Azerbaijan',
-          type: 'Full-time',
-          salary: '1800-2500 AZN',
-          matchPercentage: 82,
-          description: 'Build the next generation of web applications...',
-          requirements: ['Full-stack development', 'Database design', 'API development'],
-          benefits: ['Equity options', 'Modern office', 'Team events']
-        }
-      ];
-
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Get JWT token from localStorage
+      const token = localStorage.getItem('token');
       
-      setJobMatches(mockJobs);
-      setCurrentStep(3);
+      if (!token) {
+        setSearchError(siteLanguage === 'azerbaijani' 
+          ? 'İcazə tapılmadı. Yenidən daxil olun.'
+          : siteLanguage === 'english'
+          ? 'Authorization not found. Please log in again.'
+          : 'Авторизация не найдена. Пожалуйста, войдите снова.');
+        return;
+      }
+
+      // Map site language to API language code
+      const languageMap: Record<string, string> = {
+        'azerbaijani': 'az',
+        'english': 'en',
+        'russian': 'ru'
+      };
+      
+      // Use analysisLanguage directly instead of siteLanguage
+      const apiLanguage = analysisLanguage; // Already in 'az', 'en', 'ru' format
+
+      // 🔍 DEBUG: Check analysis language
+      console.log('🌐 Site Language:', siteLanguage);
+      console.log('� Analysis Language (user selected):', analysisLanguage);
+      console.log('🔤 API Language Code:', apiLanguage);
+
+      // Build job description from form data with site language support
+      const jobDescriptionLabels = {
+        azerbaijani: {
+          jobType: 'İş Növü',
+          location: 'Yer',
+          experienceLevel: 'Təcrübə Səviyyəsi',
+          salaryRange: 'Maaş Aralığı',
+          industry: 'Sənaye',
+          additionalFilters: 'Əlavə Filtrlər',
+          notSpecified: 'Göstərilməyib',
+          none: 'Yoxdur'
+        },
+        english: {
+          jobType: 'Job Type',
+          location: 'Location',
+          experienceLevel: 'Experience Level',
+          salaryRange: 'Salary Range',
+          industry: 'Industry',
+          additionalFilters: 'Additional Filters',
+          notSpecified: 'Not specified',
+          none: 'None'
+        },
+        russian: {
+          jobType: 'Тип работы',
+          location: 'Местоположение',
+          experienceLevel: 'Уровень опыта',
+          salaryRange: 'Зарплата',
+          industry: 'Индустрия',
+          additionalFilters: 'Дополнительные фильтры',
+          notSpecified: 'Не указано',
+          none: 'Нет'
+        }
+      };
+
+      const labels = jobDescriptionLabels[siteLanguage as keyof typeof jobDescriptionLabels] || jobDescriptionLabels.azerbaijani;
+
+      // Map form values to display text based on site language
+      const jobTypeMap: Record<string, Record<string, string>> = {
+        'full-time': { azerbaijani: 'Tam vaxt', english: 'Full-time', russian: 'Полный рабочий день' },
+        'part-time': { azerbaijani: 'Yarım vaxt', english: 'Part-time', russian: 'Неполный рабочий день' },
+        'contract': { azerbaijani: 'Müqavilə', english: 'Contract', russian: 'Контракт' },
+        'remote': { azerbaijani: 'Uzaqdan', english: 'Remote', russian: 'Удаленная работа' }
+      };
+
+      const experienceLevelMap: Record<string, Record<string, string>> = {
+        'entry': { azerbaijani: 'Başlanğıc', english: 'Entry Level', russian: 'Начальный' },
+        'mid': { azerbaijani: 'Orta', english: 'Mid Level', russian: 'Средний' },
+        'senior': { azerbaijani: 'Yüksək', english: 'Senior Level', russian: 'Высокий' }
+      };
+
+      const jobTypeDisplay = jobTypeMap[formData.jobType]?.[siteLanguage] || formData.jobType;
+      const experienceLevelDisplay = experienceLevelMap[formData.experienceLevel]?.[siteLanguage] || formData.experienceLevel;
+
+      const jobDescriptionText = `
+${labels.jobType}: ${jobTypeDisplay}
+${labels.location}: ${formData.location || labels.notSpecified}
+${labels.experienceLevel}: ${experienceLevelDisplay}
+${labels.salaryRange}: ${formData.salaryRange || labels.notSpecified}
+${labels.industry}: ${formData.industryPreference || labels.notSpecified}
+${labels.additionalFilters}: ${formData.additionalFilters || labels.none}
+      `.trim();
+
+      // 🔍 DEBUG: Log job description being sent
+      console.log('📝 Job Description:', jobDescriptionText);
+
+      // Call real Job Match API with site language
+      console.log('🚀 Sending API request with language:', apiLanguage);
+      const response = await fetch('/api/job-match', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          cvId: selectedCV,
+          jobTitle: formData.jobTitle,
+          jobDescription: jobDescriptionText,
+          language: apiLanguage // Pass site language to API
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'API xətası');
+      }
+
+      const data = await response.json();
+      
+      // 🔍 DEBUG: Check API response
+      console.log('✅ API Response:', data);
+      console.log('📊 Analysis data:', data.analysis);
+      
+      if (data.success && data.analysis) {
+        // Convert API response to JobMatch format
+        const jobMatch: JobMatch = {
+          id: '1',
+          title: formData.jobTitle,
+          company: formData.industryPreference || siteLanguage === 'azerbaijani' 
+            ? 'Müəssisə məlumatı yoxdur' 
+            : siteLanguage === 'english'
+            ? 'Company information not available'
+            : 'Информация о компании недоступна',
+          location: formData.location || siteLanguage === 'azerbaijani' 
+            ? 'Məkan göstərilməyib' 
+            : siteLanguage === 'english'
+            ? 'Location not specified'
+            : 'Местоположение не указано',
+          type: formData.jobType,
+          salary: formData.salaryRange || siteLanguage === 'azerbaijani' 
+            ? 'Maaş göstərilməyib' 
+            : siteLanguage === 'english'
+            ? 'Salary not specified'
+            : 'Зарплата не указана',
+          matchPercentage: data.analysis.overallScore,
+          description: siteLanguage === 'azerbaijani' 
+            ? 'AI tərəfindən analiz edilmiş iş uyğunluğu' 
+            : siteLanguage === 'english'
+            ? 'AI-analyzed job compatibility'
+            : 'Совместимость с работой, проанализированная ИИ',
+          requirements: data.analysis.matchingPoints || [],
+          benefits: data.analysis.recommendations || [],
+          improvementAreas: data.analysis.improvementAreas || []
+        };
+
+        setJobMatches([jobMatch]);
+        setCurrentStep(3);
+      } else {
+        throw new Error('Analiz cavabı tapılmadı');
+      }
+      
     } catch (error) {
       console.error('Error searching jobs:', error);
       setSearchError(siteLanguage === 'azerbaijani' 
-        ? 'Axtarış zamanı xəta baş verdi. Yenidən cəhd edin.'
+        ? `Axtarış zamanı xəta baş verdi: ${error instanceof Error ? error.message : 'Naməlum xəta'}`
         : siteLanguage === 'english'
-        ? 'An error occurred during search. Please try again.'
-        : 'Произошла ошибка при поиске. Попробуйте снова.');
+        ? `An error occurred during search: ${error instanceof Error ? error.message : 'Unknown error'}`
+        : `Произошла ошибка при поиске: ${error instanceof Error ? error.message : 'Неизвестная ошибка'}`);
     } finally {
       setSearchLoading(false);
     }
@@ -373,6 +501,46 @@ export default function JobMatchForm({ onBack }: JobMatchFormProps) {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
+            {/* Analysis Language Selector - NEW */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {currentContent.analysisLanguageLabel}
+              </label>
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => setAnalysisLanguage('az')}
+                  className={`flex-1 px-4 py-3 rounded-lg border-2 transition-all duration-200 ${
+                    analysisLanguage === 'az'
+                      ? 'border-blue-600 bg-blue-50 text-blue-700 font-semibold'
+                      : 'border-gray-300 bg-white text-gray-700 hover:border-blue-400'
+                  }`}
+                >
+                  Azərbaycan
+                </button>
+                <button
+                  onClick={() => setAnalysisLanguage('en')}
+                  className={`flex-1 px-4 py-3 rounded-lg border-2 transition-all duration-200 ${
+                    analysisLanguage === 'en'
+                      ? 'border-blue-600 bg-blue-50 text-blue-700 font-semibold'
+                      : 'border-gray-300 bg-white text-gray-700 hover:border-blue-400'
+                  }`}
+                >
+                  English
+                </button>
+                <button
+                  onClick={() => setAnalysisLanguage('ru')}
+                  className={`flex-1 px-4 py-3 rounded-lg border-2 transition-all duration-200 ${
+                    analysisLanguage === 'ru'
+                      ? 'border-blue-600 bg-blue-50 text-blue-700 font-semibold'
+                      : 'border-gray-300 bg-white text-gray-700 hover:border-blue-400'
+                  }`}
+                >
+                  Русский
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">{currentContent.analysisLanguageHint}</p>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {currentContent.jobTitle}
@@ -596,10 +764,15 @@ export default function JobMatchForm({ onBack }: JobMatchFormProps) {
               {job.description}
             </p>
 
-            <div className="grid md:grid-cols-2 gap-4 mb-4">
+            <div className="grid md:grid-cols-3 gap-4 mb-4">
               <div>
                 <h4 className="font-medium text-gray-900 mb-2">
-                  {currentContent.requirements}
+                  {siteLanguage === 'azerbaijani' 
+                    ? 'Uyğun Məqamlar' 
+                    : siteLanguage === 'english'
+                    ? 'Matching Points'
+                    : 'Совпадающие моменты'
+                  }
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {job.requirements.map((req, index) => (
@@ -612,9 +785,38 @@ export default function JobMatchForm({ onBack }: JobMatchFormProps) {
                   ))}
                 </div>
               </div>
+              
+              {job.improvementAreas && job.improvementAreas.length > 0 && (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">
+                    {siteLanguage === 'azerbaijani' 
+                      ? 'İnkişaf Sahələri' 
+                      : siteLanguage === 'english'
+                      ? 'Improvement Areas'
+                      : 'Области улучшения'
+                    }
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {job.improvementAreas.map((area, index) => (
+                      <span
+                        key={index}
+                        className="px-2 py-1 bg-orange-100 text-orange-800 text-sm rounded-md"
+                      >
+                        {area}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
               <div>
                 <h4 className="font-medium text-gray-900 mb-2">
-                  {currentContent.benefits}
+                  {siteLanguage === 'azerbaijani' 
+                    ? 'Tövsiyələr' 
+                    : siteLanguage === 'english'
+                    ? 'Recommendations'
+                    : 'Рекомендации'
+                  }
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {job.benefits.map((benefit, index) => (

@@ -135,7 +135,7 @@ export default function Footer() {
                 <div className="text-left">
                   <h3 className="text-base lg:text-lg font-semibold text-gray-900 mb-3 lg:mb-6">{content.services}</h3>
                   <ul className="space-y-2 lg:space-y-4">
-                    <li><Link href="/dashboard" className="text-gray-600 hover:text-blue-600 transition-colors duration-200 text-xs sm:text-sm lg:text-base">{content.createCV}</Link></li>
+                    <li><Link href="/create" className="text-gray-600 hover:text-blue-600 transition-colors duration-200 text-xs sm:text-sm lg:text-base">{content.createCV}</Link></li>
                     <li><Link href="/coverletter" className="text-gray-600 hover:text-blue-600 transition-colors duration-200 text-xs sm:text-sm lg:text-base">{content.coverLetter}</Link></li>
                     <li><Link href="/templates" className="text-gray-600 hover:text-blue-600 transition-colors duration-200 text-xs sm:text-sm lg:text-base">{content.templates}</Link></li>
                     <li><Link href="/pricing" className="text-gray-600 hover:text-blue-600 transition-colors duration-200 text-xs sm:text-sm lg:text-base">{content.pricing}</Link></li>

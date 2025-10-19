@@ -57,6 +57,55 @@ async function checkAndDeactivateExpiredPromoCodes() {
 }
 
 export async function POST(req: NextRequest) {
+  // Error messages helper function
+  const getMessages = (lang: string = 'azerbaijani') => {
+    const messages = {
+      azerbaijani: {
+        loginRequired: "Giriş tələb olunur",
+        invalidToken: "Token etibarsızdır",
+        enterCode: "Promokod daxil edin",
+        notFound: "Promokod tapılmadı",
+        inactive: "Bu promokod artıq aktiv deyil",
+        alreadyUsed: "Bu promokodu artıq istifadə etmisiniz",
+        limitExceeded: "Bu promokoddun istifadə limiti bitib",
+        expired: "Bu promokoddun vaxtı keçib",
+        userNotFound: "İstifadəçi tapılmadı",
+        timeout: "Prosedur çox uzun çəkir, təkrar cəhd edin",
+        serverError: "Server xətası",
+        upgradeSuccess: "Tebrikler! Paketiniz uğurla yeniləndi"
+      },
+      english: {
+        loginRequired: "Login required",
+        invalidToken: "Token is invalid",
+        enterCode: "Enter promo code",
+        notFound: "Promo code not found",
+        inactive: "This promo code is no longer active",
+        alreadyUsed: "You have already used this promo code",
+        limitExceeded: "Usage limit for this promo code has been reached",
+        expired: "This promo code has expired",
+        userNotFound: "User not found",
+        timeout: "Operation taking too long, please try again",
+        serverError: "Server error",
+        upgradeSuccess: "Congratulations! Your package has been successfully upgraded"
+      },
+      russian: {
+        loginRequired: "Требуется вход",
+        invalidToken: "Токен недействителен",
+        enterCode: "Введите промокод",
+        notFound: "Промокод не найден",
+        inactive: "Этот промокод больше не активен",
+        alreadyUsed: "Вы уже использовали этот промокод",
+        limitExceeded: "Лимит использования этого промокода исчерпан",
+        expired: "Срок действия этого промокода истек",
+        userNotFound: "Пользователь не найден",
+        timeout: "Операция занимает слишком много времени, попробуйте еще раз",
+        serverError: "Ошибка сервера",
+        upgradeSuccess: "Поздравляем! Ваш пакет успешно обновлен"
+      }
+    };
+    return messages[lang as keyof typeof messages] || messages.azerbaijani;
+  };
+  
   try {
     // Auto-check and deactivate expired promo codes before application
     await checkAndDeactivateExpiredPromoCodes();
@@ -71,7 +120,8 @@ export async function POST(req: NextRequest) {
       'Expires': '0'
     };
 
-    const { promoCode } = await req.json();
+    const { promoCode, language = 'azerbaijani' } = await req.json();
+    const msg = getMessages(language);
 
     // Get user from token with production-safe fallbacks
     const authHeader = req.headers.get('authorization');
@@ -84,7 +134,7 @@ export async function POST(req: NextRequest) {
       console.log('❌ [APPLY] No token provided for promo application');
       return NextResponse.json({
         success: false,
-        message: "Giriş tələb olunur"
+        message: msg.loginRequired
       }, { status: 401, headers });
     }
 
@@ -101,7 +151,7 @@ export async function POST(req: NextRequest) {
       console.error('❌ [APPLY] JWT verification failed:', jwtError);
       return NextResponse.json({
         success: false,
-        message: "Token etibarsızdır"
+        message: msg.invalidToken
       }, { status: 401, headers });
     }
 
@@ -114,7 +164,7 @@ export async function POST(req: NextRequest) {
       console.log('❌ [APPLY] Invalid promo code input');
       return NextResponse.json({
         success: false,
-        message: "Promokod daxil edin"
+        message: msg.enterCode
       }, { status: 400, headers });
     }
 
@@ -153,7 +203,7 @@ export async function POST(req: NextRequest) {
 
       if (!foundPromoCode) {
         console.log(`❌ [APPLY] Promo code not found: "${promoCode}"`);
-        throw new Error("Promokod tapılmadı");
+        throw new Error(msg.notFound);
       }
 
       console.log(`✅ [APPLY] Found promo code: ${foundPromoCode.code} | Tier: ${foundPromoCode.tier}`);
@@ -161,25 +211,25 @@ export async function POST(req: NextRequest) {
       // Check if promo code is active
       if (!foundPromoCode.isActive) {
         console.log(`❌ [APPLY] Promo code inactive: ${foundPromoCode.code}`);
-        throw new Error("Bu promokod artıq aktiv deyil");
+        throw new Error(msg.inactive);
       }
 
       // Check if user already used this promo code
       if (foundPromoCode.usedBy.length > 0) {
         console.log(`❌ [APPLY] User already used promo: ${foundPromoCode.code}`);
-        throw new Error("Bu promokodu artıq istifadə etmisiniz");
+        throw new Error(msg.alreadyUsed);
       }
 
       // Check usage limit
       if (foundPromoCode.usageLimit && foundPromoCode.usedCount >= foundPromoCode.usageLimit) {
         console.log(`❌ [APPLY] Usage limit exceeded: ${foundPromoCode.usedCount}/${foundPromoCode.usageLimit}`);
-        throw new Error("Bu promokoddun istifadə limiti bitib");
+        throw new Error(msg.limitExceeded);
       }
 
       // Check expiration date
       if (foundPromoCode.expiresAt && foundPromoCode.expiresAt < new Date()) {
         console.log(`❌ [APPLY] Promo code expired: ${foundPromoCode.expiresAt}`);
-        throw new Error("Bu promokoddun vaxtı keçib");
+        throw new Error(msg.expired);
       }
 
       // Get user info with enhanced logging
@@ -191,7 +241,7 @@ export async function POST(req: NextRequest) {
 
       if (!user) {
         console.log(`❌ [APPLY] User not found: ${userId}`);
-        throw new Error("İstifadəçi tapılmadı");
+        throw new Error(msg.userNotFound);
       }
 
       console.log(`👤 [APPLY] Found user: ${user.email} | Current tier: ${user.tier} | Subscriptions: ${user.subscriptions?.length || 0}`);
@@ -298,7 +348,7 @@ export async function POST(req: NextRequest) {
       if (error instanceof Error && error.message.includes('timeout')) {
         return NextResponse.json({
           success: false,
-          message: "Prosedur çox uzun çəkir, təkrar cəhd edin"
+          message: getMessages('azerbaijani').timeout
         }, { status: 408, headers });
       }
       throw error; // Re-throw non-timeout errors

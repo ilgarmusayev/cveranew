@@ -151,7 +151,10 @@ export default function PromoCodeSection({ userTier, onTierUpdate }: PromoCodeSe
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ promoCode: promoCode.trim() })
+        body: JSON.stringify({ 
+          promoCode: promoCode.trim(),
+          language: siteLanguage
+        })
       });
 
       const validateData = await validateResponse.json();
@@ -181,7 +184,10 @@ export default function PromoCodeSection({ userTier, onTierUpdate }: PromoCodeSe
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ promoCode: promoCode.trim() })
+        body: JSON.stringify({ 
+          promoCode: promoCode.trim(),
+          language: siteLanguage
+        })
       });
 
       const applyData = await applyResponse.json();

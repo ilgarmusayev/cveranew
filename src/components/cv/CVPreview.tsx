@@ -3149,7 +3149,7 @@ const AtlasTemplate: React.FC<{
     const availableLeftSections = useMemo(() => {
         const sections = getAvailableLeftSections();
         return sections;
-    }, [education, skills, languages, certifications, getAvailableLeftSections]);
+    }, [education?.length, skills?.length, languages?.length, certifications?.length]);
     
     // Filter leftColumnOrder to only include sections that actually exist
     const filteredLeftColumnOrder = useMemo(() => leftColumnOrder.filter(sectionId => availableLeftSections.includes(sectionId)), [leftColumnOrder, availableLeftSections]);
@@ -4458,7 +4458,7 @@ const LumenTemplate: React.FC<{
     const availableLeftSections = useMemo(() => {
         const sections = getAvailableLeftSections();
         return sections;
-    }, [education, skills, languages, certifications, getAvailableLeftSections]);
+    }, [education?.length, skills?.length, languages?.length, certifications?.length]);
     
     // Filter leftColumnOrder to only include sections that actually exist
     const filteredLeftColumnOrder = useMemo(() => leftColumnOrder.filter(sectionId => availableLeftSections.includes(sectionId)), [leftColumnOrder, availableLeftSections]);

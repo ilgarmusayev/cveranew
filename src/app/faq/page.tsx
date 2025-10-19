@@ -19,6 +19,7 @@ interface FAQItem {
       title: 'Tez-tez Verilən Suallar',
       subtitle: 'CVEra platforması haqqında ən çox verilən sualların cavabları',
       searchPlaceholder: 'Sualları axtarın...',
+      categoriesTitle: 'Kateqoriyalar',
       categories: ['Hamısı', 'Ümumi', 'CV Yaratma', 'Şablonlar', 'AI Xüsusiyyətlər', 'Abunəlik', 'Texniki', 'Dəstək'],
       noResultsTitle: 'Sual tapılmadı',
       noResultsDescription: 'Axtarış terminizi dəyişib yenidən cəhd edin',
@@ -128,6 +129,7 @@ interface FAQItem {
     title: 'Frequently Asked Questions',
     subtitle: 'Answers to the most common questions about CVEra platform',
     searchPlaceholder: 'Search questions...',
+    categoriesTitle: 'Categories',
     categories: ['All', 'General', 'CV Creation', 'Templates', 'AI Features', 'Subscription', 'Technical', 'Support'],
     noResultsTitle: 'No questions found',
     noResultsDescription: 'Try changing your search terms',
@@ -237,6 +239,7 @@ interface FAQItem {
     title: 'Часто задаваемые вопросы',
     subtitle: 'Ответы на самые популярные вопросы о платформе CVEra',
     searchPlaceholder: 'Поиск вопросов...',
+    categoriesTitle: 'Категории',
     categories: ['Все', 'Общие', 'Создание CV', 'Шаблоны', 'AI функции', 'Подписка', 'Техническое', 'Поддержка'],
     noResultsTitle: 'Вопросы не найдены',
     noResultsDescription: 'Попробуйте изменить условия поиска',
@@ -426,7 +429,7 @@ export default function FAQPage() {
             <div className="sticky top-24 bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
                 <span className="text-2xl mr-3">📋</span>
-                Kateqoriyalar
+                {content.categoriesTitle}
               </h3>
               <div className="space-y-2">
                 {content.categories.map((category: string, index: number) => (

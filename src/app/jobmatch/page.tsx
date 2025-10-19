@@ -172,6 +172,14 @@ export default function JobMatchPage() {
 
     try {
       const token = localStorage.getItem('accessToken');
+      
+      // Map site language to API language format
+      const languageMap: { [key: string]: 'az' | 'en' | 'ru' } = {
+        'azerbaijani': 'az',
+        'english': 'en',
+        'russian': 'ru'
+      };
+      
       const response = await fetch('/api/job-match', {
         method: 'POST',
         headers: {
@@ -182,7 +190,7 @@ export default function JobMatchPage() {
           cvId: selectedCV,
           jobTitle: jobTitle.trim(),
           jobDescription: jobDescription.trim(),
-          language: siteLanguage
+          language: languageMap[siteLanguage] || 'az'
         })
       });
 
