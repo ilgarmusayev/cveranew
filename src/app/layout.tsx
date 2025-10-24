@@ -5,7 +5,7 @@ import { AuthProvider } from "@/lib/auth";
 import { ToastProvider } from "@/components/ui/Toast";
 import { SiteLanguageProvider } from "@/contexts/SiteLanguageContext";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
-import TawkToWidget from "@/components/TawkToWidget";
+import FloatingChatbotWrapper from "@/components/chat/FloatingChatbotWrapper";
 import CustomCursor from "@/components/CustomCursor";
 import AOSProvider from "@/components/providers/AOSProvider";
 import "./globals.css";
@@ -127,11 +127,11 @@ export default function RootLayout({
                 </main>
               </AOSProvider>
             </AuthProvider>
+            <FloatingChatbotWrapper />
           </SiteLanguageProvider>
         </ToastProvider>
         <SpeedInsights />
         <GoogleAnalytics />
-        <TawkToWidget />
         <CustomCursor />
       </body>
     </html>
