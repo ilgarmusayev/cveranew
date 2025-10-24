@@ -942,9 +942,21 @@ ${personalInfo?.phone ? personalInfo.phone : ''}
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {[
-                    { id: 'azerbaijani', name: 'Azərbaycan dili', flag: '/flagaz.png' },
-                    { id: 'english', name: 'English', flag: '/flagusa.png' },
-                    { id: 'russian', name: 'Русский язык', flag: '/flagrus.png' }
+                    { 
+                      id: 'azerbaijani', 
+                      name: siteLanguage === 'azerbaijani' ? 'Azərbaycanca' : siteLanguage === 'english' ? 'Azerbaijani' : 'Азербайджанский', 
+                      flag: '/flagaz.png' 
+                    },
+                    { 
+                      id: 'english', 
+                      name: siteLanguage === 'azerbaijani' ? 'İngiliscə' : siteLanguage === 'english' ? 'English' : 'Английский', 
+                      flag: '/flagusa.png' 
+                    },
+                    { 
+                      id: 'russian', 
+                      name: siteLanguage === 'azerbaijani' ? 'Rusca' : siteLanguage === 'english' ? 'Russian' : 'Русский', 
+                      flag: '/flagrus.png' 
+                    }
                   ].map((language) => (
                     <button
                       key={language.id}

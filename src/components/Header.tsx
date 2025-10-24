@@ -73,9 +73,21 @@ export default function Header({
   // Language helper function
   const getLanguageDisplay = (lang: 'azerbaijani' | 'english' | 'russian') => {
     const displays = {
-      azerbaijani: { flagImg: '/flagaz.png', code: 'AZ', name: 'Azərbaycan' },
-      english: { flagImg: '/flagusa.png', code: 'EN', name: 'English' },
-      russian: { flagImg: '/flagrus.png', code: 'RU', name: 'Русский' }
+      azerbaijani: { 
+        flagImg: '/flagaz.png', 
+        code: 'AZ', 
+        name: siteLanguage === 'azerbaijani' ? 'Azərbaycanca' : siteLanguage === 'english' ? 'Azerbaijani' : 'Азербайджанский'
+      },
+      english: { 
+        flagImg: '/flagusa.png', 
+        code: 'EN', 
+        name: siteLanguage === 'azerbaijani' ? 'İngiliscə' : siteLanguage === 'english' ? 'English' : 'Английский'
+      },
+      russian: { 
+        flagImg: '/flagrus.png', 
+        code: 'RU', 
+        name: siteLanguage === 'azerbaijani' ? 'Rusca' : siteLanguage === 'english' ? 'Russian' : 'Русский'
+      }
     };
     return displays[lang];
   };

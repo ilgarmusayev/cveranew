@@ -260,6 +260,80 @@ export default function ProfileEditPage() {
     setError('');
     setSuccess('');
 
+    // Validate name
+    const trimmedName = formData.name.trim();
+    
+    if (!trimmedName) {
+      setError(content.validationNameRequired);
+      setSaving(false);
+      return;
+    }
+
+    if (trimmedName.length < 2) {
+      setError(siteLanguage === 'azerbaijani' 
+        ? 'Ad Soyad ən azı 2 simvoldan ibarət olmalıdır'
+        : siteLanguage === 'russian'
+        ? 'Имя должно содержать не менее 2 символов'
+        : 'Name must be at least 2 characters');
+      setSaving(false);
+      return;
+    }
+
+    if (trimmedName.length > 100) {
+      setError(siteLanguage === 'azerbaijani' 
+        ? 'Ad Soyad çox uzundur'
+        : siteLanguage === 'russian'
+        ? 'Имя слишком длинное'
+        : 'Name is too long');
+      setSaving(false);
+      return;
+    }
+
+    // Check for dash/hyphen
+    if (trimmedName.includes('-')) {
+      setError(siteLanguage === 'azerbaijani' 
+        ? 'Ad Soyadda tire (-) istifadə edilə bilməz'
+        : siteLanguage === 'russian'
+        ? 'В имени нельзя использовать дефис (-)'
+        : 'Hyphens (-) are not allowed in the name');
+      setSaving(false);
+      return;
+    }
+
+    // Check for numbers
+    if (/\d/.test(trimmedName)) {
+      setError(siteLanguage === 'azerbaijani' 
+        ? 'Ad Soyadda rəqəm istifadə edilə bilməz'
+        : siteLanguage === 'russian'
+        ? 'В имени нельзя использовать цифры'
+        : 'Numbers are not allowed in the name');
+      setSaving(false);
+      return;
+    }
+
+    // Check for multiple consecutive spaces
+    if (trimmedName.includes('  ')) {
+      setError(siteLanguage === 'azerbaijani' 
+        ? 'Ad Soyadda ardıcıl boşluqlar ola bilməz'
+        : siteLanguage === 'russian'
+        ? 'В имени не может быть нескольких пробелов подряд'
+        : 'Multiple consecutive spaces are not allowed');
+      setSaving(false);
+      return;
+    }
+
+    // Check for valid characters (Azerbaijani alphabet)
+    const nameRegex = /^[a-zA-Z\u0259\u018F\u011F\u011E\u00FC\u00DC\u015F\u015E\u00F6\u00D6\u00E7\u00C7\u0131\u0130\s'.]+$/;
+    if (!nameRegex.test(trimmedName)) {
+      setError(siteLanguage === 'azerbaijani' 
+        ? 'Ad Soyadda yalnız hərflər istifadə edilə bilər'
+        : siteLanguage === 'russian'
+        ? 'В имени можно использовать только буквы'
+        : 'Only letters are allowed in the name');
+      setSaving(false);
+      return;
+    }
+
     // Validate password fields if changing password
     if (showPasswordSection) {
       if (!formData.currentPassword) {
@@ -456,12 +530,76 @@ export default function ProfileEditPage() {
                     id="name"
                     type="text"
                     required
+                    minLength={2}
+                    maxLength={100}
+                    pattern="[a-zA-Z\u0259\u018F\u011F\u011E\u00FC\u00DC\u015F\u015E\u00F6\u00D6\u00E7\u00C7\u0131\u0130\s'.]+"
+                    title={siteLanguage === 'azerbaijani' 
+                      ? 'Ad Soyadda yalnız hərflər istifadə edilə bilər (tire və rəqəmlər qadağandır)'
+                      : siteLanguage === 'russian'
+                      ? 'В имени можно использовать только буквы (дефисы и цифры запрещены)'
+                      : 'Only letters are allowed in the name (hyphens and numbers are prohibited)'}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                     placeholder={content.fullNamePlaceholder}
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      
+                      // Prevent starting with space
+                      if (value.startsWith(' ') && !formData.name.startsWith(' ')) {
+                        return;
+                      }
+                      
+                      // Prevent multiple consecutive spaces
+                      if (value.includes('  ')) {
+                        return;
+                      }
+                      
+                      // Prevent dash/hyphen
+                      if (value.includes('-')) {
+                        return;
+                      }
+                      
+                      // Prevent numbers
+                      if (/\d/.test(value)) {
+                        return;
+                      }
+                      
+                      // Only allow Azerbaijani alphabet characters, spaces, apostrophe, and dot
+                      const nameRegex = /^[a-zA-Z\u0259\u018F\u011F\u011E\u00FC\u00DC\u015F\u015E\u00F6\u00D6\u00E7\u00C7\u0131\u0130\s'.]*$/;
+                      if (nameRegex.test(value)) {
+                        setFormData({ ...formData, name: value });
+                      }
+                    }}
+                    onBlur={(e) => {
+                      // Trim on blur
+                      const trimmed = e.target.value.trim();
+                      if (trimmed !== e.target.value) {
+                        setFormData({ ...formData, name: trimmed });
+                      }
+                    }}
                     onInvalid={(e) => {
-                      (e.target as HTMLInputElement).setCustomValidity(content.validationNameRequired);
+                      const target = e.target as HTMLInputElement;
+                      if (target.validity.valueMissing) {
+                        target.setCustomValidity(content.validationNameRequired);
+                      } else if (target.validity.tooShort) {
+                        target.setCustomValidity(siteLanguage === 'azerbaijani' 
+                          ? 'Ad Soyad ən azı 2 simvoldan ibarət olmalıdır'
+                          : siteLanguage === 'russian'
+                          ? 'Имя должно содержать не менее 2 символов'
+                          : 'Name must be at least 2 characters');
+                      } else if (target.validity.patternMismatch) {
+                        target.setCustomValidity(siteLanguage === 'azerbaijani' 
+                          ? 'Ad Soyadda yalnız hərflər istifadə edilə bilər'
+                          : siteLanguage === 'russian'
+                          ? 'В имени можно использовать только буквы'
+                          : 'Only letters are allowed in the name');
+                      } else {
+                        target.setCustomValidity(siteLanguage === 'azerbaijani' 
+                          ? 'Düzgün Ad Soyad daxil edin'
+                          : siteLanguage === 'russian'
+                          ? 'Введите правильное имя'
+                          : 'Enter a valid name');
+                      }
                     }}
                     onInput={(e) => {
                       (e.target as HTMLInputElement).setCustomValidity('');

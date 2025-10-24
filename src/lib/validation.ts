@@ -156,9 +156,17 @@ export function validateName(name: string): ValidationResult {
     return { isValid: false, error: 'Ad Soyadda tire (-) istifadə edilə bilməz' };
   }
 
-  // FIXED: Include all Azerbaijani letters including "ə" and "Ə"
-  // Azərbaycan əlifbasının bütün hərfləri daxil edilib
-  const nameRegex = /^[a-zA-ZəƏğüşöçıİĞÜŞÖÇ\s'.]+$/;
+  // Check for numbers
+  if (/\d/.test(trimmedName)) {
+    return { isValid: false, error: 'Ad Soyadda rəqəm istifadə edilə bilməz' };
+  }
+
+  // FIXED: Include all Azerbaijani letters including "ə" and "Ə" with explicit Unicode codes
+  // Azərbaycan əlifbasının bütün hərfləri daxil edilib (a-z, A-Z və Azərbaycan hərfləri)
+  // ə = \u0259, Ə = \u018F, ğ = \u011F, Ğ = \u011E, ü = \u00FC, Ü = \u00DC
+  // ş = \u015F, Ş = \u015E, ö = \u00F6, Ö = \u00D6, ç = \u00E7, Ç = \u00C7
+  // ı = \u0131, İ = \u0130
+  const nameRegex = /^[a-zA-Z\u0259\u018F\u011F\u011E\u00FC\u00DC\u015F\u015E\u00F6\u00D6\u00E7\u00C7\u0131\u0130\s'.]+$/;
   if (!nameRegex.test(trimmedName)) {
     return { isValid: false, error: 'Ad Soyadda yalnız hərflər istifadə edilə bilər' };
   }

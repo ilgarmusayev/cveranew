@@ -623,9 +623,21 @@ Write as if ${fullName} is confidently introducing themselves at a coffee meetin
           <div className="space-y-3">
             <div className="grid grid-cols-3 gap-3">
               {[
-                { id: 'azerbaijani', name: 'Azərbaycan', flag: '/flagaz.png' },
-                { id: 'english', name: 'English', flag: '/flagusa.png' },
-                { id: 'russian', name: 'Русский', flag: '/flagrus.png' }
+                { 
+                  id: 'azerbaijani', 
+                  name: siteLanguage === 'azerbaijani' ? 'Azərbaycanca' : siteLanguage === 'english' ? 'Azerbaijani' : 'Азербайджанский', 
+                  flag: '/flagaz.png' 
+                },
+                { 
+                  id: 'english', 
+                  name: siteLanguage === 'azerbaijani' ? 'İngiliscə' : siteLanguage === 'english' ? 'English' : 'Английский', 
+                  flag: '/flagusa.png' 
+                },
+                { 
+                  id: 'russian', 
+                  name: siteLanguage === 'azerbaijani' ? 'Rusca' : siteLanguage === 'english' ? 'Russian' : 'Русский', 
+                  flag: '/flagrus.png' 
+                }
               ].map((lang) => (
                 <button
                   key={lang.id}

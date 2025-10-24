@@ -248,19 +248,6 @@ const RegisterForm = ({ onSuccess, onSwitchToLogin }: RegisterFormProps) => {
     }
   };
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const name = e.target.value;
-    setFormData(prev => ({ ...prev, name }));
-    setFieldErrors(prev => ({ ...prev, name: '' }));
-
-    if (name.trim()) {
-      const validation = validateName(name);
-      if (!validation.isValid) {
-        setFieldErrors(prev => ({ ...prev, name: validation.error! }));
-      }
-    }
-  };
-
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const password = e.target.value;
     setFormData(prev => ({ ...prev, password }));
@@ -399,37 +386,13 @@ const RegisterForm = ({ onSuccess, onSwitchToLogin }: RegisterFormProps) => {
             </label>
             <input
                 id="name"
-                name={`name_${Math.random().toString(36)}`}
                 type="text"
                 required
-                minLength={2}
                 value={formData.name}
-                onChange={handleNameChange}
-                autoComplete="off"
-                autoCapitalize="off"
-                autoCorrect="off"
-                spellCheck="false"
-                data-form-type="other"
-                data-lpignore="true"
-                data-1p-ignore="true"
-                data-bwignore="true"
-                data-dashlane-ignore="true"
-                style={{
-                  backgroundColor: 'transparent !important',
-                  backgroundImage: 'none !important',
-                  color: 'inherit !important'
+                onChange={(e) => {
+                  setFormData(prev => ({ ...prev, name: e.target.value }));
+                  setFieldErrors(prev => ({ ...prev, name: '' }));
                 }}
-                onInvalid={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  if (target.validity.valueMissing) {
-                    target.setCustomValidity('Ad Soyad tələb olunur');
-                  } else if (target.validity.tooShort) {
-                    target.setCustomValidity('Ad Soyad ən azı 2 simvoldan ibarət olmalıdır');
-                  } else {
-                    target.setCustomValidity('Düzgün Ad Soyad daxil edin');
-                  }
-                }}
-                onInput={(e) => (e.target as HTMLInputElement).setCustomValidity('')}
                 className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                     fieldErrors.name ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-gray-300'
                 }`}

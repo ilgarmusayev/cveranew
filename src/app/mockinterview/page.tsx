@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import StandardHeader from '@/components/ui/StandardHeader';
 import { apiClient } from '@/lib/api';
+import { useSiteLanguage } from '@/contexts/SiteLanguageContext';
 
 // Interview mərhələləri
 type InterviewStage = 'selection' | 'interview' | 'result';
@@ -57,13 +58,30 @@ const LEVELS = [
     { id: 'senior' as LevelType, name: 'Senior', description: 'Təcrübəsi 5+ il' },
 ];
 
-const LANGUAGES = [
-    { id: 'az' as LanguageType, name: 'Azərbaycan', flag: '/flagaz.png', description: 'Suallar Azərbaycan dilində olacaq' },
-    { id: 'en' as LanguageType, name: 'English', flag: '/flagusa.png', description: 'Questions will be in English' },
-    { id: 'ru' as LanguageType, name: 'Русский', flag: '/flagrus.png', description: 'Вопросы будут на русском языке' },
-];
-
 export default function MockInterviewPage() {
+    const { siteLanguage } = useSiteLanguage();
+    
+    const LANGUAGES = [
+        { 
+            id: 'az' as LanguageType, 
+            name: siteLanguage === 'azerbaijani' ? 'Azərbaycanca' : siteLanguage === 'english' ? 'Azerbaijani' : 'Азербайджанский', 
+            flag: '/flagaz.png', 
+            description: siteLanguage === 'azerbaijani' ? 'Suallar Azərbaycan dilində olacaq' : siteLanguage === 'english' ? 'Questions will be in Azerbaijani' : 'Вопросы будут на азербайджанском языке'
+        },
+        { 
+            id: 'en' as LanguageType, 
+            name: siteLanguage === 'azerbaijani' ? 'İngiliscə' : siteLanguage === 'english' ? 'English' : 'Английский', 
+            flag: '/flagusa.png', 
+            description: siteLanguage === 'azerbaijani' ? 'Suallar İngilis dilində olacaq' : siteLanguage === 'english' ? 'Questions will be in English' : 'Вопросы будут на английском языке'
+        },
+        { 
+            id: 'ru' as LanguageType, 
+            name: siteLanguage === 'azerbaijani' ? 'Rusca' : siteLanguage === 'english' ? 'Russian' : 'Русский', 
+            flag: '/flagrus.png', 
+            description: siteLanguage === 'azerbaijani' ? 'Suallar Rus dilində olacaq' : siteLanguage === 'english' ? 'Questions will be in Russian' : 'Вопросы будут на русском языке'
+        },
+    ];
+    
     const [stage, setStage] = useState<InterviewStage>('selection');
     const [config, setConfig] = useState<InterviewConfig>({
         cvId: null,

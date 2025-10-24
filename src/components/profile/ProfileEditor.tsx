@@ -53,6 +53,12 @@ export default function ProfileEditor({ user, onUserUpdate, onClose }: ProfileEd
           const target = e.target as HTMLInputElement;
           if (target.validity.valueMissing) {
             target.setCustomValidity('Zəhmət olmasa bu sahəni doldurun');
+          } else if (target.validity.tooShort) {
+            target.setCustomValidity('Ad Soyad ən azı 2 simvoldan ibarət olmalıdır');
+          } else if (target.validity.patternMismatch) {
+            target.setCustomValidity('Ad Soyadda yalnız hərflər istifadə edilə bilər');
+          } else {
+            target.setCustomValidity('Düzgün Ad Soyad daxil edin');
           }
         };
         nameInput.oninput = function(e) {
@@ -88,6 +94,53 @@ export default function ProfileEditor({ user, onUserUpdate, onClose }: ProfileEd
     setSuccess('');
 
     try {
+      // Validate name
+      const trimmedName = formData.name.trim();
+      
+      if (!trimmedName) {
+        throw new Error('Ad Soyad tələb olunur');
+      }
+
+      if (trimmedName.length < 2) {
+        throw new Error('Ad Soyad ən azı 2 simvoldan ibarət olmalıdır');
+      }
+
+      if (trimmedName.length > 100) {
+        throw new Error('Ad Soyad çox uzundur');
+      }
+
+      // Check for dash/hyphen
+      if (trimmedName.includes('-')) {
+        throw new Error('Ad Soyadda tire (-) istifadə edilə bilməz');
+      }
+
+      // Check for numbers
+      if (/\d/.test(trimmedName)) {
+        throw new Error('Ad Soyadda rəqəm istifadə edilə bilməz');
+      }
+
+      // Check for multiple consecutive spaces
+      if (trimmedName.includes('  ')) {
+        throw new Error('Ad Soyadda ardıcıl boşluqlar ola bilməz');
+      }
+
+      // Check for valid characters (Azerbaijani alphabet)
+      const nameRegex = /^[a-zA-Z\u0259\u018F\u011F\u011E\u00FC\u00DC\u015F\u015E\u00F6\u00D6\u00E7\u00C7\u0131\u0130\s'.]+$/;
+      if (!nameRegex.test(trimmedName)) {
+        throw new Error('Ad Soyadda yalnız hərflər istifadə edilə bilər');
+      }
+
+      // Check if starts or ends with space
+      if (formData.name.startsWith(' ') || formData.name.endsWith(' ')) {
+        throw new Error('Ad Soyad boşluqla başlaya və ya bitə bilməz');
+      }
+
+      // Validate email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        throw new Error('Düzgün email formatı daxil edin');
+      }
+
       // Validate passwords if changing
       if (formData.newPassword) {
         if (formData.newPassword !== formData.confirmPassword) {
@@ -212,10 +265,51 @@ export default function ProfileEditor({ user, onUserUpdate, onClose }: ProfileEd
             <input
               type="text"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) => {
+                const value = e.target.value;
+                
+                // Prevent starting with space
+                if (value.startsWith(' ') && !formData.name.startsWith(' ')) {
+                  return;
+                }
+                
+                // Prevent multiple consecutive spaces
+                if (value.includes('  ')) {
+                  return;
+                }
+                
+                // Prevent dash/hyphen
+                if (value.includes('-')) {
+                  return;
+                }
+                
+                // Prevent numbers
+                if (/\d/.test(value)) {
+                  return;
+                }
+                
+                // Only allow Azerbaijani alphabet characters, spaces, apostrophe, and dot
+                const nameRegex = /^[a-zA-Z\u0259\u018F\u011F\u011E\u00FC\u00DC\u015F\u015E\u00F6\u00D6\u00E7\u00C7\u0131\u0130\s'.]*$/;
+                if (nameRegex.test(value)) {
+                  setFormData({ ...formData, name: value });
+                  setError(''); // Clear error on valid input
+                }
+              }}
+              onBlur={(e) => {
+                // Trim on blur
+                const trimmed = e.target.value.trim();
+                if (trimmed !== e.target.value) {
+                  setFormData({ ...formData, name: trimmed });
+                }
+              }}
+              pattern="[a-zA-Z\u0259\u018F\u011F\u011E\u00FC\u00DC\u015F\u015E\u00F6\u00D6\u00E7\u00C7\u0131\u0130\s'.]+"
+              title="Ad Soyadda yalnız hərflər istifadə edilə bilər (tire və rəqəmlər qadağandır)"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
+              minLength={2}
+              maxLength={100}
             />
+          
           </div>
 
           <div>

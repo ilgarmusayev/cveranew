@@ -198,9 +198,9 @@ export class OpenAITranslationService implements AITranslationService {
 
   private buildTranslationPrompt(text: string, fromLang: CVLanguage, toLang: CVLanguage, systemPrompt: string): string {
     const langNames = {
-      azerbaijani: 'Azərbaycan dili',
+      azerbaijani: 'Azərbaycanca',
       english: 'English',
-      russian: 'Русский язык'
+      russian: 'Русский'
     };
 
     if (toLang === 'azerbaijani') {

@@ -54,9 +54,21 @@ export function SiteLanguageProvider({ children }: SiteLanguageProviderProps) {
   // Dil məlumatlarını qaytaran funksiya
   const getLanguageDisplay = (language: SiteLanguage) => {
     const languageData = {
-      azerbaijani: { code: 'AZ', name: 'Azərbaycan', flag: '/flagaz.png' },
-      english: { code: 'EN', name: 'English', flag: '/flagusa.png' },
-      russian: { code: 'RU', name: 'Русский', flag: '/flagrus.png' }
+      azerbaijani: { 
+        code: 'AZ', 
+        name: siteLanguage === 'azerbaijani' ? '' : siteLanguage === 'english' ? '' : '', 
+        flag: '/flagaz.png' 
+      },
+      english: { 
+        code: 'EN', 
+        name: siteLanguage === 'azerbaijani' ? '' : siteLanguage === 'english' ? '' : '', 
+        flag: '/flagusa.png' 
+      },
+      russian: { 
+        code: 'RU', 
+        name: siteLanguage === 'azerbaijani' ? '' : siteLanguage === 'english' ? '' : '', 
+        flag: '/flagrus.png' 
+      }
     };
     return languageData[language];
   };

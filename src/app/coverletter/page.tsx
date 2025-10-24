@@ -57,9 +57,9 @@ export default function CoverLetterPage() {
       },
       coverLetterLanguage: 'Cover Letter Dili',
       coverLetterLanguages: {
-        azerbaijani: 'Azərbaycan dili',
-        english: 'İngilis dili',
-        russian: 'Rus dili'
+        azerbaijani: 'Azərbaycanca',
+        english: 'İngiliscə',
+        russian: 'Rusca'
       },
       length: 'Uzunluq',
       lengths: {

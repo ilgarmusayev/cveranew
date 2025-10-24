@@ -821,58 +821,6 @@ export default function DashboardV2({ user, onEditCV }: DashboardV2Props) {
               </div>
             </button>
           </div>
-
-          {/* Elevator Pitch Card */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 flex flex-col">
-            <div className="flex items-center mb-4">
-              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mr-3">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">{content.elevatorPitch}</h3>
-                <p className="text-gray-600 text-sm mt-1">{content.createElevatorPitch}</p>
-              </div>
-            </div>
-
-            <p className="text-gray-700 text-sm mb-4 leading-relaxed">
-              {content.elevatorPitchDescription}
-            </p>
-
-            <div className="space-y-2 mb-6 flex-grow">
-              <div className="flex items-center text-gray-700 text-sm">
-                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                {content.impactfulPresentation}
-              </div>
-              <div className="flex items-center text-gray-700 text-sm">
-                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                {content.quickIntroduction}
-              </div>
-              <div className="flex items-center text-gray-700 text-sm">
-                <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                {content.speechPractice}
-              </div>
-            </div>
-
-            <button
-              onClick={() => router.push('/30sec')}
-              className="w-full bg-blue-600 text-white border-2 rounded-xl px-4 py-3 font-medium hover:bg-white hover:text-blue-600 hover:border-2 hover:border-blue-600 transition-all duration-200"
-            >
-              <div className="flex items-center justify-center">
-                <span className="text-sm">{content.startCreatingEP}</span>
-                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            </button>
-          </div>
         </div>
 
         {/* Existing CVs Section */}

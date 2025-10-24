@@ -5157,13 +5157,17 @@ const LumenTemplate: React.FC<{
                                                 <h3 className="text-sm font-bold text-gray-900">{org.name}</h3>
                                                 {(org.role || org.position) && <p className="text-xs font-medium text-gray-700">{org.role || org.position}</p>}
                                             </div>
-                                            {(org.startDate || org.endDate) && (
+                                            {(org.startDate || org.endDate || org.current) && (
                                                 <span className="text-xs text-gray-600 font-medium whitespace-nowrap ml-2">
-                                                    {org.startDate && org.endDate ? (
-                                                        org.current ? `${formatDate(org.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : `${formatDate(org.startDate, data.cvLanguage)} - ${formatDate(org.endDate, data.cvLanguage)}`
-                                                    ) : (
-                                                        formatDate((org.startDate || org.endDate) || '', data.cvLanguage)
-                                                    )}
+                                                    {org.startDate ? (
+                                                        org.current || !org.endDate ? 
+                                                            `${formatDate(org.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
+                                                            `${formatDate(org.startDate, data.cvLanguage)} - ${formatDate(org.endDate, data.cvLanguage)}`
+                                                    ) : org.current ? (
+                                                        getCurrentText(data.cvLanguage)
+                                                    ) : org.endDate ? (
+                                                        formatDate(org.endDate, data.cvLanguage)
+                                                    ) : ''}
                                                 </span>
                                             )}
                                         </div>
@@ -6248,7 +6252,16 @@ const PrimeTemplate: React.FC<{
                                 </h2>
                             </div>
                             <div className="space-y-2" style={{ marginTop: '4px' }}>
-                                {organizations.map((org, index) => (
+                                {organizations.map((org, index) => {
+                                    // Debug log for exclusive template organizations
+                                    console.log('Exclusive Template - Organization:', {
+                                        name: org.name,
+                                        startDate: org.startDate,
+                                        endDate: org.endDate,
+                                        current: org.current
+                                    });
+                                    
+                                    return (
                                     <div key={org.id} className={`${index < organizations.length - 1 ? 'border-b border-green-200' : ''} pb-2`}>
                                         <div className="flex justify-between items-start mb-1 flex-wrap gap-1">
                                             <div className="flex-1 min-w-0">
@@ -6263,12 +6276,12 @@ const PrimeTemplate: React.FC<{
                                                     <p className="text-sm font-semibold text-green-700 mt-0">{org.role || org.position}</p>
                                                 )}
                                             </div>
-                                            {(org.startDate || org.endDate) && (
+                                            {(org.startDate || org.endDate || org.current) && (
                                                 <span className="text-xs text-gray-600 font-medium whitespace-nowrap flex-shrink-0">
                                                     {org.startDate ? (
-                                                        org.current ? `${formatDate(org.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
-                                                        org.endDate ? `${formatDate(org.startDate, data.cvLanguage)} - ${formatDate(org.endDate, data.cvLanguage)}` :
-                                                        formatDate(org.startDate, data.cvLanguage)
+                                                        (org.current === true || !org.endDate || org.endDate === '' || org.endDate === null || org.endDate === undefined) ? 
+                                                            `${formatDate(org.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : 
+                                                            `${formatDate(org.startDate, data.cvLanguage)} - ${formatDate(org.endDate, data.cvLanguage)}`
                                                     ) : org.current ? (
                                                         getCurrentText(data.cvLanguage)
                                                     ) : org.endDate ? (
@@ -6283,7 +6296,8 @@ const PrimeTemplate: React.FC<{
                                             </div>
                                         )}
                                     </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
                     </SortableItem>
@@ -9446,10 +9460,10 @@ const ExclusiveTemplate: React.FC<{
                                         ) : (
                                             <h3 className="font-semibold text-gray-900 text-sm">{org.name}</h3>
                                         )}
-                                        {(org.startDate || org.endDate) && (
+                                        {(org.startDate || org.endDate || org.current) && (
                                             <div className="text-xs text-gray-600 font-medium text-right whitespace-nowrap">
-                                                {org.startDate && org.endDate ? (
-                                                    org.current ? `${formatDate(org.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : `${formatDate(org.startDate, data.cvLanguage)} - ${formatDate(org.endDate, data.cvLanguage)}`
+                                                {org.startDate ? (
+                                                    org.current || !org.endDate ? `${formatDate(org.startDate, data.cvLanguage)} - ${getCurrentText(data.cvLanguage)}` : `${formatDate(org.startDate, data.cvLanguage)} - ${formatDate(org.endDate, data.cvLanguage)}`
                                                 ) : (
                                                     formatDate((org.startDate || org.endDate) || '', data.cvLanguage)
                                                 )}

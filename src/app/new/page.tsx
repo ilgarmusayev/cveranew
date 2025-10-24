@@ -707,7 +707,7 @@ function NewCVContent() {
                       disabled={loading}
                     />
                     <label htmlFor="cv-lang-az" className="ml-2 text-sm font-medium text-gray-700">
-                      Azərbaycan dili
+                      {siteLanguage === 'azerbaijani' ? 'Azərbaycanca' : siteLanguage === 'english' ? 'Azerbaijani' : 'Азербайджанский'}
                     </label>
                   </div>
                   <div className="flex items-center">
@@ -722,7 +722,7 @@ function NewCVContent() {
                       disabled={loading}
                     />
                     <label htmlFor="cv-lang-en" className="ml-2 text-sm font-medium text-gray-700">
-                      English
+                      {siteLanguage === 'azerbaijani' ? 'İngiliscə' : siteLanguage === 'english' ? 'English' : 'Английский'}
                     </label>
                   </div>
                   <div className="flex items-center">
@@ -737,7 +737,7 @@ function NewCVContent() {
                       disabled={loading}
                     />
                     <label htmlFor="cv-lang-ru" className="ml-2 text-sm font-medium text-gray-700">
-                      Русский
+                      {siteLanguage === 'azerbaijani' ? 'Rusca' : siteLanguage === 'english' ? 'Russian' : 'Русский'}
                     </label>
                   </div>
                 </div>

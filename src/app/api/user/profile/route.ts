@@ -98,6 +98,72 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    // Validate name with Azerbaijani characters
+    const trimmedName = name.trim();
+    if (trimmedName.length < 2) {
+      return NextResponse.json(
+        { error: 'Ad Soyad ən azı 2 simvoldan ibarət olmalıdır' },
+        { status: 400 }
+      );
+    }
+
+    if (trimmedName.length > 100) {
+      return NextResponse.json(
+        { error: 'Ad Soyad çox uzundur' },
+        { status: 400 }
+      );
+    }
+
+    // Check for dash/hyphen
+    if (trimmedName.includes('-')) {
+      return NextResponse.json(
+        { error: 'Ad Soyadda tire (-) istifadə edilə bilməz' },
+        { status: 400 }
+      );
+    }
+
+    // Check for numbers
+    if (/\d/.test(trimmedName)) {
+      return NextResponse.json(
+        { error: 'Ad Soyadda rəqəm istifadə edilə bilməz' },
+        { status: 400 }
+      );
+    }
+
+    // Check for multiple consecutive spaces
+    if (trimmedName.includes('  ')) {
+      return NextResponse.json(
+        { error: 'Ad Soyadda ardıcıl boşluqlar ola bilməz' },
+        { status: 400 }
+      );
+    }
+
+    // Check if starts or ends with space (should be handled by trim, but double check)
+    if (name.startsWith(' ') || name.endsWith(' ')) {
+      return NextResponse.json(
+        { error: 'Ad Soyad boşluqla başlaya və ya bitə bilməz' },
+        { status: 400 }
+      );
+    }
+
+    // Check for Azerbaijani alphabet including ə, Ə, ğ, Ğ, etc.
+    const nameRegex = /^[a-zA-Z\u0259\u018F\u011F\u011E\u00FC\u00DC\u015F\u015E\u00F6\u00D6\u00E7\u00C7\u0131\u0130\s'.]+$/;
+    if (!nameRegex.test(trimmedName)) {
+      return NextResponse.json(
+        { error: 'Ad Soyadda yalnız hərflər istifadə edilə bilər' },
+        { status: 400 }
+      );
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: 'Düzgün email formatı daxil edin' },
+        { status: 400 }
+      );
+    }
+
     // Get current user
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId }

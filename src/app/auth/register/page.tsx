@@ -161,48 +161,10 @@ export default function RegisterPage() {
     return errors;
   };
 
-  // Name validation function - only letters, spaces and certain characters allowed
-  const validateName = (name: string, fieldName: string) => {
-    const errors: string[] = [];
-
-    if (name.trim().length < 2) {
-      errors.push(`${fieldName} ən azı 2 simvoldan ibarət olmalıdır`);
-    }
-
-    // Only allow letters (including Azerbaijani), spaces, hyphens, and apostrophes
-    const nameRegex = /^[a-zA-ZəğĞıİöÖşŞüÜçÇ\s'-]+$/;
-    if (!nameRegex.test(name)) {
-      errors.push(`${fieldName} yalnız hərflər ehtiva etməlidir (rəqəm və xüsusi simvollar qadağandır)`);
-    }
-
-    // Check for consecutive spaces or special characters
-    if (/\s{2,}/.test(name) || /[-']{2,}/.test(name)) {
-      errors.push(`${fieldName} ardıcıl boşluq və ya xüsusi simvollar ehtiva edə bilməz`);
-    }
-
-    return errors;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
-    // Validate names
-    const firstNameErrors = validateName(formData.firstName, 'Ad');
-    const lastNameErrors = validateName(formData.lastName, 'Soyad');
-
-    if (firstNameErrors.length > 0) {
-      setError(firstNameErrors.join(', '));
-      setLoading(false);
-      return;
-    }
-
-    if (lastNameErrors.length > 0) {
-      setError(lastNameErrors.join(', '));
-      setLoading(false);
-      return;
-    }
 
     // Validate password
     const passwordValidationErrors = validatePassword(formData.password);
@@ -346,23 +308,80 @@ export default function RegisterPage() {
                     name="firstName"
                     type="text"
                     required
+                    minLength={2}
+                    maxLength={100}
+                    pattern="[a-zA-Z\u0259\u018F\u011F\u011E\u00FC\u00DC\u015F\u015E\u00F6\u00D6\u00E7\u00C7\u0131\u0130\s']+"
+                    title={siteLanguage === 'azerbaijani' 
+                      ? 'Adda yalnız hərflər istifadə edilə bilər (tire və rəqəmlər qadağandır)'
+                      : siteLanguage === 'russian'
+                      ? 'В имени можно использовать только буквы (дефисы и цифры запрещены)'
+                      : 'Only letters are allowed in the name (hyphens and numbers are prohibited)'}
                     value={formData.firstName}
                     onChange={(e) => {
-                      // Only allow letters, spaces, hyphens and apostrophes in real-time
                       const value = e.target.value;
-                      const filteredValue = value.replace(/[^a-zA-ZəğĞıİöÖşŞüÜçÇ\s'-]/g, '');
-                      setFormData({ ...formData, firstName: filteredValue });
+                      
+                      // Prevent starting with space
+                      if (value.startsWith(' ') && !formData.firstName.startsWith(' ')) {
+                        return;
+                      }
+                      
+                      // Prevent multiple consecutive spaces
+                      if (value.includes('  ')) {
+                        return;
+                      }
+                      
+                      // Prevent dash/hyphen
+                      if (value.includes('-')) {
+                        return;
+                      }
+                      
+                      // Prevent numbers
+                      if (/\d/.test(value)) {
+                        return;
+                      }
+                      
+                      // Prevent dot
+                      if (value.includes('.')) {
+                        return;
+                      }
+                      
+                      // Only allow Azerbaijani alphabet characters, spaces, and apostrophe
+                      const nameRegex = /^[a-zA-Z\u0259\u018F\u011F\u011E\u00FC\u00DC\u015F\u015E\u00F6\u00D6\u00E7\u00C7\u0131\u0130\s']*$/;
+                      if (nameRegex.test(value)) {
+                        setFormData({ ...formData, firstName: value });
+                      }
+                    }}
+                    onBlur={(e) => {
+                      // Trim on blur
+                      const trimmed = e.target.value.trim();
+                      if (trimmed !== e.target.value) {
+                        setFormData({ ...formData, firstName: trimmed });
+                      }
                     }}
                     onInvalid={(e) => {
-                      const input = e.target as HTMLInputElement;
-                      if (!input.value) {
-                        input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Zəhmət olmasa bu sahəni doldurun' : 
-                                                 siteLanguage === 'russian' ? 'Пожалуйста, заполните это поле' : 
-                                                 'Please fill out this field');
+                      const target = e.target as HTMLInputElement;
+                      if (target.validity.valueMissing) {
+                        target.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Ad tələb olunur' : 
+                                                 siteLanguage === 'russian' ? 'Имя обязательно' : 
+                                                 'First name is required');
+                      } else if (target.validity.tooShort) {
+                        target.setCustomValidity(siteLanguage === 'azerbaijani' 
+                          ? 'Ad ən azı 2 simvoldan ibarət olmalıdır'
+                          : siteLanguage === 'russian'
+                          ? 'Имя должно содержать не менее 2 символов'
+                          : 'First name must be at least 2 characters');
+                      } else if (target.validity.patternMismatch) {
+                        target.setCustomValidity(siteLanguage === 'azerbaijani' 
+                          ? 'Adda yalnız hərflər istifadə edilə bilər'
+                          : siteLanguage === 'russian'
+                          ? 'В имени можно использовать только буквы'
+                          : 'Only letters are allowed in the name');
                       } else {
-                        input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Zəhmət olmasa bu sahəni düzgün doldurun' : 
-                                                 siteLanguage === 'russian' ? 'Пожалуйста, правильно заполните это поле' : 
-                                                 'Please fill out this field correctly');
+                        target.setCustomValidity(siteLanguage === 'azerbaijani' 
+                          ? 'Düzgün ad daxil edin'
+                          : siteLanguage === 'russian'
+                          ? 'Введите правильное имя'
+                          : 'Enter a valid first name');
                       }
                     }}
                     onInput={(e) => {
@@ -381,23 +400,80 @@ export default function RegisterPage() {
                     name="lastName"
                     type="text"
                     required
+                    minLength={2}
+                    maxLength={100}
+                    pattern="[a-zA-Z\u0259\u018F\u011F\u011E\u00FC\u00DC\u015F\u015E\u00F6\u00D6\u00E7\u00C7\u0131\u0130\s']+"
+                    title={siteLanguage === 'azerbaijani' 
+                      ? 'Soyadda yalnız hərflər istifadə edilə bilər (tire və rəqəmlər qadağandır)'
+                      : siteLanguage === 'russian'
+                      ? 'В фамилии можно использовать только буквы (дефисы и цифры запрещены)'
+                      : 'Only letters are allowed in the name (hyphens and numbers are prohibited)'}
                     value={formData.lastName}
                     onChange={(e) => {
-                      // Only allow letters, spaces, hyphens and apostrophes in real-time
                       const value = e.target.value;
-                      const filteredValue = value.replace(/[^a-zA-ZəğĞıİöÖşŞüÜçÇ\s'-]/g, '');
-                      setFormData({ ...formData, lastName: filteredValue });
+                      
+                      // Prevent starting with space
+                      if (value.startsWith(' ') && !formData.lastName.startsWith(' ')) {
+                        return;
+                      }
+                      
+                      // Prevent multiple consecutive spaces
+                      if (value.includes('  ')) {
+                        return;
+                      }
+                      
+                      // Prevent dash/hyphen
+                      if (value.includes('-')) {
+                        return;
+                      }
+                      
+                      // Prevent numbers
+                      if (/\d/.test(value)) {
+                        return;
+                      }
+                      
+                      // Prevent dot
+                      if (value.includes('.')) {
+                        return;
+                      }
+                      
+                      // Only allow Azerbaijani alphabet characters, spaces, and apostrophe
+                      const nameRegex = /^[a-zA-Z\u0259\u018F\u011F\u011E\u00FC\u00DC\u015F\u015E\u00F6\u00D6\u00E7\u00C7\u0131\u0130\s']*$/;
+                      if (nameRegex.test(value)) {
+                        setFormData({ ...formData, lastName: value });
+                      }
+                    }}
+                    onBlur={(e) => {
+                      // Trim on blur
+                      const trimmed = e.target.value.trim();
+                      if (trimmed !== e.target.value) {
+                        setFormData({ ...formData, lastName: trimmed });
+                      }
                     }}
                     onInvalid={(e) => {
-                      const input = e.target as HTMLInputElement;
-                      if (!input.value) {
-                        input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Zəhmət olmasa bu sahəni doldurun' : 
-                                                 siteLanguage === 'russian' ? 'Пожалуйста, заполните это поле' : 
-                                                 'Please fill out this field');
+                      const target = e.target as HTMLInputElement;
+                      if (target.validity.valueMissing) {
+                        target.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Soyad tələb olunur' : 
+                                                 siteLanguage === 'russian' ? 'Фамилия обязательна' : 
+                                                 'Last name is required');
+                      } else if (target.validity.tooShort) {
+                        target.setCustomValidity(siteLanguage === 'azerbaijani' 
+                          ? 'Soyad ən azı 2 simvoldan ibarət olmalıdır'
+                          : siteLanguage === 'russian'
+                          ? 'Фамилия должна содержать не менее 2 символов'
+                          : 'Last name must be at least 2 characters');
+                      } else if (target.validity.patternMismatch) {
+                        target.setCustomValidity(siteLanguage === 'azerbaijani' 
+                          ? 'Soyadda yalnız hərflər istifadə edilə bilər'
+                          : siteLanguage === 'russian'
+                          ? 'В фамилии можно использовать только буквы'
+                          : 'Only letters are allowed in the name');
                       } else {
-                        input.setCustomValidity(siteLanguage === 'azerbaijani' ? 'Zəhmət olmasa bu sahəni düzgün doldurun' : 
-                                                 siteLanguage === 'russian' ? 'Пожалуйста, правильно заполните это поле' : 
-                                                 'Please fill out this field correctly');
+                        target.setCustomValidity(siteLanguage === 'azerbaijani' 
+                          ? 'Düzgün soyad daxil edin'
+                          : siteLanguage === 'russian'
+                          ? 'Введите правильную фамилию'
+                          : 'Enter a valid last name');
                       }
                     }}
                     onInput={(e) => {

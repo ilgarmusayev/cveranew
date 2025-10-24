@@ -158,6 +158,17 @@ export default function DateRangeInput({
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth();
 
+    // Parse start date for end date validation
+    let startYear: number | null = null;
+    let startMonth: number | null = null;
+    if (!isStartDate && startDate) {
+      const match = startDate.match(/^(\d{4})-(\d{2})$/);
+      if (match) {
+        startYear = parseInt(match[1]);
+        startMonth = parseInt(match[2]) - 1; // Convert to 0-based index
+      }
+    }
+
     if (!isOpen) return null;
 
     return (
@@ -185,7 +196,16 @@ export default function DateRangeInput({
           </label>
           <div className="grid grid-cols-3 gap-2">
             {monthNames.map((month, index) => {
-              const isDisabled = selectedYear === currentYear && index > currentMonth;
+              // Check if month is in the future (for current year)
+              const isFutureMonth = selectedYear === currentYear && index > currentMonth;
+              
+              // Check if end date is before start date
+              const isBeforeStartDate = !isStartDate && startYear !== null && startMonth !== null && (
+                selectedYear < startYear || 
+                (selectedYear === startYear && index < startMonth)
+              );
+              
+              const isDisabled = isFutureMonth || isBeforeStartDate;
               const isSelected = currentValue === `${selectedYear}-${String(index + 1).padStart(2, '0')}`;
               
               return (
@@ -337,9 +357,11 @@ export default function DateRangeInput({
       {/* Validation Message - only show if not singleDate */}
       {!singleDate && startDate && endDate && !current && new Date(startDate) > new Date(endDate) && (
         <div className="text-red-500 text-sm">
-          {language === 'english' 
-            ? 'End date must be after start date'
-            : 'Bitirmə tarixi başlama tarixindən sonra olmalıdır'
+          {language === 'azerbaijani' 
+            ? 'Bitirmə tarixi başlama tarixindən sonra olmalıdır'
+            : language === 'russian'
+            ? 'Дата окончания должна быть позже даты начала'
+            : 'End date must be after start date'
           }
         </div>
       )}
