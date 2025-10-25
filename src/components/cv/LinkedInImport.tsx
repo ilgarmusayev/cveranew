@@ -87,14 +87,36 @@ export default function LinkedInImport({ onImport, onCancel, cvLanguage = 'azerb
   // Check if user can access AI features
   const canUseAiFeatures = userTier === 'Medium' || userTier === 'Premium';
 
+  // Validation messages in 3 languages
+  const validationMessages = {
+    azerbaijani: {
+      urlRequired: 'LinkedIn URL daxil edin',
+      invalidUrl: 'Düzgün LinkedIn URL daxil edin',
+      networkError: 'Şəbəkə xətası',
+      defaultError: 'LinkedIn məlumatları əldə edilərkən xəta baş verdi'
+    },
+    english: {
+      urlRequired: 'Enter LinkedIn URL',
+      invalidUrl: 'Enter a valid LinkedIn URL',
+      networkError: 'Network error',
+      defaultError: 'An error occurred while fetching LinkedIn data'
+    },
+    russian: {
+      urlRequired: 'Введите LinkedIn URL',
+      invalidUrl: 'Введите действительный LinkedIn URL',
+      networkError: 'Ошибка сети',
+      defaultError: 'Произошла ошибка при получении данных LinkedIn'
+    }
+  }[siteLanguage];
+
   const handleImport = async () => {
     if (!url.trim()) {
-      setError('LinkedIn URL daxil edin');
+      setError(validationMessages.urlRequired);
       return;
     }
 
     if (!url.includes('linkedin.com')) {
-      setError('Düzgün LinkedIn URL daxil edin');
+      setError(validationMessages.invalidUrl);
       return;
     }
 
@@ -122,15 +144,15 @@ export default function LinkedInImport({ onImport, onCancel, cvLanguage = 'azerb
       if (response.ok && data.success) {
         setImportedData(data.data);
         setError('');
-        console.log('✅ HTML Scraper ilə LinkedIn məlumatları import edildi:', data.data);
+        console.log('✅ LinkedIn məlumatları import edildi:', data.data);
       } else {
-        const errorMsg = data.error || 'HTML scraping zamanı xəta baş verdi';
+        const errorMsg = data.error || validationMessages.defaultError;
         setError(errorMsg);
-        console.error('❌ HTML Scraper xətası:', errorMsg);
+        console.error('❌ LinkedIn import xətası:', errorMsg);
       }
     } catch (error: any) {
-      console.error('💥 HTML Scraper şəbəkə xətası:', error);
-      setError('Şəbəkə xətası: ' + (error.message || 'HTML scraping zamanı xəta baş verdi'));
+      console.error('💥 LinkedIn import şəbəkə xətası:', error);
+      setError(`${validationMessages.networkError}: ${error.message || validationMessages.defaultError}`);
     } finally {
       setLoading(false);
     }
