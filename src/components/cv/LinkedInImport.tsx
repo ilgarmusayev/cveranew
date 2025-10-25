@@ -74,7 +74,7 @@ export default function LinkedInImport({ onImport, onCancel, cvLanguage = 'azerb
   // Bütün məlumatlar real-time olaraq LinkedIn səhifəsindən alınır
   
   const { siteLanguage } = useSiteLanguage();
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const userTier = user ? getUserTier(user) : 'Free';
   
   const [url, setUrl] = useState('');
@@ -102,6 +102,9 @@ export default function LinkedInImport({ onImport, onCancel, cvLanguage = 'azerb
     setError('');
 
     try {
+      // Get token from localStorage
+      const token = localStorage.getItem('accessToken');
+      
       const response = await fetch('/api/import/linkedin', {
         method: 'POST',
         headers: {
