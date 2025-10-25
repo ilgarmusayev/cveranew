@@ -66,7 +66,8 @@ export default function DateRangeInput({
       selectMonth: 'Ay seçin',
       year: 'İl',
       month: 'Ay',
-      currentlyWorking: 'Davam edir'
+      currentlyWorking: 'Davam edir',
+      present: 'İndi'
     },
     english: {
       clear: 'Clear',
@@ -75,7 +76,8 @@ export default function DateRangeInput({
       selectMonth: 'Select month',
       year: 'Year',
       month: 'Month',
-      currentlyWorking: 'Currently working'
+      currentlyWorking: 'Currently working',
+      present: 'Present'
     },
     russian: {
       clear: 'Очистить',
@@ -84,7 +86,8 @@ export default function DateRangeInput({
       selectMonth: 'Выберите месяц',
       year: 'Год',
       month: 'Месяц',
-      currentlyWorking: 'В настоящее время работаю'
+      currentlyWorking: 'В настоящее время работаю',
+      present: 'Настоящее время'
     }
   };
 
@@ -320,7 +323,7 @@ export default function DateRangeInput({
               }`}
             >
               {current 
-                ? content.currentlyWorking
+                ? content.present
                 : formatDateForDisplay(endDate || '') || content.selectMonth
               }
             </button>

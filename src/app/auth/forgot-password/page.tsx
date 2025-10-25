@@ -70,6 +70,7 @@ export default function ForgotPasswordPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-site-language': siteLanguage,
         },
         body: JSON.stringify({ email }),
       });
@@ -81,7 +82,7 @@ export default function ForgotPasswordPage() {
         setMessage(data.message);
       } else {
         setIsSuccess(false);
-        setMessage(data.message);
+        setMessage(data.message || content.errorMessage);
       }
     } catch (error) {
       setIsSuccess(false);

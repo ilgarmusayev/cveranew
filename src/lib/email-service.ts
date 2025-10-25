@@ -124,6 +124,11 @@ export class EmailService {
                         <a href="${resetLink}" class="button" style="color:white">🔐 Şifrəni Yenilə</a>
                     </div>
                     
+                    <p style="font-size: 14px; color: #64748b; text-align: center;">
+                        Əgər yuxarıdakı düymə işləmirsə, bu linki kopyalayıb brauzerinizə yapışdırın:<br>
+                        <a href="${resetLink}" style="color: #2563eb; word-break: break-all; display: inline-block; margin-top: 8px;">${resetLink}</a>
+                    </p>
+                    
                     <div class="warning">
                         <strong>⏰ Vaxt məhdudiyyəti:</strong> Bu link yalnız <strong>1 saat</strong> ərzində etibarlıdır və yalnız bir dəfə istifadə edilə bilər.
                     </div>
@@ -383,6 +388,11 @@ Bu e-poçt avtomatik olaraq göndərilmişdir.
                         <a href="${verificationLink}" style="color:white" class="button">✉️ Email Ünvanımı Təsdiqlə</a>
                     </div>
                     
+                    <p style="font-size: 14px; color: #64748b; text-align: center;">
+                        Əgər yuxarıdakı düymə işləmirsə, bu linki kopyalayıb brauzerinizə yapışdırın:<br>
+                        <a href="${verificationLink}" style="color: #2563eb; word-break: break-all; display: inline-block; margin-top: 8px;">${verificationLink}</a>
+                    </p>
+                    
                     <div class="warning">
                         <strong>⏰ Vaxt məhdudiyyəti:</strong> Bu təsdiqləmə linki <strong>24 saat</strong> ərzində etibarlıdır.
                     </div>
@@ -412,11 +422,6 @@ Bu e-poçt avtomatik olaraq göndərilmişdir.
                     </div>
                     
                     <p>E-poçt ünvanınızı təsdiqlədikdən sonra dərhal hesabınıza daxil olub peşəkar CV yaratmağa başlaya bilərsiniz!</p>
-                    
-                    <p style="font-size: 14px; color: #64748b;">
-                        Əgər yuxarıdakı düymə işləmirsə, bu linki kopyalayıb brauzerinizə yapışdırın:<br>
-                        <code style="background: #f1f5f9; padding: 5px; border-radius: 4px; word-break: break-all;">${verificationLink}</code>
-                    </p>
                 </div>
                 
                 <div class="footer">
@@ -523,6 +528,11 @@ Bu e-poçt avtomatik olaraq göndərilmişdir.
                 <div style="text-align: center; margin: 30px 0;">
                     <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://cvera.net'}/auth/login" class="cta-button" style="color:white">🚀 İlk CV-nizi Yaratmağa Başlayın</a>
                 </div>
+                
+                <p style="font-size: 14px; color: #64748b; text-align: center;">
+                    Əgər yuxarıdakı düymə işləmirsə, bu linkə daxil olun:<br>
+                    <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://cvera.net'}/auth/login" style="color: #2563eb; display: inline-block; margin-top: 8px;">${process.env.NEXT_PUBLIC_BASE_URL || 'https://cvera.net'}/auth/login</a>
+                </p>
                 
                 <p>Hər hansı sualınız varsa, bizə müraciət etməkdən çəkinməyin.</p>
                 

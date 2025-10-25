@@ -165,8 +165,17 @@ async function generatePDF(coverLetter: string, jobTitle?: string, companyName?:
 
 async function generateDOCX(coverLetter: string, jobTitle?: string, companyName?: string): Promise<NextResponse> {
   try {
+    // Validate input
+    if (!coverLetter || coverLetter.trim().length === 0) {
+      throw new Error('Cover letter content is empty');
+    }
+
     // Split content into paragraphs
     const paragraphs = coverLetter.split('\n').filter(p => p.trim());
+
+    if (paragraphs.length === 0) {
+      throw new Error('No valid paragraphs found in cover letter');
+    }
 
     const doc = new Document({
       sections: [{
@@ -200,6 +209,10 @@ async function generateDOCX(coverLetter: string, jobTitle?: string, companyName?
 
     const buffer = await Packer.toBuffer(doc);
     
+    if (!buffer || buffer.length === 0) {
+      throw new Error('Failed to generate DOCX buffer');
+    }
+
     const fileName = `Cover-Letter-${jobTitle || companyName || 'Default'}.docx`;
     
     return new NextResponse(Buffer.from(buffer), {
@@ -211,8 +224,9 @@ async function generateDOCX(coverLetter: string, jobTitle?: string, companyName?
       }
     });
 
-  } catch (error) {
-    throw error;
+  } catch (error: any) {
+    console.error('DOCX generation error:', error);
+    throw new Error(`DOCX creation failed: ${error.message || 'Unknown error'}`);
   }
 }
 

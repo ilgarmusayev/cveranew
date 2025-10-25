@@ -48,6 +48,9 @@ function VerifyEmailContent() {
     try {
       const response = await fetch(`/api/auth/verify-email?token=${token}`, {
         method: 'GET',
+        headers: {
+          'x-site-language': siteLanguage,
+        },
       });
 
       const data = await response.json();

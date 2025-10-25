@@ -49,8 +49,8 @@ function extractLinkedInUsername(input: string): { username: string; normalizedU
 // ScrapingDog LinkedIn Service instance
 const scrapingDogService = new ScrapingDogLinkedInService();
 
-// Error messages in 3 languages
-const getErrorMessages = (language: string = 'azerbaijani') => {
+// Error and success messages in 3 languages
+const getMessages = (language: string = 'azerbaijani') => {
   const messages = {
     azerbaijani: {
       authRequired: 'Authorization token tələb olunur',
@@ -63,7 +63,8 @@ const getErrorMessages = (language: string = 'azerbaijani') => {
       generalError: 'LinkedIn məlumatları əldə edilərkən xəta baş verdi',
       rapidApiError: 'Əlavə skills əldə edilərkən xəta baş verdi (RapidAPI)',
       noDataReceived: 'Heç bir məlumat alınmadı',
-      profileInvalid: 'LinkedIn profili tapılmadı və ya etibarsızdır. Zəhmət olmasa düzgün LinkedIn istifadəçi profil URL-i daxil edin.'
+      profileInvalid: 'LinkedIn profili tapılmadı və ya etibarsızdır. Zəhmət olmasa düzgün LinkedIn istifadəçi profil URL-i daxil edin.',
+      successMessage: 'LinkedIn profili uğurla import edildi və CV yaradıldı - bütün məlumatlar + AI skills dolduruldu (İngilis dilində)'
     },
     english: {
       authRequired: 'Authorization token required',
@@ -76,7 +77,8 @@ const getErrorMessages = (language: string = 'azerbaijani') => {
       generalError: 'An error occurred while fetching LinkedIn data',
       rapidApiError: 'Error fetching additional skills (RapidAPI)',
       noDataReceived: 'No data received',
-      profileInvalid: 'LinkedIn profile not found or invalid. Please enter a valid LinkedIn user profile URL.'
+      profileInvalid: 'LinkedIn profile not found or invalid. Please enter a valid LinkedIn user profile URL.',
+      successMessage: 'LinkedIn profile successfully imported and CV created - all data + AI skills populated (in English)'
     },
     russian: {
       authRequired: 'Требуется токен авторизации',
@@ -89,7 +91,8 @@ const getErrorMessages = (language: string = 'azerbaijani') => {
       generalError: 'Произошла ошибка при получении данных ЛинкедИн',
       rapidApiError: 'Ошибка при получении дополнительных навыков (RapidAPI)',
       noDataReceived: 'Данные не получены',
-      profileInvalid: 'Профиль ЛинкедИн не найден или недействителен. Пожалуйста, введите действительный URL профиля пользователя ЛинкедИн.'
+      profileInvalid: 'Профиль ЛинкедИн не найден или недействителен. Пожалуйста, введите действительный URL профиля пользователя ЛинкедИн.',
+      successMessage: 'Профиль ЛинкедИн успешно импортирован и резюме создано - все данные + AI навыки заполнены (на английском)'
     }
   };
   
@@ -770,13 +773,13 @@ export async function POST(request: NextRequest) {
     // Get language from request body or default to azerbaijani
     const body = await request.json();
     const language = body.language || 'azerbaijani';
-    const errorMessages = getErrorMessages(language);
+    const messages = getMessages(language);
 
     // Verify JWT token
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
     if (!token) {
       return NextResponse.json(
-        { error: errorMessages.authRequired },
+        { error: messages.authRequired },
         { status: 401 }
       );
     }
@@ -784,7 +787,7 @@ export async function POST(request: NextRequest) {
     const decoded = await verifyJWT(token);
     if (!decoded?.userId) {
       return NextResponse.json(
-        { error: errorMessages.invalidToken },
+        { error: messages.invalidToken },
         { status: 401 }
       );
     }
@@ -793,7 +796,7 @@ export async function POST(request: NextRequest) {
     const { linkedinUrl } = body;
     if (!linkedinUrl?.trim()) {
       return NextResponse.json(
-        { error: errorMessages.urlRequired },
+        { error: messages.urlRequired },
         { status: 400 }
       );
     }
@@ -802,7 +805,7 @@ export async function POST(request: NextRequest) {
     const linkedinData = extractLinkedInUsername(linkedinUrl);
     if (!linkedinData) {
       return NextResponse.json(
-        { error: errorMessages.invalidUrl },
+        { error: messages.invalidUrl },
         { status: 400 }
       );
     }
@@ -850,22 +853,22 @@ export async function POST(request: NextRequest) {
       if (isProfileNotFound) {
         // LinkedIn profile not found
         console.log('🛑 LinkedIn profil tapılmadı');
-        userFriendlyMessage = errorMessages.profileNotFound;
+        userFriendlyMessage = messages.profileNotFound;
         statusCode = 404;
       } else if (isAllKeysRateLimited) {
         // All API keys are rate limited
         console.log('🚫 Bütün API key-lər limit-ə çatıb');
-        userFriendlyMessage = errorMessages.rateLimitError;
+        userFriendlyMessage = messages.rateLimitError;
         statusCode = 429;
       } else if (isRateLimitError) {
         // Single key rate limit
         console.log('⚠️ API rate limit');
-        userFriendlyMessage = errorMessages.rateLimitError;
+        userFriendlyMessage = messages.rateLimitError;
         statusCode = 429;
       } else {
         // General error
         console.log('❌ Ümumi ScrapingDog xətası');
-        userFriendlyMessage = errorMessages.serviceUnavailable;
+        userFriendlyMessage = messages.serviceUnavailable;
         statusCode = 503;
       }
       
@@ -992,7 +995,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       cvId: newCV.id,
-      message: 'LinkedIn profili uğurla import edildi və CV yaradıldı - bütün məlumatlar + AI skills dolduruldu (İngilis dilində)',
+      message: messages.successMessage,
       summary: {
         name: cvName,
         language: 'en',
@@ -1014,9 +1017,13 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('❌ LinkedIn import general error:', error);
     
+    // Get language from request headers or default
+    const language = request.headers.get('x-site-language') || 'azerbaijani';
+    const messages = getMessages(language);
+    
     return NextResponse.json({
       success: false,
-      error: error.message || 'LinkedIn import zamanı xəta baş verdi'
+      error: error.message || messages.generalError
     }, { status: 500 });
   }
 }

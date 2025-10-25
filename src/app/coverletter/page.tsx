@@ -83,7 +83,11 @@ export default function CoverLetterPage() {
       fillAllFields: 'Bütün sahələri doldurun',
       generationError: 'Cover letter yaradılarkən xəta baş verdi',
       copySuccess: 'Mətn panoya kopyalandı!',
-      loadingCVs: 'CV-lər yüklənir...'
+      loadingCVs: 'CV-lər yüklənir...',
+      docxError: 'DOCX faylı yaradılarkən xəta baş verdi',
+      docxSuccess: 'DOCX faylı uğurla yükləndi!',
+      pdfError: 'PDF faylı yaradılarkən xəta baş verdi',
+      pdfSuccess: 'PDF faylı uğurla yükləndi!'
     },
     english: {
       title: 'Create Cover Letter',
@@ -130,7 +134,11 @@ export default function CoverLetterPage() {
       fillAllFields: 'Please fill all fields',
       generationError: 'Error occurred while generating cover letter',
       copySuccess: 'Text copied to clipboard!',
-      loadingCVs: 'Loading CVs...'
+      loadingCVs: 'Loading CVs...',
+      docxError: 'Error creating DOCX file',
+      docxSuccess: 'DOCX file downloaded successfully!',
+      pdfError: 'Error creating PDF file',
+      pdfSuccess: 'PDF file downloaded successfully!'
     },
     russian: {
       title: 'Создать сопроводительное письмо',
@@ -177,7 +185,11 @@ export default function CoverLetterPage() {
       fillAllFields: 'Заполните все поля',
       generationError: 'Произошла ошибка при создании сопроводительного письма',
       copySuccess: 'Текст скопирован в буфер обмена!',
-      loadingCVs: 'Загрузка резюме...'
+      loadingCVs: 'Загрузка резюме...',
+      docxError: 'Ошибка при создании DOCX файла',
+      docxSuccess: 'DOCX файл успешно загружен!',
+      pdfError: 'Ошибка при создании PDF файла',
+      pdfSuccess: 'PDF файл успешно загружен!'
     }
   };
 
@@ -292,7 +304,8 @@ export default function CoverLetterPage() {
       });
 
       if (!response.ok) {
-        throw new Error('PDF export failed');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'PDF export failed');
       }
 
       const blob = await response.blob();
@@ -306,10 +319,10 @@ export default function CoverLetterPage() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
       
-      showSuccess('PDF yükləndi!');
+      showSuccess(labels.pdfSuccess);
     } catch (error) {
       console.error('PDF export error:', error);
-      showError('PDF yaradılarkən xəta baş verdi');
+      showError(labels.pdfError);
     }
   };
 
@@ -333,7 +346,8 @@ export default function CoverLetterPage() {
       });
 
       if (!response.ok) {
-        throw new Error('DOCX export failed');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'DOCX export failed');
       }
 
       const blob = await response.blob();
@@ -347,10 +361,10 @@ export default function CoverLetterPage() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
       
-      showSuccess(`DOCX yükləndi! ${labels.docxInfo}`);
+      showSuccess(labels.docxSuccess);
     } catch (error) {
       console.error('DOCX export error:', error);
-      showError('DOCX yaradılarkən xəta baş verdi');
+      showError(labels.docxError);
     }
   };
 
@@ -602,7 +616,7 @@ export default function CoverLetterPage() {
 
             {/* Result Area */}
             <div className="lg:col-span-3 bg-white rounded-lg shadow-lg p-6">
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
                 <div className="flex items-center">
                   <div className="bg-green-100 p-2 rounded-lg mr-3">
                     <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -612,25 +626,34 @@ export default function CoverLetterPage() {
                   <h2 className="text-xl font-semibold text-gray-900">{labels.result}</h2>
                 </div>
                 {coverLetter && (
-                  <div className="flex space-x-2">
+                  <div className="flex flex-wrap gap-2">
                     <button
                       onClick={copyToClipboard}
-                      className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+                      className="flex-1 sm:flex-none px-4 py-2.5 text-sm font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
                     >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                      </svg>
                       {labels.copyText}
                     </button>
                     {!isEditing && (
                       <button
                         onClick={startEditing}
-                        className="px-3 py-2 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                        className="flex-1 sm:flex-none px-4 py-2.5 text-sm font-medium bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors flex items-center justify-center gap-2"
                       >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
                         {labels.editText}
                       </button>
                     )}
                     <button
                       onClick={downloadAsDOC}
-                      className="px-3 py-2 text-sm bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
+                      className="flex-1 sm:flex-none px-4 py-2.5 text-sm font-medium bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors flex items-center justify-center gap-2"
                     >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
                       {labels.downloadDOCX}
                     </button>
                   </div>

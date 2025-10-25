@@ -92,10 +92,11 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
       descriptionPlaceholder: 'Əldə etdiyiniz nailiyyətlər, kurslar və ya fəaliyyətlər haqqında məlumat verin...',
       optional: 'ixtiyari',
       selectDegree: '🎓 Dərəcə seçin',
+      subbachelor: 'Subbakalavr',
       bachelor: 'Bakalavr',
       master: 'Magistr',
       phd: 'Doktorantura',
-      diploma: 'Diploma',
+      diploma: 'Diplom',
       certificate: 'Sertifikat',
       other: 'Digər',
       noEducation: 'Hələ heç bir təhsil məlumatı əlavə etməmisiniz',
@@ -128,6 +129,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
       descriptionPlaceholder: 'Provide information about achievements, courses, or activities...',
       optional: 'optional',
       selectDegree: '🎓 Select degree',
+      subbachelor: 'Associate Degree',
       bachelor: 'Bachelor',
       master: 'Master',
       phd: 'PhD',
@@ -164,6 +166,7 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
       descriptionPlaceholder: 'Предоставьте информацию о достижениях, курсах или деятельности...',
       optional: 'необязательно',
       selectDegree: '🎓 Выберите степень',
+      subbachelor: 'Специалист',
       bachelor: 'Бакалавр',
       master: 'Магистр',
       phd: 'Кандидат наук',
@@ -380,8 +383,12 @@ export default function EducationSection({ data, onChange, cvLanguage = 'azerbai
                         <option value="">
                           {sectionContent.selectDegree}
                         </option>
+                       
                         <option value={degreeContent.bachelor}>
                           🎓 {sectionContent.bachelor}
+                        </option>
+                         <option value={degreeContent.subbachelor}>
+                          🎓 {sectionContent.subbachelor}
                         </option>
                         <option value={degreeContent.master}>
                           🎓 {sectionContent.master}

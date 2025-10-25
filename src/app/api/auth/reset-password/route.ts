@@ -5,22 +5,55 @@ import { EmailService } from '@/lib/email-service';
 
 const emailService = new EmailService();
 
+// Get error messages in 3 languages
+const getMessages = (language: string = 'azerbaijani') => {
+  const messages = {
+    azerbaijani: {
+      tokenPasswordRequired: 'Token və yeni şifrə tələb olunur',
+      passwordTooShort: 'Şifrə minimum 8 simvol olmalıdır',
+      tokenInvalid: 'Token etibarsızdır və ya müddəti bitib',
+      passwordResetSuccess: 'Şifrəniz uğurla yeniləndi. İndi yeni şifrənizlə daxil ola bilərsiniz.',
+      serverError: 'Server xətası baş verdi. Zəhmət olmasa yenidən cəhd edin.'
+    },
+    english: {
+      tokenPasswordRequired: 'Token and new password are required',
+      passwordTooShort: 'Password must be at least 8 characters',
+      tokenInvalid: 'Token is invalid or has expired',
+      passwordResetSuccess: 'Your password has been successfully updated. You can now login with your new password.',
+      serverError: 'Server error occurred. Please try again.'
+    },
+    russian: {
+      tokenPasswordRequired: 'Требуется токен и новый пароль',
+      passwordTooShort: 'Пароль должен содержать минимум 8 символов',
+      tokenInvalid: 'Токен недействителен или истек',
+      passwordResetSuccess: 'Ваш пароль успешно обновлен. Теперь вы можете войти с новым паролем.',
+      serverError: 'Произошла ошибка сервера. Пожалуйста, попробуйте снова.'
+    }
+  };
+  
+  return messages[language as keyof typeof messages] || messages.azerbaijani;
+};
+
 export async function POST(request: NextRequest) {
   try {
+    // Get site language from headers
+    const siteLanguage = request.headers.get('x-site-language') || 'azerbaijani';
+    const content = getMessages(siteLanguage);
+    
     const { token, newPassword } = await request.json();
 
     // Validate input
     if (!token || !newPassword) {
       return NextResponse.json(
-        { message: 'Token və yeni şifrə tələb olunur' },
+        { message: content.tokenPasswordRequired },
         { status: 400 }
       );
     }
 
     // Validate password strength
-    if (newPassword.length < 6) {
+    if (newPassword.length < 8) {
       return NextResponse.json(
-        { message: 'Şifrə minimum 6 simvol olmalıdır' },
+        { message: content.passwordTooShort },
         { status: 400 }
       );
     }
@@ -37,7 +70,7 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { message: 'Token etibarsızdır və ya müddəti bitib' },
+        { message: content.tokenInvalid },
         { status: 400 }
       );
     }
@@ -66,7 +99,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
-        message: 'Şifrəniz uğurla yeniləndi. İndi yeni şifrənizlə daxil ola bilərsiniz.',
+        message: content.passwordResetSuccess,
         success: true
       },
       { status: 200 }
@@ -75,8 +108,11 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('❌ Reset password error:', error);
 
+    const siteLanguage = request.headers.get('x-site-language') || 'azerbaijani';
+    const content = getMessages(siteLanguage);
+
     return NextResponse.json(
-      { message: 'Server xətası baş verdi. Zəhmət olmasa yenidən cəhd edin.' },
+      { message: content.serverError },
       { status: 500 }
     );
   } finally {

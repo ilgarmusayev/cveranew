@@ -277,6 +277,9 @@ const translateDegree = (degree: string, cvLanguage?: string): string => {
     // Degree translations
     const degreeTranslations: Record<string, Record<string, string>> = {
         azerbaijani: {
+            'Subbakalavr': 'Subbakalavr',
+            'Associate Degree': 'Subbakalavr',
+            'Специалист': 'Subbakalavr',
             'Bachelor': 'Bakalavr',
             'Master': 'Magistr',
             'PhD': 'Doktorantura',
@@ -296,6 +299,8 @@ const translateDegree = (degree: string, cvLanguage?: string): string => {
             'Другое': 'Digər'
         },
         english: {
+            'Subbakalavriat': 'Associate Degree',
+            'Специалист': 'Associate Degree',
             'Bakalavr': 'Bachelor',
             'Magistr': 'Master',
             'Doktorantura': 'PhD',
@@ -303,6 +308,7 @@ const translateDegree = (degree: string, cvLanguage?: string): string => {
             'Sertifikat': 'Certificate',
             'Digər': 'Other',
             // Keep English as is
+            'Associate Degree': 'Associate Degree',
             'Bachelor': 'Bachelor',
             'Master': 'Master',
             'PhD': 'PhD',
@@ -317,6 +323,8 @@ const translateDegree = (degree: string, cvLanguage?: string): string => {
             'Другое': 'Other'
         },
         russian: {
+            'Subbakalavriat': 'Специалист',
+            'Associate Degree': 'Специалист',
             'Bachelor': 'Бакалавр',
             'Master': 'Магистр',
             'PhD': 'Кандидат наук',
